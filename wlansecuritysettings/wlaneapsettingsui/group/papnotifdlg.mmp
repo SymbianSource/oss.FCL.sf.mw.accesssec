@@ -1,0 +1,71 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Project specification file for pap/notifierui
+*
+*/
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET          papnotifdlg.dll
+TARGETTYPE      DLL
+UID             0x101FDFAE 0x200159AA
+CAPABILITY      CAP_GENERAL_DLL
+VENDORID        VID_DEFAULT
+
+
+SOURCEPATH      ../pap/notifierui/src
+
+SOURCE          papnotifdlgplugin.cpp 
+SOURCE          papauthdialog.cpp
+SOURCE          papchallengemsgdialog.cpp
+SOURCE          papchallengereplydialog.cpp
+
+
+USERINCLUDE     ../pap/notifierui/inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+
+START RESOURCE  ../data/papnotifdlgui.rss
+HEADER
+TARGETPATH  RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END
+
+
+#if defined(ARMCC)
+    DEFFILE ../eabi/papnotifdlg.def
+#elif defined( WINSCW )
+    DEFFILE ../bwinscw/papnotifdlg.def
+#elif defined( WINS )
+    DEFFILE ../bwins/papnotifdlg.def
+#else
+    DEFFILE ../bmarm/papnotifdlg.def
+#endif
+
+
+
+LIBRARY euser.lib eikdlg.lib eiksrv.lib cone.lib commdb.lib eikcore.lib
+LIBRARY eikcoctl.lib bafl.lib
+LIBRARY avkon.lib
+LIBRARY AknSkins.lib
+LIBRARY charconv.lib
+LIBRARY commonengine.lib
+LIBRARY AknNotify.lib  
+
+
+// End of File

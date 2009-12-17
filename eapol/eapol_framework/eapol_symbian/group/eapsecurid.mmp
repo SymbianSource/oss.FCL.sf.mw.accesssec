@@ -1,0 +1,94 @@
+/*
+* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project EAPOL
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include "eapol.mmh"
+
+CAPABILITY CAP_ECOM_PLUGIN
+VENDORID VID_DEFAULT
+TARGETTYPE    PLUGIN
+
+TARGET        eapsecurid.dll
+UID	          0x10009d8d 0x101F8E74
+
+SOURCEPATH    ../am/type/securid/symbian/plugin/src
+
+START RESOURCE 101F8E74.rss 
+	TARGET eapsecurid.rsc
+END
+
+SOURCE        EapSecurID.cpp
+SOURCE        EapSecurIDProxy.cpp
+
+SOURCE        EapSecurIDDbUtils.cpp
+SOURCE        EapGtcDbUtils.cpp
+
+SOURCEPATH    ../am/type/symbian/plugin/common
+SOURCE	      EapTypeInfo.cpp
+
+SOURCEPATH    ../am/type/securid/symbian
+SOURCE 	      eap_am_type_securid_symbian.cpp
+
+SOURCEPATH    ../../eapol_common/type/securid/core
+SOURCE		  eap_type_securid.cpp
+SOURCE		  eap_type_securid_client.cpp
+SOURCE		  eap_type_securid_state.cpp
+
+#ifdef COMPILE_EAP_SECURID_SERVER
+	SOURCE		  eap_type_securid_server.cpp
+#endif
+
+SOURCEPATH    ../am/common/symbian
+SOURCE		  eap_am_trace_symbian.cpp
+
+SOURCEPATH    ../am/type/securid/symbian/plugin/src
+SOURCE		  EapGtcUiConnection.cpp
+SOURCE        EapGtcUiDataConnection.cpp
+SOURCE        EapGtcUiGtcData.cpp
+LIBRARY       avkon.lib
+STATICLIBRARY eapgtcui.lib
+
+USERINCLUDE   ../am/type/securid/symbian/plugin/inc
+USERINCLUDE   ../../eapol_common/type/securid/include
+USERINCLUDE   ../../eapol_common/include
+USERINCLUDE   ../am/include
+USERINCLUDE   ../../eapol_common/am/include
+USERINCLUDE	  ../am/type/symbian/plugin/include
+USERINCLUDE   ../../eapol_common/type
+
+//SYSTEMINCLUDE /epoc32/include/ecom
+//SYSTEMINCLUDE /epoc32/include/libc
+//SYSTEMINCLUDE /epoc32/include/cshelp
+
+MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
+
+LIBRARY     euser.lib ecom.lib eapol.lib edbms.lib efsrv.lib cone.lib eikcoctl.lib
+LIBRARY		bafl.lib
+LIBRARY     eikdlg.lib
+LIBRARY     eikcore.lib
+LIBRARY     hlplch.lib
+LIBRARY		featmgr.lib
+
+LANG		  SC
+
+MACRO EAP_NO_EXPORTS=1
+
+//-------------------------------------------------------------------
+
+//-------------------------------------------------------------------
+// End of File

@@ -1,0 +1,11 @@
+EXPORTS
+	_Z13NotifierArrayv @ 1 NONAME
+	_ZTI14CPapAuthDialog @ 2 NONAME ; #<TI>#
+	_ZTI21CPapNotifDialogPlugin @ 3 NONAME ; #<TI>#
+	_ZTI22CPapChallengeMsgDialog @ 4 NONAME ; #<TI>#
+	_ZTI24CPapChallengeReplyDialog @ 5 NONAME ; #<TI>#
+	_ZTV14CPapAuthDialog @ 6 NONAME ; #<VT>#
+	_ZTV21CPapNotifDialogPlugin @ 7 NONAME ; #<VT>#
+	_ZTV22CPapChallengeMsgDialog @ 8 NONAME ; #<VT>#
+	_ZTV24CPapChallengeReplyDialog @ 9 NONAME ; #<VT>#
+

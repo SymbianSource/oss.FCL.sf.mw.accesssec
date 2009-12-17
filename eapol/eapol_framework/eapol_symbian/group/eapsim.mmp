@@ -1,0 +1,102 @@
+/*
+* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project EAPOL
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include "eapol.mmh"
+
+CAPABILITY CAP_ECOM_PLUGIN
+VENDORID VID_DEFAULT
+TARGETTYPE    PLUGIN
+
+TARGET        eapsim.dll
+UID		0x10009d8d 0x101f8e49
+
+SOURCEPATH    ../am/type/gsmsim/symbian/plugin/src
+
+START RESOURCE 101f8e49.rss
+	TARGET eapsim.rsc
+END
+
+SOURCE        EapSim.cpp
+SOURCE		  EapSimProxy.cpp
+SOURCE		  EapSimDbUtils.cpp
+SOURCEPATH    ../am/type/symbian/plugin/common
+SOURCE	      EapTypeInfo.cpp
+
+SOURCEPATH    ../am/type/gsmsim/symbian
+SOURCE 	      eap_am_type_gsmsim_symbian.cpp
+
+SOURCEPATH	  ../../eapol_common/type/gsmsim/core
+SOURCE	      eap_type_gsmsim_state_notification.cpp
+SOURCE		  eap_type_gsmsim_payloads.cpp
+SOURCE		  eap_type_gsmsim_state.cpp
+SOURCE        eap_type_gsmsim.cpp
+SOURCE		  eap_type_gsmsim_client.cpp
+SOURCE		  eap_type_gsmsim_server.cpp
+SOURCE        eap_type_gsmsim_header.cpp
+SOURCE		  eap_type_gsmsim_initialized.cpp
+SOURCE		  eap_type_gsmsim_mac_attributes.cpp
+
+SOURCEPATH	  ../../eapol_common/common
+SOURCE        eap_sim_triplets.cpp
+
+SOURCEPATH    ../am/common/symbian
+SOURCE		  eap_am_trace_symbian.cpp
+
+SOURCEPATH    ../am/type/gsmsim/symbian/plugin/src
+SOURCE		  EapSimUiConnection.cpp
+SOURCE        EapSimUiDataConnection.cpp
+SOURCE        EapSimUiSimData.cpp
+
+LIBRARY       avkon.lib
+STATICLIBRARY eapsimui.lib
+
+USERINCLUDE   ../am/type/gsmsim/symbian/plugin/inc
+USERINCLUDE   ../../eapol_common/type/gsmsim/include
+USERINCLUDE   ../../eapol_common/include
+USERINCLUDE   ../am/include
+USERINCLUDE   ../../eapol_common/am/include
+USERINCLUDE   ../../eapol_common/type
+
+MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
+
+LIBRARY       euser.lib ecom.lib eapol.lib edbms.lib efsrv.lib 
+LIBRARY		  cone.lib eikcoctl.lib eikctl.lib bafl.lib
+LIBRARY		  estor.lib	// For RReadStream
+
+LANG		  SC
+
+SOURCEPATH		../am/type/gsmsim/symbian/plugin/inc
+DOCUMENT		101f8e49.loc
+
+// For test environment, comment out USE_EAP_GSMSIM_INTERFACE in eapol.mmh.
+#if !defined(WINS) && defined(USE_EAP_GSMSIM_INTERFACE)
+	SOURCEPATH	../am/type/gsmsim/symbian
+	SOURCE 		EapSimInterface.cpp
+	LIBRARY		CustomAPI.lib etelmm.lib etel.lib	// For ETel connection	
+#endif // End of #if !defined(WINS) && defined(USE_EAP_GSMSIM_INTERFACE)
+
+MACRO EAP_NO_EXPORTS
+
+LIBRARY     eikdlg.lib
+LIBRARY     eikcore.lib
+LIBRARY     hlplch.lib
+LIBRARY		featmgr.lib
+
+//-------------------------------------------------------------------
+// End of File

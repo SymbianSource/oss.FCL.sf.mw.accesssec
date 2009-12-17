@@ -1,0 +1,76 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: This is project specification file for the WEPSecuritySettingsUI. 
+*
+*/
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+
+TARGET      WEPSecuritySettingsUI.dll
+TARGETTYPE  DLL
+
+CAPABILITY CAP_GENERAL_DLL
+VENDORID VID_DEFAULT
+
+
+START RESOURCE  ../data/WEPSecuritySettingsUI.rss
+HEADER
+TARGETPATH RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END  // RESOURCE
+
+
+SOURCEPATH ../src
+
+SOURCE WEPSecuritySettings.cpp
+SOURCE WEPSecuritySettingsImpl.cpp
+SOURCE WEPSecuritySettingsUI.cpp
+SOURCE WEPSecuritySettingsUiImpl.cpp
+SOURCE WEPSecuritySettingsDlg.cpp
+SOURCE WepKeyDataTextSettingPage.cpp
+SOURCE WEPSecuritySettingsUiPanic.cpp
+
+// Component specific internal headers 
+USERINCLUDE			../inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY hlplch.lib
+LIBRARY euser.lib
+LIBRARY cone.lib
+LIBRARY eikcore.lib
+LIBRARY eikcoctl.lib
+LIBRARY avkon.lib
+LIBRARY eikdlg.lib 
+LIBRARY bafl.lib
+LIBRARY commonengine.lib 
+LIBRARY commdb.lib
+LIBRARY FeatMgr.lib
+LIBRARY commsdat.lib
+
+DEBUGLIBRARY flogger.lib
+
+#if defined( WINSCW )
+    DEFFILE ../bwinscw/WEPSecuritySettingsUI_EKA2_ALR.def
+#else
+    DEFFILE ../eabi/WEPSecuritySettingsUI_EKA2_ALR.def
+#endif
+
+
+// End of File

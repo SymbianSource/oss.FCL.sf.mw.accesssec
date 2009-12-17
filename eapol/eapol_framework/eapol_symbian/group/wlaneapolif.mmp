@@ -1,0 +1,72 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Project definition file for project EAPOL
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include "eapol.mmh"
+
+#if defined(USE_EAPOL_WLAN_AUTHENTICATION_MESSAGE_IF)
+
+CAPABILITY CAP_ECOM_PLUGIN
+TARGET wlaneapolif.dll
+TARGETTYPE    PLUGIN
+
+VENDORID VID_DEFAULT
+
+// ECom Dll recognition UID followed by the unique UID for this dll
+UID 0x10009D8D 0x2000b05a
+
+SOURCEPATH ../am/wlaneapolif/src
+SOURCE		wlan_eapol_if_implementation.cpp
+
+USERINCLUDE   ../am/wlaneapolif/inc
+USERINCLUDE ..
+USERINCLUDE ../am/type/symbian/plugin/include
+USERINCLUDE ../am/common
+USERINCLUDE ../../eapol_common/am/common
+USERINCLUDE ../am/include
+USERINCLUDE   ../../eapol_common/am/include
+USERINCLUDE   ../../eapol_common/include
+USERINCLUDE   ../../eapol_common/type
+USERINCLUDE ../../eapol_common/am/common/DSS_random
+
+#if defined(USE_EAP_SIMPLE_CONFIG)
+USERINCLUDE   ../../eapol_common/type/simple_config/simple_config/include
+USERINCLUDE   ../../eapol_common/type/simple_config/eap/include
+#endif // #if defined(USE_EAP_SIMPLE_CONFIG)
+
+SYSTEMINCLUDE /epoc32/include/ecom
+SYSTEMINCLUDE /epoc32/include/libc
+SYSTEMINCLUDE /epoc32/include/cshelp
+
+MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
+
+SOURCEPATH ../am/wlaneapolif/data
+START RESOURCE	2000b05a.rss
+TARGET wlaneapolif.rsc
+END
+
+LIBRARY euser.lib ECom.lib eapol.lib edbms.lib efsrv.lib
+DEBUGLIBRARY    flogger.lib
+
+#else
+
+TARGETTYPE    NONE
+
+#endif //#if defined(USE_EAPOL_WLAN_AUTHENTICATION_MESSAGE_IF)
+
+// End

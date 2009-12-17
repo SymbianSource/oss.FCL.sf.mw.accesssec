@@ -1,0 +1,54 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Image description file for project WlanEapSettingsUi
+*
+*/
+
+
+
+#ifndef __WLANEAPSETTINGSUIRESOURCES_IBY__
+#define __WLANEAPSETTINGSUIRESOURCES_IBY__
+
+#include <bldvariant.hrh>
+
+#ifdef __PROTOCOL_WLAN
+
+DATA=DATAZ_\RESOURCE_FILES_DIR\EapSimUi.rsc            RESOURCE_FILES_DIR\EapSimUi.rsc
+DATA=DATAZ_\RESOURCE_FILES_DIR\EapAkaUi.rsc            RESOURCE_FILES_DIR\EapAkaUi.rsc
+DATA=DATAZ_\RESOURCE_FILES_DIR\EapMschapv2Ui.rsc       RESOURCE_FILES_DIR\EapMschapv2Ui.rsc
+DATA=DATAZ_\RESOURCE_FILES_DIR\EapTlsUi.rsc            RESOURCE_FILES_DIR\EapTlsUi.rsc
+DATA=DATAZ_\RESOURCE_FILES_DIR\EapPeapUi.rsc           RESOURCE_FILES_DIR\EapPeapUi.rsc
+DATA=DATAZ_\RESOURCE_FILES_DIR\EapTtlsUi.rsc           RESOURCE_FILES_DIR\EapTtlsUi.rsc
+DATA=DATAZ_\RESOURCE_FILES_DIR\EapGtcUi.rsc            RESOURCE_FILES_DIR\EapGtcUi.rsc
+DATA=DATAZ_\RESOURCE_FILES_DIR\papui.rsc               RESOURCE_FILES_DIR\papui.rsc
+
+#ifdef FF_WLAN_EXTENSIONS
+DATA=DATAZ_\RESOURCE_FILES_DIR\EapLeapUi.rsc           RESOURCE_FILES_DIR\EapLeapUi.rsc
+DATA=DATAZ_\RESOURCE_FILES_DIR\LeapNotifDlgUi.rsc      RESOURCE_FILES_DIR\LeapNotifDlgUi.rsc
+DATA=DATAZ_\RESOURCE_FILES_DIR\eapfastui.rsc           RESOURCE_FILES_DIR\eapfastui.rsc
+DATA=DATAZ_\RESOURCE_FILES_DIR\eapfastnotifdlgui.rsc   RESOURCE_FILES_DIR\eapfastnotifdlgui.rsc
+#endif // FF_WLAN_EXTENSIONS
+
+DATA=DATAZ_\RESOURCE_FILES_DIR\MsChapv2NotifDlgUi.rsc  RESOURCE_FILES_DIR\MsChapv2NotifDlgUi.rsc
+DATA=DATAZ_\RESOURCE_FILES_DIR\GtcNotifDlgUi.rsc       RESOURCE_FILES_DIR\GtcNotifDlgUi.rsc
+DATA=DATAZ_\RESOURCE_FILES_DIR\papnotifdlgui.rsc       RESOURCE_FILES_DIR\papnotifdlgui.rsc
+
+// For the EAPPluginConfig module
+DATA=DATAZ_\RESOURCE_FILES_DIR\EapPluginConfigRes.rsc  RESOURCE_FILES_DIR\EapPluginConfigRes.rsc
+
+#endif // __PROTOCOL_WLAN
+
+#endif // __WLANEAPSETTINGSUIRESOURCES_IBY__
+
+//  End of File

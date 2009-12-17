@@ -1,0 +1,246 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: This is a localisation file for WEPSecuritySettingsUI A .loc file is the one and only place where the logical strings to be localised are defined. 
+*
+*/
+
+
+
+// LOCALISATION STRINGS
+
+
+//d:Command in options menu.
+//d:Exits WEP Security Settings.
+//l:list_single_pane_t1_cp2
+//w:
+//r:3.0
+//
+#define qtn_set_options_exit                    "Exit"
+
+
+//d:Command in options menu.
+//d:Modifies the currently selected item.
+//l:list_single_pane_t1_cp2
+//w:
+//r:3.0
+//
+#define qtn_set_options_change                  "Change"
+
+
+//d:Name of the first tab of four
+//l:tabs_4_active_pane_t1/opt1
+//w:
+//r:3.0
+//
+#define qtn_wlan_tab_wep_key_1                  "#1"
+
+
+//d:Name of the second tab of four
+//l:tabs_4_active_pane_t1/opt1
+//w:
+//r:3.0
+//
+#define qtn_wlan_tab_wep_key_2                  "#2"
+
+
+//d:Name of the third tab of four
+//l:tabs_4_active_pane_t1/opt1
+//w:
+//r:3.0
+//
+#define qtn_wlan_tab_wep_key_3                  "#3"
+
+
+//d:Name of the fourth tab of four
+//l:tabs_4_active_pane_t1/opt1
+//w:
+//r:3.0
+//
+#define qtn_wlan_tab_wep_key_4                  "#4"
+
+
+//d:Error note message: database is inaccessible.
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_set_err_db_inaccessible             "Cannot access\ndatabase.\nTry again later."
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_key_in_use            "WEP key in use"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_auth_mode             "Authentication type"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_key_settings          "WEP key settings"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_key_length            "WEP key length"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_key_format            "WEP key format"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_key_data              "WEP key data"
+
+
+//d:List pane for the setting value item list qtn_wlan_sett_wep_key_in_use
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_key_1                 "#1"
+
+
+//d:List pane for the setting value item list qtn_wlan_sett_wep_key_in_use
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_key_2                 "#2"
+
+
+//d:List pane for the setting value item list qtn_wlan_sett_wep_key_in_use
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_key_3                 "#3"
+
+
+//d:List pane for the setting value item list qtn_wlan_sett_wep_key_in_use
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_key_4                 "#4"
+
+
+//d:List pane for the setting value item list qtn_wlan_sett_wep_auth_mode
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_auth_mode_open        "Open"
+
+
+//d:List pane for the setting value item list qtn_wlan_sett_wep_auth_mode
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_auth_mode_shared      "Shared"
+
+
+//d:List pane for the setting value item list qtn_wlan_sett_wep_key_length
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_key_length_64_bits    "64 bits"
+
+
+//d:List pane for the setting value item list qtn_wlan_sett_wep_key_length
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_key_length_128_bits   "128 bits"
+
+
+//d:List pane for the setting value item list qtn_wlan_sett_wep_key_length
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_key_length_256_bits   "256 bits"
+
+
+//d:List pane for the setting value item list qtn_wlan_sett_wep_key_format
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_key_format_ascii      "ASCII"
+
+
+//d:List pane for the setting value item list qtn_wlan_sett_wep_key_format
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_wep_key_format_hexa       "Hexadecimal"
+
+
+//d:Confirmation query text to ask the user if he wants to continue even if
+//d:qtn_wlan_sett_wep_key_data was not entered and therefore security settings
+//d:will not be saved.
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_wlan_quest_wep_key_data_missing     "WEP key data for the key in use is compulsory. Security settings will not be saved. Continue?"
+
+
+//d:Error note to be showed when invalid number of characters have been
+//d:entered for qtn_wlan_sett_wep_key_data editor.
+//d:%N is the number of characters that must be entered.
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_wlan_info_wep_key_too_short         "WEP key too short. Key must be exactly %N characters long"
+
+
+//d:Error note to be showed when invalid characters have been entered for
+//d:qtn_wlan_sett_wep_key_data editor
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_wlan_info_wep_key_illegal_chars     "Illegal characters in WEP key"
+
+
+// End of File

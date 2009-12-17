@@ -1,0 +1,51 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: This file provides the information required for building the Wi-Fi Protected Setup Ui. 
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// export iby files
+
+../rom/WiFiProt.iby                             CORE_MW_LAYER_IBY_EXPORT_PATH(WiFiProt.iby)
+../rom/WiFiProtResources.iby                    LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(WiFiProtResources.iby)
+
+
+// export localised loc file
+../loc/wifiprot.loc                             MW_LAYER_LOC_EXPORT_PATH(wifiprot.loc)
+
+PRJ_MMPFILES
+
+./wifiprotclient.mmp
+./wifiprotplugin.mmp
+
+// gnumakefile wifiprot_icons.mk
+
+PRJ_EXTENSIONS
+
+START EXTENSION s60/mifconv
+OPTION TARGETFILE wifiprot.mif
+OPTION HEADERFILE wifiprot.mbg
+OPTION SOURCES -c8,1 qgn_prop_wlan_bearer 
+END
+
+PRJ_TESTMMPFILES
+
+// End of file

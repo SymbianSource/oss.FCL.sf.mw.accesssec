@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<api id="05dcacc9a3b2427e80999dead4919374" dataversion="1.0">
+<name>WAPI Security Settings UI API</name>
+<description>API for accessing WAPI security settings UI</description>
+<type>c++</type>
+<subsystem>networkingutilities</subsystem>
+<libs><lib name="wapisecuritysettingsui.lib"/>
+</libs>
+<release category="domain" sinceversion="5.0"/>
+<attributes>
+<htmldocprovided>yes</htmldocprovided>
+<adaptation>no</adaptation>
+</attributes>
+</api>

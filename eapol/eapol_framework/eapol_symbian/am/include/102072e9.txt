@@ -1,0 +1,16 @@
+;
+; Policy file to allow the eapol and eap type databases to be shared
+;
+; \EPOC32\RELEASE\WINSCW\UDEB\EDBSPCONV.EXE /f=c:\102072e9.txt /b=c:\102072e9.spd
+; c: is Symbian specfic c drive (it is /epoc32\winscw\c for winscw paltform)
+;
+[database]
+read
+capability = ReadUserData WriteUserData
+write
+capability = ReadUserData WriteUserData
+schema
+capability = ReadUserData WriteUserData
+
+[BACKUP]
+SID=101F8EC5

@@ -1,0 +1,54 @@
+/*
+* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization strings for project EAPOL
+*
+*/
+
+
+
+// LOCALISATION STRINGS:
+
+// b: 50
+// e: 300
+// f: EDialogLabelFont
+// d: This name for the EAP-TLS EAP type is displayed in the EAP type list in IAP UI and in EAP-PEAP
+// d: encapsulated EAP type selection.
+#define TLPL_GE_NAME "EAP-TLS"
+
+// b: 50
+// e: 300
+// f: EDialogLabelFont
+// d: This name for the EAP-PEAP EAP type is displayed in the EAP type list in IAP UI.
+#define PEPL_GE_NAME "EAP-PEAP"
+
+
+// b: 50
+// e: 300
+// f: EDialogLabelFont
+// d: This name for the EAP-TTLS EAP type is displayed in the EAP type list in IAP UI.
+#define TTLSPL_GE_NAME "EAP-TTLS"
+
+// b: 50
+// e: 300
+// f: EDialogLabelFont
+// d: This name for the EAP-FAST EAP type is displayed in the EAP type list in IAP UI.
+#define FASTPL_GE_NAME "EAP-FAST"
+
+// b: 50
+// e: 300
+// f: EDialogLabelFont
+// d: This name for the TTLS-PAP type is displayed in the tunneled EAP type list inside EAP-TTLS in IAP UI.
+#define TTLSPAPPL_GE_NAME "PAP"
+
+// End of File

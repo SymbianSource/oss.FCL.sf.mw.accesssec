@@ -1,0 +1,411 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: EAP TLS UI resource file
+*
+*/
+
+
+
+CHARACTER_SET   UTF8
+
+//  RESOURCE IDENTIFIER
+NAME ETLS
+
+//  INCLUDES
+#include <eikon.rh>
+#include "EapTlsUi.hrh"   // Enums for these resources
+#include <eaptlsui.loc>   // Localisation file
+#include <wlaneapsettingsui.loc>
+#include <eikon.rsg>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.mbg>
+#include <avkon.loc>
+
+
+//  CONSTANTS  
+#define KUsernameMaxNameLength 255
+
+
+//  RESOURCE DEFINITIONS 
+
+RESOURCE RSS_SIGNATURE { }
+
+
+RESOURCE TBUF16 { buf=""; }
+
+
+RESOURCE CBA r_tls_ui_softkeys_options_back_edit
+    {
+    buttons = 
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_back; },
+        CBA_BUTTON { id = ETlsUiCmdChange; txt = qtn_msk_change; }
+        };
+    }
+    
+    
+RESOURCE CBA r_tls_ui_softkeys_options_back_enable
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_back; },
+        CBA_BUTTON { id = ETlsUiCmdEnable; txt = qtn_msk_wlan_eap_cs_enable; }
+        };
+    }
+
+
+RESOURCE CBA r_tls_ui_softkeys_options_back_disable
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_back; },
+        CBA_BUTTON { id = ETlsUiCmdDisable; txt = qtn_msk_wlan_eap_cs_disable; }
+        };
+    }
+
+
+RESOURCE DIALOG r_tls_setting_dialog
+    {
+    flags = EEikDialogFlagFillAppClientRect | EEikDialogFlagCbaButtons | 
+            EEikDialogFlagWait | EEikDialogFlagNotifyEsc;
+    buttons = r_tls_ui_softkeys_options_back_edit;
+    pages = r_tls_pages;
+    }
+
+
+// ******* PAGES ************
+RESOURCE ARRAY r_tls_pages
+    {
+    items=
+        {
+        PAGE 
+            {
+            id = KEAPTLSSETTINGSPAGE;
+            text = qtn_wlan_eap_tab_settings; 
+            lines = r_tls_tab_settings; 
+            },
+
+        PAGE 
+            {
+            id = KEAPTLSCIPHERPAGE;
+            text = qtn_wlan_eap_tab_cipher_suites; 
+            lines = r_tls_tab_cipher_suites; 
+            }
+        };
+    }
+
+
+// ******* 1st page *********
+RESOURCE ARRAY r_tls_tab_settings
+    {
+    items=
+        {
+        DLG_LINE
+            {
+            id = ETlsSettingsListbox;
+            type = EAknCtSettingListBox;
+            control = LISTBOX 
+                {
+                flags = EAknListBoxMenuList;
+                };
+            }
+        };
+    }
+
+
+// ******* 2nd page *********
+RESOURCE ARRAY r_tls_tab_cipher_suites
+    {
+    items=
+         {
+         DLG_LINE
+            {
+            id = ETlsSettingsCipherSuiteListbox;
+            type = EAknCtSingleNumberListBox;
+            control = LISTBOX 
+                {
+                flags = EAknGenericListBoxFlags;
+                //array_id = r_tls_cipher_suite_array;
+                };
+            }
+         };
+    }
+
+
+RESOURCE AVKON_SETTING_PAGE r_tls_username_page
+    {
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    label = qtn_wlan_eap_sett_username;
+    type = EEikCtEdwin;
+    editor_resource_id = r_tls_setting_edwin;
+    }
+
+
+RESOURCE AVKON_SETTING_PAGE r_tls_realm_page
+    {
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    label = qtn_wlan_eap_sett_realm;
+    type = EEikCtEdwin;
+    editor_resource_id = r_tls_setting_edwin;
+    }
+
+
+RESOURCE EDWIN r_tls_setting_edwin 
+    {
+    flags = 0;
+    width = 9;
+    lines = 5;
+    maxlength = 255;
+    }
+
+
+RESOURCE MENU_BAR r_tls_menubar
+    {
+    titles =
+        {
+        MENU_TITLE 
+            { 
+            menu_pane = r_tls_menu_pane;
+            txt = "";
+            }
+        };
+    }
+
+
+RESOURCE MENU_PANE r_tls_menu_pane
+    {
+    items =
+        {
+        MENU_ITEM 
+            { 
+            command = ETlsUiCmdEnable;  
+            txt = qtn_wlan_options_eap_plugin_enable;
+            flags = EEikMenuItemAction;
+            },
+
+        MENU_ITEM 
+            { 
+            command = ETlsUiCmdDisable;
+            txt = qtn_wlan_options_eap_plugin_disable;
+            flags = EEikMenuItemSpecific;
+            },
+
+        MENU_ITEM 
+            { 
+            command = ETlsUiCmdChange;
+            txt = qtn_options_change;
+            flags = EEikMenuItemAction;
+            },
+
+        MENU_ITEM 
+            { 
+            command = EAknCmdHelp; 
+            txt = qtn_options_help; 
+            },
+
+        MENU_ITEM 
+            { 
+            command = EAknCmdExit;
+            txt = qtn_options_exit; 
+            }
+        };
+    }
+
+
+// Resource strings
+RESOURCE TBUF r_tls_settings_title          { buf = qtn_wlan_eap_tls_title; }
+RESOURCE TBUF r_tls_username_inusestring      \
+                                  { buf = qtn_wlan_eap_sett_username_inuse; }
+RESOURCE TBUF r_tls_username_inusestring_auto \
+                        { buf = qtn_wlan_eap_sett_username_inuse_from_cert; }
+RESOURCE TBUF r_tls_username_inusestring_conf \
+                             { buf = qtn_wlan_eap_sett_username_inuse_user; }
+RESOURCE TBUF r_tls_username_string     { buf = qtn_wlan_eap_sett_username; }
+RESOURCE TBUF r_tls_realm_inusestring         \
+                                     { buf = qtn_wlan_eap_sett_realm_inuse; }
+RESOURCE TBUF r_tls_realm_inusestring_auto    \
+                           { buf = qtn_wlan_eap_sett_realm_inuse_from_cert; }
+RESOURCE TBUF r_tls_realm_inusestring_conf    \
+                                { buf = qtn_wlan_eap_sett_realm_inuse_user; }
+RESOURCE TBUF r_tls_realm_string           { buf = qtn_wlan_eap_sett_realm; }
+RESOURCE TBUF r_tls_user_cert_setting         \
+                                { buf = qtn_wlan_eap_sett_user_certificate; }
+RESOURCE TBUF r_tls_ca_cert_setting           \
+                                  { buf = qtn_wlan_eap_sett_ca_certificate; }
+RESOURCE TBUF r_tls_not_defined      { buf = qtn_wlan_eap_cert_not_defined; }
+RESOURCE TBUF r_tls_none_selection            \
+                                  { buf = qtn_wlan_eap_cert_none_selection; }
+RESOURCE TBUF r_tls_suite_rsarc4md5  { buf = qtn_wlan_eap_cipher_rsarc4md5; }
+RESOURCE TBUF r_tls_suite_rsarc4sha  { buf = qtn_wlan_eap_cipher_rsarc4sha; }
+RESOURCE TBUF r_tls_suite_rsa3dessha          \
+                                    { buf = qtn_wlan_eap_cipher_rsa3dessha; }
+RESOURCE TBUF r_tls_suite_dhersa3dessha       \
+                                 { buf = qtn_wlan_eap_cipher_dhersa3dessha; }
+RESOURCE TBUF r_tls_suite_dhedss3dessha       \
+                                 { buf = qtn_wlan_eap_cipher_dhedss3dessha; }
+RESOURCE TBUF r_tls_suite_rsaaessha  { buf = qtn_wlan_eap_cipher_rsaaessha; }
+RESOURCE TBUF r_tls_suite_dhersaaessha        \
+                                  { buf = qtn_wlan_eap_cipher_dhersaaessha; }
+RESOURCE TBUF r_tls_suite_dhedssaessha        \
+                                  { buf = qtn_wlan_eap_cipher_dhedssaessha; }
+
+RESOURCE TBUF r_tls_tls_privacy_string
+                                  { buf = qtn_wlan_eap_sett_tls_privacy; }
+
+
+// ********************************************
+// USERNAME IN USE AND REALM POPUP DEFINITION
+// ********************************************
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_tls_username_autouseconf_texts
+    {
+    setting_texts_resource = r_tls_username_autouseconf_texts_resource;
+    popped_up_texts_resource = r_tls_username_automatic_useconfigured_array;
+    }
+
+
+RESOURCE ARRAY r_tls_username_autouseconf_texts_resource
+    {
+    items =
+        {
+        AVKON_ENUMERATED_TEXT 
+            { 
+            value = 0; 
+            text = qtn_wlan_eap_sett_username_inuse_from_cert; 
+            },
+
+        AVKON_ENUMERATED_TEXT 
+            { 
+            value = 1; 
+            text = qtn_wlan_eap_sett_username_inuse_user; 
+            }
+        };
+    }
+
+
+RESOURCE ARRAY r_tls_username_automatic_useconfigured_array
+    {
+    items =
+        {
+        LBUF { txt = qtn_wlan_eap_sett_username_inuse_from_cert; },
+        LBUF { txt = qtn_wlan_eap_sett_username_inuse_user; }
+        };
+    }
+
+
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_tls_realm_autouseconf_texts
+    {
+    setting_texts_resource = r_tls_realm_autouseconf_texts_resource;
+    popped_up_texts_resource = r_tls_realm_automatic_useconfigured_array;
+    }
+
+
+RESOURCE ARRAY r_tls_realm_autouseconf_texts_resource
+    {
+    items=
+        {
+        AVKON_ENUMERATED_TEXT 
+            { 
+            value = 0; 
+            text = qtn_wlan_eap_sett_realm_inuse_from_cert; 
+            },
+
+        AVKON_ENUMERATED_TEXT 
+            { 
+            value = 1; 
+            text = qtn_wlan_eap_sett_realm_inuse_user; 
+            }
+        };
+    }
+
+
+RESOURCE ARRAY r_tls_realm_automatic_useconfigured_array
+    {
+    items=
+        {
+        LBUF { txt = qtn_wlan_eap_sett_realm_inuse_from_cert; },
+        LBUF { txt = qtn_wlan_eap_sett_realm_inuse_user; }
+        };
+    }
+
+RESOURCE ARRAY r_tls_tls_privacy_autouseconf_texts_resource
+    {
+    items=
+        {
+        AVKON_ENUMERATED_TEXT 
+            { 
+            value = 0; 
+            text = qtn_wlan_eap_sett_tls_privacy_off; 
+            },
+
+        AVKON_ENUMERATED_TEXT 
+            { 
+            value = 1; 
+            text = qtn_wlan_eap_sett_tls_privacy_on; 
+            }
+        };
+    }
+
+
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_tls_tls_privacy_autouseconf_texts
+    {
+    setting_texts_resource = r_tls_tls_privacy_autouseconf_texts_resource;
+    popped_up_texts_resource = r_tls_tls_privacy_automatic_useconfigured_array;
+    }
+
+
+RESOURCE ARRAY r_tls_tls_privacy_automatic_useconfigured_array
+    {
+    items =
+        {
+        LBUF { txt = qtn_wlan_eap_sett_tls_privacy_off; },
+        LBUF { txt = qtn_wlan_eap_sett_tls_privacy_on; }
+        };
+    }
+
+RESOURCE AVKON_SETTING_PAGE r_tls_display_autouseconf_page
+    {
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_tls_setting_enumerated_popup;
+    }
+
+
+RESOURCE POPUP_SETTING_LIST r_tls_setting_enumerated_popup
+    {
+    flags = EAknPopupSettingListFlagInitialised;
+    }
+
+
+// ********************************************
+// USER&CA CERTIFICATES  POPUP DEFINITION
+// ********************************************
+RESOURCE AVKON_SETTING_PAGE r_radio_button_setting_page
+    {
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    type =  EAknSetListBox;
+    editor_resource_id= r_setting_listbox;
+    }
+
+
+RESOURCE LISTBOX r_setting_listbox 
+    {
+    flags = EEikListBoxMultipleSelection;
+    }
+
+
+// End of File

@@ -1,0 +1,173 @@
+/*
+* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project EAPOL
+*
+*/
+
+
+//-------------------------------------------------------------------
+
+// Set up the preprocessor macros for source files
+
+// This enables TTLS
+MACRO USE_TTLS_EAP_TYPE
+
+// This flag activates start WPXM functionaly.
+MACRO USE_EAPOL_START_WPXM_REASSOCIATION
+
+// This flag tells the 64-bit multiplication of platform can be used.
+MACRO USE_EAP_64_BIT_MULTIPLICATION
+
+// This flag activates the EAP-TTLS/MsChapv2 authentication.
+// Note this is inside EAP protocol.
+// We did not have any plan to make this authentication.
+MACRO EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK
+#define EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK
+
+MACRO USE_EAP_GSMSIM_INTERFACE
+// Comment the below line for Test environment. ( Eg: for Plugin Tester )
+// Also use the directory wlaneapol_testing. Otherwise EAP GSM SIM won't compile.
+#define USE_EAP_GSMSIM_INTERFACE
+
+// Comment the below lines for Test environment ( Eg: for Plugin Tester in emulator or simulator tests on hardware )
+// Also use the directory wlaneapol_testing. Otherwise EAP AKA won't compile.
+MACRO USE_EAP_AKA_INTERFACE
+#define USE_EAP_AKA_INTERFACE
+
+// This might be useless.
+//MACRO SYMBIAN_CRYPTO=1
+
+// This is very important definition.
+MACRO EAP_LITTLE_ENDIAN=1
+
+//-------------------------------------------------------------------
+
+// This macro activates stack trace of EAP_ASSERT().
+// When assertion is false the current stack is traced before abort of program.
+//MACRO USE_EAP_ASSERT_STACK_TRACE
+//#define USE_EAP_ASSERT_STACK_TRACE
+
+// This is used to enable configuring from file.
+MACRO USE_EAP_FILECONFIG=1
+
+// Add this when database compatibility is not needed anymore.
+// This fixes some names of database fields.
+MACRO USE_EAP_FIXED_DATABASE_FIELDS=1
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// This flag enables EAP expanded types.
+MACRO USE_EAP_EXPANDED_TYPES=1
+#define USE_EAP_EXPANDED_TYPES
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// This flag activates message based WLAN engine EAPOL interface.
+MACRO USE_EAPOL_WLAN_AUTHENTICATION_MESSAGE_IF
+#define USE_EAPOL_WLAN_AUTHENTICATION_MESSAGE_IF
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// This flag enables EAP Protected setup (or Simple Config or Easy Setup or EAP-WSC).
+MACRO USE_EAP_SIMPLE_CONFIG=1
+#define USE_EAP_SIMPLE_CONFIG
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+#if defined(FF_WLAN_EXTENSIONS)
+
+MACRO USE_FAST_EAP_TYPE=1
+#define USE_FAST_EAP_TYPE
+
+MACRO USE_EAP_TLS_SESSION_TICKET=1
+#define USE_EAP_TLS_SESSION_TICKET
+
+MACRO USE_EAP_TLS_IDENTITY_PRIVACY=1
+
+MACRO USE_PAC_STORE=1
+#define USE_PAC_STORE
+
+#endif // End: #if defined(FF_WLAN_EXTENSIONS)
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// This macro enables some traces for release error log.
+// EAP_TRACE_ALWAYS() and EAP_TRACE_DATA_ALWAYS() are left
+// active if USE_EAP_TRACE_ALWAYS is defined.
+//MACRO USE_EAP_TRACE_ALWAYS=1
+
+// This very heavy trace. Do use only when other things fail.
+//MACRO USE_EAP_FUNCTION_TRACE=1
+
+// This flag activates minimum traces for release version.
+// Traces will be written to log file.
+//MACRO USE_EAP_MINIMUM_RELEASE_TRACES
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// This flag activates some interoperability PEAPv0 and PEAPv1 fixes.
+MACRO USE_EAP_TLS_PEAP_TPPD_PEAP_V1_NEW_FIXES=1
+
+// This flag activates server codes of EAP-SIM.
+// Uncomment the below lines for activating the server codes ( for plugin tester).
+//MACRO USE_EAP_TYPE_SERVER_GSMSIM=1
+
+// This flag activates server codes of EAP-AKA.
+// Uncomment the below lines for activating the server codes ( for plugin tester).
+// MACRO USE_EAP_TYPE_SERVER_AKA
+// #define USE_EAP_TYPE_SERVER_AKA
+
+// This flag activates server codes of EAP-SECURID and GTC.
+// Uncomment the below lines for activating the server codes ( for plugin tester).
+//MACRO COMPILE_EAP_SECURID_SERVER=1
+//MACRO EAP_SECURID_SERVER=1
+
+// This flag activates server codes of EAPOL
+MACRO USE_EAP_CORE_SERVER=1
+
+// This is to enable password change functionality for MSCHAPv2
+// MACRO EAP_MSCHAPV2_ENABLE_PASSWORD_CHANGE=1
+
+// These following macros should be adjusted depending on the test environment.
+// For WLM compatibility only NO_EAP_MUTEX should be defined.
+MACRO NO_EAP_MUTEX=1
+MACRO USE_EAPOL_KEY_STATE=1
+
+// The following marco activates optimized 4-Way Handshake.
+// Note the interface between WLAN engine and EAPOL changes too.
+MACRO USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE=1
+
+// Enables configuration option to skips user interactions in selected test cases.
+MACRO USE_EAP_CONFIGURATION_TO_SKIP_USER_INTERACTIONS=1
+
+// Enables timer to stop authentication with broken authentication server or access point configuration that blocks WLAN connection for too long time.
+MACRO USE_EAP_CORE_WAIT_REQUEST_TYPE_TIMER=1
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if defined(FF_WLAN_EXTENSIONS)
+	#define USE_EAPOL_WLAN_WPX
+	// This activates WPXM.
+	// You need all EAPOL WPX sources or binary eapolwpx.lib to compile WPX version.
+	MACRO EAP_USE_WPXM=1
+	#define EAP_USE_WPXM
+#else
+	// The WPX stub is needed even without WPX functionality.
+	#define USE_EAPOL_WLAN_WPX_STUB 
+#endif // #if defined(FF_WLAN_EXTENSIONS)
+
+
+//-------------------------------------------------------------------
+// End of File

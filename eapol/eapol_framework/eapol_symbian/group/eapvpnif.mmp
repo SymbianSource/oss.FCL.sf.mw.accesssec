@@ -1,0 +1,61 @@
+/*
+* Copyright (c) 2000 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Project definition file for project EAPOL
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include "eapol.mmh"
+
+CAPABILITY CAP_ECOM_PLUGIN
+TARGET eapvpnif.dll
+TARGETTYPE    PLUGIN
+
+VENDORID VID_DEFAULT
+
+// ECom Dll recognition UID followed by the unique UID for this dll
+UID 0x10009D8D 0x10200ec9
+
+SOURCEPATH ../am/eapvpnif/src
+//SOURCE		eap_vpn_if_main.cpp
+SOURCE		eap_vpn_if_proxy.cpp
+SOURCE		eap_vpn_if_implementation.cpp
+SOURCE		eap_vpn_if_timer.cpp
+
+USERINCLUDE   ../am/eapvpnif/inc
+USERINCLUDE   ../../eapol_common/include
+USERINCLUDE   ../am/include
+USERINCLUDE   ../../eapol_common/am/include
+USERINCLUDE   ../../eapol_common/type/aka/include
+USERINCLUDE   ../../eapol_common/type/gsmsim/include
+
+USERINCLUDE   ../am/type/gsmsim/symbian/plugin/inc
+USERINCLUDE   ../am/type/aka/symbian/plugin/inc
+
+SYSTEMINCLUDE /epoc32/include/ecom
+SYSTEMINCLUDE /epoc32/include/libc
+SYSTEMINCLUDE /epoc32/include/cshelp
+
+MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
+
+SOURCEPATH ../am/eapvpnif/data
+START RESOURCE	10200ec9.rss
+TARGET eapvpnif.rsc
+END
+
+LIBRARY euser.lib ECom.lib eapol.lib edbms.lib efsrv.lib PlatformEnv.lib
+DEBUGLIBRARY    flogger.lib
+
+// End

@@ -1,0 +1,52 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: EAP MsChapV2 UI Project mmp file
+*
+*/
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+
+TARGET          eapmschapv2ui.lib
+TARGETTYPE      lib
+UID             0x1000008d 0x102072A8
+
+
+SOURCEPATH  ../EapMschapv2/ConfigUi/src
+
+SOURCE  EapMschapv2Ui.cpp
+SOURCE  EapMschapv2UiView.cpp
+SOURCE  EapMschapv2UiSettingArray.cpp
+
+
+USERINCLUDE     ../EapMschapv2/ConfigUi/inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+APP_LAYER_SYSTEMINCLUDE
+
+
+// Resource files
+START RESOURCE ../data/EapMschapv2Ui.rss
+
+HEADER
+TARGETPATH RESOURCE_FILES_DIR
+LANGUAGE_IDS
+
+END
+
+
+// End of File

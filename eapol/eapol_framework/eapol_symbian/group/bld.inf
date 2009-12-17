@@ -1,0 +1,80 @@
+/*
+* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for project EAPOL
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+// Exporting IBY file (only for 5.0).
+../rom/eapol.iby	CORE_MW_LAYER_IBY_EXPORT_PATH(eapol.iby) 
+
+// Secure policy file for saving all EAPOL AND EAP databases in DBMS.
+../am/include/102072e9.spd 	/epoc32/data/z/private/100012a5/policy/102072e9.spd
+../am/include/102072e9.spd  /epoc32/release/winscw/udeb/z/private/100012a5/policy/102072e9.spd
+../am/include/102072e9.spd  /epoc32/release/winscw/urel/z/private/100012a5/policy/102072e9.spd
+
+// Backup registration file for backing up all EAPOL related databases. Exported to the private cage path for WLAN engine.
+backup_registration_eapol.xml  /epoc32/data/z/private/101F8EC5/backup_registration_eapol.xml
+backup_registration_eapol.xml  /epoc32/release/winscw/udeb/z/private/101F8EC5/backup_registration_eapol.xml
+backup_registration_eapol.xml  /epoc32/release/winscw/urel/z/private/101F8EC5/backup_registration_eapol.xml
+
+// Copies configuration file of EAPOL.
+../am/core/symbian/file_config/eap_symbian.conf  /epoc32/data/z/private/101F8EC5/eap.conf
+../am/core/symbian/file_config/eap_symbian.conf  /epoc32/release/winscw/udeb/z/private/101F8EC5/eap.conf
+../am/core/symbian/file_config/eap_symbian.conf  /epoc32/release/winscw/urel/z/private/101F8EC5/eap.conf
+
+#ifndef __SERIES60_HELP
+../am/type/securid/symbian/plugin/inc/eapgtc.hlp.hrh     /epoc32/include/cshelp/eapgtc.hlp.hrh
+../am/type/mschapv2/symbian/plugin/inc/eapmschap.hlp.hrh /epoc32/include/cshelp/eapmschap.hlp.hrh
+../am/type/tls_peap/symbian/plugin/inc/eappeap.hlp.hrh   /epoc32/include/cshelp/eappeap.hlp.hrh
+../am/type/gsmsim/symbian/plugin/inc/eapsim.hlp.hrh      /epoc32/include/cshelp/eapsim.hlp.hrh
+../am/type/tls_peap/symbian/plugin/inc/eaptls.hlp.hrh    /epoc32/include/cshelp/eaptls.hlp.hrh
+#endif
+
+#ifndef __SERIES60_HELP
+// EAP-LEAP is part of WPX. You need special release to compile this. However the header is needed.
+../am/type/leap/symbian/plugin/inc/eapleap.hlp.hrh /epoc32/include/cshelp/eapleap.hlp.hrh
+#endif
+
+
+PRJ_MMPFILES
+
+// This compiles stub of EAPOL WPX, the empty functions that implement WPX.
+eapolwpxstub.mmp
+
+// This is the basic set that should always be compiled for every environment.
+eapol.mmp
+eapsim.mmp
+eaptlspeap.mmp
+eapmschapv2.mmp
+eapsecurid.mmp
+eapaka.mmp
+
+// API for VPN.
+eapvpnif.mmp
+
+eapprotectedsetup.mmp
+
+// API for WLAN-engine.
+wlaneapolif.mmp
+
+
+// End of file.

@@ -1,0 +1,17 @@
+EXPORTS
+	??1CWPASecuritySettings@@UAE@XZ @ 1 NONAME ; CWPASecuritySettings::~CWPASecuritySettings(void)
+	??1CWPASecuritySettingsUi@@UAE@XZ @ 2 NONAME ; CWPASecuritySettingsUi::~CWPASecuritySettingsUi(void)
+	?Cvt@CWPASecuritySettingsUi@@SAHXZ @ 3 NONAME ; int CWPASecuritySettingsUi::Cvt(void)
+	?DeleteL@CWPASecuritySettings@@QBEXK@Z @ 4 NONAME ; void CWPASecuritySettings::DeleteL(unsigned long) const
+	?EditL@CWPASecuritySettings@@QAEHAAVCWPASecuritySettingsUi@@ABVTDesC16@@@Z @ 5 NONAME ; int CWPASecuritySettings::EditL(class CWPASecuritySettingsUi &, class TDesC16 const &)
+	?IsValid@CWPASecuritySettings@@QBEHXZ @ 6 NONAME ; int CWPASecuritySettings::IsValid(void) const
+	?LoadL@CWPASecuritySettings@@QAEXKAAVCCommsDatabase@@@Z @ 7 NONAME ; void CWPASecuritySettings::LoadL(unsigned long, class CCommsDatabase &)
+	?NewL@CWPASecuritySettings@@SAPAV1@W4TSecurityMode@@@Z @ 8 NONAME ; class CWPASecuritySettings * CWPASecuritySettings::NewL(enum TSecurityMode)
+	?NewL@CWPASecuritySettingsUi@@SAPAV1@AAVCEikonEnv@@@Z @ 9 NONAME ; class CWPASecuritySettingsUi * CWPASecuritySettingsUi::NewL(class CEikonEnv &)
+	?SaveL@CWPASecuritySettings@@QBEXKAAVCCommsDatabase@@W4TTypeOfSaving@@K@Z @ 10 NONAME ; void CWPASecuritySettings::SaveL(unsigned long, class CCommsDatabase &, enum TTypeOfSaving, unsigned long) const
+	?SetWPAPreSharedKey@CWPASecuritySettings@@QAEHABVTDesC16@@@Z @ 11 NONAME ; int CWPASecuritySettings::SetWPAPreSharedKey(class TDesC16 const &)
+	?LoadL@CWPASecuritySettings@@QAEXKAAVCMDBSession@CommsDat@@@Z @ 12 NONAME ; void CWPASecuritySettings::LoadL(unsigned long, class CommsDat::CMDBSession &)
+	?SaveL@CWPASecuritySettings@@QBEXKAAVCMDBSession@CommsDat@@W4TTypeOfSaving@@K@Z @ 13 NONAME ; void CWPASecuritySettings::SaveL(unsigned long, class CommsDat::CMDBSession &, enum TTypeOfSaving, unsigned long) const
+	?SetWPADisabledEAPPlugin@CWPASecuritySettings@@QAEHABVTDesC8@@@Z @ 14 NONAME ; int CWPASecuritySettings::SetWPADisabledEAPPlugin(class TDesC8 const &)
+	?SetWPAEnabledEAPPlugin@CWPASecuritySettings@@QAEHABVTDesC8@@@Z @ 15 NONAME ; int CWPASecuritySettings::SetWPAEnabledEAPPlugin(class TDesC8 const &)
+

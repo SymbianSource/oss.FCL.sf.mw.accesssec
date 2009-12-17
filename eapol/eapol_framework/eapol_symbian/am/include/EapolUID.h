@@ -1,0 +1,86 @@
+/*
+* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  EAP and WLAN authentication protocols.
+*
+*/
+
+
+
+#ifndef _EAPOLUID_H_
+#define _EAPOLUID_H_
+
+#define PLUGIN_INTERFACE_UID 0x101f8e4a
+
+// EAPOL
+#define EAPOL_DLL_UID 0x101f8e48
+#define EAPOL_NOTIFIERS_DLL_UID 0x101f8e79
+#define EAPOL_PROGRESS_NOTIFIER_UID 0x101f8e7a
+
+// EAP-SIM
+#define EAP_SIM_DLL_UID 0x101f8e49
+#define EAP_SIM_IMPLEMENTATION_UID 0x101f8e4b
+
+// EAP-TLS/PEAP
+#define EAP_TLS_PEAP_DLL_UID 0x101f8e4c
+#define EAP_TLS_IMPLEMENTATION_UID 0x101f8e4d
+#define EAP_PEAP_IMPLEMENTATION_UID 0x101f8e4e
+#define EAP_TTLS_IMPLEMENTATION_UID 0x101f8e4f
+#define EAP_TLS_PEAP_NOTIFIERS_DLL_UID 0x101f8e7d
+#define EAP_TLS_PEAP_SELECTION_NOTIFIERS_UID 0x101f8e7e
+#define EAP_TLS_PEAP_IDENTITY_NOTIFIERS_UID 0x101f8ecf
+#define EAP_FAST_IMPLEMENTATION_UID 0x2000BF12 // EAP-FAST
+
+// TTLS-PAP
+#define TTLS_PAP_IMPLEMENTATION_UID 0x2001B2F2
+
+// EAP-MSCHAPv2
+#define EAP_MSCHAPV2_DLL_UID 0x101f8e66
+#define EAP_MSCHAPV2_IMPLEMENTATION_UID 0x101f8e67
+#define MSCHAPV2_IMPLEMENTATION_UID 0x101f8e7b
+#define EAP_MSCHAPV2_NOTIFIERS_DLL_UID 0x101f8e68
+#define EAP_MSCHAPV2_USERNAME_PASSWORD_NOTIFIER_UID 0x101f8e69
+#define EAP_MSCHAPV2_CHANGE_PASSWORD_NOTIFIER_UID 0x101f8e6a
+
+// EAP-SecurID
+#define EAP_SECURID_NOTIFIERS_DLL_UID 0x101f8e6c
+#define EAP_SECURID_DLL_UID 0x101f8e74
+#define EAP_SECURID_IMPLEMENTATION_UID 0x101f8e75
+#define EAP_SECURID_IDENTITY_NOTIFIER_UID 0x101f8e76
+#define EAP_SECURID_PASSCODE_NOTIFIER_UID 0x101f8e77
+#define EAP_SECURID_PINCODE_NOTIFIER_UID 0x101f8e78
+
+// EAP-GTC (implemented in EAP-SecurID)
+#define EAP_GTC_IMPLEMENTATION_UID 0x101f8e80
+#define EAP_GTC_IDENTITY_NOTIFIER_UID 0x101f8e7c
+#define EAP_GTC_USER_INPUT_NOTIFIER_UID 0x101f8e7f
+
+// EAP-LEAP
+#define EAP_LEAP_DLL_UID 0x101f8ea6
+#define EAP_LEAP_IMPLEMENTATION_UID 0x101f8ea7
+#define EAP_LEAP_NOTIFIERS_DLL_UID 0x101f8ea8
+#define EAP_LEAP_USERNAME_PASSWORD_NOTIFIER_UID 0x101f8ea9
+
+// EAP-AKA
+#define EAP_AKA_DLL_UID 0x102073c1
+#define EAP_AKA_IMPLEMENTATION_UID 0x102073c2
+
+// EAP-WSC Protected Setup
+#define EAP_PROTECTED_SETUP_DLL_UID 0x2000b003
+#define EAP_PROTECTED_SETUP_IMPLEMENTATION_UID 0x2000b004	 
+
+
+// FREE UIDS
+
+
+#endif // _EAPOLUID_H_

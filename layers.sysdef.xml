@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE SystemDefinition SYSTEM "sysdef_1_4_0.dtd" [
+  <!ENTITY layer_real_source_path "sf/mw/accesssec" >
+]>
+
+<SystemDefinition name="accesssec" schema="1.4.0">
+  <systemModel>
+    <layer name="mw_layer">
+      <module name="accesssec">
+        <unit unitID="netdo.accesssec" mrp="" bldFile="&layer_real_source_path;/group" name="accesssec" />
+        <unit unitID="netdo.wpxeapol" mrp="" bldFile="&layer_real_source_path;/eapol/eapol_framework/eapol_symbian/group/wpxeapol" filter="dfs_build" name="wpxeapol" />
+        <unit unitID="netdo.wpxeap" mrp="" bldFile="&layer_real_source_path;/eapol/eapol_framework/eapol_symbian/group/wpxeap" filter="dfs_build" name="wpxeap" />
+        <unit unitID="netdo.wpx" mrp="" bldFile="&layer_real_source_path;/wlansecuritysettings/wlaneapsettingsui/group/wpx" filter="dfs_build" name="wpx" />
+        <unit unitID="netdo.wapisymbian" mrp="" bldFile="&layer_real_source_path;/eapol/eapol_framework/wapi_symbian/group" filter="dfs_build" name="wapisymbian" />
+        <unit unitID="netdo.wapiui" mrp="" bldFile="&layer_real_source_path;/wlansecuritysettings/wapisecuritysettingsui/group/" filter="dfs_build" name="wapiui" />
+      </module>
+    </layer>
+  </systemModel>
+</SystemDefinition>

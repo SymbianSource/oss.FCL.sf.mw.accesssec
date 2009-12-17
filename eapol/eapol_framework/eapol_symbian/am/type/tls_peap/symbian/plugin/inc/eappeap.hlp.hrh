@@ -1,0 +1,39 @@
+/*
+* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource headers for project EAPOL
+*
+*/
+
+
+//
+// eappeap.hlp.hrh
+//
+
+//
+// File generated on 10:42:20 28/7/2004
+// by cshlpcmp Version 010
+//
+
+#ifndef __EAPPEAP_HLP_HRH__
+#define __EAPPEAP_HLP_HRH__
+
+
+_LIT(KPEPL_HLP_DIAL_USER_CERTS,"PEPL_HLP_DIAL_USER_CERTS");
+_LIT(KPEPL_HLP_DIAL_CA_CERTS,"PEPL_HLP_DIAL_CA_CERTS");
+_LIT(KPEPL_HLP_DIAL_CIPHER_SUITES,"PEPL_HLP_DIAL_CIPHER_SUITES");
+_LIT(KPEPL_HLP_DIAL_EAP_TYPES,"PEPL_HLP_DIAL_EAP_TYPES");
+_LIT(KPEPL_HLP_DIAL_SETTINGS,"PEPL_HLP_DIAL_SETTINGS");
+_LIT(KETPN_HLP_DIAL_IDENTITY,"ETPN_HLP_DIAL_IDENTITY");
+
+#endif

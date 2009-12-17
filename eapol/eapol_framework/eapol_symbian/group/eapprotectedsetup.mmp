@@ -1,0 +1,154 @@
+/*
+* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project EAP-Protected setup
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include "eapol.mmh"
+
+CAPABILITY CAP_ECOM_PLUGIN
+VENDORID VID_DEFAULT
+TARGETTYPE    PLUGIN
+
+TARGET        eapprotectedsetup.dll
+UID	      0x10009d8d 0x2000b003
+
+SOURCEPATH    ../am/type/protected_setup/symbian/plugin/src
+
+START RESOURCE 2000b003.rss 
+	TARGET eapprotectedsetup.rsc
+END
+
+// For Symbian Side
+SOURCEPATH    ../am/type/protected_setup/symbian/plugin/src
+SOURCE        EapProtectedSetup.cpp 
+SOURCE        EapProtectedSetupProxy.cpp
+
+SOURCEPATH	../am/type/symbian/plugin/common
+SOURCE		EapTypeInfo.cpp
+
+//SOURCEPATH    ../am/type/symbian/plugin/common
+//SOURCE	      EapProtectedSetupInfo.cpp
+
+SOURCEPATH    ../am/type/protected_setup
+SOURCE        eap_am_type_protected_setup_symbian.cpp
+SOURCE        EapProtectedSetupInterface.cpp
+
+SOURCEPATH    ../am/common/symbian
+SOURCE		  eap_am_trace_symbian.cpp
+
+// For Common Side
+SOURCEPATH		../../eapol_common/type/simple_config/eap/src
+SOURCE			eap_type_simple_config.cpp
+SOURCE			eap_type_simple_config_header.cpp
+SOURCE			eap_type_simple_config_state_notification.cpp
+	
+SOURCEPATH    	../../eapol_common/type/simple_config/simple_config/src	
+SOURCE			simple_config_base_record.cpp
+SOURCE			simple_config_completion.cpp
+SOURCE			simple_config_message.cpp
+SOURCE			simple_config_record.cpp
+SOURCE			simple_config_tlv_header.cpp
+SOURCE			simple_config_types.cpp
+SOURCE			simple_config_payloads.cpp
+SOURCE			simple_config_credential.cpp
+
+// For Common Side
+USERINCLUDE   ../../eapol_common/include
+USERINCLUDE   ../../eapol_common/am/include
+USERINCLUDE   ../../eapol_common/type/simple_config/eap/include
+USERINCLUDE   ../../eapol_common/type/simple_config/simple_config/include
+
+// For Symbian Side
+USERINCLUDE   ../am/include
+USERINCLUDE   ../am/type/protected_setup/symbian/plugin/inc
+
+/*
+
+//USERINCLUDE   ../am/type/tls_peap/symbian/plugin/inc
+
+USERINCLUDE   ../../eapol_common/am/include
+USERINCLUDE   ../../eapol_common/type
+USERINCLUDE   ../../eapol_common/type/diameter/include
+
+#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
+USERINCLUDE   ../../eapol_common/type/mschapv2/include
+#endif //#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
+
+#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
+SOURCEPATH    ../../eapol_common/type/mschapv2/core
+SOURCE		  eap_type_mschapv2_header.cpp
+#endif //#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
+
+*/
+
+//SOURCEPATH		../am/type/tls_peap/symbian/plugin/inc
+//DOCUMENT		101f8e4c.loc
+
+/*
+// UI 
+SOURCEPATH    ../am/type/tls_peap/symbian/plugin/src
+SOURCE		  EapTlsPeapUiConnection.cpp
+SOURCE        EapTlsPeapUiDataConnection.cpp
+SOURCE        EapTlsPeapUiTlsPeapData.cpp
+SOURCE		  EapTlsPeapCertFetcher.cpp
+SOURCE        EapTlsPeapUiEapTypes.cpp
+SOURCE        EapTlsPeapUiCertificates.cpp
+SOURCE        EapTlsPeapUiCipherSuites.cpp
+*/
+/*
+LIBRARY       avkon.lib
+LIBRARY       AknSkins.lib
+LIBRARY       AknIcon.lib
+STATICLIBRARY eaptlsui.lib
+STATICLIBRARY eappeapui.lib
+STATICLIBRARY eapttlsui.lib
+LIBRARY		  x509certnameparser.lib		// For parsing of certificate label. 
+
+//SYSTEMINCLUDE /epoc32/include/ecom
+//SYSTEMINCLUDE /epoc32/include/libc
+//SYSTEMINCLUDE /epoc32/include/cshelp
+*/
+
+LANG		  SC
+
+MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
+
+LIBRARY		euser.lib ecom.lib eapol.lib //edbms.lib efsrv.lib 
+LIBRARY		cone.lib eikcoctl.lib
+LIBRARY		etelmm.lib etel.lib	// For ETel connection
+
+LIBRARY 	wlandbif.lib
+
+//LIBRARY	    x509.lib crypto.lib certstore.lib ctframework.lib pkixcert.lib
+//LIBRARY		asn1.lib x500.lib bafl.lib eikctl.lib egul.lib fbscli.lib
+/*
+LIBRARY		gdi.lib
+LIBRARY		cryptography.lib
+LIBRARY     eikdlg.lib
+LIBRARY     eikcore.lib
+LIBRARY		CommonEngine.lib
+
+LIBRARY     hlplch.lib
+LIBRARY		featmgr.lib
+*/
+
+MACRO EAP_NO_EXPORTS=1
+
+//-------------------------------------------------------------------
+
+//-------------------------------------------------------------------
+// End of File

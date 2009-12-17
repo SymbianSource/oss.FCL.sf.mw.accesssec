@@ -1,0 +1,97 @@
+/*
+* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for project EAPOL
+*
+*/
+
+
+
+//  INCLUDES
+#include <ecom/registryinfo.rh>
+#include "101f8e4c.loc"
+#include "EapolUID.h"
+
+//  RESOURCE DEFINITIONS 
+// ---------------------------------------------------------
+//   
+//    theInfo
+//    Contains the ECom registration information for EAP TLS & EAP PEAP & EAP TTLS
+//
+// ---------------------------------------------------------
+//
+RESOURCE REGISTRY_INFO theInfo
+{
+dll_uid = EAP_TLS_PEAP_DLL_UID;
+interfaces = 
+    {
+    INTERFACE_INFO
+		{		
+        interface_uid = PLUGIN_INTERFACE_UID;
+        implementations = 
+            {
+            
+            BINARY_IMPLEMENTATION_INFO
+                {
+                implementation_uid = EAP_TLS_IMPLEMENTATION_UID;
+                version_no = 1;
+                display_name = TLPL_GE_NAME;
+                default_data = {0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D}; // TLS
+                opaque_data = {0x00};
+                },
+			BINARY_IMPLEMENTATION_INFO
+                {
+                implementation_uid = EAP_PEAP_IMPLEMENTATION_UID;
+                version_no = 1;
+                display_name = PEPL_GE_NAME;
+                default_data = {0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x19}; // PEAP
+                opaque_data = {0x55}; // "NOT_INSIDE|NOT_INSIDE_PEAP|NOT_INSIDE_TTLS|NOT_INSIDE_FAST"
+                },
+			BINARY_IMPLEMENTATION_INFO
+                {
+                implementation_uid = EAP_TTLS_IMPLEMENTATION_UID;
+                version_no = 1;
+                display_name = TTLSPL_GE_NAME;
+                default_data = {0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x15}; // TTLS
+                opaque_data = {0x55}; // "NOT_INSIDE|NOT_INSIDE_PEAP|NOT_INSIDE_TTLS|NOT_INSIDE_FAST"
+                }
+                
+#ifdef FF_WLAN_EXTENSIONS
+				, // Must
+			BINARY_IMPLEMENTATION_INFO
+                {
+                implementation_uid = EAP_FAST_IMPLEMENTATION_UID;
+                version_no = 1;
+                display_name = FASTPL_GE_NAME;
+                default_data = {0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2B}; // FAST
+                opaque_data = {0x55}; // "NOT_INSIDE|NOT_INSIDE_PEAP|NOT_INSIDE_TTLS|NOT_INSIDE_FAST"
+                }
+#endif // #ifdef FF_WLAN_EXTENSIONS
+
+                , // Must
+			BINARY_IMPLEMENTATION_INFO
+                {
+                implementation_uid = TTLS_PAP_IMPLEMENTATION_UID;
+                version_no = 1;
+                display_name = TTLSPAPPL_GE_NAME;
+                default_data = {0xFE, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x62}; // PAP only allowed inside TTLS
+                opaque_data = {0x4E}; //"NOT_OUTSIDE|NOT_OUTSIDE_PEAP|NOT_INSIDE_PEAP|NOT_INSIDE_FAST"
+                }					  // NOT_OUTSIDE is the only needed instead of NOT_OUTSIDE_PEAP, 
+                					  // but for historical reasons we are using NOT_OUTSIDE_PEAP 
+                					  // to indicate that the EAP is allowed only as encapsulated EAP.
+                              
+            };
+        }
+	};
+}
+// End of File

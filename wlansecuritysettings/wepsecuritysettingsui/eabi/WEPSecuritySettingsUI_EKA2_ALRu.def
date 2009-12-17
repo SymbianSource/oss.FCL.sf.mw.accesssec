@@ -1,0 +1,20 @@
+EXPORTS
+	_ZN20CWEPSecuritySettings4NewLEv @ 1 NONAME
+	_ZN20CWEPSecuritySettings5EditLER22CWEPSecuritySettingsUiRK7TDesC16 @ 2 NONAME
+	_ZN20CWEPSecuritySettings5LoadLEmR14CCommsDatabase @ 3 NONAME
+	_ZN20CWEPSecuritySettingsD0Ev @ 4 NONAME
+	_ZN20CWEPSecuritySettingsD1Ev @ 5 NONAME
+	_ZN20CWEPSecuritySettingsD2Ev @ 6 NONAME
+	_ZN22CWEPSecuritySettingsUi3CvtEv @ 7 NONAME
+	_ZN22CWEPSecuritySettingsUi4NewLER9CEikonEnv @ 8 NONAME
+	_ZN22CWEPSecuritySettingsUiD0Ev @ 9 NONAME
+	_ZN22CWEPSecuritySettingsUiD1Ev @ 10 NONAME
+	_ZN22CWEPSecuritySettingsUiD2Ev @ 11 NONAME
+	_ZNK20CWEPSecuritySettings5SaveLEmR14CCommsDatabase @ 12 NONAME
+	_ZNK20CWEPSecuritySettings7IsValidEv @ 13 NONAME
+	_ZN20CWEPSecuritySettings11SetKeyDataLEiRK7TDesC16i @ 14 NONAME
+	_ZN20CWEPSecuritySettings5LoadLEmRN8CommsDat11CMDBSessionE @ 15 NONAME
+	_ZNK20CWEPSecuritySettings5SaveLEmRN8CommsDat11CMDBSessionE @ 16 NONAME
+	_ZN20CWEPSecuritySettings11SetKeyInUseENS_12TWEPKeyInUseE @ 17 NONAME
+	_ZN20CWEPSecuritySettings17SetAuthenticationENS_18TWEPAuthenticationE @ 18 NONAME
+

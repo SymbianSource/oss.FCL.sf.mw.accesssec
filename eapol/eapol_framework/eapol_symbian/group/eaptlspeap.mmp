@@ -1,0 +1,164 @@
+/*
+* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project EAPOL
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include "eapol.mmh"
+
+CAPABILITY CAP_ECOM_PLUGIN
+VENDORID VID_DEFAULT
+TARGETTYPE    PLUGIN
+
+TARGET        eaptlspeap.dll
+UID	      0x10009d8d 0x101f8e4c
+
+SOURCEPATH    ../am/type/tls_peap/symbian/plugin/src
+
+START RESOURCE 101f8e4c.rss 
+	TARGET eaptlspeap.rsc
+END
+
+SOURCEPATH    ../am/type/tls_peap/symbian
+SOURCE	EapTlsPeapCertInterface.cpp // For certificate interface.
+
+SOURCEPATH    ../am/type/tls_peap/symbian/plugin/src
+SOURCE        EapTlsPeap.cpp 
+SOURCE		  EapTlsPeapProxy.cpp
+SOURCE        EapTlsPeapUtils.cpp 
+
+SOURCEPATH    ../am/type/symbian/plugin/common
+SOURCE	      EapTypeInfo.cpp
+
+SOURCEPATH    ../am/type/tls_peap/symbian
+SOURCE        eap_am_type_tls_peap_symbian.cpp 
+
+SOURCEPATH    ../../eapol_common/type/tls_peap/eap/src
+SOURCE 	      eap_type_tls_peap_state_notification.cpp 
+SOURCE		  eap_type_tls_peap.cpp
+SOURCE		  eap_type_tls_peap_header.cpp
+
+SOURCEPATH    ../../eapol_common/type/tls_peap/tls/src
+SOURCE 	      tls_application_eap_core.cpp 
+SOURCE 	      tls_application_ttls_plain_mschapv2.cpp 
+SOURCE		  tls_base_application.cpp
+SOURCE        tls_base_record.cpp
+SOURCE		  tls_record.cpp
+SOURCE		  tls_handshake_message.cpp
+SOURCE		  tls_message.cpp
+SOURCE		  tls_record_message.cpp
+SOURCE		  tls_peap_types.cpp
+SOURCE		  tls_completion.cpp 
+SOURCE		  tls_change_cipher_spec_message.cpp
+SOURCE		  tls_application_data_message.cpp
+SOURCE		  tls_alert_message.cpp
+SOURCE		  tls_peap_tlv_payloads.cpp
+SOURCE		  tls_handshake_header.cpp
+SOURCE		  tls_peap_tlv_header.cpp
+SOURCE		  tls_record_header.cpp
+SOURCE		  tls_extension.cpp
+
+
+SOURCEPATH    ../../eapol_common/type/diameter/src
+SOURCE		  eap_diameter_avp_header.cpp
+SOURCE		  eap_diameter_payloads.cpp
+SOURCE		  eap_diameter_avp_code.cpp
+
+SOURCEPATH    ../am/common/symbian
+SOURCE		  eap_am_trace_symbian.cpp
+
+SOURCEPATH    ../am/type/ttls_pap/symbian/src
+SOURCE        eap_ttls_pap_active.cpp
+
+USERINCLUDE   ../am/type/tls_peap/symbian/plugin/inc
+USERINCLUDE   ../../eapol_common/type/tls_peap/eap/include
+USERINCLUDE   ../../eapol_common/type/tls_peap/tls/include
+#if defined(USE_FAST_EAP_TYPE)
+USERINCLUDE   ../../eapol_common/type/tls_peap/tls/include/wpx
+#endif //#if defined(USE_FAST_EAP_TYPE)
+USERINCLUDE   ../../eapol_common/include
+USERINCLUDE   ../am/include
+USERINCLUDE   ../../eapol_common/am/include
+USERINCLUDE   ../../eapol_common/type
+USERINCLUDE   ../../eapol_common/type/diameter/include
+USERINCLUDE   ../am/type/ttls_pap/symbian/inc
+
+#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
+USERINCLUDE   ../../eapol_common/type/mschapv2/include
+#endif //#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
+
+#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
+SOURCEPATH    ../../eapol_common/type/mschapv2/core
+SOURCE		  eap_type_mschapv2_header.cpp
+#endif //#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
+
+#if defined(USE_FAST_EAP_TYPE)
+#include "wpxeap/eapfast.mmp"
+#endif
+LANG		  SC
+
+SOURCEPATH		../am/type/tls_peap/symbian/plugin/inc
+DOCUMENT		101f8e4c.loc
+
+// UI 
+SOURCEPATH    ../am/type/tls_peap/symbian/plugin/src
+SOURCE		  EapTlsPeapUiConnection.cpp
+SOURCE        EapTlsPeapUiDataConnection.cpp
+SOURCE        EapTlsPeapUiTlsPeapData.cpp
+SOURCE		  EapTlsPeapCertFetcher.cpp
+SOURCE        EapTlsPeapUiEapTypes.cpp
+SOURCE        EapTlsPeapUiCertificates.cpp
+SOURCE        EapTlsPeapUiCipherSuites.cpp
+
+LIBRARY       avkon.lib
+LIBRARY       AknSkins.lib
+LIBRARY       AknIcon.lib
+LIBRARY       aknnotify.lib
+LIBRARY       eiksrv.lib
+STATICLIBRARY eaptlsui.lib
+STATICLIBRARY eappeapui.lib
+STATICLIBRARY eapttlsui.lib
+
+STATICLIBRARY papui.lib
+
+LIBRARY		  x509certnameparser.lib		// For parsing of certificate label. 
+
+//SYSTEMINCLUDE /epoc32/include/ecom
+//SYSTEMINCLUDE /epoc32/include/libc
+//SYSTEMINCLUDE /epoc32/include/cshelp
+
+MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
+
+LIBRARY		euser.lib ecom.lib eapol.lib edbms.lib efsrv.lib cone.lib eikcoctl.lib
+LIBRARY	    x509.lib crypto.lib certstore.lib ctframework.lib pkixcert.lib
+LIBRARY		asn1.lib x500.lib bafl.lib eikctl.lib egul.lib fbscli.lib
+LIBRARY		gdi.lib
+LIBRARY		cryptography.lib
+LIBRARY     eikdlg.lib
+LIBRARY     eikcore.lib
+LIBRARY		CommonEngine.lib
+
+LIBRARY     hlplch.lib
+LIBRARY		featmgr.lib
+
+LIBRARY     charconv.lib
+
+MACRO EAP_NO_EXPORTS=1
+
+//-------------------------------------------------------------------
+
+//-------------------------------------------------------------------
+// End of File

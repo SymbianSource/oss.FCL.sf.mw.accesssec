@@ -1,0 +1,5 @@
+EXPORTS
+	?NotifierArray@@YAPAV?$CArrayPtr@VMEikSrvNotifierBase2@@@@XZ @ 1 NONAME ; class CArrayPtr<class MEikSrvNotifierBase2> * NotifierArray(void)
+	?NewL@CWifiProtUiInProcess@@SAPAV1@PAVRCmManagerExt@@@Z @ 2 NONAME ; class CWifiProtUiInProcess * CWifiProtUiInProcess::NewL(class RCmManagerExt *)
+	?StartFromUiL@CWifiProtUiInProcess@@QAE?AW4TWiFiReturn@WiFiProt@@ABV?$TBuf8@$0CA@@@HAAV?$RArray@K@@@Z @ 3 NONAME ; enum WiFiProt::TWiFiReturn CWifiProtUiInProcess::StartFromUiL(class TBuf8<32> const &, int, class RArray<unsigned long> &)
+

@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<api id="f1a224f57447315c09d1b45847fa2bdd" dataversion="1.0">
+  <name>EAP Type API</name>
+  <description>Generic API for configuring EAP type plugins</description>
+  <type>c++</type>
+  <subsystem>wlaneapol</subsystem>
+  <libs>
+  </libs>
+  <release category="domain"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

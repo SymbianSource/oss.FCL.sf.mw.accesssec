@@ -1,0 +1,59 @@
+/*
+* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project EAPOL
+*
+*/
+
+
+
+//-------------------------------------------------------------------
+
+#include <platform_paths.hrh>
+#include "eapol.mmh"
+
+//-------------------------------------------------------------------
+
+TARGET			eapolwpxstub.lib
+
+TARGETTYPE		lib
+UID			0x1000008d  0x101f8e48
+
+///////////////////////////////////////////////////////////////////
+
+LANG	SC
+
+SOURCEPATH ../../eapol_common/wpxstub
+SOURCE eapol_core_wpxm_stub.cpp
+SOURCE eapol_key_state_common_wpxm_stub.cpp
+SOURCE ethernet_core_wpxm_stub.cpp
+
+USERINCLUDE ..
+USERINCLUDE ../am/type/symbian/plugin/include
+USERINCLUDE ../am/common
+USERINCLUDE ../../eapol_common/am/common
+USERINCLUDE ../am/include
+USERINCLUDE ../../eapol_common/am/include
+USERINCLUDE ../../eapol_common/include
+USERINCLUDE ../../eapol_common/type
+USERINCLUDE ../../eapol_common/am/common/DSS_random
+
+SYSTEMINCLUDE /epoc32/include/ecom
+SYSTEMINCLUDE /epoc32/include/kernel 
+SYSTEMINCLUDE /epoc32/include/libc
+SYSTEMINCLUDE /epoc32/include/libc/netinet
+
+MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
+
+//-------------------------------------------------------------------
+// End of File

@@ -1,0 +1,422 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Common UI strings for WLAN EAP Plugins
+*
+*/
+
+
+
+// LOCALISATION STRINGS
+
+
+//d:Command in options menu. Open configuration settings.
+//l:list_single_pane_t1_cp2
+//w:
+//r:3.1
+//
+#define qtn_wlan_options_eap_plugin_configure       "Configure"
+
+
+//d:Command in options menu. Enables a plugin.
+//l:list_single_pane_t1_cp2
+//w:
+//r:3.1
+//
+#define qtn_wlan_options_eap_plugin_enable          "Enable"
+
+
+//d:Command in options menu. Disables a plugin.
+//l:list_single_pane_t1_cp2
+//w:
+//r:3.1
+//
+#define qtn_wlan_options_eap_plugin_disable         "Disable"
+
+
+//d:MSK text. Open configuration settings.
+//l:control_pane_t3/opt7
+//w:
+//r:3.2
+//
+#define qtn_msk_wlan_eap_configure       "Configure"
+
+
+//d:MSK text. Enables a cipher suite.
+//l:control_pane_t3/opt7
+//w:
+//r:3.2
+//
+#define qtn_msk_wlan_eap_cs_enable          "Enable"
+
+
+//d:MSK text. Disables a cipher suite.
+//l:control_pane_t3/opt7
+//w:
+//r:3.2
+//
+#define qtn_msk_wlan_eap_cs_disable         "Disable"
+
+
+//d:Options list item, command. Selected plugin is moved up one row in a
+//d:numbered EAP type list, where list order represents the priority.
+//l:list_single_pane_t1_cp2
+//w:
+//r:3.1
+//
+#define qtn_wlan_options_eap_plugin_priority_up     "Raise priority"
+
+
+//d:Options list item, command. Selected plugin is moved down one row in a
+//d:numbered EAP type list, where list order represents the priority.
+//l:list_single_pane_t1_cp2
+//w:
+//r:3.1
+//
+#define qtn_wlan_options_eap_plugin_priority_down   "Lower priority"
+
+
+//d:Info note to the user when he is trying to disable all the EAP plugins
+//l:popup_note_window
+//w:
+//r:3.1
+//
+#define qtn_wlan_info_cannot_disable_all_eap_plugins   "At least one EAP plug-in has to be enabled"
+
+
+//d:The setting item for user name entry
+//l:list_setting_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_username                  "User name"
+
+
+//d:The setting item that specifies what kind of user name is in use.
+//d:Possible options are "From SIM" 
+//d:(qtn_wlan_eap_sett_username_inuse_from_sim), "From certificate" 
+//d:(qtn_wlan_eap_sett_username_inuse_from_cert) or "User-configured"
+//d:(qtn_wlan_eap_sett_username_inuse_user)
+//l:list_setting_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_username_inuse            "User name in use"
+
+
+//d:One of the setting item values for qtn_wlan_eap_sett_username_inuse
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_username_inuse_from_sim   "From SIM"
+
+
+//d:One of the setting item values for qtn_wlan_eap_sett_username_inuse
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_username_inuse_from_cert  "From certificate"
+
+
+//d:One of the setting item values for qtn_wlan_eap_sett_username_inuse
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_username_inuse_user       "User-configured"
+
+
+//d:The setting item is for password promt
+//l:list_setting_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_password                  "Password"
+
+
+//d:The setting item where the user can choose if he should be prompted for the
+//d:password or not. Possible options are "Yes" 
+//d:(qtn_wlan_eap_sett_passprompt_on) or "No" 
+//d:(qtn_wlan_eap_sett_passprompt_off).
+//l:list_setting_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_passprompt                "Prompt password"
+
+
+//d:One of the setting item values for qtn_wlan_eap_sett_passprompt
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_passprompt_on             "Yes"
+
+
+//d:One of the setting item values for qtn_wlan_eap_sett_passprompt
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_passprompt_off            "No"
+
+
+//d:The setting item for Realm entry
+//l:list_setting_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_realm                     "Realm"
+
+
+//d:The setting item that specifies what kind of realm is in use.
+//d:Possible options are "From SIM" (qtn_wlan_eap_sett_realm_inuse_from_sim),
+//d:"From certificate" (qtn_wlan_eap_sett_realm_inuse_from_cert) or 
+//d:"User-configured" (qtn_wlan_eap_sett_realm_inuse_user).
+//l:list_setting_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_realm_inuse               "Realm in use"
+
+
+//d:One of the setting item values for qtn_wlan_eap_sett_realm_inuse
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_realm_inuse_from_sim      "From SIM"
+
+
+//d:One of the setting item values for qtn_wlan_eap_sett_realm_inuse
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_realm_inuse_from_cert     "From certificate"
+
+
+//d:One of the setting item values for qtn_wlan_eap_sett_realm_inuse
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_realm_inuse_user          "User-configured"
+
+
+//d:The setting item for user certificate entry
+//d:Possible options are "(not defined)" (qtn_wlan_eap_cert_not_defined),
+//d:"None" (qtn_wlan_eap_cert_none_selection), or one of the installed user
+//d:certificates.
+//l:list_setting_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_user_certificate          "User certificate"
+
+
+//d:The setting item for CA certificate entry.
+//d:Possible options are "(not defined)" (qtn_wlan_eap_cert_not_defined),
+//d:"None" (qtn_wlan_eap_cert_none_selection), or one of the installed user
+//d:certificates.
+//l:list_setting_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_ca_certificate            "CA certificate"
+
+
+//d:Not defined text to qtn_wlan_eap_sett_user_certificate and 
+//d:qtn_wlan_eap_sett_ca_certificate setting items in case
+//d:no certificate has been selected.
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_cert_not_defined               "(not defined)"
+
+
+//d:One of the setting item values for qtn_wlan_eap_sett_user_certificate and
+//d:qtn_wlan_eap_sett_ca_certificate.
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_cert_none_selection            "None"
+
+
+//d:Text in the tab for Settings page.
+//l:tabs_2_active_pane_t1/opt1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_tab_settings                   "Settings"
+
+
+//d:Text in the tab for EAP type selection page
+//l:tabs_2_active_pane_t1/opt1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_tab_eap_types                  "EAP types"
+
+
+//d:Text in the tab for Cipher suites selection page
+//l:tabs_2_active_pane_t1/opt1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_tab_cipher_suites              "Cipher suites"
+
+
+//d:Cipher suite type text in list control
+//l:list_single_number_pane_t1/opt2
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_cipher_rsarc4md5               "RSA,RC4,MD5"
+
+
+//d:Cipher suite type text in list control
+//l:list_single_number_pane_t1/opt2
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_cipher_rsarc4sha               "RSA,RC4,SHA"
+
+
+//d:Cipher suite type text in list control
+//l:list_single_number_pane_t1/opt2
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_cipher_rsa3dessha              "RSA,3DES,SHA"
+
+
+//d:Cipher suite type text in list control
+//l:list_single_number_pane_t1/opt2
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_cipher_dhersa3dessha           "DHE-RSA,3DES,SHA"
+
+
+//d:Cipher suite type text in list control
+//l:list_single_number_pane_t1/opt2
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_cipher_dhedss3dessha           "DHE-DSS,3DES,SHA"
+
+
+//d:Cipher suite type text in list control
+//l:list_single_number_pane_t1/opt2
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_cipher_rsaaessha               "RSA,AES,SHA"
+
+
+//d:Cipher suite type text in list control
+//l:list_single_number_pane_t1/opt2
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_cipher_dhersaaessha            "DHE-RSA,AES,SHA"
+
+
+//d:Cipher suite type text in list control
+//l:list_single_number_pane_t1/opt2
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_cipher_dhedssaessha            "DHE-DSS,AES,SHA"
+
+
+//d:The setting item that specifies if TLS privacy is used or not.
+//d:Possible options are "On" 
+//d:(qtn_wlan_eap_sett_tls_privacy_on) or "Off"
+//d:(qtn_wlan_eap_sett_tls_privacy_off)
+//l:list_setting_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_wlan_eap_sett_tls_privacy               "TLS privacy"
+
+
+//d:One of the setting item values for qtn_wlan_eap_sett_tls_privacy
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_wlan_eap_sett_tls_privacy_on            "On"
+
+//d:One of the setting item values for qtn_wlan_eap_sett_tls_privacy
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_wlan_eap_sett_tls_privacy_off           "Off"
+
+
+//d:Information note for user when passwords do not match
+//l:popup_note_window
+//w:
+//r:3.2
+//
+#define qtn_wlan_eap_info_passwords_do_not_match     "Passwords do not match, try again"
+
+
+//d:Error note for user when password is incorrect
+//l:popup_note_window
+//w:
+//r:3.2
+//
+#define qtn_wlan_eap_error_incorrect_password       "Incorrect password"
+
+
+//d:The popup query for user to create a PAC store password
+//l:popup_query_data_window
+//w:
+//r:3.2
+//
+#define qtn_wlan_eap_fast_prmpt_create_pac_password      "Create password for the encrypted PAC store:"
+
+
+//d:The popup query for user to verify a PAC store password
+//l:popup_query_data_window
+//w:
+//r:3.2
+//
+#define qtn_wlan_eap_fast_prmpt_verify_password      "Verify password:"
+
+
+//d:The popup query for user to set a PAC store password
+//l:popup_query_data_window
+//w:
+//r:3.2
+//
+#define qtn_wlan_eap_fast_prmpt_pac_password     "PAC store password:"
+
+//d:Default value text for a username setting item whose value has not yet been set. 
+//d:Used for the username setting qtn_wlan_eap_sett_username
+//l:list_set_graphic_pane_t1
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_eap_sett_username_not_defined               "(not defined)"
+
+
+// End of File

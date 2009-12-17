@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<api id="51d47a7acd0e5650437ca61be7412caf" dataversion="1.0">
+  <name>Wi-Fi Protected Setup UI API</name>
+  <description>Provides UI related functionality for Wi-Fi Protected Setup. This API can be called from a process without UI context.</description>
+  <type>c++</type>
+  <subsystem>networkingutilities</subsystem>
+  <libs>
+    <lib name="wifiprotclient.lib" />
+    <lib name="wifiprotplugin.lib" />
+  </libs>
+  <release category="domain"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

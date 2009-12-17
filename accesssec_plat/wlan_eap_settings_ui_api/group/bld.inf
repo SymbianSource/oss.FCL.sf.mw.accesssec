@@ -1,0 +1,37 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: File that exports the files belonging to  WLAN EAP Settings UI API
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+../inc/EapAkaUi.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapAkaUi.h)
+../inc/EapMschapv2Ui.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapMschapv2Ui.h)
+../inc/EapTtlsUi.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTtlsUi.h)
+../inc/EapTlsUi.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTlsUi.h)
+../inc/EapSimUi.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapSimUi.h)
+../inc/EapLeapUi.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapLeapUi.h)
+../inc/EapPeapUi.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapPeapUi.h)
+../inc/eapfastui.h     MW_LAYER_PLATFORM_EXPORT_PATH(eapfastui.h)
+../inc/EapGtcUi.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapGtcUi.h)
+../inc/papui.h     MW_LAYER_PLATFORM_EXPORT_PATH(papui.h)
+../inc/EAPPluginConfigurationIf.inl     MW_LAYER_PLATFORM_EXPORT_PATH(EAPPluginConfigurationIf.inl)
+../inc/EAPPluginConfigurationIf.h     MW_LAYER_PLATFORM_EXPORT_PATH(EAPPluginConfigurationIf.h)
