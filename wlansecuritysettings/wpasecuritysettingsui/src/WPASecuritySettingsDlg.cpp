@@ -720,9 +720,11 @@ TBool CWPASecuritySettingsDlg::ShowPopupTextSettingPageL()
 
     	            CAknInformationNote* dialog = new ( ELeave )
                                                   CAknInformationNote( ETrue );
-
+                    CleanupStack::Pop( stringLabel );
+                    	
       	            dialog->ExecuteLD( *stringLabel );
-                    CleanupStack::PopAndDestroy( stringLabel );
+      	            
+                    delete stringLabel;
                     }
                 else
                     {

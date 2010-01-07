@@ -962,7 +962,7 @@ TBool CWEPSecuritySettingsDlg::ShowPopupTextSettingPageL()
 
                 dialog->ExecuteLD( *stringLabel );
 
-                CleanupStack::PopAndDestroy( stringLabel );   // stringLabel
+                delete stringLabel;   // stringLabel
 
                 ptrKeyData.Zero();
                 }

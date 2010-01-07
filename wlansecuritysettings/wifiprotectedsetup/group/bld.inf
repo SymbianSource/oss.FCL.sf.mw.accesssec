@@ -36,8 +36,6 @@ PRJ_MMPFILES
 ./wifiprotclient.mmp
 ./wifiprotplugin.mmp
 
-// gnumakefile wifiprot_icons.mk
-
 PRJ_EXTENSIONS
 
 START EXTENSION s60/mifconv
