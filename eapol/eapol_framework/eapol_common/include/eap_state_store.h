@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 9 %
+*/
 
 #if !defined(_EAP_STATE_STORE_H_)
 #define _EAP_STATE_STORE_H_

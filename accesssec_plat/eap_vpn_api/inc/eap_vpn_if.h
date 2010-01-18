@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 11 %
+*/
 
 #ifndef __EAPPLUGININTERFACE_H__
 #define __EAPPLUGININTERFACE_H__

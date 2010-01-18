@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 6 %
+*/
 
 #if !defined( _EAP_EXPORT_H_ )
 #define _EAP_EXPORT_H_

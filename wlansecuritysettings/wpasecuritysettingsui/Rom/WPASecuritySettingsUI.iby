@@ -15,13 +15,18 @@
 *
 */
 
-
+/*
+* %version: tr1cfwln#10 %
+*/
 
 #ifndef __WPASECURITYSETTINGSUI_IBY__
 #define __WPASECURITYSETTINGSUI_IBY__
 
-
+#ifdef __PROTOCOL_WLAN
 FILE=ABI_DIR\BUILD_DIR\WPASecuritySettingsUI.dll    SHARED_LIB_DIR\WPASecuritySettingsUI.dll
-
+#else
+// stub for non-WLAN products
+FILE=ABI_DIR\BUILD_DIR\wpasecuritysettingsuistub.dll    SHARED_LIB_DIR\WPASecuritySettingsUI.dll
+#endif // __PROTOCOL_WLAN
 
 #endif

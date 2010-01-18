@@ -15,9 +15,9 @@
 *
 */
 
-
-
-
+/*
+* %version: 10.1.2 %
+*/
 
 #if !defined(_EAP_EXPANDED_TYPE_H_)
 #define _EAP_EXPANDED_TYPE_H_

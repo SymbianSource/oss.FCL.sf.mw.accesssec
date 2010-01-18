@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 18.1.3 %
+*/
 
 #ifndef _EAPTYPE_H_
 #define _EAPTYPE_H_

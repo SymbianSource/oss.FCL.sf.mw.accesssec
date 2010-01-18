@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 6.1.2 %
+*/
 
 #ifndef _EAPSIMUICONNECTION_H_
 #define _EAPSIMUICONNECTION_H_

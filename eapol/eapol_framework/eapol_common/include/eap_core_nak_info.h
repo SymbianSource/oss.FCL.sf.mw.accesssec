@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 9 %
+*/
 
 #if !defined(_EAP_CORE_NAK_INFO_H_)
 #define _EAP_CORE_NAK_INFO_H_

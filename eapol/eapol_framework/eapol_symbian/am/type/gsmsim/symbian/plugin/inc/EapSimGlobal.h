@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 7 %
+*/
 
 #ifndef _EAPSIMGLOBAL_H_
 #define _EAPSIMGLOBAL_H_

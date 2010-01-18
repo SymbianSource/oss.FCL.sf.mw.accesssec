@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 8 %
+*/
 
 #if !defined(_TLS_RECORD_MESSAGE_H_)
 #define _TLS_RECORD_MESSAGE_H_

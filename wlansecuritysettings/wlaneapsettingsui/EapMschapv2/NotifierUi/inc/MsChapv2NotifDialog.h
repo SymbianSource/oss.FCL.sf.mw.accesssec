@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 15 %
+*/
 
 #ifndef __MSCHAPV2DIALOG_H__
 #define __MSCHAPV2DIALOG_H__

@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 6 %
+*/
 
 // INCLUDE FILES
 #include "papuisettingarray.h"

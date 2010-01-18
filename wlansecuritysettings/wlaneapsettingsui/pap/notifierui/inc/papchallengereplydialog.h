@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 6 %
+*/
 
 #ifndef __PAPCHALLENGEREPLYDIALOG_H__
 #define __PAPCHALLENGEREPLYDIALOG_H__

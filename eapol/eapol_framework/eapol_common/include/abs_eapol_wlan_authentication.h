@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 2.1.2 %
+*/
 
 #if !defined(_ABS_WLAN_AUTHENTICATION_H_)
 #define _ABS_WLAN_AUTHENTICATION_H_

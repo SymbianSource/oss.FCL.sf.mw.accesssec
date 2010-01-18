@@ -15,9 +15,9 @@
 *
 */
 
-
-
-
+/*
+* %version: 9 %
+*/
 
 #if !defined(_EAPOLTOWLMIF_H_)
 #define _EAPOLTOWLMIF_H_

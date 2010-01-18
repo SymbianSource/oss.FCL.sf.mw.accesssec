@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 9 %
+*/
 
 #if !defined(_SAE_COOKIE_H_)
 #define _SAE_COOKIE_H_

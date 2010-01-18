@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: %
+*/
 
 #ifndef _EAPMSCHAPV2UI_HRH_
 #define _EAPMSCHAPV2UI_HRH_

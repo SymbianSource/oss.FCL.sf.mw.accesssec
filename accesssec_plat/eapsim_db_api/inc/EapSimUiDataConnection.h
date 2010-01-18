@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 6.1.2 %
+*/
 
 #ifndef _EAPSIMUIDATACONNECTION_H_
 #define _EAPSIMUIDATACONNECTION_H_

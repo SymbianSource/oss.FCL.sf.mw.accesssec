@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 5 %
+*/
 
 #if !defined(_GSMSIM_RESULT_H_)
 #define _GSMSIM_RESULT_H_

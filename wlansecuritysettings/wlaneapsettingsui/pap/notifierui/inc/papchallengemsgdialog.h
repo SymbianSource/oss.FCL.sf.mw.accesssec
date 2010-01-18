@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 5 %
+*/
 
 #ifndef __PAPCHALLENGEMSGDIALOG_H__
 #define __PAPCHALLENGEMSGDIALOG_H__

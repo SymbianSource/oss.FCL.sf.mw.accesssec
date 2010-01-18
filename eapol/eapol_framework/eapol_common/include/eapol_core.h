@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 28.1.3 %
+*/
 
 #if !defined(_EAPOL_CORE_H_)
 #define _EAPOL_CORE_H_

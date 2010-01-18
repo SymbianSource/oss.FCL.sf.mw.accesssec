@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 13 %
+*/
 
 #if !defined(_AKA_HEADER_H_)
 #define _AKA_HEADER_H_

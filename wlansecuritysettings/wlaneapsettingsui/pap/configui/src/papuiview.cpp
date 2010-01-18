@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 12 %
+*/
 
 // INCLUDE FILES
 #include "papuiview.h"

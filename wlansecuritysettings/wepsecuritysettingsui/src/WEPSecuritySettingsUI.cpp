@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#10 %
+*/
 
 // INCLUDE FILES
 #include <WEPSecuritySettingsUI.h>

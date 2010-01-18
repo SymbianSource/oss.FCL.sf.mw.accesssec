@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 11.1.2 %
+*/
 
 #ifndef _EAPMSCHAPV2_H_
 #define _EAPMSCHAPV2_H_

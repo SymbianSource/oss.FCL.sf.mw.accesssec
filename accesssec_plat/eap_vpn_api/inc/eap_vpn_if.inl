@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 12 %
+*/
 
 // Interface's (abstract base class's) static factory method implementation.
 // Asks ECOM plugin framework to instantiate appropriate concret plugin

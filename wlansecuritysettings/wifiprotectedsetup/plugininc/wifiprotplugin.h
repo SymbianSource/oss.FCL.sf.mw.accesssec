@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#6 %
+*/
 
 #ifndef WIFIPROTPLUGIN_H
 #define WIFIPROTPLUGIN_H

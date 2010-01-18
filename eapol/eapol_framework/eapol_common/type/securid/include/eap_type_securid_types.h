@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 13 %
+*/
 
 #ifndef SECURID_TYPES_H
 #define SECURID_TYPES_H

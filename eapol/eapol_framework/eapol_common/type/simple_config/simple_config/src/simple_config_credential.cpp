@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 5.1.2 %
+*/
 
 #include "eap_tools.h"
 #include "simple_config_credential.h"

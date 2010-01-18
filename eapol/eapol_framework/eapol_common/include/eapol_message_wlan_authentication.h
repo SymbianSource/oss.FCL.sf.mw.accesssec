@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 25.1.2 %
+*/
 
 #if !defined(EAPOL_MESSAGE_WLAN_AUTHENTICATION_H)
 #define EAPOL_MESSAGE_WLAN_AUTHENTICATION_H

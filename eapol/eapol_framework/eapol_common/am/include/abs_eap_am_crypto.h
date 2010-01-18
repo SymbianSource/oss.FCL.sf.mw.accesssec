@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 6 %
+*/
 
 #if !defined( _ABS_EAP_AM_CRYPTO_H_ )
 #define _ABS_EAP_AM_CRYPTO_H_

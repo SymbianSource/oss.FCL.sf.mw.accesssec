@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 11.1.2 %
+*/
 
 /* The meaning and bit positions used in "opaque_data" field in ECOM implementation
 

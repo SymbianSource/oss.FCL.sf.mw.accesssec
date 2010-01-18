@@ -15,13 +15,17 @@
 *
 */
 
-
+/*
+* %version: tr1cfwln#10 %
+*/
 
 #ifndef __WPASECURITYSETTINGSUIRESOURCES_IBY__
 #define __WPASECURITYSETTINGSUIRESOURCES_IBY__
 
+#ifdef __PROTOCOL_WLAN
 
 DATA=DATAZ_\RESOURCE_FILES_DIR\WPASecuritySettingsUI.rsc	RESOURCE_FILES_DIR\WPASecuritySettingsUI.rsc
 
+#endif // __PROTOCOL_WLAN
 
 #endif

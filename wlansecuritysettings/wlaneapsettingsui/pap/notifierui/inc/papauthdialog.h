@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 6 %
+*/
 
 #ifndef __PAPAUTHDIALOG_H__
 #define __PAPAUTHDIALOG_H__

@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 6.1.2 %
+*/
 
 #ifndef _EAPLEAPUICONNECTION_H_
 #define _EAPLEAPUICONNECTION_H_

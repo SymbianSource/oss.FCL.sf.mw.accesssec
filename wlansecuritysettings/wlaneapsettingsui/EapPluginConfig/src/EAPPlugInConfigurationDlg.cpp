@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 20.1.14 %
+*/
 
 // INCLUDE FILES
 #include <akntitle.h>

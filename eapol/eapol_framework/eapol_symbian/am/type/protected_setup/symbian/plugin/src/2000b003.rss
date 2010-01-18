@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 7 %
+*/
 
 //  INCLUDES
 #include <ecom/registryinfo.rh>

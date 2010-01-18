@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 8.1.2 %
+*/
 
 #if !defined( _EAP_TOOLS_H_ )
 #define _EAP_TOOLS_H_

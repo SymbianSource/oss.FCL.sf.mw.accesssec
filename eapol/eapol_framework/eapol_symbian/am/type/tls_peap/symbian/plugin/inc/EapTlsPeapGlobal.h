@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 8 %
+*/
 
 #ifndef _EAPTLSPEAPGLOBAL_H_
 #define _EAPTLSPEAPGLOBAL_H_

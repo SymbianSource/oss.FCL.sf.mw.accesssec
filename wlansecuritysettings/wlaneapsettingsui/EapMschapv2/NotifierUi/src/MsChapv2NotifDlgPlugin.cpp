@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 12.1.7 %
+*/
 
 // INCLUDE FILES
 #include <coemain.h>

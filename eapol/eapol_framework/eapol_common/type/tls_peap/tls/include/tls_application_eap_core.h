@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 36.1.2 %
+*/
 
 #if !defined(_TLS_APPLICATION_EAP_CORE_H_)
 #define _TLS_APPLICATION_EAP_CORE_H_

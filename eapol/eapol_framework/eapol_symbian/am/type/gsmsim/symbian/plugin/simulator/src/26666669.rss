@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 5 %
+*/
 
 #include <ecom/RegistryInfo.rh>
 RESOURCE REGISTRY_INFO theInfo

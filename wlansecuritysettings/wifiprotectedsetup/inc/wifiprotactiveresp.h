@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: tr1cfwln#7 %
+*/
 
 #ifndef C_WIFIPROTACTIVERESP_H
 #define C_WIFIPROTACTIVERESP_H

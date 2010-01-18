@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: tr1cfwln#7 %
+*/
 
 #ifndef R_WIFIPROTSESSION_H
 #define R_WIFIPROTSESSION_H

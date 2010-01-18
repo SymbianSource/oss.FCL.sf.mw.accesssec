@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 7 %
+*/
 
 //
 //	Copyright (c) Nokia Corporation 2002. All rights reserved.

@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#30 %
+*/
 
 // INCLUDE FILES
 #include "WPASecuritySettingsDlg.h"

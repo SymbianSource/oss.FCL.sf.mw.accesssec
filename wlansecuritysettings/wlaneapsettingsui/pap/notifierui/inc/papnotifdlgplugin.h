@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 7 %
+*/
 
 #ifndef __PAPNOTIFDLGPLUGIN_H__
 #define __PAPNOTIFDLGPLUGIN_H__

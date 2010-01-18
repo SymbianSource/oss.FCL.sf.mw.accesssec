@@ -15,12 +15,24 @@
 *
 */
 
+/*
+* %version: tr1cfwln#9 %
+*/
+
 #ifndef __WIFIPROT_IBY__
 #define __WIFIPROT_IBY__
+
+#ifdef __PROTOCOL_WLAN
 
 REM Wi-Fi Protected Setup
 
 file=ABI_DIR\BUILD_DIR\WIFIPROTCLIENT.DLL		SHARED_LIB_DIR\WIFIPROTCLIENT.DLL
 file=ABI_DIR\BUILD_DIR\WIFIPROTPLUGIN.DLL		SHARED_LIB_DIR\WIFIPROTPLUGIN.DLL
+#else
+//stub for non-WLAN products
+file=ABI_DIR\BUILD_DIR\wifiprotclientstub.dll		SHARED_LIB_DIR\WIFIPROTCLIENT.DLL
+file=ABI_DIR\BUILD_DIR\wifiprotpluginstub.dll		SHARED_LIB_DIR\WIFIPROTPLUGIN.DLL
+
+#endif // __PROTOCOL_WLAN
 
 #endif

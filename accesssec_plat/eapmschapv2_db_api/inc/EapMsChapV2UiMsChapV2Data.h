@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 9 %
+*/
 
 #ifndef _EAPMSCHAPV2UIMSCHAPV2DATA_H_
 #define _EAPMSCHAPV2UIMSCHAPV2DATA_H_

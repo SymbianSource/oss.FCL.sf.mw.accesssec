@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 21 %
+*/
 
 #ifndef _EAPPEAPUIVIEW_H_
 #define _EAPPEAPUIVIEW_H_

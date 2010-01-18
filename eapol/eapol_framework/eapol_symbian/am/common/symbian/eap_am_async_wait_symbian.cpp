@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 4 %
+*/
 
 // INCLUDE FILES
 #include <e32base.h>

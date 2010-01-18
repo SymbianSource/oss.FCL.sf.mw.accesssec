@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 30.1.2 %
+*/
 
 #if !defined(_EAPOL_AM_WLAN_AUTHENTICATION_SYMBIAN_H_)
 #define _EAPOL_AM_WLAN_AUTHENTICATION_SYMBIAN_H_

@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 9 %
+*/
 
 #ifndef EAP_TYPE_SECURID_STATE_H
 #define EAP_TYPE_SECURID_STATE_H

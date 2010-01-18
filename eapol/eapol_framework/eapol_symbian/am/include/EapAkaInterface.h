@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 13 %
+*/
 
 #ifndef _EAPAKAINTERFACE_H_
 #define _EAPAKAINTERFACE_H_

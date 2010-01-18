@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 8 %
+*/
 
 #if !defined(_ABS_TLS_CHANGE_CIPHER_SPEC_H_)
 #define _ABS_TLS_CHANGE_CIPHER_SPEC_H_

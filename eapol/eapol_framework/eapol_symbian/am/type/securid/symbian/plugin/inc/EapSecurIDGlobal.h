@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 7 %
+*/
 
 #ifndef EAPSECURIDGLOBAL_H
 #define EAPSECURIDGLOBAL_H

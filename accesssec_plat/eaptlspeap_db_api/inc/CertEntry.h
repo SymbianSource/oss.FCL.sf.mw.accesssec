@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 8.1.2 %
+*/
 
 #ifndef _SCERTENTRY_H_
 #define _SCERTENTRY_H_

@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#20 %
+*/
 
 #ifndef WPA_SECURITY_SETTINGS_DLG_H
 #define WPA_SECURITY_SETTINGS_DLG_H

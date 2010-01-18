@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 9.1.2 %
+*/
 
 #ifndef _EAPAKA_H_
 #define _EAPAKA_H_

@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#14 %
+*/
 
 #ifndef WEP_SECURITY_SETTINGS_DLG_H
 #define WEP_SECURITY_SETTINGS_DLG_H

@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 4 %
+*/
 
 #if !defined( _EAP_HEADER_STRING_H_ )
 #define _EAP_HEADER_STRING_H_

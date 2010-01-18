@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 10.1.2 %
+*/
 
 #ifndef _MSCHAPV2_STATE_H_
 #define _MSCHAPV2_STATE_H_

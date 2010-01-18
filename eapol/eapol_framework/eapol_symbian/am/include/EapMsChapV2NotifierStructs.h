@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 7 %
+*/
 
 #ifndef EAPMSCHAPV2NOTIFIERSTRUCTS_H
 #define EAPMSCHAPV2NOTIFIERSTRUCTS_H

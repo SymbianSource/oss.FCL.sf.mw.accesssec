@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 8.1.2 %
+*/
 
 #if !defined( _EAP_AM_TRACE_SYMBIAN_H_ )
 #define _EAP_AM_TRACE_SYMBIAN_H_

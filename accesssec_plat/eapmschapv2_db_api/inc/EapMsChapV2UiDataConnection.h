@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 6.1.2 %
+*/
 
 #ifndef _EAPMSCHAPV2UIDATACONNECTION_H_
 #define _EAPMSCHAPV2UIDATACONNECTION_H_

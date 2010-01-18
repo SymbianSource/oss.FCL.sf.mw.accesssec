@@ -16,6 +16,9 @@
 *
 */
 
+/*
+* %version: 13.1.2 %
+*/
 
 // INCLUDE FILES
 #include "eap_tools.h"

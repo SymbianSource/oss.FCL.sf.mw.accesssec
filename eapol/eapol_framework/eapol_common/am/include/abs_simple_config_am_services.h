@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 12 %
+*/
 
 #if !defined(_ABS_SIMPLE_CONFIG_AM_SERVICES_H_)
 #define _ABS_SIMPLE_CONFIG_AM_SERVICES_H_

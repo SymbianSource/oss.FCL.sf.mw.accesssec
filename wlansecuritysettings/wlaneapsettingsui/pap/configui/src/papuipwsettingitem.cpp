@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 5 %
+*/
 
 // INCLUDE FILES
 #include "papuipwsettingitem.h"

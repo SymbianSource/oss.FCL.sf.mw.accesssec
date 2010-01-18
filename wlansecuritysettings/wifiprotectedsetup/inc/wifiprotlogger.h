@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#7 %
+*/
 
 #ifndef WIFIPROTLOGGER_H_INCLUDED
 #define WIFIPROTLOGGER_H_INCLUDED

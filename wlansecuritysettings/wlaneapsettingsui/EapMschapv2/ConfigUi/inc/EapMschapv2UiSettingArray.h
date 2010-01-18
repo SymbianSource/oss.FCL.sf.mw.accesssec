@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 12 %
+*/
 
 #ifndef _EAPMSCHAPV2UISETTINGARRAY_H_
 #define _EAPMSCHAPV2UISETTINGARRAY_H_

@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 7 %
+*/
 
 #if !defined(_EAP_BUFFER_H_)
 #define _EAP_BUFFER_H_

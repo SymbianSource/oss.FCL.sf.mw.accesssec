@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#8 %
+*/
 
 #ifndef WPASECURITYSETTINGSUIIMPL_H
 #define WPASECURITYSETTINGSUIIMPL_H

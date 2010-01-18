@@ -15,9 +15,17 @@
 *
 */
 
+/*
+* %version: tr1cfwln#8 %
+*/
+
 #ifndef __WIFIPROTRESOURCES_IBY__
 #define __WIFIPROTRESOURCES_IBY__
 
+#ifdef __PROTOCOL_WLAN
+
 data=DATAZ_\RESOURCE_FILES_DIR\WiFiProtPlugin.rsc	RESOURCE_FILES_DIR\WiFiProtPlugin.rsc
+
+#endif // __PROTOCOL_WLAN
 
 #endif

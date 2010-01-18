@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 23 %
+*/
 
 // INCLUDE FILES
 #include "EAPPluginConfiguration.h"

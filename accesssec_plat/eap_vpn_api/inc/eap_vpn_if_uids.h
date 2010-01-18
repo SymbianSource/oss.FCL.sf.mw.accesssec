@@ -15,6 +15,10 @@
 *
 */
 
+/*
+* %version: 10 %
+*/
+
 #ifndef __EAPPLUGINUIDS_H__
 #define __EAPPLUGINUIDS_H__
 

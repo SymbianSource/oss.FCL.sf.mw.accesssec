@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#7 %
+*/
 
 #ifndef C_WIFIPROTSELECTNETWORKDLG_H
 #define C_WIFIPROTSELECTNETWORKDLG_H

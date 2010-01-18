@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 4.1.2 %
+*/
 
 #if !defined(_EAP_CONFIGURATION_FIELD_H_)
 #define _EAP_CONFIGURATION_FIELD_H_

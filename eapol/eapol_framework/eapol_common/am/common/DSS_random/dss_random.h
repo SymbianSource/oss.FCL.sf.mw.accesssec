@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 8 %
+*/
 
 #include "eap_am_types.h"
 #include "eap_am_export.h"

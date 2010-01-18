@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 8 %
+*/
 
 #ifndef ABS_EAP_AM_TYPE_LEAP_H
 #define ABS_EAP_AM_TYPE_LEAP_H

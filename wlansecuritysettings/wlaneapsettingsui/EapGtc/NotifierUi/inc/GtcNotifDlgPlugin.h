@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 11.1.7 %
+*/
 
 #ifndef __GTCNOTIFDLGPLUGIN_H__
 #define __GTCNOTIFDLGPLUGIN_H__

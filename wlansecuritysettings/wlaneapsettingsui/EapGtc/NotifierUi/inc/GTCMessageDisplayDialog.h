@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: tr1cfwln#11 %
+*/
 
 #ifndef __GTCMESSAGEDISPLAYDIALOG_H__
 #define __GTCMESSAGEDISPLAYDIALOG_H__

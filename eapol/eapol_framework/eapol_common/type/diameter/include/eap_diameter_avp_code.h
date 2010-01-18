@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 10 %
+*/
 
 #if !defined(_EAP_DIAMETER_AVP_CODE_H_)
 #define _EAP_DIAMETER_AVP_CODE_H_

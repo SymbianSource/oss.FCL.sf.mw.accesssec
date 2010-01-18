@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 6.1.2 %
+*/
 
 #ifndef _ABSEAPTLSPEAPUICERTIFICATES_H_
 #define _ABSEAPTLSPEAPUICERTIFICATES_H_

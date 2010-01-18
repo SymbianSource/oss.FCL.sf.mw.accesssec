@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 7 %
+*/
 
 #if !defined(_MS_MPPE_KEYS_H_)
 #define _MS_MPPE_KEYS_H_

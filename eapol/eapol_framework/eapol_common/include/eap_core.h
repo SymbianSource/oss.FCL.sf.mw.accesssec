@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 15 %
+*/
 
 /**
  *  @mainpage EAP Core documentation.

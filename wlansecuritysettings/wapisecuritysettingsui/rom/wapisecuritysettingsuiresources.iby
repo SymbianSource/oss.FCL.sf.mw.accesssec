@@ -15,11 +15,15 @@
 *
 */
 
-
+/*
+* %version: 3.1.4 %
+*/
 
 #ifndef __WAPISECURITYSETTINGSUIRESOURCES_IBY__
 #define __WAPISECURITYSETTINGSUIRESOURCES_IBY__
 
+#ifdef __PROTOCOL_WLAN
 DATA=DATAZ_\RESOURCE_FILES_DIR\wapisecuritysettingsui.rsc	RESOURCE_FILES_DIR\wapisecuritysettingsui.rsc
+#endif
 
 #endif

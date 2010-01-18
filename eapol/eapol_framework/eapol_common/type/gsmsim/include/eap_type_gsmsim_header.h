@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 5 %
+*/
 
 #if !defined(_GSMSIM_HEADER_H_)
 #define _GSMSIM_HEADER_H_

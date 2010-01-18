@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 7 %
+*/
 
 #if !defined(_EAPOLDBDEFAULTS_H_)
 #define _EAPOLDBDEFAULTS_H_

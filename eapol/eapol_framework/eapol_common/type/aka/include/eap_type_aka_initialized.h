@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 10 %
+*/
 
 #if !defined(_AKA_INITIALIZED_H_)
 #define _AKA_INITIALIZED_H_

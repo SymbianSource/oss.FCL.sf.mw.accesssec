@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 6 %
+*/
 
 #ifndef _EAPPROTECTEDSETUPINTERFACE_H_
 #define _EAPPROTECTEDSETUPINTERFACE_H_

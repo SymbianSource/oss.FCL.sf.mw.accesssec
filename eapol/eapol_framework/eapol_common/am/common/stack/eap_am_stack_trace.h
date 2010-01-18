@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 9 %
+*/
 
 #if !defined(_STACK_OUTPUT_H_)
 #define _STACK_OUTPUT_H_

@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 18 %
+*/
 
 #ifndef _EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H_
 #define _EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H_

@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 9 %
+*/
 
 #if !defined(_ABS_EAP_AM_TYPE_SIM_H_)
 #define _ABS_EAP_AM_TYPE_SIM_H_

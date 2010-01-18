@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 8 %
+*/
 
 #include <platform_paths.hrh>
 

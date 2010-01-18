@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 11 %
+*/
 
 #ifndef _EAPGTCUISETTINGARRAY_H_
 #define _EAPGTCUISETTINGARRAY_H_

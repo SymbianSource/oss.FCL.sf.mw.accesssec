@@ -15,6 +15,10 @@
 *
 */
 
+/*
+* %version: tr1cfwln#8 %
+*/
+
 #include <ecom/registryinfo.rh>
 #include <uikon.hrh>
 

@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 4 %
+*/
 
 #if !defined(_ABS_EAP_BASE_TIMER_H_)
 #define _ABS_EAP_BASE_TIMER_H_

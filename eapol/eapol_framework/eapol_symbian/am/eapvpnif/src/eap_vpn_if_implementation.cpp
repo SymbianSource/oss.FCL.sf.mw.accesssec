@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 38.1.5 %
+*/
 
 // INCLUDE FILES
 #include <w32std.h>

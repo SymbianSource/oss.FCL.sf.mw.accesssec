@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 10.1.2 %
+*/
 
 #ifndef _EAPSIM_H_
 #define _EAPSIM_H_

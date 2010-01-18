@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 32.1.2 %
+*/
 
 #if !defined(_SIMPLE_CONFIG_TYPES_H_)
 #define _SIMPLE_CONFIG_TYPES_H_

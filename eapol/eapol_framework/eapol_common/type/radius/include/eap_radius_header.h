@@ -15,9 +15,9 @@
 *
 */
 
-
-
-
+/*
+* %version: 9 %
+*/
 
 #if !defined(_EAP_RADIUS_HEADER_H_)
 #define _EAP_RADIUS_HEADER_H_

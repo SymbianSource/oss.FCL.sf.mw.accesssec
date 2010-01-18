@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 12 %
+*/
 
 #ifndef _EAPAKAUISETTINGARRAY_H_
 #define _EAPAKAUISETTINGARRAY_H_

@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 86.1.2 %
+*/
 
 #if !defined(_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H_)
 #define _EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H_

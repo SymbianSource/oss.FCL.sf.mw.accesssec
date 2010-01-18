@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: tr1cfwln#12 %
+*/
 
 #ifndef WEPSECURITYSETTINGSIMPL_INL
 #define WEPSECURITYSETTINGSIMPL_INL

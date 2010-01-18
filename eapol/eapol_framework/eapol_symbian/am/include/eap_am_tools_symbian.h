@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 3.1.2 %
+*/
 
 // INCLUDES
 #if !defined( _EAP_AM_TOOLS_SYMBIAN_H_ )

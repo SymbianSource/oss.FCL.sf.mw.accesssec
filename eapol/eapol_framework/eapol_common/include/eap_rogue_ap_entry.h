@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 4 %
+*/
 
 #ifndef EAP_ROGUE_AP_ENTRY_H
 #define EAP_ROGUE_AP_ENTRY_H

@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 12 %
+*/
 
 #ifndef _EAPMSCHAPV2DBDEFAULTS_H_
 #define _EAPMSCHAPV2DBDEFAULTS_H_

@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 16 %
+*/
 
 #ifndef _EAPAKAUIVIEW_H_
 #define _EAPAKAUIVIEW_H_

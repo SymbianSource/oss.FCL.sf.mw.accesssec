@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 5.1.3 %
+*/
 
 #if !defined(_EAP_TYPE_MAP_H_)
 #define _EAP_TYPE_MAP_H_

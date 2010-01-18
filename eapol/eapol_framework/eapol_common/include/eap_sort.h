@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 12 %
+*/
 
 #if !defined(_EAP_SORT_H_)
 #define _EAP_SORT_H_

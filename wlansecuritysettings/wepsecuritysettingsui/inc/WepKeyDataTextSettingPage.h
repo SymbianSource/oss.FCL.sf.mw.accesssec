@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#10 %
+*/
 
 #ifndef WEPKEYDATA_TEXT_SETTING_PAGE_H
 #define WEPKEYDATA_TEXT_SETTING_PAGE_H

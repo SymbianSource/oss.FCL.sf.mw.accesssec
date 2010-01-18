@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 12 %
+*/
 
 #if !defined(_AKA_RESULT_H_)
 #define _AKA_RESULT_H_

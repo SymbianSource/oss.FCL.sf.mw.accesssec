@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 22.1.2 %
+*/
 
 #ifndef _MSCHAPV2_CORE_H_
 #define _MSCHAPV2_CORE_H_

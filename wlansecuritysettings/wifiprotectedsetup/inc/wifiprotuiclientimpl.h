@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#7 %
+*/
 
 #ifndef C_WIFIPROTUICLIENTIMPL_H
 #define C_WIFIPROTUICLIENTIMPL_H

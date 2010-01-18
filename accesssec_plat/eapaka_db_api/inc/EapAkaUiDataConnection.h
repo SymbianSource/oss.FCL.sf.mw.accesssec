@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 6.1.2 %
+*/
 
 #ifndef _EAPAKAUIDATACONNECTION_H_
 #define _EAPAKAUIDATACONNECTION_H_

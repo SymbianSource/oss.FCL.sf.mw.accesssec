@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 16.1.2 %
+*/
 
 #ifndef _EAPTLSPEAPUICONNECTION_H_
 #define _EAPTLSPEAPUICONNECTION_H_

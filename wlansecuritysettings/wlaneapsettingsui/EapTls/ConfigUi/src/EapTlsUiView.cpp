@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 40 %
+*/
 
 // INCLUDE FILES
 #include <eikdialg.h>

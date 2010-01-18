@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 6 %
+*/
 
 #if !defined(_EAPOL_HEADER_H_)
 #define _EAPOL_HEADER_H_

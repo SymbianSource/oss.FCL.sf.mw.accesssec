@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 11 %
+*/
 
 #if !defined(_EAP_SIMPLE_CONFIG_HEADER_H_)
 #define _EAP_SIMPLE_CONFIG_HEADER_H_

@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 9 %
+*/
 
 #ifndef _EAPTLSPEAPTIMERVALUES_H_
 #define _EAPTLSPEAPTIMERVALUES_H_

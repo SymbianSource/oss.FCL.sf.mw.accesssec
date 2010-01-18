@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 14.1.4 %
+*/
 
 #if !defined(_EAPOL_KEY_STATE_H_)
 #define _EAPOL_KEY_STATE_H_

@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 13 %
+*/
 
 #if !defined(_EAP_AM_TYPE_AKA_H_)
 #define _EAP_AM_TYPE_AKA_H_

@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 7 %
+*/
 
 #ifndef EAPSECURIDDBDEFAULTS_H
 #define EAPSECURIDDBDEFAULTS_H

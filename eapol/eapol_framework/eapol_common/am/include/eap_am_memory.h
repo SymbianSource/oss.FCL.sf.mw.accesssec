@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 6 %
+*/
 
 #if !defined(_EAP_MEMORY_H_)
 #define _EAP_MEMORY_H_

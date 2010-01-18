@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 11 %
+*/
 
 #ifndef _EAPGTCUI_H_
 #define _EAPGTCUI_H_

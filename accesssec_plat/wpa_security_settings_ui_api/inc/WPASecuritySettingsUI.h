@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 5 %
+*/
 
 #ifndef WPASECURITYSETTINGSUI_H
 #define WPASECURITYSETTINGSUI_H

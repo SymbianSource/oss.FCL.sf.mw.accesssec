@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 6.1.2 %
+*/
 
 #ifndef _EAPGTCUICONNECTION_H_
 #define _EAPGTCUICONNECTION_H_

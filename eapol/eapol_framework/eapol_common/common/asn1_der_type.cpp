@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 34 %
+*/
 
 #include "asn1_der_type.h"
 #include "eap_automatic_variable.h"

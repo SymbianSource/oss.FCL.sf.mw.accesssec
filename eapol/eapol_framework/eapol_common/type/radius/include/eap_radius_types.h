@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 9 %
+*/
 
 #if !defined(_RADIUS_TYPES_H_)
 #define _RADIUS_TYPES_H_

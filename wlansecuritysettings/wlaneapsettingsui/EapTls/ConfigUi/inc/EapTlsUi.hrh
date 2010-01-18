@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: %
+*/
 
 #ifndef _EAPTLSUI_HRH_
 #define _EAPTLSUI_HRH_

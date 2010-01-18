@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 9.1.2 %
+*/
 
 #if !defined(_EAP_SESSION_CORE_H_)
 #define _EAP_SESSION_CORE_H_

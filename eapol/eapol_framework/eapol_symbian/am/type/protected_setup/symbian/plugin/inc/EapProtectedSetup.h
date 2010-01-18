@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 4.1.2 %
+*/
 
 #ifndef _EAPPROTECTEDSETUP_H_
 #define _EAPPROTECTEDSETUP_H_

@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 7.1.2 %
+*/
 
 #if !defined(_ABS_EAPOL_KEY_STATE_H_)
 #define _ABS_EAPOL_KEY_STATE_H_

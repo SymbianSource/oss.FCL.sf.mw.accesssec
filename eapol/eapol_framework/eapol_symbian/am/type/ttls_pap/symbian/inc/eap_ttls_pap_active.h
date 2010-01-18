@@ -16,6 +16,9 @@
 *
 */
 
+/*
+* %version: 10 %
+*/
 
 #ifndef EAPTTLSPAPACTIVE_H
 #define EAPTTLSPAPACTIVE_H

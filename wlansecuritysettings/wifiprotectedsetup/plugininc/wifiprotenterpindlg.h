@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#9 %
+*/
 
 #ifndef C_WIFIPROTENTERPINDLG_H
 #define C_WIFIPROTENTERPINDLG_H

@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 11 %
+*/
 
 #ifndef __EAP_PLUGIN_LIST_H__
 #define __EAP_PLUGIN_LIST_H__

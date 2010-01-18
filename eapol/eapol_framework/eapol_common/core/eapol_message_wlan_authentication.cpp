@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 46.1.2 %
+*/
 
 // This is enumeration of EAPOL source code.
 #if defined(USE_EAP_MINIMUM_RELEASE_TRACES)

@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 12 %
+*/
 
 #ifndef __EAPPLUGINCONFIGURATIONMODEL_H__
 #define __EAPPLUGINCONFIGURATIONMODEL_H__

@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 11 %
+*/
 
 #ifndef __EAPPLUGINCONFIGURATIONMODEL_INL__
 #define __EAPPLUGINCONFIGURATIONMODEL_INL__

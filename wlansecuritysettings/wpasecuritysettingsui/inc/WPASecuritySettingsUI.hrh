@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: %
+*/
 
 #ifndef WPASecuritySettingsUI_HRH
 #define WPASecuritySettingsUI_HRH

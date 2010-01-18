@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 41 %
+*/
 
 #if !defined(_SIMPLE_CONFIG_RECORD_H_)
 #define _SIMPLE_CONFIG_RECORD_H_

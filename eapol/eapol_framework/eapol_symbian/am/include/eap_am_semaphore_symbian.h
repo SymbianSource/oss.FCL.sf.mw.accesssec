@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 5 %
+*/
 
 #if !defined( _EAP_AM_SEMAPHORE_SYMBIAN_H_ )
 #define _EAP_AM_SEMAPHORE_SYMBIAN_H_

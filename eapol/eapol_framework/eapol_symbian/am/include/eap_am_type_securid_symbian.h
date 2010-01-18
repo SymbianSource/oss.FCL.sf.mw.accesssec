@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 18 %
+*/
 
 #ifndef EAP_AM_TYPE_SECURID_SYMBIAN_H
 #define EAP_AM_TYPE_SECURID_SYMBIAN_H

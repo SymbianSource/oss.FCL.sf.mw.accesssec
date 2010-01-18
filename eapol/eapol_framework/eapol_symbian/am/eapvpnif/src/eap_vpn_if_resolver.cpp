@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 10 %
+*/
 
 // INCLUDE FILES
 #include <ecom/ecom.h>

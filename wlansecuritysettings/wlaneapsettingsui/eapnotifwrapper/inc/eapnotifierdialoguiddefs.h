@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: tr1cfwln#8 %
+*/
 
 #ifndef __EAPNOTIFIERDIALOGUIDDEFS_H__
 #define __EAPNOTIFIERDIALOGUIDDEFS_H__

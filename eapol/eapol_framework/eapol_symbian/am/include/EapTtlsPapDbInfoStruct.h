@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 7 %
+*/
 
 #ifndef EAPTTLSPAPDBINFOSTRUCT_H
 #define EAPTTLSPAPDBINFOSTRUCT_H

@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 4.1.2 %
+*/
 
 #if !defined(_SIMPLE_CONFIG_CREDENTIAL_H_)
 #define _SIMPLE_CONFIG_CREDENTIAL_H_

@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 6.1.2 %
+*/
 
 #ifndef _EAPTLSPEAPUICIPHERSUITE_H_
 #define _EAPTLSPEAPUICIPHERSUITE_H_

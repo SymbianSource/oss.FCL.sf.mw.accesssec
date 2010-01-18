@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 11.1.2.1.3 %
+*/
 
 // Refer the document S60_3_1_EAP_Symbian_Adaptation_Design_C.doc for more 
 // details of using EAPSettings. Refer section 9.2 for code samples.

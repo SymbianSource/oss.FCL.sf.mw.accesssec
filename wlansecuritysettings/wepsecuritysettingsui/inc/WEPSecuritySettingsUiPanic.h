@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#8 %
+*/
 
 #ifndef WEPSECURITYSETTINGSUIPANIC_H
 #define WEPSECURITYSETTINGSUIPANIC_H

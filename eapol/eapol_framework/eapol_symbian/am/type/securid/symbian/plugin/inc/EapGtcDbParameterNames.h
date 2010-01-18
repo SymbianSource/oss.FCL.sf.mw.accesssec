@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 11 %
+*/
 
 #ifndef EAPGTCDBPARAMETERNAMES_H
 #define EAPGTCDBPARAMETERNAMES_H

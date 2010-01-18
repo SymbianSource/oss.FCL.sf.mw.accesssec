@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#11 %
+*/
 
 #include <platform_paths.hrh>
 

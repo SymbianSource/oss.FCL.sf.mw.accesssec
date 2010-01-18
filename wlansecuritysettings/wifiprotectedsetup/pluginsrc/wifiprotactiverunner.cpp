@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#28 %
+*/
 
 //SYSTEM INCLUDES
 #include <wlanmgmtclient.h>

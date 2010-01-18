@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 6 %
+*/
 
 #ifndef _PAPUISETTINGARRAY_H_
 #define _PAPUISETTINGARRAY_H_

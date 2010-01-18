@@ -15,11 +15,14 @@
 *
 */
 
-
+/*
+* %version: 9 %
+*/
 
 #ifndef __WAPISECURITYSETTINGSUI_IBY__
 #define __WAPISECURITYSETTINGSUI_IBY__
 
+#ifdef __PROTOCOL_WLAN
 #ifndef FF_WLAN_WAPI_INCLUDE_IN_ROM
 // Use stub implementation
 FILE=ABI_DIR\BUILD_DIR\wapisecuritysettingsui.dll		SHARED_LIB_DIR\wapisecuritysettingsui.dll
@@ -27,5 +30,6 @@ FILE=ABI_DIR\BUILD_DIR\wapisecuritysettingsui.dll		SHARED_LIB_DIR\wapisecurityse
 // Use real implementation
 FILE=ABI_DIR\BUILD_DIR\realwapisecuritysettingsui.dll	SHARED_LIB_DIR\wapisecuritysettingsui.dll
 #endif // FF_WLAN_WAPI_INCLUDE_IN_ROM
+#endif // __PROTOCOL_WLAN
 
 #endif // #ifndef __WAPISECURITYSETTINGSUI_IBY__

@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 5 %
+*/
 
 #ifndef C_WIFIPROTUIINPROCESS_H
 #define C_WIFIPROTUIINPROCESS_H

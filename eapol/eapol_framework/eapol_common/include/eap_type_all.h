@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 8.1.2 %
+*/
 
 #if !defined(_EAP_TYPE_ALL_H_)
 #define _EAP_TYPE_ALL_H_

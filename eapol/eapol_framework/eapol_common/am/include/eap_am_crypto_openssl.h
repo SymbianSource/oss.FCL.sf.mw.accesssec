@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 13 %
+*/
 
 #if !defined( _EAP_AM_CRYPTO_OPENSSL_H_ )
 #define _EAP_AM_CRYPTO_OPENSSL_H_

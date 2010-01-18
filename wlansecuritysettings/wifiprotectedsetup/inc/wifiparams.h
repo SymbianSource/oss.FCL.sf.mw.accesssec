@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#7 %
+*/
 
 #ifndef T_WIFIPARAMS_H
 #define T_WIFIPARAMS_H

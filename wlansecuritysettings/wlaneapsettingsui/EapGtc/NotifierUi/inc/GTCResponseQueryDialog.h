@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: tr1cfwln#11 %
+*/
 
 #ifndef __GTCRESPONSEQUERYDIALOG_H__
 #define __GTCRESPONSEQUERYDIALOG_H__

@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 6.1.2 %
+*/
 
 #ifndef _EAPTLSPEAPUICERTIFICATE_H_
 #define _EAPTLSPEAPUICERTIFICATE_H_

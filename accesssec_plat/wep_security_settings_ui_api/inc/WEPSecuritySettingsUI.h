@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 5 %
+*/
 
 #ifndef WEPSECURITYSETTINGSUI_H
 #define WEPSECURITYSETTINGSUI_H

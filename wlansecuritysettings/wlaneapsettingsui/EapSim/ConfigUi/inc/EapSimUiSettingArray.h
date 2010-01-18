@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 11 %
+*/
 
 #ifndef _EAPSIMUISETTINGARRAY_H_
 #define _EAPSIMUISETTINGARRAY_H_

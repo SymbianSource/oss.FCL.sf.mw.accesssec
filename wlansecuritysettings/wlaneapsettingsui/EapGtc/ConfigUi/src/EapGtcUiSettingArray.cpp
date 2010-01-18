@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 11 %
+*/
 
 // INCLUDE FILES
 #include "EapGtcUiSettingArray.h"

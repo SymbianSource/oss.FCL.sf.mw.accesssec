@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 9 %
+*/
 
 #if !defined(_ABS_EAP_RADIUS_SESSION_H_)
 #define _ABS_EAP_RADIUS_SESSION_H_

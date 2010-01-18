@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 7 %
+*/
 
 #ifndef _EAPAKAGLOBAL_H_
 #define _EAPAKAGLOBAL_H_

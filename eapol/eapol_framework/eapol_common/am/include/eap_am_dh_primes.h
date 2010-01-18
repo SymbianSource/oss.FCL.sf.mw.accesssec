@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 7 %
+*/
 
 #if !defined(_EAP_AM_DH_PRIMES_H_)
 #define _EAP_AM_DH_PRIMES_H_

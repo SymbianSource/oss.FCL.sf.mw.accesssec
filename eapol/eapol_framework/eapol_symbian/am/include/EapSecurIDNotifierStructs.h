@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 7 %
+*/
 
 #ifndef EAPSECURIDNOTIFIERSTRUCTS_H
 #define EAPSECURIDNOTIFIERSTRUCTS_H

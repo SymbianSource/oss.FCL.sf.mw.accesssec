@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 10 %
+*/
 
 #if !defined(_EAP_AM_TYPE_GSMSIM_SYMBIAN_SIMULATOR_H_)
 #define _EAP_AM_TYPE_GSMSIM_SYMBIAN_SIMULATOR_H_

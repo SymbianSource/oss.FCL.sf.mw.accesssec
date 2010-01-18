@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 9 %
+*/
 
 #if !defined(_EAP_TYPE_AKA_AUTHENTICATION_VECTOR_H_)
 #define _EAP_TYPE_AKA_AUTHENTICATION_VECTOR_H_

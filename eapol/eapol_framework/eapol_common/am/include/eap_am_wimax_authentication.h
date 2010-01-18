@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 2.1.2 %
+*/
 
 #if !defined(_EAP_AM_WIMAX_AUTHENTICATION_H_)
 #define _EAP_AM_WIMAX_AUTHENTICATION_H_

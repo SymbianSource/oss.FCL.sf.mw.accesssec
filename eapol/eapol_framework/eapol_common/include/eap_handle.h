@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 8 %
+*/
 
 #error Do not use this anymore.
 

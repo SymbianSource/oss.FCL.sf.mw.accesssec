@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 8 %
+*/
 
 #if !defined(_EAP_SIMPLE_CONFIG_STATE_NOTIFICATION_H_)
 #define _EAP_SIMPLE_CONFIG_STATE_NOTIFICATION_H_

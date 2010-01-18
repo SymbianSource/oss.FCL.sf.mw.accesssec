@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 10 %
+*/
 
 #if !defined( _EAP_AM_TOOLS_H_ )
 #define _EAP_AM_TOOLS_H_

@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 9 %
+*/
 
 // INCLUDE FILES
 #include <coemain.h>

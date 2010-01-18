@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 6 %
+*/
 
 #if !defined(_EAPOL_TIMER_H_)
 #define _EAPOL_TIMER_H_

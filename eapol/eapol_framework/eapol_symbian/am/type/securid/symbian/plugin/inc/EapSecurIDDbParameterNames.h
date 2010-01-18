@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 5.1.2 %
+*/
 
 #ifndef EAPSECURIDDBPARAMETERNAMES_H
 #define EAPSECURIDDBPARAMETERNAMES_H

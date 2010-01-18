@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 7.1.2 %
+*/
 
 #ifndef _EAPGTCUIGTCDATA_H_
 #define _EAPGTCUIGTCDATA_H_

@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 9 %
+*/
 
 #ifndef _EAPAKADBUTILS_H_
 #define _EAPAKADBUTILS_H_

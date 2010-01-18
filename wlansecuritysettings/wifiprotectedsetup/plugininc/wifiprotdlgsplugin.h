@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: tr1cfwln#11 %
+*/
 
 #ifndef C_WIFIPROTDLGSPLUGIN_H
 #define C_WIFIPROTDLGSPLUGIN_H

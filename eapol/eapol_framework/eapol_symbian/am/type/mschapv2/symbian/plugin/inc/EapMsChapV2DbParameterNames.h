@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 8.1.2 %
+*/
 
 #ifndef EAPMSCHAPV2DBPARAMETERNAMES_H
 #define EAPMSCHAPV2DBPARAMETERNAMES_H

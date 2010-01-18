@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 10 %
+*/
 
 #if !defined(_RADIUS_STATE_H_)
 #define _RADIUS_STATE_H_

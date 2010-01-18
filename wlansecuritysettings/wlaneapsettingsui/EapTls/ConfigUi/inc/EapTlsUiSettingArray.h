@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 11 %
+*/
 
 #ifndef _EAPTLSUISETTINGARRAY_H_
 #define _EAPTLSUISETTINGARRAY_H_

@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 11.1.2 %
+*/
 
 #if !defined(_EAP_RADIUS_SESSION_H_)
 #define _EAP_RADIUS_SESSION_H_

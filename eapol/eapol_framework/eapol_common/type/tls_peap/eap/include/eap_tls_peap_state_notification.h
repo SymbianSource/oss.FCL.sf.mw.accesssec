@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 9 %
+*/
 
 #if !defined(_EAP_TLS_PEAP_STATE_NOTIFICATION_H_)
 #define _EAP_TLS_PEAP_STATE_NOTIFICATION_H_

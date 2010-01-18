@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 9 %
+*/
 
 #if !defined(_EAPOL_WLAN_STATE_H_)
 #define _EAPOL_WLAN_STATE_H_

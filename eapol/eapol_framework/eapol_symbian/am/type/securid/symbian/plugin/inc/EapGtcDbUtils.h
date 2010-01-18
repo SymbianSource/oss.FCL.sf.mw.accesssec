@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 10 %
+*/
 
 #ifndef EAPGTCDBUTILS_H
 #define EAPGTCDBUTILS_H

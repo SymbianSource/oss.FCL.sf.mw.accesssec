@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: %
+*/
 
 #ifndef WEPSecuritySettingsUI_HRH
 #define WEPSecuritySettingsUI_HRH

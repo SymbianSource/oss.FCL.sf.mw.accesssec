@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 18 %
+*/
 
 #if !defined(_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H_)
 #define _EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H_

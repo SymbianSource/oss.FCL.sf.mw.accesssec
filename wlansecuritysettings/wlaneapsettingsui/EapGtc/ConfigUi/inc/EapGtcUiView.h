@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 16 %
+*/
 
 #ifndef _EAPGTCUIVIEW_H_
 #define _EAPGTCUIVIEW_H_

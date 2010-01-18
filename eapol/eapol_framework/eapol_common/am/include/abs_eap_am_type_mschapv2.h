@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 7 %
+*/
 
 #if !defined(_ABS_EAP_AM_TYPE_MSCHAPV2_H_)
 #define _ABS_EAP_AM_TYPE_MSCHAPV2_H_

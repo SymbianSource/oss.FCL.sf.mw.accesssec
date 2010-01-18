@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 5 %
+*/
 
 #ifndef _EAPFASTUI_H_
 #define _EAPFASTUI_H_

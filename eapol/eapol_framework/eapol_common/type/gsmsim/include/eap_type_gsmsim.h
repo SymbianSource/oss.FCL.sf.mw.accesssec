@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 5.1.2 %
+*/
 
 #if !defined(_GSMSIM_CORE_H_)
 #define _GSMSIM_CORE_H_

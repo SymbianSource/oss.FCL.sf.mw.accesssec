@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 5 %
+*/
 
 #ifndef _PAPUIPWSETTINGITEM_H_
 #define _PAPUIPWSETTINGITEM_H_

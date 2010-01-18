@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 12.1.2 %
+*/
 
 #ifndef _EAPOLUID_H_
 #define _EAPOLUID_H_

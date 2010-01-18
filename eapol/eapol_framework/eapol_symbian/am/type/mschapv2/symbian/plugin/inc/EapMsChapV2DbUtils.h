@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 10 %
+*/
 
 #ifndef _EAPMSCHAPV2DBUTILS_H_
 #define _EAPMSCHAPV2DBUTILS_H_

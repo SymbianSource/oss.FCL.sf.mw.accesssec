@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 7 %
+*/
 
 #ifndef _PAPUIVIEW_H_
 #define _PAPUIVIEW_H_

@@ -15,9 +15,9 @@
 *
 */
 
-
-
-
+/*
+* %version: 7.1.2 %
+*/
 
 #if !defined( _ABS_EAP_AM_TOOLS_H_ )
 #define _ABS_EAP_AM_TOOLS_H_

@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: %
+*/
 
 #ifndef _EAPPLUGINCONFIG_HRH_
 #define _EAPPLUGINCONFIG_HRH_

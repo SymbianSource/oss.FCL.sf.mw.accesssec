@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 14 %
+*/
 
 #if !defined(_SIMPLE_CONFIG_MESSAGE_H_)
 #define _SIMPLE_CONFIG_MESSAGE_H_

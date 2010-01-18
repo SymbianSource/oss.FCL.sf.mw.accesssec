@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: %
+*/
 
 #ifndef WIFIPROTPLUGIN_HRH
 #define WIFIPROTPLUGIN_HRH

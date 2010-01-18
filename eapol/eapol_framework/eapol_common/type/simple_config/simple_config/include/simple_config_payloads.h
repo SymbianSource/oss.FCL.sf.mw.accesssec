@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 26 %
+*/
 
 #if !defined(_SIMPLE_CONFIG_PAYLOADS_H_)
 #define _SIMPLE_CONFIG_PAYLOADS_H_

@@ -15,6 +15,10 @@
 *
 */
 
+/*
+* %version: 10 %
+*/
+
 #ifndef WAPISECURITYSETTINGSUI_H
 #define WAPISECURITYSETTINGSUI_H
 

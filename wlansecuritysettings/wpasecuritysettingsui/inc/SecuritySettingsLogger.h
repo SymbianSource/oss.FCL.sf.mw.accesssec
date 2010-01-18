@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#6 %
+*/
 
 #ifndef SECURITYSETTINGSLOGGER_H
 #define SECURITYSETTINGSLOGGER_H

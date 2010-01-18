@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 19 %
+*/
 
 #if !defined(_EAPOL_KEY_TYPES_H_)
 #define _EAPOL_KEY_TYPES_H_

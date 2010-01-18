@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 16 %
+*/
 
 #ifndef _EAPSIMUIVIEW_H_
 #define _EAPSIMUIVIEW_H_

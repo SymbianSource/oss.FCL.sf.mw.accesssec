@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 7.1.2 %
+*/
 
 #ifndef _EAPTLSPEAPUICIPHERSUITES_H_
 #define _EAPTLSPEAPUICIPHERSUITES_H_

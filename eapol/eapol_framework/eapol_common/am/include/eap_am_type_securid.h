@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 10 %
+*/
 
 #ifndef EAP_AM_TYPE_SECURID_H
 #define EAP_AM_TYPE_SECURID_H

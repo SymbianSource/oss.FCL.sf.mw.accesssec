@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 2.1.2 %
+*/
 
 #if !defined(_ABS_EAP_STACK_INTERFACE_H_)
 #define _ABS_EAP_STACK_INTERFACE_H_

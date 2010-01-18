@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 13.1.2 %
+*/
 
 #if !defined(_EAP_AUTOMATIC_VARIABLE_H_)
 #define _EAP_AUTOMATIC_VARIABLE_H_

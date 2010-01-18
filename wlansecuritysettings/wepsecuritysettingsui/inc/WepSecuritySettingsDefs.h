@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#10 %
+*/
 
 #ifndef WEPSECURITYSETTINGSDEFS_H
 #define WEPSECURITYSETTINGSDEFS_H

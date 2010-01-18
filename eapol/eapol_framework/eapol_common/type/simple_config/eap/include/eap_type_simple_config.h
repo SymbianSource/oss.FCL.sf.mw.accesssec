@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 21.1.2 %
+*/
 
 #if !defined(_EAP_TYPE_SIMPLE_CONFIG_H_)
 #define _EAP_TYPE_SIMPLE_CONFIG_H_

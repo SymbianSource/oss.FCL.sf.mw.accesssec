@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 7 %
+*/
 
 #ifndef _EAPMSCHAPV2GLOBAL_H_
 #define _EAPMSCHAPV2GLOBAL_H_

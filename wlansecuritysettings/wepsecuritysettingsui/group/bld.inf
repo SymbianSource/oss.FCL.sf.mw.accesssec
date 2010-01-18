@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#22 %
+*/
 
 #include <platform_paths.hrh>
 
@@ -32,8 +35,10 @@ PRJ_EXPORTS
 
 
 PRJ_MMPFILES
+// real implementation for WLAN products
 ./WEPSecuritySettingsUI.mmp
-
+// stub implementation for non-WLAN products
+./wepsecuritysettingsuistub.mmp
 
 PRJ_TESTMMPFILES
 

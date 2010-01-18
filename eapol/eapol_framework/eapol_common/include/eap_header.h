@@ -15,9 +15,9 @@
 *
 */
 
-
-
-
+/*
+* %version: 6 %
+*/
 
 #if !defined(_EAP_HEADER_H_)
 #define _EAP_HEADER_H_

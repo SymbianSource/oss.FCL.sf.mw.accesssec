@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: tr1cfwln#18 %
+*/
 
 #ifndef __WLANEAPSETTINGSUIRESOURCES_IBY__
 #define __WLANEAPSETTINGSUIRESOURCES_IBY__

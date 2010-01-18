@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 11 %
+*/
 
 #ifndef __EAPPLUGINCALLBACKINTERFACE_H__
 #define __EAPPLUGINCALLBACKINTERFACE_H__

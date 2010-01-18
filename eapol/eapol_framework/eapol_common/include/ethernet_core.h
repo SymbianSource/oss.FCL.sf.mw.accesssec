@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 19.1.2 %
+*/
 
 #if !defined(_ETHERNET_CORE_H_)
 #define _ETHERNET_CORE_H_

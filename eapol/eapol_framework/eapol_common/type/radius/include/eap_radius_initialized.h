@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 10 %
+*/
 
 #if !defined(_RADIUS_INITIALIZED_H_)
 #define _RADIUS_INITIALIZED_H_

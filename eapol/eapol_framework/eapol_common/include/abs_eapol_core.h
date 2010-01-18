@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 7.1.2 %
+*/
 
 #if !defined(_ABS_EAPOL_CORE_H_)
 #define _ABS_EAPOL_CORE_H_

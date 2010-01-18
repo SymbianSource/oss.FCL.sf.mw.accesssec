@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 6 %
+*/
 
 #if !defined(_ABS_EAPOL_WLAN_DATABASE_REFERENCE_IF_H_)
 #define _ABS_EAPOL_WLAN_DATABASE_REFERENCE_IF_H_

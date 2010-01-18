@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 20.1.2 %
+*/
 
 #if !defined(_AKA_CORE_H_)
 #define _AKA_CORE_H_

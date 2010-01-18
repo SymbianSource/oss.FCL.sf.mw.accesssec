@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 11 %
+*/
 
 #ifndef _EAPPEAPUISETTINGARRAY_H_
 #define _EAPPEAPUISETTINGARRAY_H_

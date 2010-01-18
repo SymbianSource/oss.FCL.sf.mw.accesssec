@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#8 %
+*/
 
 #ifndef WIFIPARAMS_INL
 #define WIFIPARAMS_INL

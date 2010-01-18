@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 18 %
+*/
 
 #ifndef EAP_AM_TYPE_LEAP_SYMBIAN_H
 #define EAP_AM_TYPE_LEAP_SYMBIAN_H

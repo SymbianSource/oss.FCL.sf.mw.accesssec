@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 4 %
+*/
 
 #if !defined(_EAP_STATE_NOTIFICATION_H_)
 #define _EAP_STATE_NOTIFICATION_H_

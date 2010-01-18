@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 10.1.2 %
+*/
 
 #ifndef _EAPTLSPEAPUIEAPTYPES_H_
 #define _EAPTLSPEAPUIEAPTYPES_H_

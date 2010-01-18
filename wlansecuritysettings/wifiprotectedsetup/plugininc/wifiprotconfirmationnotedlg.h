@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#7 %
+*/
 
 #ifndef C_WIFIPROTCONFIRMATIONNOTEDLG_H__
 #define C_WIFIPROTCONFIRMATIONNOTEDLG_H__

@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#8 %
+*/
 
 #ifndef T_WIFIRETURN_H
 #define T_WIFIRETURN_H

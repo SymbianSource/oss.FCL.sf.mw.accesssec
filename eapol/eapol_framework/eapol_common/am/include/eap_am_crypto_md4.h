@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 9 %
+*/
 
 #if !defined( _EAP_AM_CRYPTO_MD4_H_ )
 #define _EAP_AM_CRYPTO_MD4_H_

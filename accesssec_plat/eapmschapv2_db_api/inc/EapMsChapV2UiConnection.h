@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 7.1.2 %
+*/
 
 #ifndef _EAPMSCHAPV2UICONNECTION_H_
 #define _EAPMSCHAPV2UICONNECTION_H_

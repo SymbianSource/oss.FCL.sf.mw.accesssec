@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 9 %
+*/
 
 #if !defined(_ABS_AKA_ALGORITHM_H_)
 #define _ABS_AKA_ALGORITHM_H_

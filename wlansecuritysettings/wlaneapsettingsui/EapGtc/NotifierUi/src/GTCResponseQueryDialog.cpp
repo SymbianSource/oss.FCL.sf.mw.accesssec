@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: tr1cfwln#11 %
+*/
 
 // INCLUDE FILES
 #include "GtcNotifDlgPlugin.h"

@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 10 %
+*/
 
 #if !defined(_EAP_GSMSIM_STATE_NOTIFICATION_H_)
 #define _EAP_GSMSIM_STATE_NOTIFICATION_H_

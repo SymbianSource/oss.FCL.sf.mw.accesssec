@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 14 %
+*/
 
 #ifndef _WAPICERTIFICATES_H_
 #define _WAPICERTIFICATES_H_

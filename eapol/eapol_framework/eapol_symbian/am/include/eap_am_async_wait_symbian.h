@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 4 %
+*/
 
 #ifndef _EAP_AM_ASYNC_WAIT_SYMBIAN_H_
 #define _EAP_AM_ASYNC_WAIT_SYMBIAN_H_

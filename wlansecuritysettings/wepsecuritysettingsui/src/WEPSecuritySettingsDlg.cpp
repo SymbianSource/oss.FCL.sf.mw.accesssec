@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#8.1.21 %
+*/
 
 // INCLUDE FILES
 #include <aknnavide.h>

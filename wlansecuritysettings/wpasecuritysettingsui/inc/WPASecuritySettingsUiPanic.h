@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#8 %
+*/
 
 #ifndef WPASECURITYSETTINGSUIPANIC_H
 #define WPASECURITYSETTINGSUIPANIC_H

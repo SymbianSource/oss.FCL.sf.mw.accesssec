@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 7.1.2 %
+*/
 
 #ifndef EAPTTLSPAPNOTIFIERSTRUCT_H
 #define EAPTTLSPAPNOTIFIERSTRUCT_H

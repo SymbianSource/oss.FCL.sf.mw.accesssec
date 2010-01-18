@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: tr1cfwln#15 %
+*/
 
 #include <platform_paths.hrh>
 
@@ -35,6 +38,9 @@ PRJ_MMPFILES
 
 ./wifiprotclient.mmp
 ./wifiprotplugin.mmp
+// stub implementation for non-WLAN products
+./wifiprotclientstub.mmp
+./wifiprotpluginstub.mmp
 
 PRJ_EXTENSIONS
 

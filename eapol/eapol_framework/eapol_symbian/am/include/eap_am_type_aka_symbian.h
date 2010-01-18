@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 20 %
+*/
 
 #if !defined(_EAP_AM_TYPE_AKA_SYMBIAN_H_)
 #define _EAP_AM_TYPE_AKA_SYMBIAN_H_

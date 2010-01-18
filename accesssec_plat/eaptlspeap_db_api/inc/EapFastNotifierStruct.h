@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 7.1.2 %
+*/
 
 #ifndef EAPFASTNOTIFIERSTRUCT_H
 #define EAPFASTNOTIFIERSTRUCT_H

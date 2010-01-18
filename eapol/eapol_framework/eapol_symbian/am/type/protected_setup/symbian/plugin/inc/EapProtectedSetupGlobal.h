@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 4 %
+*/
 
 #ifndef _EAPPROTECTEDSETUPGLOBAL_H_
 #define _EAPPROTECTEDSETUPGLOBAL_H_

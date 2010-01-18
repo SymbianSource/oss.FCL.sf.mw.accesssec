@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 8 %
+*/
 
 #if !defined(_ABS_EAP_AM_BLOOM_ALGORITHM_STORE_H_)
 #define _ABS_EAP_AM_BLOOM_ALGORITHM_STORE_H_

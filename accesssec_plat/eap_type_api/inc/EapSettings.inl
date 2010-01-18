@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 5.1.3 %
+*/
 
 inline CertificateEntry::CertificateEntry()
 : iCertType(ECA)

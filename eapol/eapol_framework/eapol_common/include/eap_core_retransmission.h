@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 8.1.2 %
+*/
 
 #if !defined(_GSMSIM_RETRANSMISSION_H_)
 #define _GSMSIM_RETRANSMISSION_H_

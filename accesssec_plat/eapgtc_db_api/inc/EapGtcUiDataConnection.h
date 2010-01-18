@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 6.1.2 %
+*/
 
 #ifndef _EAPGTCUIDATACONNECTION_H_
 #define _EAPGTCUIDATACONNECTION_H_

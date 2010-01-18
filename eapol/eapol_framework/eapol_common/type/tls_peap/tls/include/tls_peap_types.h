@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 47 %
+*/
 
 #if !defined(_TLS_PEAP_TYPES_H_)
 #define _TLS_PEAP_TYPES_H_

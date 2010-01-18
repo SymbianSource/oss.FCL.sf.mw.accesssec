@@ -15,7 +15,9 @@
 *
 */
 
-
+/*
+* %version: 9.1.2 %
+*/
 
 #ifndef EAPSECURID_H
 #define EAPSECURID_H

@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 21 %
+*/
 
 #if !defined(_EAP_TYPE_SIMPLE_CONFIG_TYPES_H_)
 #define _EAP_TYPE_SIMPLE_CONFIG_TYPES_H_

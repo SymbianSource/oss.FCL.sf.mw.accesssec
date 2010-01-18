@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 6.1.2 %
+*/
 
 #ifndef _CERTIFICATESELECTIONINFO_H_
 #define _CERTIFICATESELECTIONINFO_H_

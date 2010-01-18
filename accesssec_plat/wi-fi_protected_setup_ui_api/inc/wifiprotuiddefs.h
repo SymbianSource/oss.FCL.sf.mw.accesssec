@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 6 %
+*/
 
 #ifndef WIFIPROTUIDDEFS_H
 #define WIFIPROTUIDDEFS_H

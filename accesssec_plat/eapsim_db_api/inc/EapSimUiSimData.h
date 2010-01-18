@@ -15,6 +15,9 @@
 *
 */
 
+/*
+* %version: 9 %
+*/
 
 #ifndef _EAPSIMUISIMDATA_H_
 #define _EAPSIMUISIMDATA_H_

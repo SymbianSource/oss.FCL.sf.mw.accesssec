@@ -15,8 +15,9 @@
 *
 */
 
-
-
+/*
+* %version: 8 %
+*/
 
 #if !defined(_ABS_TLS_MESSAGE_RECORD_PROCESS_H_)
 #define _ABS_TLS_MESSAGE_RECORD_PROCESS_H_
