@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 37.1.7 %
+* %version: 37.1.8 %
 */
 
 // INCLUDE FILES
@@ -25,7 +25,7 @@
 #include <aknlists.h>
 #include "EapPeapUiView.h"
 #include "EapPeapUi.hrh"
-#include <EapPeapUi.rsg>
+#include <eappeapui.rsg>
 #include <akntextsettingpage.h>
 #include <aknsettingitemlist.h>
 #include "EapPeapUiSettingArray.h"
@@ -45,7 +45,7 @@
 #include <EapTypeInfo.h> // For EAP type info query
 #include <AknIconArray.h>
 #include <AknsUtils.h>
-#include <FeatMgr.h>
+#include <featmgr.h>
 #include <hlplch.h>
 #include <csxhelp/cp.hlp.hrh>
 

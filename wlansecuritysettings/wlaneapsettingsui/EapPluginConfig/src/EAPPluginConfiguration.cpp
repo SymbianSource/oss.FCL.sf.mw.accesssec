@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 23 %
+* %version: 24 %
 */
 
 // INCLUDE FILES
@@ -29,7 +29,7 @@
 
 #include <ecom/ecom.h>
 #include <data_caging_path_literals.hrh>
-#include <EAPPluginConfigRes.rsg>
+#include <eappluginconfigres.rsg>
 
 // CONSTANTS
 _LIT( KDriveZ, "z:" );                               // ROM folder

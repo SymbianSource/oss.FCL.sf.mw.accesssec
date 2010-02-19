@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: tr1cfwln#8.1.21 %
+* %version: tr1cfwln#8.1.22 %
 */
 
 // INCLUDE FILES
@@ -42,7 +42,7 @@
 #include <hlplch.h>
 #include <csxhelp/cp.hlp.hrh>
 
-#include <FeatMgr.h>
+#include <featmgr.h>
 
 
 // CONSTANT DECLARATIONS
