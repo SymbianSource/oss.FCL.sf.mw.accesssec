@@ -17,12 +17,12 @@
 */
 
 /*
-* %version: 2 %
+* %version: 3 %
 */
 
 // INCLUDE FILES
 
-#include <WEPSecuritySettingsUi.h>
+#include <WEPSecuritySettingsUI.h>
 
 
 

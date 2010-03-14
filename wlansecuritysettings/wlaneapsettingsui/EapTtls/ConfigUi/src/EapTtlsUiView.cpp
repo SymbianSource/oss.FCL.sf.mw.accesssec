@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 27.1.1.1.8 %
+* %version: 27.1.1.1.9 %
 */
 
 // INCLUDE FILES
@@ -25,7 +25,7 @@
 #include <aknlists.h>
 #include "EapTtlsUiView.h"
 #include "EapTtlsUi.hrh"
-#include <EapTtlsUi.rsg>
+#include <eapttlsui.rsg>
 #include <akntextsettingpage.h>
 #include <aknsettingitemlist.h>
 #include "EapTtlsUiSettingArray.h"
@@ -43,7 +43,7 @@
 #include <AknIconArray.h>
 #include <AknsUtils.h>
 
-#include <FeatMgr.h>
+#include <featmgr.h>
 #include <hlplch.h>
 #include <csxhelp/cp.hlp.hrh>
 
