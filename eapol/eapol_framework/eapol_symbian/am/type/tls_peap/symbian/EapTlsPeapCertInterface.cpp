@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 42 %
+* %version: 43 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -143,7 +143,10 @@ CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface()
 	delete iSignature;
 	delete iPtrOut;
 	delete iSignaturePtr;
-	
+	delete iRSASignature;
+	delete iDSASignature;
+	delete iKeyFilter;
+		
 	iFs.Close();	
 	
 	EAP_TRACE_DEBUG(
@@ -2312,6 +2315,9 @@ void CEapTlsPeapCertInterface::RunL()
 				iParent->complete_sign(R, reinterpret_cast<const RInteger&>(iRSASignature->S()), eap_status_ok);
 				
 				CleanupStack::PopAndDestroy();
+
+				delete iRSASignature;
+				iRSASignature = 0;
 				
 				iRSASigner->Release(); // This seems to be needed.
 			}
@@ -2319,6 +2325,9 @@ void CEapTlsPeapCertInterface::RunL()
 			{
 				iParent->complete_sign(reinterpret_cast<const RInteger&>(iDSASignature->R()), 
 					reinterpret_cast<const RInteger&>(iDSASignature->S()), eap_status_ok);
+
+				delete iDSASignature;
+				iDSASignature = 0;
 				
 				iDSASigner->Release(); // This seems to be needed.
 			}			

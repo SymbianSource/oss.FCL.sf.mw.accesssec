@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: tr1cfwln#8 %
+* %version: tr1cfwln#9 %
 */
 
 #ifndef WEPSECURITYSETTINGSUIPANIC_H
@@ -30,7 +30,8 @@
 enum TWepSecuritySettingsPanicCodes
 	{
     EUnknownCase,
-    ETableNotFound
+    ETableNotFound,
+    EGeneral
 	};
 
 

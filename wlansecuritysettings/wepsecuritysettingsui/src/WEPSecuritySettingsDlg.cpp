@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: tr1cfwln#8.1.22 %
+* %version: tr1cfwln#8.1.23 %
 */
 
 // INCLUDE FILES
@@ -444,7 +444,10 @@ void CWEPSecuritySettingsDlg::PreLayoutDynInitL()
         {
         iNaviDecoratorEmpty = iNaviPane->CreateNavigationLabelL( KEmpty );
         }
-
+    if ( !iNaviDecoratorEmpty )
+        {    
+         	__ASSERT_DEBUG( EFalse, Panic( EGeneral ) );
+        }
     if ( !iNaviDecoratorTabbed )
         {
         iNaviDecoratorTabbed = iNaviPane->CreateTabGroupL();
@@ -483,8 +486,11 @@ void CWEPSecuritySettingsDlg::PreLayoutDynInitL()
                 
             iTabGroup->SetObserver( this );
             }
+        else 
+          	{
+          	__ASSERT_DEBUG( EFalse, Panic( EGeneral ) );
+           	}
         }
-
     iNaviPane->PushL( *iNaviDecoratorEmpty );
     iList = STATIC_CAST( CAknSettingStyleListBox*, 
                                         Control( KWepMainSettingsListboxId ) );
