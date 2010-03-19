@@ -26,11 +26,9 @@
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if !defined(EAP_NO_STDINT_H_HEADER)
 #if defined(__GNUC__)
-	#include <stdint.h>
-#endif //#if defined(__GNUC__)
-#endif //#if !defined(EAP_NO_STDINT_H_HEADER)
+#define EAP_NO_STDINT_H_HEADER
+#endif // defined(__GNUC__)
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
