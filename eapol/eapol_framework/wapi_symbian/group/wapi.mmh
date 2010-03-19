@@ -1,0 +1,69 @@
+/*
+* ============================================================================
+*  Name        : ./accesssec/eapol/eapol_framework/wapi_symbian/group/wapi.mmh
+*  Part of     : WAPI / WAPI       *** Info from the SWAD
+*  Description : Project definition file for project WAPI
+*  Version     : %version: 11 % << Don't touch! Updated by Synergy at check-out.
+*
+*  Copyright © 2001-2009 Nokia.  All rights reserved.
+*  This material, including documentation and any related computer
+*  programs, is protected by copyright controlled by Nokia.  All
+*  rights are reserved.  Copying, including reproducing, storing,
+*  adapting or translating, any or all of this material requires the
+*  prior written consent of Nokia.  This material also contains
+*  confidential information which may not be disclosed to others
+*  without the prior written consent of Nokia.
+* ============================================================================
+* Template version: 4.1
+*/
+
+//-------------------------------------------------------------------
+
+// Set up the preprocessor macros for source files
+
+// This flag tells the 64-bit multiplication of platform can be used.
+MACRO USE_EAP_64_BIT_MULTIPLICATION
+
+// This is very important definition.
+MACRO EAP_LITTLE_ENDIAN=1
+
+//-------------------------------------------------------------------
+// This is used to enable configuring from file.
+MACRO USE_WAPI_FILECONFIG=1
+MACRO USE_EAP_FILECONFIG=1
+
+MACRO USE_EAP_EXPANDED_TYPES=1
+
+// Add this when database compatibility is not needed anymore.
+// This fixes some names of database fields.
+MACRO USE_WAPI_FIXED_DATABASE_FIELDS=1
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// This flag activates message based WLAN engine EAPOL interface.
+MACRO USE_EAPOL_WLAN_AUTHENTICATION_MESSAGE_IF
+#define USE_EAPOL_WLAN_AUTHENTICATION_MESSAGE_IF
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+MACRO USE_CERTIFICATE_STORE=1
+#define USE_CERTIFICATE_STORE
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// This flag activates server codes of EAPOL
+MACRO USE_EAP_CORE_SERVER=1
+
+// These following macros should be adjusted depending on the test environment.
+// For WLM compatibility only NO_EAP_MUTEX should be defined.
+MACRO NO_EAP_MUTEX=1
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+MACRO USE_WAPI_CORE=1
+#define USE_WAPI_CORE
+MACRO USE_EC_CERTIFICATE_STORE=1
+#define USE_EC_CERTIFICATE_STORE
+
+MACRO USE_NRC_ECC_ALGORITHMS
+#define USE_NRC_ECC_ALGORITHMS
+
+MACRO WAPI_USE_CERTIFICATE_STORE=1
+#define WAPI_USE_CERTIFICATE_STORE
+
+//-------------------------------------------------------------------
+// End of File

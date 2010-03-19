@@ -1,0 +1,11 @@
+#ifndef __WAPISECURITYSETTINGSUIHELPS_VARIANT_IBY__
+#define __WAPISECURITYSETTINGSUIHELPS_VARIANT_IBY__
+
+#if defined(FF_S60_HELPS_IN_USE) && defined(FF_WLAN_WAPI_INCLUDE_IN_ROM)
+    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0x10009D8D\contents.zip, RESOURCE_FILES_DIR\xhtml\%02d\0x10009D8D\contents.zip)
+    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0x10009D8D\index.xml, RESOURCE_FILES_DIR\xhtml\%02d\0x10009D8D\index.xml)
+    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0x10009D8D\keywords.xml, RESOURCE_FILES_DIR\xhtml\%02d\0x10009D8D\keywords.xml)
+    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0x10009D8D\meta.xml, RESOURCE_FILES_DIR\xhtml\%02d\0x10009D8D\meta.xml)
+#endif
+
+#endif

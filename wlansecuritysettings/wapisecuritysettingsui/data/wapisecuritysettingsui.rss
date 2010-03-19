@@ -1,0 +1,342 @@
+/*
+* ============================================================================
+*  Name     : wapisecuritysettingsui.rss
+*  Part of  : S60 WAPI Security Settings  UI
+*
+*  Description:
+*     This file contains all the resources for the WAPI Security Settings UI.
+*  Version: %version:  6.1.2 %
+*
+*  Copyright (C) 2008 Nokia Corporation.
+*  This material, including documentation and any related 
+*  computer programs, is protected by copyright controlled by 
+*  Nokia Corporation. All rights are reserved. Copying, 
+*  including reproducing, storing,  adapting or translating, any 
+*  or all of this material requires the prior written consent of 
+*  Nokia Corporation. This material also contains confidential 
+*  information which may not be disclosed to others without the 
+*  prior written consent of Nokia Corporation.
+*
+* ============================================================================
+*/
+
+//  RESOURCE IDENTIFIER
+NAME    AWST // 4 letter ID
+
+//  INCLUDES
+#include <eikon.rh>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.loc>
+#include <avkon.hrh>
+#include <errorres.loc>
+
+#include "wapisecuritysettingsui.hrh"
+#include <wapisecuritysettingsui.loc>
+
+//  RESOURCE DEFINITIONS
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf="WAPISecuritySettings"; }
+
+
+//----------------------------------------------------
+//
+//  r_wapi_security_settings_menubar
+//  Menubar    
+//
+//----------------------------------------------------
+//
+RESOURCE MENU_BAR r_wapi_security_settings_menubar
+    {
+    titles=
+        {
+        MENU_TITLE 
+            { 
+            menu_pane = r_wapi_security_settings_menu;
+            }
+        };
+    }
+
+
+//----------------------------------------------------
+//
+//  r_wapi_security_settings_menu
+//  The Options menu
+//
+//----------------------------------------------------
+//
+RESOURCE MENU_PANE r_wapi_security_settings_menu
+    {
+    items=
+        {
+        MENU_ITEM 
+            { 
+            command = EWapiSelCmdChange; 
+            txt = qtn_options_change;
+            flags = EEikMenuItemAction; 
+            },
+
+        MENU_ITEM 
+            { 
+            command = EWapiSelCmdReset;     
+            txt = qtn_wlan_options_reset_wapi_cert_store; 
+            },         
+           
+        MENU_ITEM 
+            { 
+            command = EAknCmdHelp; 
+            txt = qtn_options_help; 
+            },
+
+        MENU_ITEM 
+            { 
+            command = EAknCmdExit; 
+            txt = qtn_options_exit; 
+            }
+        };
+    }
+
+
+
+//----------------------------------------------------
+//
+//    r_wapisettings_pane_softkeys_options_back_edit
+//    WAPI Security Settings softkeys
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_wapisettings_pane_softkeys_options_back_edit
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_back; },
+        CBA_BUTTON { id = EWapiSelCmdChange; txt = qtn_msk_change; }
+        };
+    }
+
+
+
+//----------------------------------------------------
+//
+//  r_wapisettings_dialog
+//  WAPI Security Settings main dialog
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_wapisettings_dialog
+    {
+    flags = EEikDialogFlagWait | EEikDialogFlagNoDrag | 
+            EEikDialogFlagNoTitleBar | EEikDialogFlagFillAppClientRect |
+            EEikDialogFlagCbaButtons;
+
+    buttons = r_wapisettings_pane_softkeys_options_back_edit;
+
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtSettingListBox;
+            id = KWapiMainSettingsListboxId;
+            control = LISTBOX 
+                { 
+                flags = EAknListBoxSelectionList;
+                };
+            }
+        };
+    }
+
+
+//----------------------------------------------------
+//   
+//  r_setting_app_listbox
+//  Listbox for setting page
+//
+//----------------------------------------------------
+//
+RESOURCE LISTBOX r_setting_app_listbox
+    {
+    flags = EEikListBoxMultipleSelection;
+    }
+
+
+
+//----------------------------------------------------
+//
+//    r_wapisettings_pane_softkeys_ok_cancel_select
+//    WAPI Security Settings softkeys
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_wapisettings_pane_softkeys_ok_cancel_select
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOk; txt = text_softkey_ok; },
+        CBA_BUTTON { id = EAknSoftkeyCancel; txt = text_softkey_cancel; },
+        CBA_BUTTON { id = EAknSoftkeyOk; txt = qtn_msk_select; }
+        };
+    }
+
+
+//----------------------------------------------------
+//   
+//  r_radio_button_setting_page
+//  Setting page with radio buttons
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_radio_button_setting_page
+    {
+    number = EAknSettingPageNoOrdinalDisplayed;
+    softkey_resource = r_wapisettings_pane_softkeys_ok_cancel_select;
+    type =  EAknSetListBox;
+    editor_resource_id= r_setting_app_listbox;
+    }
+
+RESOURCE TBUF r_wapi_auth
+    { 
+    buf = qtn_wlan_sett_wapi_auth;
+    }
+
+RESOURCE TBUF r_wapi_auth_cert
+    { 
+    buf = qtn_wlan_sett_wapi_auth_cert;
+    }
+
+RESOURCE TBUF r_wapi_client_cert
+    { 
+    buf = qtn_wlan_sett_wapi_client_cert;
+    }
+
+RESOURCE TBUF r_wapi_root_cert
+    { 
+    buf = qtn_wlan_sett_wapi_root_cert;
+    }
+
+RESOURCE TBUF r_wapi_cert_not_defined
+    {
+    buf = qtn_wlan_sett_wapi_cert_not_defined;
+    }
+
+RESOURCE TBUF r_wapi_none
+    {
+    buf = qtn_wlan_sett_wapi_cert_none;
+    }
+
+RESOURCE TBUF r_wapi_done
+    {
+    buf = text_done; //from avkon.loc
+    }
+
+RESOURCE TBUF r_wapi_failure
+    {
+    buf = qtn_err_failure; //from errorres.loc
+    }
+
+RESOURCE TBUF r_wapi_preshared_key_format
+    { 
+    buf = qtn_wlan_sett_preshared_key_format;
+    }
+
+RESOURCE TBUF r_wapi_preshared_key_format_ascii
+    { 
+    buf = qtn_wlan_sett_preshared_key_format_ascii;
+    }
+
+RESOURCE TBUF r_wapi_preshared_key_format_hex
+    { 
+    buf = qtn_wlan_sett_preshared_key_format_hex;
+    }
+
+RESOURCE TBUF r_wapi_auth_psk
+    { 
+    buf = qtn_wlan_sett_wapi_auth_psk;
+    }
+
+//----------------------------------------------------
+//   
+//  r_psk_setting_page_key_data
+//  Setting page for entering PSK key data
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_psk_setting_page_key_data
+    {
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    number= EAknSettingPageNoOrdinalDisplayed;
+    label= qtn_wlan_sett_preshared_key;
+    type = EEikCtEdwin;
+    editor_resource_id = r_setting_app_edwin_key_data;
+    }
+
+//----------------------------------------------------
+//   
+//  r_setting_app_edwin_key_data
+//  Window to enter key data
+//
+//----------------------------------------------------
+//
+RESOURCE EDWIN r_setting_app_edwin_key_data
+    {
+    avkon_flags = EAknEditorFlagNoT9;
+    allowed_input_modes = EAknEditorTextInputMode | 
+                          EAknEditorNumericInputMode | 
+                          EAknEditorHalfWidthTextInputMode;
+    default_case = EAknEditorLowerCase;
+    maxlength = KWapiMaxKeyLength;
+    lines = 8;
+    }
+
+RESOURCE TBUF r_wapi_preshared_key
+    { 
+    buf = qtn_wlan_sett_preshared_key;
+    }
+
+RESOURCE TBUF r_wapi_preshared_key_not_defined
+    { 
+    buf = qtn_wlan_sett_preshared_key_not_defined;
+    }
+
+RESOURCE TBUF r_wapi_info_preshared_key_illegal_chars
+    { 
+    buf = qtn_wlan_info_preshared_key_illegal_chars;
+    }
+
+RESOURCE TBUF r_wapi_quest_preshared_key_data_missing
+    {
+    buf = qtn_wlan_quest_preshared_key_data_missing;
+    }
+
+RESOURCE TBUF r_wapi_info_preshared_key_not_even
+    {
+    buf = qtn_wlan_info_psk_not_even;
+    }
+//----------------------------------------------------
+//   
+//    r_wapi_sec_sett_conf_query
+//    ConfirmationQuery dialog
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_wapi_sec_sett_conf_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO__YES;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+// End of File

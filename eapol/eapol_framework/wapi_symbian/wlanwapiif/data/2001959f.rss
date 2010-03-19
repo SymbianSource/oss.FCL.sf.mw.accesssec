@@ -1,0 +1,55 @@
+/*
+* ============================================================================
+*  Name        : ./accesssec/eapol/eapol_framework/wapi_symbian/wlanwapiif/data/2001959f.rss
+*  Part of     : WAPI / WAPI       *** Info from the SWAD
+*  Description : Resource definitions for project WAPI
+*  Version     : %version: 6 % << Don't touch! Updated by Synergy at check-out.
+*
+*  Copyright © 2001-2009 Nokia.  All rights reserved.
+*  This material, including documentation and any related computer
+*  programs, is protected by copyright controlled by Nokia.  All
+*  rights are reserved.  Copying, including reproducing, storing,
+*  adapting or translating, any or all of this material requires the
+*  prior written consent of Nokia.  This material also contains
+*  confidential information which may not be disclosed to others
+*  without the prior written consent of Nokia.
+* ============================================================================
+* Template version: 4.1
+*/
+
+#include <registryinfo.rh>
+
+// ---------------------------------------------------------
+//   
+//    
+//    ECOM resource definitions for WlanWAPIIf plugin
+//
+// ---------------------------------------------------------
+//
+RESOURCE REGISTRY_INFO theInfo
+	{
+	// UID for the DLL
+	dll_uid = 0x2001959f;
+				
+	// Declare array of interface info
+	interfaces = 
+		{
+		INTERFACE_INFO
+			{
+			// UID of interface that is implemented
+			interface_uid = 0x200195a0;
+			implementations = 
+				{
+				// Info for WlanEapolClient
+				IMPLEMENTATION_INFO
+					{
+					implementation_uid = 0x200195a1;
+					version_no         = 1;
+					display_name       = "WlanWAPIIf";
+					default_data       = "";
+					opaque_data        = "";
+					}
+				};
+			}
+		};
+	}

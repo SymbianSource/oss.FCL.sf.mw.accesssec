@@ -1,0 +1,44 @@
+/*
+* ============================================================================
+*  Name     : bld.inf
+*  Part of  : S60 WAPI Security Settings UI
+*
+*  Description:
+*    This file provides the information required for building the
+*    whole of a wapisecuritysettingsui.
+*  Version: %version:  9 %
+*
+*  Copyright (C) 2008-2009 Nokia Corporation.
+*  This material, including documentation and any related 
+*  computer programs, is protected by copyright controlled by 
+*  Nokia Corporation. All rights are reserved. Copying, 
+*  including reproducing, storing,  adapting or translating, any 
+*  or all of this material requires the prior written consent of 
+*  Nokia Corporation. This material also contains confidential 
+*  information which may not be disclosed to others without the 
+*  prior written consent of Nokia Corporation.
+*
+* ============================================================================
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+//  Help exports
+#include "../help/group/bld.inf"
+
+PRJ_EXPORTS
+
+// export iby files
+../rom/wapisecuritysettingsui.iby		CORE_MW_LAYER_IBY_EXPORT_PATH(wapisecuritysettingsui.iby)
+../rom/wapisecuritysettingsuiresources.iby	LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(wapisecuritysettingsuiresources.iby)
+
+// export localised loc file
+../loc/wapisecuritysettingsui.loc	MW_LAYER_LOC_EXPORT_PATH(wapisecuritysettingsui.loc)
+
+PRJ_MMPFILES
+./wapisecuritysettingsui.mmp
+
+// End of File

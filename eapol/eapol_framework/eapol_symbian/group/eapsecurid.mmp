@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16.2.2 %
+* %version: 16.2.3 %
 */
 
 #include <platform_paths.hrh>
@@ -88,8 +88,6 @@ LIBRARY     hlplch.lib
 LIBRARY		featmgr.lib
 
 LANG		  SC
-
-MACRO EAP_NO_EXPORTS=1
 
 //-------------------------------------------------------------------
 

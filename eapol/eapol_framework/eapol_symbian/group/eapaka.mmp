@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 17.2.2 %
+* %version: 17.2.3 %
 */
 
 #include <platform_paths.hrh>
@@ -93,8 +93,6 @@ SOURCE		EapAkaInterface.cpp
 LIBRARY		CustomAPI.lib etelmm.lib etel.lib	// For ETel connection
 		
 #endif // End of #if !defined(WINS) && defined(USE_EAP_AKA_INTERFACE)
-
-MACRO EAP_NO_EXPORTS
 
 LIBRARY     eikdlg.lib
 LIBRARY     eikcore.lib

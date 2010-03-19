@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -16,14 +16,14 @@
 */
 
 /*
-* %version: 27 %
+* %version: 28 %
 */
 
 // INCLUDE FILES
 #include <eikdialg.h>
 #include <AknDialog.h>
 #include <aknlists.h>
-#include <EapGtcUi.rsg>
+#include <eapgtcui.rsg>
 #include <akntextsettingpage.h>
 #include <aknsettingitemlist.h>
 #include <aknnavide.h>
@@ -36,7 +36,7 @@
 #include "EapGtcUi.hrh"
 #include "EapGtcUiSettingArray.h"
 
-#include <FeatMgr.h>
+#include <featmgr.h>
 #include <hlplch.h>
 #include <csxhelp/cp.hlp.hrh>
 

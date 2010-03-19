@@ -1,0 +1,150 @@
+/*
+* ============================================================================
+*  Name     : wapisecuritysettingsui.loc
+*  Part of  : WAPI Security Settings UI
+*
+*  Description:
+*     This is a localisation file for wapisecuritysettingsui
+*     A .loc file is the one and only place where the logical strings
+*     to be localised are defined.
+*  Version: %version:  6 %
+*
+*  Copyright (C) 2008 Nokia Corporation.
+*  This material, including documentation and any related 
+*  computer programs, is protected by copyright controlled by 
+*  Nokia Corporation. All rights are reserved. Copying, 
+*  including reproducing, storing,  adapting or translating, any 
+*  or all of this material requires the prior written consent of 
+*  Nokia Corporation. This material also contains confidential 
+*  information which may not be disclosed to others without the 
+*  prior written consent of Nokia Corporation.
+*
+* ============================================================================
+*/
+
+
+// LOCALISATION STRINGS
+
+
+//d:Command in options menu.
+//d:Resets the WAPI certificate store DB.
+//l:list_single_pane_t1_cp2
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_options_reset_wapi_cert_store  "Reset certificate store"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_sett_wapi_client_cert          "WAPI client certificate"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_sett_wapi_root_cert            "WAPI root certificate"
+
+
+//d:Item text in setting list.
+//l:list_set_graphic_pane_t1
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_sett_wapi_cert_none            "None"
+
+
+//d:List pane for the setting value item list 
+//d:This is for qtn_wlan_sett_wapi_client_cert
+//d:or for qtn_wlan_sett_wapi_root_cert
+//l:list_set_graphic_pane_t1
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_sett_wapi_cert_not_defined     "(not defined)"
+
+//d:Item text in setting list.
+//d:Defines the WAPI authentication method.
+//l:list_setting_pane_t1
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_sett_wapi_auth  "WAPI authentication"
+
+//d:Item text in setting list.
+//l:list_set_graphic_pane_t1
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_sett_wapi_auth_cert            "Certificate"
+
+//d:Item text in setting list.
+//l:list_set_graphic_pane_t1
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_sett_wapi_auth_psk            "Pre-shared key"
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_sett_preshared_key_format            "Pre-shared key format"
+
+//d:Item text in setting list.
+//l:list_set_graphic_pane_t1
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_sett_preshared_key_format_ascii            "ASCII"
+
+//d:Item text in setting list.
+//l:list_set_graphic_pane_t1
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_sett_preshared_key_format_hex            "Hexadecimal"
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_sett_preshared_key            "Pre-shared key"
+
+//d:Item text in setting list.
+//l:list_set_graphic_pane_t1
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_sett_preshared_key_not_defined            "Must be defined"
+
+//d:Confirmation query showed to the user when not all compulsory data have
+//d:been entered
+//l:popup_note_window
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_quest_preshared_key_data_missing	"Pre-shared key data is compulsory. Security settings will not be saved. Continue?"
+
+//d:Information note showed to the user when pre-shared key contains illegal characters
+//l:popup_note_window
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_info_preshared_key_illegal_chars	"Illegal characters in pre-shared key"
+
+//d:Information note showed to the user when hexadecimal pre-shared key length is not even
+//l:popup_note_window
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_info_psk_not_even                   "Hex key must be even length"
+
+// End of File

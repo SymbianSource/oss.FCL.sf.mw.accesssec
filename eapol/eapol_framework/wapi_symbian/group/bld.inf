@@ -1,0 +1,45 @@
+/*
+* ============================================================================
+*  Name        : bld.inf
+*  Part of     : WAPI / WAPI       *** Info from the SWAD
+*  Description : Build information file for project WAPI
+*  Version     : %version: 3 % << Don't touch! Updated by Synergy at check-out.
+*
+*  Copyright © 2001-2009 Nokia.  All rights reserved.
+*  This material, including documentation and any related computer
+*  programs, is protected by copyright controlled by Nokia.  All
+*  rights are reserved.  Copying, including reproducing, storing,
+*  adapting or translating, any or all of this material requires the
+*  prior written consent of Nokia.  This material also contains
+*  confidential information which may not be disclosed to others
+*  without the prior written consent of Nokia.
+* ============================================================================
+* Template version: 4.1.1
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+// DBMS security policy file for storing WAPI database
+// WAPI database is not backed up for security reasons (contains plaintext private keys)
+20021357.SPD  /epoc32/data/z/private/100012a5/policy/20021357.SPD
+20021357.SPD  /epoc32/release/winscw/udeb/z/private/100012a5/policy/20021357.SPD
+20021357.SPD  /epoc32/release/winscw/urel/z/private/100012a5/policy/20021357.SPD
+
+// Exporting IBY file
+../rom/wapi.iby	CORE_MW_LAYER_IBY_EXPORT_PATH(wapi.iby) 
+
+// Copies WAPI configuration file to WLAN server private folder
+../wapi_core/symbian/file_config/wapi_symbian.conf  /epoc32/data/z/private/101F8EC5/wapi.conf
+
+PRJ_MMPFILES
+
+// This compiles WAPI implementation. You need special release to compile this.
+wapi.mmp
+wlanwapiif.mmp
+
+// End of file.

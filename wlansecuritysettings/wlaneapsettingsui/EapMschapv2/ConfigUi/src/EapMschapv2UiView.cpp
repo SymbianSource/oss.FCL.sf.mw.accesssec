@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 28 %
+* %version: 29 %
 */
 
 // INCLUDE FILES
@@ -25,7 +25,7 @@
 #include <aknlists.h>
 #include "EapMschapv2UiView.h"
 #include "EapMschapv2Ui.hrh"
-#include <EapMschapv2Ui.rsg>
+#include <eapmschapv2ui.rsg>
 #include <akntextsettingpage.h>
 #include <aknsettingitemlist.h>
 #include "EapMschapv2UiSettingArray.h"
@@ -35,7 +35,7 @@
 #include <EapMsChapV2UiDataConnection.h>
 #include <EapMsChapV2UiMsChapV2Data.h>
 
-#include <FeatMgr.h>
+#include <featmgr.h>
 #include <hlplch.h>
 #include <csxhelp/cp.hlp.hrh>
 

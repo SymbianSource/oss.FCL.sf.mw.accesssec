@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12.1.7 %
+* %version: 12.1.8 %
 */
 
 // INCLUDE FILES
@@ -24,7 +24,7 @@
 #include <eikenv.h>
 #include <bautils.h>
 #include <data_caging_path_literals.hrh>
-#include <MsChapv2NotifDlgUi.rsg>
+#include <mschapv2notifdlgui.rsg>
 
 #include <e32property.h>		// For RProperty 
 #include <UikonInternalPSKeys.h> // For KPSUidUikon and KUikGlobalNotesAllowed.
