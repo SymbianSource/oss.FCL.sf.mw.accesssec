@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: tr1cfwln#28 %
+* %version: tr1cfwln#29 %
 */
 
 //SYSTEM INCLUDES
@@ -52,7 +52,7 @@
 #include "wifiprotenterpindlg.h"
 #include "wifiprotinitiateeasysetupdlg.h"
 
-#include "FeatMgr.h"
+#include "featmgr.h"
 
 // valid Wep key lengths, to check wep key format
 // (wep key format depends on key length)

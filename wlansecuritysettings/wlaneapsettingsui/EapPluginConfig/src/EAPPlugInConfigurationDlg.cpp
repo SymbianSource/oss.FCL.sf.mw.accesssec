@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 20.1.14 %
+* %version: 20.1.15 %
 */
 
 // INCLUDE FILES
@@ -29,7 +29,7 @@
 #include <aknnotewrappers.h>
 #include <EapType.h>
 
-#include <EAPPluginConfigRes.rsg>
+#include <eappluginconfigres.rsg>
 #include "EAPPluginConfig.hrh"
 
 #include <avkon.mbg>
@@ -39,7 +39,7 @@
 #include "EAPPluginConfigurationModel.h"
 
 
-#include <FeatMgr.h>
+#include <featmgr.h>
 #include <hlplch.h>
 #include <eikappui.h>
 #include <csxhelp/cp.hlp.hrh>

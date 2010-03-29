@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -16,14 +16,14 @@
 */
 
 /*
-* %version: 14 %
+* %version: 15 %
 */
 
 // INCLUDE FILES
 #include "EapPeapUi.h"
 #include "EapTlsPeapUiConnection.h"
 #include "EapPeapUiView.h"
-#include <EapPeapUi.rsg>
+#include <eappeapui.rsg>
 #include <bautils.h>
 #include <coemain.h>
 #include <aknnotewrappers.h>
