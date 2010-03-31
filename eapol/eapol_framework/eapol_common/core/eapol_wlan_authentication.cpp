@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 86.1.2 %
+* %version: 86.1.2.1.1 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -572,7 +572,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::start_authentication(
 		
 		if (eap_type->get_type() == eap_type_leap)
 		{
-			if (m_authentication_type == eapol_key_authentication_type_802_1X)
+			if (m_authentication_type == eapol_key_authentication_type_dynamic_WEP)
 			{
 				// LEAP uses it's own 802.11 authentication mode when 802.1X (dynamic WEP) is used.
 				m_802_11_authentication_mode = eapol_key_802_11_authentication_mode_leap;
@@ -848,11 +848,12 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::complete_association(
 
 	if (m_authentication_type == eapol_key_authentication_type_RSNA_EAP
 		|| m_authentication_type == eapol_key_authentication_type_WPA_EAP
-		|| m_authentication_type == eapol_key_authentication_type_802_1X
+		|| m_authentication_type == eapol_key_authentication_type_dynamic_WEP
 		|| m_authentication_type == eapol_key_authentication_type_WFA_SC
 #if defined(EAP_USE_WPXM)
 		|| m_authentication_type == eapol_key_authentication_type_WPXM
 #endif //#if defined(EAP_USE_WPXM)
+		|| m_authentication_type == eapol_key_authentication_type_EAP_authentication_no_encryption
 		)
 	{
 		// Start authentication if mode is not pre-shared key. If mode is pre-shared key then

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 4.1.2 %
+* %version: 4.1.3 %
 */
 
 #if !defined(_EAP_CONFIG_H_)
@@ -494,6 +494,13 @@ EAP_CONFIGURATION_FIELD(
 	cf_str_EAPOL_TEST_MTU,
 	"EAPOL_TEST_MTU",
 	eap_configure_type_u32_t,
+	false);
+
+
+EAP_CONFIGURATION_FIELD(
+	cf_str_EAPOL_TEST_use_pmkid_in_ie,
+	"EAPOL_TEST_use_pmkid_in_ie",
+	eap_configure_type_boolean,
 	false);
 
 

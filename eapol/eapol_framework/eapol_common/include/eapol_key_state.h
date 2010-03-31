@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 14.1.4 %
+* %version: 14.1.5 %
 */
 
 #if !defined(_EAPOL_KEY_STATE_H_)
@@ -445,6 +445,10 @@ EAP_KEY_TEST_PRIVATE_FUNCTION
 	EAP_FUNC_IMPORT eap_status_e derive_WPXM_PTK(const u32_t WPXM_WPXC);
 
 	EAP_FUNC_IMPORT eap_status_e verify_field_is_zero(
+		const u8_t * const field,
+		const u32_t field_length);
+
+	EAP_FUNC_IMPORT eap_status_e check_padding(
 		const u8_t * const field,
 		const u32_t field_length);
 

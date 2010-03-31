@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 19 %
+* %version: 19.1.2 %
 */
 
 #if !defined(_EAPOL_KEY_TYPES_H_)
@@ -102,13 +102,14 @@ enum eapol_key_authentication_type_e
 	eapol_key_authentication_type_RSNA_PSK = 2,    ///< Authentication is RNSA 802.11i PSK (pre shared key), 4-Way and Group Key Handshakes.
 	eapol_key_authentication_type_WPA_EAP = 3,    ///< Authentication is WPA EAP-authentication, 4-Way and Group Key Handshakes.
 	eapol_key_authentication_type_WPA_PSK = 4,    ///< Authentication is WPA PSK (pre shared key), 4-Way and Group Key Handshakes.
-	eapol_key_authentication_type_802_1X = 5, ///< Authentication is dynamic WEP (802.1X). EAP-authentication with simple EAPOL RC4 key message.
+	eapol_key_authentication_type_dynamic_WEP = 5, ///< Authentication is dynamic WEP (802.1X). EAP-authentication with simple EAPOL RC4 key message.
 	eapol_key_authentication_type_WPXM = 6,    ///< Authentication is WPXM.
 	eapol_key_authentication_type_WFA_SC = 7,  ///< Authentication is Wi-Fi Alliance Simple Configure.
 #if defined(USE_WAPI_CORE)
 	eapol_key_authentication_type_WAI_PSK = 8,  ///< Authentication is WAI PSK.
 	eapol_key_authentication_type_WAI_certificate = 9,  ///< Authentication is WAI certificate.
 #endif //#if defined(USE_WAPI_CORE)
+	eapol_key_authentication_type_EAP_authentication_no_encryption = 10, ///< Authentication is EAP-authentication without EAPOL RC4 key message. WLAN data will be plain text.
 };
 
 /**
@@ -141,6 +142,8 @@ enum eapol_key_handshake_type_e
 #if defined(USE_WAPI_CORE)
 	eapol_key_handshake_type_wai_handshake = 7,
 #endif //#if defined(USE_WAPI_CORE)
+	eapol_key_handshake_type_EAP_authentication_no_encryption = 8,
+	eapol_key_handshake_type_authenticated = 9,
 };
 
 /**
@@ -304,6 +307,13 @@ EAP_CONFIGURATION_FIELD(
 	"dynamic_WEP",
 	eap_configure_type_string,
 	false);
+
+EAP_CONFIGURATION_FIELD(
+	cf_str_EAPOL_key_authentication_type_config_value_EAP_authentication_no_encryption,
+	"EAP_authentication_no_encryption",
+	eap_configure_type_string,
+	false);
+
 
 #if defined(EAP_USE_WPXM)
 EAP_CONFIGURATION_FIELD(

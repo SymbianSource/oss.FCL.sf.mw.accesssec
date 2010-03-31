@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 17.1.2 %
+* %version: 17.1.2.1.1 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -1049,7 +1049,7 @@ TInt eapol_am_core_symbian_c::CompleteAssociation(
 
 	// Initialise EAPOL key state
 
-	eapol_key_authentication_type_e authentication_type(eapol_key_authentication_type_802_1X);
+	eapol_key_authentication_type_e authentication_type(eapol_key_authentication_type_dynamic_WEP);
 	
 	if (aReceivedWPAIE !=0 
 		&& aSentWPAIE != 0)
@@ -1069,7 +1069,7 @@ TInt eapol_am_core_symbian_c::CompleteAssociation(
 	else
 	{
 		// Non-wpa mode
-		authentication_type = eapol_key_authentication_type_802_1X;
+		authentication_type = eapol_key_authentication_type_dynamic_WEP;
 	}	
 
 	eap_variable_data_c	authenticator_RSNA_IE(m_am_tools);

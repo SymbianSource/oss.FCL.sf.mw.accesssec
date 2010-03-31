@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 37.1.8 %
+* %version: 37.1.8.1.1 %
 */
 
 // INCLUDE FILES
@@ -411,6 +411,19 @@ void CEapPeapUiDialog::HandleDialogPageEventL( TInt aEventID )
      }
 
 
+// -----------------------------------------------------------------------------
+// CleanupImplArray
+// -----------------------------------------------------------------------------
+//
+static void CleanupResetAndDestroy( TAny* aAny )
+{
+	RImplInfoPtrArray* implArray = 
+		reinterpret_cast<RImplInfoPtrArray*>( aAny );
+
+	implArray->ResetAndDestroy();
+	implArray->Close();
+}
+
 // ---------------------------------------------------------
 // CEapPeapUiDialog::ConfigureL
 // ---------------------------------------------------------
@@ -420,8 +433,11 @@ void CEapPeapUiDialog::ConfigureL( TBool aQuick )
     RImplInfoPtrArray eapArray;
     eapArray.Reset();
 
+	CleanupStack::PushL( TCleanupItem( CleanupResetAndDestroy, &eapArray ) );
+
     REComSession::ListImplementationsL( KEapTypeInterfaceUid, 
                                         eapArray );
+
     TInt itemIndex = iEapTypesListBox->CurrentItemIndex();    
     TInt eapIndex( 0 );
     for ( TInt i = 0; i < eapArray.Count(); i++ )
@@ -438,7 +454,9 @@ void CEapPeapUiDialog::ConfigureL( TBool aQuick )
     CEapType* eapType;
     eapType = CEapType::NewL( eapArray[eapIndex]->DataType(), 
                               iIndexType, iIndex );
-    eapArray.ResetAndDestroy();
+
+	CleanupStack::PopAndDestroy(); // eapArray
+
     eapType->SetTunnelingType( KEapPeapId );
     CleanupStack::PushL( eapType );
     TInt buttonId = eapType->InvokeUiL();

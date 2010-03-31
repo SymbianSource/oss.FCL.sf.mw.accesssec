@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 67.1.2 %
+* %version: 67.1.2.1.1 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -261,11 +261,12 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::packet_process(
 	{
 		if (m_authentication_type != eapol_key_authentication_type_RSNA_EAP
 			&& m_authentication_type != eapol_key_authentication_type_WPA_EAP
-			&& m_authentication_type != eapol_key_authentication_type_802_1X
+			&& m_authentication_type != eapol_key_authentication_type_dynamic_WEP
 #if defined(EAP_USE_WPXM)
 			&& m_authentication_type != eapol_key_authentication_type_WPXM
 #endif //#if defined(EAP_USE_WPXM)
 			&& m_authentication_type != eapol_key_authentication_type_WFA_SC
+			&& m_authentication_type != eapol_key_authentication_type_EAP_authentication_no_encryption
 			)
 		{
 			EAP_TRACE_DEBUG(
@@ -317,11 +318,12 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::packet_process(
 	{
 		if (m_authentication_type != eapol_key_authentication_type_RSNA_EAP
 			&& m_authentication_type != eapol_key_authentication_type_WPA_EAP
-			&& m_authentication_type != eapol_key_authentication_type_802_1X
+			&& m_authentication_type != eapol_key_authentication_type_dynamic_WEP
 			&& m_authentication_type != eapol_key_authentication_type_WFA_SC
 #if defined(EAP_USE_WPXM)
 			&& m_authentication_type != eapol_key_authentication_type_WPXM
 #endif //#if defined(EAP_USE_WPXM)
+			&& m_authentication_type != eapol_key_authentication_type_EAP_authentication_no_encryption
 			)
 		{
 			EAP_TRACE_DEBUG(
@@ -347,10 +349,11 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::packet_process(
 			&& m_authentication_type != eapol_key_authentication_type_RSNA_PSK
 			&& m_authentication_type != eapol_key_authentication_type_WPA_EAP
 			&& m_authentication_type != eapol_key_authentication_type_WPA_PSK
-			&& m_authentication_type != eapol_key_authentication_type_802_1X
+			&& m_authentication_type != eapol_key_authentication_type_dynamic_WEP
 #if defined(EAP_USE_WPXM)
 			&& m_authentication_type != eapol_key_authentication_type_WPXM
 #endif //#if defined(EAP_USE_WPXM)
+			&& m_authentication_type != eapol_key_authentication_type_EAP_authentication_no_encryption
 			)
 		{
 			EAP_TRACE_DEBUG(
@@ -827,11 +830,12 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::restart_authentication(
 
 		if (m_authentication_type == eapol_key_authentication_type_RSNA_EAP
 			|| m_authentication_type == eapol_key_authentication_type_WPA_EAP
-			|| m_authentication_type == eapol_key_authentication_type_802_1X
+			|| m_authentication_type == eapol_key_authentication_type_dynamic_WEP
 #if defined(EAP_USE_WPXM)
 			|| m_authentication_type == eapol_key_authentication_type_WPXM
 #endif //#if defined(EAP_USE_WPXM)
 			|| m_authentication_type == eapol_key_authentication_type_WFA_SC
+			|| m_authentication_type == eapol_key_authentication_type_EAP_authentication_no_encryption
 			)
 		{
 			status = m_eap_core->send_eap_identity_request(receive_network_id);
@@ -3990,9 +3994,11 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::association(
 #if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 	else if (authentication_type == eapol_key_authentication_type_RSNA_EAP
 		|| authentication_type == eapol_key_authentication_type_WPA_EAP
-		|| authentication_type == eapol_key_authentication_type_802_1X
+		|| authentication_type == eapol_key_authentication_type_dynamic_WEP
 		|| authentication_type == eapol_key_authentication_type_WPXM
-		|| authentication_type == eapol_key_authentication_type_WFA_SC)
+		|| authentication_type == eapol_key_authentication_type_WFA_SC
+		|| authentication_type == eapol_key_authentication_type_EAP_authentication_no_encryption
+		)
 	{
 		// Creates a EAP-session.
 		status = m_eap_core->synchronous_create_eap_session(receive_network_id);
