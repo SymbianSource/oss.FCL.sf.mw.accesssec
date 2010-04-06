@@ -1121,7 +1121,7 @@ eap_am_type_tls_peap_symbian_c::CompleteQueryUserPermissionForAid(
 //--------------------------------------------------
 
 //
-void eap_am_type_tls_peap_symbian_c::notify_configuration_error(
+EAP_FUNC_EXPORT void eap_am_type_tls_peap_symbian_c::notify_configuration_error(
 	const eap_status_e configuration_status)
 {
 	if (m_is_client == true)
@@ -1956,7 +1956,7 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ConfigureL()
 
 //--------------------------------------------------
 
-eap_status_e eap_am_type_tls_peap_symbian_c::reset()
+EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::reset()
 {
 
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);

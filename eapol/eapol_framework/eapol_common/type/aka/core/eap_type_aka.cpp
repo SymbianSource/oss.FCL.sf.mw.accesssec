@@ -383,7 +383,7 @@ EAP_FUNC_EXPORT eap_type_aka_c::eap_type_aka_c(
 //-----------------------------------------------
 
 //
-void eap_type_aka_c::initialize_state(
+EAP_FUNC_EXPORT void eap_type_aka_c::initialize_state(
 				const eap_type_aka_state_variable_e state,
 				const bool must_be_initiator,
 				const bool must_be_responder,

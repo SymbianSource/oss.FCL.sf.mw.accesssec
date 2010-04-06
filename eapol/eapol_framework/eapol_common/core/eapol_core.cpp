@@ -1489,7 +1489,7 @@ eap_status_e eapol_core_c::generate_new_pmksa(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_core_c::read_reassociation_parameters(
+EAP_FUNC_EXPORT eap_status_e eapol_core_c::read_reassociation_parameters(
 	const eap_am_network_id_c * const old_receive_network_id, ///< source includes remote address, destination includes local address.
 	const eap_am_network_id_c * const new_receive_network_id, ///< source includes remote address, destination includes local address.
 	const eapol_key_authentication_type_e authentication_type,
@@ -1739,7 +1739,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::start_reassociation(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_core_c::complete_reassociation(
+EAP_FUNC_EXPORT eap_status_e eapol_core_c::complete_reassociation(
 	const eapol_wlan_authentication_state_e reassociation_result,
 	const eap_am_network_id_c * const receive_network_id,
 	const eapol_key_authentication_type_e authentication_type,
@@ -2857,7 +2857,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::remove_eapol_key_state(
 #if defined(USE_EAPOL_KEY_STATE)
 
 //
-eap_status_e eapol_core_c::asynchronous_init_remove_eapol_key_state(
+EAP_FUNC_EXPORT eap_status_e eapol_core_c::asynchronous_init_remove_eapol_key_state(
 	const eap_am_network_id_c * const send_network_id)
 {
 	EAP_TRACE_DEBUG(

@@ -775,7 +775,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::set_wlan_pa
 //--------------------------------------------------
 
 //
-void eapol_am_wlan_authentication_symbian_c::state_notification(
+EAP_FUNC_EXPORT void eapol_am_wlan_authentication_symbian_c::state_notification(
 	const abs_eap_state_notification_c * const state)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);

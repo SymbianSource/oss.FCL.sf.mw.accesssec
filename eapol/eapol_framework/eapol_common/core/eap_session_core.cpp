@@ -1274,7 +1274,7 @@ eap_status_e eap_session_core_c::asynchronous_init_remove_eap_session(
 //--------------------------------------------------
 
 //
-eap_status_e eap_session_core_c::asynchronous_init_remove_eap_session(
+EAP_FUNC_EXPORT eap_status_e eap_session_core_c::asynchronous_init_remove_eap_session(
 	const eap_network_id_selector_c * const state_selector)
 {
 	EAP_TRACE_DEBUG(

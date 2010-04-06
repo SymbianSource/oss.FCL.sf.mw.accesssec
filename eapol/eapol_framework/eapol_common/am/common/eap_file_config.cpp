@@ -1271,7 +1271,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::store_configure(
 
 //-----------------------------------------------------------------
 
-eap_status_e eap_file_config_c::find_rvalue(
+EAP_FUNC_EXPORT eap_status_e eap_file_config_c::find_rvalue(
 	const eap_variable_data_c * const config_param,
 	bool * const read_env_value,
 	eap_variable_data_c * const param_name,

@@ -139,7 +139,7 @@ void eap_am_type_protected_setup_symbian_c::ConstructL()
 
 //--------------------------------------------------
 
-eap_am_type_protected_setup_symbian_c* eap_am_type_protected_setup_symbian_c::NewL(
+EAP_FUNC_EXPORT eap_am_type_protected_setup_symbian_c* eap_am_type_protected_setup_symbian_c::NewL(
 	abs_eap_am_tools_c * const tools,
 	abs_eap_base_type_c * const partner,
 	const TIndexType aIndexType,

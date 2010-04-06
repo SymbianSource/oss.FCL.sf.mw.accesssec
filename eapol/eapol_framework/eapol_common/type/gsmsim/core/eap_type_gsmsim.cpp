@@ -344,7 +344,7 @@ EAP_FUNC_EXPORT eap_type_gsmsim_c::eap_type_gsmsim_c(
 #if !defined(NO_EAP_TYPE_GSMSIM_MESSAGE_STATE_CHECK)
 
 //
-void eap_type_gsmsim_c::initialize_state(
+EAP_FUNC_EXPORT void eap_type_gsmsim_c::initialize_state(
 				const eap_type_gsmsim_state_variable_e state,
 				const bool must_be_initiator,
 				const bool must_be_responder,
@@ -626,7 +626,7 @@ EAP_FUNC_EXPORT const eap_type_gsmsim_state_variable_parameters_c * eap_type_gsm
  * This function saves the current m_state to m_saved_previous_state.
  * The saved state is restored in error case.
  */
-void eap_type_gsmsim_c::save_current_state()
+EAP_FUNC_EXPORT void eap_type_gsmsim_c::save_current_state()
 {
 	m_saved_previous_state = m_state;
 }
@@ -636,7 +636,7 @@ void eap_type_gsmsim_c::save_current_state()
 /**
  * This function restores the saved state.
  */
-void eap_type_gsmsim_c::restore_saved_previous_state()
+EAP_FUNC_EXPORT void eap_type_gsmsim_c::restore_saved_previous_state()
 {
 	set_state(m_saved_previous_state);
 }

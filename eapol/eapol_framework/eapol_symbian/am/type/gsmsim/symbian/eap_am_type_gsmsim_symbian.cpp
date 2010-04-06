@@ -354,7 +354,7 @@ void eap_am_type_gsmsim_symbian_c::store_reauth_parametersL(
 
 //--------------------------------------------------
 
-eap_status_e eap_am_type_gsmsim_symbian_c::authentication_finished(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_gsmsim_symbian_c::authentication_finished(
 	const bool true_when_successful,
 	const eap_gsmsim_authentication_type_e authentication_type,
 	const eap_type_gsmsim_identity_type identity_type)
@@ -1576,7 +1576,7 @@ eap_status_e eap_am_type_gsmsim_symbian_c::complete_SIM_imsi_L(
 //--------------------------------------------------
 
 //
-eap_status_e eap_am_type_gsmsim_symbian_c::cancel_SIM_IMSI_or_pseudonym_or_reauthentication_id_query()
+EAP_FUNC_EXPORT eap_status_e eap_am_type_gsmsim_symbian_c::cancel_SIM_IMSI_or_pseudonym_or_reauthentication_id_query()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 #if defined (USE_EAP_GSMSIM_INTERFACE) && !defined(__WINS__)
@@ -1940,7 +1940,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_gsmsim_symbian_c::query_SIM_kc_sres(
 //-------------------------------------------------
 
 //
-eap_status_e eap_am_type_gsmsim_symbian_c::cancel_SIM_kc_sres_query()
+EAP_FUNC_EXPORT eap_status_e eap_am_type_gsmsim_symbian_c::cancel_SIM_kc_sres_query()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 		
@@ -2461,7 +2461,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_gsmsim_symbian_c::query_imsi_from_usern
 //--------------------------------------------------
 
 //
-eap_status_e eap_am_type_gsmsim_symbian_c::cancel_imsi_from_username_query()
+EAP_FUNC_EXPORT eap_status_e eap_am_type_gsmsim_symbian_c::cancel_imsi_from_username_query()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);

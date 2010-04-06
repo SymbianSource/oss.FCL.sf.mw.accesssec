@@ -242,7 +242,7 @@ EAP_FUNC_EXPORT void eap_core_c::ignore_notifications()
 //--------------------------------------------------
 
 //
-eap_status_e eap_core_c::initialize_asynchronous_init_remove_eap_session(
+EAP_FUNC_EXPORT eap_status_e eap_core_c::initialize_asynchronous_init_remove_eap_session(
 	const u32_t remove_session_timeout)
 {
 	EAP_TRACE_DEBUG(
@@ -314,7 +314,7 @@ eap_status_e eap_core_c::initialize_asynchronous_init_remove_eap_session(
 
 //--------------------------------------------------
 
-eap_status_e eap_core_c::cancel_asynchronous_init_remove_eap_session()
+EAP_FUNC_EXPORT eap_status_e eap_core_c::cancel_asynchronous_init_remove_eap_session()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -343,7 +343,7 @@ eap_status_e eap_core_c::cancel_asynchronous_init_remove_eap_session()
 //--------------------------------------------------
 
 //
-eap_status_e eap_core_c::asynchronous_init_remove_eap_session()
+EAP_FUNC_EXPORT eap_status_e eap_core_c::asynchronous_init_remove_eap_session()
 {
 	EAP_TRACE_DEBUG(
 		m_am_tools, 

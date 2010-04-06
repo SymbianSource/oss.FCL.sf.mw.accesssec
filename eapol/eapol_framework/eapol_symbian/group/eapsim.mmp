@@ -94,8 +94,6 @@ DOCUMENT		101f8e49.loc
 	LIBRARY		CustomAPI.lib etelmm.lib etel.lib	// For ETel connection	
 #endif // End of #if !defined(WINS) && defined(USE_EAP_GSMSIM_INTERFACE)
 
-MACRO EAP_NO_EXPORTS
-
 LIBRARY     eikdlg.lib
 LIBRARY     eikcore.lib
 LIBRARY     hlplch.lib

@@ -114,7 +114,7 @@ void dss_random_G(abs_eap_am_tools_c * const m_am_tools, u8_t *out, u32_t out_le
  *              d. XKEY = (1 + XKEY + xj) mod 2^b.
  *  @endcode
 */
-eap_status_e dss_pseudo_random(abs_eap_am_tools_c * const m_am_tools, u8_t *out, u32_t out_length, u8_t *xkey, u32_t xkey_length)
+EAP_FUNC_EXPORT eap_status_e dss_pseudo_random(abs_eap_am_tools_c * const m_am_tools, u8_t *out, u32_t out_length, u8_t *xkey, u32_t xkey_length)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	eap_status_e status = eap_status_ok;

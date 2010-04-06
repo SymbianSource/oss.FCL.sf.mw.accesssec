@@ -5072,7 +5072,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_gsmsim_c::handle_reauthentication_request_
 //--------------------------------------------------
 
 //
-eap_status_e eap_type_gsmsim_c::handle_eap_identity_query(
+EAP_FUNC_EXPORT eap_status_e eap_type_gsmsim_c::handle_eap_identity_query(
 	const eap_am_network_id_c * const send_network_id,
 	eap_variable_data_c * const p_identity,
 	const u8_t eap_identifier,
@@ -5458,7 +5458,7 @@ eap_status_e eap_type_gsmsim_c::handle_eap_identity_query(
 //--------------------------------------------------
 
 //
-eap_status_e eap_type_gsmsim_c::query_eap_identity(
+EAP_FUNC_EXPORT eap_status_e eap_type_gsmsim_c::query_eap_identity(
 	const bool must_be_synchronous,
 	eap_variable_data_c * const identity,
 	const eap_am_network_id_c * const receive_network_id,

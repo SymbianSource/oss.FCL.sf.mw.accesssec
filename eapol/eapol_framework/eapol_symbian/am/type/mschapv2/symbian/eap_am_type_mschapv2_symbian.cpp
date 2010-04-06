@@ -711,7 +711,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_mschapv2_symbian_c::type_configure_writ
 
 //--------------------------------------------------
 
-eap_status_e eap_am_type_mschapv2_symbian_c::update_username_password()
+EAP_FUNC_EXPORT eap_status_e eap_am_type_mschapv2_symbian_c::update_username_password()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	eap_status_e status(eap_status_ok);

@@ -225,7 +225,7 @@ void eap_am_type_aka_symbian_c::ConstructL()
 
 //--------------------------------------------------
 
-eap_am_type_aka_symbian_c* eap_am_type_aka_symbian_c::NewL(
+EAP_FUNC_EXPORT eap_am_type_aka_symbian_c* eap_am_type_aka_symbian_c::NewL(
 	abs_eap_am_tools_c * const aTools,
 	abs_eap_base_type_c * const aPartner,
 	const TIndexType aIndexType,
@@ -1386,7 +1386,7 @@ void eap_am_type_aka_symbian_c::query_AKA_IMSI_or_pseudonym_or_reauthentication_
 
 //--------------------------------------------------
 
-eap_status_e eap_am_type_aka_symbian_c::complete_AKA_imsi_L(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_aka_symbian_c::complete_AKA_imsi_L(
 	const eap_variable_data_c * const IMSI,
 	const eap_status_e completion_status )
 {
@@ -1700,7 +1700,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_aka_symbian_c::query_AKA_RES(
 
 //--------------------------------------------------
 
-eap_status_e eap_am_type_aka_symbian_c::complete_AKA_RES_L(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_aka_symbian_c::complete_AKA_RES_L(
 	eap_variable_data_c * const aRES, 
 	eap_variable_data_c * const aCK,
 	eap_variable_data_c * const aIK,
@@ -2605,7 +2605,7 @@ eap_status_e eap_am_type_aka_symbian_c::query_imsi_from_username_syncronous(
 
 //--------------------------------------------------
 
-eap_status_e eap_am_type_aka_symbian_c::generate_reauthentication_id(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_aka_symbian_c::generate_reauthentication_id(
 	const eap_am_network_id_c * const send_network_id,
 	const eap_variable_data_c * const imsi,
 	eap_variable_data_c * const reauthentication_identity,
@@ -2982,7 +2982,7 @@ eap_status_e eap_am_type_aka_symbian_c::check_is_valid_imsi(
 
 //--------------------------------------------------
 
-bool eap_am_type_aka_symbian_c::is_session_valid()
+EAP_FUNC_EXPORT bool eap_am_type_aka_symbian_c::is_session_valid()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	
