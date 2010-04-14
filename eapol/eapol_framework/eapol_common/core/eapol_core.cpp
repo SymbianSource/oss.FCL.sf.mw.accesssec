@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 67.1.2.1.1 %
+* %version: 67.1.2.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -749,6 +749,52 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::restart_authentication(
 			m_eapol_header_offset,
 			eapol_header_wr_c::get_header_length()+eapol.get_data_length(),
 			buffer_size);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+
+		if (m_authentication_type == eapol_key_authentication_type_EAP_authentication_no_encryption)
+		{
+			// This is a hack for this security mode. Some APs need broadcast EAPOL-Start-message.
+
+			const u8_t BROADCAST_ADDRESS[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+
+			eap_variable_data_c broadcast_destination(
+				m_am_tools,
+				BROADCAST_ADDRESS,
+				sizeof(BROADCAST_ADDRESS),
+				false,
+				false);
+		
+			if (broadcast_destination.get_is_valid_data() == false)
+			{
+				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+			}
+
+			// Here we swap the addresses.
+			eap_am_network_id_c broadcast_send_network_id(m_am_tools,
+				receive_network_id->get_destination_id(),
+				&broadcast_destination,
+				receive_network_id->get_type());
+			if (send_network_id.get_is_valid_data() == false)
+			{
+				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+			}
+
+			status = m_partner->packet_send(
+				&broadcast_send_network_id,
+				&start_packet,
+				m_eapol_header_offset,
+				eapol_header_wr_c::get_header_length()+eapol.get_data_length(),
+				buffer_size);
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+		}
 
 		if (from_timer == false)
 		{
