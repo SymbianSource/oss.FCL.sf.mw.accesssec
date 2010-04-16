@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: tr1cfwln#29 %
+* %version: tr1cfwln#30 %
 */
 
 //SYSTEM INCLUDES
@@ -42,7 +42,6 @@
 
 #include <CoreApplicationUIsSDKCRKeys.h>
 #include <e32std.h>
-#include <ConnectionUiUtilities.h>
 
 //USER INCLUDES
 #include "wifiprotlogger.h"

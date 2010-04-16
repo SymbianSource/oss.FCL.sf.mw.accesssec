@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 29 %
+* %version: 30 %
 */
 
 // INCLUDE FILES
@@ -35,7 +35,6 @@
 
 #include <featmgr.h>
 #include <hlplch.h>
-#include <csxhelp/cp.hlp.hrh>
 
 
 // LOCAL CONSTANTS AND MACROS
@@ -453,10 +452,10 @@ void CEapAkaUiDialog::ProcessCommandL( TInt aCommand )
 // CEapAkaUiDialog::GetHelpContext
 // -----------------------------------------------------------------------------
 //
-void CEapAkaUiDialog::GetHelpContext( TCoeHelpContext& aContext ) const
+void CEapAkaUiDialog::GetHelpContext( TCoeHelpContext& /* aContext */ ) const
     {
-    aContext.iMajor = KHelpUidPlugin;
-    aContext.iContext = KSET_HLP_WLAN_EAP_AKA;
+    // Avkon help dependencies removed, hence do nothing
+    return;
     }
 
 

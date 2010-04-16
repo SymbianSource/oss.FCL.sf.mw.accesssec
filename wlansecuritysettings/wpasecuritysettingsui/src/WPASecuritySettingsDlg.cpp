@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: tr1cfwln#31 %
+* %version: tr1cfwln#31.1.1 %
 */
 
 // INCLUDE FILES
@@ -27,7 +27,6 @@
 
 #include "WPASecuritySettingsDefs.h"
 
-#include <csxhelp/cp.hlp.hrh>
 #include <hlplch.h>
 
 #include <featmgr.h>
@@ -1025,17 +1024,10 @@ void CWPASecuritySettingsDlg::ChangeSettingsL( TBool aQuick )
 // CWPASecuritySettingsDlg::GetHelpContext
 // ---------------------------------------------------------
 //
-void CWPASecuritySettingsDlg::GetHelpContext( TCoeHelpContext& aContext ) const
+void CWPASecuritySettingsDlg::GetHelpContext( TCoeHelpContext& /* aContext */ ) const
     {
-    aContext.iMajor = KWPASecuritySettingsUiHelpMajor;
-    if ( iSecuritySettings->SecurityMode() == ESecurityModeWpa )
-        {
-        aContext.iContext = KSET_HLP_WLAN_WPA_MAIN;
-        }
-    else    // iSecuritySettings->SecurityMode() == ESecurityMode8021x
-        {
-        aContext.iContext = KSET_HLP_WLAN_8021X_MAIN;
-        }
+    // Avkon help dependencies removed, hence do nothing
+    return;
     }
 
 

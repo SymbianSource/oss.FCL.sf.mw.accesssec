@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 28 %
+* %version: 29 %
 */
 
 // INCLUDE FILES
@@ -38,7 +38,6 @@
 
 #include <featmgr.h>
 #include <hlplch.h>
-#include <csxhelp/cp.hlp.hrh>
 
 
 // CONSTANTS
@@ -447,11 +446,10 @@ void CEapGtcUiDialog::ProcessCommandL( TInt aCommand )
 // CEapGtcUiDialog::GetHelpContext
 // -----------------------------------------------------------------------------
 //
-void CEapGtcUiDialog::GetHelpContext( TCoeHelpContext& aContext ) const
+void CEapGtcUiDialog::GetHelpContext( TCoeHelpContext& /* aContext */ ) const
     {
-    aContext.iMajor = KHelpUidPlugin;
-    aContext.iContext = KSET_HLP_WLAN_EAP_GTC;
+    // Avkon help dependencies removed, hence do nothing
+    return;
     }
-
 
 //  End of File

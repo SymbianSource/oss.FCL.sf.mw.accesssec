@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 29 %
+* %version: 30 %
 */
 
 // INCLUDE FILES
@@ -37,7 +37,6 @@
 
 #include <featmgr.h>
 #include <hlplch.h>
-#include <csxhelp/cp.hlp.hrh>
 
 
 // CONSTANTS
@@ -470,10 +469,10 @@ void CEapSimUiDialog::ProcessCommandL( TInt aCommand )
 // CEapSimUiDialog::GetHelpContext
 // -----------------------------------------------------------------------------
 //
-void CEapSimUiDialog::GetHelpContext( TCoeHelpContext& aContext ) const
+void CEapSimUiDialog::GetHelpContext( TCoeHelpContext& /* aContext */ ) const
     {
-    aContext.iMajor = KHelpUidPlugin;
-    aContext.iContext = KSET_HLP_WLAN_EAP_SIM;
+    // Avkon help dependencies removed, hence do nothing
+    return;
     }
     
 

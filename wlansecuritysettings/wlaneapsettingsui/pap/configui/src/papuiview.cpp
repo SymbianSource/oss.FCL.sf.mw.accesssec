@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 13 %
+* %version: 14 %
 */
 
 // INCLUDE FILES
@@ -39,7 +39,6 @@
 #include <EapTlsPeapUiTlsPeapData.h>
 #include <featmgr.h>
 #include <hlplch.h>
-#include <csxhelp/cp.hlp.hrh>
 
 
 // CONSTANTS
@@ -640,10 +639,10 @@ void CPapUiDialog::ShowPasswordSettingPageL()
 // CPapUiDialog::GetHelpContext
 // -----------------------------------------------------------------------------
 //
-void CPapUiDialog::GetHelpContext( TCoeHelpContext& aContext ) const
+void CPapUiDialog::GetHelpContext( TCoeHelpContext& /* aContext */ ) const
     {
-    aContext.iMajor = KHelpUidPlugin;    
-    aContext.iContext = KSET_HLP_WLAN_EAP_PAP;
+    // Avkon help dependencies removed, hence do nothing
+    return;
     }
 
 //  End of File

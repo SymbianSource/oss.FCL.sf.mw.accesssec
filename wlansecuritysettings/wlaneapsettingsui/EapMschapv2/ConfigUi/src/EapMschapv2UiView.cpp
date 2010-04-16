@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 29 %
+* %version: 30 %
 */
 
 // INCLUDE FILES
@@ -37,7 +37,6 @@
 
 #include <featmgr.h>
 #include <hlplch.h>
-#include <csxhelp/cp.hlp.hrh>
 
 
 // CONSTANTS
@@ -501,17 +500,10 @@ void CEapMsChapV2UiDialog::ProcessCommandL( TInt aCommand )
 // CEapMsChapV2UiDialog::GetHelpContext
 // -----------------------------------------------------------------------------
 //
-void CEapMsChapV2UiDialog::GetHelpContext( TCoeHelpContext& aContext ) const
+void CEapMsChapV2UiDialog::GetHelpContext( TCoeHelpContext& /* aContext */ ) const
     {
-    aContext.iMajor = KHelpUidPlugin;
-    if( iConnection->GetBearerEAPType() == KEapMsChapv2Id )
-        {
-        aContext.iContext = KSET_HLP_WLAN_EAP_MSCHAPV2;
-        }
-    else
-        {
-        aContext.iContext = KSET_HLP_WLAN_EAP_PLAIN_MSCHAP;
-        }
+    // Avkon help dependencies removed, hence do nothing
+    return;
     }
     
 

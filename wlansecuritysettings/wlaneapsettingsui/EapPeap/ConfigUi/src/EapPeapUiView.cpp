@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 37.1.8 %
+* %version: 37.1.9 %
 */
 
 // INCLUDE FILES
@@ -47,7 +47,6 @@
 #include <AknsUtils.h>
 #include <featmgr.h>
 #include <hlplch.h>
-#include <csxhelp/cp.hlp.hrh>
 
 
 // CONSTANTS
@@ -1785,30 +1784,10 @@ TUint CEapPeapUiDialog::GetEnabledEapTypeCount()
 // CEapPeapUiDialog::GetHelpContext
 // -----------------------------------------------------------------------------
 //
-void CEapPeapUiDialog::GetHelpContext(TCoeHelpContext& aContext) const
+void CEapPeapUiDialog::GetHelpContext(TCoeHelpContext& /* aContext */) const
     {
-    aContext.iMajor = KHelpUidPlugin;
-    TPageIds index = static_cast< TPageIds >( ActivePageIndex() );
-    switch ( index )
-        {
-        case EEapTypePage:
-            {
-            aContext.iContext = KSET_HLP_WLAN_EAP_PEAP_TYPES;
-            break;
-            }
-
-        case ECipherSuitePage:
-            {
-            aContext.iContext = KSET_HLP_WLAN_EAP_PEAP_SUITES;
-            break;
-            }
-
-        default:
-            {
-            aContext.iContext = KSET_HLP_WLAN_EAP_PEAP_SETT;
-            break;
-            }
-        }
+    // Avkon help dependencies removed, hence do nothing
+    return;
     }
 
 

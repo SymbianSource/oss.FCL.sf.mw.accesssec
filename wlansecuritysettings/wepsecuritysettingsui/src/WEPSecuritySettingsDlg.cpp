@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: tr1cfwln#8.1.22 %
+* %version: tr1cfwln#8.1.22.1.1 %
 */
 
 // INCLUDE FILES
@@ -40,7 +40,6 @@
 #include "WEPSecuritySettingsUI.hrh"
 
 #include <hlplch.h>
-#include <csxhelp/cp.hlp.hrh>
 
 #include <featmgr.h>
 
@@ -1294,17 +1293,10 @@ void CWEPSecuritySettingsDlg::InvertSettings( CWEPSecuritySettings::TWepMember
 // CWEPSecuritySettingsDlg::GetHelpContext
 // ---------------------------------------------------------
 //
-void CWEPSecuritySettingsDlg::GetHelpContext( TCoeHelpContext& aContext ) const
+void CWEPSecuritySettingsDlg::GetHelpContext( TCoeHelpContext& /* aContext */ ) const
     {
-    aContext.iMajor = KWEPSecuritySettingsUiHelpMajor;
-    if ( iLevel )
-        {
-        aContext.iContext = KSET_HLP_WLAN_WEP_KEY_SETT;
-        }
-    else
-        {
-        aContext.iContext = KSET_HLP_WLAN_WEP_MAIN;
-        }
+    // Avkon help dependencies removed, hence do nothing
+    return;
     }
 
 

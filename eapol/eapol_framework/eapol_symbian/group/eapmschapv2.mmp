@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 15.2.3 %
+* %version: 18 %
 */
 
 #include <platform_paths.hrh>
@@ -66,7 +66,7 @@ SOURCE		  EapMsChapV2UiConnection.cpp
 SOURCE        EapMsChapV2UiDataConnection.cpp
 SOURCE        EapMsChapV2UiMsChapV2Data.cpp
 LIBRARY       avkon.lib
-STATICLIBRARY	EAPMSCHAPV2UI.LIB
+STATICLIBRARY	eapmschapv2ui.lib
 
 USERINCLUDE   ../am/type/mschapv2/symbian/plugin/inc
 USERINCLUDE   ../../eapol_common/type/mschapv2/include

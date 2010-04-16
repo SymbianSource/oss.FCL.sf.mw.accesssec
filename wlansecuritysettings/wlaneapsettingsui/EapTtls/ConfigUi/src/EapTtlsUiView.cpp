@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 27.1.1.1.9 %
+* %version: 27.1.1.1.10 %
 */
 
 // INCLUDE FILES
@@ -45,7 +45,6 @@
 
 #include <featmgr.h>
 #include <hlplch.h>
-#include <csxhelp/cp.hlp.hrh>
 
 
 // CONSTANTS
@@ -1827,30 +1826,10 @@ TBool CEapTtlsUiDialog::IsPapEnabled()
 // CEapTtlsUiDialog::GetHelpContext
 // -----------------------------------------------------------------------------
 //
-void CEapTtlsUiDialog::GetHelpContext( TCoeHelpContext& aContext ) const
+void CEapTtlsUiDialog::GetHelpContext( TCoeHelpContext& /* aContext */ ) const
     {
-    aContext.iMajor = KHelpUidPlugin;
-    TPageIds index = static_cast<TPageIds>( ActivePageIndex() );
-    switch ( index )
-        {
-        case EEapTypePage:
-            {
-            aContext.iContext = KSET_HLP_WLAN_EAP_TTLS_TYPES;
-            break;
-            }
-
-        case ECipherSuitePage:
-            {
-            aContext.iContext = KSET_HLP_WLAN_EAP_TTLS_SUITES;
-            break;
-            }
-
-        default:
-            {
-            aContext.iContext = KSET_HLP_WLAN_EAP_TTLS_SETT;
-            break;
-            }
-        }
+    // Avkon help dependencies removed, hence do nothing
+    return;
     }
 
 

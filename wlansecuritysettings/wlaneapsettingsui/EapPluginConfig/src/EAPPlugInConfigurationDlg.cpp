@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 20.1.15 %
+* %version: 20.1.16 %
 */
 
 // INCLUDE FILES
@@ -42,7 +42,6 @@
 #include <featmgr.h>
 #include <hlplch.h>
 #include <eikappui.h>
-#include <csxhelp/cp.hlp.hrh>
 
 
 // CONSTANTS
@@ -606,11 +605,10 @@ void CEAPPluginConfigurationDlg::HandleResourceChange( TInt aType )
 // CEAPPluginConfigurationDlg::GetHelpContext
 // ---------------------------------------------------------
 //
-void CEAPPluginConfigurationDlg::GetHelpContext( 
-                                            TCoeHelpContext& aContext ) const
+void CEAPPluginConfigurationDlg::GetHelpContext( TCoeHelpContext& /* aContext */ ) const
     {
-    aContext.iMajor = KHelpUidPlugin;
-    aContext.iContext = KSET_HLP_WLAN_EAP_PLUGINS_IAP;
+    // Avkon help dependencies removed, hence do nothing
+    return;
     }
 
 

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 41 %
+* %version: 42 %
 */
 
 // INCLUDE FILES
@@ -44,7 +44,6 @@
 
 #include <featmgr.h>
 #include <hlplch.h>
-#include <csxhelp/cp.hlp.hrh>
 
 
 // CONSTANTS
@@ -1188,24 +1187,10 @@ void CEapTlsUiDialog::SetIconsL()
 // CEapTlsUiDialog::GetHelpContext
 // -----------------------------------------------------------------------------
 //
-void CEapTlsUiDialog::GetHelpContext( TCoeHelpContext& aContext ) const
+void CEapTlsUiDialog::GetHelpContext( TCoeHelpContext& /* aContext */ ) const
     {
-    aContext.iMajor = KHelpUidPlugin;
-    TPageIds index = static_cast< TPageIds >( ActivePageIndex() );
-    switch ( index )
-        {
-        case ECipherSuitePage:
-            {
-            aContext.iContext = KSET_HLP_WLAN_EAP_TLS_SUITES;
-            break;
-            }
-
-        default:
-            {
-            aContext.iContext = KSET_HLP_WLAN_EAP_TLS_SETT;
-            break;
-            }
-        }
+    // Avkon help dependencies removed, hence do nothing
+    return;
     }
 
 
