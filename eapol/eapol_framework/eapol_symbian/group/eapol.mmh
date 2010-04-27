@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 52 %
+* %version: 53 %
 */
 
 //-------------------------------------------------------------------
@@ -170,6 +170,10 @@ MACRO USE_EAP_CORE_WAIT_REQUEST_TYPE_TIMER=1
 	// The WPX stub is needed even without WPX functionality.
 	#define USE_EAPOL_WLAN_WPX_STUB 
 #endif // #if defined(FF_WLAN_EXTENSIONS)
+
+// Removes include statements for stdint.h
+MACRO EAP_NO_STDINT_H_HEADER=1
+#define EAP_NO_STDINT_H_HEADER
 
 
 //-------------------------------------------------------------------
