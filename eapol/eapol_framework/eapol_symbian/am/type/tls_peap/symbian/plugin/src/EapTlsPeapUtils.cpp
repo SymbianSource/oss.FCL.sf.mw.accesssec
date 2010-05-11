@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 76.1.1.1.5 %
+* %version: 76.1.1.1.6 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -1986,6 +1986,8 @@ void EapTlsPeapUtils::ReadCertRowsToArrayL(
 #endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::ReadCertRowsToArrayL -Start")) );
+	
+	CleanupClosePushL( aArray );
 
 	HBufC* buf = HBufC::NewLC(512);
 	TPtr sqlStatement = buf->Des();
@@ -2035,6 +2037,7 @@ void EapTlsPeapUtils::ReadCertRowsToArrayL(
 	// Close database
 	CleanupStack::PopAndDestroy(colSet); 
 	CleanupStack::PopAndDestroy(2); // view, buf
+	CleanupStack::Pop( &aArray );
 }
 
 void EapTlsPeapUtils::ReadUintRowsToArrayL(
@@ -2058,6 +2061,8 @@ void EapTlsPeapUtils::ReadUintRowsToArrayL(
 #endif //#ifdef USE_EAP_EXPANDED_TYPES
 	
 	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::ReadUintRowsToArrayL -Start")) );
+
+	CleanupClosePushL( aArray );
 
 	HBufC* buf = HBufC::NewLC(512);
 	TPtr sqlStatement = buf->Des();
@@ -2095,6 +2100,7 @@ void EapTlsPeapUtils::ReadUintRowsToArrayL(
 
 	// Close database
 	CleanupStack::PopAndDestroy(2); // view, buf
+	CleanupStack::Pop( &aArray );
 }
 
 // Don't use this finction as Label is not saved for certificates saved by SetConfigurationL().

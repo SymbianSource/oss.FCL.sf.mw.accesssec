@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12.2.2 %
+* %version: 12.2.3 %
 */
 
 #include <platform_paths.hrh>
@@ -148,8 +148,6 @@ LIBRARY		CommonEngine.lib
 LIBRARY     hlplch.lib
 LIBRARY		featmgr.lib
 */
-
-MACRO EAP_NO_EXPORTS=1
 
 //-------------------------------------------------------------------
 
