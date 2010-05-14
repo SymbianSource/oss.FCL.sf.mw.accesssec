@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16.2.3 %
+* %version: 16.2.4 %
 */
 
 #include <platform_paths.hrh>
@@ -60,11 +60,6 @@ SOURCEPATH    ../am/common/symbian
 SOURCE		  eap_am_trace_symbian.cpp
 
 SOURCEPATH    ../am/type/securid/symbian/plugin/src
-SOURCE		  EapGtcUiConnection.cpp
-SOURCE        EapGtcUiDataConnection.cpp
-SOURCE        EapGtcUiGtcData.cpp
-LIBRARY       avkon.lib
-STATICLIBRARY eapgtcui.lib
 
 USERINCLUDE   ../am/type/securid/symbian/plugin/inc
 USERINCLUDE   ../../eapol_common/type/securid/include

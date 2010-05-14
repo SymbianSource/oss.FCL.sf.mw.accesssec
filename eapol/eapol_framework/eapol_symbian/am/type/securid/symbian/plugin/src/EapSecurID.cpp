@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 15.1.2 %
+* %version: 15.1.3 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -37,8 +37,6 @@
 #include <EapTypeInfo.h>
 #include "EapGtcDbUtils.h"
 
-#include <EapGtcUiConnection.h>
-#include "EapGtcUi.h"
 
 #include "eap_am_tools_symbian.h"
 
@@ -155,21 +153,6 @@ TUint CEapSecurID::GetInterfaceVersion()
 TInt CEapSecurID::InvokeUiL()
 {
 	TInt buttonId(0);
-
-#ifdef USE_EAP_EXPANDED_TYPES
-
-    CEapGtcUiConnection uiConn(iIndexType, iIndex, iTunnelingType.get_vendor_type());
-	
-#else
-
-    CEapGtcUiConnection uiConn(iIndexType, iIndex, iTunnelingType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-	
-	CEapGtcUi* ui = CEapGtcUi::NewL(&uiConn);
-	CleanupStack::PushL(ui);
-	buttonId = ui->InvokeUiL();
-	CleanupStack::PopAndDestroy(ui);
 	return buttonId;
 }
 

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 17.1.3 %
+* %version: 17.1.4 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -37,8 +37,6 @@
 #include <EapTypeInfo.h>
 #include "EapMsChapV2DbUtils.h"
 
-#include <EapMsChapV2UiConnection.h>
-#include "EapMschapv2Ui.h"
 
 // LOCAL CONSTANTS
 
@@ -161,22 +159,7 @@ TUint CEapMsChapV2::GetInterfaceVersion()
 TInt CEapMsChapV2::InvokeUiL()
 {
 	TInt buttonId(0);
-   	
-#ifdef USE_EAP_EXPANDED_TYPES
 
-	CEapMsChapV2UiConnection uiConn(iIndexType, iIndex, 
-									iTunnelingType.get_vendor_type(), iEapType.get_vendor_type());
-	
-#else
-
-   	CEapMsChapV2UiConnection uiConn(iIndexType, iIndex, iTunnelingType, (TInt)iEapType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-	
-	CEapMsChapV2Ui* ui = CEapMsChapV2Ui::NewL(&uiConn);
-	CleanupStack::PushL(ui);
-	buttonId = ui->InvokeUiL();
-	CleanupStack::PopAndDestroy(ui);
 	return buttonId;
 }
 

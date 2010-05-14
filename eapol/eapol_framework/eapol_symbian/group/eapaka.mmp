@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 17.2.3 %
+* %version: 17.2.4 %
 */
 
 #include <platform_paths.hrh>
@@ -59,11 +59,6 @@ SOURCEPATH    ../am/common/symbian
 SOURCE		  eap_am_trace_symbian.cpp
 
 SOURCEPATH    	../am/type/aka/symbian/plugin/src
-SOURCE		  	EapAkaUiConnection.cpp
-SOURCE        	EapAkaUiDataConnection.cpp
-SOURCE        	EapAkaUiAkaData.cpp
-LIBRARY       	avkon.lib
-STATICLIBRARY 	eapakaui.lib
 
 USERINCLUDE		../am/include
 USERINCLUDE		../am/type/symbian/plugin/include

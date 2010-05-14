@@ -1,0 +1,9 @@
+EXPORTS
+	?pluginHandle@EapQtPluginInfo@@QBE?AVEapQtPluginHandle@@XZ @ 1 NONAME ; class EapQtPluginHandle EapQtPluginInfo::pluginHandle(void) const
+	?localizationId@EapQtPluginInfo@@QBE?AVQString@@XZ @ 2 NONAME ; class QString EapQtPluginInfo::localizationId(void) const
+	??0EapQtPluginHandle@@QAE@XZ @ 3 NONAME ; EapQtPluginHandle::EapQtPluginHandle(void)
+	??0EapQtPluginInfo@@QAE@VEapQtPluginHandle@@VQString@@H@Z @ 4 NONAME ; EapQtPluginInfo::EapQtPluginInfo(class EapQtPluginHandle, class QString, int)
+	?orderNumber@EapQtPluginInfo@@QBEHXZ @ 5 NONAME ; int EapQtPluginInfo::orderNumber(void) const
+	??1EapQtPluginHandle@@QAE@XZ @ 6 NONAME ; EapQtPluginHandle::~EapQtPluginHandle(void)
+	??1EapQtPluginInfo@@QAE@XZ @ 7 NONAME ; EapQtPluginInfo::~EapQtPluginInfo(void)
+

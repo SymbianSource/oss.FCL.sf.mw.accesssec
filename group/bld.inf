@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 8 %
 */
 
 PRJ_PLATFORMS
@@ -25,7 +25,6 @@ DEFAULT
 PRJ_EXPORTS
 
 PRJ_MMPFILES
-#include "../wlansecuritysettings/group/bld.inf"
 #include "../accesssec_plat/group/bld.inf"
 #include "../eapol/group/bld.inf"
 

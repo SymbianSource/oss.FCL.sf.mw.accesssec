@@ -1,14 +1,15 @@
 <?xml version="1.0"?>
-<!DOCTYPE SystemDefinition SYSTEM "sysdef_1_4_0.dtd" [
+<!DOCTYPE SystemDefinition SYSTEM "sysdef_1_5_1.dtd" [
   <!ENTITY layer_real_source_path "sf/mw/accesssec" >
 ]>
 
-<SystemDefinition name="accesssec" schema="1.4.0">
+<SystemDefinition name="accesssec" schema="1.5.1">
   <systemModel>
     <layer name="mw_layer">
       <module name="accesssec">
         <unit unitID="netdo.accesssec" mrp="" bldFile="&layer_real_source_path;/group" name="accesssec" />
-      </module>
+        <unit unitID="netdo.accesssecqt" mrp="" bldFile="&layer_real_source_path;" name="accesssecqt" proFile="accesssec.pro" qmakeArgs="-r"/>
+     </module>
     </layer>
   </systemModel>
 </SystemDefinition>

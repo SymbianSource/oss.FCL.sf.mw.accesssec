@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16.1.2 %
+* %version: 16.1.3 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -38,8 +38,7 @@
 #include <EapTypeInfo.h>
 #include "EapSimDbUtils.h"
 
-#include <EapSimUiConnection.h>
-#include "EapSimUi.h"
+
 
 #include "eap_am_tools_symbian.h"
 
@@ -140,21 +139,7 @@ eap_base_type_c* CEapSim::GetStackInterfaceL(abs_eap_am_tools_c* const aTools,
 TInt CEapSim::InvokeUiL()
 {
 	TInt buttonId(0);
-	
-#ifdef USE_EAP_EXPANDED_TYPES
 
-    CEapSimUiConnection uiConn(iIndexType, iIndex, iTunnelingType.get_vendor_type());
-	
-#else
-
-    CEapSimUiConnection uiConn(iIndexType, iIndex, iTunnelingType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-	
-	CEapSimUi* ui = CEapSimUi::NewL(&uiConn);
-	CleanupStack::PushL(ui);
-	buttonId = ui->InvokeUiL();
-	CleanupStack::PopAndDestroy(ui);
 	return buttonId;
 }
 // ----------------------------------------------------------

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18.2.3 %
+* %version: 18.2.4 %
 */
 
 #include <platform_paths.hrh>
@@ -62,12 +62,6 @@ SOURCEPATH    ../am/common/symbian
 SOURCE		  eap_am_trace_symbian.cpp
 
 SOURCEPATH    ../am/type/gsmsim/symbian/plugin/src
-SOURCE		  EapSimUiConnection.cpp
-SOURCE        EapSimUiDataConnection.cpp
-SOURCE        EapSimUiSimData.cpp
-
-LIBRARY       avkon.lib
-STATICLIBRARY eapsimui.lib
 
 USERINCLUDE   ../am/type/gsmsim/symbian/plugin/inc
 USERINCLUDE   ../../eapol_common/type/gsmsim/include

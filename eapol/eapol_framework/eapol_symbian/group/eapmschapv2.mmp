@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18 %
+* %version: 19 %
 */
 
 #include <platform_paths.hrh>
@@ -62,11 +62,6 @@ SOURCEPATH    ../am/common/symbian
 SOURCE		  eap_am_trace_symbian.cpp
 
 SOURCEPATH    ../am/type/mschapv2/symbian/plugin/src
-SOURCE		  EapMsChapV2UiConnection.cpp
-SOURCE        EapMsChapV2UiDataConnection.cpp
-SOURCE        EapMsChapV2UiMsChapV2Data.cpp
-LIBRARY       avkon.lib
-STATICLIBRARY	eapmschapv2ui.lib
 
 USERINCLUDE   ../am/type/mschapv2/symbian/plugin/inc
 USERINCLUDE   ../../eapol_common/type/mschapv2/include

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 44.2.3 %
+* %version: 44.2.4 %
 */
 
 #include <platform_paths.hrh>
@@ -116,7 +116,9 @@ LANG		  SC
 SOURCEPATH		../am/type/tls_peap/symbian/plugin/inc
 DOCUMENT		101f8e4c.loc
 
-// UI 
+// old ui db api
+USERINCLUDE   ../am/include/eaptlspeap_db_api
+// UI
 SOURCEPATH    ../am/type/tls_peap/symbian/plugin/src
 SOURCE		  EapTlsPeapUiConnection.cpp
 SOURCE        EapTlsPeapUiDataConnection.cpp
@@ -126,22 +128,10 @@ SOURCE        EapTlsPeapUiEapTypes.cpp
 SOURCE        EapTlsPeapUiCertificates.cpp
 SOURCE        EapTlsPeapUiCipherSuites.cpp
 
-LIBRARY       avkon.lib
-LIBRARY       AknSkins.lib
-LIBRARY       AknIcon.lib
-LIBRARY       aknnotify.lib
-LIBRARY       eiksrv.lib
-STATICLIBRARY eaptlsui.lib
-STATICLIBRARY eappeapui.lib
-STATICLIBRARY eapttlsui.lib
 
-STATICLIBRARY papui.lib
 
 LIBRARY		  x509certnameparser.lib		// For parsing of certificate label. 
 
-//SYSTEMINCLUDE /epoc32/include/ecom
-//SYSTEMINCLUDE /epoc32/include/libc
-//SYSTEMINCLUDE /epoc32/include/cshelp
 
 MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
 

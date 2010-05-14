@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 35.1.3 %
+* %version: 35.1.4 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -35,15 +35,8 @@
 #include "EapTlsPeapGlobal.h"
 #include <EapTypeInfo.h>
 
-#include <EapTlsPeapUiConnection.h>
-#include <EapTlsUi.h>
-#include <EapPeapUi.h>
-#if defined(USE_TTLS_EAP_TYPE)
-	#include <EapTtlsUi.h>
-#endif
 
 #if defined(USE_FAST_EAP_TYPE)
-#include <eapfastui.h>
 #include "tls_application_eap_fast.h"
 #endif 
 
@@ -59,7 +52,6 @@
 #include "pac_store_db_symbian.h"
 #endif
 
-#include <papui.h>
 
 // LOCAL CONSTANTS
 
@@ -388,96 +380,6 @@ eap_base_type_c* CEapTlsPeap::GetStackInterfaceL(abs_eap_am_tools_c* const aTool
 TInt CEapTlsPeap::InvokeUiL()
 {
 	TInt buttonId(0);
-
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("CEapTlsPeap::InvokeUiL -Start- iIndexType=%d, iIndex=%d, Tunneling vendor type=%d, Eap vendor type=%d \n"),
-		iIndexType,iIndex, iTunnelingType.get_vendor_type(), iEapType.get_vendor_type()));
-
-	CEapTlsPeapUiConnection uiConn(iIndexType, iIndex, 
-									iTunnelingType.get_vendor_type(), iEapType.get_vendor_type());
-	
-#else
-
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("CEapTlsPeap::InvokeUiL -Start- iIndexType=%d, iIndex=%d, iTunnelingType=%d, iEapType=%d \n"),
-		iIndexType, iIndex, iTunnelingType, iEapType));
-
-    CEapTlsPeapUiConnection uiConn(iIndexType, iIndex, iTunnelingType, iEapType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("CEapTlsPeap::InvokeUiL Created UI connection \n")));
-
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	switch (iEapType.get_vendor_type())
-	
-#else
-
-	switch (iEapType)
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-	{
-	case eap_type_tls:
-		{
-			CEapTlsUi* tls_ui = CEapTlsUi::NewL(&uiConn);	
-			CleanupStack::PushL(tls_ui);
-			buttonId = tls_ui->InvokeUiL();
-			CleanupStack::PopAndDestroy(tls_ui);	
-		}
-		break;
-
-	case eap_type_peap:
-		{
-			CEapPeapUi* peap_ui = CEapPeapUi::NewL(&uiConn, iIndexType, iIndex);
-			CleanupStack::PushL(peap_ui);
-			buttonId = peap_ui->InvokeUiL();
-			CleanupStack::PopAndDestroy(peap_ui);
-		}
-		break;
-
-#if defined (USE_TTLS_EAP_TYPE)
-	case eap_type_ttls:
-		{
-			CEapTtlsUi* ttls_ui = CEapTtlsUi::NewL(&uiConn, iIndexType, iIndex);
-			CleanupStack::PushL(ttls_ui);
-			buttonId = ttls_ui->InvokeUiL();
-			CleanupStack::PopAndDestroy(ttls_ui);
-		}
-		break;
-#endif
-
-#if defined (USE_FAST_EAP_TYPE)
-	case eap_type_fast:
-		{
-			CEapFastUi* fast_ui = CEapFastUi::NewL(&uiConn, iIndexType, iIndex);
-			CleanupStack::PushL(fast_ui);
-			buttonId = fast_ui->InvokeUiL();
-			CleanupStack::PopAndDestroy(fast_ui);
-		}
-		break;
-#endif
-		
-	case eap_type_ttls_plain_pap:
-	    {
-	        CPapUi* papUi = CPapUi::NewL( &uiConn );
-	        CleanupStack::PushL( papUi );
-	        buttonId = papUi->InvokeUiL();
-	        CleanupStack::PopAndDestroy( papUi );
-	    }
-	    break;
-
-	default:
-		// Should never happen
-		User::Leave(KErrArgument);
-	}
-	
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("CEapTlsPeap::InvokeUiL -End-\n")));
-	
 	return buttonId;
 }
 // ----------------------------------------------------------
