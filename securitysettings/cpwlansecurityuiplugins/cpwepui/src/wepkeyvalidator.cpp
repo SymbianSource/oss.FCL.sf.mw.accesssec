@@ -76,11 +76,7 @@ WepKeyValidator::KeyStatus WepKeyValidator::validateWepKey(const QString &key)
     else if (length == WepAscii64BitMaxLength || length == WepAscii128BitMaxLength) {
         ret = isAscii(key);
     }
-    
-    else if (length == WepKeyEmptyString) {
-       ret =  KeyStatusOk ;  
-    }
-    
+
     else {
         ret = KeyStatusWepInvalidLength;
     }

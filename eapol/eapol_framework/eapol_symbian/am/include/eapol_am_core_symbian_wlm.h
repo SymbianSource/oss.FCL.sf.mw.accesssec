@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8 %
+* %version: %
 */
 
 #if !defined(_EAPOL_AM_CORE_SYMBIAN_WLM_H_)

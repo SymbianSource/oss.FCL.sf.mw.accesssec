@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 44.2.4 %
+* %version: 44.1.16 %
 */
 
 #include <platform_paths.hrh>
@@ -49,6 +49,12 @@ SOURCE	      EapTypeInfo.cpp
 SOURCEPATH    ../am/type/tls_peap/symbian
 SOURCE        eap_am_type_tls_peap_symbian.cpp 
 
+SOURCEPATH ../../eapol_common/core
+SOURCE			dummy_eap_core.cpp
+
+SOURCEPATH	../am/common/symbian
+SOURCE EapConfigToolsSymbian.cpp
+
 SOURCEPATH    ../../eapol_common/type/tls_peap/eap/src
 SOURCE 	      eap_type_tls_peap_state_notification.cpp 
 SOURCE		  eap_type_tls_peap.cpp
@@ -80,11 +86,7 @@ SOURCE		  eap_diameter_avp_header.cpp
 SOURCE		  eap_diameter_payloads.cpp
 SOURCE		  eap_diameter_avp_code.cpp
 
-SOURCEPATH    ../am/common/symbian
-SOURCE		  eap_am_trace_symbian.cpp
 
-SOURCEPATH    ../am/type/ttls_pap/symbian/src
-SOURCE        eap_ttls_pap_active.cpp
 
 USERINCLUDE   ../am/type/tls_peap/symbian/plugin/inc
 USERINCLUDE   ../../eapol_common/type/tls_peap/eap/include
@@ -98,10 +100,13 @@ USERINCLUDE   ../../eapol_common/am/include
 USERINCLUDE   ../../eapol_common/type
 USERINCLUDE   ../../eapol_common/type/diameter/include
 USERINCLUDE   ../am/type/ttls_pap/symbian/inc
-
+USERINCLUDE   ../eap_if/include
+USERINCLUDE   ../eap_server/include
+USERINCLUDE   ../am/type/symbian/plugin/include
 #if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
 USERINCLUDE   ../../eapol_common/type/mschapv2/include
 #endif //#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
+USERINCLUDE   ../am/eap_notifier/inc
 
 #if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
 SOURCEPATH    ../../eapol_common/type/mschapv2/core
@@ -116,8 +121,9 @@ LANG		  SC
 SOURCEPATH		../am/type/tls_peap/symbian/plugin/inc
 DOCUMENT		101f8e4c.loc
 
-// old ui db api
-USERINCLUDE   ../am/include/eaptlspeap_db_api
+// old ui
+USERINCLUDE   ../am/include/eaptlspeap_db_api_inc
+
 // UI
 SOURCEPATH    ../am/type/tls_peap/symbian/plugin/src
 SOURCE		  EapTlsPeapUiConnection.cpp
@@ -128,14 +134,11 @@ SOURCE        EapTlsPeapUiEapTypes.cpp
 SOURCE        EapTlsPeapUiCertificates.cpp
 SOURCE        EapTlsPeapUiCipherSuites.cpp
 
-
-
 LIBRARY		  x509certnameparser.lib		// For parsing of certificate label. 
-
 
 MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
 
-LIBRARY		euser.lib ecom.lib eapol.lib edbms.lib efsrv.lib cone.lib eikcoctl.lib
+LIBRARY		euser.lib ecom.lib eaptools.lib eaptrace.lib eapsymbiantools.lib edbms.lib efsrv.lib cone.lib eikcoctl.lib
 LIBRARY	    x509.lib crypto.lib certstore.lib ctframework.lib pkixcert.lib
 LIBRARY		asn1.lib x500.lib bafl.lib eikctl.lib egul.lib fbscli.lib
 LIBRARY		gdi.lib
@@ -150,6 +153,14 @@ LIBRARY		featmgr.lib
 LIBRARY     charconv.lib
 
 //-------------------------------------------------------------------
+LIBRARY		HbCore.lib
+LIBRARY		HbWidgets.lib
+LIBRARY   eap_notifier.lib
+
+// exports unfrozen in winscw
+#if defined(WINSCW)
+EXPORTUNFROZEN
+#endif
 
 //-------------------------------------------------------------------
 // End of File

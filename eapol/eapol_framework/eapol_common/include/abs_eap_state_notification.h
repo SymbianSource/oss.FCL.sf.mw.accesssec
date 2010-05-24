@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 4 %
+* %version: %
 */
 
 #if !defined(_ABS_EAP_STATE_NOTIFICATION_H_)

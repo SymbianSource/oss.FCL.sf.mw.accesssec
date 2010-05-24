@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8 %
+* %version: %
 */
 
 #if !defined(_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H_)

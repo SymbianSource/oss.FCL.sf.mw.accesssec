@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 22.1.2 %
+* %version: %
 */
 
 #ifndef _MSCHAPV2_CORE_H_
@@ -138,7 +138,7 @@ private:
 #endif //#if defined(USE_FAST_EAP_TYPE)
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
+
 	void send_error_notification(const eap_status_e error);
 
 	eap_status_e finish_successful_authentication();

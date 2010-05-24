@@ -17,40 +17,58 @@
  */
 
 /*
- * %version: 1 %
+ * %version: 5 %
  */
 
 #include <QList>
 #include <QVariant>
 
-#include "eapqtplugininfo.h"
+#include <eapqtpluginhandle.h>
+#include <eapqtplugininfo.h>
+
+#include "eapqtplugininfo_p.h"
 
 //----------------------------------------------------------------------------
 //              EapQtPluginInfo
 //----------------------------------------------------------------------------
 
-// stub implementation for now
-
-EapQtPluginInfo::EapQtPluginInfo(EapQtPluginHandle /* id */, QString /* locId */, int /* orderNumber */)
+EapQtPluginInfo::EapQtPluginInfo(EapQtPluginHandle id, QString locId, int orderNumber) :
+    d_ptr(new EapQtPluginInfoPrivate(id, locId, orderNumber))
 {
+}
+
+EapQtPluginInfo::EapQtPluginInfo(const EapQtPluginInfo & info) :
+    d_ptr(
+        new EapQtPluginInfoPrivate(info.pluginHandle(), info.localizationId(), info.orderNumber()))
+{
+}
+
+EapQtPluginInfo& EapQtPluginInfo::operator=(const EapQtPluginInfo &info)
+{
+    // check if assigning to myself
+    if (this != &info) {
+        d_ptr.reset(new EapQtPluginInfoPrivate(info.pluginHandle(), info.localizationId(),
+            info.orderNumber()));
+    }
+    return *this;
 }
 
 EapQtPluginInfo::~EapQtPluginInfo()
 {
+    // scoped pointer delete
 }
 
 EapQtPluginHandle EapQtPluginInfo::pluginHandle() const
 {
-    EapQtPluginHandle tmp;
-    return tmp;
+    return d_ptr->mHandle;
 }
 
 QString EapQtPluginInfo::localizationId() const
 {
-    return QString();
+    return d_ptr->mLocId;
 }
 
 int EapQtPluginInfo::orderNumber() const
 {
-    return 0;
+    return d_ptr->mOrderNumber;
 }

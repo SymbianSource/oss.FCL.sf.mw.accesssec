@@ -1,0 +1,72 @@
+/*
+* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project EAPOL
+*
+*/
+
+/*
+* %version: %
+*/
+
+#include <platform_paths.hrh>
+#include "eapol.mmh"
+
+CAPABILITY CAP_ECOM_PLUGIN
+VENDORID VID_DEFAULT
+TARGETTYPE PLUGIN
+
+TARGET	EapCoreInterfaceImplementation.dll
+UID		0x10009D8D 0x20026FCD
+SECUREID 0x20026FCD
+
+SOURCEPATH  ../eap_if/data
+START RESOURCE 20026fcd.rss
+TARGET EapCoreInterfaceImplementation
+END
+
+/*
+SOURCEPATH  ../eap_if/data
+START RESOURCE 20026fd3.rss
+	TARGET EapPlugin.rsc
+END
+*/
+
+SYSTEMINCLUDE /epoc32/include/ecom
+
+USERINCLUDE	../am/include
+USERINCLUDE	../am/type/symbian/plugin/include
+USERINCLUDE	../../eapol_common
+USERINCLUDE	../../eapol_common/include
+USERINCLUDE	../../eapol_common/am/include
+USERINCLUDE	../am/type/generic/symbian/plugin/inc
+USERINCLUDE	../../eapol_common/type
+USERINCLUDE	../../eapol_common/type/simple_config/simple_config/include/
+USERINCLUDE	../eap_server/include
+USERINCLUDE	../eap_if/include
+
+
+MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
+
+SOURCEPATH  ../eap_if/src
+SOURCE EapCoreInterfaceImplementation.cpp
+SOURCE EapClientIf.cpp
+
+LIBRARY		euser.lib ecom.lib eapclientif.lib eaptools.lib eaptrace.lib eapsymbiantools.lib
+
+// exports unfrozen in winscw
+#if defined(WINSCW)
+EXPORTUNFROZEN
+#endif
+
+// end

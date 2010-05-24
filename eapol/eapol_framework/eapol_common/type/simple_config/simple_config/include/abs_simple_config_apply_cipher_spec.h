@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 7 %
+* %version: %
 */
 
 #if !defined(_ABS_SIMPLE_CONFIG_MESSAGE_RECORD_PROCESS_H_)

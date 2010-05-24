@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18 %
+* %version: 16.1.7 %
 */
 
 #ifndef EAP_AM_TYPE_SECURID_SYMBIAN_H
@@ -27,7 +27,8 @@
 #include "abs_eap_base_type.h"
 #include "eap_am_type_securid.h"
 #include "eap_am_network_id.h"
-#include "EapSecurIDNotifierStructs.h"
+#include "eap_auth_notifier.h"
+
 #include <EapType.h>
 #include <d32dbms.h>
 
@@ -39,10 +40,13 @@ const TUint KDefaultTimeoutEAPSecurId = 120000;
 */
 class EAP_EXPORT eap_am_type_securid_symbian_c
 	: public CActive, public eap_am_type_securid_c
+	, public MNotificationCallback
+
+
 {
 private:
 
-	RDbs m_session;
+	RFs m_session;
 
 	RDbNamedDatabase m_database;
 
@@ -58,8 +62,9 @@ private:
 
 	RNotifier m_notifier;
 
-	TEapSecurIDStruct * m_dialog_data_ptr;
-	TPckg<TEapSecurIDStruct> * m_dialog_data_pckg_ptr;
+	CEapAuthNotifier::TEapDialogInfo * m_dialog_data_ptr;
+	TPckg<CEapAuthNotifier::TEapDialogInfo> * m_dialog_data_pckg_ptr;
+
 
 	abs_eap_am_tools_c * const m_am_tools;
 
@@ -88,19 +93,12 @@ private:
 	// This holds the max session time read from the configuration file.
 	TInt64 m_max_session_time;
 	
-	// This is the vendor-type for tunneling EAP type.
-	// Valid for both expanded and non-expanded EAP types.
-	// This is used since m_tunneling_type can not be used in the same way 
-	// in expanded and non-expanded cases. 
-	// Unlike EAP type, Tunneling type is still non-expanded
-	// for both cases especially for using in the EAP databases.
-	u32_t m_tunneling_vendor_type;	
-
-	u32_t m_eap_vendor_type; // This is needed in certain cases.
-	
 	void send_error_notification(const eap_status_e error);
 	
 	bool is_session_validL();	
+
+	CEapAuthNotifier* iEapAuthNotifier;
+
 
 protected:
 
@@ -204,6 +202,9 @@ public:
 	 * Returns appropriate error if storing fails. eap_status_ok for successful storing.
 	 */
 	eap_status_e store_authentication_time();
+
+	void DlgComplete( TInt aStatus );
+
 
 }; // class eap_am_type_securid_symbian_c
 

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18 %
+* %version: %
 */
 
 #if !defined(_TLS_BASE_RECORD_H_)

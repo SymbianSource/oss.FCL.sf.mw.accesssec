@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12.2.4 %
+* %version: 14 %
 */
 
 #include <platform_paths.hrh>
@@ -46,9 +46,6 @@ SOURCE		EapTypeInfo.cpp
 SOURCEPATH    ../am/type/protected_setup
 SOURCE        eap_am_type_protected_setup_symbian.cpp
 SOURCE        EapProtectedSetupInterface.cpp
-
-SOURCEPATH    ../am/common/symbian
-SOURCE		  eap_am_trace_symbian.cpp
 
 // For Common Side
 SOURCEPATH		../../eapol_common/type/simple_config/eap/src
@@ -80,13 +77,16 @@ LANG		  SC
 
 MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
 
-LIBRARY		euser.lib ecom.lib eapol.lib //edbms.lib efsrv.lib 
+LIBRARY		euser.lib ecom.lib eaptools.lib eaptrace.lib eapsymbiantools.lib 
 LIBRARY		cone.lib eikcoctl.lib
 LIBRARY		etelmm.lib etel.lib	// For ETel connection
 
-LIBRARY 	wlandbif.lib
 
-//-------------------------------------------------------------------
+
+// exports unfrozen in winscw
+#if defined(WINSCW)
+EXPORTUNFROZEN
+#endif
 
 //-------------------------------------------------------------------
 // End of File

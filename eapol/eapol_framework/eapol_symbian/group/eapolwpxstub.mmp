@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12.2.2 %
+* %version: %
 */
 
 //-------------------------------------------------------------------
@@ -49,6 +49,7 @@ USERINCLUDE ../../eapol_common/am/include
 USERINCLUDE ../../eapol_common/include
 USERINCLUDE ../../eapol_common/type
 USERINCLUDE ../../eapol_common/am/common/DSS_random
+USERINCLUDE ../../eapol_common/type/simple_config/simple_config/include
 
 SYSTEMINCLUDE /epoc32/include/ecom
 SYSTEMINCLUDE /epoc32/include/kernel 
@@ -56,6 +57,11 @@ SYSTEMINCLUDE /epoc32/include/libc
 SYSTEMINCLUDE /epoc32/include/libc/netinet
 
 MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
+
+// exports unfrozen in winscw
+#if defined(WINSCW)
+EXPORTUNFROZEN
+#endif
 
 //-------------------------------------------------------------------
 // End of File

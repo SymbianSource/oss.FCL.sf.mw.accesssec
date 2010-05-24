@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8 %
+* %version: 6.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -36,7 +36,7 @@
 
 // ================= MEMBER FUNCTIONS =======================
 
-CEapProtectedSetupInterface::CEapProtectedSetupInterface(abs_eap_am_tools_c* const aTools, eap_am_type_protected_setup_symbian_c* const aParent)
+CEapProtectedSetupInterface::CEapProtectedSetupInterface(abs_eap_am_tools_c* const aTools, CEapAmProtectedSetupSymbian* const aParent)
 : CActive(CActive::EPriorityStandard)
 , iParent(aParent)
 , m_am_tools(aTools)
@@ -50,7 +50,7 @@ CEapProtectedSetupInterface::CEapProtectedSetupInterface(abs_eap_am_tools_c* con
 //--------------------------------------------------
 
 CEapProtectedSetupInterface* CEapProtectedSetupInterface::NewL(abs_eap_am_tools_c* const aTools, 
-											   eap_am_type_protected_setup_symbian_c* const aParent)
+											   CEapAmProtectedSetupSymbian* const aParent)
 {
 	CEapProtectedSetupInterface* self = new(ELeave) CEapProtectedSetupInterface(aTools, aParent);
 	CleanupStack::PushL(self);

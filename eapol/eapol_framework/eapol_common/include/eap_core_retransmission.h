@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8.1.2 %
+* %version: %
 */
 
 #if !defined(_GSMSIM_RETRANSMISSION_H_)
@@ -32,7 +32,7 @@
  * This class stores the information of re-transmission of EAP-packet.
  * @{ Add more comments. }
  */
-class eap_core_retransmission_c
+class EAP_EXPORT eap_core_retransmission_c
 {
 private:
 	

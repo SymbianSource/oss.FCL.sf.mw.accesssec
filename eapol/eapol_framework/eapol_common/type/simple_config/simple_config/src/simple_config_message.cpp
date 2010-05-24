@@ -11,12 +11,12 @@
 *
 * Contributors:
 *
-* Description:  EAP and WLAN authentication protocols.
+* Description:  This class defines one SIMPLE_CONFIG-message.
 *
 */
 
 /*
-* %version: 20 %
+* %version: 18.1.2 %
 */
 
 // This is enumeration of EAPOL source code.

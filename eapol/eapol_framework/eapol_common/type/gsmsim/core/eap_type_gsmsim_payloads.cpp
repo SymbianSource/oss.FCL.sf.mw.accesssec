@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10 %
+* %version: 7.1.3 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -269,7 +269,7 @@ EAP_FUNC_EXPORT bool gsmsim_payloads_c::check_payloads(
 		&& check_one_payload(VERSION_LIST, get_VERSION_LIST()) == true
 		&& check_one_payload(SELECTED_VERSION, get_SELECTED_VERSION()) == true
 		&& check_one_payload(COUNTER, get_COUNTER()) == true
-		&& check_one_payload(COUNTER_TOO_SMALL, get_COUNTER_TOO_SMALL()) == true
+		&& check_one_payload(COUNTER_TOO_SMALL, get_counter_too_small()) == true
 		&& check_one_payload(CLIENT_ERROR_CODE, get_CLIENT_ERROR_CODE()) == true
 		&& check_one_payload(RESULT_IND, get_RESULT_IND()) == true
 		)
@@ -378,7 +378,7 @@ EAP_FUNC_EXPORT gsmsim_variable_data_c * gsmsim_payloads_c::get_COUNTER()
 	return static_cast<gsmsim_variable_data_c *>(&m_COUNTER);
 }
 
-EAP_FUNC_EXPORT gsmsim_variable_data_c * gsmsim_payloads_c::get_COUNTER_TOO_SMALL()
+EAP_FUNC_EXPORT gsmsim_variable_data_c * gsmsim_payloads_c::get_counter_too_small()
 {
 	return static_cast<gsmsim_variable_data_c *>(&m_COUNTER_TOO_SMALL);
 }

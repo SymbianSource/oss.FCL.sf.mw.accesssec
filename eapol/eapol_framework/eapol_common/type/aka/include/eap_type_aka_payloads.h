@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12 %
+* %version: 10.1.2 %
 */
 
 #if !defined(_AKA_RESULT_H_)
@@ -337,7 +337,7 @@ public:
 		return static_cast<aka_variable_data_c *>(&m_COUNTER);
 	}
 
-	aka_variable_data_c * const get_COUNTER_TOO_SMALL()
+	aka_variable_data_c * const get_counter_too_small()
 	{
 		return static_cast<aka_variable_data_c *>(&m_COUNTER_TOO_SMALL);
 	}

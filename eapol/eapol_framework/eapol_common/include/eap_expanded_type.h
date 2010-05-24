@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10.1.2 %
+* %version: 17 %
 */
 
 #if !defined(_EAP_EXPANDED_TYPE_H_)
@@ -43,13 +43,8 @@ enum eap_code_value_e
 };
 
 
-#if defined(USE_EAP_EXPANDED_TYPES)
 /// Enumeration of the IETF defined EAP-Type values.
 enum eap_type_ietf_values_e
-#else
-/// This is the original enumeration of the EAP-Type values.
-enum eap_type_value_e
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 {
 	eap_type_none               = 0,  ///< This is internal value for no type case.
 	eap_type_identity           = 1,  ///< This is Identity.
@@ -83,13 +78,6 @@ enum eap_type_value_e
 	eap_type_expanded_type      = 254, ///< This is Expanded Type.
 	eap_type_experimental_type  = 255, ///< This is Experimental Type.
 };
-
-
-#if !defined(USE_EAP_EXPANDED_TYPES)
-	typedef eap_type_value_e eap_type_ietf_values_e;
-#endif //#if !defined(USE_EAP_EXPANDED_TYPES)
-
-
 
 enum eap_type_vendor_id_e
 {
@@ -126,6 +114,7 @@ public:
 		m_eap_expanded_type_size = m_ietf_type_size+m_vendor_id_size+m_vendor_type_size,
 	};
 
+	// This must not be virtual destructor.
 	EAP_FUNC_IMPORT ~eap_expanded_type_c();
 
 	EAP_FUNC_IMPORT eap_expanded_type_c();
@@ -137,29 +126,36 @@ public:
 	EAP_FUNC_IMPORT eap_expanded_type_c(
 		const eap_type_ietf_values_e type);
 
+	EAP_FUNC_IMPORT bool get_is_valid() const;
+
+	EAP_FUNC_IMPORT bool get_is_valid_data() const;
+
+	EAP_FUNC_IMPORT eap_expanded_type_c * copy() const;
+
 	EAP_FUNC_IMPORT static bool is_expanded_type(const eap_type_ietf_values_e eap_type);
 
-#if defined(USE_EAP_EXPANDED_TYPES)
 	EAP_FUNC_IMPORT static bool is_ietf_type(const eap_expanded_type_c eap_type);
-#else
-	EAP_FUNC_IMPORT static bool is_ietf_type(const eap_type_ietf_values_e eap_type);
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 
 	EAP_FUNC_IMPORT eap_status_e get_type_data(
 		abs_eap_am_tools_c * const am_tools,
-		eap_type_ietf_values_e * const type);
+		eap_type_ietf_values_e * const type) const;
 
 	EAP_FUNC_IMPORT eap_status_e get_type_data(
 		abs_eap_am_tools_c * const am_tools,
-		eap_expanded_type_c * const type);
+		eap_expanded_type_c * const type) const;
 
 	EAP_FUNC_IMPORT eap_status_e get_expanded_type_data(
 		abs_eap_am_tools_c * const am_tools,
-		eap_variable_data_c * const data);
+		eap_variable_data_c * const data) const;
 
 	EAP_FUNC_IMPORT eap_status_e set_expanded_type_data(
 		abs_eap_am_tools_c * const am_tools,
 		const eap_variable_data_c * const data);
+
+	EAP_FUNC_IMPORT eap_status_e set_expanded_type_data(
+		abs_eap_am_tools_c * const am_tools,
+		const void * const data,
+		const u32_t data_length);
 
 	EAP_FUNC_IMPORT void set_eap_type_values(
 		const eap_type_vendor_id_e vendor_id,
@@ -193,11 +189,7 @@ public:
 		const u32_t index,
 		const void * const buffer,
 		const u32_t buffer_length,
-#if defined(USE_EAP_EXPANDED_TYPES)
 		eap_expanded_type_c * const type
-#else
-		eap_type_ietf_values_e * const type
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 		);
 
 	/// This function writes EAP-type to offset.
@@ -207,16 +199,10 @@ public:
 		void * const buffer,
 		const u32_t buffer_length,
 		const bool write_extented_type_when_true, ///< True value writes always Extented Type.
-#if defined(USE_EAP_EXPANDED_TYPES)
 		const eap_expanded_type_c p_type ///< The EAP type to be written.
-#else
-		const eap_type_ietf_values_e p_type ///< The EAP type to be written.
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 		);
 
-#if defined(USE_EAP_EXPANDED_TYPES)
 	EAP_FUNC_IMPORT i32_t compare(const eap_expanded_type_c * const data) const;
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 
 private:
 
@@ -277,21 +263,12 @@ EAP_EXPANDED_TYPE(
 //-----------------------------------------------------------------------------------------
 
 
-#if defined(USE_EAP_EXPANDED_TYPES)
+typedef eap_expanded_type_c eap_type_value_e;
 
-	typedef eap_expanded_type_c eap_type_value_e;
 
-	EAP_C_FUNC_IMPORT u32_t convert_eap_type_to_u32_t(eap_type_value_e type);
+EAP_C_FUNC_IMPORT u32_t convert_eap_type_to_u32_t(eap_type_value_e type);
 
-	EAP_C_FUNC_IMPORT u64_t convert_eap_type_to_u64_t(eap_type_value_e type);
-
-#else
-
-	EAP_C_FUNC_IMPORT u32_t convert_eap_type_to_u32_t(eap_type_value_e type);
-
-	EAP_C_FUNC_IMPORT u64_t convert_eap_type_to_u64_t(eap_type_value_e type);
-
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
+EAP_C_FUNC_IMPORT u64_t convert_eap_type_to_u64_t(eap_type_value_e type);
 
 
 //-----------------------------------------------------------------------------------------

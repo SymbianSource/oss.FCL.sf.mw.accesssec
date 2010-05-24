@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 4.1.2 %
+* %version: %
 */
 
 #if !defined(_EAP_CONFIGURATION_FIELD_H_)
@@ -43,6 +43,7 @@ enum eap_configure_type_e
 	eap_configure_type_u32array,
 	eap_configure_type_section,
 	eap_configure_type_subsection,
+	eap_configure_type_all_configurations, //< This is special type to read all configuration options. Data is in message format. Please see eap_tlv_message_data_c.
 };
 
 //--------------------------------------------------------------------------------------------------
@@ -175,6 +176,26 @@ public:
 		}
 
 		return tmp;
+	}
+
+	static eap_const_string get_configure_type_string(const eap_configure_type_e type)
+	{
+		#if defined(USE_EAP_TRACE_STRINGS)
+		EAP_IF_RETURN_STRING(type, eap_configure_type_none)
+		else EAP_IF_RETURN_STRING(type, eap_configure_type_u32_t)
+		else EAP_IF_RETURN_STRING(type, eap_configure_type_boolean)
+		else EAP_IF_RETURN_STRING(type, eap_configure_type_string)
+		else EAP_IF_RETURN_STRING(type, eap_configure_type_hex_data)
+		else EAP_IF_RETURN_STRING(type, eap_configure_type_u32array)
+		else EAP_IF_RETURN_STRING(type, eap_configure_type_section)
+		else EAP_IF_RETURN_STRING(type, eap_configure_type_subsection)
+		else EAP_IF_RETURN_STRING(type, eap_configure_type_all_configurations)
+		else
+		#endif // #if defined(USE_EAP_TRACE_STRINGS)
+		{
+			EAP_UNREFERENCED_PARAMETER(type);
+			return EAPL("Unknown EAP-configure_type");
+		}
 	}
 
 private:

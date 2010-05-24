@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 25.1.2 %
+* %version: 32 %
 */
 
 #if !defined(EAPOL_MESSAGE_WLAN_AUTHENTICATION_H)
@@ -27,7 +27,7 @@
 #include "eapol_ethernet_header.h"
 #include "eap_file_config.h"
 //#include <eap_am_file_input_stdio.h>
-#include "abs_eapol_wlan_database_reference_if.h"
+#include "abs_eap_database_reference_if.h"
 #include "abs_eapol_message_wlan_authentication.h"
 #include "eapol_handle_tlv_message_data.h"
 
@@ -40,7 +40,6 @@ class eap_tlv_header_c;
 class eapol_message_wlan_authentication_c
 : public abs_eapol_wlan_authentication_c
 , public abs_eap_base_timer_c
-, public abs_eapol_wlan_database_reference_if_c
 {
 
 private:
@@ -62,7 +61,7 @@ private:
 
 	wlan_eap_if_send_status_e m_error_code;
 
-	eapol_tlv_message_type_function_e m_error_function;
+	eap_tlv_message_type_function_e m_error_function;
 
 	bool m_use_asyncronous_test;
 
@@ -114,7 +113,7 @@ private:
 
 	EAP_FUNC_IMPORT eap_status_e send_error_message(
 		const eap_status_e status,
-		const eapol_tlv_message_type_function_e function);
+		const eap_tlv_message_type_function_e function);
 
 	EAP_FUNC_IMPORT eap_status_e process_message_type_error(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters);
@@ -127,7 +126,7 @@ private:
 
 public:
 
-	EAP_FUNC_IMPORT ~eapol_message_wlan_authentication_c();
+	EAP_FUNC_IMPORT virtual ~eapol_message_wlan_authentication_c();
 
 	EAP_FUNC_IMPORT eapol_message_wlan_authentication_c(
 		abs_eap_am_tools_c * const tools,
@@ -215,17 +214,6 @@ public:
 	// ----------------------------------------------------------------
 
 
-	// ----------------------------------------------------------------------
-	// The following function is from abs_eapol_wlan_database_reference_if_c.
-
-	// Look at abs_eapol_wlan_database_reference_if_c::get_wlan_database_reference_values().
-	EAP_FUNC_IMPORT eap_status_e get_wlan_database_reference_values(
-		eap_variable_data_c * const reference) const;
-
-	// The previous function is from abs_eapol_wlan_database_reference_if_c.
-	// ----------------------------------------------------------------------
-
-
 	/// Function receives the data message from lower layer.
 	/// Data is formatted to Attribute-Value Pairs.
 	/// Look at eap_tlv_header_c and eap_tlv_message_data_c.
@@ -243,6 +231,12 @@ public:
 		const simple_config_payloads_c * const other_configuration);
 
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
+
+	EAP_FUNC_IMPORT eap_status_e complete_check_pmksa_cache(
+		EAP_TEMPLATE_CONST eap_array_c<eap_am_network_id_c> * const bssid_sta_receive_network_ids);
+
+	EAP_FUNC_IMPORT eap_status_e complete_disassociation(
+		const eap_am_network_id_c * const receive_network_id);
 
 	// ----------------------------------------------------------------------
 };

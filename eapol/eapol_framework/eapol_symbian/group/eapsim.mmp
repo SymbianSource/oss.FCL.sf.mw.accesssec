@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18.2.4 %
+* %version: 18.1.11 %
 */
 
 #include <platform_paths.hrh>
@@ -58,10 +58,7 @@ SOURCE		  eap_type_gsmsim_mac_attributes.cpp
 SOURCEPATH	  ../../eapol_common/common
 SOURCE        eap_sim_triplets.cpp
 
-SOURCEPATH    ../am/common/symbian
-SOURCE		  eap_am_trace_symbian.cpp
 
-SOURCEPATH    ../am/type/gsmsim/symbian/plugin/src
 
 USERINCLUDE   ../am/type/gsmsim/symbian/plugin/inc
 USERINCLUDE   ../../eapol_common/type/gsmsim/include
@@ -69,10 +66,11 @@ USERINCLUDE   ../../eapol_common/include
 USERINCLUDE   ../am/include
 USERINCLUDE   ../../eapol_common/am/include
 USERINCLUDE   ../../eapol_common/type
+USERINCLUDE   ../am/type/symbian/plugin/include
 
 MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
 
-LIBRARY       euser.lib ecom.lib eapol.lib edbms.lib efsrv.lib 
+LIBRARY       euser.lib ecom.lib eaptools.lib eaptrace.lib eapsymbiantools.lib edbms.lib efsrv.lib 
 LIBRARY		  cone.lib eikcoctl.lib eikctl.lib bafl.lib
 LIBRARY		  estor.lib	// For RReadStream
 
@@ -92,6 +90,11 @@ LIBRARY     eikdlg.lib
 LIBRARY     eikcore.lib
 LIBRARY     hlplch.lib
 LIBRARY		featmgr.lib
+
+// exports unfrozen in winscw
+#if defined(WINSCW)
+EXPORTUNFROZEN
+#endif
 
 //-------------------------------------------------------------------
 // End of File

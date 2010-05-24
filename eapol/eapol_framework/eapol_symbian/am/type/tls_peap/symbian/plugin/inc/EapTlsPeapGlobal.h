@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8 %
+* %version: %
 */
 
 #ifndef _EAPTLSPEAPGLOBAL_H_
@@ -27,9 +27,9 @@
 
 // LOCAL CONSTANTS
 
-_LIT(KReleaseDate, "20040829:");
+_LIT(KReleaseDate, "");
 _LIT(KEapTypeVersion, "1.0");
-_LIT(KManufacturer, "Nokia");
+_LIT(KManufacturer, "");
 _LIT(KNokiaSignature, "");
 _LIT(KExtraInfo1, "");
 _LIT(KExtraInfo2, "");

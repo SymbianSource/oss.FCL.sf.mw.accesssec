@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 14 %
+* %version: %
 */
 
 #if !defined(_TLS_COMPLETION_H_)

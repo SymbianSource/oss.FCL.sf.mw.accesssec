@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 14 %
+* %version: %
 */
 
 #if !defined(_EAP_PROTOCOL_LAYER_H_)

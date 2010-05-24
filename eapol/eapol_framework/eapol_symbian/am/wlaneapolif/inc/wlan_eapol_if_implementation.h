@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 6 %
+* %version: %
 */
 
 #ifndef _WLAN_EAPOL_INTERFACE_IMPLEMENTATION_H_

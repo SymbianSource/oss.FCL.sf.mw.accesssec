@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 5 %
+* %version: %
 */
 
 #if !defined(_EAPOL_KEY_STATE_STRING_H_)
@@ -46,29 +46,29 @@ public:
 	 * Function returns string of eapol_key_state_e.
 	 * @param state is the queried string.
 	 */
-	EAP_FUNC_IMPORT eap_const_string get_eapol_key_state_string(
-		const eapol_key_state_e state) const;
+	EAP_FUNC_IMPORT static eap_const_string get_eapol_key_state_string(
+		const eapol_key_state_e state);
 
 	/**
 	 * Function returns string of eapol_key_handshake_type_e.
 	 * @param state is the queried string.
 	 */
-	EAP_FUNC_IMPORT eap_const_string get_eapol_key_handshake_type_string(
-		const eapol_key_handshake_type_e handshake_type) const;
+	EAP_FUNC_IMPORT static eap_const_string get_eapol_key_handshake_type_string(
+		const eapol_key_handshake_type_e handshake_type);
 
 	/**
 	 * Function returns string of eapol_key_handshake_type_e.
 	 * @param state is the queried string.
 	 */
-	EAP_FUNC_IMPORT eap_const_string get_eapol_key_authentication_type_string(
-		const eapol_key_authentication_type_e authentication_type) const;
+	EAP_FUNC_IMPORT static eap_const_string get_eapol_key_authentication_type_string(
+		const eapol_key_authentication_type_e authentication_type);
 
 	/**
 	 * Function returns string of eapol_key_descriptor_type_e.
 	 * @param state is the queried string.
 	 */
-	eap_const_string get_eapol_key_descriptor_type_string(
-		const eapol_key_descriptor_type_e key_descriptor_type) const;
+	EAP_FUNC_IMPORT static eap_const_string get_eapol_key_descriptor_type_string(
+		const eapol_key_descriptor_type_e key_descriptor_type);
 
 };
 

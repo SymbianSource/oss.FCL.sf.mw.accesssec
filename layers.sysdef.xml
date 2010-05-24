@@ -7,7 +7,6 @@
   <systemModel>
     <layer name="mw_layer">
       <module name="accesssec">
-        <unit unitID="netdo.accesssec" mrp="" bldFile="&layer_real_source_path;/group" name="accesssec" />
         <unit unitID="netdo.accesssecqt" mrp="" bldFile="&layer_real_source_path;" name="accesssecqt" proFile="accesssec.pro" qmakeArgs="-r"/>
      </module>
     </layer>

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11 %
+* %version: %
 */
 
 #if !defined(_EAP_AM_TYPE_SIMPLE_CONFIG_H_)

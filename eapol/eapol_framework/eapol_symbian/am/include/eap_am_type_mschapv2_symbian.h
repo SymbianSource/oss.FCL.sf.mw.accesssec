@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18 %
+* %version: 16.1.7 %
 */
 
 #ifndef _EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H_
@@ -27,7 +27,8 @@
 #include "abs_eap_base_type.h"
 #include "eap_am_type_mschapv2.h"
 #include "eap_type_mschapv2.h"
-#include "EapMsChapV2NotifierStructs.h"
+#include "eap_auth_notifier.h"
+
 #include <EapType.h>
 #include <d32dbms.h>
 
@@ -39,14 +40,19 @@ const TUint KDefaultTimeoutEAPMsChapV2 = 120000;
 */
 class EAP_EXPORT eap_am_type_mschapv2_symbian_c
 : public CActive, public eap_am_type_mschapv2_c
+	, public MNotificationCallback
+
+
 {
 private:
+
 	//--------------------------------------------------
+
 	eap_am_tools_symbian_c * const m_am_tools;
 
 	abs_eap_base_type_c * const m_partner;
 
-	RDbs m_session;
+	RFs m_session;
 
 	RDbNamedDatabase m_database;
 
@@ -58,7 +64,7 @@ private:
 
 	TState m_state;
 
-	RNotifier m_notifier;
+
 
 	eap_variable_data_c * m_username_utf8;
 	eap_variable_data_c * m_password_utf8;
@@ -66,8 +72,9 @@ private:
 	bool * m_password_prompt_enabled;
 	bool m_is_identity_query;
 
-	TEapMsChapV2UsernamePasswordInfo * m_username_password_io_ptr;
-	TPckg<TEapMsChapV2UsernamePasswordInfo> * m_username_password_io_pckg_ptr;
+	CEapAuthNotifier::TEapDialogInfo * m_username_password_io_ptr;
+	TPckg<CEapAuthNotifier::TEapDialogInfo> * m_username_password_io_pckg_ptr;
+
 
 	eap_am_network_id_c m_receive_network_id;
 
@@ -83,18 +90,13 @@ private:
 
 	bool m_shutdown_was_called;
 	
-	bool m_is_notifier_connected; // Tells if notifier server is connected.
+
 
 	// This holds the max session time read from the configuration file.
 	TInt64 m_max_session_time;
 
-	// This is the vendor-type for tunneling EAP type.
-	// Valid for both expanded and non-expanded EAP types.
-	// This is used since m_tunneling_type can not be used in the same way 
-	// in expanded and non-expanded cases. 
-	// Unlike EAP type, Tunneling type is still non-expanded
-	// for both cases especially for using in the EAP databases.
-	u32_t m_tunneling_vendor_type;	
+	CEapAuthNotifier* iEapAuthNotifier;
+
 
 	void send_error_notification(const eap_status_e error);
 
@@ -201,6 +203,9 @@ public:
 	 * Returns appropriate error if storing fails. eap_status_ok for successful storing.
 	 */
 	eap_status_e store_authentication_time();	
+
+	EAP_FUNC_IMPORT void DlgComplete( TInt aStatus );
+
 
 }; // class eap_am_type_mschapv2_symbian_c
 

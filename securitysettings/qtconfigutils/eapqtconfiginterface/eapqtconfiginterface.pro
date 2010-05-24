@@ -7,7 +7,7 @@
 # at the URL "http://www.eclipse.org/legal/epl-v10.html".
 #
 # Initial Contributors:
-# Nokia Corporation - initial contribution.
+# 	Nokia Corporation - initial contribution.
 #
 # Contributors:
 #
@@ -15,58 +15,77 @@
 #	EAP method configuration QT interface
 #
 
-# %version: 1 %
+# %version: 17 %
 
 
 TEMPLATE            = lib
 TARGET              = eapqtconfiginterface
-TARGET.CAPABILITY   = CAP_GENERAL_DLL
+
+# to export the public class
 DEFINES             += BUILD_EAP_QT_CONFIG_INTERFACE_DLL
 DEPENDPATH          += . 
 
-# Store generated files to their own directories
-MOC_DIR     = _moc
-RCC_DIR     = _rcc
-OBJECTS_DIR = _objects
-
-# hb config needed when hb classes are used
+# for using hb classes
 CONFIG += hb
 
-LIBS += \
-    -leapqtplugininfo
+# translations
+TRANSLATIONS = cpeapuiplugins.ts
+
+# Storage for generated files
+MOC_DIR     = _build
+RCC_DIR     = _build
+OBJECTS_DIR = _build
+
+# path to def files
+defFilePath = .
 
 INCLUDEPATH += \
-	../../inc \
-    $$MW_LAYER_SYSTEMINCLUDE \
-    $$OS_LAYER_SYSTEMINCLUDE
-    
-HEADERS += 
-
+    ../../inc
+   
+HEADERS += \
+    inc/eapqtcertificateinfo_p.h \
+    inc/eapqtconfig_p.h \
+    inc/eapqtconfiginterface_p.h \
+    inc/eapqtvalidatorpassword.h \
+    inc/eapqtvalidatorrealm.h \
+    inc/eapqtvalidatorusername.h
+     
 SOURCES += \
-    src/eapqtconfiginterface.cpp
+    src/eapqtconfiginterface.cpp \
+    src/eapqtconfiginterface_p.cpp \
+    src/eapqtcertificateinfo.cpp \
+    src/eapqtcertificateinfo_p.cpp \
+    src/eapqtconfig.cpp \
+    src/eapqtconfig_p.cpp \
+    src/eapqtvalidatorpassword.cpp \
+    src/eapqtvalidatorrealm.cpp \
+    src/eapqtvalidatorusername.cpp
     
-defFilePath = ..
-
+# qt libs
+LIBS += \
+    -leapqtplugininfo
+    
 symbian { 
-    # no Symbian only headers
-    HEADERS += 
     
-    # no Symbian only sources
-    SOURCES += 
+    # symbian libs
+    LIBS += \
+        -leapsymbiantools \
+        -leaptools \
+        -leaptrace \
+        -lecom \
+        -lcmmanager
     
-    # add needed Symbian libs here
-    LIBS += 
-        
     TARGET.UID3 = 0x2002C2FC
     TARGET.EPOCALLOWDLLDATA = 1
     
     TARGET.CAPABILITY = CAP_GENERAL_DLL
     
-    # exports not frozen yet
-    # MMP_RULES += EXPORTUNFROZEN
-    BLD_INF_RULES.prj_exports += \
-        "$${LITERAL_HASH}include <platform_paths.hrh>"
-        
+    # TODO: exports not frozen yet
+    MMP_RULES += EXPORTUNFROZEN
+            
     BLD_INF_RULES.prj_exports += \ 
   		"rom/eapqtconfiginterface.iby CORE_MW_LAYER_IBY_EXPORT_PATH(eapqtconfiginterface.iby)"
+
+    BLD_INF_RULES.prj_exports += \ 
+  		"rom/eapqtconfiginterface_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(eapqtconfiginterface_resources.iby)"
 }

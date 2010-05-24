@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 26.1.2 %
+* %version: %
 */
 
 // This is enumeration of EAPOL source code.
@@ -3620,19 +3620,6 @@ EAP_FUNC_EXPORT eap_status_e eap_type_simple_config_c::cancel_timer(
 	eap_status_e status = get_type_partner()->cancel_timer(
 		p_initializer, 
 		p_id);
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, status);
-}
-
-//--------------------------------------------------
-
-//
-EAP_FUNC_EXPORT eap_status_e eap_type_simple_config_c::cancel_all_timers()
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	eap_status_e status = get_type_partner()->cancel_all_timers();
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);

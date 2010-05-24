@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 52 %
+* %version: 48.1.17 %
 */
 
 //-------------------------------------------------------------------
@@ -70,12 +70,6 @@ MACRO USE_EAP_FIXED_DATABASE_FIELDS=1
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-// This flag enables EAP expanded types.
-MACRO USE_EAP_EXPANDED_TYPES=1
-#define USE_EAP_EXPANDED_TYPES
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 // This flag activates message based WLAN engine EAPOL interface.
 MACRO USE_EAPOL_WLAN_AUTHENTICATION_MESSAGE_IF
 #define USE_EAPOL_WLAN_AUTHENTICATION_MESSAGE_IF
@@ -90,6 +84,8 @@ MACRO USE_EAP_SIMPLE_CONFIG=1
 
 
 #if defined(FF_WLAN_EXTENSIONS)
+
+#warning FF_WLAN_EXTENSIONS enabled
 
 MACRO USE_FAST_EAP_TYPE=1
 #define USE_FAST_EAP_TYPE
@@ -146,17 +142,15 @@ MACRO USE_EAP_CORE_SERVER=1
 // These following macros should be adjusted depending on the test environment.
 // For WLM compatibility only NO_EAP_MUTEX should be defined.
 MACRO NO_EAP_MUTEX=1
-MACRO USE_EAPOL_KEY_STATE=1
-
-// The following marco activates optimized 4-Way Handshake.
-// Note the interface between WLAN engine and EAPOL changes too.
-MACRO USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE=1
 
 // Enables configuration option to skips user interactions in selected test cases.
 MACRO USE_EAP_CONFIGURATION_TO_SKIP_USER_INTERACTIONS=1
 
 // Enables timer to stop authentication with broken authentication server or access point configuration that blocks WLAN connection for too long time.
 MACRO USE_EAP_CORE_WAIT_REQUEST_TYPE_TIMER=1
+
+// Enables EAP-timer traces.
+MACRO USE_EAP_TIMER_QUEUE_TRACE=1
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -166,11 +160,17 @@ MACRO USE_EAP_CORE_WAIT_REQUEST_TYPE_TIMER=1
 	// You need all EAPOL WPX sources or binary eapolwpx.lib to compile WPX version.
 	MACRO EAP_USE_WPXM=1
 	#define EAP_USE_WPXM
+
+	MACRO USE_EAP_PAC_STORE_IF=1
+	#define USE_EAP_PAC_STORE_IF
 #else
 	// The WPX stub is needed even without WPX functionality.
 	#define USE_EAPOL_WLAN_WPX_STUB 
 #endif // #if defined(FF_WLAN_EXTENSIONS)
 
+// Removes include statements for stdint.h
+MACRO EAP_NO_STDINT_H_HEADER=1
+#define EAP_NO_STDINT_H_HEADER
 
 //-------------------------------------------------------------------
 // End of File

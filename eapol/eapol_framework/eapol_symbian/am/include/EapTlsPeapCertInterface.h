@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 13.1.2 %
+* %version: %
 */
 
 #ifndef _EAPTLSPEAPCERTINTERFACE_H_
@@ -48,17 +48,20 @@ public:
 
 	virtual ~CEapTlsPeapCertInterface();	
 	
-	void ReadCertificateL(SCertEntry& aCertInfo, const TBool aRetrieveChain);
+	void ReadCertificateL(EapCertificateEntry& aCertInfo, const TBool aRetrieveChain);
 	
-	void ReadCACertificateL(SCertEntry& aCertInfo);
+	void ReadCACertificateL(EapCertificateEntry& aCertInfo);
 	
 	void ReadPrivateKeyL(TKeyIdentifier& aHash);
 	
-	void ValidateChainL(TDesC8& aCertChain, RArray<SCertEntry>& aCACerts);
+	void ValidateChainL(
+		TDesC8& aCertChain,
+		RPointerArray<EapCertificateEntry>& aCACerts,
+		const TBool aUseAutomaticCaCertificate);
 
 	
 	void GetMatchingCertificatesL(
-		const RArray<SCertEntry>& aAllowedUserCerts,
+		const RPointerArray<EapCertificateEntry>& aAllowedUserCerts,
 		const TBool aUseCertAuthoritiesFilter,
 		EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * const aCertAuthorities,
 		const TBool aUseCertTypesFilter,
@@ -67,12 +70,12 @@ public:
 		const RArray<TUint>& aAllowedCipherSuites);		
 
 	void SignL(
-		TKeyIdentifier& aKeyId,
+		const TKeyIdentifier& aKeyId,
 		const TDesC8& aHashIn,
 		const TUint aSignatureLength);
 
 	void DecryptL(
-		TKeyIdentifier& aKeyId,
+		const TKeyIdentifier& aKeyId,
 		const TDesC8& aData);
 		
 	void CancelSignWithPrivateKey();		
@@ -134,7 +137,7 @@ private:
 	
 	RFs iFs;
 	
-	RArray<SCertEntry> iAllowedUserCerts;
+	RPointerArray<EapCertificateEntry> iAllowedUserCerts;
 
 	TBool iUseCertAuthoritiesFilter;
 	
@@ -145,9 +148,9 @@ private:
 	TBool iRSACertsAllowed;
 
 	TBool iDSACertsAllowed;
-	
+
 	RPointerArray<CX500DistinguishedName> iCertAuthorities;
-	
+
 	const eap_array_c<u8_t>* iCertTypes;
 
 	RMPointerArray<CCTCertInfo> iCertInfos;
@@ -173,17 +176,17 @@ private:
 
 	RPointerArray<CX509Certificate> iUserCertChain;
 	
-	CArrayFixFlat<SCertEntry> iMatchingUserCertInfos;
+	RPointerArray<EapCertificateEntry> iMatchingUserCertInfos;
 
 	TUint iCAIndex;
 
 	TUint iUserCertIndex;
 	
-	RArray<SCertEntry> iAllowedCACerts;
+	RPointerArray<EapCertificateEntry> iAllowedCACerts;
 	
 	HBufC8* iInputCertChain;
 
-	SCertEntry iCertInfo;
+	EapCertificateEntry iCertInfo;
 
 	TAny *iResArray;	
 
@@ -209,6 +212,9 @@ private:
 	CUnifiedKeyStore* iKeyStore;
 
 	TBool iRetrieveChain;
+
+	TBool iUseAutomaticCaCertificate;
+
 }; 
 
 #endif // _EAPTLSPEAPCERTINTERFACE_H_

@@ -16,76 +16,41 @@
 */
 
 /*
-* %version: 11.1.2 %
+* %version: %
 */
 
-/* The meaning and bit positions used in "opaque_data" field in ECOM implementation
-
- 0 0 0 0 0 0 0 0 ---->All 0 means allowed both inside (encapsulated EAP) and outside (Outer EAP)
- | | | | | | | |
- | | | | | | | |_____ 1 means NOT_INSIDE_TUNNEL (NOT allowed as encapsulated EAP)
- | | | | | | |
- | | | | | | |_______ 1 means NOT_OUTSIDE_TUNNEL (only allowed as encapsulated EAP, NOT as outer EAP)
- | | | | | |  
- | | | | | |_________ 1 means NOT_INSIDE_PEAP
- | | | | |  
- | | | | |___________ 1 means NOT_OUTSIDE_PEAP  
- | | | | 
- | | | |_____________ 1 means NOT_INSIDE_TTLS
- | | | 
- | | |_______________ 1 means NOT_OUTSIDE_TTLS
- | | 
- | |_________________ 1 means NOT_INSIDE_FAST
- |
- |___________________ 1 means NOT_OUTSIDE_FAST
- 
- 
- // For historical reasons NOT_OUTSIDE_PEAP is used instead of NOT_OUTSIDE_TUNNEL
- // Both of these convey the same meaning. It means if an EAP is not allowed outside PEAP
- // (DisallowedOutsidePEAP), it can be used only as an encapsulated EAP.
- // EAP-MSCHAPv2 is an example for this.
-
- // The bits can be ORed. 
- // "NOT_OUTSIDE|NOT_OUTSIDE_PEAP" is 0x0A (0000 1010).
- // "NOT_OUTSIDE|NOT_OUTSIDE_PEAP|NOT_INSIDE_PEAP|NOT_INSIDE_FAST" is 0x4E (0100 1110).
- // "NOT_INSIDE|NOT_INSIDE_PEAP|NOT_INSIDE_TTLS|NOT_INSIDE_FAST" is 0x55 (0101 0101).
- // "NOT_INSIDE|NOT_INSIDE_PEAP|NOT_INSIDE_TTLS|NOT_INSIDE_FAST|NOT_OUTSIDE_PEAP|NOT_OUTSIDE" is 0x5F (0101 1111).
- 
-*/
+#include "EapTraceSymbian.h"
 
 
-
-const TUint8 KNotInsideTunnel = 0x01; // Only the last bit position is 1. 		(0000 0001)
-const TUint8 KNotOutsideTunnel = 0x02; // Only the 2nd last bit positions is 1. (0000 0010)
-
-const TUint8 KNotInsidePEAP = 0x04; // Only the 3rd last bit position is 1. 	(0000 0100)
-const TUint8 KNotOutsidePEAP = 0x08; // Only the 4th last bit positions is 1. 	(0000 1000)
-
-const TUint8 KNotInsideTTLS = 0x10; // Only the 5th last bit position is 1. 	(0001 0000)
-const TUint8 KNotOutsideTTLS = 0x20; // Only the 6th last bit position is 1. 	(0010 0000)
-
-const TUint8 KNotInsideFAST = 0x40; // Only the 7th last bit position is 1. 	(0100 0000)
-const TUint8 KNotOutsideFAST = 0x80;  // Only the first bit position is 1. 		(1000 0000)
-
-
-inline CEapType* CEapType::NewL(const TDesC8& aCue, TIndexType aIndexType, TInt aIndex)
+// Used By UI
+inline CEapType* CEapType::NewL(const TIndexType aIndexType, const TInt aIndex, const TEapExpandedType aEapType)
 {
-	// The EAP type id (aCue) is passed to ECom as resolver parameters
-    TEComResolverParams resolverParams;
-    resolverParams.SetDataType(aCue);
-	
-	// The arguments are stored to a iapInfo struct.
-	SIapInfo iapInfo;
-	iapInfo.indexType = aIndexType;
-	iapInfo.index = aIndex;
-	
-	// This call finds and loads the correct DLL and after that calls the
-	// entry function in the interface implementation in the DLL.
-    TAny* ptr = REComSession::CreateImplementationL(
-        KEapTypeInterfaceUid,
-        _FOFF(CEapType, iDtor_ID_Key), 
-		&iapInfo,
-        resolverParams);
+    EAP_TRACE_DEBUG_SYMBIAN((_L("CEapType::NewL(EapGeneric): start")));
+
+    // The arguments are stored to a iapInfo struct.
+    SIapInfo iapInfo;
+    iapInfo.indexType = aIndexType;
+    iapInfo.index = aIndex;
+    iapInfo.aEapType = aEapType;
+
+    // This call finds and loads the correct DLL and after that calls the
+    // entry function in the interface implementation in the DLL.
+    TAny* ptr = 0;
+
+    const TUid KimplementationUid = { 0x20026FD2 };
+
+    TRAPD( err, ptr = REComSession::CreateImplementationL(
+            KimplementationUid,
+            _FOFF(CEapType, iDtor_ID_Key), 
+            &iapInfo));
+
+    EAP_TRACE_DEBUG_SYMBIAN((_L("CEapType::NewL(EapGeneric): CreateImplementationL(Uid=0x%08x), err=%d, returns ptr=0x%08x\n"),
+		KimplementationUid.iUid,
+        err,
+        ptr));
+
+    User::LeaveIfError(err);
+
     return (CEapType *) ptr;
 }
 
@@ -93,42 +58,6 @@ inline CEapType::~CEapType()
 {
 	// Unload DLL
     REComSession::DestroyedImplementation(iDtor_ID_Key);
-}
-
-inline TBool CEapType::IsDisallowedOutsidePEAP(const CImplementationInformation& aImplInfo)
-{
-	
-	const TUint8 pluginOpaqueData = *(aImplInfo.OpaqueData().Ptr());
-	
-	if(pluginOpaqueData & KNotOutsidePEAP)
-	{
-		return ETrue;
-	}
-	return EFalse;
-	
-}
-
-inline TBool CEapType::IsDisallowedInsidePEAP(const CImplementationInformation& aImplInfo)
-{
-	const TUint8 pluginOpaqueData = *(aImplInfo.OpaqueData().Ptr());
-	
-	if(pluginOpaqueData & KNotInsidePEAP)
-	{
-		return ETrue;
-	}
-	return EFalse;
-
-}
-
-inline TBool CEapType::IsDisallowedInsideTTLS(const CImplementationInformation& aImplInfo)
-{
-	const TUint8 pluginOpaqueData = *(aImplInfo.OpaqueData().Ptr());
-	
-	if(pluginOpaqueData & KNotInsideTTLS)
-	{
-		return ETrue;
-	}
-	return EFalse;
 }
 
 // End of file

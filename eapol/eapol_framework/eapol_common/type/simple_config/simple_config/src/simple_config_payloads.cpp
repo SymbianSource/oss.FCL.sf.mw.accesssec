@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2007 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -11,12 +11,12 @@
 *
 * Contributors:
 *
-* Description:  EAP and WLAN authentication protocols.
+* Description:  Defines payloads of protected setup message.
 *
 */
 
 /*
-* %version: 35 %
+* %version: 33.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -474,7 +474,7 @@ EAP_FUNC_EXPORT eap_status_e simple_config_payloads_c::check_mandatory_payloads(
 				used_payloads,
 				&attribute_type,
 				m_am_tools);
-			if (index < 0ul)
+			if (index < 0)
 			{
 				// ERROR: not used mandatory TLV.
 				EAP_TRACE_ERROR(
@@ -515,11 +515,6 @@ EAP_FUNC_EXPORT eap_status_e simple_config_payloads_c::copy_attribute(
 
 	eap_status_e status = add_attribute(
 		payload->copy());
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
@@ -1299,14 +1294,9 @@ EAP_FUNC_EXPORT eap_status_e simple_config_payloads_c::reset()
 	}
 
 	status = m_read_payloads.reset();
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
+	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
 //--------------------------------------------------

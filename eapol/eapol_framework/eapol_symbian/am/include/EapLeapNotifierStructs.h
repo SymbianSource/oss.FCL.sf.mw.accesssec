@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 7 %
+* %version: %
 */
 
 #ifndef EAPLEAPNOTIFIERSTRUCTS_H

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10 %
+* %version: %
 */
 
 // This is enumeration of EAPOL source code.
@@ -131,6 +131,7 @@ u8_t * tls_record_header_c::get_data(const u32_t contignuous_bytes) const
 /// This function returns debug strings of the TLS-protocol values.
 eap_const_string tls_record_header_c::get_tls_protocol_string(const tls_record_protocol_e protocol)
 {
+
 #if defined(USE_EAP_TRACE_STRINGS)
 	EAP_IF_RETURN_STRING(protocol, tls_record_protocol_none)
 	else EAP_IF_RETURN_STRING(protocol, tls_record_protocol_change_cipher_spec)

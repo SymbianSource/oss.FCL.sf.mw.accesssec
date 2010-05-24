@@ -7,22 +7,29 @@
 # at the URL "http://www.eclipse.org/legal/epl-v10.html".
 #
 # Initial Contributors:
-# Nokia Corporation - initial contribution.
+# 	Nokia Corporation - initial contribution.
 #
 # Contributors:
 #
 # Description: 
-# Control Panel QT UIs for WLAN security settings configuration
+# 	Control Panel QT UIs for WLAN security settings configuration
 #
-# %version: tr1cfwln#4.1.1 %
+# %version: tr1cfwln#10 %
+#
 
 TEMPLATE = subdirs
 
-SUBDIRS  += \
-		cpwepui \
-		cpwpaui \
-		cpwpa2ui \
-		cpwpacmnui
-		
+SUBDIRS += \
+	cpwepui \
+	cpwpacmnui \
+	cpwpaui \
+	cpwpa2ui
 
 CONFIG += ordered
+
+# export common iby for the translation file
+symbian:
+{
+   	BLD_INF_RULES.prj_exports += \
+  		"rom/cpwlansecurityuiplugins_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(cpwlansecurityuiplugins_resources.iby)"
+}

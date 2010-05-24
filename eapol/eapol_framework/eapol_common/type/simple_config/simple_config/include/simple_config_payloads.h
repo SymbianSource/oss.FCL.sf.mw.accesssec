@@ -11,12 +11,12 @@
 *
 * Contributors:
 *
-* Description:  EAP and WLAN authentication protocols.
+* Description:  Defines payloads of protected setup message.
 *
 */
 
 /*
-* %version: 26 %
+* %version: 24.1.2 %
 */
 
 #if !defined(_SIMPLE_CONFIG_PAYLOADS_H_)

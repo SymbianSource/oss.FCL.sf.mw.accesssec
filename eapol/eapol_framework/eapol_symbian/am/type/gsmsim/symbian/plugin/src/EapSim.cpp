@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16.1.3 %
+* %version: 24 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -38,9 +38,9 @@
 #include <EapTypeInfo.h>
 #include "EapSimDbUtils.h"
 
-
-
+#include "EapConversion.h"
 #include "eap_am_tools_symbian.h"
+#include "EapTraceSymbian.h"
 
 // LOCAL CONSTANTS
 
@@ -136,21 +136,14 @@ eap_base_type_c* CEapSim::GetStackInterfaceL(abs_eap_am_tools_c* const aTools,
 }
 
 // ----------------------------------------------------------
-TInt CEapSim::InvokeUiL()
-{
-	TInt buttonId(0);
 
-	return buttonId;
-}
-// ----------------------------------------------------------
-CEapTypeInfo* CEapSim::GetInfoLC()
+CEapTypeInfo* CEapSim::GetInfoL()
 {
 	CEapTypeInfo* info = new(ELeave) CEapTypeInfo(
 		(TDesC&)KReleaseDate, 
 		(TDesC&)KEapTypeVersion,
 		(TDesC&)KManufacturer);
 
-	CleanupStack::PushL(info);
 	return info;
 }
 
@@ -170,18 +163,21 @@ TUint CEapSim::GetInterfaceVersion()
 
 // ----------------------------------------------------------
 
-void CEapSim::SetTunnelingType(const TInt aTunnelingType)
+void CEapSim::SetTunnelingType(const TEapExpandedType aTunnelingType)
 {
-#ifdef USE_EAP_EXPANDED_TYPES
 
-	// Vendor id is eap_type_vendor_id_ietf always in this plugin.
-	iTunnelingType.set_eap_type_values(eap_type_vendor_id_ietf, aTunnelingType);
+EAP_TRACE_DATA_DEBUG_SYMBIAN(
+    (EAPL("CEapSim::SetTunnelingType - tunneling type"),
+    aTunnelingType.GetValue().Ptr(), aTunnelingType.GetValue().Length()));
 
-#else
+eap_type_value_e aInternalType;
 
-	iTunnelingType = static_cast<eap_type_value_e>(aTunnelingType);
+TInt err = CEapConversion::ConvertExpandedEAPTypeToInternalType(
+        &aTunnelingType,
+        &aInternalType);
 
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
+iTunnelingType = aInternalType;
+
 }
 
 
@@ -207,7 +203,7 @@ void CEapSim::SetIndexL(
 
 	RDbNamedDatabase db;
 
-	RDbs session;
+	RFs session;
 	
 	EapSimDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 	
@@ -226,14 +222,15 @@ void CEapSim::SetIndexL(
 	iIndexType = aIndexType;
 	iIndex = aIndex;
 	
-	CleanupStack::PopAndDestroy(2); // db
+	CleanupStack::PopAndDestroy(&db);
+	CleanupStack::PopAndDestroy(&session);
 }
 
 void CEapSim::SetConfigurationL(const EAPSettings& aSettings)
 {
 	RDbNamedDatabase db;
 
-	RDbs session;	
+	RFs session;
 	
 	// This also creates the IAP entry if it doesn't exist
 	EapSimDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
@@ -248,14 +245,15 @@ void CEapSim::SetConfigurationL(const EAPSettings& aSettings)
 		iIndex,
 		iTunnelingType);		
 		
-	CleanupStack::PopAndDestroy(2); // db, session
+	CleanupStack::PopAndDestroy(&db);
+	CleanupStack::PopAndDestroy(&session);
 }
 
 void CEapSim::GetConfigurationL(EAPSettings& aSettings)
 {
 	RDbNamedDatabase db;
 
-	RDbs session;
+	RFs session;
 	
 	// This also creates the IAP entry if it doesn't exist
 	EapSimDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
@@ -270,7 +268,8 @@ void CEapSim::GetConfigurationL(EAPSettings& aSettings)
 		iIndex,
 		iTunnelingType);
 		
-	CleanupStack::PopAndDestroy(2); // db, session
+	CleanupStack::PopAndDestroy(&db);
+	CleanupStack::PopAndDestroy(&session);
 }
 
 void CEapSim::CopySettingsL(
@@ -294,7 +293,7 @@ void CEapSim::CopySettingsL(
 
 	RDbNamedDatabase db;
 
-	RDbs session;
+	RFs session;
 	
 	EapSimDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 	
@@ -310,7 +309,8 @@ void CEapSim::CopySettingsL(
 		aDestinationIndex, 
 		iTunnelingType);
 		
-	CleanupStack::PopAndDestroy(2); // db
+	CleanupStack::PopAndDestroy(&db);
+	CleanupStack::PopAndDestroy(&session);
 	
 }
 

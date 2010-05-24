@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18 %
+* %version: 13.1.9 %
 */
 
 #if !defined(_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H_)
@@ -52,14 +52,15 @@ class abs_eap_configuration_if_c;
 */
 
 
-class EAP_EXPORT eap_am_type_protected_setup_symbian_c
-: public eap_am_type_simple_config_c
+class EAP_EXPORT CEapAmProtectedSetupSymbian
+: public CBase
+, public eap_am_type_simple_config_c
 {
 public:
 
 	//--------------------------------------------------	
 	
-	EAP_FUNC_IMPORT static eap_am_type_protected_setup_symbian_c* NewL(
+	EAP_FUNC_IMPORT static CEapAmProtectedSetupSymbian* NewL(
 		abs_eap_am_tools_c * const tools,
 		abs_eap_base_type_c * const partner,
 		const TIndexType aIndexType,
@@ -71,7 +72,7 @@ public:
 		abs_eap_configuration_if_c * const configuration_if);
 		
 	// 
-	EAP_FUNC_IMPORT ~eap_am_type_protected_setup_symbian_c();	
+	EAP_FUNC_IMPORT virtual ~CEapAmProtectedSetupSymbian();	
 	
 	EAP_FUNC_IMPORT void set_is_valid();	
 		
@@ -243,7 +244,7 @@ protected:
 
 	//--------------------------------------------------
 
-	eap_am_type_protected_setup_symbian_c(
+	CEapAmProtectedSetupSymbian(
 		abs_eap_am_tools_c * const tools,
 		abs_eap_base_type_c * const partner,
 		const TIndexType aIndexType,
@@ -330,7 +331,7 @@ private:
     
 	//-----------------------------------------------------------------	
 	
-}; // class eap_am_type_protected_setup_symbian_c
+}; // class CEapAmProtectedSetupSymbian
 
 
 #endif //#if !defined(_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H_)

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12 %
+* %version: %
 */
 
 #if !defined(_TLS_PEAP_TLV_HEADER_H_)

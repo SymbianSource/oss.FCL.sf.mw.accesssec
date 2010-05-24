@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 46 %
+* %version: %
 */
 
 // This is enumeration of EAPOL source code.
@@ -356,8 +356,8 @@ eap_status_e eapol_key_state_c::create_4_way_handshake_message_3(
 
 	u32_t extra_encryption_padding_and_block(0ul);
 
-	if (m_eapol_pairwise_cipher == eapol_RSNA_key_header_c::eapol_RSNA_cipher_CCMP
-		|| m_eapol_group_cipher == eapol_RSNA_key_header_c::eapol_RSNA_cipher_CCMP)
+	//if (m_eapol_pairwise_cipher == eapol_RSNA_key_header_c::eapol_RSNA_cipher_CCMP
+	//	|| m_eapol_group_cipher == eapol_RSNA_key_header_c::eapol_RSNA_cipher_CCMP)
 	{
 		extra_encryption_padding_and_block = 2ul * EAP_CRYPTO_AES_WRAP_BLOCK_SIZE;
 	}
@@ -978,11 +978,14 @@ eap_status_e eapol_key_state_c::start_4_way_handshake(
 			m_am_tools, 
 			TRACE_FLAGS_DEFAULT, 
 			(EAPL("EAPOL_KEY: %s: eapol_key_state_c::start_4_way_handshake(): ")
-			 EAPL("Start 4-Way Handshake, m_authentication_type=%d\n"),
+			 EAPL("Start 4-Way Handshake, m_authentication_type=%d=%s\n"),
 			 (m_is_client == true ? "client": "server"),
-			 m_authentication_type));
+			 m_authentication_type,
+			 eapol_key_state_string_c::get_eapol_key_authentication_type_string(m_authentication_type)));
 	}
-	else if (m_authentication_type == eapol_key_authentication_type_802_1X)
+	else if (m_authentication_type == eapol_key_authentication_type_dynamic_WEP
+			|| m_authentication_type == eapol_key_authentication_type_EAP_authentication_no_encryption
+			)
 	{
 		// No 4-Way Handshake needed.
 		// AP will send unicast and broad cast keys in EAPOL key messages.
@@ -990,9 +993,10 @@ eap_status_e eapol_key_state_c::start_4_way_handshake(
 			m_am_tools, 
 			TRACE_FLAGS_DEFAULT, 
 			(EAPL("EAPOL_KEY: %s: eapol_key_state_c::start_4_way_handshake(): ")
-			 EAPL("Dynamic WEP, m_authentication_type=%d\n"),
+			 EAPL("Dynamic WEP, m_authentication_type=%d=%s\n"),
 			(m_is_client == true ? "client": "server"),
-			m_authentication_type));
+			m_authentication_type,
+			eapol_key_state_string_c::get_eapol_key_authentication_type_string(m_authentication_type)));
 
 		m_eapol_key_handshake_type = eapol_key_handshake_type_dynamic_WEP;
 
@@ -1008,22 +1012,25 @@ eap_status_e eapol_key_state_c::start_4_way_handshake(
 			m_am_tools, 
 			TRACE_FLAGS_DEFAULT, 
 			(EAPL("EAPOL_KEY: %s: eapol_key_state_c::start_4_way_handshake(): ")
-			 EAPL("No 4-Way Handshake, m_authentication_type=%d\n"),
+			 EAPL("No 4-Way Handshake, m_authentication_type=%d=%s\n"),
 			(m_is_client == true ? "client": "server"),
-			m_authentication_type));
+			m_authentication_type,
+			eapol_key_state_string_c::get_eapol_key_authentication_type_string(m_authentication_type)));
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
 	}
 
 	if (m_eapol_key_handshake_type != eapol_key_handshake_type_none
+		&& m_eapol_key_handshake_type != eapol_key_handshake_type_authenticated
 		&& m_eapol_key_handshake_type != eapol_key_handshake_type_4_way_handshake)
 	{
 		eapol_key_state_string_c state_string;
 		EAP_TRACE_ERROR(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("WARNING: EAPOL_KEY: %s: start_4_way_handshake(): wrong handshake type %s\n"),
+			(EAPL("WARNING: EAPOL_KEY: %s: start_4_way_handshake(): wrong handshake type m_eapol_key_handshake_type=%d=%s\n"),
 			(m_is_client == true ? "client": "server"),
+			m_eapol_key_handshake_type,
 			state_string.get_eapol_key_handshake_type_string(m_eapol_key_handshake_type)));
 
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1835,7 +1842,7 @@ eap_status_e eapol_key_state_c::process_4_way_handshake_message_4(
 
 	set_eapol_key_state(eapol_key_state_4_way_handshake_successfull);
 
-	m_eapol_key_handshake_type = eapol_key_handshake_type_none;
+	m_eapol_key_handshake_type = eapol_key_handshake_type_authenticated;
 
 	cancel_retransmission();
 
@@ -2469,7 +2476,7 @@ eap_status_e eapol_key_state_c::process_group_key_handshake_message_2(
 
 	set_eapol_key_state(eapol_key_state_group_key_handshake_successfull);
 
-	m_eapol_key_handshake_type = eapol_key_handshake_type_none;
+	m_eapol_key_handshake_type = eapol_key_handshake_type_authenticated;
 
 	cancel_retransmission();
 	cancel_handshake_timeout();

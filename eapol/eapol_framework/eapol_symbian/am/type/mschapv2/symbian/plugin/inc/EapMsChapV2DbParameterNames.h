@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8.1.2 %
+* %version: %
 */
 
 #ifndef EAPMSCHAPV2DBPARAMETERNAMES_H
@@ -28,6 +28,7 @@
 
 _LIT(KServiceType, "ServiceType");
 _LIT(KServiceIndex, "ServiceIndex");
+_LIT(KTunnelingTypeVendorId, "TunnelingTypeVendorId");
 _LIT(KTunnelingType, "TunnelingType");
 
 _LIT(KMSCHAPv2LastFullAuthTime, "EAP_MSCHAPv2_last_full_authentication_time");

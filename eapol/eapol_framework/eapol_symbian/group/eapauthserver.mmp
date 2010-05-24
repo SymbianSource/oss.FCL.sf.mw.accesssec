@@ -1,0 +1,126 @@
+/*
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for eapauthserver
+*
+*/
+
+/*
+* %version:  %
+*/
+
+//-------------------------------------------------------------------
+
+#include <platform_paths.hrh>
+#include "eapol.mmh"
+
+//-------------------------------------------------------------------
+CAPABILITY ALL -TCB
+VENDORID VID_DEFAULT
+
+TARGET			EapAuthServer.dll
+TARGETTYPE		dll
+UID			0x1000008d  0x20026807
+
+///////////////////////////////////////////////////////////////////
+
+LANG	SC
+
+
+//USERINCLUDE ../../wapi_symbian/wapi_client/include/
+//USERINCLUDE ../../wapi_symbian/wapi_server/include/
+//USERINCLUDE ../../wapi_symbian/wapi_adaptation/
+USERINCLUDE ../eap_if/include
+USERINCLUDE ../eap_server/include
+USERINCLUDE ../../eapol_common/am/include
+USERINCLUDE ../../eapol_common/include
+USERINCLUDE ../../eapol_symbian/am/include
+USERINCLUDE ../../eapol_symbian/am/include/eaptlspeap_db_api_inc
+USERINCLUDE ../../eapol_common/type/simple_config/simple_config/include
+USERINCLUDE ../../eapol_symbian/am/type/fast/symbian/inc
+USERINCLUDE ../../eapol_common/type/tls_peap/eap/include/
+USERINCLUDE ../../eapol_common/type/tls_peap/tls/include/
+#if defined(USE_FAST_EAP_TYPE)
+USERINCLUDE ../../eapol_common/type/tls_peap/tls/include/wpx
+#endif
+USERINCLUDE ../am/type/tls_peap/symbian/plugin/inc
+USERINCLUDE ../am/type/ttls_pap/symbian/inc
+USERINCLUDE ../am/type/symbian/plugin/include
+
+SYSTEMINCLUDE /epoc32/include/ecom
+SYSTEMINCLUDE /epoc32/include/kernel 
+SYSTEMINCLUDE /epoc32/include/libc
+SYSTEMINCLUDE /epoc32/include/libc/netinet
+
+SOURCEPATH ../eap_server/src/
+SOURCE EapCoreIf.cpp
+SOURCE EapPluginIf.cpp
+SOURCE EapServerProcessHandler.cpp
+SOURCE EapScheduler.cpp
+SOURCE EapServer.cpp
+SOURCE EapServerExe.cpp
+SOURCE EapSession.cpp
+SOURCE EapSettingsIf.cpp
+SOURCE eap_am_general_settings_symbian.cpp
+SOURCE eap_am_plugin_symbian.cpp
+SOURCE eap_am_stack_symbian.cpp
+SOURCE eap_loaded_type.cpp
+SOURCE EapServerBackup.cpp
+
+SOURCEPATH ../eap_if/src/
+SOURCE EapClientIf.cpp
+
+SOURCEPATH ../../eapol_common/core
+SOURCE eap_core_server_message_if.cpp
+SOURCE eap_plugin_server_message_if.cpp
+SOURCE eap_general_settings_server_message_if.cpp
+SOURCE eapol_key_state_string.cpp
+
+
+SOURCEPATH  ../../eapol_common/common
+SOURCE		eap_method_settings.cpp
+
+SOURCEPATH    ../am/type/tls_peap/symbian/plugin/src
+SOURCE		  EapTlsPeapCertFetcher.cpp
+
+SOURCEPATH	../am/common/symbian
+SOURCE EapConfigToolsSymbian.cpp
+
+MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
+
+LIBRARY  eaptools.lib eaptrace.lib eapsymbiantools.lib
+
+LIBRARY		euser.lib ecom.lib efsrv.lib cone.lib
+LIBRARY		etelmm.lib etel.lib	// For ETel connection
+LIBRARY		hash.lib random.lib cryptography.lib asn1.lib
+LIBRARY     estor.lib edbms.lib // for RReadStream and RDbColReadStream
+LIBRARY     charconv.lib 
+LIBRARY bafl.lib
+LIBRARY estlib.lib // For memcmp, used in NRC ECC library.
+
+// JPH: EapTlsPeapCertFetcher.cpp requires
+LIBRARY		  x509certnameparser.lib		// For parsing of certificate label. 
+LIBRARY	    x509.lib crypto.lib certstore.lib ctframework.lib pkixcert.lib
+LIBRARY		x500.lib eikctl.lib egul.lib fbscli.lib
+
+#if defined(USE_FAST_EAP_TYPE)
+LIBRARY		pacstoreif.lib
+#endif
+
+// exports unfrozen in winscw
+#if defined(WINSCW)
+EXPORTUNFROZEN
+#endif
+
+//-------------------------------------------------------------------
+// End of File

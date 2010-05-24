@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 13 %
+* %version: %
 */
 
 #if defined(USE_EAP_TLS_SESSION_TICKET)
