@@ -18,7 +18,7 @@
 // INCLUDE FILES
 #include <hb/hbcore/hbsymbianvariant.h>
 #include <e32debug.h> 
-#include <eapexpandedtype.h> 
+#include <EapExpandedType.h> 
 #include "eap_auth_notifier.h"
 #include "eap_auth_observer.h"
 #include "eap_auth_ui_strings.h"
