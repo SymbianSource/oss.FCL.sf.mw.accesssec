@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 51 %
+* %version: 52 %
 */
 
 #include "eap_tools.h"
@@ -136,6 +136,9 @@ eap_am_general_settings_symbian_c::~eap_am_general_settings_symbian_c()
 
 	CloseGeneralSettings();
 
+	delete iCertificateFetcher;
+	iCertificateFetcher = 0;
+
 	EAP_ASSERT(m_shutdown_was_called == true);
 }
 
@@ -183,9 +186,6 @@ eap_status_e eap_am_general_settings_symbian_c::shutdown()
 		this));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_am_general_settings_symbian_c::shutdown()");
-
-	delete iCertificateFetcher;
-	iCertificateFetcher = 0;
 
 	m_shutdown_was_called = true;
 

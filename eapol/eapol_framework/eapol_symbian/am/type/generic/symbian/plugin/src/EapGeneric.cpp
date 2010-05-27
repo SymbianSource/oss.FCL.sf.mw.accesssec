@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 53 %
+* %version: 54 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -340,8 +340,6 @@ void CEapGeneric::DeleteConfigurationL()
 			EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)));
 	}
 	
-	CleanupStack::PushL(internal_settings);
- 	
 	internal_settings->m_IndexType = iIndexType;
 	internal_settings->m_Index = iIndex;
 
@@ -350,6 +348,8 @@ void CEapGeneric::DeleteConfigurationL()
 		&(internal_settings->m_EAPType));
 	if (error != KErrNone)
 	{
+		delete internal_settings;
+
 		(void)EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(error));
 		User::Leave(error);
 	}
@@ -357,7 +357,7 @@ void CEapGeneric::DeleteConfigurationL()
 
 	eap_status_e status = m_server->delete_configuration(internal_settings);
 
-	CleanupStack::PopAndDestroy(internal_settings);
+	delete internal_settings;
 
 	if (status != eap_status_ok)
 	{
@@ -445,7 +445,6 @@ void CEapGeneric::SetIndexL(
 			EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)));
 	}
 	
-  CleanupStack::PushL(internal_settings);
 	internal_settings->m_IndexType = aIndexType;
 	internal_settings->m_Index = aIndex;
 
@@ -454,6 +453,8 @@ void CEapGeneric::SetIndexL(
 		&(internal_settings->m_EAPType));
 	if (error != KErrNone)
 	{
+		delete internal_settings;
+
 		(void)EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(error));
 		User::Leave(error);
 	}
@@ -464,7 +465,7 @@ void CEapGeneric::SetIndexL(
 
 	if (status != eap_status_ok)
 	{
-		 CleanupStack::PopAndDestroy(internal_settings);
+		delete internal_settings;
 
 		User::Leave(m_am_tools->convert_eapol_error_to_am_error(
 			EAP_STATUS_RETURN(m_am_tools, status)));
@@ -476,6 +477,8 @@ void CEapGeneric::SetIndexL(
 
 	if (iCompletionStatus != eap_status_ok)
 	{
+		delete internal_settings;
+
 		User::Leave(m_am_tools->convert_eapol_error_to_am_error(
 			EAP_STATUS_RETURN(m_am_tools, iCompletionStatus)));
 	}
@@ -488,6 +491,8 @@ void CEapGeneric::SetIndexL(
 		&(internal_settings->m_EAPType));
 	if (error != KErrNone)
 	{
+		delete internal_settings;
+
 		(void)EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(error));
 		User::Leave(error);
 	}
@@ -503,7 +508,7 @@ void CEapGeneric::SetIndexL(
 
 	status = m_server->set_index(internal_settings);
 
-	CleanupStack::PopAndDestroy(internal_settings);
+	delete internal_settings;
 
 	if (status != eap_status_ok)
 	{
@@ -542,8 +547,6 @@ void CEapGeneric::SetConfigurationL(const EAPSettings& aSettings)
 			EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)));
 	}
 
-	CleanupStack::PushL(internal_settings);
-
 	eap_status_e status(eap_status_process_general_error);
 
 	TInt error(KErrNone);
@@ -562,7 +565,8 @@ void CEapGeneric::SetConfigurationL(const EAPSettings& aSettings)
 			&(internal_settings->m_EAPType));
 		if (error != KErrNone)
 		{
-			CleanupStack::PopAndDestroy(internal_settings);
+			delete internal_settings;
+
 			(void)EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(error));
 			User::Leave(error);
 		}
@@ -579,7 +583,7 @@ void CEapGeneric::SetConfigurationL(const EAPSettings& aSettings)
 		status = m_am_tools->convert_am_error_to_eapol_error(error);
 	}
 
-	CleanupStack::PopAndDestroy(internal_settings);
+	delete internal_settings;
 
 	if (status != eap_status_ok)
 	{
@@ -616,7 +620,6 @@ void CEapGeneric::GetConfigurationL(EAPSettings& aSettings)
 		User::Leave(m_am_tools->convert_eapol_error_to_am_error(
 			EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)));
 	}
-  CleanupStack::PushL(internal_settings);
 
 	internal_settings->m_IndexType = iIndexType;
 	internal_settings->m_Index = iIndex;
@@ -626,7 +629,8 @@ void CEapGeneric::GetConfigurationL(EAPSettings& aSettings)
 		&(internal_settings->m_EAPType));
 	if (error != KErrNone)
 	{
-		CleanupStack::PopAndDestroy(internal_settings);
+		delete internal_settings;
+
 		(void)EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(error));
 		User::Leave(error);
 	}
@@ -640,7 +644,7 @@ void CEapGeneric::GetConfigurationL(EAPSettings& aSettings)
 
 	eap_status_e status = m_server->get_configuration(internal_settings);
 
-	CleanupStack::PopAndDestroy(internal_settings);
+	delete internal_settings;
 
 	if (status != eap_status_ok)
 	{
@@ -715,6 +719,8 @@ void CEapGeneric::CopySettingsL(
 		&(internal_settings->m_EAPType));
 	if (error != KErrNone)
 	{
+		delete internal_settings;
+
 		(void)EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(error));
 		User::Leave(error);
 	}

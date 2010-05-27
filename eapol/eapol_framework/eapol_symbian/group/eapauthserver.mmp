@@ -16,7 +16,7 @@
 */
 
 /*
-* %version:  %
+* %version:  32 %
 */
 
 //-------------------------------------------------------------------
@@ -115,11 +115,6 @@ LIBRARY		x500.lib eikctl.lib egul.lib fbscli.lib
 
 #if defined(USE_FAST_EAP_TYPE)
 LIBRARY		pacstoreif.lib
-#endif
-
-// exports unfrozen in winscw
-#if defined(WINSCW)
-EXPORTUNFROZEN
 #endif
 
 //-------------------------------------------------------------------

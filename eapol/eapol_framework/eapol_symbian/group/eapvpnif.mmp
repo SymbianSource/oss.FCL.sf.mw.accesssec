@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11.1.8 %
+* %version: 11.1.9 %
 */
 
 #include <platform_paths.hrh>
@@ -70,10 +70,5 @@ END
 
 LIBRARY euser.lib ECom.lib eaptools.lib eaptrace.lib eapsymbiantools.lib edbms.lib efsrv.lib PlatformEnv.lib
 DEBUGLIBRARY    flogger.lib
-
-// exports unfrozen in winscw
-#if defined(WINSCW)
-EXPORTUNFROZEN
-#endif
 
 // End

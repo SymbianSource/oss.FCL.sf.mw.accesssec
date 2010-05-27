@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 14 %
+* %version: 15 %
 */
 
 #include <platform_paths.hrh>
@@ -80,13 +80,6 @@ MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
 LIBRARY		euser.lib ecom.lib eaptools.lib eaptrace.lib eapsymbiantools.lib 
 LIBRARY		cone.lib eikcoctl.lib
 LIBRARY		etelmm.lib etel.lib	// For ETel connection
-
-
-
-// exports unfrozen in winscw
-#if defined(WINSCW)
-EXPORTUNFROZEN
-#endif
 
 //-------------------------------------------------------------------
 // End of File

@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 17 %
+ * %version: 18 %
  */
 
 #ifndef CPEAPUSERPASSWORDUI_H
@@ -86,8 +86,8 @@ private:
     CpSettingFormItemData *mPasswordPrompt;
     CpSettingFormItemData *mPassword;
 
-    EapQtValidator *mValidatorUsername;
-    EapQtValidator *mValidatorPassword;
+    QScopedPointer<EapQtValidator> mValidatorUsername;
+    QScopedPointer<EapQtValidator> mValidatorPassword;
     
     bool mPasswordStored;
     bool mPasswordChanged;

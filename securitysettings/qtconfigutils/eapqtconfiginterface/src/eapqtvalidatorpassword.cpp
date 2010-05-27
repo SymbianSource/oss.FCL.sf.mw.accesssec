@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 6 %
+ * %version: 7 %
  */
 
 #include <HbEditorInterface>
@@ -83,6 +83,11 @@ EapQtValidator::Status EapQtValidatorPassword::validateGeneral(QVariant value)
 
 void EapQtValidatorPassword::updateEditor(HbLineEdit *edit)
 {
+    Q_ASSERT(edit);
+    if(edit == NULL) {
+        return;
+    }
+
     switch (mEapType.type()) {
     case EapQtExpandedEapType::TypeEapGtc:
     case EapQtExpandedEapType::TypeEapMschapv2:
@@ -100,6 +105,8 @@ void EapQtValidatorPassword::updateEditor(HbLineEdit *edit)
 void EapQtValidatorPassword::updateEditorGeneral(HbLineEdit *edit)
 {
     qDebug("EapQtValidatorPassword::updateEditorGeneral()");
+
+    Q_ASSERT(edit);
 
     edit->setMaxLength(EapQtConfigInterfacePrivate::StringMaxLength);
     edit->setInputMethodHints(Qt::ImhNoAutoUppercase | Qt::ImhPreferLowercase

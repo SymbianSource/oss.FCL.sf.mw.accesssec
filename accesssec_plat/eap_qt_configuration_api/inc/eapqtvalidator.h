@@ -17,24 +17,19 @@
  */
 
 /*
- * %version: 1 %
+ * %version: 2 %
  */
 
 #ifndef EAPQTVALIDATOR_H
 #define EAPQTVALIDATOR_H
 
 #include <QVariant>
+#include <eapqtconfigdefs.h>
 
 /*!
  * @addtogroup group_eap_config_api
  * @{
  */
-
-#ifdef BUILD_EAP_QT_CONFIG_INTERFACE_DLL
-#define EAP_QT_CONFIG_INTERFACE_EXPORT Q_DECL_EXPORT
-#else
-#define EAP_QT_CONFIG_INTERFACE_EXPORT Q_DECL_IMPORT
-#endif
 
 class HbLineEdit;
 

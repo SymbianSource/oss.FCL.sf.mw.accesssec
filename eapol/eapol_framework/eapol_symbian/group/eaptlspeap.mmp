@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 44.1.16 %
+* %version: 44.1.17 %
 */
 
 #include <platform_paths.hrh>
@@ -156,11 +156,6 @@ LIBRARY     charconv.lib
 LIBRARY		HbCore.lib
 LIBRARY		HbWidgets.lib
 LIBRARY   eap_notifier.lib
-
-// exports unfrozen in winscw
-#if defined(WINSCW)
-EXPORTUNFROZEN
-#endif
 
 //-------------------------------------------------------------------
 // End of File

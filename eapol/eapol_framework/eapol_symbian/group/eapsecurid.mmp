@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16.1.11 %
+* %version: 16.1.13 %
 */
 
 #include <platform_paths.hrh>
@@ -79,13 +79,6 @@ LIBRARY		HbWidgets.lib
 LIBRARY   eap_notifier.lib
 
 LANG		  SC
-
-// exports unfrozen in winscw
-#if defined(WINSCW)
-EXPORTUNFROZEN
-#endif
-
-//-------------------------------------------------------------------
 
 //-------------------------------------------------------------------
 // End of File

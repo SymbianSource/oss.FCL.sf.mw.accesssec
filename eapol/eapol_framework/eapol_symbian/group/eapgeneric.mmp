@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 22 %
+* %version: 23 %
 */
 
 #include <platform_paths.hrh>
@@ -86,11 +86,6 @@ LIBRARY	eikdlg.lib
 LIBRARY	eikcore.lib
 LIBRARY	hlplch.lib
 LIBRARY		featmgr.lib
-
-// exports unfrozen in winscw
-#if defined(WINSCW)
-EXPORTUNFROZEN
-#endif
 
 //-------------------------------------------------------------------
 // End of File

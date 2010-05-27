@@ -1,0 +1,5 @@
+EXPORTS
+	?Cancel@CEapAuthNotifier@@QAEXXZ @ 1 NONAME ; void CEapAuthNotifier::Cancel(void)
+	?NewL@CEapAuthNotifier@@SAPAV1@AAVMNotificationCallback@@@Z @ 2 NONAME ; class CEapAuthNotifier * CEapAuthNotifier::NewL(class MNotificationCallback &)
+	?StartL@CEapAuthNotifier@@QAEXW4EEapNotifierType@1@PAUTEapDialogInfo@1@AAVTEapExpandedType@@@Z @ 3 NONAME ; void CEapAuthNotifier::StartL(enum CEapAuthNotifier::EEapNotifierType, struct CEapAuthNotifier::TEapDialogInfo *, class TEapExpandedType &)
+

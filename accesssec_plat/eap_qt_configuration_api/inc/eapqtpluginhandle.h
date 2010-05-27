@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 3 %
+ * %version: 4 %
  */
 
 #ifndef EAPQTPLUGINHANDLE_H
@@ -25,17 +25,12 @@
 
 #include <qglobal.h>
 #include <QMetaType>
-
-#ifdef BUILD_EAP_QT_PLUGIN_INFO_DLL
-#define EAP_QT_PLUGIN_HANDLE_EXPORT Q_DECL_EXPORT
-#else
-#define EAP_QT_PLUGIN_HANDLE_EXPORT Q_DECL_IMPORT
-#endif
+#include <eapqtconfigdefs.h>
 
 class EapQtExpandedEapType;
 class EapQtPluginHandlePrivate;
 
-class EAP_QT_PLUGIN_HANDLE_EXPORT EapQtPluginHandle
+class EAP_QT_PLUGIN_INFO_EXPORT EapQtPluginHandle
 {
 public:
     
@@ -61,8 +56,8 @@ public:
     EapQtPluginHandle();
     EapQtPluginHandle(Plugin id);
     EapQtPluginHandle(EapQtExpandedEapType type); // maps type to default UIDs
-    EapQtPluginHandle(EapQtExpandedEapType type, int uid);
     EapQtPluginHandle(const EapQtPluginHandle& handle);
+    EapQtPluginHandle(EapQtExpandedEapType type, int uid);
     ~EapQtPluginHandle();
 
     EapQtExpandedEapType type() const;

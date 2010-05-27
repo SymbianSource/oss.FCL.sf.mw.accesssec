@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 1 %
+ * %version: 3 %
  */
 
 #ifndef EAPQTCONFIG_H
@@ -25,20 +25,13 @@
 
 #include <QList>
 #include <QVariant>
-
-#ifdef BUILD_EAP_QT_CONFIG_INTERFACE_DLL
-#define EAP_QT_CONFIG_EXPORT Q_DECL_EXPORT
-#else
-#define EAP_QT_CONFIG_EXPORT Q_DECL_IMPORT
-#endif
+#include <eapqtconfigdefs.h>
 
 class EapQtConfigPrivate;
 
-class EAP_QT_CONFIG_EXPORT EapQtConfig
+class EAP_QT_CONFIG_INTERFACE_EXPORT EapQtConfig
 {
 public:
-
-    // TODO: document default values
 
     enum SettingsId
     {
@@ -76,45 +69,18 @@ public:
         /*! uint */
         SessionValidityTime,
         /*! 
-         * QList<uint> contains RFC numbers for activated ciphersuites
+         * QList<uint> contains RFC2246 numbers for activated ciphersuites
          *
-         * Refer to RFC2246 chapter A.5 for the values.
-         *
-         * Supported CipherSuites by EAP Server default implementation: 
-         * TLS_NULL_WITH_NULL_NULL = (0x0000), 
-         * - No key exchange, no encryption and no authentication.
-         * TLS_RSA_WITH_RC4_128_MD5 = (0x0004),
-         * - RSA key exchange, RC4_128 encryption and MD5 authentication.
-         *   NOTE this is included only because PEAP requires this cipher 
-         *   suite as a mandatory. Think carefully whether this meets your 
-         *   security requirements.
-         * TLS_RSA_WITH_RC4_128_SHA = (0x0005), 
-         * - RSA key exchange, RC4_128 encryption and SHA1 authentication.
-         *   NOTE this is included only because PEAP requires this cipher 
-         *   suite as a mandatory. Think carefully whether this meets your 
-         *   security
-         *   requirements.
-         * TLS_RSA_WITH_3DES_EDE_CBC_SHA = (0x000a)
-         * - RSA key exchange, 3DES-EDE-CBC encryption and SHA1 
-         *   authentication.
-         * TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA = (0x0016)
-         * - Diffie-Helmann RSA key exchange, 3DES-EDE-CBC encryption and SHA1
-         *   authentication.
-         * TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA = (0x0013)
-         * - Diffie-Helmann DSS key exchange, 3DES-EDE-CBC encryption and SHA1
-         *   authentication.
+         * TLS_NULL_WITH_NULL_NULL           = 0x0000 
+         * TLS_RSA_WITH_RC4_128_MD5          = 0x0004
+         * TLS_RSA_WITH_RC4_128_SHA          = 0x0005 
+         * TLS_RSA_WITH_3DES_EDE_CBC_SHA     = 0x000a
+         * TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA = 0x0016
+         * TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA = 0x0013
          * TLS_RSA_WITH_AES_128_CBC_SHA      = 0x002F
-         * - RSA key exchange, AES-128 encryption and SHA1 authentication.
          * TLS_DHE_DSS_WITH_AES_128_CBC_SHA  = 0x0032
-         * - Diffie-Helmann DSS key exchange, AES-128-CBC encryption and SHA1
-         *   authentication.
          * TLS_DHE_RSA_WITH_AES_128_CBC_SHA  = 0x0033
-         * - Diffie-Helmann RSA key exchange, AES-128-CBC encryption and SHA1
-         *   authentication.
-         * TLS_DH_anon_WITH_AES_128_CBC_SHA  = 0x0034,
-         * - Supported when EAP-FAST is supported 
-         * - Diffie-Helmann anonymous key exchange, AES-128-CBC encryption and 
-         *   SHA1 authentication.
+         * TLS_DH_anon_WITH_AES_128_CBC_SHA  = 0x0034
          */
         CipherSuites,
         /*! bool */

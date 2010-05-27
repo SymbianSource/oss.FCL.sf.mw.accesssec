@@ -15,7 +15,7 @@
 #	EAP method configuration QT interface
 #
 
-# %version: 17 %
+# %version: 18 %
 
 
 TEMPLATE            = lib
@@ -79,10 +79,7 @@ symbian {
     TARGET.EPOCALLOWDLLDATA = 1
     
     TARGET.CAPABILITY = CAP_GENERAL_DLL
-    
-    # TODO: exports not frozen yet
-    MMP_RULES += EXPORTUNFROZEN
-            
+                
     BLD_INF_RULES.prj_exports += \ 
   		"rom/eapqtconfiginterface.iby CORE_MW_LAYER_IBY_EXPORT_PATH(eapqtconfiginterface.iby)"
 

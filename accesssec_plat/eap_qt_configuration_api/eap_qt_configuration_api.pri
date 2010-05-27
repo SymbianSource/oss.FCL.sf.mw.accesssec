@@ -15,7 +15,7 @@
 #	EAP Qt configuration API project include
 #
 
-# %version: 1 %
+# %version: 2 %
 
 
 PLATFORM_HEADERS += \
@@ -25,4 +25,5 @@ PLATFORM_HEADERS += \
     eap_qt_configuration_api/inc/eapqtexpandedeaptype.h \
     eap_qt_configuration_api/inc/eapqtpluginhandle.h \
     eap_qt_configuration_api/inc/eapqtplugininfo.h \
-    eap_qt_configuration_api/inc/eapqtvalidator.h
+    eap_qt_configuration_api/inc/eapqtvalidator.h \
+    eap_qt_configuration_api/inc/eapqtconfigdefs.h

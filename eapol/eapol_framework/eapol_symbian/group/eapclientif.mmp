@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 8 %
 */
 
 #include <platform_paths.hrh>
@@ -51,10 +51,5 @@ SOURCE REapSession.cpp
 SOURCE EapClientIf.cpp
 
 LIBRARY		euser.lib ecom.lib eapauthserver.lib eaptools.lib eaptrace.lib
-
-// exports unfrozen in winscw
-#if defined(WINSCW)
-EXPORTUNFROZEN
-#endif
 
 // end

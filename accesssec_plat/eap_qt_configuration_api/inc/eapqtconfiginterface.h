@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 1 %
+ * %version: 2 %
  */
 
 #ifndef EAPQTCONFIGINTERFACE_H
@@ -25,17 +25,12 @@
 
 #include <qglobal.h>
 #include <eapqtconfig.h>
+#include <eapqtconfigdefs.h>
 
 /*!
  * @addtogroup group_eap_config_api
  * @{
  */
-
-#ifdef BUILD_EAP_QT_CONFIG_INTERFACE_DLL
-#define EAP_QT_CONFIG_INTERFACE_EXPORT Q_DECL_EXPORT
-#else
-#define EAP_QT_CONFIG_INTERFACE_EXPORT Q_DECL_IMPORT
-#endif
 
 class CpBaseSettingView;
 class EapQtValidator;
@@ -58,7 +53,7 @@ public:
         EapBearerTypeVpn,
     };
 
-    static const int IAP_ID_UNDEFINED = -1;
+    static const int IapIdUndefined = -1;
 
 public:
 

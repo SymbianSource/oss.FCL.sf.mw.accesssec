@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 2 %
+ * %version: 3 %
  */
 
 #ifndef EAPQTCERTIFICATEINFO_P_H
@@ -35,14 +35,13 @@ public:
     
     // copy constructor
     EapQtCertificateInfoPrivate(const EapQtCertificateInfoPrivate &certInfo);
-    // assignment operator
-    EapQtCertificateInfoPrivate &operator=(const EapQtCertificateInfoPrivate &certInfo);
 
     QVariant value(int id);
     void setValue(int id, QVariant newValue);
 
 private:
-
+    // disable assignment
+    EapQtCertificateInfoPrivate &operator=(const EapQtCertificateInfoPrivate&);
     QHash<int, QVariant> mCerts;
 
 };

@@ -17,7 +17,7 @@
  */
 
 /*
- * %version:  15 %
+ * %version:  16 %
  */
 
 // System includes
@@ -92,9 +92,7 @@ CpEapSimAkaUi::~CpEapSimAkaUi()
 {
     qDebug("CpEapSimAkaUi::~CpEapSimAkaUi");
 
-    delete mValidatorRealm;
-    delete mValidatorUsername;
-
+    // mValidatorRealm, mValidatorUsername
     // mConfigIf: scoped pointer deleted automatically
 }
 
@@ -197,19 +195,15 @@ void CpEapSimAkaUi::setValidator(const QModelIndex modelIndex)
     
     if (modelItem == mUsername) {
         // When username lineEdit is activated (shown) first time, validator is added
-        if (NULL == mValidatorUsername) {
-            mValidatorUsername = mConfigIf->validatorEap(mPluginInfo.pluginHandle().type(),
-                EapQtConfig::Username);           
-        }
+        mValidatorUsername.reset(mConfigIf->validatorEap(mPluginInfo.pluginHandle().type(),
+            EapQtConfig::Username));
         HbLineEdit *edit = qobject_cast<HbLineEdit *> (viewItem->dataItemContentWidget());
         mValidatorUsername->updateEditor(edit);
     }
     else if (modelItem == mRealm) {
         // When realm lineEdit is activated (shown) first time, validator is added
-        if (NULL == mValidatorRealm) {
-            mValidatorRealm = mConfigIf->validatorEap(mPluginInfo.pluginHandle().type(),
-                EapQtConfig::Realm);           
-        }
+        mValidatorRealm.reset(mConfigIf->validatorEap(mPluginInfo.pluginHandle().type(),
+                EapQtConfig::Realm));
         HbLineEdit *edit = qobject_cast<HbLineEdit *> (viewItem->dataItemContentWidget());
         mValidatorRealm->updateEditor(edit);
     }
@@ -310,8 +304,8 @@ bool CpEapSimAkaUi::validate()
 {
     bool valid = false;
 
-    if (validateGroup(mUsername, mUsernameAutomatic, mValidatorUsername) && validateGroup(mRealm,
-        mRealmAutomatic, mValidatorRealm)) {
+    if (validateGroup(mUsername, mUsernameAutomatic, mValidatorUsername.data()) 
+        && validateGroup(mRealm, mRealmAutomatic, mValidatorRealm.data())) {
         valid = true;
     }
 

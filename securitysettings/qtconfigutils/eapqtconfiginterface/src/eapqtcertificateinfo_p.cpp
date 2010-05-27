@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 4 %
+ * %version: 5 %
  */
 
 #include "eapqtcertificateinfo_p.h"
@@ -38,17 +38,6 @@ EapQtCertificateInfoPrivate::EapQtCertificateInfoPrivate(
     const EapQtCertificateInfoPrivate &certInfo)
 {
     mCerts = certInfo.mCerts;
-}
-
-EapQtCertificateInfoPrivate& EapQtCertificateInfoPrivate::operator=(
-    const EapQtCertificateInfoPrivate &certInfo)
-{
-    // check if assigning to myself
-    if(this != &certInfo) 
-    {
-        mCerts = certInfo.mCerts;
-    }
-    return *this;
 }
 
 QVariant EapQtCertificateInfoPrivate::value(int id)

@@ -15,7 +15,7 @@
 #   QT EAP plugin information handling component
 #
 
-# %version: 9 %
+# %version: 11 %
 
 
 TEMPLATE            = lib
@@ -59,10 +59,7 @@ symbian {
     TARGET.EPOCALLOWDLLDATA = 1
     
     TARGET.CAPABILITY = CAP_GENERAL_DLL
-    
-    # exports not frozen yet
-    MMP_RULES += EXPORTUNFROZEN
-        
+            
     BLD_INF_RULES.prj_exports += \ 
   		"rom/eapqtplugininfo.iby CORE_MW_LAYER_IBY_EXPORT_PATH(eapqtplugininfo.iby)"        
 }

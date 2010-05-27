@@ -17,7 +17,7 @@
  */
 
 /*
- * %version:  11 %
+ * %version:  12 %
  */
 
 #ifndef CPEAPSIMAKAUI_H
@@ -86,8 +86,8 @@ private:
     CpSettingFormItemData *mRealmAutomatic;
     CpSettingFormItemData *mRealm;
 
-    EapQtValidator *mValidatorRealm;
-    EapQtValidator *mValidatorUsername;
+    QScopedPointer<EapQtValidator> mValidatorRealm;
+    QScopedPointer<EapQtValidator> mValidatorUsername;
 };
 
 /*! @} */

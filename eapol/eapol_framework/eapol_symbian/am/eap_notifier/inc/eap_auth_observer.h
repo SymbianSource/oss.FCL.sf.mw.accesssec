@@ -74,14 +74,13 @@ NONSHARABLE_CLASS ( CEapAuthObserver ) : public CBase, public MHbDeviceDialogObs
         void OldPwdQueryDataReceived( CHbSymbianVariantMap& aData );
         
     private:
-        
-        /* Current EAP notifier type to serve */
-        CEapAuthNotifier::EEapNotifierType iType;
-        
         /* Pointer to the object that triggered the dialog opening,
          * needed to update the information about the user input.
          */
         CEapAuthNotifier* iNotifier;
+        
+        /* Current EAP notifier type to serve */
+        CEapAuthNotifier::EEapNotifierType iType;
     };
 
 #endif /* __EAPAUTHOBSERVER_H__ */

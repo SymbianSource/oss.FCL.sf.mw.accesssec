@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 3 %
+ * %version: 5 %
  */
 
 #ifndef EAPQTVALIDATOR_USERNAME_H
@@ -36,7 +36,7 @@ class EapQtValidatorUsername: public EapQtValidator
 {
 public:
 
-    EapQtValidatorUsername(EapQtExpandedEapType type);
+    explicit EapQtValidatorUsername(EapQtExpandedEapType type);
     ~EapQtValidatorUsername();
 
     // from EapQtValidator
@@ -49,6 +49,7 @@ private:
     Q_DISABLE_COPY(EapQtValidatorUsername)
 
     EapQtValidator::Status validateGeneral(QVariant value);
+    bool validateCharacters(QString& str);
     void updateEditorGeneral(HbLineEdit *edit);
 
 private:

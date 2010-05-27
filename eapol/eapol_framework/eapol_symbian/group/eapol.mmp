@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 46 %
+* %version: 47 %
 */
 
 //-------------------------------------------------------------------
@@ -117,11 +117,6 @@ LIBRARY		euser.lib hash.lib random.lib cryptography.lib efsrv.lib asn1.lib edbms
 LIBRARY   charconv.lib 
 
 MACRO USE_EAP_INTERFACE_EXPORTS
-
-// exports unfrozen in winscw
-#if defined(WINSCW)
-EXPORTUNFROZEN
-#endif
 
 //-------------------------------------------------------------------
 // End of File

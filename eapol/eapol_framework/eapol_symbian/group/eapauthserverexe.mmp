@@ -16,7 +16,7 @@
 */
 
 /*
-* %version:  %
+* %version:  13 %
 */
 
 #include <platform_paths.hrh>
@@ -51,11 +51,6 @@ MW_LAYER_SYSTEMINCLUDE
 
 
 LIBRARY 		euser.lib ecom.lib EapAuthServer.lib
-
-// exports unfrozen in winscw
-#if defined(WINSCW)
-EXPORTUNFROZEN
-#endif
 
 EPOCSTACKSIZE 0x4000
 

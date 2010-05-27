@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 3 %
+ * %version: 4 %
  */
 
 #ifndef EAPQTVALIDATOR_PASSWORD_H
@@ -36,7 +36,7 @@ class EapQtValidatorPassword : public EapQtValidator
 {
 public:
 
-    EapQtValidatorPassword(EapQtExpandedEapType type);
+    explicit EapQtValidatorPassword(EapQtExpandedEapType type);
     ~EapQtValidatorPassword();
 
     // from EapQtValidator

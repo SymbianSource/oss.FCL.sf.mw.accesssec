@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 5 %
+ * %version: 6 %
  */
 
 #include <HbEditorInterface>
@@ -84,6 +84,11 @@ EapQtValidator::Status EapQtValidatorRealm::validateGeneral(QVariant value)
 
 void EapQtValidatorRealm::updateEditor(HbLineEdit *edit)
 {
+    Q_ASSERT(edit);
+    if(edit == NULL) {
+        return;
+    }
+
     switch (mEapType.type()) {
     case EapQtExpandedEapType::TypeEapAka:
     case EapQtExpandedEapType::TypeEapFast:
@@ -105,6 +110,8 @@ void EapQtValidatorRealm::updateEditor(HbLineEdit *edit)
 void EapQtValidatorRealm::updateEditorGeneral(HbLineEdit *edit)
 {
     qDebug("EapQtValidatorRealm::updateEditorGeneral()");
+
+    Q_ASSERT(edit);
 
     edit->setMaxLength(EapQtConfigInterfacePrivate::StringMaxLength);
     edit->setInputMethodHints(Qt::ImhNoAutoUppercase | Qt::ImhPreferLowercase

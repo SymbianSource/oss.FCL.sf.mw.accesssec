@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 39 %
+ * %version: 41 %
  */
 
 #include <QDir>
@@ -475,38 +475,40 @@ void EapQtConfigInterfacePrivate::copyCertificateInfo(
 
     for (ind = 0; ind < certEntries->Count(); ind++) {
 
+        EapCertificateEntry* certPtr = (*certEntries)[ind];
+
         qDebug() << "EapQtConfigInterfacePrivate - copyCertificateInfo *** certificate starts *** ";
 
-        if ((*certEntries)[ind]->GetSubjectNamePresent() != EFalse) {
+        if (certPtr->GetSubjectNamePresent() != EFalse) {
 
-            text = (*certEntries)[ind]->GetSubjectName();
+            text = certPtr->GetSubjectName();
             cert.setValue(EapQtCertificateInfo::SubjectName, QString::fromUtf16(text->Ptr(),
                 text->Length()));
 
             qDebug() << "EapQtConfigInterfacePrivate - copyCertificateInfo SubjectName: "
                 << QString::fromUtf16(text->Ptr(), text->Length());
         }
-        if ((*certEntries)[ind]->GetIssuerNamePresent() != EFalse) {
+        if (certPtr->GetIssuerNamePresent() != EFalse) {
 
-            text = (*certEntries)[ind]->GetIssuerName();
+            text = certPtr->GetIssuerName();
             cert.setValue(EapQtCertificateInfo::IssuerName, QString::fromUtf16(text->Ptr(),
                 text->Length()));
 
             qDebug() << "EapQtConfigInterfacePrivate - copyCertificateInfo IssuerName: "
                 << QString::fromUtf16(text->Ptr(), text->Length());
         }
-        if ((*certEntries)[ind]->GetSerialNumberPresent() != EFalse) {
+        if (certPtr->GetSerialNumberPresent() != EFalse) {
 
-            text = (*certEntries)[ind]->GetSerialNumber();
+            text = certPtr->GetSerialNumber();
             cert.setValue(EapQtCertificateInfo::SerialNumber, QString::fromUtf16(text->Ptr(),
                 text->Length()));
 
             qDebug() << "EapQtConfigInterfacePrivate - copyCertificateInfo SerialNumber: "
                 << QString::fromUtf16(text->Ptr(), text->Length());
         }
-        if ((*certEntries)[ind]->GetSubjectKeyIdPresent() != EFalse) {
+        if (certPtr->GetSubjectKeyIdPresent() != EFalse) {
 
-            subjectKeyId = (*certEntries)[ind]->GetSubjectKeyId();
+            subjectKeyId = certPtr->GetSubjectKeyId();
             cert.setValue(EapQtCertificateInfo::SubjectKeyId, QByteArray(
                 reinterpret_cast<const char*> (subjectKeyId.Ptr()), subjectKeyId.Length()));
 
@@ -514,18 +516,18 @@ void EapQtConfigInterfacePrivate::copyCertificateInfo(
                 << (QByteArray(reinterpret_cast<const char*> (subjectKeyId.Ptr()),
                     subjectKeyId.Length())).toHex();
         }
-        if ((*certEntries)[ind]->GetThumbprintPresent() != EFalse) {
+        if (certPtr->GetThumbprintPresent() != EFalse) {
 
-            text = (*certEntries)[ind]->GetThumbprint();
+            text = certPtr->GetThumbprint();
             cert.setValue(EapQtCertificateInfo::ThumbPrint, QString::fromUtf16(text->Ptr(),
                 text->Length()));
 
             qDebug() << "EapQtConfigInterfacePrivate - copyCertificateInfo ThumbPrint: "
                 << QString::fromUtf16(text->Ptr(), text->Length());
         }
-        if ((*certEntries)[ind]->GetLabelPresent() != EFalse) {
+        if (certPtr->GetLabelPresent() != EFalse) {
 
-            text = (*certEntries)[ind]->GetLabel();
+            text = certPtr->GetLabel();
             cert.setValue(EapQtCertificateInfo::CertificateLabel, QString::fromUtf16(text->Ptr(),
                 text->Length()));
 
@@ -736,7 +738,6 @@ bool EapQtConfigInterfacePrivate::readConfiguration(const EapQtPluginHandle& out
 {
     qDebug("EapQtConfigInterfacePrivate::readConfiguration(), this = 0x%08x", this);
 
-
     // clear input
     config.clear();
 
@@ -809,10 +810,6 @@ TBool EapQtConfigInterfacePrivate::convertToTbool(bool value)
 
 void EapQtConfigInterfacePrivate::copyToEapSettings(EapQtConfig& config, EAPSettings& eapSettings)
 {
-    // TODO:
-    // - fix & add validation
-    // - check if there are something missing still defined in EapSettings.h
-    // - pac store parameters from eapqtconfig.h
 
     qDebug("EapQtConfigInterfacePrivate::copyToEapSettings(), this = 0x%08x", this);
 
@@ -968,7 +965,7 @@ void EapQtConfigInterfacePrivate::copyToEapSettings(EapQtConfig& config, EAPSett
     varValue = config.value(EapQtConfig::PACGroupReference);
     // do not copy if too large string
     if (varValue.type() == QVariant::String && varValue.toString().count() <= StringMaxLength) {
-        // TODO: what is the format (ascii/unicode?) of iPACGroupReference?
+        // not supported
         qDebug() << "EapQtConfigInterfacePrivate - copyToEapSettings PACGroupReference: "
             << varValue.toString();
     }
@@ -1205,12 +1202,7 @@ void EapQtConfigInterfacePrivate::appendCertificateInfo(bool isCaCertificate,
 
 void EapQtConfigInterfacePrivate::copyFromEapSettings(EAPSettings& eapSettings, EapQtConfig& config)
 {
-    // TODO:
-    // - add validation?
-    // - check if there are something missing still defined in EaPSettings.h
-    // - pac store parameters from eapqtconfig.h
     qDebug("EapQtConfigInterfacePrivate::copyFromEapSettings(), this = 0x%08x", this);
-
 
     int ind = 0;
 

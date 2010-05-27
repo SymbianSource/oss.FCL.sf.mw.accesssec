@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 8 %
+ * %version: 9 %
  */
 
 #include "eapqtconfig.h"
@@ -27,85 +27,6 @@
 //              EapQtConfig                
 //----------------------------------------------------------------------------
 
-/*!
- * TODO: check the list
- * 
- * EAP-SIM (TypeEapSim), EAP-AKA (TypeEapAka)
- * - UsernameAutomatic
- * - Username
- * - RealmAutomatic
- * - Realm
- * - UsePseudonyms
- * - SessionValidityTime
- * - Notifications
- * 
- * EAP-GTC (TypeEapGtc), LEAP (TypeLeap), 
- * EAP-MSCHAPv2 (TypeEapMschapv2), Plain MSCHAPv2 (TypePlainMschapv2),
- * PAP (TypePap)
- * - Username
- * - PasswordPrompt
- * - Password
- * - Notifications
- * 
- * EAP-TLS (TypeEapTls)
- * - AuthorityCertificateAutomatic
- * - AuthorityCertificate
- * - UserCertificate
- * - UsernameAutomatic
- * - Username
- * - RealmAutomatic
- * - Realm
- * - TlsPrivacy
- * - Notifications
- * - CipherSuites
- * 
- * EAP-TTLS (TypeEapTtls)
- * - AuthorityCertificateAutomatic
- * - AuthorityCertificate
- * - UserCertificate
- * - UsernameAutomatic
- * - Username
- * - RealmAutomatic
- * - Realm
- * - TlsPrivacy
- * - InnerType
- * - Notifications
- * - CipherSuites
- * 
- * EAP-FAST (TypeEapFast)
- * - ProvisioningModeAuthenticated
- * - ProvisioningModeUnAuthenticated
- * - AuthorityCertificateAutomatic
- * - AuthorityCertificate
- * - UserCertificate
- * - UsernameAutomatic
- * - Username
- * - RealmAutomatic
- * - Realm
- * - ServerNameVerify
- * - ServerName
- * - TlsPrivacy
- * - InnerType
- * - PacStorePassword
- * - PacStoreReset
- * - CipherSuites
- * 
- * PEAP (TypePeap)
- * - AuthorityCertificateAutomatic
- * - AuthorityCertificate
- * - UserCertificate
- * - UsernameAutomatic
- * - Username
- * - RealmAutomatic
- * - Realm
- * - ServerNameVerify
- * - ServerName
- * - TlsPrivacy
- * - PeapVersion
- * - InnerType
- * - Notifications
- * - CipherSuites
- */
 EapQtConfig::EapQtConfig() :
     d_ptr(new EapQtConfigPrivate)
 {
@@ -145,7 +66,7 @@ void EapQtConfig::clear() {
 QList<EapQtConfig::SettingsId> EapQtConfig::validate(
     QList<EapQtConfig::SettingsId> ids)
 {
-    // TODO: allow validation only for 0 < id < SettingsIdLast
+    // not supported
     Q_UNUSED(ids);
     return QList<EapQtConfig::SettingsId>();
 }

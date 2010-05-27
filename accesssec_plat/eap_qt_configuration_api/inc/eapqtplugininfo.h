@@ -17,19 +17,14 @@
  */
 
 /*
- * %version: 1 %
+ * %version: 2 %
  */
 
 #ifndef EAPQTPLUGININFO_H
 #define EAPQTPLUGININFO_H
 
 #include <QString>
-
-#ifdef BUILD_EAP_QT_PLUGIN_INFO_DLL
-#define EAP_QT_PLUGIN_INFO_EXPORT Q_DECL_EXPORT
-#else
-#define EAP_QT_PLUGIN_INFO_EXPORT Q_DECL_IMPORT
-#endif
+#include <eapqtconfigdefs.h>
 
 class EapQtPluginHandle;
 class EapQtPluginInfoPrivate;

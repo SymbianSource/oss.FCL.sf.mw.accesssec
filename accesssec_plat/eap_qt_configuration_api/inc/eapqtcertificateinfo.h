@@ -18,7 +18,7 @@
  */
 
 /*
- * %version: 1 %
+ * %version: 2 %
  */
 
 #ifndef EAPQTCERTIFICATEINFO_H
@@ -26,16 +26,11 @@
 
 #include <QMetaType>
 #include <QVariant>
-
-#ifdef BUILD_EAP_QT_CONFIG_INTERFACE_DLL
-#define EAP_QT_CERTIFICATE_INFO_EXPORT Q_DECL_EXPORT
-#else
-#define EAP_QT_CERTIFICATE_INFO_EXPORT Q_DECL_IMPORT
-#endif
+#include <eapqtconfigdefs.h>
 
 class EapQtCertificateInfoPrivate;
 
-class EAP_QT_CERTIFICATE_INFO_EXPORT EapQtCertificateInfo
+class EAP_QT_CONFIG_INTERFACE_EXPORT EapQtCertificateInfo
 {
 public:
 

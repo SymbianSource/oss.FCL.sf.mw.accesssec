@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 12.1.4 %
 */
 
 //-------------------------------------------------------------------
@@ -57,11 +57,6 @@ SYSTEMINCLUDE /epoc32/include/libc
 SYSTEMINCLUDE /epoc32/include/libc/netinet
 
 MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
-
-// exports unfrozen in winscw
-#if defined(WINSCW)
-EXPORTUNFROZEN
-#endif
 
 //-------------------------------------------------------------------
 // End of File

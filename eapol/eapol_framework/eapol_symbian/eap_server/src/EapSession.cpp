@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 29 %
 */
 
 
@@ -184,12 +184,14 @@ void CEapSession::ServiceL(const RMessage2& aMessage)
 
 
 	{
+#if 0
+		// Add this later.
 		CheckCapabilityL(
 			aMessage,
 			ETrue,
 			ECapabilityNetworkControl,
 			"EAP-SERVER: Missing ECapabilityNetworkControl");
-
+#endif
 		CheckCapabilityL(
 			aMessage,
 			ETrue,

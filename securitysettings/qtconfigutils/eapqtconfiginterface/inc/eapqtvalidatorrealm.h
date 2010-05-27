@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 3 %
+ * %version: 4 %
  */
 
 #ifndef EAPQTVALIDATOR_REALM_H
@@ -36,7 +36,7 @@ class EapQtValidatorRealm : public EapQtValidator
 {
 public:
 
-    EapQtValidatorRealm(EapQtExpandedEapType type);
+    explicit EapQtValidatorRealm(EapQtExpandedEapType type);
     ~EapQtValidatorRealm();
 
     // from EapQtValidator

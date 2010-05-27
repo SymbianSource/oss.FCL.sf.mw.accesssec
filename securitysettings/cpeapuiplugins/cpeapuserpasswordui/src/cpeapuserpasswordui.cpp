@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 23 %
+ * %version: 24 %
  */
 
 // System includes
@@ -100,9 +100,7 @@ CpEapUserPasswordUi::~CpEapUserPasswordUi()
 {
     qDebug("CpEapUserPasswordUi::~CpEapUserPasswordUi");
 
-    delete mValidatorUsername;
-    delete mValidatorPassword;
-
+    // mValidatorUsername, mValidatorPassword
     // mConfigIf: scoped pointer deleted automatically
 }
 
@@ -197,19 +195,15 @@ void CpEapUserPasswordUi::setValidator(const QModelIndex modelIndex)
     
     if (modelItem == mUsername) {
         // When username lineEdit is activated (shown) first time, validator is added
-        if (NULL == mValidatorUsername) {
-            mValidatorUsername = mConfigIf->validatorEap(mPluginInfo.pluginHandle().type(),
-                EapQtConfig::Username);
-        }
+        mValidatorUsername.reset(mConfigIf->validatorEap(mPluginInfo.pluginHandle().type(),
+            EapQtConfig::Username));
         HbLineEdit *usernameEdit = qobject_cast<HbLineEdit *> (viewItem->dataItemContentWidget());
         mValidatorUsername->updateEditor(usernameEdit);
     }
     else if (modelItem == mPassword) {
         // When password lineEdit is activated (shown) first time, validator is added
-        if (NULL == mValidatorPassword){
-            mValidatorPassword = mConfigIf->validatorEap(mPluginInfo.pluginHandle().type(),
-                EapQtConfig::Password);            
-        }
+        mValidatorPassword.reset(mConfigIf->validatorEap(mPluginInfo.pluginHandle().type(),
+            EapQtConfig::Password));
         mPasswordEdit = qobject_cast<HbLineEdit *> (viewItem->dataItemContentWidget());
         mValidatorPassword->updateEditor(mPasswordEdit);
         // Install event filter to clear dummy password, when password is started to edit.

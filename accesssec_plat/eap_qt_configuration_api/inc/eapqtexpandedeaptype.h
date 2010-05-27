@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 1 %
+ * %version: 2 %
  */
 
 #ifndef EAPQTEXPANDEDEAPTYPE_H
@@ -25,16 +25,12 @@
 
 #include <QByteArray>
 #include <QMetaType>
+#include <eapqtconfigdefs.h>
 
-#ifdef BUILD_EAP_QT_PLUGIN_INFO_DLL
-#define EAP_QT_EXPANDED_EAP_TYPE_EXPORT Q_DECL_EXPORT
-#else
-#define EAP_QT_EXPANDED_EAP_TYPE_EXPORT Q_DECL_IMPORT
-#endif
 
 class EapQtExpandedEapTypePrivate;
-// http://www.iana.org/assignments/eap-numbers
-class EAP_QT_EXPANDED_EAP_TYPE_EXPORT EapQtExpandedEapType
+
+class EAP_QT_PLUGIN_INFO_EXPORT EapQtExpandedEapType
 {
 public:
     enum Type
@@ -59,7 +55,7 @@ public:
     EapQtExpandedEapType();
     EapQtExpandedEapType(const Type type);
     EapQtExpandedEapType(const QByteArray data);
-    EapQtExpandedEapType(const EapQtExpandedEapType & type);
+    EapQtExpandedEapType(const EapQtExpandedEapType& type);
     ~EapQtExpandedEapType();
 
     QByteArray eapExpandedData() const;

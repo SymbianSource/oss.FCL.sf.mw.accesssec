@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 4 %
+ * %version: 5 %
  */
 
 #include "eapqtexpandedeaptype_p.h"
@@ -186,6 +186,8 @@ EapQtExpandedEapTypePrivate::EapQtExpandedEapTypePrivate(const QByteArray data)
     }
     else {
         mType = EapQtExpandedEapType::TypeUndefined;
+        mData = QByteArray(reinterpret_cast<const char*> ((*EapExpandedTypeNone.GetType()).Ptr()),
+            (*EapExpandedTypeNone.GetType()).Length());
     }
     qDebug("EapQtExpandedEapTypePrivate(const QByteArray data) - mType: %d", mType);
 }

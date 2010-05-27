@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 14 %
+ * %version: 15 %
  */
 
 #include "eapqtpluginhandle.h"
@@ -60,6 +60,8 @@ static const EapQtPluginHandle::Plugin typeMapper[EapQtExpandedEapType::TypeLast
     EapQtPluginHandle::PluginPlainMschapv2 
 };
 
+
+
 //----------------------------------------------------------------------------
 //              EapQtPluginHandle
 //----------------------------------------------------------------------------
@@ -72,15 +74,15 @@ EapQtPluginHandle::EapQtPluginHandle() :
 EapQtPluginHandle::EapQtPluginHandle(Plugin id) :
     d_ptr(NULL)
 {
-    Plugin local_id;
+    Plugin localId;
     if (id < PluginLast) {
-        local_id = id;
+        localId = id;
     }
     else {
-        local_id = PluginUndefined;
+        localId = PluginUndefined;
     }
-    d_ptr.reset(new EapQtPluginHandlePrivate(handleMapper[local_id].mType,
-        handleMapper[local_id].mUid));
+    d_ptr.reset(new EapQtPluginHandlePrivate(handleMapper[localId].mType,
+        handleMapper[localId].mUid));
 }
 
 EapQtPluginHandle::EapQtPluginHandle(EapQtExpandedEapType type, int uid) :

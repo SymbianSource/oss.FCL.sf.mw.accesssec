@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 28 %
+ * %version: 29 %
  */
 
 #ifndef EAPQTCONFIGINTERFACEPRIVATE_H
@@ -44,8 +44,6 @@ class EapQtConfigInterfacePrivate
 {
 public:
 
-    // TODO: check all certificate fields. Are they treated correctly, unicode vs. ascii vs. binary?
-
     // maximum lenghts (number of characters) for UTF-16 strings copied to EAP settings
     static const unsigned int StringMaxLength = KGeneralStringMaxLength;
     static const unsigned int CertLabelMaxLength = KMaxCertLabelLength;
@@ -65,6 +63,7 @@ public:
     // - readConfiguration
     // - saveConfiguration
     // - deleteConfiguration
+    // - uiInstance
     // other methods are usable with negative iapId
     EapQtConfigInterfacePrivate(const EapQtConfigInterface::EapBearerType bearerType,
         const int iapId);

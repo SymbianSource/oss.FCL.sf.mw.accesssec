@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 8 %
 */
 
 #include <platform_paths.hrh>
@@ -63,10 +63,5 @@ SOURCE EapCoreInterfaceImplementation.cpp
 SOURCE EapClientIf.cpp
 
 LIBRARY		euser.lib ecom.lib eapclientif.lib eaptools.lib eaptrace.lib eapsymbiantools.lib
-
-// exports unfrozen in winscw
-#if defined(WINSCW)
-EXPORTUNFROZEN
-#endif
 
 // end

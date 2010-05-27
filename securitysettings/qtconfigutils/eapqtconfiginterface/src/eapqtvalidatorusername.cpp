@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 5 %
+ * %version: 7 %
  */
 
 #include <HbEditorInterface>
@@ -72,8 +72,7 @@ EapQtValidator::Status EapQtValidatorUsername::validateGeneral(QVariant value)
     else if (str.length() > EapQtConfigInterfacePrivate::StringMaxLength) {
         status = StatusTooLong;
     }
-    // username and realm are separated with @, not allowed to be part of username
-    else if (str.contains(QChar('@'), Qt::CaseInsensitive)) {
+    else if (!validateCharacters(str)) {
         status = StatusInvalidCharacters;
     }
 
@@ -82,8 +81,36 @@ EapQtValidator::Status EapQtValidatorUsername::validateGeneral(QVariant value)
     return status;
 }
 
+bool EapQtValidatorUsername::validateCharacters(QString& str)
+{
+    bool ret(true);
+
+    switch (mEapType.type()) {
+    case EapQtExpandedEapType::TypeEapAka:
+    case EapQtExpandedEapType::TypeEapFast:
+    case EapQtExpandedEapType::TypeEapSim:
+    case EapQtExpandedEapType::TypeEapTls:
+    case EapQtExpandedEapType::TypeEapTtls:
+    case EapQtExpandedEapType::TypePeap:
+        // these methods have a separate UI setting for realm,
+        // hence @ is not allowed in username field
+        ret = !(str.contains(QChar('@'), Qt::CaseInsensitive));
+        break;
+    default:
+        // username field can contain realm separated with @
+        break;
+    }
+
+    return ret;
+}
+
 void EapQtValidatorUsername::updateEditor(HbLineEdit *edit)
 {
+    Q_ASSERT(edit);
+    if(edit == NULL) {
+        return;
+    }
+
     switch (mEapType.type()) {
     case EapQtExpandedEapType::TypeEapAka:
     case EapQtExpandedEapType::TypeEapFast:
@@ -105,6 +132,8 @@ void EapQtValidatorUsername::updateEditor(HbLineEdit *edit)
 void EapQtValidatorUsername::updateEditorGeneral(HbLineEdit *edit)
 {
     qDebug("EapQtValidatorUsername::updateEditorGeneral()");
+
+    Q_ASSERT(edit);
 
     edit->setMaxLength(EapQtConfigInterfacePrivate::StringMaxLength);
     edit->setInputMethodHints(Qt::ImhNoAutoUppercase | Qt::ImhPreferLowercase

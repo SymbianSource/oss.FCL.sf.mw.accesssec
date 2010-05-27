@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 30 %
+* %version: 31 %
 */
 
 #include "EapServer.h"
@@ -391,9 +391,9 @@ void CEapServer::StopL()
 			(EAPL("CEapServer::StopL(): aSession=0x%08x calls CancelReceive()\n"),
 			aSession));
 
-		if (dynamic_cast<CEapSession *>(aSession) != NULL)
+		if (static_cast<CEapSession *>(aSession) != NULL)
 			{
-			dynamic_cast<CEapSession *>(aSession)->CancelReceive();
+			static_cast<CEapSession *>(aSession)->CancelReceive();
 			}
 	}
 }

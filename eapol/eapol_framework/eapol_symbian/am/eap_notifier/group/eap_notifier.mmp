@@ -16,7 +16,7 @@
 */
 
 /*
-* %version:  %
+* %version:  5 %
 */
 
 // using relative paths for sourcepath and user includes
@@ -41,8 +41,3 @@ LIBRARY	      eapsymbiantools.lib
 LIBRARY	      eaptools.lib
 LIBRARY		    HbCore.lib
 LIBRARY	      HbWidgets.lib
-
-EXPORTUNFROZEN
-
-//deffile ...
-//nostrictdef
