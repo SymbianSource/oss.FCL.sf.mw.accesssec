@@ -16,14 +16,14 @@
 */
 
 /*
-* %version: 11.1.2 %
+* %version: 19 %
 */
 
 #ifndef _EAPMSCHAPV2_H_
 #define _EAPMSCHAPV2_H_
 
 // INCLUDES
-#include <EapType.h>
+#include <EapTypePlugin.h>
 #include "eap_header.h"
 
 // LOCAL CONSTANTS
@@ -33,7 +33,7 @@
 * Class that implements the generic EAP type interface. Implements EAP MSCHAPv2 and 
 * plain MSCHAPv2 protocol.
 */
-class CEapMsChapV2 : public CEapType
+class CEapMsChapV2 : public CEapTypePlugin
 {
 public:		
 	/**
@@ -93,16 +93,13 @@ public:
 	
 #endif // #ifdef USE_EAP_SIMPLE_CONFIG
 
-	/**
-	* Invokes the configuration UI.
-	**/
-	TInt InvokeUiL();
+
 	
 	/**
 	* Gets information about EAP type. 
 	* @return Pointer to a class that contains the EAP type information. Also pushed to cleanup stack.
 	*/
-	CEapTypeInfo* GetInfoLC();
+	CEapTypeInfo* GetInfoL();
 	
 	/**
 	* Deletes EAP type configuration
@@ -124,7 +121,7 @@ public:
 	* EAP type. 
 	* @param aTunnelingType Type number for the tunneling type
 	*/	
-	void SetTunnelingType(const TInt aTunnelingType);
+	void SetTunnelingType(const TEapExpandedType aTunnelingType);
 	
 	/**
 	* Changes the index of the saved parameters.
@@ -159,7 +156,7 @@ protected:
 	* Constructor initialises member variables.
 	*/
 	CEapMsChapV2(const TIndexType aIndexType, const TInt aIndex,
-				 const eap_type_value_e aEapType = eap_type_mschapv2 );
+				 const eap_type_value_e aEapType );
 
 private:
 

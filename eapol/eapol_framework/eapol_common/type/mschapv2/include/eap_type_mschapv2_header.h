@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 14 %
+* %version: %
 */
 
 #ifndef _MSCHAPV2_HEADER_H_

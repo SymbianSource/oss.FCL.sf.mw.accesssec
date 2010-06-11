@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -11,12 +11,12 @@
 *
 * Contributors:
 *
-* Description:  EAP and WLAN authentication protocols.
+* Description:  This class defines Credential attributes for protected setup (previously known as simple config).
 *
 */
 
 /*
-* %version: 4.1.2 %
+* %version: 9 %
 */
 
 #if !defined(_SIMPLE_CONFIG_CREDENTIAL_H_)
@@ -33,7 +33,7 @@
 //----------------------------------------------------------------------------
 
 
-/// This class defines Credential attributes.
+/// This class defines Credential attributes for protected setup (previously known as simple config).
 class EAP_EXPORT simple_config_credential_c
 {
 private:
@@ -73,9 +73,11 @@ public:
 
 	EAP_FUNC_IMPORT void set_network_index(const u8_t index);
 
-	EAP_FUNC_IMPORT u8_t get_network_index();
+	EAP_FUNC_IMPORT u8_t get_network_index() const;
 
 	EAP_FUNC_IMPORT eap_variable_data_c * get_SSID();
+
+	EAP_FUNC_IMPORT const eap_variable_data_c * get_SSID_const() const;
 
 	EAP_FUNC_IMPORT simple_config_Authentication_Type_e get_Authentication_Type();
 
@@ -87,7 +89,11 @@ public:
 
 	EAP_FUNC_IMPORT eap_array_c<network_key_and_index_c> * get_network_keys();
 
+	EAP_FUNC_IMPORT const eap_array_c<network_key_and_index_c> * get_network_keys_const() const;
+
 	EAP_FUNC_IMPORT eap_variable_data_c * get_MAC_address();
+
+	EAP_FUNC_IMPORT const eap_variable_data_c * get_MAC_address_const() const;
 
 	EAP_FUNC_IMPORT bool get_is_valid();
 

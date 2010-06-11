@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 27 %
+* %version: %
 */
 
 #ifndef _MSCHAPV2_TYPES_H_

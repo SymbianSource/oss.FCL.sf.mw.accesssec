@@ -7,15 +7,23 @@
 # at the URL "http://www.eclipse.org/legal/epl-v10.html".
 #
 # Initial Contributors:
-# Nokia Corporation - initial contribution.
+# 	Nokia Corporation - initial contribution.
 #
 # Contributors:
 #
 # Description:
-#
+#	Project file for building accesssec package
+
+# %version: 5 %
+
 
 TEMPLATE = subdirs
 
-SUBDIRS  += securitysettings
+SUBDIRS  += \
+    accesssec_plat \
+    securitysettings
 
 CONFIG += ordered
+
+BLD_INF_RULES.prj_exports += \
+    "$${LITERAL_HASH}include \"./group/bld.inf\""

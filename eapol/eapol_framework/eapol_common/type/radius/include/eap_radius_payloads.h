@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12 %
+* %version: %
 */
 
 #if !defined(_EAP_RADIUS_RESULT_H_)

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 13 %
+* %version: 10.1.2 %
 */
 
 #ifndef _EAPAKAINTERFACE_H_

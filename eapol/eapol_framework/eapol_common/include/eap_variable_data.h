@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 9 %
+* %version: %
 */
 
 #if !defined(_EAP_VARIABLE_DATA_H_)

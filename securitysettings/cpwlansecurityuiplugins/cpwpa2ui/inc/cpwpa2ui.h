@@ -17,7 +17,7 @@
 */
 
 /*
-* %version: 10 %
+* %version: 14 %
 */
 
 
@@ -26,23 +26,17 @@
 
 // System includes
 #include <cpsettingformitemdata.h>
-#include <HbMessageBox>
-//#include <HbTranslator>
-//#include <QSharedPointer>
-#include <QTranslator>
-
+#include <cpwlansecurityplugininterface.h>
 
 // User includes
-#include "cpwlansecurityplugininterface.h"
+
 
 // Forward declarations
-class EapPluginInformation;
-class PluginInformation;
-class CpBaseSettingView;
 class EapQtConfigInterface;
-class EapEntyItemData;
 class CpWpaCmnUi;
 class CmConnectionMethodShim;
+class HbTranslator;
+
 
 /*!
  * @addtogroup group_wlan_security_ui_plugin_wpa2_only
@@ -74,39 +68,19 @@ public: // from CpWlanSecurityPluginInterface
               
        CpSettingFormItemData* uiInstance(
                CpItemDataHelper &dataHelper);
-    
-private:
        
-       bool tryUpdate();
-
-       void handleUpdateError();
-
-       void showMessageBox( HbMessageBox::MessageBoxType type,
-           const QString &text);
-
-       void updateWpaSettings();
-  
-private slots:
- 
-    //void currentEapPlugin(int currentPlugin);    
-    //void wpaTypeChanged(int pskEnable);
-    void pskKeyChanged(QString& key);
-    
+       bool validateSettings();
 
 private:
     
     Q_DISABLE_COPY(CpWpa2Ui)
         
     //!WPA security group item
-    CpSettingFormItemData* mUi;   
-
-    //! Connection method Id
-    int mCmId;
-   
-    //!Translator for all the localisation Text Id's
-    //QSharedPointer<HbTranslator> mTranslator;
-    QTranslator* mTranslator;
+    CpSettingFormItemData* mUi;  
     
+    //!Translator for all the localisation Text Id's    
+   	HbTranslator* mTranslator;
+
     //! Connection Settings Shim connection method pointer    
     CmConnectionMethodShim *mCmCM;    
     
@@ -115,9 +89,6 @@ private:
 	
 	//!WPA ui Implementer Interface
     QScopedPointer <CpWpaCmnUi> mWpa2Ui;
-    
-    //! Message box for info notes
-    QSharedPointer<HbMessageBox> mMessageBox;
 
  };
 

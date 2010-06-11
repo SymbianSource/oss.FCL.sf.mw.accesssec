@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 4.1.5 %
+* %version: %
 */
 
 #if !defined(_EAP_ARRAY_H_)

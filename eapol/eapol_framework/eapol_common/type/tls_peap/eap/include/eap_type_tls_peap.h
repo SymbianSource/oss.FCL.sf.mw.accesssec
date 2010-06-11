@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 23.1.2 %
+* %version: %
 */
 
 #if !defined(_EAP_TYPE_TLS_PEAP_H_)
@@ -772,9 +772,6 @@ public:
 	EAP_FUNC_IMPORT eap_status_e cancel_timer(
 		abs_eap_base_timer_c * const p_initializer, 
 		const u32_t p_id);
-
-	/// @see abs_tls_base_record_c::cancel_all_timers().
-	EAP_FUNC_IMPORT eap_status_e cancel_all_timers();
 
 	/// @see abs_tls_base_record_c::load_module().
 	EAP_FUNC_IMPORT eap_status_e load_module(

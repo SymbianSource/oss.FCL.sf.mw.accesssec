@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 21 %
+* %version: 19.1.11 %
 */
 
 #ifndef __EAPPLUGIN_H__
@@ -27,17 +27,20 @@
 
 #include <wdbifwlansettings.h>
 #include "eap_vpn_if.h"
-#include "abs_eap_core.h"
+//#include "abs_eap_core.h"
 #include "eapol_session_key.h"
-#include "eap_core.h"
 #include "eap_am_tools_symbian.h"
 #include "EapType.h"
 #include "EapolTimer.h"
+#include "abs_eap_session_core.h"
 
 // FORWARD DECLARATIONS
 class CEapType;
+class CEapTypePlugin;
 class eap_am_tools_symbian_c;
 class eap_file_config_c;
+class eap_session_core_base_c;
+class eap_process_tlv_message_data_c;
 
 /**
  * Class:       CEapVpnInterfaceImplementation
@@ -48,7 +51,7 @@ class eap_file_config_c;
  */
 class CEapVpnInterfaceImplementation
 	: public CEapVpnInterface
-	, public abs_eap_core_c
+	, public abs_eap_session_core_c
 	, public abs_eap_base_timer_c
 {
 public:
@@ -320,12 +323,48 @@ public:
     eap_status_e timer_delete_data(
         const u32_t id, void *data);
 
+	eap_status_e complete_get_802_11_authentication_mode(
+		const eap_status_e completion_status,
+		const eap_am_network_id_c * const receive_network_id,
+		const eapol_key_802_11_authentication_mode_e mode);
+
+	eap_status_e complete_remove_eap_session(
+		const bool complete_to_lower_layer,
+		const eap_am_network_id_c * const receive_network_id);
+
+#if defined(USE_EAP_SIMPLE_CONFIG)
+	/**
+	 * This function tells AM to save SIMPLE_CONFIG configuration parameters.
+	 * This is always syncronous call.
+	 */
+	eap_status_e save_simple_config_session(
+		const simple_config_state_e state,
+		EAP_TEMPLATE_CONST eap_array_c<simple_config_credential_c> * const credential_array,
+		const eap_variable_data_c * const new_password,
+		const simple_config_Device_Password_ID_e Device_Password_ID,
+		const simple_config_payloads_c * const other_configuration
+		);
+#endif // #if defined(USE_EAP_SIMPLE_CONFIG)
+
+	static eap_session_core_base_c * new_eap_core_client_message_if_c(
+		abs_eap_am_tools_c * const tools,
+		abs_eap_session_core_c * const partner,
+		const bool is_client_when_true,
+		const u32_t MTU);
+
 private:
 
     TInt CompleteAssociation(const TInt aResult);
     eap_status_e send_eap_identity_request();
     
     eap_status_e create_upper_stack();
+
+	eap_status_e add_configuration_data(
+		eap_process_tlv_message_data_c * const message,
+		const eap_configuration_field_c * field,
+		const eap_configure_type_e type,
+		const eap_variable_data_c * const value_data
+		);
 
 protected:
 
@@ -355,25 +394,17 @@ private:
     TBool iQueryIdentity;
 
     /// Pointer to the lower layer in the stack
-    MAbsEapVpnInterface* iCaller;
+    MAbsEapVpnInterface * iCaller;
 
     /// Pointer to the upper layer in the stack
-    eap_core_c* iEapCore;
+    eap_session_core_base_c * iEapCore;
 
-#ifdef USE_EAP_EXPANDED_TYPES
-    
     eap_type_value_e iRequestedEapType;
 
-#else
-    
-    TUint8 iRequestedEapType;
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-    
     /// Pointer to the tools class
-    eap_am_tools_symbian_c* m_am_tools;
+    eap_am_tools_symbian_c * m_am_tools;
 
-    eap_am_network_id_c* m_receive_network_id;
+    eap_am_network_id_c * m_receive_network_id;
 
 	eap_variable_data_c * m_trace_log_file_name;
     
@@ -388,9 +419,10 @@ private:
     bool m_is_client;	
 
     /// Array for storing the loaded EAP types.
-    RPointerArray<CEapType> m_plugin_if_array;
+    RPointerArray<CEapType> m_eap_if_array;
 
-#ifdef USE_EAP_EXPANDED_TYPES
+    /// Array for storing the loaded EAP types.
+    RPointerArray<CEapTypePlugin> m_eap_plugin_if_array;
 
 	/// Enabled expanded EAP configuration data from CommsDat
 	// This is for the outer most EAP (not tunneled)
@@ -403,23 +435,13 @@ private:
 	/// Array which corresponds with m_plugin_if_array and indicates the types of the loaded EAP types.	
 	eap_array_c<eap_type_value_e> * m_eap_type_array;
 
-#else
-
-    /// EAP configuration data from CommDb
-    TEapArray m_iap_eap_array;
-
-    /// Array which corresponds with m_plugin_if_array and indicates the types of the loaded EAP types.
-    RArray<TUint8> m_eap_type_array;
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
     /// Indicates the bearer type
     TIndexType m_index_type;
 
     /// Indicates the service index in CommDb
     TInt m_index;
 
-    eap_file_config_c* m_fileconfig;
+    eap_file_config_c * m_fileconfig;
 
     u32_t m_packet_index;
 
@@ -427,9 +449,9 @@ private:
 
     bool m_stack_marked_to_be_deleted;
 
-    HBufC8* iManualUsername;
-    HBufC8* iManualRealm;
-    HBufC8* iRealmPrefix;
+    HBufC8 * iManualUsername;
+    HBufC8 * iManualRealm;
+    HBufC8 * iRealmPrefix;
     TBool iHideInitialIdentity;    
 };
 

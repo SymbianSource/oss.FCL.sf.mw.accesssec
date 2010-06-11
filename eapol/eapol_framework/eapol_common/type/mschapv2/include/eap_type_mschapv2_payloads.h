@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12 %
+* %version: %
 */
 
 #ifndef _MSCHAPV2_PAYLOADS_H_

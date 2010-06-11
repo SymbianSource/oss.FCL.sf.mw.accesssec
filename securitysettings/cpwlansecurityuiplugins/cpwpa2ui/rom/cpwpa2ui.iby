@@ -7,13 +7,18 @@
 * at the URL "http://www.eclipse.org/legal/epl-v10.html".
 *
 * Initial Contributors:
-* Nokia Corporation - initial contribution.
+* 	Nokia Corporation - initial contribution.
 *
 * Contributors:
 *
 * Description:
+* 	IBY file for WPA2 only control panel plugin
 *
 */
+
+/*
+ * %version: tr1cfwln#3 %
+ */
 
 #ifndef CPWPA2UI_IBY
 #define CPWPA2UI_IBY
@@ -21,8 +26,11 @@
 #include <data_caging_paths_for_iby.hrh>
 #include <bldvariant.hrh>
 
+#ifdef __PROTOCOL_WLAN
+
 file=ABI_DIR/BUILD_DIR/cpwpa2ui.dll SHARED_LIB_DIR/cpwpa2ui.dll
 data=/epoc32/data/c/resource/qt/plugins/controlpanel/wlansecurity/cpwpa2ui.qtplugin resource/qt/plugins/controlpanel/wlansecurity/cpwpa2ui.qtplugin
 
+#endif // __PROTOCOL_WLAN
 
 #endif // CPWPA2UI_IBY

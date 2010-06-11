@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 15 %
+* %version: %
 */
 
 #if !defined(_ABS_EAP_AM_FILE_INPUT_H_)

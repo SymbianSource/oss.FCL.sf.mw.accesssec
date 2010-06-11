@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 17.2.4 %
+* %version: 17.1.11 %
 */
 
 #include <platform_paths.hrh>
@@ -55,10 +55,7 @@ SOURCE	    eap_type_aka_server.cpp
 SOURCE      eap_type_aka_header.cpp
 SOURCE		eap_type_aka_authentication_vector.cpp
 
-SOURCEPATH    ../am/common/symbian
-SOURCE		  eap_am_trace_symbian.cpp
 
-SOURCEPATH    	../am/type/aka/symbian/plugin/src
 
 USERINCLUDE		../am/include
 USERINCLUDE		../am/type/symbian/plugin/include
@@ -69,13 +66,9 @@ USERINCLUDE   	../../eapol_common/type/aka/include
 USERINCLUDE  	../am/type/aka/symbian/plugin/inc
 USERINCLUDE   ../../eapol_common/type
 
-//SYSTEMINCLUDE 	/epoc32/include/ecom
-//SYSTEMINCLUDE 	/epoc32/include/libc
-//SYSTEMINCLUDE 	/epoc32/include/cshelp
-
 MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
 
-LIBRARY     euser.lib ecom.lib eapol.lib edbms.lib efsrv.lib 
+LIBRARY     euser.lib ecom.lib eaptools.lib eaptrace.lib eapsymbiantools.lib edbms.lib efsrv.lib 
 LIBRARY		cone.lib eikcoctl.lib eikctl.lib bafl.lib
 LIBRARY		estor.lib	// For RReadStream
 
@@ -93,5 +86,6 @@ LIBRARY     eikdlg.lib
 LIBRARY     eikcore.lib
 LIBRARY     hlplch.lib
 LIBRARY		featmgr.lib
+
 //-------------------------------------------------------------------
 // End of File

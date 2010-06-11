@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 19 %
+* %version: 15.1.11 %
 */
 
 #include <platform_paths.hrh>
@@ -58,11 +58,6 @@ SOURCE        eap_type_mschapv2_credential_store.cpp
 	SOURCE		  eap_type_mschapv2_server.cpp
 #endif
 
-SOURCEPATH    ../am/common/symbian
-SOURCE		  eap_am_trace_symbian.cpp
-
-SOURCEPATH    ../am/type/mschapv2/symbian/plugin/src
-
 USERINCLUDE   ../am/type/mschapv2/symbian/plugin/inc
 USERINCLUDE   ../../eapol_common/type/mschapv2/include
 USERINCLUDE   ../../eapol_common/include
@@ -70,16 +65,14 @@ USERINCLUDE   ../am/include
 USERINCLUDE   ../../eapol_common/am/include
 USERINCLUDE	  ../am/type/symbian/plugin/include
 USERINCLUDE   ../../eapol_common/type
-
-//SYSTEMINCLUDE /epoc32/include/ecom
-//SYSTEMINCLUDE /epoc32/include/libc
-//SYSTEMINCLUDE /epoc32/include/cshelp
+USERINCLUDE   ../am/eap_notifier/inc
 
 MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
 
 LIBRARY     euser.lib
 LIBRARY		ecom.lib
-LIBRARY     eapol.lib
+LIBRARY     eaptools.lib eaptrace.lib
+LIBRARY     eapsymbiantools.lib
 LIBRARY     edbms.lib
 LIBRARY     efsrv.lib
 LIBRARY     cone.lib
@@ -91,7 +84,17 @@ LIBRARY     eikcore.lib
 LIBRARY     hlplch.lib
 LIBRARY		featmgr.lib
 
+LIBRARY		HbCore.lib
+LIBRARY		HbWidgets.lib
+LIBRARY   eap_notifier.lib
+
 LANG		  SC
+
+
+// exports unfrozen in winscw
+#if defined(WINSCW)
+EXPORTUNFROZEN
+#endif
 
 //-------------------------------------------------------------------
 

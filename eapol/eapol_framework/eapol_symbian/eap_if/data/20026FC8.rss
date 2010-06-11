@@ -1,0 +1,57 @@
+/*
+* Copyright (c) 2000 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  ECom resources for the EapTools
+*
+*/
+
+/*
+* %version: 3 %
+*/
+
+#include <registryinfo.rh>
+#include "EapolUID.h"
+// ---------------------------------------------------------
+//   
+//    
+//    ECOM resource definitions for EapPlugin plugin
+//
+// ---------------------------------------------------------
+//
+RESOURCE REGISTRY_INFO theInfo
+	{
+	// UID for the DLL
+	dll_uid = EAP_TOOLS_DLL_UID;
+				
+	// Declare array of interface info
+	interfaces = 
+		{
+		INTERFACE_INFO
+			{
+			// UID of interface that is implemented
+			interface_uid = EAP_TOOLS_INTERFACE_UID;
+			implementations = 
+				{
+				// Info for EapTools
+				IMPLEMENTATION_INFO
+					{
+					implementation_uid = EAP_TOOLS_IMPLEMENTATION_UID;
+					version_no         = 1;
+					display_name       = "EapTools";
+					default_data       = "";
+					opaque_data        = "";
+					}
+				};
+			}
+		};
+	}

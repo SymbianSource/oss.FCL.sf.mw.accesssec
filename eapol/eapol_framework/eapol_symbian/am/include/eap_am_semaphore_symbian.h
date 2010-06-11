@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 5 %
+* %version: %
 */
 
 #if !defined( _EAP_AM_SEMAPHORE_SYMBIAN_H_ )

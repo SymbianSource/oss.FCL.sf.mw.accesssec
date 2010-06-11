@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 1 %
+ * %version: 4 %
  */
 
 #ifndef WEPKEYVALIDATOR_H

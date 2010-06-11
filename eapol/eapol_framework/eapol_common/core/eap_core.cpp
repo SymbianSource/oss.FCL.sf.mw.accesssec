@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 63 %
+* %version: 58.1.11 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -383,29 +383,13 @@ eap_status_e eap_core_c::init_end_of_session(
 	// Remove session only if the stack is not already being deleted
 	if (m_shutdown_was_called == false)
 	{
-		#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAP_CORE_RESTART_AUTHENTICATION)
-			#error ERROR: USE_EAPOL_KEY_STATE and USE_EAP_CORE_RESTART_AUTHENTICATION cannot be used same time.
-		#endif //#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAP_CORE_RESTART_AUTHENTICATION)
-
-		#if defined(USE_EAP_CORE_SIMULATOR_VERSION) && defined(USE_EAP_CORE_RESTART_AUTHENTICATION)
-
-			// Simulator reuses current session.
-			status = restart_authentication(
-				state->get_send_network_id(),
-				m_is_client);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
-
-		#elif defined(USE_EAP_CORE_SIMULATOR_VERSION) && defined(USE_EAPOL_KEY_STATE)
+		#if defined(USE_EAP_CORE_SIMULATOR_VERSION)
 
 			EAP_TRACE_DEBUG(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("eap_core_c::state_notification(): %s, %s, Ignored notification: ")
-				 EAPL("Protocol layer %d, EAP type 0x%02x, State transition from ")
+				 EAPL("Protocol layer %d, EAP-type 0x%02x, State transition from ")
 				 EAPL("%d=%s to %d=%s, client %d.\n"),
 				 (m_is_client == true) ? "client": "server",
 				 (m_is_tunneled_eap == true) ? "tunneled": "outer most",
@@ -433,7 +417,7 @@ eap_status_e eap_core_c::init_end_of_session(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("eap_core_c::state_notification(): %s, %s, Ignored notification: ")
-			 EAPL("Protocol layer %d, EAP type 0x%02x, State transition from ")
+			 EAPL("Protocol layer %d, EAP-type 0x%02x, State transition from ")
 			 EAPL("%d=%s to %d=%s, client %d when shutdown was called.\n"),
 			 (m_is_client == true) ? "client": "server",
 			 (m_is_tunneled_eap == true) ? "tunneled": "outer most",
@@ -460,22 +444,21 @@ EAP_FUNC_EXPORT void eap_core_c::state_notification(
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	eap_status_string_c status_string;
-	eap_header_string_c eap_string;
 	EAP_UNREFERENCED_PARAMETER(status_string); // in release
-	EAP_UNREFERENCED_PARAMETER(eap_string); // in release
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eap_core_c::state_notification(), %s, %s, protocol_layer %d=%s, protocol %d=%s, EAP-type 0x%08x=%s.\n"),
+		(EAPL("eap_core_c::state_notification(), %s, %s, protocol_layer %d=%s, protocol %d=%s, EAP-type 0xfe%06x%08x=%s.\n"),
 		(m_is_client == true) ? "client": "server",
 		(m_is_tunneled_eap == true) ? "tunneled": "outer most",
 		state->get_protocol_layer(),
 		state->get_protocol_layer_string(),
 		state->get_protocol(),
 		state->get_protocol_string(),
-		convert_eap_type_to_u32_t(state->get_eap_type()),
-		eap_string.get_eap_type_string(state->get_eap_type())));
+		state->get_eap_type().get_vendor_id(),
+		state->get_eap_type().get_vendor_type(),
+		eap_header_string_c::get_eap_type_string(state->get_eap_type())));
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
@@ -506,7 +489,7 @@ EAP_FUNC_EXPORT void eap_core_c::state_notification(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("eap_core_c::state_notification(): %s, %s, Ignored notification: ")
-			 EAPL("Protocol layer %d, non-active EAP type 0x%02x, current EAP type 0x%08x, State transition from ")
+			 EAPL("Protocol layer %d, non-active EAP-type 0x%02x, current EAP type 0x%08x, State transition from ")
 			 EAPL("%d=%s to %d=%s, client %d\n"),
 			 (m_is_client == true) ? "client": "server",
 			 (m_is_tunneled_eap == true) ? "tunneled": "outer most",
@@ -791,9 +774,14 @@ EAP_FUNC_EXPORT eap_status_e eap_core_c::cancel_session_timeout()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
-	eap_status_e status = m_partner->cancel_timer(
-		this,
-		EAP_CORE_SESSION_TIMEOUT_ID);
+	eap_status_e status(eap_status_ok);
+
+	if (m_am_tools != 0)
+	{
+		status = m_partner->cancel_timer(
+			this,
+			EAP_CORE_SESSION_TIMEOUT_ID);
+	}
 	
 	EAP_UNREFERENCED_PARAMETER(status); // in release
 	
@@ -1312,9 +1300,9 @@ EAP_FUNC_EXPORT eap_status_e eap_core_c::packet_process_type(
 		}
 	}
 #endif //#if defined(USE_EAP_CORE_SERVER)
-	else if ((eap.get_code() == eap_code_request
+	else if (((eap.get_code() == eap_code_request
 				|| eap.get_code() == eap_code_response)
-			&& eap.get_type() == used_eap_type
+			  && eap.get_type() == used_eap_type)
 		|| eap.get_code() == eap_code_success
 		|| eap.get_code() == eap_code_failure)
 	{
@@ -1524,17 +1512,15 @@ EAP_FUNC_EXPORT eap_status_e eap_core_c::packet_process(
 #if defined (_DEBUG)
 	if (m_retransmission != 0)
 	{
-		eap_header_string_c eap_string;
-
 		EAP_TRACE_DEBUG(
 			m_am_tools, 
 			TRACE_FLAGS_DEFAULT, 
 			(EAPL("EAP_Core: eap_core_c::packet_process(): %s, retransmission counter %d, retrans EAP-type %s, retrans EAP-Id %d, current EAP-type %s, current EAP-Id %d, session 0x%08x.\n"),
 			 (m_is_client_role == true) ? "client": "server",
 			 m_retransmission->get_retransmission_counter(),
-			 eap_string.get_eap_type_string(m_retransmission->get_eap_type()),
+			 eap_header_string_c::get_eap_type_string(m_retransmission->get_eap_type()),
 			 m_retransmission->get_eap_identifier(),
-			 eap_string.get_eap_type_string(eap.get_type()),
+			 eap_header_string_c::get_eap_type_string(eap.get_type()),
 			 eap.get_identifier(),
 			 this));
 	}
@@ -2223,7 +2209,8 @@ EAP_FUNC_EXPORT eap_status_e eap_core_c::cancel_retransmission()
 			 (m_is_tunneled_eap == true) ? "tunneled": "outer most"
 			 ));
 
-		if (m_is_client_role == false)
+		if (m_is_client_role == false
+			&& m_partner != 0)
 		{
 			// Only EAP-server uses timer to re-transmits EAP-packets.
 			m_partner->cancel_timer(this, EAP_CORE_TIMER_RETRANSMISSION_ID);
@@ -2404,9 +2391,16 @@ EAP_FUNC_EXPORT eap_status_e eap_core_c::cancel_eap_failure_timeout()
 		 (m_is_tunneled_eap == true) ? "tunneled": "outer most"
 		 ));
 
-	return m_partner->cancel_timer(
-		this,
-		EAP_CORE_FAILURE_RECEIVED_ID);
+	eap_status_e status(eap_status_ok);
+
+	if (m_am_tools != 0)
+	{
+		status = m_partner->cancel_timer(
+			this,
+			EAP_CORE_FAILURE_RECEIVED_ID);
+	}
+	
+	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
 //--------------------------------------------------
@@ -2474,9 +2468,16 @@ eap_status_e eap_core_c::cancel_wait_eap_request_type_timeout()
 
 		m_wait_eap_request_type_timeout_set = false;
 
-		return m_partner->cancel_timer(
-			this,
-			EAP_CORE_WAIT_EAP_REQUEST_TYPE_ID);
+		eap_status_e status(eap_status_ok);
+
+		if (m_am_tools != 0)
+		{
+			m_partner->cancel_timer(
+				this,
+				EAP_CORE_WAIT_EAP_REQUEST_TYPE_ID);
+		}
+
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 	else
 	{
@@ -3014,7 +3015,6 @@ EAP_FUNC_EXPORT eap_status_e eap_core_c::configure()
 
 	//----------------------------------------------------------
 
-#if defined(USE_EAP_EXPANDED_TYPES)
 	{
 		eap_variable_data_c use_eap_expanded_type(m_am_tools);
 
@@ -3040,7 +3040,6 @@ EAP_FUNC_EXPORT eap_status_e eap_core_c::configure()
 			}
 		}
 	}
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 
 	//----------------------------------------------------------
 
@@ -5403,10 +5402,12 @@ EAP_FUNC_EXPORT eap_status_e eap_core_c::get_saved_eap_identity(
 		EAP_TRACE_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("WARNING: %s, %s, EAP-identity is unknown: current EAP-type 0x%08x\n"),
+			(EAPL("WARNING: %s, %s, EAP-identity is unknown: current EAP-type 0xfe%06x%08x=%s\n"),
 			 (m_is_client == true) ? "client": "server",
 			 (m_is_tunneled_eap == true) ? "tunneled": "outer most",
-			 convert_eap_type_to_u32_t(m_current_eap_type)));
+			 m_current_eap_type.get_vendor_id(),
+			 m_current_eap_type.get_vendor_type(),
+			 eap_header_string_c::get_eap_type_string(m_current_eap_type)));
 	}
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -5481,21 +5482,6 @@ EAP_FUNC_EXPORT eap_status_e eap_core_c::cancel_timer(
 	const eap_status_e status = m_partner->cancel_timer(
 		p_initializer, 
 		p_id);
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, status);
-}
-
-//--------------------------------------------------
-
-//
-EAP_FUNC_EXPORT eap_status_e eap_core_c::cancel_all_timers()
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	EAP_ASSERT(m_am_tools->get_global_mutex()->get_is_reserved() == true);
-
-	const eap_status_e status = m_partner->cancel_all_timers();
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);

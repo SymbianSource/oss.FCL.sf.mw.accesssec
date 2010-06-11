@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 92.1.4 %
+* %version: %
 */
 
 // This is enumeration of EAPOL source code.
@@ -329,7 +329,6 @@ EAP_FUNC_EXPORT eap_status_e tls_application_eap_core_c::configure()
 				return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_configure_field);
 			}
 		}
-//#if defined(USE_EAP_EXPANDED_TYPES)
 		else if (tunneled_eap_type.get_data_length()
 				 == eap_expanded_type_c::get_eap_expanded_type_size()
 			&& tunneled_eap_type.get_data(tunneled_eap_type.get_data_length()) != 0)
@@ -354,7 +353,6 @@ EAP_FUNC_EXPORT eap_status_e tls_application_eap_core_c::configure()
 				return EAP_STATUS_RETURN(m_am_tools, status);
 			}
 		}
-//#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 		else
 		{
 			EAP_TRACE_DEBUG(
@@ -370,13 +368,7 @@ EAP_FUNC_EXPORT eap_status_e tls_application_eap_core_c::configure()
 
 
 #if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
-		if (
-#if defined(USE_EAP_EXPANDED_TYPES)
-			m_peap_tunneled_eap_type == eap_expanded_type_ttls_plain_mschapv2.get_type()
-#else
-			m_peap_tunneled_eap_type == eap_type_plain_mschapv2
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
-			)
+		if (m_peap_tunneled_eap_type == eap_expanded_type_ttls_plain_mschapv2.get_type())
 		{
 			// This is special case.
 			// We must tell to inner EAP-stack to use EAP-MsChapv2.
@@ -680,44 +672,6 @@ EAP_FUNC_EXPORT eap_status_e tls_application_eap_core_c::configure()
 	}
 
 #endif //#if defined(USE_EAP_ERROR_TESTS)
-
-	//----------------------------------------------------------
-
-#if defined(USE_EAP_EXPANDED_TYPES) && 0
-	{
-		eap_variable_data_c use_eap_expanded_type(m_am_tools);
-
-		eap_status_e status = read_configure(
-			cf_str_EAP_TLS_PEAP_use_eap_expanded_type.get_field(),
-			&use_eap_expanded_type);
-
-		if (status != eap_status_ok)
-		{
-			status = read_configure(
-				cf_str_EAP_CORE_use_eap_expanded_type.get_field(),
-				&use_eap_expanded_type);
-		}
-
-		if (status == eap_status_ok
-			&& use_eap_expanded_type.get_data_length() == sizeof(u32_t)
-			&& use_eap_expanded_type.get_data() != 0)
-		{
-			u32_t *flag = reinterpret_cast<u32_t *>(use_eap_expanded_type.get_data(use_eap_expanded_type.get_data_length()));
-
-			if (flag != 0)
-			{
-				if ((*flag) != 0ul)
-				{
-					m_use_eap_expanded_type = true;
-				}
-				else
-				{
-					m_use_eap_expanded_type = false;
-				}
-			}
-		}
-	}
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 
 	//----------------------------------------------------------
 
@@ -1359,13 +1313,7 @@ EAP_FUNC_EXPORT eap_status_e tls_application_eap_core_c::start_ttls_tunneled_aut
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	if (
-#if defined(USE_EAP_EXPANDED_TYPES)
-		m_peap_tunneled_eap_type == eap_expanded_type_ttls_plain_pap.get_type()
-#else
-		m_peap_tunneled_eap_type == eap_type_ttls_plain_pap
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
-		)
+	if (m_peap_tunneled_eap_type == eap_expanded_type_ttls_plain_pap.get_type())
 	{
 		// Query PAP username and password.
 		status = m_application_partner->query_ttls_pap_username_and_password(0);
@@ -1468,12 +1416,7 @@ EAP_FUNC_EXPORT eap_status_e tls_application_eap_core_c::start_ttls_tunneled_aut
 
 #if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
 		if (m_eap_type == eap_type_ttls
-#if defined(USE_EAP_EXPANDED_TYPES)
-			&& m_peap_tunneled_eap_type == eap_expanded_type_ttls_plain_mschapv2.get_type()
-#else
-			&& m_peap_tunneled_eap_type == eap_type_plain_mschapv2
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
-			)
+			&& m_peap_tunneled_eap_type == eap_expanded_type_ttls_plain_mschapv2.get_type())
 		{
 			eap_header_wr_c sent_eap_packet(
 				m_am_tools,
@@ -1507,12 +1450,7 @@ EAP_FUNC_EXPORT eap_status_e tls_application_eap_core_c::start_ttls_tunneled_aut
 
 #if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
 		if (m_eap_type == eap_type_ttls
-#if defined(USE_EAP_EXPANDED_TYPES)
-			&& m_peap_tunneled_eap_type == eap_expanded_type_ttls_plain_mschapv2.get_type()
-#else
-			&& m_peap_tunneled_eap_type == eap_type_plain_mschapv2
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
-			)
+			&& m_peap_tunneled_eap_type == eap_expanded_type_ttls_plain_mschapv2.get_type())
 		{
 			eap_header_wr_c sent_eap_packet(
 				m_am_tools,
@@ -6428,13 +6366,7 @@ EAP_FUNC_EXPORT eap_status_e tls_application_eap_core_c::read_configure(
 
 #if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
 		if (m_tunneled_eap_in_ttls == false
-			&& (
-#if defined(USE_EAP_EXPANDED_TYPES)
-				m_peap_tunneled_eap_type == eap_expanded_type_ttls_plain_mschapv2.get_type()
-#else
-				m_peap_tunneled_eap_type == eap_type_plain_mschapv2
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
-			))
+			&& m_peap_tunneled_eap_type == eap_expanded_type_ttls_plain_mschapv2.get_type())
 		{
 			tunneled_type = eap_type_mschapv2;
 		}
@@ -6940,35 +6872,18 @@ EAP_FUNC_EXPORT eap_status_e tls_application_eap_core_c::cancel_timer(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e tls_application_eap_core_c::cancel_all_timers()
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-	eap_status_e status = eap_status_process_general_error;
-	abs_tls_base_application_c * partner = get_application_partner();
-	if (partner != 0)
-	{
-		status = partner->cancel_all_timers();
-	}
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, status);
-}
-
-//--------------------------------------------------
-
 EAP_FUNC_EXPORT eap_status_e tls_application_eap_core_c::check_is_valid_eap_type(
 	const eap_type_value_e eap_type)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
-	eap_header_string_c eap_string;
-	EAP_UNREFERENCED_PARAMETER(eap_string);
-
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("tls_application_eap_core_c::check_is_valid_eap_type(): EAP-type=0x%08x=%s\n"),
-		convert_eap_type_to_u32_t(eap_type),
-		eap_string.get_eap_type_string(eap_type)));
+		(EAPL("tls_application_eap_core_c::check_is_valid_eap_type(): EAP-type=0xfe%06x%08x=%s\n"),
+		eap_type.get_vendor_id(),
+		eap_type.get_vendor_type(),
+		eap_header_string_c::get_eap_type_string(eap_type)));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: tls_application_eap_core_c::check_is_valid_eap_type()");
 
@@ -7006,9 +6921,10 @@ EAP_FUNC_EXPORT eap_status_e tls_application_eap_core_c::check_is_valid_eap_type
 			EAP_TRACE_DEBUG(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
-				(EAPL("ERROR: tls_application_eap_core_c::check_is_valid_eap_type(): No allowed EAP-type=0x%08x=%s\n"),
-				convert_eap_type_to_u32_t(eap_type),
-				eap_string.get_eap_type_string(eap_type)));
+				(EAPL("ERROR: tls_application_eap_core_c::check_is_valid_eap_type(): No allowed EAP-type=0xfe%06x%08x=%s\n"),
+				eap_type.get_vendor_id(),
+				eap_type.get_vendor_type(),
+				eap_header_string_c::get_eap_type_string(eap_type)));
 
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_eap_type);
 		}

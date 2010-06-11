@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 5.1.2 %
+* %version: %
 */
 
 /** @file */
@@ -126,7 +126,7 @@ typedef struct
 	 * This defines const reserved word for template types.
 	 * This is because the stupid Windows compiler cannot compile "const template_type<Type> * const".
 	 */
-	#define EAP_TEMPLATE_CONST
+	#define EAP_TEMPLATE_CONST const
 
 #endif
 

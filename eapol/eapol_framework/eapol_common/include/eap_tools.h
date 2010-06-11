@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8.1.2 %
+* %version: %
 */
 
 #if !defined( _EAP_TOOLS_H_ )
@@ -347,6 +347,8 @@ inline eap_status_e eap_write_u64_t_host_order(
 
 	#define EAP_TRACE_RETURN_STRING(object_name, string) EAP_NULL_FUNCTION
 
+	#define EAP_TRACE_RETURN_STRING_FLAGS(object_name, flags, string) EAP_NULL_FUNCTION
+
 	#define EAP_TRACE_DATA_ERROR(object_name, flags, _parameter_list_) EAP_NULL_FUNCTION
 
 	#define EAP_TRACE_DATA_DEBUG(object_name, flags, _parameter_list_) EAP_NULL_FUNCTION
@@ -467,6 +469,9 @@ inline eap_status_e eap_write_u64_t_host_order(
 		#define EAP_TRACE_RETURN_STRING(object_name, string) \
 			eap_automatic_trace_string_c __eap_trace_function_returns__(object_name, string);
 
+		#define EAP_TRACE_RETURN_STRING_FLAGS(object_name, flags, string) \
+			eap_automatic_trace_string_c __eap_trace_function_returns__(object_name, flags, string);
+
 		/**
 		 * This flag indicates that the debug traces are active.
 		 * Functions can use this flag to deduce whether debug related
@@ -483,6 +488,8 @@ inline eap_status_e eap_write_u64_t_host_order(
 		#define EAP_TRACE_FORMAT(object_name, _parameter_list_) EAP_NULL_FUNCTION
 
 		#define EAP_TRACE_RETURN_STRING(object_name, string) EAP_NULL_FUNCTION
+
+		#define EAP_TRACE_RETURN_STRING_FLAGS(object_name, flags, string) EAP_NULL_FUNCTION
 
 	#endif
 

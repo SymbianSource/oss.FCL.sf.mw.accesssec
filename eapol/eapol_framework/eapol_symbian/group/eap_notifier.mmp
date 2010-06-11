@@ -1,0 +1,49 @@
+/*
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for eap_notifier
+*
+*/
+
+/*
+* %version:  %
+*/
+
+#include <platform_paths.hrh>
+#include "eapol.mmh"
+
+
+TARGET        eap_notifier.dll
+TARGETTYPE    dll
+
+UID           0x1000008d 0x2002E6F1
+
+CAPABILITY    All -TCB
+
+deffile eap_notifier.def
+
+SOURCEPATH    ../am/eap_notifier/src
+SOURCE        eap_auth_notifier.cpp
+SOURCE        eap_auth_observer.cpp
+
+USERINCLUDE   ../am/eap_notifier/inc
+
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY       euser.lib
+LIBRARY	      eapsymbiantools.lib 
+LIBRARY	      eaptools.lib
+LIBRARY		  HbCore.lib
+LIBRARY	      HbWidgets.lib
+
+

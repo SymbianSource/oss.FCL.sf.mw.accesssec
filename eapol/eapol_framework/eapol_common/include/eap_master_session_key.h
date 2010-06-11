@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 5 %
+* %version: %
 */
 
 #if !defined(_EAP_MASTER_SESSION_KEY_H_)

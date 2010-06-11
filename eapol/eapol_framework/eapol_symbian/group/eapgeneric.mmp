@@ -1,0 +1,91 @@
+/*
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project EAP-generic.
+*
+*/
+
+/*
+* %version: 23 %
+*/
+
+#include <platform_paths.hrh>
+#include "eapol.mmh"
+
+CAPABILITY CAP_ECOM_PLUGIN
+VENDORID VID_DEFAULT
+TARGETTYPE    PLUGIN
+
+TARGET	eapgeneric.dll
+UID		0x10009d8d 0x20026FD1
+
+SOURCEPATH    ../am/type/generic/symbian/plugin/src
+SOURCE		EapGeneric.cpp 
+SOURCE		EapGenericProxy.cpp 
+
+SOURCEPATH  ../eap_if/data
+START RESOURCE 20026fd1.rss
+	TARGET EapGeneric
+END
+
+SOURCEPATH	../am/type/symbian/plugin/common
+SOURCE		EapTypeInfo.cpp
+
+SOURCEPATH  ../../eapol_common/core
+SOURCE		eap_plugin_client_message_if.cpp
+SOURCE		eap_plugin_message_base.cpp
+
+SOURCEPATH  ../../eapol_common/common
+SOURCE		eap_method_settings.cpp
+
+SOURCEPATH  ../../eapol_common/type/simple_config/simple_config/src
+SOURCE		simple_config_payloads.cpp
+SOURCE		simple_config_credential.cpp
+SOURCE		simple_config_types.cpp
+SOURCE		simple_config_tlv_header.cpp
+SOURCE		simple_config_message.cpp
+
+SOURCEPATH  ../eap_if/src
+SOURCE 		eap_am_message_if_symbian.cpp
+SOURCE		EapClientIf.cpp
+
+LIBRARY	    charconv.lib
+
+SYSTEMINCLUDE /epoc32/include/ecom
+
+USERINCLUDE	../am/include
+USERINCLUDE	../am/type/symbian/plugin/include
+USERINCLUDE	../../eapol_common
+USERINCLUDE	../../eapol_common/include
+USERINCLUDE	../../eapol_common/am/include
+USERINCLUDE	../am/type/generic/symbian/plugin/inc
+USERINCLUDE	../../eapol_common/type
+USERINCLUDE	../../eapol_common/type/simple_config/simple_config/include/
+USERINCLUDE	../eap_if/include
+USERINCLUDE	../eap_server/include
+
+MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
+
+LIBRARY		euser.lib eaptools.lib eaptrace.lib eapsymbiantools.lib edbms.lib efsrv.lib  eapclientif.lib ecom.lib
+LIBRARY		cone.lib eikcoctl.lib eikctl.lib bafl.lib
+LIBRARY		estor.lib	// For RReadStream
+
+LANG		SC
+
+LIBRARY	eikdlg.lib
+LIBRARY	eikcore.lib
+LIBRARY	hlplch.lib
+LIBRARY		featmgr.lib
+
+//-------------------------------------------------------------------
+// End of File

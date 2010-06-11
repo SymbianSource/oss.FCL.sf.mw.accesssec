@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 6.1.2 %
+* %version: 18 %
 */
 
 #if !defined(_EAPOL_WLAN_AUTHENTICATION_H_)
@@ -32,6 +32,8 @@
 #include "eap_array.h"
 #include "eapol_key_state.h"
 #include "eapol_test_stack_if.h"
+#include "eap_database_reference_if.h"
+#include "abs_eap_configuration_if.h"
 
 #if defined(USE_EAP_SIMPLE_CONFIG)
 #include "abs_eap_configuration_if.h"
@@ -51,6 +53,7 @@ class EAP_EXPORT eapol_wlan_authentication_c
 #if defined(USE_TEST_EAPOL_WLAN_AUTHENTICATION)
 , public eapol_test_stack_if_c
 #endif //#if defined(USE_TEST_EAPOL_WLAN_AUTHENTICATION)
+, public eap_database_reference_if_c
 #if defined(USE_EAP_SIMPLE_CONFIG)
 , public abs_eap_configuration_if_c
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
@@ -60,8 +63,7 @@ public:
 	EAP_FUNC_IMPORT static eapol_wlan_authentication_c * new_eapol_wlan_authentication(
 		abs_eap_am_tools_c * const tools,
 		abs_eapol_wlan_authentication_c * const partner,
-		const bool is_client_when_true,
-		const abs_eapol_wlan_database_reference_if_c * const wlan_database_reference);
+		const bool is_client_when_true);
 
 	EAP_FUNC_IMPORT eapol_wlan_authentication_c(
 		abs_eap_am_tools_c * const tools,
@@ -97,11 +99,8 @@ public:
 		const eap_variable_data_c * const SSID,
 		const eapol_key_authentication_type_e selected_eapol_key_authentication_type,
 		const eap_variable_data_c * const wpa_preshared_key,
-		const bool WPA_override_enabled
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-		,
+		const bool WPA_override_enabled,
 		const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 		);
 
 	EAP_FUNC_IMPORT eap_status_e complete_association(
@@ -162,6 +161,9 @@ public:
 	EAP_FUNC_IMPORT eap_status_e eap_acknowledge(
 		const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
 		); 
+
+	EAP_FUNC_IMPORT eap_status_e set_eap_database_reference_values(
+		const eap_variable_data_c * const reference);
 
 	/////////////////////////////////////////
 	/* These are called from ethernet_core */
@@ -291,22 +293,37 @@ public:
 		const simple_config_payloads_c * const other_configuration);
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
 
+	EAP_FUNC_IMPORT eap_status_e complete_get_802_11_authentication_mode(
+		const eap_status_e completion_status,
+		const eap_am_network_id_c * const receive_network_id,
+		const eapol_key_802_11_authentication_mode_e mode);
+
+	EAP_FUNC_IMPORT eap_status_e complete_disassociation(
+		const bool complete_to_lower_layer,
+		const eap_am_network_id_c * const receive_network_id);
+
 private:
 
-	EAP_FUNC_IMPORT eap_status_e eapol_indication(
+	eap_status_e eapol_indication(
 		const eap_am_network_id_c * const receive_network_id, ///< source includes remote address, destination includes local address.
 		const eapol_wlan_authentication_state_e notification);
 
-	EAP_FUNC_IMPORT eap_status_e create_upper_stack();
+	eap_status_e create_upper_stack();
 
 	eap_status_e disassociation_mutex_must_be_reserved(
+		const bool complete_to_lower_layer,
+		const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
+		);
+
+	eap_status_e internal_disassociation(
+		const bool complete_to_lower_layer,
 		const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
 		);
 
 	eap_status_e cancel_all_authentication_sessions();
 
-private:
-
+	eap_status_e complete_check_pmksa_cache(
+		EAP_TEMPLATE_CONST eap_array_c<eap_am_network_id_c> * const bssid_sta_receive_network_ids);
 
 	eap_status_e cancel_timer_this_ap_failed();
 
@@ -316,7 +333,7 @@ private:
 
 	eap_status_e cancel_timer_authentication_cancelled();
 
-
+private:
 
 	/// Pointer to the lower layer in the stack
 	abs_eapol_wlan_authentication_c * m_partner;
@@ -332,7 +349,7 @@ private:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	eap_array_c<eap_type_selection_c> m_selected_eap_types;
+	//eap_array_c<eap_type_selection_c> m_selected_eap_types;
 
 	eap_variable_data_c m_wpa_preshared_key_hash;
 

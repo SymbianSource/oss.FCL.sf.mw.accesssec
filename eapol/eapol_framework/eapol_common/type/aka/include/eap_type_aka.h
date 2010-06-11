@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 20.1.2 %
+* %version: %
 */
 
 #if !defined(_AKA_CORE_H_)
@@ -1937,9 +1937,6 @@ public:
 	EAP_FUNC_IMPORT eap_status_e cancel_timer(
 		abs_eap_base_timer_c * const p_initializer, 
 		const u32_t p_id);
-
-	//
-	EAP_FUNC_IMPORT eap_status_e cancel_all_timers();
 
 	EAP_FUNC_IMPORT static eap_const_string get_identity_string(const eap_type_aka_identity_type identity_type);
 

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 5.1.2 %
+* %version: %
 */
 
 #if !defined(_GSMSIM_CORE_H_)
@@ -1858,9 +1858,6 @@ public:
 	EAP_FUNC_IMPORT eap_status_e cancel_timer(
 		abs_eap_base_timer_c * const p_initializer, 
 		const u32_t p_id);
-
-	//
-	EAP_FUNC_IMPORT eap_status_e cancel_all_timers();
 
 	//--------------------------------------------------
 }; // class eap_type_gsmsim_c

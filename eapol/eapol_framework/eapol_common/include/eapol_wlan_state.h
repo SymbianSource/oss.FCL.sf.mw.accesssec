@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 9 %
+* %version: %
 */
 
 #if !defined(_EAPOL_WLAN_STATE_H_)

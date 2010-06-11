@@ -1,0 +1,6 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+	<qresource prefix="/docml">
+        <file>input_prompt_line_edit.docml</file>
+	</qresource>
+</RCC>

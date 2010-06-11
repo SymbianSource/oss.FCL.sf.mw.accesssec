@@ -14,10 +14,14 @@
 # Description:
 #
 
-# %version: 2 %
+# %version: 6 %
 
 TEMPLATE = subdirs
 
-SUBDIRS  += qtconfigutils cpwlansecurityuiplugins
+SUBDIRS += \
+  qtconfigutils \
+  cpwlansecurityuiplugins \
+  cpeapuiplugins \
+  eapqtdialogs
 
 CONFIG += ordered

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 4 %
+* %version: %
 */
 
 #if !defined(_EAP_TYPE_ALL_TYPES_H_)

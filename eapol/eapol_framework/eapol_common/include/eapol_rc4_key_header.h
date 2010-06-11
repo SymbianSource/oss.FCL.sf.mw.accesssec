@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 13 %
+* %version: %
 */
 
 #if !defined(_EAPOL_RC4_KEY_HEADER_H_)

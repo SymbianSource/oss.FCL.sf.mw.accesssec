@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 2.1.2 %
+* %version: %
 */
 
 #if !defined(_EAP_AM_WIMAX_AUTHENTICATION_H_)
@@ -33,7 +33,6 @@ class abs_eap_base_type_c;
 class eap_base_type_c;
 class eap_am_network_id_c;
 class eap_type_selection_c;
-class abs_eapol_wlan_database_reference_if_c;
 class abs_eap_state_notification_c;
 
 /// This is interface to adaptation module of class eap_wimax_authentication_c.
@@ -55,8 +54,7 @@ public:
 
 	EAP_FUNC_IMPORT static eap_am_wimax_authentication_c* new_eap_am_wimax_authentication(
 		abs_eap_am_tools_c * const tools,
-		const bool is_client_when_true,
-		const abs_eapol_wlan_database_reference_if_c * const wimax_database_reference
+		const bool is_client_when_true
 		);
 
 	/// This is documented in abs_eap_stack_interface_c::get_is_valid().

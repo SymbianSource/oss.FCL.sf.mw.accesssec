@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12 %
+* %version: %
 */
 
 // This is enumeration of EAPOL source code.
@@ -86,7 +86,7 @@ EAP_FUNC_EXPORT bool eapol_key_state_c::get_is_WPXM()
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::derive_WPXM_WPXK1_WPXK2()
+eap_status_e eapol_key_state_c::derive_WPXM_WPXK1_WPXK2()
 {
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_not_supported);
 }
@@ -106,7 +106,7 @@ eap_status_e eapol_key_state_c::save_keys_for_test_use(
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::derive_WPXM_PTK(const u32_t /* WPXM_WPXC */)
+eap_status_e eapol_key_state_c::derive_WPXM_PTK(const u32_t /* WPXM_WPXC */)
 {
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_not_supported);
 }

@@ -15,7 +15,7 @@
 #    EAP QT utility components
 #
 
-# %version: 1 %
+# %version: 4 %
 
 TEMPLATE = subdirs
 SUBDIRS = eapqtplugininfo eapqtconfiginterface

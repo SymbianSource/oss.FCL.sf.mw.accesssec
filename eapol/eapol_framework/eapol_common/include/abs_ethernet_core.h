@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 2.1.2 %
+* %version: 9 %
 */
 
 #if !defined(_ABS_ETHERNET_CORE_H_)
@@ -25,7 +25,9 @@
 #include "eap_header.h"
 #include "eap_array.h"
 #include "eapol_key_state.h"
-
+#if defined(USE_EAP_SIMPLE_CONFIG)
+	#include "abs_eap_configuration_if.h"
+#endif // #if defined(USE_EAP_SIMPLE_CONFIG)
 
 class abs_eapol_core_c;
 class eap_am_network_id_c;
@@ -170,6 +172,32 @@ public:
 		eap_array_c<eap_type_value_e> * const eap_type_list) = 0;
 
 	virtual eap_status_e add_rogue_ap(eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list) = 0;
+
+	virtual eap_status_e complete_check_pmksa_cache(
+		EAP_TEMPLATE_CONST eap_array_c<eap_am_network_id_c> * const bssid_sta_receive_network_ids) = 0;
+
+#if defined(USE_EAP_SIMPLE_CONFIG)
+	/**
+	 * This function tells AM to save SIMPLE_CONFIG configuration parameters.
+	 * This is always syncronous call.
+	 */
+	virtual eap_status_e save_simple_config_session(
+		const simple_config_state_e state,
+		EAP_TEMPLATE_CONST eap_array_c<simple_config_credential_c> * const credential_array,
+		const eap_variable_data_c * const new_password,
+		const simple_config_Device_Password_ID_e Device_Password_ID,
+		const simple_config_payloads_c * const other_configuration
+		) = 0;
+#endif // #if defined(USE_EAP_SIMPLE_CONFIG)
+
+	virtual eap_status_e complete_get_802_11_authentication_mode(
+		const eap_status_e completion_status,
+		const eap_am_network_id_c * const receive_network_id,
+		const eapol_key_802_11_authentication_mode_e mode) = 0;
+
+	virtual eap_status_e complete_disassociation(
+		const bool complete_to_lower_layer,
+		const eap_am_network_id_c * const receive_network_id) = 0;
 
 	//--------------------------------------------------
 }; // class abs_ethernet_core_c

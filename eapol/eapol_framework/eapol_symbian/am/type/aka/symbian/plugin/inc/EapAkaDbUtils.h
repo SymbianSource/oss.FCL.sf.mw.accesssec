@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 9 %
+* %version: 7.1.5 %
 */
 
 #ifndef _EAPAKADBUTILS_H_
@@ -29,32 +29,22 @@
 
 // LOCAL CONSTANTS
 
-#ifdef SYMBIAN_SECURE_DBMS
-// For EAP AKA secure database.
-// Full path is not needed. The database eapaka.dat will be saved in the 
-// data cage path for DBMS. So it will be in "\private\100012a5\eapaka.dat" in C: drive.
-// The maximum length of database name is 0x40 (KDbMaxName) , which is defined in d32dbms.h.
+// For EAP-AKA private database. Database will be in the private folder of EAP-server (20026FCB).
+// The maximum length of database name is 0x40 (KDbMaxName), which is defined in d32dbms.h.
 
-_LIT(KDatabaseName, "c:eapaka.dat");
-
-_LIT(KSecureUIDFormat, "SECURE[102072e9]"); // For the security policy.
-
-#else
-
-_LIT(KDatabaseName, "c:\\system\\data\\eapaka.dat");
-
-#endif // #ifdef SYMBIAN_SECURE_DBMS
+_LIT(KEapAkaDatabaseName, "eapaka.dat");
 
 _LIT(KAkaTableName, "eapaka");
 
 // CLASS DECLARATION
 class EapAkaDbUtils 
 {
+
 public:
 	
 	static void OpenDatabaseL(
 		RDbNamedDatabase& aDatabase, 
-		RDbs& aSession, 
+		RFs& aFileServerSession,
 		const TIndexType aIndexType,
 		const TInt aIndex,
 		const eap_type_value_e aTunnelingType);
@@ -98,7 +88,6 @@ public:
 		const TIndexType aIndexType,
 		const TInt aIndex,
 		const eap_type_value_e aTunnelingType);
-
 };
 
 #endif // _EAPAKADBUTILS_H_

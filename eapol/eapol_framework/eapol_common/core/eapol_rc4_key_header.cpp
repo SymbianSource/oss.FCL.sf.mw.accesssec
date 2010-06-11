@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11 %
+* %version: %
 */
 
 // This is enumeration of EAPOL source code.
@@ -308,7 +308,8 @@ EAP_FUNC_EXPORT eap_status_e eapol_RC4_key_header_c::set_key_flag(eapol_RC4_key_
 	u8_t * const data = get_header_offset(m_offset_key_index, sizeof(u8_t));
 	if (data != 0)
 	{
-		*data = ((*data) & ~m_flag_mask_key_flag) | static_cast<u8_t>((((flags << m_flag_shift_key_flag) & m_flag_mask_key_flag)));
+		*data = static_cast<u8_t>(((*data) & ~m_flag_mask_key_flag)
+								  | static_cast<u8_t>((flags << m_flag_shift_key_flag) & m_flag_mask_key_flag));
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
 	}
 	else
@@ -324,7 +325,8 @@ EAP_FUNC_EXPORT eap_status_e eapol_RC4_key_header_c::set_key_index(u8_t index)
 	u8_t * const data = get_header_offset(m_offset_key_index, sizeof(u8_t));
 	if (data != 0)
 	{
-		*data = ((*data) & m_flag_mask_key_flag) | static_cast<u8_t>((index & ~m_flag_mask_key_flag));
+		*data = static_cast<u8_t>(((*data) & m_flag_mask_key_flag)
+								  | static_cast<u8_t>((index & ~m_flag_mask_key_flag)));
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
 	}
 	else

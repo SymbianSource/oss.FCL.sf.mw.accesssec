@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 24 %
+* %version: %
 */
 
 // This is enumeration of EAPOL source code.

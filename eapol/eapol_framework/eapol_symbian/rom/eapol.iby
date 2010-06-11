@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -11,23 +11,35 @@
 *
 * Contributors:
 *
-* Description:  Image description file for project EAPOL
+* Description:  Image description file for EAPOL framework
 *
 */
 
 /*
-* %version: 16.1.2 %
+* %version: 34 %
 */
 
 #ifndef __EAPOL_IBY__
 #define __EAPOL_IBY__
+
+#include <data_caging_paths_for_iby.hrh>
 #include <bldvariant.hrh>
 
 #ifdef __PROTOCOL_WLAN
 
+
+/* tools */
+file=ABI_DIR\BUILD_DIR\eaptools.dll		SHARED_LIB_DIR\eaptools.dll
+
+/* Symbian tools */
+file=ABI_DIR\BUILD_DIR\eapsymbiantools.dll		SHARED_LIB_DIR\eapsymbiantools.dll
+
+/* Symbian trace */
+file=ABI_DIR\BUILD_DIR\eaptrace.dll		SHARED_LIB_DIR\eaptrace.dll
+
 /* EAPOL + EAP types */
 
-file=ABI_DIR\BUILD_DIR\eapol.dll			SHARED_LIB_DIR\Eapol.dll
+file=ABI_DIR\BUILD_DIR\eapol.dll			SHARED_LIB_DIR\eapol.dll
 
 // EAP SIM
 ECOM_PLUGIN( eapsim.dll,101f8e49.rsc )
@@ -35,32 +47,26 @@ ECOM_PLUGIN( eapsim.dll,101f8e49.rsc )
 // EAP AKA
 ECOM_PLUGIN( eapaka.dll,102073c1.rsc )
 
-// EAP MSCHAPV2
+// EAP MSCHAPv2 / Plain-MSCHAPv2
 ECOM_PLUGIN( eapmschapv2.dll,101f8e66.rsc )
 
-// EAP TLS PEAP
+// EAP TLS PEAP TTLS
 ECOM_PLUGIN( eaptlspeap.dll,101f8e4c.rsc )
 
-// EAP Secure ID
+// EAP Secure ID / GTC
 ECOM_PLUGIN( eapsecurid.dll,101f8e74.rsc )
 
-#ifdef FF_WLAN_EXTENSIONS
-// EAP LEAP
-ECOM_PLUGIN( eapleap.dll,101f8ea6.rsc )
-#endif //#ifdef FF_WLAN_EXTENSIONS
-
-// The VPN interface
+// VPN interface
 ECOM_PLUGIN(eapvpnif.dll, 10200ec9.rsc)
 
 // The Engine EAPOL interface
 ECOM_PLUGIN(wlaneapolif.dll, 2000b05a.rsc)
 
-// EAP Protected Setup
+// Protected Setup
 ECOM_PLUGIN( eapprotectedsetup.dll,2000b003.rsc )
 
 // For database policy file (For secured databases of different EAP types and EAPOL.dat)
 data=ZPRIVATE\100012A5\policy\102072e9.spd			private\100012A5\policy\102072e9.spd
-
 
 // For additional backup registration file for EAPOL.
 data=ZPRIVATE\101F8EC5\backup_registration_eapol.xml	private\101F8EC5\backup_registration_eapol.xml
@@ -68,5 +74,30 @@ data=ZPRIVATE\101F8EC5\backup_registration_eapol.xml	private\101F8EC5\backup_reg
 // Copies configuration file of EAPOL.
 data=ZPRIVATE\101F8EC5\eap.conf	private\101F8EC5\eap.conf
 
+// Copies configuration file of EAP-server.
+data=ZPRIVATE\20026FCB\eap.conf	private\20026FCB\eap.conf
+
+// Copies backup registration file of EAP-server.
+data=ZPRIVATE\20026FCB\backup_registration.xml	private\20026FCB\backup_registration.xml
+
+
+file=ABI_DIR\BUILD_DIR\EapAuthServer.dll		SHARED_LIB_DIR\EapAuthServer.dll
+
+file=ABI_DIR\BUILD_DIR\EapAuthServerExe.exe		SHARED_LIB_DIR\EapAuthServerExe.exe
+
+file=ABI_DIR\BUILD_DIR\eapcoreinterface.dll		SHARED_LIB_DIR\eapcoreinterface.dll
+
+file=ABI_DIR\BUILD_DIR\eapclientif.dll		SHARED_LIB_DIR\eapclientif.dll
+
+ECOM_PLUGIN( EapCoreInterfaceImplementation.dll, 20026fcd.rsc)
+
+ECOM_PLUGIN( EapGeneric.dll, 20026fd1.rsc )
+
+ECOM_PLUGIN( EapGeneralSettings.dll, 20026fd6.rsc)
+
+file=ABI_DIR\BUILD_DIR\eap_notifier.dll		SHARED_LIB_DIR\eap_notifier.dll
+
+
 #endif // __PROTOCOL_WLAN
-#endif // #ifndef __EAPOL_IBY__
+
+#endif // __EAPOL_IBY__

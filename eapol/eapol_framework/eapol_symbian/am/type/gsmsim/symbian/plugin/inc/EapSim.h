@@ -16,14 +16,14 @@
 */
 
 /*
-* %version: 10.1.2 %
+* %version: 19 %
 */
 
 #ifndef _EAPSIM_H_
 #define _EAPSIM_H_
 
 // INCLUDES
-#include <EapType.h>
+#include <EapTypePlugin.h>
 #include "eap_header.h"
 
 // FORWARD DECLARATIONS
@@ -33,7 +33,7 @@ class eap_am_network_id_c;
 /**
 * Class that implements the generic EAP type interface. Implements EAP SIM protocol.
 */
-class CEapSim : public CEapType
+class CEapSim : public CEapTypePlugin
 {
 public:		
 
@@ -87,16 +87,13 @@ public:
 	
 #endif // #ifdef USE_EAP_SIMPLE_CONFIG
 	
-	/**
-	* Invokes the configuration UI.
-	**/
-	TInt InvokeUiL();
+
 	
 	/**
 	* Gets information about EAP type. 
 	* @return Pointer to a class that contains the EAP type information. Also pushed to cleanup stack.
 	*/
-	CEapTypeInfo* GetInfoLC();
+	CEapTypeInfo* GetInfoL();
 
 	/**
 	* Deletes EAP type configuration
@@ -118,7 +115,7 @@ public:
 	* EAP type. 
 	* @param aTunnelingType Type number for the tunneling type
 	*/	
-	void SetTunnelingType(const TInt aTunnelingType);
+	void SetTunnelingType(const TEapExpandedType aTunnelingType);
 
 	/**
 	* Changes the index of the saved parameters.

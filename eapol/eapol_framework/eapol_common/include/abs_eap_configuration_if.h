@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 7 %
+* %version: %
 */
 
 #if !defined(_ABS_EAPOL_WLAN_CONFIGURATION_REFERENCE_IF_H_)
@@ -48,6 +48,11 @@ private:
 public:
 	//--------------------------------------------------
 
+	/* The destructor does nothing */
+	virtual ~abs_eap_configuration_if_c()
+	{
+	};
+	
 #if defined(USE_EAP_SIMPLE_CONFIG)
 	/**
 	 * This function tells AM to save SIMPLE_CONFIG configuration parameters.

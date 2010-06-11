@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 19.1.2 %
+* %version: 33 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -70,7 +70,7 @@ EAP_FUNC_EXPORT eap_session_core_c::~eap_session_core_c()
 // 
 EAP_FUNC_EXPORT eap_session_core_c::eap_session_core_c(
 	abs_eap_am_tools_c * const tools,
-	abs_eap_core_c * const partner,
+	abs_eap_session_core_c * const partner,
 	const bool is_client_when_true)
 : m_partner(partner)
 , m_am_tools(tools)
@@ -98,7 +98,7 @@ EAP_FUNC_EXPORT eap_session_core_c::eap_session_core_c(
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT abs_eap_core_c * eap_session_core_c::get_partner()
+EAP_FUNC_EXPORT abs_eap_session_core_c * eap_session_core_c::get_partner()
 {
 	EAP_ASSERT(m_am_tools->get_global_mutex()->get_is_reserved() == true);
 
@@ -250,7 +250,7 @@ EAP_FUNC_EXPORT eap_core_c * eap_session_core_c::create_new_session(
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("create_new_session() EAP-session"),
+		(EAPL("eap_session_core_c::create_new_session() EAP-session"),
 		 selector.get_data(selector.get_data_length()),
 		 selector.get_data_length()));
 
@@ -276,6 +276,14 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::reset_or_remove_session(
 	const bool reset_immediately)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eap_session_core_c::reset_or_remove_session(): %s.\n"),
+		 (m_is_client == true) ? "client": "server"));
+
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_session_core_c::reset_or_remove_session()");
 
 	eap_status_e status(eap_status_process_general_error);
 
@@ -459,7 +467,7 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::packet_process(
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("packet_process() EAP-session"),
+		(EAPL("eap_session_core_c::packet_process() EAP-session"),
 		 selector.get_data(selector.get_data_length()),
 		 selector.get_data_length()));
 
@@ -467,18 +475,8 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::packet_process(
 
 	if (session == 0)
 	{
-
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_handler_does_not_exists_error);
-
-#else
 		// Create a new session.
 		session = create_new_session(receive_network_id);
-
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
 	}
 
 	if (session != 0)
@@ -714,7 +712,7 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::eap_acknowledge(
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_acknowledge() EAP-session"),
+		(EAPL("eap_session_core_c::eap_acknowledge() EAP-session"),
 		 selector.get_data(selector.get_data_length()),
 		 selector.get_data_length()));
 
@@ -761,7 +759,7 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::restart_authentication(
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("restart_authentication() EAP-session"),
+		(EAPL("eap_session_core_c::restart_authentication() EAP-session"),
 		 selector.get_data(selector.get_data_length()),
 		 selector.get_data_length()));
 
@@ -814,7 +812,7 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::restart_authentication(
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("restart_authentication() EAP-session"),
+		(EAPL("eap_session_core_c::restart_authentication() EAP-session"),
 		 selector.get_data(selector.get_data_length()),
 		 selector.get_data_length()));
 
@@ -882,7 +880,7 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::send_eap_identity_request(
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("send_eap_identity_request() EAP-session"),
+		(EAPL("eap_session_core_c::send_eap_identity_request() EAP-session"),
 		 selector.get_data(selector.get_data_length()),
 		 selector.get_data_length()));
 
@@ -994,7 +992,7 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::timer_expired(
 		EAP_TRACE_DATA_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("timer_expired() EAP-session"),
+			(EAPL("eap_session_core_c::timer_expired() EAP-session"),
 			 selector->get_data(selector->get_data_length()),
 			 selector->get_data_length()));
 
@@ -1078,14 +1076,14 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::timer_delete_data(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_session_core_c::synchronous_cancel_all_eap_sessions()
+EAP_FUNC_EXPORT eap_status_e eap_session_core_c::cancel_all_eap_sessions()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eap_session_core_c::synchronous_cancel_all_eap_sessions(): this = 0x%08x => 0x%08x.\n"),
+		(EAPL("eap_session_core_c::cancel_all_eap_sessions(): this = 0x%08x => 0x%08x.\n"),
 		this,
 		dynamic_cast<abs_eap_base_timer_c *>(this)));
 
@@ -1097,9 +1095,7 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::synchronous_cancel_all_eap_sess
 
 //--------------------------------------------------
 
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
-EAP_FUNC_EXPORT eap_status_e eap_session_core_c::synchronous_create_eap_session(
+EAP_FUNC_EXPORT eap_status_e eap_session_core_c::create_eap_session(
 	const eap_am_network_id_c * const receive_network_id)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1107,7 +1103,7 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::synchronous_create_eap_session(
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eap_session_core_c::synchronous_create_eap_session(): this = 0x%08x => 0x%08x.\n"),
+		(EAPL("eap_session_core_c::create_eap_session(): this = 0x%08x => 0x%08x.\n"),
 		this,
 		dynamic_cast<abs_eap_base_timer_c *>(this)));
 
@@ -1137,7 +1133,7 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::synchronous_create_eap_session(
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("synchronous_create_eap_session() EAP-session"),
+		(EAPL("eap_session_core_c::create_eap_session() EAP-session"),
 		 selector.get_data(selector.get_data_length()),
 		 selector.get_data_length()));
 
@@ -1166,11 +1162,10 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::synchronous_create_eap_session(
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_session_core_c::synchronous_remove_eap_session(
+EAP_FUNC_EXPORT eap_status_e eap_session_core_c::remove_eap_session(
+	const bool /* complete_to_lower_layer */,
 	const eap_am_network_id_c * const receive_network_id)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1178,9 +1173,11 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::synchronous_remove_eap_session(
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eap_session_core_c::synchronous_remove_eap_session(): this = 0x%08x => 0x%08x.\n"),
+		(EAPL("eap_session_core_c::remove_eap_session(): this = 0x%08x => 0x%08x.\n"),
 		this,
 		dynamic_cast<abs_eap_base_timer_c *>(this)));
+
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_session_core_c::remove_eap_session()");
 
 	eap_status_e status = eap_status_process_general_error;
 
@@ -1208,7 +1205,7 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::synchronous_remove_eap_session(
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("synchronous_remove_eap_session() EAP-session"),
+		(EAPL("eap_session_core_c::remove_eap_session() EAP-session"),
 		 selector.get_data(selector.get_data_length()),
 		 selector.get_data_length()));
 
@@ -1230,6 +1227,11 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::synchronous_remove_eap_session(
 	else
 	{
 		// Not found, no need to remove.
+		EAP_TRACE_DEBUG(
+			m_am_tools, 
+			TRACE_FLAGS_DEFAULT, 
+			(EAPL("eap_session_core_c::remove_eap_session(): session not found.\n")));
+
 		status = eap_status_ok;
 	}
 
@@ -1261,7 +1263,7 @@ eap_status_e eap_session_core_c::asynchronous_init_remove_eap_session(
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("asynchronous_init_remove_eap_session() EAP-session"),
+		(EAPL("eap_session_core_c::asynchronous_init_remove_eap_session() EAP-session"),
 		 state_selector.get_data(state_selector.get_data_length()),
 		 state_selector.get_data_length()));
 
@@ -1283,7 +1285,7 @@ eap_status_e eap_session_core_c::asynchronous_init_remove_eap_session(
 		(EAPL("eap_session_core_c::asynchronous_init_remove_eap_session(): %s.\n"),
 		 (m_is_client == true) ? "client": "server"));
 
-	// NOTE: we cannot call directly synchronous_remove_eap_session(), because we will
+	// NOTE: we cannot call directly remove_eap_session(), because we will
 	// return from here to removed object.
 
 	eap_status_e status = eap_status_process_general_error;
@@ -1291,7 +1293,7 @@ eap_status_e eap_session_core_c::asynchronous_init_remove_eap_session(
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("asynchronous_init_remove_eap_session() EAP-session"),
+		(EAPL("eap_session_core_c::asynchronous_init_remove_eap_session() EAP-session"),
 		 state_selector->get_data(state_selector->get_data_length()),
 		 state_selector->get_data_length()));
 
@@ -1398,21 +1400,6 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::cancel_timer(
 
 //--------------------------------------------------
 
-//
-EAP_FUNC_EXPORT eap_status_e eap_session_core_c::cancel_all_timers()
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	EAP_ASSERT(m_am_tools->get_global_mutex()->get_is_reserved() == true);
-
-	const eap_status_e status = m_partner->cancel_all_timers();
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, status);
-}
-
-//--------------------------------------------------
-
 EAP_FUNC_EXPORT eap_status_e eap_session_core_c::check_is_valid_eap_type(
 	const eap_type_value_e eap_type)
 {
@@ -1460,6 +1447,22 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::set_session_timeout(
 
 //--------------------------------------------------
 
+EAP_FUNC_EXPORT eap_status_e eap_session_core_c::set_eap_database_reference_values(
+	const eap_variable_data_c * const reference)
+{
+	return EAP_STATUS_RETURN(m_am_tools, eap_status_not_supported);
+}
 
+//--------------------------------------------------
 
+EAP_FUNC_EXPORT eap_status_e eap_session_core_c::get_802_11_authentication_mode(
+	const eap_am_network_id_c * const receive_network_id,
+	const eapol_key_authentication_type_e authentication_type,
+	const eap_variable_data_c * const SSID,
+	const eap_variable_data_c * const preshared_key)
+{
+	return EAP_STATUS_RETURN(m_am_tools, eap_status_not_supported);
+}
+
+//--------------------------------------------------
 // End.

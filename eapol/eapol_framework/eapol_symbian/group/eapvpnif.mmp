@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11.2.3 %
+* %version: 11.1.9 %
 */
 
 #include <platform_paths.hrh>
@@ -37,6 +37,12 @@ SOURCE		eap_vpn_if_proxy.cpp
 SOURCE		eap_vpn_if_implementation.cpp
 SOURCE		eap_vpn_if_timer.cpp
 
+SOURCEPATH ../eap_if/src
+SOURCE		EapCoreInterface.cpp
+
+SOURCEPATH ../../eapol_common/core
+SOURCE eap_core_client_message_if.cpp
+
 USERINCLUDE   ../am/eapvpnif/inc
 USERINCLUDE   ../../eapol_common/include
 USERINCLUDE   ../am/include
@@ -46,6 +52,10 @@ USERINCLUDE   ../../eapol_common/type/gsmsim/include
 
 USERINCLUDE   ../am/type/gsmsim/symbian/plugin/inc
 USERINCLUDE   ../am/type/aka/symbian/plugin/inc
+USERINCLUDE   ../../eapol_common/type/simple_config/simple_config/include
+USERINCLUDE   ../eap_if/include
+USERINCLUDE   ../eap_server/include
+USERINCLUDE   ../am/type/symbian/plugin/include
 
 SYSTEMINCLUDE /epoc32/include/ecom
 SYSTEMINCLUDE /epoc32/include/libc
@@ -58,7 +68,7 @@ START RESOURCE	10200ec9.rss
 TARGET eapvpnif.rsc
 END
 
-LIBRARY euser.lib ECom.lib eapol.lib edbms.lib efsrv.lib PlatformEnv.lib
+LIBRARY euser.lib ECom.lib eaptools.lib eaptrace.lib eapsymbiantools.lib edbms.lib efsrv.lib PlatformEnv.lib
 DEBUGLIBRARY    flogger.lib
 
 // End

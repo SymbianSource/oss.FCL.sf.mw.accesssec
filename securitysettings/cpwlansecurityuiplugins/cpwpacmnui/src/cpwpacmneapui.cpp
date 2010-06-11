@@ -20,27 +20,47 @@
  * %version: 4 %
  */
 
-#include "cpwpacmneapui.h"
-#include "cpwpacmnui.h"
-
+// System includes
 #include <HbDataFormModelItem>
+
+
+// User includes
+#include "cpwpacmneapui.h"
+#include "cpwpacmnui_p.h"
+
+//Trace Definition
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cpwpacmneapuiTraces.h"
 #endif
 
-EapEntyItemData::EapEntyItemData(CpWpaCmnUi* wpa,
-        CpItemDataHelper &itemDataHelper, const QString &text,
-        const QString &description, const HbIcon &icon,
-        const HbDataFormModelItem *parent) :
-    CpSettingFormEntryItemData(itemDataHelper, text, description, icon,
-            parent),itemdatahelper(itemDataHelper)
-{
-    mUi = wpa;
+/*!
+  \class  
+  Implements the Ui EAP Plugin Loader for WPA/WPA2/802_Dot_1x/WPA2 only Security Modes  
+ */
 
+/*!
+   Constructor
+   
+   @param wpa Pointer to UI object
+   @param itemDataHelpper Control Panel Item data helpper object
+   @param text Text for entry button
+ */
+EapEntryItemData::EapEntryItemData(
+    CpWpaCmnUiPrivate* wpa,
+    CpItemDataHelper &itemDataHelper, 
+    const QString &text) :
+    CpSettingFormEntryItemData(CpSettingFormEntryItemData::ButtonEntryItem, 
+        itemDataHelper, text),
+    mUi(wpa),
+    itemdatahelper(itemDataHelper)
+{
 }
 
-EapEntyItemData::~EapEntyItemData()
+/*!
+   Desctructor.
+ */
+EapEntryItemData::~EapEntryItemData()
 {
     OstTraceFunctionEntry1(EAPENTRYITEMDATA_EAPENTRYITEMDATA_ENTRY,this); 
     OstTraceFunctionExit1(EAPENTRYITEMDATA_EAPENTRYITEMDATA_EXIT,this);
@@ -49,7 +69,7 @@ EapEntyItemData::~EapEntyItemData()
 /*!
  Implement CpSettingFormEntryItemData::createSettingView
  */
-CpBaseSettingView* EapEntyItemData::createSettingView() const
+CpBaseSettingView* EapEntryItemData::createSettingView() const
 {
     OstTraceFunctionEntry1(EAPENTRYITEMDATA_CREATESETTING_VIEW_ENTRY,this); 
     OstTraceFunctionExit1(EAPENTRYITEMDATA_CREATESETTING_VIEW_EXIT,this);

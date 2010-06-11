@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 4.1.2 %
+* %version: %
 */
 
 // This is enumeration of EAPOL source code.
@@ -31,7 +31,7 @@
 
 // INCLUDES
 #include "eap_am_memory.h"
-#include "eap_am_trace_symbian.h"
+#include "EapTraceSymbian.h"
 
 #include "eap_am_semaphore_symbian.h"
 

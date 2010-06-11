@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 9 %
+* %version: %
 */
 
 #if !defined( _EAP_RADIUS_HEADER_STRING_H_ )

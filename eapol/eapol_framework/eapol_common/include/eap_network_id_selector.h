@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10 %
+* %version: %
 */
 
 #if !defined(_EAP_NETWORK_ID_SELECTOR_H_)

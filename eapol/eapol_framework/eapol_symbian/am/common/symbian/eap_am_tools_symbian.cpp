@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 22.1.3 %
+* %version: 32 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -28,11 +28,12 @@
 #endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 
 
+#include <e32math.h>
+#include <utf.h>
 
 #include "eap_am_tools_symbian.h"
 #include "eap_am_types.h"
-#include <e32math.h>
-#include <utf.h>
+#include "eap_automatic_variable.h"
 
 const TUint MAX_DB_TRANSACTION_RETRY_COUNT = 10;
 const u32_t EAP_TIMER_MAX_AFTER_TIME_MILLISECONDS_SYMBIAN = 2100000ul;
@@ -63,6 +64,7 @@ EAP_FUNC_EXPORT eap_am_tools_symbian_c::~eap_am_tools_symbian_c()
 EAP_FUNC_EXPORT eap_am_tools_symbian_c::eap_am_tools_symbian_c(eap_const_string /*pfilename*/)
 	: eap_am_tools_c()
 	, CTimer(CTimer::EPriorityStandard)
+	, m_prefix_string(this)
 	, m_start_ticks(0)
 	, m_directory_exists(false)
 	, m_crypto(this)
@@ -79,16 +81,38 @@ EAP_FUNC_EXPORT eap_am_tools_symbian_c::eap_am_tools_symbian_c(eap_const_string 
 
 #if defined(USE_EAP_HARDWARE_TRACE)
 	set_trace_mask(
-		eap_am_tools_c::eap_trace_mask_always
-		| eap_am_tools_c::eap_trace_mask_error
+		TRACE_FLAGS_ALWAYS
+		| TRACE_FLAGS_ERROR
 		| eap_am_tools_c::eap_trace_mask_debug
-		| eap_am_tools_c::eap_trace_mask_message_data);
+		| EAP_TRACE_FLAGS_MESSAGE_DATA
+		| TRACE_FLAGS_TIMER
+		| TRACE_FLAGS_TIMER_QUEUE);
 #endif //#if defined(USE_EAP_HARDWARE_TRACE)
+
+	const u8_t DEFAULT_PREFIX[] = "EAPOL";
+
+	eap_status_e status = m_prefix_string.set_copy_of_buffer(DEFAULT_PREFIX, sizeof(DEFAULT_PREFIX)-1ul);;
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(this, TRACE_FLAGS_DEFAULT);
+		(void)EAP_STATUS_RETURN(this, status);
+		return;
+	}
+
+	status = m_prefix_string.add_end_null();
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(this, TRACE_FLAGS_DEFAULT);
+		(void)EAP_STATUS_RETURN(this, status);
+		return;
+	}
 
 	EAP_TRACE_DEBUG(
 		this,
 		TRACE_FLAGS_DEFAULT,
 		(EAPL("eap_am_tools_symbian_c::eap_am_tools_symbian_c()\n")));
+
+	EAP_TRACE_RETURN_STRING(this, "returns: eap_am_tools_symbian_c::eap_am_tools_symbian_c()");
 
 	if (m_crypto.get_is_valid() == false)
 	{
@@ -160,6 +184,8 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_symbian_c::configure()
 		TRACE_FLAGS_DEFAULT,
 		(EAPL("eap_am_tools_symbian_c::configure()\n")));
 
+	EAP_TRACE_RETURN_STRING(this, "returns: eap_am_tools_symbian_c::configure()");
+
 	if (m_configure_called == true)
 	{
 		return EAP_STATUS_RETURN(this, eap_status_ok);
@@ -167,10 +193,12 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_symbian_c::configure()
 
 #if defined(USE_EAP_HARDWARE_TRACE)
 	set_trace_mask(
-		eap_am_tools_c::eap_trace_mask_always
-		| eap_am_tools_c::eap_trace_mask_error
+		TRACE_FLAGS_ALWAYS
+		| TRACE_FLAGS_ERROR
 		| eap_am_tools_c::eap_trace_mask_debug
-		| eap_am_tools_c::eap_trace_mask_message_data);
+		| EAP_TRACE_FLAGS_MESSAGE_DATA
+		| TRACE_FLAGS_TIMER
+		| TRACE_FLAGS_TIMER_QUEUE);
 #endif //#if defined(USE_EAP_HARDWARE_TRACE)
 
 	m_start_ticks = get_clock_ticks();
@@ -379,23 +407,28 @@ EAP_FUNC_EXPORT void eap_am_tools_symbian_c::formatted_print(eap_format_string f
 			TInt64 _hours = _minutes / _div_60;
 			_minutes = _minutes - _hours* _div_60;
 
-			_LIT8(KFormat1, "%02d:%02d:%02d.%06d:EAPOL:");
+			_LIT8(KFormat1, "%02d:%02d:%02d.%06d:%s:");
 
 			m_trace_buf.Format(
 				KFormat1,
 				static_cast<TInt32>(_hours),
 				static_cast<TInt32>(_minutes),
 				static_cast<TInt32>(_seconds),
-				static_cast<TInt32>(_micro_seconds));				
+				static_cast<TInt32>(_micro_seconds),
+				m_prefix_string.get_data());
 		}
 
 	}
 	else
 	{
-		_LIT8(KFormat2, "%08x%08x:EAPOL:");
+		_LIT8(KFormat2, "%08x%08x:%s:");
 
 		u32_t *time_stamp_u32_t = reinterpret_cast<u32_t *>(&time_stamp);
-		m_trace_buf.Format(KFormat2, time_stamp_u32_t[1], time_stamp_u32_t[0]);		
+		m_trace_buf.Format(
+			KFormat2,
+			time_stamp_u32_t[1],
+			time_stamp_u32_t[0],
+			m_prefix_string.get_data());
 	}
 
 	VA_LIST args = {0,};
@@ -517,6 +550,35 @@ EAP_FUNC_EXPORT bool eap_am_tools_symbian_c::get_is_timer_thread_active()
 	return m_run_thread;
 }
 
+//--------------------------------------------------
+
+//
+EAP_FUNC_EXPORT eap_status_e eap_am_tools_symbian_c::set_trace_prefix(
+	const eap_variable_data_c * const prefix8bit)
+{
+	EAP_TRACE_BEGIN(this, TRACE_FLAGS_DEFAULT);
+
+	enter_trace_mutex();
+
+	eap_status_e status = m_prefix_string.set_copy_of_buffer(prefix8bit);
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(this, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(this, status);
+	}
+
+	status = m_prefix_string.add_end_null();
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(this, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(this, status);
+	}
+
+	leave_trace_mutex();
+
+	EAP_TRACE_END(this, TRACE_FLAGS_DEFAULT);
+	return eap_status_ok;
+}
 
 //--------------------------------------------------
 
@@ -524,14 +586,23 @@ EAP_FUNC_EXPORT bool eap_am_tools_symbian_c::get_is_timer_thread_active()
 EAP_FUNC_EXPORT eap_status_e eap_am_tools_symbian_c::set_trace_file_name(
 	const eap_variable_data_c * const trace_output_file)
 {
+	EAP_TRACE_DEBUG(
+		this,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_tools_symbian_c::set_trace_file_name()")));
+
+	EAP_TRACE_RETURN_STRING(this, "returns: eap_am_tools_symbian_c::set_trace_file_name()");
+
 	EAP_TRACE_BEGIN(this, TRACE_FLAGS_DEFAULT);
 
 	EAP_UNREFERENCED_PARAMETER(trace_output_file);
 	
 #if defined(USE_EAP_FILE_TRACE)
 #if defined(USE_EAP_TRACE) || defined(USE_EAP_TRACE_ALWAYS)
+
 	TBuf8<64> tmpFilename((TUint8 *)trace_output_file->get_data(trace_output_file->get_data_length()));
 	tmpFilename.SetLength(trace_output_file->get_data_length());
+
 	enter_trace_mutex();
 
 	m_filename.Copy(tmpFilename);
@@ -921,7 +992,7 @@ EAP_FUNC_EXPORT void eap_am_tools_symbian_c::timer_sleep(u32_t milli_seconds)
 
 EAP_FUNC_EXPORT void eap_am_tools_symbian_c::sleep(u32_t milli_seconds)
 {
-	User::After(limit_microsecond_timeout(milli_seconds));
+	After(limit_microsecond_timeout(milli_seconds));
 }
 
 //--------------------------------------------------
@@ -1058,6 +1129,7 @@ EAP_FUNC_EXPORT i32_t eap_am_tools_symbian_c::convert_eapol_error_to_am_error(ea
 		status = KErrCompletion;
 		break;
 
+	case eap_status_not_found:
 	case eap_status_illegal_configure_field:
 		status = KErrNotFound;
 		break;
@@ -1157,7 +1229,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_symbian_c::begin_db_transaction(RDbNam
 		
 		// Wait 0 - 524287 microseconds
 		randomWait = randomWait & 0x7ffff;
-		User::After(randomWait);
+		After(randomWait);
 	}
 	return EAP_STATUS_RETURN(this, status);
 }
@@ -1192,7 +1264,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_symbian_c::begin_db_update(RDbView& aV
 		
 		// Wait 0 - 524287 microseconds
 		randomWait = randomWait & 0x7ffff;
-		User::After(randomWait);
+		After(randomWait);
 	}
 	return EAP_STATUS_RETURN(this, status);
 }
@@ -1227,7 +1299,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_symbian_c::begin_db_delete(RDbView& aV
 		
 		// Wait 0 - 524287 microseconds
 		randomWait = randomWait & 0x7ffff;
-		User::After(randomWait);
+		After(randomWait);
 	}
 	return EAP_STATUS_RETURN(this, status);
 }
@@ -1509,7 +1581,7 @@ EAP_FUNC_EXPORT_INTERFACE abs_eap_am_tools_c * abs_eap_am_tools_c::new_abs_eap_a
 			EAP_TRACE_DEBUG(
 				am_tools,
 				TRACE_FLAGS_TIMER,
-				(EAPL("abs_eap_am_tools_c::new_abs_eap_am_tools_c() => 0x%08x success\n"),
+				(EAPL("abs_eap_am_tools_c::new_abs_eap_am_tools_c(0x%08x): success\n"),
 				am_tools));
 		}
 	}
@@ -1521,15 +1593,18 @@ EAP_FUNC_EXPORT_INTERFACE abs_eap_am_tools_c * abs_eap_am_tools_c::new_abs_eap_a
 
 EAP_FUNC_EXPORT_INTERFACE void abs_eap_am_tools_c::delete_abs_eap_am_tools_c(abs_eap_am_tools_c * const am_tools)
 {
-	EAP_TRACE_DEBUG(
-		am_tools,
-		TRACE_FLAGS_TIMER,
-		(EAPL("abs_eap_am_tools_c::delete_abs_eap_am_tools_c(0x%08x)\n"),
-		am_tools));
-
-	(void)am_tools->shutdown();
-
-	delete am_tools;
+	if (am_tools != 0)
+		{
+		EAP_TRACE_DEBUG(
+			am_tools,
+			TRACE_FLAGS_TIMER,
+			(EAPL("abs_eap_am_tools_c::delete_abs_eap_am_tools_c(0x%08x)\n"),
+			am_tools));
+	
+		(void)am_tools->shutdown();
+	
+		delete am_tools;
+		}
 }
 
 //--------------------------------------------------

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8 %
+* %version: %
 */
 
 #ifndef ABS_EAP_AM_TYPE_SECURID_H

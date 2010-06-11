@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11 %
+* %version: %
 */
 
 #ifndef _ABS_MSCHAPV2_STATE_H_

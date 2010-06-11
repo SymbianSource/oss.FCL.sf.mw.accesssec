@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 9 %
+* %version: %
 */
 
 #if !defined(_EAP_TYPE_GSMSIM_MAC_ATTRIBUTES_H_)

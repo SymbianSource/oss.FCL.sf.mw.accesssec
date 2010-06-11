@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18 %
+* %version: 16.1.8 %
 */
 
 #ifndef EAP_AM_TYPE_LEAP_SYMBIAN_H
@@ -28,7 +28,9 @@
 #include "abs_eap_base_type.h"
 #include "eap_am_type_leap.h"
 #include "eap_am_network_id.h"
-#include "EapLeapNotifierStructs.h"
+
+#include "eap_auth_notifier.h"
+
 #include <EapType.h>
 #include <d32dbms.h>
 
@@ -42,6 +44,8 @@ const TUint KDefaultTimeoutLEAP = 120000;
 */
 class EAP_EXPORT eap_am_type_leap_symbian_c
 : public CActive, public eap_am_type_leap_c
+	, public MNotificationCallback
+
 {
 private:
 	//--------------------------------------------------
@@ -50,15 +54,15 @@ private:
 
 	abs_eap_base_type_c * const m_partner;
 
-	RDbs m_session;
+	RFs m_session;
 
 	RDbNamedDatabase m_database;
 
 	RNotifier m_notifier;
 
-	TEapLeapUsernamePasswordInfo * m_input_output_data_ptr;
+	CEapAuthNotifier::TEapDialogInfo * m_input_output_data_ptr;
 
-	TPckg<TEapLeapUsernamePasswordInfo> * m_input_output_pckg_ptr;
+	TPckg<CEapAuthNotifier::TEapDialogInfo> * m_input_output_pckg_ptr;
 
 	eap_am_network_id_c m_receive_network_id;
 
@@ -82,18 +86,9 @@ private:
 
 	bool m_shutdown_was_called;
 	
-	bool m_is_notifier_connected; // Tells if notifier server is connected.
-	
+
 	// This holds the max session time read from the configuration file.
 	TInt64 m_max_session_time;
-	
-	// This is the vendor-type for tunneling EAP type.
-	// Valid for both expanded and non-expanded EAP types.
-	// This is used since m_tunneling_type can not be used in the same way 
-	// in expanded and non-expanded cases. 
-	// Unlike EAP type, Tunneling type is still non-expanded
-	// for both cases especially for using in the EAP databases.
-	u32_t m_tunneling_vendor_type;	
 	
 	void send_error_notification(const eap_status_e error);
 
@@ -105,6 +100,7 @@ private:
 	 
 	bool is_session_validL();	
 
+	CEapAuthNotifier* iEapAuthNotifier;
 
 	//--------------------------------------------------
 protected:
@@ -196,6 +192,8 @@ public:
 	 * Returns appropriate error if storing fails. eap_status_ok for successful storing.
 	 */
 	eap_status_e store_authentication_time();
+
+	void DlgComplete( TInt aStatus );
 
 }; // class eap_am_type_leap_symbian_c
 

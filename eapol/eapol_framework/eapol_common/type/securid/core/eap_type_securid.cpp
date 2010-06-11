@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 25 %
+* %version: %
 */
 
 // This is enumeration of EAPOL source code.
@@ -636,7 +636,6 @@ EAP_FUNC_EXPORT eap_status_e eap_type_securid_c::configure()
 
 	//----------------------------------------------------------
 
-#if defined(USE_EAP_EXPANDED_TYPES)
 	{
 		eap_variable_data_c use_eap_expanded_type(m_am_tools);
 		eap_status_e status(eap_status_process_general_error);
@@ -680,7 +679,6 @@ EAP_FUNC_EXPORT eap_status_e eap_type_securid_c::configure()
 			}
 		}
 	}
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 
 
 	//----------------------------------------------------------

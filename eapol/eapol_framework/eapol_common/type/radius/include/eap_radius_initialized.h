@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10 %
+* %version: %
 */
 
 #if !defined(_RADIUS_INITIALIZED_H_)

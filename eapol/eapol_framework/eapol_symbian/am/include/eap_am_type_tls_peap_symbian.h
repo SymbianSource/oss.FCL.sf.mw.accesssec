@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 86.1.2 %
+* %version: 109 %
 */
 
 #if !defined(_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H_)
@@ -33,7 +33,8 @@
 #include <unifiedcertstore.h>
 #include <mctwritablecertstore.h>
 #include <pkixcertchain.h>
-#include "EapTlsPeapNotifierStructs.h"
+#include "eap_auth_notifier.h"
+
 #include "EapTlsPeapUtils.h"
 #include <bigint.h>
 
@@ -48,14 +49,12 @@ class CX509Certificate;
 class CEapTlsPeapCertInterface;
 class eap_am_tools_symbian_c;
 class abs_tls_am_application_eap_fast_c;
-#if defined(USE_FAST_EAP_TYPE)
-class CEapFastActive;
-#endif
-class CEapTtlsPapActive;
+
+
 
 #ifdef USE_PAC_STORE
 class CPacStoreDatabase;
-struct SInfoEntry;
+class SInfoEntry;
 #endif
 #if defined(USE_EAP_CONFIGURATION_TO_SKIP_USER_INTERACTIONS)
 class eap_file_config_c;
@@ -73,7 +72,10 @@ const u32_t KEapFastPacProvisResultDefaultTimeout = 10000; // in milliseconds = 
 /// This class is interface to adaptation module of EAP/TLS and PEAP.
 class EAP_EXPORT eap_am_type_tls_peap_symbian_c
 : public CActive, public eap_am_type_tls_peap_c
-,public abs_eap_base_timer_c 
+,public abs_eap_base_timer_c
+	, public MNotificationCallback
+
+
 {
 
 public:
@@ -88,7 +90,7 @@ public:
 private: // data
 //--------------------------------------------------
 
-	RDbs m_session;
+	RFs m_session;
 
 	RDbNamedDatabase m_database;
 
@@ -98,17 +100,21 @@ private: // data
 		EHandlingManualIdentityQuery,     /* 1 */
 		EHandlingChainQuery,              /* 2 */
 		EHandlingCipherSuiteQuery,        /* 3 */
-#if defined(USE_FAST_EAP_TYPE)            /* 4 */
-		EHandlingNotifierQuery,           /* 5 */
-		EPasswordQuery,                   /* 6 */
-		EWrongPassword,                   /* 7 */
-		EFilePasswordQuery,               /* 8 */
-		EMasterkeyQuery,                  /* 9 */
-		EPasswordCancel,                  /* 10 */
-		EShowProvSuccesstNote,            /* 11 */
-		EShowProvNotSuccesstNote,         /* 12 */
-		ENone                             /* 13 */
+    EHandlingDeviceSeedQuery,        /* 4 */
+#if defined(USE_FAST_EAP_TYPE)            /* 5 */
+		EHandlingNotifierQuery,           /* 6 */
+		EPasswordQuery,                   /* 7 */
+		EWrongPassword,                   /* 8 */
+		EFilePasswordQuery,               /* 9 */
+		EMasterkeyQuery,                  /* 10 */
+		EPasswordCancel,                  /* 11 */
+		EShowProvSuccesstNote,            /* 12 */
+		EShowProvNotSuccesstNote,         /* 13 */
+		ENotifierComplete,				/*14 */
 #endif //#if defined(USE_FAST_EAP_TYPE)
+		EPapUserNameAndPassword, /* 15 */
+		EPapChallenge, /* 16 */
+		ENone                             /* 17 */
 		
 	};
 	
@@ -130,9 +136,7 @@ private: // data
 
 #if defined(USE_FAST_EAP_TYPE)
 	abs_tls_am_application_eap_fast_c * m_tls_application;
-	CEapFastActive* iEapFastActiveWaitNote;
-	CEapFastActive* iEapFastActiveNotes;
-	
+
 	enum TAlterTableCmd
 	    {
 	    EAddColumn,
@@ -146,11 +150,6 @@ private: // data
 
 	eap_type_value_e m_current_eap_type;
 
-	// These are the vendor-types for EAP type and tunneling EAP type.
-	// Valid for both expanded and non-expanded EAP types.
-	u32_t m_current_eap_vendor_type;
-	u32_t m_tunneling_vendor_type;
-
 	TBufC<KMaxDatabaseTableName> m_db_table_name;
 	TBufC<KMaxDatabaseTableName> m_db_user_cert_table_name;
 	TBufC<KMaxDatabaseTableName> m_db_ca_cert_table_name;
@@ -158,8 +157,8 @@ private: // data
 	TBufC<KMaxDatabaseTableName> m_db_name;
 
 #if defined (USE_FAST_EAP_TYPE)	
-TBufC<KMaxDatabaseTableName> m_db_fast_special_table_name;
-RArray<SInfoEntry> m_info_array;
+	TBufC<KMaxDatabaseTableName> m_db_fast_special_table_name;
+	RPointerArray<SInfoEntry> m_info_array;
 #endif	
 
 	u32_t m_max_count_of_session_resumes;
@@ -174,7 +173,7 @@ RArray<SInfoEntry> m_info_array;
 
 	CEapTlsPeapCertInterface* m_cert_if;	
 
-	SCertEntry m_own_certificate_info;
+	EapCertificateEntry m_own_certificate_info;
 
 	eap_am_network_id_c m_receive_network_id;
 
@@ -182,11 +181,11 @@ RArray<SInfoEntry> m_info_array;
 
 	TKeyIdentifier m_subject_key_id;
 
-	RArray<SCertEntry> m_allowed_ca_certs;
+	RPointerArray<EapCertificateEntry> m_allowed_ca_certs;
 
-	RArray<SCertEntry> m_allowed_user_certs;
+	RPointerArray<EapCertificateEntry> m_allowed_user_certs;
 	
-	RArray<SCertEntry> m_allowed_server_certs;
+	RPointerArray<EapCertificateEntry> m_allowed_server_certs;
 
 	RArray<TUint> m_allowed_cipher_suites;
 
@@ -198,20 +197,11 @@ RArray<SInfoEntry> m_info_array;
 	
 	bool m_shutdown_was_called;
 
-#ifdef USE_EAP_EXPANDED_TYPES
-
 	/// Tunneling EAP configuration data from EAP database.
-	RExpandedEapTypePtrArray m_enabled_tunneling_exp_eap_array;
-	RExpandedEapTypePtrArray m_disabled_tunneling_exp_eap_array;
+	RPointerArray<TEapExpandedType> m_enabled_tunneling_exp_eap_array;
+	RPointerArray<TEapExpandedType> m_disabled_tunneling_exp_eap_array;
 
-#else
 
-	/// Tunneling EAP configuration data from EAP database.
-	TEapArray m_iap_eap_array;
-
-#endif  // #ifdef USE_EAP_EXPANDED_TYPES
-	TIdentityInfo* m_identity_info; 
-	
 	TBuf8<4> m_selector_output;
 
 	eap_type_value_e m_tunneled_type;
@@ -229,6 +219,8 @@ RArray<SInfoEntry> m_info_array;
 	eap_variable_data_c m_manual_realm;
 	
 	bool m_tls_peap_server_authenticates_client_policy_flag;
+
+	bool m_use_automatic_ca_certificate;
 
 	/// This flag prevents double configuration. This can happen when 
 	/// this class implements many interfaces.
@@ -264,18 +256,16 @@ RArray<SInfoEntry> m_info_array;
 	
 	bool m_serv_unauth_prov_mode;
 	bool m_serv_auth_prov_mode;
+#endif
 	
-	// For FAST notifiers
-	RNotifier m_notifier;	
-	bool m_is_notifier_connected; // Tells if notifier server is connected.
 
-	TEapFastNotifierStruct * m_notifier_data_to_user;
-	TPckg<TEapFastNotifierStruct> * m_notifier_data_pckg_to_user;	
 
-	TEapFastNotifierStruct * m_notifier_data_from_user;
-	TPckg<TEapFastNotifierStruct> * m_notifier_data_pckg_from_user;	
+	CEapAuthNotifier::TEapDialogInfo * m_notifier_data_to_user;
+
+	TPckg<CEapAuthNotifier::TEapDialogInfo> * m_notifier_data_pckg_to_user;
 
     /* For MMETEL */
+#if defined(USE_FAST_EAP_TYPE)
     
 	// ETel connection.
     RTelServer iServer;
@@ -287,6 +277,7 @@ RArray<SInfoEntry> m_info_array;
     	
     // Tells if MMETEL is connected already or not.
     TBool iMMETELConnectionStatus;    
+
     TBool m_completed_with_zero;   
 	TBool m_verificationStatus;
 
@@ -294,7 +285,6 @@ RArray<SInfoEntry> m_info_array;
 	EEapFastNotifierUserAction m_userAction;
 	eap_pac_store_data_type_e m_pacStoreDataRefType;
 	eap_fast_pac_store_data_c m_data_reference;
-	TBool m_notifier_complete;
 	eap_variable_data_c m_userResponse;
 	eap_fast_pac_store_pending_operation_e m_pending_operation;
 	TInt m_both_completed;
@@ -316,6 +306,7 @@ RArray<SInfoEntry> m_info_array;
 	eap_fast_initialize_pac_store_completion_e iCompletion;
 
 #endif //#if defined(USE_FAST_EAP_TYPE)
+	TBool m_notifier_complete;
 
 #ifdef USE_PAC_STORE
 	CPacStoreDatabase * iPacStoreDb;
@@ -338,7 +329,16 @@ RArray<SInfoEntry> m_info_array;
 	* Provides asynch services used by the caller such as
     * query for TTLS-PAP user name and password.
     */
-	CEapTtlsPapActive* iEapTtlsPapActive;
+
+ //   eap_am_type_tls_peap_symbian_c* iCaller;
+    
+    eap_variable_data_c* iPacStoreDeviceSeed;
+
+#ifdef USE_PAC_STORE
+#endif
+
+	CEapAuthNotifier* iEapAuthNotifier;
+
 
 	
 //--------------------------------------------------
@@ -460,8 +460,7 @@ private: // methods
 		const eap_fast_pac_store_pending_operation_e in_pending_operation,
 		EAP_TEMPLATE_CONST eap_array_c<eap_fast_pac_store_data_c> * const in_references_and_data_blocks);
 		
-	eap_status_e ShowNotifierItemAndGetResponse(
-		EEapFastNotifierUiItem aNotifierUiItem, TBool aSetActive );
+
 
 	eap_status_e RemoveIAPReference();
 
@@ -562,6 +561,15 @@ private: // methods
 		const TInt64& aInMaxSessionTime,
 		const TInt64& aInLastFullAuthTime );
 	
+#ifdef USE_FAST_EAP_TYPE    
+    TInt CreateMMETelConnectionL();
+
+    void DisconnectMMETel();    
+
+    eap_status_e CreateDeviceSeedAsync();
+    
+    void CompleteCreateDeviceSeedL( TInt aStatus );
+#endif
 	
 //--------------------------------------------------
 protected: // methods
@@ -602,7 +610,7 @@ public: // methods
 
 	EAP_FUNC_IMPORT virtual ~eap_am_type_tls_peap_symbian_c();
 
-	EAP_FUNC_EXPORT eap_status_e shutdown();
+	EAP_FUNC_IMPORT eap_status_e shutdown();
 
 	EAP_FUNC_IMPORT void set_is_valid();
 
@@ -818,7 +826,7 @@ public: // methods
 
 	void complete_validate_chain(CPKIXValidationResult& aValidationResult, eap_status_e aStatus);
 
-	void complete_get_matching_certificates(CArrayFixFlat<SCertEntry>& aMatchingCerts, eap_status_e aStatus);
+	void complete_get_matching_certificates(RPointerArray<EapCertificateEntry>& aMatchingCerts, eap_status_e aStatus);
 
 	void complete_sign(const RInteger& aR, const RInteger& aS, eap_status_e aStatus);
 
@@ -1016,7 +1024,12 @@ public: // methods
 #if defined(USE_EAP_CONFIGURATION_TO_SKIP_USER_INTERACTIONS)
  	eap_status_e ReadFileConfig();
 #endif
-#endif 	
+
+#endif 
+
+	EAP_FUNC_IMPORT void DlgComplete( TInt aStatus );
+
+	
 }; // class eap_am_type_tls_peap_symbian_c
 
 

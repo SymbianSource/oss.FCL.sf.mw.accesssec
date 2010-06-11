@@ -11,16 +11,15 @@
  *
  * Contributors:
  *
- * Description: .
+ * Description: TraceHeader ,includes the TraceAPI 
  *   
  *
  */
  
- 
 /*
  * %version: 2 %
  */
-
+ 
 #ifndef __OSTTRACEDEFINITIONS_H__
 #define __OSTTRACEDEFINITIONS_H__
 #include <opensystemtrace.h>

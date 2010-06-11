@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 7.1.2 %
+* %version: 13 %
 */
 
 #if !defined(_ABS_EAPOL_CORE_H_)
@@ -24,6 +24,9 @@
 
 #include "eap_am_types.h"
 #include "eapol_key_state.h"
+#if defined(USE_EAP_SIMPLE_CONFIG)
+	#include "abs_eap_configuration_if.h"
+#endif // #if defined(USE_EAP_SIMPLE_CONFIG)
 
 class eap_am_network_id_c;
 class eapol_session_key_c;
@@ -36,6 +39,9 @@ class eap_base_type_c;
 /// will use with the partner class.
 /// Later eapol and ethernet could be integrated. Now I am too lazy.
 class EAP_EXPORT abs_eapol_core_c
+#if defined(USE_EAP_SIMPLE_CONFIG)
+: public abs_eap_configuration_if_c
+#endif // #if defined(USE_EAP_SIMPLE_CONFIG)
 {
 private:
 	//--------------------------------------------------
@@ -199,7 +205,19 @@ public:
 
 	virtual eap_status_e add_rogue_ap(eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list) = 0;
 
-//--------------------------------------------------
+	virtual eap_status_e complete_check_pmksa_cache(
+		EAP_TEMPLATE_CONST eap_array_c<eap_am_network_id_c> * const bssid_sta_receive_network_ids) = 0;
+
+	virtual eap_status_e complete_get_802_11_authentication_mode(
+		const eap_status_e completion_status,
+		const eap_am_network_id_c * const receive_network_id,
+		const eapol_key_802_11_authentication_mode_e mode) = 0;
+
+	virtual eap_status_e complete_disassociation(
+		const bool complete_to_lower_layer,
+		const eap_am_network_id_c * const receive_network_id) = 0;
+
+	//--------------------------------------------------
 }; // class abs_eapol_core_c
 
 #endif //#if !defined(_ABS_EAPOL_CORE_H_)

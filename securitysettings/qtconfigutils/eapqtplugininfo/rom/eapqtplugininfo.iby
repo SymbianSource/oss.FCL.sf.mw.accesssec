@@ -20,12 +20,16 @@
 * %version: 2 %
 */
 
-#ifndef __EAPQTPLUGININFO_IBY__
-#define __EAPQTPLUGININFO_IBY__
+#ifndef EAPQTPLUGININFO_IBY
+#define EAPQTPLUGININFO_IBY
 
-#include <bldvariant.hrh>
 #include <data_caging_paths_for_iby.hrh>
+#include <bldvariant.hrh>
 
-file=ABI_DIR\BUILD_DIR\eapqtplugininfo.dll SHARED_LIB_DIR\eapqtplugininfo.dll
+#ifdef __PROTOCOL_WLAN
 
-#endif
+file=ABI_DIR\BUILD_DIR\eapqtplugininfo.dll 	SHARED_LIB_DIR\eapqtplugininfo.dll
+
+#endif  // __PROTOCOL_WLAN
+
+#endif  // EAPQTPLUGININFO_IBY
