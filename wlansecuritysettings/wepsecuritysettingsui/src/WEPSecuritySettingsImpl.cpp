@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: tr1cfwln#26 %
+* %version: tr1cfwln#27 %
 */
 
 // INCLUDE FILES
@@ -534,6 +534,9 @@ void CWEPSecuritySettingsImpl::LoadL( TUint32 aIapId,
 void CWEPSecuritySettingsImpl::SaveL( TUint32 aIapId, 
                                       CMDBSession& aSession ) const
     {
+    const TInt KRetryWait = 100000;    // Wait time between retries in TTimeIntervalMicroSeconds32
+    const TInt KRetryCount = 50;       // Max retry count
+
     // Load WLAN service table
     // first get WLAN table id
     CMDBGenericRecord* generic = static_cast<CMDBGenericRecord*>
@@ -588,17 +591,41 @@ void CWEPSecuritySettingsImpl::SaveL( TUint32 aIapId,
                             ( generic->GetFieldByIdL( KCDTIdWlanFormatKey4 ) );
     formatKey4Field->SetL( iKeyFormat[ KFourthKey ] );
     
-    // If table existed modify it
-    if( found )
+    TInt error( KErrNone );
+    
+    // Saving changes
+    for ( TInt i( 0 ); i < KRetryCount; i++ )
         {
-        generic->ModifyL( aSession );
+        
+        // If table existed modify it
+        if( found )
+            {
+            TRAP( error, generic->ModifyL( aSession ) );
+            }
+                   
+        // Otherwise store a new record
+        else
+            {
+            generic->SetRecordId( KCDNewRecordRequest );
+            TRAP( error, generic->StoreL( aSession ) );
+            }
+                  
+        // If operation failed with KErrLocked, we'll retry.
+        if ( KErrLocked == error )
+            {
+            User::After( KRetryWait );
+            }
+        
+        // Otherwise break the retry loop.
+        else 
+            {
+            break;        
+            }
         }
-    // Otherwise store a new record
-    else
-        {
-        generic->SetRecordId( KCDNewRecordRequest );
-        generic->StoreL( aSession );
-        }
+    
+    // If the save operation failed, leave now. 
+    User::LeaveIfError( error );
+
     CleanupStack::PopAndDestroy( generic );
     }
 
