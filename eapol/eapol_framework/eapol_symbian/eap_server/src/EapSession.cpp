@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 29 %
+* %version: 30 %
 */
 
 
@@ -192,11 +192,6 @@ void CEapSession::ServiceL(const RMessage2& aMessage)
 			ECapabilityNetworkControl,
 			"EAP-SERVER: Missing ECapabilityNetworkControl");
 #endif
-		CheckCapabilityL(
-			aMessage,
-			ETrue,
-			ECapabilityNetworkServices,
-			"EAP-SERVER: Missing ECapabilityNetworkServices");
 
 		CheckCapabilityL(
 			aMessage,
@@ -207,8 +202,8 @@ void CEapSession::ServiceL(const RMessage2& aMessage)
 		CheckCapabilityL(
 			aMessage,
 			ETrue,
-			ECapabilityReadUserData,
-			"EAP-SERVER: Missing ECapabilityReadUserData");
+			ECapabilityWriteDeviceData,
+			"EAP-SERVER: Missing ECapabilityWriteDeviceData");
 	}
 
 

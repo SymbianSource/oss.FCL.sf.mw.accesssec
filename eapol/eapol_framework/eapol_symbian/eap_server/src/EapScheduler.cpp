@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 15 %
+* %version: 16 %
 */
 
 #include "EapScheduler.h"
@@ -128,7 +128,9 @@ EAP_FUNC_EXPORT TInt CEapScheduler::ThreadStart(TServerStart& aStart)
     // get cleanup stack
     EAP_TRACE_DEBUG_SYMBIAN((_L("CEapScheduler::ThreadStart()")));           
 
+#if defined(USE_EAP_HEAP_CHECK)
     __UHEAP_MARK;
+#endif //#if defined(USE_EAP_HEAP_CHECK)
 
     CTrapCleanup* cleanup=CTrapCleanup::New();
 
@@ -140,7 +142,9 @@ EAP_FUNC_EXPORT TInt CEapScheduler::ThreadStart(TServerStart& aStart)
 		delete cleanup;
 		}
 
+#if defined(USE_EAP_HEAP_CHECK)
     __UHEAP_MARKEND;
+#endif //#if defined(USE_EAP_HEAP_CHECK)
 
     EAP_TRACE_DEBUG_SYMBIAN((_L("CEapScheduler::ThreadStart end err=%d"), err));           
     return err;

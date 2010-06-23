@@ -46,8 +46,7 @@ symbian: {
     pluginstub.path = /resource/plugins/devicedialogs
     DEPLOYMENT += pluginstub
 }
-TRANSLATIONS = cellularpromptdialog.ts
+TRANSLATIONS = eapprompts.ts
 
 LIBS  += -leapqtconfiginterface -leapqtplugininfo
 
-# RESOURCES += res/eapdialog.qrc
