@@ -16,13 +16,13 @@
 */
 
 /*
-* %version: 9 %
+* %version: 11 %
 */
 
 // This is enumeration of EAPOL source code.
 #if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 	#undef EAP_FILE_NUMBER_ENUM
-	#define EAP_FILE_NUMBER_ENUM 48 
+	#define EAP_FILE_NUMBER_ENUM 745 
 	#undef EAP_FILE_NUMBER_DATE 
 	#define EAP_FILE_NUMBER_DATE 1127594498 
 #endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
@@ -105,7 +105,7 @@ EAP_FUNC_EXPORT eap_pac_store_server_message_if_c::eap_pac_store_server_message_
 
 //
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_server_message_if_c::configure(
-	const eap_variable_data_c * const client_configuration)
+	const eap_variable_data_c * const /* client_configuration */)
 {
 	EAP_ASSERT(m_am_tools->get_global_mutex()->get_is_reserved() == true);
 
@@ -486,6 +486,8 @@ EAP_FUNC_EXPORT bool eap_pac_store_server_message_if_c::get_is_valid()
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_server_message_if_c::timer_expired(
 	const u32_t id, void *data)
 {
+	EAP_UNREFERENCED_PARAMETER(id);
+	EAP_UNREFERENCED_PARAMETER(data);
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
@@ -509,6 +511,8 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_server_message_if_c::timer_expired(
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_server_message_if_c::timer_delete_data(
 	const u32_t id, void *data)
 {
+	EAP_UNREFERENCED_PARAMETER(id);
+	EAP_UNREFERENCED_PARAMETER(data);
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
@@ -526,7 +530,7 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_server_message_if_c::timer_delete_dat
 //--------------------------------------------------
 
 eap_status_e eap_pac_store_server_message_if_c::open_pac_store(
-	EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters)
+	EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const /* parameters */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -554,7 +558,7 @@ eap_status_e eap_pac_store_server_message_if_c::open_pac_store(
 
 //--------------------------------------------------
 
-eap_status_e eap_pac_store_server_message_if_c::create_device_seed(EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters)
+eap_status_e eap_pac_store_server_message_if_c::create_device_seed(EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const /* parameters */)
     {
     EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -575,7 +579,7 @@ eap_status_e eap_pac_store_server_message_if_c::create_device_seed(EAP_TEMPLATE_
     }
 //--------------------------------------------------
 
-eap_status_e eap_pac_store_server_message_if_c::is_master_key_present(EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters)
+eap_status_e eap_pac_store_server_message_if_c::is_master_key_present(EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const /* parameters */)
     {
     EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -690,7 +694,7 @@ eap_status_e eap_pac_store_server_message_if_c::create_and_save_master_key(EAP_T
     }
 //--------------------------------------------------
 
-eap_status_e eap_pac_store_server_message_if_c::is_pacstore_password_present(EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters)
+eap_status_e eap_pac_store_server_message_if_c::is_pacstore_password_present(EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const /* parameters */)
     {
     EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -813,7 +817,7 @@ eap_status_e eap_pac_store_server_message_if_c::set_pac_store_password(EAP_TEMPL
     }
 //--------------------------------------------------
 
-eap_status_e eap_pac_store_server_message_if_c::destroy_pac_store(EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters)
+eap_status_e eap_pac_store_server_message_if_c::destroy_pac_store(EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const /* parameters */)
     {
     EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 

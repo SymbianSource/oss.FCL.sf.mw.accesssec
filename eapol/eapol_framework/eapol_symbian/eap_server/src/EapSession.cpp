@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 30 %
+* %version: 31 %
 */
 
 
@@ -57,7 +57,7 @@ CEapSession::CEapSession()
 
 // -----------------------------------------------------------------------------------------
 
-void CEapSession::ConstructL(CEapServer& aServer, abs_eap_am_tools_c * const tools)
+void CEapSession::ConstructL(CEapServer& /* aServer */, abs_eap_am_tools_c * const tools)
     {
 	EAP_TRACE_DEBUG(
 		tools,

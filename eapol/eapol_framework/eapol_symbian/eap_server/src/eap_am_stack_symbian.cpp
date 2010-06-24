@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 48 %
+* %version: 49 %
 */
 
 #include "eap_am_stack_symbian.h"
@@ -1300,7 +1300,7 @@ void eap_am_stack_symbian_c::ReadEAPSettingsL()
 
 //--------------------------------------------------
 
-void eap_am_stack_symbian_c::SetToTopPriorityL(const eap_type_value_e aEapType)
+void eap_am_stack_symbian_c::SetToTopPriorityL(const eap_type_value_e /* aEapType */)
 {
 	EAP_TRACE_BEGIN(iTools, TRACE_FLAGS_DEFAULT);
 

@@ -16,11 +16,14 @@
 */
 
 /*
-* %version: 16.1.8 %
+* %version: 16.1.11 %
 */
 
 #ifndef EAP_AM_TYPE_LEAP_SYMBIAN_H
 #define EAP_AM_TYPE_LEAP_SYMBIAN_H
+
+// This flag is for testing memory leaks that occurs in QT notifier.
+#define USE_EAP_AUTH_NOTIFIER
 
 // INCLUDES
 
@@ -29,7 +32,9 @@
 #include "eap_am_type_leap.h"
 #include "eap_am_network_id.h"
 
+#if defined(USE_EAP_AUTH_NOTIFIER)
 #include "eap_auth_notifier.h"
+#endif //#if defined(USE_EAP_AUTH_NOTIFIER)
 
 #include <EapType.h>
 #include <d32dbms.h>
@@ -44,7 +49,9 @@ const TUint KDefaultTimeoutLEAP = 120000;
 */
 class EAP_EXPORT eap_am_type_leap_symbian_c
 : public CActive, public eap_am_type_leap_c
+#if defined(USE_EAP_AUTH_NOTIFIER)
 	, public MNotificationCallback
+#endif //#if defined(USE_EAP_AUTH_NOTIFIER)
 
 {
 private:
@@ -58,11 +65,13 @@ private:
 
 	RDbNamedDatabase m_database;
 
+#if defined(USE_EAP_AUTH_NOTIFIER)
 	RNotifier m_notifier;
 
 	CEapAuthNotifier::TEapDialogInfo * m_input_output_data_ptr;
 
 	TPckg<CEapAuthNotifier::TEapDialogInfo> * m_input_output_pckg_ptr;
+#endif //#if defined(USE_EAP_AUTH_NOTIFIER)
 
 	eap_am_network_id_c m_receive_network_id;
 
@@ -100,7 +109,9 @@ private:
 	 
 	bool is_session_validL();	
 
+#if defined(USE_EAP_AUTH_NOTIFIER)
 	CEapAuthNotifier* iEapAuthNotifier;
+#endif //#if defined(USE_EAP_AUTH_NOTIFIER)
 
 	//--------------------------------------------------
 protected:
@@ -195,6 +206,8 @@ public:
 
 	void DlgComplete( TInt aStatus );
 
+	TInt IsDlgReadyToCompleteL();
+	
 }; // class eap_am_type_leap_symbian_c
 
 

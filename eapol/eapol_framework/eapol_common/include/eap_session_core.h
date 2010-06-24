@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 24 %
 */
 
 #if !defined(_EAP_SESSION_CORE_H_)

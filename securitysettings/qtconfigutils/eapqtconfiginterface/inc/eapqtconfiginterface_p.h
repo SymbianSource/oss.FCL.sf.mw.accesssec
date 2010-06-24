@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -17,32 +17,41 @@
  */
 
 /*
- * %version: 29 %
+ * %version: 36 %
  */
 
 #ifndef EAPQTCONFIGINTERFACEPRIVATE_H
 #define EAPQTCONFIGINTERFACEPRIVATE_H
 
+// System includes
 #include <qglobal.h>
 #include <EapSettings.h>
 #include <EapTypeDefinitions.h>
 #include <eapqtconfig.h>
 #include <eapqtpluginhandle.h>
 #include <eapqtconfiginterface.h>
+#include <eapqtpacstoreconfig.h>
 
-/*!
- * @addtogroup group_eap_config_if_impl
- * @{
- */
+// User includes
+
+// Forward declarations
 class HbTranslator;
 class CEapType;
 class CEapGeneralSettings;
 class CpEapPluginInterface;
 class EapQtConfigInterface;
 
+// External data types
+
+// Constants
+
+// Class declaration
 class EapQtConfigInterfacePrivate
 {
+
 public:
+
+    // Data types
 
     // maximum lenghts (number of characters) for UTF-16 strings copied to EAP settings
     static const unsigned int StringMaxLength = KGeneralStringMaxLength;
@@ -50,21 +59,10 @@ public:
     static const unsigned int CertThumbprintMaxLength = KThumbprintMaxLength;
     static const unsigned int CertSubjectKeyIdLength = KSHA1HashLengthBytes;
 
-public:
+    // see eapqtinterface.h for documentation
 
-    // the constructor can only be used for validators
-    // any other call trows an exception
     EapQtConfigInterfacePrivate();
 
-    // this is the constructor for using the interface for accessing settings etc.
-    // if iapId is negative, it must be later set to correct value with setConfigurationReference
-    // to be able to use the methods:
-    // - selectedOuterTypes
-    // - readConfiguration
-    // - saveConfiguration
-    // - deleteConfiguration
-    // - uiInstance
-    // other methods are usable with negative iapId
     EapQtConfigInterfacePrivate(const EapQtConfigInterface::EapBearerType bearerType,
         const int iapId);
 
@@ -73,32 +71,37 @@ public:
     QList<EapQtPluginInfo> supportedOuterTypes();
     QList<EapQtPluginInfo> supportedInnerTypes(const EapQtPluginHandle &outerType);
 
-    bool isSupportedOuterType(const EapQtPluginHandle& handle);
-    bool isSupportedInnerType(const EapQtPluginHandle& outerHandle,
-        const EapQtPluginHandle& innerHandle);
+    bool isSupportedOuterType(const EapQtPluginHandle &handle);
+    bool isSupportedInnerType(const EapQtPluginHandle &outerHandle,
+        const EapQtPluginHandle &innerHandle);
 
     QList<EapQtCertificateInfo> certificateAuthorityCertificates();
     QList<EapQtCertificateInfo> userCertificates();
+    bool updateCertificates();
 
-    EapQtValidator *validatorEap(EapQtExpandedEapType type, EapQtConfig::SettingsId id);
-
-    CpBaseSettingView *uiInstance(const EapQtPluginHandle& outerHandle,
-        const EapQtPluginHandle& pluginHandle);
-
-    // if iapId was negative in the constructor, this method must be called before
-    // calling the following methods
     bool setConfigurationReference(const int iapId);
 
     QList<EapQtPluginHandle> selectedOuterTypes();
-    bool setSelectedOuterTypes(const QList<EapQtPluginHandle>& outerHandles);
+    bool setSelectedOuterTypes(const QList<EapQtPluginHandle> &outerHandles);
 
-    bool readConfiguration(const EapQtPluginHandle& outerHandle,
-        const EapQtPluginHandle& pluginHandle, EapQtConfig &config);
-    bool saveConfiguration(const EapQtPluginHandle& pluginHandle, EapQtConfig &config);
+    bool readConfiguration(const EapQtPluginHandle &outerHandle,
+        const EapQtPluginHandle &pluginHandle, EapQtConfig &config);
+    bool saveConfiguration(const EapQtPluginHandle &pluginHandle, const EapQtConfig &config);
 
     bool deleteConfiguration();
 
+    EapQtValidator *validatorEap(const EapQtExpandedEapType &type, const EapQtConfig::SettingsId id);
+
+    CpBaseSettingView *uiInstance(const EapQtPluginHandle &outerHandle,
+        const EapQtPluginHandle &pluginHandle);
+
+    bool readPacStoreConfiguration(EapQtPacStoreConfig &config);
+    bool savePacStoreConfiguration(const EapQtPacStoreConfig &config);
+    EapQtValidator *validatorPacStore(const EapQtPacStoreConfig::PacStoreSettings id);
+
 private:
+
+    // see cpp for documentation
 
     void loadPlugins();
 
@@ -108,17 +111,17 @@ private:
     void copyCertificateInfo(const RPointerArray<EapCertificateEntry>* const certEntries, QList<
         EapQtCertificateInfo>* const certInfos);
 
-    void appendCertificateInfo(bool isCaCertificate, const EapQtCertificateInfo& certInfo,
+    void appendCertificateInfo(bool isCaCertificate, const EapQtCertificateInfo &certInfo,
         RPointerArray<EapCertificateEntry>* const certList);
 
     void appendEapTypes(const RArray<TEapExpandedType>* const eapTypes,
         QList<QByteArray>* const eapList);
 
-    void getEapTypeIf(const EapQtPluginHandle& pluginHandle);
+    void getEapTypeIf(const EapQtPluginHandle &pluginHandle);
 
-    void copyFromEapSettings(EAPSettings& eapSettings, EapQtConfig& config);
+    void copyFromEapSettings(EAPSettings &eapSettings, EapQtConfig &config);
 
-    void copyToEapSettings(EapQtConfig& config, EAPSettings& eapSettings);
+    void copyToEapSettings(const EapQtConfig &config, EAPSettings &eapSettings);
 
     TBool convertToTbool(bool value);
     bool convertToBool(TBool value);
@@ -134,10 +137,17 @@ private:
 
     EapQtConfigInterface::EapBearerType getEapBearer();
 
-private:
+    // comparison mehtod for qSort
+    // must be static for using via function pointers
+    static bool pluginLessThan(const EapQtPluginInfo &plugin1, const EapQtPluginInfo &plugin2);
 
     Q_DISABLE_COPY(EapQtConfigInterfacePrivate)
 
+private: // data
+
+    /// QT members
+
+    // is current instance for validators only
     const bool mValidatorInstance;
 
     // list of available EAP UIs
@@ -153,19 +163,37 @@ private:
     // list of supported inner EAP methods queried last time,
     // combination of UI and EAP server support
     QList<EapQtPluginInfo> mSupportedInnerTypes;
+
+    // currenly loaded outer EAP type
     EapQtPluginHandle mLastOuterHandle;
 
+    // translator object for EAP UIs
     QScopedPointer<HbTranslator> mTranslator;
 
-private:
+    // read CA and user certificates
+    QList<EapQtCertificateInfo> mCaCertificates;
+    QList<EapQtCertificateInfo> mUserCertificates;
 
+    /// Symbian members
+
+    // pointers to EAP server interfaces
     QScopedPointer<CEapGeneralSettings> mEapGsIf;
     QScopedPointer<CEapType> mEapTypeIf;
 
+    // current IAP ID
     int mIapId;
+
+    // current bearer
     TIndexType mEapBearer;
+
+    // current EAP database reference to current IAP
     TInt mEapDbIndex;
+
+    // if mEapDbIndex is valid (i.e. current IAP is not
+    // EapQtConfigInterface::IapIdUndefined)
     bool mEapDbIndexValid;
+
+    // current loaded EAP server type interface
     TEapExpandedType mCurrentServerEapType;
 
     // EAP server lists of its supported outer EAP methods
@@ -174,7 +202,4 @@ private:
 
 };
 
-/*! @} */
-
-#endif
-
+#endif // EAPQTCONFIGINTERFACEPRIVATE_H

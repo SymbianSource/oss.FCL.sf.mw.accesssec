@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 39 %
+* %version: 41 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -383,7 +383,7 @@ EAP_FUNC_EXPORT eap_type_aka_c::eap_type_aka_c(
 //-----------------------------------------------
 
 //
-void eap_type_aka_c::initialize_state(
+EAP_FUNC_EXPORT void eap_type_aka_c::initialize_state(
 				const eap_type_aka_state_variable_e state,
 				const bool must_be_initiator,
 				const bool must_be_responder,
@@ -2901,8 +2901,6 @@ EAP_FUNC_EXPORT eap_status_e eap_type_aka_c::handle_aka_packet(
 
 //--------------------------------------------------
 
-#if defined(USE_EAP_TRACE)
-
 // 
 EAP_FUNC_EXPORT void eap_type_aka_c::packet_trace(
 	eap_const_string prefix,
@@ -3010,7 +3008,7 @@ EAP_FUNC_EXPORT void eap_type_aka_c::packet_trace(
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
 
-#endif //#if defined(USE_EAP_TRACE)
+
 
 //--------------------------------------------------
 

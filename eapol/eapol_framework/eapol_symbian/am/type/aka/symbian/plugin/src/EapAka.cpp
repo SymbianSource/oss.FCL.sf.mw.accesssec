@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 23 %
+* %version: 25 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -206,11 +206,14 @@ void CEapAka::SetIndexL(
 
 	RFs session;
 	
-	EapAkaDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-		
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapAka::SetIndexL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	EapAkaDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+	
 	EapAkaDbUtils::SetIndexL(
 		db, 
 		iIndexType, 
@@ -222,6 +225,9 @@ void CEapAka::SetIndexL(
 	
 	iIndexType = aIndexType;
 	iIndex = aIndex;
+
+	db.Close();
+	session.Close();
 
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
@@ -235,18 +241,24 @@ void CEapAka::SetConfigurationL(const EAPSettings& aSettings)
 
 	RFs session;
 
+	CleanupClosePushL(session);
+	CleanupClosePushL(db);
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapAka::SetConfigurationL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
 	// This also creates the IAP entry if it doesn't exist
 	EapAkaDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 	
-	CleanupClosePushL(session);
-	CleanupClosePushL(db);
-
 	EapAkaDbUtils::SetConfigurationL(
 		db,
 		aSettings, 
 		iIndexType,
 		iIndex,
 		iTunnelingType);		
+
+	db.Close();
+	session.Close();
 
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
@@ -260,11 +272,14 @@ void CEapAka::GetConfigurationL(EAPSettings& aSettings)
 
 	RFs session;
 
-	// This also creates the IAP entry if it doesn't exist
-	EapAkaDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapAka::SetConfigurationL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	// This also creates the IAP entry if it doesn't exist
+	EapAkaDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 
 	EapAkaDbUtils::GetConfigurationL(
 		db,
@@ -272,6 +287,9 @@ void CEapAka::GetConfigurationL(EAPSettings& aSettings)
 		iIndexType,
 		iIndex,
 		iTunnelingType);
+
+	db.Close();
+	session.Close();
 
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
@@ -302,11 +320,14 @@ void CEapAka::CopySettingsL(
 
 	RFs session;
 
-	EapAkaDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-		
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapAka::CopySettingsL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	EapAkaDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+
 	EapAkaDbUtils::CopySettingsL(
 		db,
 		iIndexType,
@@ -315,6 +336,9 @@ void CEapAka::CopySettingsL(
 		aDestinationIndexType, 
 		aDestinationIndex, 
 		iTunnelingType);
+
+	db.Close();
+	session.Close();
 
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);

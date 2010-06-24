@@ -16,8 +16,16 @@
 */
 
 /*
-* %version: 23 %
+* %version: 24 %
 */
+
+// This is enumeration of EAPOL source code.
+#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
+	#undef EAP_FILE_NUMBER_ENUM
+	#define EAP_FILE_NUMBER_ENUM 759 
+	#undef EAP_FILE_NUMBER_DATE 
+	#define EAP_FILE_NUMBER_DATE 1127594498 
+#endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 
 #include "eap_am_tools.h"
 #include "eap_am_export.h"
@@ -1094,7 +1102,7 @@ void eap_method_settings_c::trace() const
 				EAP_TRACE_DEBUG(
 					get_am_tools(),
 					TRACE_FLAGS_DEFAULT,
-					(EAPL("eap_method_settings_c::trace():       active EAP-type=0xfe%06x%08x\n"),
+					(EAPL("eap_method_settings_c::trace():         active EAP-type=0xfe%06x%08x\n"),
 					type->get_vendor_id(),
 					type->get_vendor_type()));
 			}
@@ -1102,7 +1110,7 @@ void eap_method_settings_c::trace() const
 		EAP_TRACE_DEBUG(
 			get_am_tools(),
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("eap_method_settings_c::trace(): m_disabled_eap_methods=%d\n"),
+			(EAPL("eap_method_settings_c::trace():     m_disabled_eap_methods=%d\n"),
 			m_disabled_eap_methods.get_object_count()));
 		for (ind = 0ul; ind < m_disabled_eap_methods.get_object_count(); ++ind)
 		{
@@ -1112,7 +1120,7 @@ void eap_method_settings_c::trace() const
 				EAP_TRACE_DEBUG(
 					get_am_tools(),
 					TRACE_FLAGS_DEFAULT,
-					(EAPL("eap_method_settings_c::trace():     disabled EAP-type=0xfe%06x%08x\n"),
+					(EAPL("eap_method_settings_c::trace():         disabled EAP-type=0xfe%06x%08x\n"),
 					type->get_vendor_id(),
 					type->get_vendor_type()));
 			}

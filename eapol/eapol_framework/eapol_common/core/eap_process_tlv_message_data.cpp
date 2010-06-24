@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 41 %
+* %version: 42 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -7699,6 +7699,8 @@ EAP_FUNC_EXPORT eap_status_e eap_process_tlv_message_data_c::read_parameter_data
 
 	eap_status_e status = get_parameter_data(positional_parameter, out_data);
 
+	out_data->trace();
+
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
@@ -8058,6 +8060,8 @@ EAP_FUNC_EXPORT eap_const_string eap_process_tlv_message_data_c::get_function_st
 	else EAP_IF_RETURN_STRING(function, eap_tlv_message_type_function_general_settings_set_eap_methods)
 	else EAP_IF_RETURN_STRING(function, eap_tlv_message_type_function_general_settings_get_eap_methods)
 	else EAP_IF_RETURN_STRING(function, eap_tlv_message_type_function_general_settings_get_certificate_lists)
+	else EAP_IF_RETURN_STRING(function, eap_tlv_message_type_function_general_settings_delete_all_eap_settings)
+	else EAP_IF_RETURN_STRING(function, eap_tlv_message_type_function_general_settings_copy_all_eap_settings)
 	else EAP_IF_RETURN_STRING(function, eap_tlv_message_type_function_general_settings_complete_set_eap_methods)
 	else EAP_IF_RETURN_STRING(function, eap_tlv_message_type_function_general_settings_complete_get_eap_methods)
 	else EAP_IF_RETURN_STRING(function, eap_tlv_message_type_function_general_settings_complete_get_certificate_lists)

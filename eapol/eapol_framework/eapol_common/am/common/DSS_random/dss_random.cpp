@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 10.1.5 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -46,6 +46,7 @@ static const u32_t BLOCK_SIZE = 160/8;
 
 static const u32_t DEBUG_BUFFER_SIZE = 80;
 
+
 /**
  *  dss_random_G() implements the G() function using modified SHA-1.
  *  @code
@@ -73,7 +74,7 @@ static const u32_t DEBUG_BUFFER_SIZE = 80;
  *      X= 47c27eb6 16dba413 91e5165b e9c5e397 7e39a15d
  *  @endcode
 */
-void dss_random_G(abs_eap_am_tools_c * const m_am_tools, u8_t *out, u32_t out_length, u8_t *c, u32_t c_length)
+eap_status_e dss_random_G(abs_eap_am_tools_c * const m_am_tools, u8_t *out, u32_t out_length, u8_t *c, u32_t c_length)
 {
 	u32_t *out_array = reinterpret_cast<u32_t *>(out);
 
@@ -92,11 +93,24 @@ void dss_random_G(abs_eap_am_tools_c * const m_am_tools, u8_t *out, u32_t out_le
 			);
 		if (status != eap_status_ok)
 		{
-			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_EAP_AM_CRYPTO, (EAPL("eap_sha1_dss_G_function(): status = %d"),
+			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_EAP_AM_CRYPTO, (EAPL("ERROR: eap_sha1_dss_G_function(): status = %d"),
 				status));
 		}
+
+		return status;
 	}
 }
+
+#define CLEAN_OPENSSL_BN(ctx) \
+	{ \
+	BN_free(&bn_mod); \
+	BN_free(&bn_tmp); \
+	BN_free(&bn_xkey); \
+	BN_free(&bn_xj); \
+	BN_free(&bn_one); \
+	BN_free(&bn_160); \
+	BN_CTX_free(ctx); \
+	}
 
 /**
  *  dss_pseudo_random() implements pseudo random function for key genearation of EAP/SIM.
@@ -163,7 +177,16 @@ eap_status_e dss_pseudo_random(abs_eap_am_tools_c * const m_am_tools, u8_t *out,
 		u8_t debug_buffer[DEBUG_BUFFER_SIZE];
 		EAP_UNREFERENCED_PARAMETER(debug_buffer);
 
-		dss_random_G(m_am_tools, &(out[ind*BLOCK_SIZE]), BLOCK_SIZE, tmp_xkey, BLOCK_SIZE);
+		eap_status_e status = dss_random_G(m_am_tools, &(out[ind*BLOCK_SIZE]), BLOCK_SIZE, tmp_xkey, BLOCK_SIZE);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_EAP_AM_CRYPTO, (EAPL("ERROR: dss_random_G(): status = %d"),
+				status));
+
+			CLEAN_OPENSSL_BN(ctx);
+
+			return status;
+		}
 
 		EAP_TRACE_FORMAT(m_am_tools, (debug_buffer, DEBUG_BUFFER_SIZE, EAPL("w[%d]   "), ind));
 		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_EAP_AM_CRYPTO, (EAPL("dss_pseudo_random(): %s = G(xkey[%d])\n"),
@@ -204,14 +227,7 @@ eap_status_e dss_pseudo_random(abs_eap_am_tools_c * const m_am_tools, u8_t *out,
 			tmp_xkey, sizeof(tmp_xkey)));
 	}
 
-	BN_free(&bn_mod);
-	BN_free(&bn_tmp);
-	BN_free(&bn_xkey);
-	BN_free(&bn_xj);
-	BN_free(&bn_one);
-	BN_free(&bn_160);
-
-	BN_CTX_free(ctx);
+	CLEAN_OPENSSL_BN(ctx);
 
 	return eap_status_ok;
 }

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 20.1.4 %
 */
 
 #if !defined(_EAPTLAPEAPDBPARAMETERNAMES_H_)
@@ -30,7 +30,7 @@ _LIT(KServiceType, "ServiceType");
 _LIT(KServiceIndex, "ServiceIndex");
 _LIT(KTunnelingTypeVendorId, "TunnelingTypeVendorId");
 _LIT(KTunnelingType, "TunnelingType");
-_LIT(KCACertLabelOld, "CA_cert_label");
+_LIT(KCACertLabel, "CA_cert_label");
 _LIT(KClientCertLabel, "client_cert_label");
 _LIT(KCertLabel, "label");
 _LIT(KCipherSuite, "cipher_suite");

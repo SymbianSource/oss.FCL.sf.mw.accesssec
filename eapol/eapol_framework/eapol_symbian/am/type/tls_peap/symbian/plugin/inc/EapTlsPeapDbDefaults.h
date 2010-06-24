@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 36.1.6 %
+* %version: 36.1.8 %
 */
 
 #if !defined(_EAPTLSPEAPDBDEFAULTS_H_)
@@ -45,9 +45,9 @@ _LIT(default_client_cert_label, "");
 
 const TInt default_EAP_TLS_PEAP_verify_certificate_realm = 0;
 
-const TUint default_EAP_TLS_PEAP_TLS_Privacy = EEapDbFalse;
+const TUint default_EAP_TLS_PEAP_TTLS_Privacy = EEapDbFalse;
 
-const TUint default_EAP_TLS_PEAP_use_automatic_ca_certificate = EEapDbFalse;
+const TUint default_EAP_TLS_PEAP_use_automatic_ca_certificate = EEapDbTrue;
 
 // Defaults for EAP-FAST specific items
 #ifdef USE_FAST_EAP_TYPE

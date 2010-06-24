@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 54 %
+* %version: 56 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -516,8 +516,11 @@ TInt CEapTlsPeapUiDataConnection::Update()
 			tmpSetPacStorePw8.Size()));
 
 	  TRAPD(err, iUiConn->SetPacStorePasswordL(tmpSetPacStorePw8));
+
+          if (err)
+               return err;
 	  	  	    
-	  EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiDataConnection::Update(): SetPacStorePassword error = %d\n"),error));
+	  EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiDataConnection::Update(): SetPacStorePassword error = %d\n"),err));
 			    
 #endif // End: #ifdef USE_PAC_STORE	    
 	    

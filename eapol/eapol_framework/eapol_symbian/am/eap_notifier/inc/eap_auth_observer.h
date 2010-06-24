@@ -27,8 +27,14 @@ NONSHARABLE_CLASS ( CEapAuthObserver ) : public CBase, public MHbDeviceDialogObs
         * Two-phased constructor.
         */
         static CEapAuthObserver* NewL( 
-                CEapAuthNotifier* aNotifier,
-                CEapAuthNotifier::EEapNotifierType aType );
+                CEapAuthNotifier* aNotifier
+                );
+        
+        /**
+        * Handles the setting of the notifier (dialog) type
+        * @param    aType EEapNotifierType
+        */
+        void SetNotifierType( CEapAuthNotifier::EEapNotifierType aType );
         
         /**
         * Destructor
@@ -50,17 +56,14 @@ NONSHARABLE_CLASS ( CEapAuthObserver ) : public CBase, public MHbDeviceDialogObs
         /**
         * Constructor
         */
-        CEapAuthObserver( 
-                CEapAuthNotifier* aNotifier,
-                CEapAuthNotifier::EEapNotifierType aType );
+        CEapAuthObserver( CEapAuthNotifier* aNotifier );
         
         /**
         * Handles the user name password input received from the dialog
         * @param    aData CHbSymbianVariantMap&
         */
         void UsernamePasswordDlgDataReceived( CHbSymbianVariantMap& aData );
-        
-        
+          
         /**
         * Handles the password query user input received from the dialog
         * @param    aData CHbSymbianVariantMap&

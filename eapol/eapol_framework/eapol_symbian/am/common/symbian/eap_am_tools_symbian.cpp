@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -11,12 +11,12 @@
 *
 * Contributors:
 *
-* Description:  EAP and WLAN authentication protocols.
+* Description:  Tools for common code to run on Symbian.
 *
 */
 
 /*
-* %version: 32 %
+* %version: 36 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -34,6 +34,7 @@
 #include "eap_am_tools_symbian.h"
 #include "eap_am_types.h"
 #include "eap_automatic_variable.h"
+#include "EapTraceSymbian.h"
 
 const TUint MAX_DB_TRANSACTION_RETRY_COUNT = 10;
 const u32_t EAP_TIMER_MAX_AFTER_TIME_MILLISECONDS_SYMBIAN = 2100000ul;
@@ -48,6 +49,11 @@ const u32_t EAP_TIMER_MAX_AFTER_TIME_MILLISECONDS_SYMBIAN = 2100000ul;
 
 EAP_FUNC_EXPORT eap_am_tools_symbian_c::~eap_am_tools_symbian_c()
 {
+    EAP_TRACE_DEBUG_SYMBIAN((_L("eap_am_tools_symbian_c::~eap_am_tools_symbian_c(): this=0x%08x"),
+		this));
+
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: eap_am_tools_symbian_c::~eap_am_tools_symbian_c()"));
+
 	// If multithreading is used the log file is not kept open all the time
 	// so no need to close the handles here.
 #if defined(USE_EAP_FILE_TRACE)
@@ -110,7 +116,9 @@ EAP_FUNC_EXPORT eap_am_tools_symbian_c::eap_am_tools_symbian_c(eap_const_string 
 	EAP_TRACE_DEBUG(
 		this,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_tools_symbian_c::eap_am_tools_symbian_c()\n")));
+		(EAPL("eap_am_tools_symbian_c::eap_am_tools_symbian_c(): this = 0x%08x => 0x%08x\n"),
+		 this,
+		 dynamic_cast<abs_eap_base_timer_c *>(this)));
 
 	EAP_TRACE_RETURN_STRING(this, "returns: eap_am_tools_symbian_c::eap_am_tools_symbian_c()");
 
@@ -477,10 +485,10 @@ EAP_FUNC_EXPORT void eap_am_tools_symbian_c::formatted_print(eap_format_string f
 #if defined(USE_EAP_FILE_TRACE)
 
 	#if defined (USE_MULTITHREADING)
+		RFs session;
+
 		if (m_filename.Length() > 0ul)
 		{
-			RFs session;
-			
 			TInt result = session.Connect();	
 			if (result != KErrNone)
 			{
@@ -835,7 +843,8 @@ EAP_FUNC_EXPORT u64_t eap_am_tools_symbian_c::get_clock_ticks()
 //
 EAP_FUNC_EXPORT u64_t eap_am_tools_symbian_c::get_clock_ticks_of_second()
 {
-	return 1000000u;
+	const u64_t COUNT_OF_CLOCK_TICS_IN_ONE_SECOND = 1000000ul;
+	return COUNT_OF_CLOCK_TICS_IN_ONE_SECOND;
 }
 
 //--------------------------------------------------
@@ -976,6 +985,8 @@ EAP_FUNC_EXPORT void eap_am_tools_symbian_c::enter_crypto_cs()
 
 }
 
+//--------------------------------------------------
+
 EAP_FUNC_EXPORT void eap_am_tools_symbian_c::leave_crypto_cs()
 {
 
@@ -996,6 +1007,7 @@ EAP_FUNC_EXPORT void eap_am_tools_symbian_c::sleep(u32_t milli_seconds)
 }
 
 //--------------------------------------------------
+
 EAP_FUNC_EXPORT u32_t eap_am_tools_symbian_c::get_gmt_unix_time()
 {
 	_LIT(KStart, "19700000:000000.000000");
@@ -1006,6 +1018,7 @@ EAP_FUNC_EXPORT u32_t eap_am_tools_symbian_c::get_gmt_unix_time()
 	now.SecondsFrom(start, interval);
 	return interval.Int();
 }
+
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT bool eap_am_tools_symbian_c::get_is_valid() const
@@ -1020,7 +1033,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_symbian_c::convert_am_error_to_eapol_e
 	EAP_TRACE_DEBUG(
 		this,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_tools_symbian_c::convert_am_error_to_eapol_error: error=%d\n"),
+		(EAPL("eap_status_e eap_am_tools_symbian_c::convert_am_error_to_eapol_error(): error=%d\n"),
 		aErr));
 
 	eap_status_e status;
@@ -1096,12 +1109,14 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_symbian_c::convert_am_error_to_eapol_e
 	return status;
 }
 
+//--------------------------------------------------
+
 EAP_FUNC_EXPORT i32_t eap_am_tools_symbian_c::convert_eapol_error_to_am_error(eap_status_e aErr)
 {
 	EAP_TRACE_DEBUG(
 		this,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_tools_symbian_c::convert_am_error_to_eapol_error: error=%d\n"),
+		(EAPL("eap_am_tools_symbian_c::convert_eapol_error_to_am_error(): error=%d\n"),
 		aErr));
 
 	TInt status;
@@ -1315,6 +1330,9 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_symbian_c::shutdown()
 		(EAPL("eap_am_tools_symbian_c::shutdown(): this = 0x%08x => 0x%08x, "),
 		 this,
 		 dynamic_cast<abs_eap_base_timer_c *>(this)));
+
+	// Note, tools cannot be used to trace on return.
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: eap_am_tools_symbian_c::shutdown()"));
 
 	StopTimer();
 	
@@ -1565,6 +1583,10 @@ void eap_am_tools_symbian_c::DoCancel()
 
 EAP_FUNC_EXPORT_INTERFACE abs_eap_am_tools_c * abs_eap_am_tools_c::new_abs_eap_am_tools_c()
 {
+    EAP_TRACE_DEBUG_SYMBIAN((_L("abs_eap_am_tools_c::new_abs_eap_am_tools_c()")));
+
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: abs_eap_am_tools_c::new_abs_eap_am_tools_c()"));
+
 	abs_eap_am_tools_c *am_tools = new eap_am_tools_symbian_c(EAP_DEFAULT_TRACE_FILE);
 
 	if (am_tools != 0)
@@ -1593,6 +1615,10 @@ EAP_FUNC_EXPORT_INTERFACE abs_eap_am_tools_c * abs_eap_am_tools_c::new_abs_eap_a
 
 EAP_FUNC_EXPORT_INTERFACE void abs_eap_am_tools_c::delete_abs_eap_am_tools_c(abs_eap_am_tools_c * const am_tools)
 {
+    EAP_TRACE_DEBUG_SYMBIAN((_L("abs_eap_am_tools_c::delete_abs_eap_am_tools_c()")));
+
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: abs_eap_am_tools_c::delete_abs_eap_am_tools_c()"));
+
 	if (am_tools != 0)
 		{
 		EAP_TRACE_DEBUG(

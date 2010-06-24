@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 247.2.42 %
+* %version: 247.2.68 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -83,8 +83,8 @@
 
 #include "EapConfigToolsSymbian.h"
 #include "EapConversion.h"
+#include "EapPluginTools.h"
 
-#include <EapPluginTools.h>
 #include <mmtsy_names.h>
 
 
@@ -358,6 +358,10 @@ eap_am_type_tls_peap_symbian_c* eap_am_type_tls_peap_symbian_c::NewL(
 //
 void eap_am_type_tls_peap_symbian_c::ConstructL()
 {
+	TInt error = m_session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("eap_am_type_tls_peap_symbian_c::ConstructL(): - m_session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
 	// Open/create database
 	EapTlsPeapUtils::OpenDatabaseL(m_database, m_session, m_index_type, m_index, m_tunneling_type, m_current_eap_type);
 
@@ -389,19 +393,6 @@ void eap_am_type_tls_peap_symbian_c::ConstructL()
 
 	m_notifier_data_to_user = new(ELeave) CEapAuthNotifier::TEapDialogInfo;
 	m_notifier_data_pckg_to_user = new(ELeave) TPckg<CEapAuthNotifier::TEapDialogInfo> (*m_notifier_data_to_user);
-
-		EAP_TRACE_DATA_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eap_am_type_tls_peap_symbian_c::ConstructL m_notifier_data_pckg_to_user"),
-			m_notifier_data_pckg_to_user->Ptr(),
-			m_notifier_data_pckg_to_user->Size()));	
-
-
-#ifdef USE_FAST_EAP_TYPE
-
-#endif	// End: #ifdef USE_FAST_EAP_TYPE	
-	
 
 }
 
@@ -543,11 +534,6 @@ EAP_FUNC_EXPORT eap_am_type_tls_peap_symbian_c::~eap_am_type_tls_peap_symbian_c(
 
 	delete m_notifier_data_to_user;
 	delete m_notifier_data_pckg_to_user;
-
-
-#ifdef USE_FAST_EAP_TYPE
-	
-#endif	// End: #ifdef USE_FAST_EAP_TYPE	
 		
 	delete m_cert_if;
 
@@ -567,7 +553,8 @@ EAP_FUNC_EXPORT eap_am_type_tls_peap_symbian_c::~eap_am_type_tls_peap_symbian_c(
 	
 	delete iPacStoreDb;
 	
-#endif	// End: #ifdef USE_PAC_STORE	
+#endif // #ifdef USE_PAC_STORE	
+
 	delete iEapAuthNotifier;
 	iEapAuthNotifier = 0;
 
@@ -576,170 +563,288 @@ EAP_FUNC_EXPORT eap_am_type_tls_peap_symbian_c::~eap_am_type_tls_peap_symbian_c(
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT void eap_am_type_tls_peap_symbian_c::DlgComplete( TInt aStatus )
-	{
+{
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("TLS: function: eap_am_type_tls_peap_symbian_c::DlgComplete(): m_notifier_complete=%d, m_state=%d\n"),
+		m_notifier_complete,
+		m_state));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_am_type_tls_peap_symbian_c::DlgComplete()");
+
 #ifdef USE_FAST_EAP_TYPE
 	m_userAction = EEapFastNotifierUserActionOk;
 #endif
+
 	eap_status_e status = m_am_tools->convert_am_error_to_eapol_error(aStatus);
-	
-	
+
 	if(m_notifier_complete)
+	{
+		EAP_TRACE_DATA_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL( "m_notifier_data_pckg_to_user" ),
+			m_notifier_data_pckg_to_user->Ptr(),
+			m_notifier_data_pckg_to_user->Size() ) );
+
+		if ( aStatus == KErrCancel )
 		{
-  	EAP_TRACE_DEBUG_SYMBIAN(
-  			(_L("m_notifier_data_pckg_to_user"),
-  			m_notifier_data_pckg_to_user->Ptr(),
-  			m_notifier_data_pckg_to_user->Size()));	    		
-  	if ( aStatus == KErrCancel )
-  		{
-  		EAP_TRACE_DEBUG_SYMBIAN(
-  				(_L("eap_am_type_tls_peap_symbian_c::DlgComplete - User cancelled the dialog")));
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("TLS: function: eap_am_type_tls_peap_symbian_c::DlgComplete(): User cancelled the dialog\n")));
+
 #ifdef USE_FAST_EAP_TYPE
-  		m_userAction = EEapFastNotifierUserActionCancel;	
+			m_userAction = EEapFastNotifierUserActionCancel;	
 #endif
-  		}		
-  	else if( aStatus != KErrNone )
-  		{
-  		EAP_TRACE_DEBUG_SYMBIAN(
-  			(_L("eap_am_type_tls_peap_symbian_c::DlgComplete - ERROR: dialog error=%d"),
-  			aStatus));	
-	  	TBuf8<KMaxNotifItemLength> userNameUtf8;
-	  	TBuf8<KMaxUiDataLength> challengeUtf8;
+		}		
+		else if( aStatus != KErrNone )
+		{
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("ERROR: TLS: function: eap_am_type_tls_peap_symbian_c::DlgComplete(): dialog error=%d\n"),
+				aStatus));
+
+			TBuf8<KMaxNotifItemLength> userNameUtf8;
+			TBuf8<KMaxUiDataLength> challengeUtf8;
 			userNameUtf8.Zero();
 			challengeUtf8.Zero();
-			
-    	CompleteQueryTtlsPapUserNameAndPassword(
-       	status, userNameUtf8, challengeUtf8 );  
-  		return; // m_am_tools->convert_am_error_to_eapol_error(aStatus);		
-  		}
 
-  	if ( m_notifier_data_to_user->iPassword.Size() > 0 )
-  		{
-  		HBufC8* notifier_data8 = NULL;
+			CompleteQueryTtlsPapUserNameAndPassword(
+				status, userNameUtf8, challengeUtf8 );
+
+			return; // m_am_tools->convert_am_error_to_eapol_error(aStatus);		
+		}
+
+		if ( m_notifier_data_to_user->iPassword.Size() > 0 )
+		{
+			HBufC8* notifier_data8 = NULL;
 			TRAPD(err, notifier_data8 = HBufC8::NewL(m_notifier_data_to_user->iPassword.Size()));
 			if (err)
-				{
+			{
 				return;	
-				}
+			}
 			TPtr8 notifier_dataPtr8 = notifier_data8->Des();
-			
+
 			notifier_dataPtr8.Copy(m_notifier_data_to_user->iPassword); // Unicode -> ascii.
-			EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("eap_am_type_tls_peap_symbian_c::DlgComplete Data copy done")));
-		    
-			EAP_TRACE_DATA_DEBUG_SYMBIAN(
-  			("eap_am_type_tls_peap_symbian_c::DlgComplete PW from UI (8bits)",
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL( "eap_am_type_tls_peap_symbian_c::DlgComplete PW from UI (8bits)" ),
 				notifier_dataPtr8.Ptr(), 
-				notifier_dataPtr8.Size()));	    
-		    
+				notifier_dataPtr8.Size() ) );
+
 #ifdef USE_FAST_EAP_TYPE
 			status = m_userResponse.set_copy_of_buffer(
 				notifier_dataPtr8.Ptr(),
 				notifier_dataPtr8.Size());
 #endif			
-  		CleanupStack::PopAndDestroy( notifier_data8 );
-  		}
+			CleanupStack::PopAndDestroy( notifier_data8 );
 		}
-  m_notifier_complete = 0;
+	}
+
+	m_notifier_complete = 0;
 
 	if ( m_state == EPapChallenge)
-		{
-  	TBuf8<KMaxNotifItemLength> userNameUtf8;
-  	TBuf8<KMaxUiDataLength> challengeUtf8;
-		userNameUtf8.Zero();
-		challengeUtf8.Zero();
+	{
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("TLS: function: eap_am_type_tls_peap_symbian_c::DlgComplete(): EPapChallenge\n")));
 
-		if (m_notifier_data_to_user->iUsername.Size()>0)
+		m_state = EPapUserNameAndPassword;
+		TEapExpandedType aEapType(*EapExpandedTypeTtlsPap.GetType());
+
+		if (iEapAuthNotifier == 0)
+		{
+			TRAPD(err, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
+			if (err)
 			{
-			const TPtrC16 unicode_uname(
-				reinterpret_cast<unsigned short *>(&m_notifier_data_to_user->iUsername),
-				m_notifier_data_to_user->iUsername.Size()); // Length in unicode characters
-	
-	  	CnvUtfConverter::ConvertFromUnicodeToUtf8( userNameUtf8, unicode_uname );
+			eap_variable_data_c userNameUtf8( m_am_tools );
+			eap_variable_data_c passwordUtf8( m_am_tools );
+		
+			(void) m_tls_am_partner->
+			    complete_query_ttls_pap_username_and_password(
+				    &userNameUtf8, &passwordUtf8, eap_status_process_general_error);	
+				return;
 			}
-  	EAP_TRACE_DATA_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, (
-  		EAPL( "userNameUtf8" ),
-  		userNameUtf8.Ptr(),
-  		userNameUtf8.Size() ) );
-
-		if (m_notifier_data_to_user->iUidata.Size()>0)
-			{
-			const TPtrC16 unicode_pw(
-				reinterpret_cast<unsigned short *>(&m_notifier_data_to_user->iUidata),
-				m_notifier_data_to_user->iUidata.Size()); // Length in unicode characters
-	
-	  	CnvUtfConverter::ConvertFromUnicodeToUtf8( challengeUtf8, unicode_pw );  
-  		} 	
-  	EAP_TRACE_DATA_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, (
-  		EAPL( "challengeUtf8" ),
-  		challengeUtf8.Ptr(),
-  		challengeUtf8.Size() ) );
-
-    	CompleteQueryTtlsPapUserNameAndPassword(
-       	status, userNameUtf8, challengeUtf8 );  
 		}
-	if ( m_state == EPapUserNameAndPassword )
+
+
+		TTtlsPapDbInfo aInDbInfo;
+		TRAPD(err2, ReadTtlsPapDbL(aInDbInfo));
+		if (err2)
 		{
-  	TBuf8<KMaxNotifItemLength> userNameUtf8;
-  	TBuf8<KMaxNotifItemLength> passwordUtf8;
+			eap_variable_data_c userNameUtf8( m_am_tools );
+			eap_variable_data_c passwordUtf8( m_am_tools );
+		
+			(void) m_tls_am_partner->
+			    complete_query_ttls_pap_username_and_password(
+				    &userNameUtf8, &passwordUtf8, eap_status_process_general_error);	
+			return;
+		}
+
+		m_notifier_data_to_user->iPasswordPromptEnabled = aInDbInfo.iUsrPwdInfo.iPasswordPromptEnabled;
+
+		if (m_notifier_data_to_user->iPasswordPromptEnabled ||
+		(aInDbInfo.iUsrPwdInfo.iUserName.Size() == 0 &&
+		aInDbInfo.iUsrPwdInfo.iPassword.Size() == 0))
+		{
+			m_notifier_data_to_user->iUsername.Zero();
+			m_notifier_data_to_user->iPassword.Zero();
+
+			TRAPD(err3,SetTtlsPapColumnToNullL( cf_str_EAP_TLS_PEAP_ttls_pap_password_literal ));
+			if (err3)
+			{
+			eap_variable_data_c userNameUtf8( m_am_tools );
+			eap_variable_data_c passwordUtf8( m_am_tools );
+		
+			(void) m_tls_am_partner->
+			    complete_query_ttls_pap_username_and_password(
+				    &userNameUtf8, &passwordUtf8, eap_status_process_general_error);	
+			return;
+			}
+
+			if (iEapAuthNotifier == 0)
+			{
+				TRAPD(err4, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
+				if (err4)
+				{
+				eap_variable_data_c userNameUtf8( m_am_tools );
+				eap_variable_data_c passwordUtf8( m_am_tools );
+			
+				(void) m_tls_am_partner->
+				    complete_query_ttls_pap_username_and_password(
+					    &userNameUtf8, &passwordUtf8, eap_status_process_general_error);	
+				return;
+				}
+			}
+			else
+			{
+				TRAPD(err5,iEapAuthNotifier->Cancel());
+				if (err5)
+				{
+				eap_variable_data_c userNameUtf8( m_am_tools );
+				eap_variable_data_c passwordUtf8( m_am_tools );
+			
+				(void) m_tls_am_partner->
+				    complete_query_ttls_pap_username_and_password(
+					    &userNameUtf8, &passwordUtf8, eap_status_process_general_error);	
+				return;
+				}
+			}
+
+			TRAPD(err6, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypePapAuthQueryDialog, m_notifier_data_to_user, aEapType));
+			if (err6)
+			{
+			eap_variable_data_c userNameUtf8( m_am_tools );
+			eap_variable_data_c passwordUtf8( m_am_tools );
+		
+			(void) m_tls_am_partner->
+			    complete_query_ttls_pap_username_and_password(
+				    &userNameUtf8, &passwordUtf8, eap_status_process_general_error);	
+			return;
+			}
+		}
+		else
+		{
+			m_notifier_data_to_user->iUsername = aInDbInfo.iUsrPwdInfo.iUserName;
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::query_ttls_pap_username_and_password(): iUserName"),
+				m_notifier_data_to_user->iUsername.Ptr(),
+				m_notifier_data_to_user->iUsername.Size()));
+
+			m_notifier_data_to_user->iPassword = aInDbInfo.iUsrPwdInfo.iPassword;
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::query_ttls_pap_username_and_password(): iPassword"),
+				m_notifier_data_to_user->iPassword.Ptr(),
+				m_notifier_data_to_user->iPassword.Size()));
+
+			DlgComplete(KErrNone);
+		}
+		 
+	}
+	else if ( m_state == EPapUserNameAndPassword )
+	{
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("TLS: function: eap_am_type_tls_peap_symbian_c::DlgComplete(): EPapUserNameAndPassword\n")));
+
+		TBuf8<KMaxNotifItemLength> userNameUtf8;
+		TBuf8<KMaxNotifItemLength> passwordUtf8;
 		userNameUtf8.Zero();
 		passwordUtf8.Zero();
 
 		if (m_notifier_data_to_user->iUsername.Size()>0)
-			{
-			const TPtrC16 unicode_uname(
-				reinterpret_cast<unsigned short *>(&m_notifier_data_to_user->iUsername),
-				m_notifier_data_to_user->iUsername.Size()); // Length in unicode characters
-	
-	  	CnvUtfConverter::ConvertFromUnicodeToUtf8( userNameUtf8, unicode_uname );
-	  	EAP_TRACE_DATA_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, (
-	  		EAPL( "userNameUtf8" ),
-	  		userNameUtf8.Ptr(),
-	  		userNameUtf8.Size() ) );
-			}
-		if (m_notifier_data_to_user->iPassword.Size()>0)
-			{
-			const TPtrC16 unicode_pw(
-				reinterpret_cast<unsigned short *>(&m_notifier_data_to_user->iPassword),
-				m_notifier_data_to_user->iPassword.Size()); // Length in unicode characters
-	
-	  	CnvUtfConverter::ConvertFromUnicodeToUtf8( passwordUtf8, unicode_pw );   	
-  		}
-  	EAP_TRACE_DATA_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, (
-  		EAPL( "passwordUtf8" ),
-  		passwordUtf8.Ptr(),
-  		passwordUtf8.Size() ) );
-
-    	CompleteQueryTtlsPapUserNameAndPassword(
-       	status, userNameUtf8, passwordUtf8 );  
-	  		
-			TTtlsPapDbInfo aInDbInfo;
-			aInDbInfo.iUsrPwdInfo.iPasswordPromptEnabled = m_notifier_data_to_user->iPasswordPromptEnabled;
-			aInDbInfo.iUsrPwdInfo.iUserName.Copy(userNameUtf8);
-			aInDbInfo.iUsrPwdInfo.iPassword.Copy(passwordUtf8);
-		
-			TRAPD(err1, WriteTtlsPapDbL( aInDbInfo));
-			if (err1)
-				{
-					// continue
-				}
- 		}
-#ifdef USE_FAST_EAP_TYPE
-	else if ( m_state == EPasswordCancel ||
-		 m_state == EMasterkeyQuery ||
-		 m_state == EPasswordQuery ||
-		 m_state == EWrongPassword ||
-		 m_state == EFilePasswordQuery )
 		{
-		m_eap_fast_completion_status = m_partner->set_timer(
-				this,
-				KHandleReadPacstoreTimerID, 
-				&aStatus,
-				0);
-		return;
+			CnvUtfConverter::ConvertFromUnicodeToUtf8( userNameUtf8, m_notifier_data_to_user->iUsername );
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL( "userNameUtf8" ),
+				userNameUtf8.Ptr(),
+				userNameUtf8.Size() ) );
 		}
-#endif		
-		
+
+		if (m_notifier_data_to_user->iPassword.Size()>0)
+		{
+			CnvUtfConverter::ConvertFromUnicodeToUtf8( passwordUtf8, m_notifier_data_to_user->iPassword );   	
+		}
+
+		EAP_TRACE_DATA_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL( "passwordUtf8" ),
+			passwordUtf8.Ptr(),
+			passwordUtf8.Size() ) );
+
+		CompleteQueryTtlsPapUserNameAndPassword(
+			status, userNameUtf8, passwordUtf8 );  
+
+		TTtlsPapDbInfo aInDbInfo;
+		aInDbInfo.iUsrPwdInfo.iPasswordPromptEnabled = m_notifier_data_to_user->iPasswordPromptEnabled;
+		aInDbInfo.iUsrPwdInfo.iUserName.Copy(userNameUtf8);
+		aInDbInfo.iUsrPwdInfo.iPassword.Copy(passwordUtf8);
+
+		TRAPD(err1, WriteTtlsPapDbL( aInDbInfo));
+		if (err1)
+		{
+			// continue
+		}
 	}
+#ifdef USE_FAST_EAP_TYPE
+	else if ( m_state == EPasswordCancel
+		|| m_state == EMasterkeyQuery
+		|| m_state == EPasswordQuery
+		|| m_state == EWrongPassword
+		|| m_state == EFilePasswordQuery )
+	{
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("TLS: function: eap_am_type_tls_peap_symbian_c::DlgComplete(): else\n")));
+
+		m_eap_fast_completion_status = m_partner->set_timer(
+			this,
+			KHandleReadPacstoreTimerID, 
+			&aStatus,
+			0);
+		return;
+	}
+#endif //#ifdef USE_FAST_EAP_TYPE
+
+}
 
 //--------------------------------------------------
 
@@ -753,9 +858,6 @@ void eap_am_type_tls_peap_symbian_c::RunL()
 		iStatus.Int() , m_state));
 	
 #ifdef USE_FAST_EAP_TYPE
-	eap_status_e status(eap_status_ok);
-
-
 	if (m_state == ENone)
 		{
 		return;		
@@ -1230,7 +1332,7 @@ eap_am_type_tls_peap_symbian_c::CompleteQueryUserPermissionForAid(
 //--------------------------------------------------
 
 //
-void eap_am_type_tls_peap_symbian_c::notify_configuration_error(
+EAP_FUNC_EXPORT void eap_am_type_tls_peap_symbian_c::notify_configuration_error(
 	const eap_status_e configuration_status)
 {
 	if (m_is_client == true)
@@ -1466,7 +1568,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::configure()
 	{
 		eap_variable_data_c use_automatic_ca_certificate(m_am_tools);
 
-		eap_status_e status = m_partner->read_configure(
+		eap_status_e status = type_configure_read(
 			cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate.get_field(),
 			&use_automatic_ca_certificate);
 		if (status == eap_status_ok
@@ -1580,7 +1682,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::configure()
 	{
 		eap_variable_data_c use_session_ticket(m_am_tools);
 
-		eap_status_e status = m_partner->read_configure(
+		eap_status_e status = type_configure_read(
 			cf_str_EAP_TLS_PEAP_use_session_ticket.get_field(),
 			&use_session_ticket);
 		if (status == eap_status_ok
@@ -1653,33 +1755,33 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::configure()
 
 		if (m_current_eap_type == eap_type_tls)
 		{
-			status = m_partner->read_configure(
+			status = type_configure_read(
 				cf_str_EAP_TLS_max_session_validity_time.get_field(),
 				&sessionTimeFromFile);
 		}
 		else if (m_current_eap_type == eap_type_peap)
 		{
-			status = m_partner->read_configure(
+			status = type_configure_read(
 				cf_str_EAP_PEAP_max_session_validity_time.get_field(),
 				&sessionTimeFromFile);
 		}
 		else if (m_current_eap_type == eap_type_ttls)
 		{
-			status = m_partner->read_configure(
+			status = type_configure_read(
 				cf_str_EAP_TTLS_max_session_validity_time.get_field(),
 				&sessionTimeFromFile);
 		}
 		else if (m_current_eap_type == eap_type_ttls_plain_pap)
 		{
 			// read PAP session time
-			status = m_partner->read_configure(
+			status = type_configure_read(
 				cf_str_EAP_TLS_PEAP_ttls_pap_max_session_validity_time.get_field(),
 				&sessionTimeFromFile );
 		}
 #if defined(USE_FAST_EAP_TYPE)
 		else if (m_current_eap_type == eap_type_fast)
 		{
-			status = m_partner->read_configure(
+			status = type_configure_read(
 				cf_str_EAP_FAST_max_session_validity_time.get_field(),
 				&sessionTimeFromFile);
 		}
@@ -2037,7 +2139,7 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ConfigureL()
 
 //--------------------------------------------------
 
-eap_status_e eap_am_type_tls_peap_symbian_c::reset()
+EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::reset()
 {
 
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
@@ -3247,6 +3349,9 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::type_configure_read
 		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_am_type_tls_peap_symbian_c::type_configure_read - Start\n")));
 	
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_am_type_tls_peap_symbian_c::type_configure_read()");
+
+
 	if (m_current_eap_type == eap_type_peap
 #if defined(USE_TTLS_EAP_TYPE)
 		|| m_current_eap_type == eap_type_ttls
@@ -3393,24 +3498,20 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::type_configure_read
 			}
 		}
 	} // End of if (m_current_eap_type == eap_type_peap
-	
+
 	TRAPD(err, type_configure_readL(
 		field->get_field(),
 		field->get_field_length(),
 		data));
 	if (err != KErrNone) 
 	{	
-		status = m_am_tools->convert_am_error_to_eapol_error(err);
+		status = m_partner->read_configure(field, data);
 	}
 
 	m_am_tools->trace_configuration(
 		status,
 		field,
 		data);
-        
-	EAP_TRACE_DEBUG(m_am_tools, 
-		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eap_am_type_tls_peap_symbian_c::type_configure_read - End\n")));
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
@@ -3855,6 +3956,63 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::alert_received(
 
 //--------------------------------------------------
 
+eap_status_e eap_am_type_tls_peap_symbian_c::select_cipher_suite(
+	const bool select_all_cipher_suites,
+	const tls_cipher_suites_e test_cipher_suite,
+	const TAlgorithmId testcertAlgorithm,
+	const TAlgorithmId certAlgorithm,
+	eap_array_c<u16_t> * cipher_suites)
+{
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::select_cipher_suite(), select_all_cipher_suites=%d, test_cipher_suite=%d, testcertAlgorithm=%d, certAlgorithm=%d\n"),
+		select_all_cipher_suites,
+		test_cipher_suite,
+		testcertAlgorithm,
+		certAlgorithm));
+
+	eap_status_e status(eap_status_ok);
+
+	// Cipher suite must be allowed AND the algorithm must match the certificates algorithm.
+	// Also select_all_cipher_suites can be used to add all cipher suites to the list.
+
+	TInt found = m_allowed_cipher_suites.Find(test_cipher_suite);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::select_cipher_suite(), found=%d, cipher suite=%d, KErrNotFound=%d\n"),
+		found,
+		test_cipher_suite,
+		KErrNotFound));
+
+	if (found != KErrNotFound
+		&& (select_all_cipher_suites == true
+			|| testcertAlgorithm == certAlgorithm))
+	{
+		u16_t *tmp_object = new u16_t;
+		if (tmp_object == 0)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+		}
+		*tmp_object = eap_htons(test_cipher_suite);
+		
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::select_cipher_suite(), adds cipher suite=%d\n"),
+			test_cipher_suite));
+
+		status = cipher_suites->add_object(tmp_object, true);
+	}
+
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
 EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_cipher_suites_and_previous_session()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -3866,18 +4024,18 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_cipher_suites
 	EAP_ASSERT_ALWAYS(m_is_client == true);
 
 	eap_status_e status(eap_status_process_general_error);
-	
+
 	TAlgorithmId certAlgorithm(ERSA);
 
 	bool select_all_cipher_suites = false;
-	
+
 	eap_variable_data_c session_id(m_am_tools);
 	eap_variable_data_c master_secret(m_am_tools);
 	tls_cipher_suites_e used_cipher_suite(tls_cipher_suites_TLS_NULL_WITH_NULL_NULL);
 	tls_session_type_e tls_session_type(tls_session_type_full_authentication);	
 
 	eap_array_c<u16_t> cipher_suites(m_am_tools);
-		
+
 #if defined(USE_FAST_EAP_TYPE)
 		
 	if(m_current_eap_type == eap_type_fast &&
@@ -3923,7 +4081,8 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_cipher_suites
 			EAP_TRACE_DEBUG(
 				m_am_tools, 
 				TRACE_FLAGS_DEFAULT, 
-				(EAPL("query_cipher_suites_and_previous_session(): No user or CA certificate. Read CA certificate.\n")));
+				(EAPL("query_cipher_suites_and_previous_session(): No user or CA certificate. Read CA certificate. m_allowed_ca_certs.Count()=%d\n"),
+				m_allowed_ca_certs.Count()));
 			
 			if (m_allowed_ca_certs.Count() != 0)
 			{		
@@ -3955,6 +4114,16 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_cipher_suites
 					}
 				}
 			} // End: if (m_allowed_ca_certs.Count() != 0)
+			else
+			{
+				EAP_TRACE_DEBUG(
+					m_am_tools, 
+					TRACE_FLAGS_DEFAULT, 
+					(EAPL("query_cipher_suites_and_previous_session(): No allowed CA certificates. Sends all cipher suites and hopes best.\n"),
+					m_allowed_ca_certs.Count()));
+
+				select_all_cipher_suites = true;
+			}
 		}
 		else if (m_own_certificate != 0)
 		{
@@ -3982,183 +4151,105 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_cipher_suites
 
 			certAlgorithm = public_key.AlgorithmId();				
 		}
-		
-			// IF cipher suite is allowed
-		if (m_allowed_cipher_suites.Find(tls_cipher_suites_TLS_RSA_WITH_3DES_EDE_CBC_SHA) != KErrNotFound
-			// AND the algorithm matches the certificates algorithm
-			&& (select_all_cipher_suites == true
-				|| certAlgorithm == ERSA))
-			// THEN add it to list.
+
+
+		status = select_cipher_suite(
+			select_all_cipher_suites,
+			tls_cipher_suites_TLS_RSA_WITH_3DES_EDE_CBC_SHA,
+			certAlgorithm,
+			ERSA,
+			&cipher_suites);
+		if (status != eap_status_ok)
 		{
-			u16_t *tmp_object = new u16_t;
-			if (tmp_object == 0)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-			}
-			*tmp_object = eap_htons(tls_cipher_suites_TLS_RSA_WITH_3DES_EDE_CBC_SHA);
-			
-			status = cipher_suites.add_object(tmp_object, true);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 
-		if (m_allowed_cipher_suites.Find(tls_cipher_suites_TLS_RSA_WITH_AES_128_CBC_SHA) != KErrNotFound
-			// AND the algorithm matches the certificates algorithm
-			&& (select_all_cipher_suites == true
-				|| certAlgorithm == ERSA))
-			// THEN add it to list.
+		status = select_cipher_suite(
+			select_all_cipher_suites,
+			tls_cipher_suites_TLS_RSA_WITH_AES_128_CBC_SHA,
+			certAlgorithm,
+			ERSA,
+			&cipher_suites);
+		if (status != eap_status_ok)
 		{
-			u16_t *tmp_object = new u16_t;
-			if (tmp_object == 0)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-			}
-			*tmp_object = eap_htons(tls_cipher_suites_TLS_RSA_WITH_AES_128_CBC_SHA);
-			
-			status = cipher_suites.add_object(tmp_object, true);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 
-		if (m_allowed_cipher_suites.Find(tls_cipher_suites_TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA) != KErrNotFound
-			// AND the algorithm matches the certificates algorithm
-			&& (select_all_cipher_suites == true
-				|| certAlgorithm == EDSA))
-			// THEN add it to list.
+		status = select_cipher_suite(
+			select_all_cipher_suites,
+			tls_cipher_suites_TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
+			certAlgorithm,
+			EDSA,
+			&cipher_suites);
+		if (status != eap_status_ok)
 		{
-			u16_t *tmp_object = new u16_t;
-			if (tmp_object == 0)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-			}
-			*tmp_object = eap_htons(tls_cipher_suites_TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA);
-			
-			status = cipher_suites.add_object(tmp_object, true);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 
-		if (m_allowed_cipher_suites.Find(tls_cipher_suites_TLS_DHE_DSS_WITH_AES_128_CBC_SHA) != KErrNotFound
-			// AND the algorithm matches the certificates algorithm
-			&& (select_all_cipher_suites == true
-				|| certAlgorithm == EDSA))
-			// THEN add it to list.
+		status = select_cipher_suite(
+			select_all_cipher_suites,
+			tls_cipher_suites_TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
+			certAlgorithm,
+			EDSA,
+			&cipher_suites);
+		if (status != eap_status_ok)
 		{
-			u16_t *tmp_object = new u16_t;
-			if (tmp_object == 0)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-			}
-			*tmp_object = eap_htons(tls_cipher_suites_TLS_DHE_DSS_WITH_AES_128_CBC_SHA);
-			
-			status = cipher_suites.add_object(tmp_object, true);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 
-		if (m_allowed_cipher_suites.Find(tls_cipher_suites_TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA) != KErrNotFound
-			// AND the algorithm matches the certificates algorithm
-			&& (select_all_cipher_suites == true
-				|| certAlgorithm == ERSA))
-			// THEN add it to list.
+		status = select_cipher_suite(
+			select_all_cipher_suites,
+			tls_cipher_suites_TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
+			certAlgorithm,
+			ERSA,
+			&cipher_suites);
+		if (status != eap_status_ok)
 		{
-			u16_t *tmp_object = new u16_t;
-			if (tmp_object == 0)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-			}
-			*tmp_object = eap_htons(tls_cipher_suites_TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA);
-			
-			status = cipher_suites.add_object(tmp_object, true);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 
-		if (m_allowed_cipher_suites.Find(tls_cipher_suites_TLS_DHE_RSA_WITH_AES_128_CBC_SHA) != KErrNotFound
-			// AND the algorithm matches the certificates algorithm
-			&& (select_all_cipher_suites == true
-				|| certAlgorithm == ERSA))
-			// THEN add it to list.
+		status = select_cipher_suite(
+			select_all_cipher_suites,
+			tls_cipher_suites_TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+			certAlgorithm,
+			ERSA,
+			&cipher_suites);
+		if (status != eap_status_ok)
 		{
-			u16_t *tmp_object = new u16_t;
-			if (tmp_object == 0)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-			}
-			*tmp_object = eap_htons(tls_cipher_suites_TLS_DHE_RSA_WITH_AES_128_CBC_SHA);
-			
-			status = cipher_suites.add_object(tmp_object, true);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 
-		if (m_allowed_cipher_suites.Find(tls_cipher_suites_TLS_RSA_WITH_RC4_128_MD5) != KErrNotFound
-			// AND the algorithm matches the certificates algorithm
-			&& (select_all_cipher_suites == true
-				|| certAlgorithm == ERSA))
-			// THEN add it to list.
+		status = select_cipher_suite(
+			select_all_cipher_suites,
+			tls_cipher_suites_TLS_RSA_WITH_RC4_128_MD5,
+			certAlgorithm,
+			ERSA,
+			&cipher_suites);
+		if (status != eap_status_ok)
 		{
-			u16_t *tmp_object = new u16_t;
-			if (tmp_object == 0)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-			}
-			*tmp_object = eap_htons(tls_cipher_suites_TLS_RSA_WITH_RC4_128_MD5);
-			
-			status = cipher_suites.add_object(tmp_object, true);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 
-		if (m_allowed_cipher_suites.Find(tls_cipher_suites_TLS_RSA_WITH_RC4_128_SHA) != KErrNotFound
-			// AND the algorithm matches the certificates algorithm
-			&& (select_all_cipher_suites == true
-				|| certAlgorithm == ERSA))
-			// THEN add it to list.)
+		status = select_cipher_suite(
+			select_all_cipher_suites,
+			tls_cipher_suites_TLS_RSA_WITH_RC4_128_SHA,
+			certAlgorithm,
+			ERSA,
+			&cipher_suites);
+		if (status != eap_status_ok)
 		{
-			u16_t *tmp_object = new u16_t;
-			if (tmp_object == 0)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-			}
-			*tmp_object = eap_htons(tls_cipher_suites_TLS_RSA_WITH_RC4_128_SHA);
-			
-			status = cipher_suites.add_object(tmp_object, true);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
+
+
 		
 		if (is_session_valid())
 		{
@@ -4256,6 +4347,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_cipher_suites
 
 	// Compression methods. TLS supports only null compression at the moment.
 	eap_array_c<u8_t> compression_methods(m_am_tools);
+
 	{
 		u8_t *tmp_object = new u8_t;
 		if (tmp_object == 0)
@@ -4264,6 +4356,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_cipher_suites
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 		}
 		*tmp_object = tls_compression_method_null;
+
 		status = compression_methods.add_object(tmp_object, true);
 		if (status != eap_status_ok)
 		{
@@ -4271,6 +4364,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_cipher_suites
 			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 	}
+
 
 	status = get_tls_am_partner()->complete_query_cipher_suites_and_previous_session(
 		tls_session_type,
@@ -4968,17 +5062,24 @@ static eap_const_string get_certificate_error_string(const enum TValidationError
 //--------------------------------------------------
 
 void eap_am_type_tls_peap_symbian_c::complete_validate_chain(
-	CPKIXValidationResult& aValidationResult,
-	eap_status_e aStatus)
+	const CPKIXValidationResult * const aValidationResult,
+	const eap_status_e aStatus)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-	
+
+	TValidationError validationError(EBadKeyUsage);
+
+	if (aValidationResult != 0)
+	{
+		validationError = aValidationResult->Error().iReason;
+	}
+
 	EAP_TRACE_DEBUG(
 		m_am_tools,
-		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eap_am_type_tls_peap_symbian_c::complete_validate_chain(): Certificate chain validation reason=%d=%s, status=%d=%s\n"), 
-		aValidationResult.Error().iReason,
-		get_certificate_error_string(aValidationResult.Error().iReason),
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::complete_validate_chain(): Certificate chain validation reason=%d=%s, status=%d=%s\n"),
+		validationError,
+		get_certificate_error_string(validationError),
 		aStatus,
 		eap_status_string_c::get_status_string(aStatus)));
 
@@ -4987,23 +5088,23 @@ void eap_am_type_tls_peap_symbian_c::complete_validate_chain(
 		get_tls_am_partner()->complete_verify_certificate_chain(aStatus);
 		return;
 	}
-	
+
 	eap_status_e result(eap_status_ok);
 
-	if (aValidationResult.Error().iReason == EValidatedOK) 
+	if (validationError == EValidatedOK)
 	{
 		EAP_TRACE_DEBUG(
 			m_am_tools,
-			TRACE_FLAGS_DEFAULT, 
-			(EAPL("Certificate chain validation OK. Reason: %d=%s\n"), 
-			aValidationResult.Error().iReason,
-			get_certificate_error_string(aValidationResult.Error().iReason)));
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("Certificate chain validation OK. Reason: %d=%s\n"),
+			validationError,
+			get_certificate_error_string(validationError)));
 
 		result = eap_status_ok;
 	}
 	else
 	{
-		if (aValidationResult.Error().iReason == EDateOutOfRange)
+		if (validationError == EDateOutOfRange)
 		{
 			send_error_notification(eap_status_certificate_expired);
 			// Ignore error on purpose
@@ -5018,8 +5119,8 @@ void eap_am_type_tls_peap_symbian_c::complete_validate_chain(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT, 
 			(EAPL("ERROR: Certificate chain validation FAILED. Reason: %d=%s\n"), 
-			aValidationResult.Error().iReason,
-			get_certificate_error_string(aValidationResult.Error().iReason)));
+			validationError,
+			get_certificate_error_string(validationError)));
 			
 		result = eap_status_illegal_certificate;
 	}
@@ -5452,7 +5553,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_certificate_a
 	eap_array_c<eap_variable_data_c> certificate_authorities(m_am_tools);
 	eap_variable_data_c ca_dn(m_am_tools);
 	
-	// TEST CODE: This is not a proper CA DN.
+	// TEST CODE: Implementation do not support yet a proper CA DN.
 	_LIT8(KTestCA, "ca.eapsim.foo");
 	status = ca_dn.add_data(KTestCA().Ptr(), KTestCA().Size());
 	if (status != eap_status_ok)
@@ -5642,13 +5743,13 @@ eap_status_e eap_am_type_tls_peap_symbian_c::get_realms_from_certificate(
 		subject_identity.get_data_length(),
 		subject_identity.get_data_length());		
 
-	status = subject_realm->set_copy_of_buffer((ptr.Mid(offset + 1)).Ptr(), ptr.Length() - offset - 1);
+	status = subject_realm->set_copy_of_buffer((ptr.Mid(offset + KOffsetCorrection)).Ptr(), ptr.Length() - offset - KOffsetCorrection);
 	if (status != eap_status_ok)
 	{
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, status);
 	}	
-	
+
 	// ISSUER
 	// Check DN
 	TRAP(err, get_identities_from_distinguished_namesL(certificate, &subject_identity, &issuer_identity));	
@@ -5663,10 +5764,10 @@ eap_status_e eap_am_type_tls_peap_symbian_c::get_realms_from_certificate(
 		issuer_identity.get_data(issuer_identity.get_data_length()), 
 		issuer_identity.get_data_length(),
 		issuer_identity.get_data_length());		
-		
+
 	offset = ptr2.Find(KAt);
 
-	status = issuer_realm->set_copy_of_buffer((ptr2.Mid(offset + 1)).Ptr(), ptr2.Length() - offset - 1);
+	status = issuer_realm->set_copy_of_buffer((ptr2.Mid(offset + KOffsetCorrection)).Ptr(), ptr2.Length() - offset - KOffsetCorrection);
 	if (status != eap_status_ok)
 	{
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -6435,20 +6536,6 @@ void eap_am_type_tls_peap_symbian_c::send_error_notification(const eap_status_e 
 }
 
 //--------------------------------------------------
-
-eap_status_e eap_am_type_tls_peap_symbian_c::show_certificate_selection_dialog()
-{
-	return eap_status_ok;
-}
-
-//--------------------------------------------------
-
-eap_status_e eap_am_type_tls_peap_symbian_c::show_manual_identity_dialog()
-{
-	return eap_status_ok;
-}
-
-//--------------------------------------------------
 // CANCELLATION FUNCTIONS
 //--------------------------------------------------
 
@@ -6946,7 +7033,7 @@ void eap_am_type_tls_peap_symbian_c::store_authentication_timeL()
 	CleanupClosePushL(view);
 	User::LeaveIfError(view.EvaluateAll());
 	
-	// Get the first (and only) row for updation.
+	// Get the first (and only) row for update.
 	view.FirstL();
 	view.UpdateL();
 	
@@ -7155,8 +7242,6 @@ eap_status_e eap_am_type_tls_peap_symbian_c::QueryUserPermissionForAIDL(
  		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
  		return EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
 	}
-
- 	TBool startedOk = ETrue;
  
     TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
     
@@ -8403,18 +8488,10 @@ void eap_am_type_tls_peap_symbian_c::WritePACStoreDataL(
 						break;		
 					}		
 					case eap_pac_store_data_type_PAC_store_password:
-					{
-						//This is not saved anywhere.
-						break;		
-					}		
 					case eap_pac_store_data_type_PAC_store_device_seed:
-					{
-						//This is not saved anywhere.
-						break;		
-					}		
 					case eap_pac_store_data_type_PAC_store_IAP_reference:
 					{
-						//This is not saved anywhere.
+						//These are not saved anywhere.
 						break;		
 					}		
 					case eap_pac_store_data_type_PAC_store_group_reference:
@@ -8915,8 +8992,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::cancel_PAC_store_op
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e
-eap_am_type_tls_peap_symbian_c::initialize_PAC_store(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::initialize_PAC_store(
 	const eap_fast_completion_operation_e aCompletionOperation,
 	const eap_fast_initialize_pac_store_completion_e aCompletion )
 {
@@ -8983,127 +9059,116 @@ eap_am_type_tls_peap_symbian_c::initialize_PAC_store(
 // eap_am_type_tls_peap_symbian_c::indicates_eap_fast_provisioning_starts
 // ---------------------------------------------------------------------------
 //  
-EAP_FUNC_EXPORT
-eap_status_e eap_am_type_tls_peap_symbian_c::indicates_eap_fast_provisioning_starts(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::indicates_eap_fast_provisioning_starts(
 	const eap_fast_completion_operation_e provisioning_mode,
 	const eap_fast_pac_type_e pac_type )
-	{
+{
 	eap_status_e status( eap_status_ok );
 	m_provisioning_mode = provisioning_mode; // save provis. mode
-	
-	TInt err = KErrNone;	
-	
 
-    TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
-    
-    m_notifier_data_to_user->iPassword.Zero();
-    
-    if (iEapAuthNotifier == 0)
-    	{
-    	TRAPD(err, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
-    	if (err)
-    		{
-    			return eap_status_process_general_error;
-    		}
-    	}
-    else
-	   	{
-		 	TRAPD(err1, iEapAuthNotifier->Cancel());
-    	if (err1)
-    		{
-    			return eap_status_process_general_error;
-    		}
-     	}
+	TInt error(KErrNone);
+
+	TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
+
+	m_notifier_data_to_user->iPassword.Zero();
+
+	if (iEapAuthNotifier == 0)
+	{
+		TRAP(error, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
+		if (error)
+		{
+			return m_am_tools->convert_am_error_to_eapol_error(error);
+		}
+	}
+	else
+	{
+		TRAP(error, iEapAuthNotifier->Cancel());
+		if (error)
+		{
+			return m_am_tools->convert_am_error_to_eapol_error(error);
+		}
+	}
 
 	if ( pac_type == eap_fast_pac_type_tunnel_pac
 		 && provisioning_mode == eap_fast_completion_operation_server_authenticated_provisioning_mode
 		 && status == eap_status_ok )
-				{
-    		TRAPD(err2, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastStartAuthProvWaitNote, m_notifier_data_to_user, aEapType));
-	    	if (err2)
-	    		{
-	    			return eap_status_process_general_error;
-	    		}
-				}
+	{
+		TRAP(error, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastStartAuthProvWaitNote, m_notifier_data_to_user, aEapType));
+		if (error)
+		{
+			return m_am_tools->convert_am_error_to_eapol_error(error);
+		}
+	}
 	else if (
 		pac_type == eap_fast_pac_type_tunnel_pac
 		&& provisioning_mode == eap_fast_completion_operation_server_unauthenticated_provisioning_mode_ADHP
 	  && status == eap_status_ok )
-				{
-    		TRAPD(err3, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastStartUnauthProvWaitNote, m_notifier_data_to_user, aEapType));
-	    	if (err3)
-	    		{
-	    			return eap_status_process_general_error;
-	    		}
-				}
+	{
+		TRAP(error, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastStartUnauthProvWaitNote, m_notifier_data_to_user, aEapType));
+		if (error)
+		{
+			return m_am_tools->convert_am_error_to_eapol_error(error);
+		}
+	}
 
 
 
 	return status;
-	}
+}
 
 // ---------------------------------------------------------------------------
 // eap_am_type_tls_peap_symbian_c::indicates_eap_fast_provisioning_ends
 // ---------------------------------------------------------------------------
 //  
-EAP_FUNC_EXPORT
-eap_status_e eap_am_type_tls_peap_symbian_c::indicates_eap_fast_provisioning_ends(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::indicates_eap_fast_provisioning_ends(
     const bool provisioning_successfull,
     const eap_fast_completion_operation_e provisioning_mode,
     const eap_fast_pac_type_e pac_type )
-	{	
-	EAP_TRACE_DEBUG_SYMBIAN( (_L("eap_am_type_tls_peap_symbian_c:: \
-	    indicates_eap_fast_provisioning_ends()")));
+{	
+	EAP_TRACE_DEBUG_SYMBIAN( (_L("eap_am_type_tls_peap_symbian_c::indicates_eap_fast_provisioning_ends()")));
 
 	EAP_UNREFERENCED_PARAMETER(provisioning_mode);
 
-	eap_status_e status( eap_status_ok );
-	
-	if ( pac_type == eap_fast_pac_type_tunnel_pac )
-		{
-	    // stop wait note;
-    TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
-    
-    m_notifier_data_to_user->iPassword.Zero();
-    
-    if (iEapAuthNotifier == 0)
-    	{
-    	TRAPD(err, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
-    	if (err)
-    		{
-    			return eap_status_process_general_error;
-    		}
-    	}
-    else
-    	{
-    	TRAPD(err1, iEapAuthNotifier->Cancel());
-    	if (err1)
-    		{
-    			return eap_status_process_general_error;
-    		}
-    	}
+	TInt error(KErrNone);
 
-    if( provisioning_successfull )
+	eap_status_e status( eap_status_ok );
+
+	if ( pac_type == eap_fast_pac_type_tunnel_pac )
+	{
+		// stop wait note;
+		TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
+
+		m_notifier_data_to_user->iPassword.Zero();
+
+		if (iEapAuthNotifier == 0)
+		{
+			TRAP(error, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
+			if (error)
 			{
-			TRAPD(err2, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastShowProvSuccessNote, m_notifier_data_to_user, aEapType));
-    	if (err2)
-    		{
-    			return eap_status_process_general_error;
-    		}
+				return m_am_tools->convert_am_error_to_eapol_error(error);
 			}
+		}
 		else
+		{
+			TRAP(error, iEapAuthNotifier->Cancel());
+			if (error)
 			{
-			TRAPD(err3, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastShowProvNotSuccessNote, m_notifier_data_to_user, aEapType));
-    	if (err3)
-    		{
-    			return eap_status_process_general_error;
-    		}
+				return m_am_tools->convert_am_error_to_eapol_error(error);
 			}
-def 
-		} // if ( pac_type == eap_fast_pac_type_tunnel_pac )
+		}
+
+		if( !provisioning_successfull )
+		{
+			TRAP(error, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastShowProvNotSuccessNote, m_notifier_data_to_user, aEapType));
+			if (error)
+			{
+				return m_am_tools->convert_am_error_to_eapol_error(error);
+			}
+		}
+	} // if ( pac_type == eap_fast_pac_type_tunnel_pac )
 
 	return status;
-	}
+}
 
 #endif //#if defined(USE_FAST_EAP_TYPE)
 
@@ -9598,7 +9663,7 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ImportFilesL()
 
 			directoryEmpty = false;
 
-			while( fileCounter < files->Count() || (!FileFound))
+			while( fileCounter < files->Count())
 				{
 				if (!((*files)[fileCounter].IsDir()))
 					{
@@ -9641,8 +9706,6 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ImportFilesL()
 				                    KHandleCompletePacstoreOkTimerID, 
 				                    &m_eap_fast_completion_status,
 				                    1);
-					   	if (readData != NULL)
-					   		CleanupStack::PopAndDestroy(readData);
 					   	CleanupStack::PopAndDestroy(5); // Path, Path8, filename, buf2, group_reference8
 						EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 						return EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
@@ -9877,36 +9940,10 @@ eap_status_e eap_am_type_tls_peap_symbian_c::PasswordQueryL()
 	    	{
 	    	CleanupStack::PopAndDestroy(m_pacStorePWBuf8);
 	    	
-    TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
-    
-    m_notifier_data_to_user->iPassword.Zero();
-    
-    if (iEapAuthNotifier == 0)
-    	{
-    	TRAPD(err, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
-    	if (err)
-    		{
-    			return eap_status_process_general_error;
-    		}
-    	}
-    else
-    	{
-    	TRAPD(err1, iEapAuthNotifier->Cancel());
-    	if (err1)
-    		{
-    			return eap_status_process_general_error;
-    		}
-    	}
-
-		TRAPD(err2, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastWrongPacStorePwNote, m_notifier_data_to_user, aEapType));
-    	if (err2)
-    		{
-    			return eap_status_process_general_error;
-    		}
-		
+		    TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
+		    
+		    m_notifier_data_to_user->iPassword.Zero();
 	
-
-
 			return m_eap_fast_completion_status;
 			 	    
 	    	}
@@ -9947,14 +9984,14 @@ eap_status_e eap_am_type_tls_peap_symbian_c::PasswordQueryL()
     	}
     else
     	{
-    	TRAPD(err4, iEapAuthNotifier->Cancel();
+    	TRAPD(err4, iEapAuthNotifier->Cancel());
     	if (err4)
     		{
     			return eap_status_process_general_error;
     		}
     	}
 
-		TRAPD(err5, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastPacStorePwQueryDialog, m_notifier_data_to_user, aEapType);
+		TRAPD(err5, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastPacStorePwQueryDialog, m_notifier_data_to_user, aEapType));
   	if (err5)
   		{
   			return eap_status_process_general_error;
@@ -10483,35 +10520,6 @@ eap_status_e eap_am_type_tls_peap_symbian_c::CompleteFilePasswordQueryL()
 
 }
 
-// ---------------------------------------------------------
-// eap_am_type_tls_peap_symbian_c::CompleteNotifier
-// ---------------------------------------------------------
-//    
-eap_status_e eap_am_type_tls_peap_symbian_c::CompleteNotifierL()
-{
-	eap_status_e status( eap_status_ok );
-	switch ( m_state )
-	    {
-	    case EPasswordCancel:
-	    case EPasswordQuery:
-	    case EWrongPassword:
-	    case EFilePasswordQuery:
-	    case EMasterkeyQuery:
-	    	{
-
-	    	break;
-
-	    	}
-	    default:
-	    	{
-	    	EAP_TRACE_DEBUG_SYMBIAN(
-	    	    ( _L( "eap_am_type_tls_peap_symbian_c::CompleteNotifierL() m_state = %d not supported." ),
-	    	    m_state ) );
-	    	}
-	    }
-	return status;
-}
-
 //--------------------------------------------------
 
 void eap_am_type_tls_peap_symbian_c::ConvertUnicodeToAsciiL(const TDesC16& aFromUnicode, TDes8& aToAscii)
@@ -11026,7 +11034,7 @@ void eap_am_type_tls_peap_symbian_c::UpdatePasswordTimeL()
 			EAPL("UpdatePasswordTimeL - evaluate view\n")));
 	User::LeaveIfError(view.EvaluateAll());
 	
-	// Get the first (and only) row for updation.
+	// Get the first (and only) row.
 	view.FirstL();
 	view.UpdateL();
 	
@@ -11114,93 +11122,128 @@ EAP_FUNC_EXPORT bool eap_am_type_tls_peap_symbian_c::is_ttls_pap_session_valid()
 EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_ttls_pap_username_and_password(
 	const eap_variable_data_c * const aInSrvChallengeUtf8 )
 {
-    EAP_TRACE_DEBUG_SYMBIAN((_L( "eap_am_type_tls_peap_symbian_c::query_ttls_pap_username_and_password()" )));    
-	
-    eap_status_e status( eap_status_pending_request );
-    TEapExpandedType aEapType(*EapExpandedTypeTtlsPap.GetType());
-    
-    m_notifier_data_to_user->iUsername.Zero();
-    m_notifier_data_to_user->iPassword.Zero();
-    m_notifier_data_to_user->iUidata.Zero();
-    
-    if (aInSrvChallengeUtf8 != NULL)
-    	{
-			const TPtrC8 utf8(
-				aInSrvChallengeUtf8->get_data(), aInSrvChallengeUtf8->get_data_length()*2); // Length in bytes
-		
-			TPtr16 unicode(reinterpret_cast<unsigned short *>(&m_notifier_data_to_user->iUidata), m_notifier_data_to_user->iUidata.Size());
-			CnvUtfConverter::ConvertToUnicodeFromUtf8(unicode, utf8);
+	EAP_TRACE_DEBUG_SYMBIAN((_L( "eap_am_type_tls_peap_symbian_c::query_ttls_pap_username_and_password()" )));    
 
-			m_state = EPapChallenge;
-	    TEapExpandedType aEapType(*EapExpandedTypeTtlsPap.GetType());
-	    
-	    if (iEapAuthNotifier == 0)
-	    	{
-	    	TRAPD(err, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
-		  	if (err)
-		  		{
-		  			return eap_status_process_general_error;
-		  		}
-	    	}
-	    TRAPD(err1, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypePapChallengeReplyQueryDialog, m_notifier_data_to_user, aEapType));
-	  	if (err1)
-	  		{
-	  			return eap_status_process_general_error;
-	  		}
-	   	}
-		else
+	eap_status_e status( eap_status_pending_request );
+	TEapExpandedType aEapType(*EapExpandedTypeTtlsPap.GetType());
+
+	m_notifier_data_to_user->iUsername.Zero();
+	m_notifier_data_to_user->iPassword.Zero();
+	m_notifier_data_to_user->iUidata.Zero();
+
+	if ((aInSrvChallengeUtf8 != NULL) && (aInSrvChallengeUtf8->get_data_length() != 0))
+	{
+		const TPtrC8 utf8(
+			aInSrvChallengeUtf8->get_data(),
+			aInSrvChallengeUtf8->get_data_length()*2); // Length in bytes
+
+		CnvUtfConverter::ConvertToUnicodeFromUtf8(m_notifier_data_to_user->iUidata, utf8);
+
+		EAP_TRACE_DATA_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::query_ttls_pap_username_and_password(): iUidata"),
+			m_notifier_data_to_user->iUidata.Ptr(),
+			m_notifier_data_to_user->iUidata.Size()));
+
+		m_state = EPapChallenge;
+		TEapExpandedType aEapType(*EapExpandedTypeTtlsPap.GetType());
+
+		if (iEapAuthNotifier == 0)
+		{
+			TRAPD(err, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
+			if (err)
 			{
-			m_state = EPapUserNameAndPassword;
-		
-			TTtlsPapDbInfo aInDbInfo;
-			TRAPD(err2, ReadTtlsPapDbL(aInDbInfo));
-	  	if (err2)
-	  		{
-	  			return eap_status_process_general_error;
-	  		}
+				return eap_status_process_general_error;
+			}
+		}
 
-	    m_notifier_data_to_user->iPasswordPromptEnabled = aInDbInfo.iUsrPwdInfo.iPasswordPromptEnabled;
-			if (m_notifier_data_to_user->iPasswordPromptEnabled ||
-				 (aInDbInfo.iUsrPwdInfo.iUserName.Size() == 0 &&
-				  aInDbInfo.iUsrPwdInfo.iPassword.Size() == 0))
-				{
-	  	  m_notifier_data_to_user->iUsername.Zero();
-	   		m_notifier_data_to_user->iPassword.Zero();
-	   		TRAPD(err3,SetTtlsPapColumnToNullL( cf_str_EAP_TLS_PEAP_ttls_pap_password_literal ));
-		  	if (err3)
-		  		{
-		  			return eap_status_process_general_error;
-		  		}
-	   		
-		    if (iEapAuthNotifier == 0)
-		    	{
-		    	TRAPD(err4, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
-			  	if (err4)
-			  		{
-			  			return eap_status_process_general_error;
-			  		}
-		    	}
-		    else
-		    	{
-		    	TRAPD(err5,iEapAuthNotifier->Cancel());
-			  	if (err5)
-			  		{
-			  			return eap_status_process_general_error;
-			  		}
-		    	}
-				TRAPD(err6, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypePapAuthQueryDialog, m_notifier_data_to_user, aEapType));
-		  	if (err6)
-		  		{
-		  			return eap_status_process_general_error;
-		  		}
-				}
+		TRAPD(err1, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypePapChallengeDialog, m_notifier_data_to_user, aEapType));
+		if (err1)
+		{
+			return eap_status_process_general_error;
+		}
+	}
+	else
+	{
+		m_state = EPapUserNameAndPassword;
+
+		TTtlsPapDbInfo aInDbInfo;
+		TRAPD(err2, ReadTtlsPapDbL(aInDbInfo));
+		if (err2)
+		{
+			return eap_status_process_general_error;
+		}
+
+		m_notifier_data_to_user->iPasswordPromptEnabled = aInDbInfo.iUsrPwdInfo.iPasswordPromptEnabled;
+
+		if (m_notifier_data_to_user->iPasswordPromptEnabled
+			|| aInDbInfo.iUsrPwdInfo.iUserName.Size() == 0
+			|| aInDbInfo.iUsrPwdInfo.iPassword.Size() == 0)
+		{
+			if (aInDbInfo.iUsrPwdInfo.iUserName.Size() == 0)
+			{
+				m_notifier_data_to_user->iUsername.Zero();
+			}
 			else
+			{
+				m_notifier_data_to_user->iUsername = aInDbInfo.iUsrPwdInfo.iUserName;
+			}
+
+			m_notifier_data_to_user->iPassword.Zero();
+
+			TRAPD(err3,SetTtlsPapColumnToNullL( cf_str_EAP_TLS_PEAP_ttls_pap_password_literal ));
+			if (err3)
+			{
+				return eap_status_process_general_error;
+			}
+
+			if (iEapAuthNotifier == 0)
+			{
+				TRAPD(err4, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
+				if (err4)
 				{
-		    m_notifier_data_to_user->iUsername = aInDbInfo.iUsrPwdInfo.iUserName;
-	  	  m_notifier_data_to_user->iPassword = aInDbInfo.iUsrPwdInfo.iPassword;
-				DlgComplete(KErrNone);
+					return eap_status_process_general_error;
 				}
 			}
+			else
+			{
+				TRAPD(err5,iEapAuthNotifier->Cancel());
+				if (err5)
+				{
+					return eap_status_process_general_error;
+				}
+			}
+
+			TRAPD(err6, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypePapUsernamePasswordDialog, m_notifier_data_to_user, aEapType));
+			if (err6)
+			{
+				return eap_status_process_general_error;
+			}
+		}
+		else
+		{
+			m_notifier_data_to_user->iUsername = aInDbInfo.iUsrPwdInfo.iUserName;
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::query_ttls_pap_username_and_password(): iUserName"),
+				m_notifier_data_to_user->iUsername.Ptr(),
+				m_notifier_data_to_user->iUsername.Size()));
+
+			m_notifier_data_to_user->iPassword = aInDbInfo.iUsrPwdInfo.iPassword;
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::query_ttls_pap_username_and_password(): iPassword"),
+				m_notifier_data_to_user->iPassword.Ptr(),
+				m_notifier_data_to_user->iPassword.Size()));
+
+			DlgComplete(KErrNone);
+		}
+	}
 
 	return status;
 }
@@ -11327,12 +11370,35 @@ void eap_am_type_tls_peap_symbian_c::ReadTtlsPapDbL(
 			// columns reading	
 			aOutDbInfo.iUsrPwdInfo.iPasswordPromptEnabled = view.ColUint(
 				colSet->ColNo( cf_str_EAP_TLS_PEAP_ttls_pap_password_prompt_literal ) );
+
+			{
+				TPtrC username = view.ColDes(
+					colSet->ColNo( cf_str_EAP_TLS_PEAP_ttls_pap_username_literal ) );
+
+				aOutDbInfo.iUsrPwdInfo.iUserName.Copy(username); 
+
+				EAP_TRACE_DATA_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("eap_am_type_tls_peap_symbian_c::ReadTtlsPapDbL(): iUserName"),
+					aOutDbInfo.iUsrPwdInfo.iUserName.Ptr(),
+					aOutDbInfo.iUsrPwdInfo.iUserName.Size()));
+			}
 			
-			aOutDbInfo.iUsrPwdInfo.iUserName = view.ColDes(
-				colSet->ColNo( cf_str_EAP_TLS_PEAP_ttls_pap_username_literal ) );
-			
-			aOutDbInfo.iUsrPwdInfo.iPassword = view.ColDes(
-				colSet->ColNo( cf_str_EAP_TLS_PEAP_ttls_pap_password_literal ) );
+			{
+				TPtrC password = view.ColDes(
+					colSet->ColNo( cf_str_EAP_TLS_PEAP_ttls_pap_password_literal ) );
+
+				 aOutDbInfo.iUsrPwdInfo.iPassword.Copy(password);
+
+
+				EAP_TRACE_DATA_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("eap_am_type_tls_peap_symbian_c::ReadTtlsPapDbL(): iPassword"),
+					aOutDbInfo.iUsrPwdInfo.iPassword.Ptr(),
+					aOutDbInfo.iUsrPwdInfo.iPassword.Size()));
+			}
 			
 			aOutDbInfo.iMaxSessionTime = view.ColInt64(
 				colSet->ColNo( cf_str_EAP_TLS_PEAP_ttls_pap_max_session_validity_time_literal ) );
@@ -11407,9 +11473,23 @@ void eap_am_type_tls_peap_symbian_c::WriteTtlsPapDbL(
 			cf_str_EAP_TLS_PEAP_ttls_pap_password_prompt_literal ),
 			aInDbInfo.iUsrPwdInfo.iPasswordPromptEnabled );
 
+		EAP_TRACE_DATA_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL( "eap_am_type_tls_peap_symbian_c::WriteTtlsPapDbL(): iUserName" ),
+			aInDbInfo.iUsrPwdInfo.iUserName.Ptr(),
+			aInDbInfo.iUsrPwdInfo.iUserName.Size() ) );
+
 		view.SetColL( colSet->ColNo(
 			cf_str_EAP_TLS_PEAP_ttls_pap_username_literal ),
 			aInDbInfo.iUsrPwdInfo.iUserName );
+
+		EAP_TRACE_DATA_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL( "eap_am_type_tls_peap_symbian_c::WriteTtlsPapDbL(): iPassword" ),
+			aInDbInfo.iUsrPwdInfo.iPassword.Ptr(),
+			aInDbInfo.iUsrPwdInfo.iPassword.Size() ) );
 
 		view.SetColL( colSet->ColNo(
 			cf_str_EAP_TLS_PEAP_ttls_pap_password_literal ),

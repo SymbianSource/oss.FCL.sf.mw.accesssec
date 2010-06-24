@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18.1.13 %
+* %version: 18.1.14 %
 */
 
 #include <platform_paths.hrh>
@@ -28,6 +28,8 @@ TARGETTYPE    PLUGIN
 
 TARGET        eapsim.dll
 UID		0x10009d8d 0x101f8e49
+
+deffile eapsim.def
 
 SOURCEPATH    ../am/type/gsmsim/symbian/plugin/src
 
@@ -90,6 +92,7 @@ LIBRARY     eikdlg.lib
 LIBRARY     eikcore.lib
 LIBRARY     hlplch.lib
 LIBRARY		featmgr.lib
+
 
 //-------------------------------------------------------------------
 // End of File

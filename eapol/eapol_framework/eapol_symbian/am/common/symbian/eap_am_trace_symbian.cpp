@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2005 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -11,18 +11,20 @@
 *
 * Contributors:
 *
-* Description:  EAP and WLAN authentication protocols.
+* Description:  Trace functions on Symbian.
 *
 */
 
 /*
-* %version: 15 %
+* %version: 16 %
 */
 
 #include "EapTraceSymbian.h"
 #include "eap_tools.h"
 
 const TInt KMaxBufferSize = 512;
+
+//-------------------------------------------------------------------------
 
 TUint8 octet_to_ascii(i32_t octet)
 {
@@ -39,6 +41,8 @@ TUint8 octet_to_ascii(i32_t octet)
 		return 0;
 	}
 }
+
+//-------------------------------------------------------------------------
 
 void formatted_print(const char * const format, ...)
 {
@@ -125,6 +129,7 @@ void formatted_print(const char * const format, ...)
 
 }
 
+//-------------------------------------------------------------------------
 
 EXPORT_C void eap_trace_data_symbian(
 	const char * const prefix,
@@ -261,6 +266,8 @@ EXPORT_C void eap_trace_data_symbian(
 		data_length,
 		data_length);
 #endif
+
 }
 
+//-------------------------------------------------------------------------
 // End of file

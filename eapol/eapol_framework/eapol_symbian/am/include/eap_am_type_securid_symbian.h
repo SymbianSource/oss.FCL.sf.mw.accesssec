@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16.1.7 %
+* %version: 16.1.11 %
 */
 
 #ifndef EAP_AM_TYPE_SECURID_SYMBIAN_H
@@ -39,7 +39,9 @@ const TUint KDefaultTimeoutEAPSecurId = 120000;
 * For Symbian OS.
 */
 class EAP_EXPORT eap_am_type_securid_symbian_c
-	: public CActive, public eap_am_type_securid_c
+	: public CActive
+	, public eap_am_type_securid_c
+	, public abs_eap_base_timer_c
 	, public MNotificationCallback
 
 
@@ -55,7 +57,8 @@ private:
 		EHandlingIdentityQuery,
 		EHandlingPasscodeQuery,
 		EHandlingPincodeQuery,
-		EHandlingGTCQuery
+		EHandlingGTCQuery,
+		EHandlingTimerCall
 	};
 
 	TState m_state;
@@ -205,6 +208,14 @@ public:
 
 	void DlgComplete( TInt aStatus );
 
+	TInt IsDlgReadyToCompleteL();
+
+	EAP_FUNC_IMPORT eap_status_e timer_expired(
+		const u32_t id, void *data);
+
+	//
+	EAP_FUNC_IMPORT eap_status_e timer_delete_data(
+		const u32_t id, void *data);
 
 }; // class eap_am_type_securid_symbian_c
 

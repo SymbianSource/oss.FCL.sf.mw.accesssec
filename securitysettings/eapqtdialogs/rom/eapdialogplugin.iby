@@ -15,14 +15,22 @@
  * 
  */
  
+ /*
+  * %version: 1 %
+  */
+ 
 #ifndef __EAPDIALOGPLUGIN_IBY__
 #define __EAPDIALOGPLUGIN_IBY__
 
 #include <bldvariant.hrh>
+
+#ifdef __PROTOCOL_WLAN
 
 #define HB_PLUGIN_STUB(NAME, SUBDIR) data=\epoc32\data\z\resource\plugins\##SUBDIR##\##NAME##.qtplugin RESOURCE_FILES_DIR\plugins\##SUBDIR##\##NAME##.qtplugin
 
 file=ABI_DIR\BUILD_DIR\EapDialogPlugin.dll                  SHARED_LIB_DIR\eapdialogplugin.dll
 HB_PLUGIN_STUB(eapdialogplugin, devicedialogs)
 
-#endif
+#endif // __PROTOCOL_WLAN
+
+#endif // __EAPDIALOGPLUGIN_IBY__

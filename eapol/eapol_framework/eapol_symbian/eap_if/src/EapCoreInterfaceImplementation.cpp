@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 21 %
+* %version: 22 %
 */
 
 // INCLUDES
@@ -117,9 +117,9 @@ TInt CEapCoreInterfaceImplementation::SetEnv(abs_eap_am_tools_c * const tools, c
  * @return Return value is specified in interface specification.
  */
 TInt CEapCoreInterfaceImplementation::Configure(
-	const TInt aHeaderOffset,
-	const TInt aMTU,
-	const TInt aTrailerLength,
+	const TInt /* aHeaderOffset */,
+	const TInt /* aMTU */,
+	const TInt /* aTrailerLength */,
 	const void * const aConfigurationData,
 	const TInt aConfigurationDataLength)
 	{

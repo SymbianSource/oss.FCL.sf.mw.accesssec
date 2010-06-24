@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 46 %
+* %version: 53 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -35,7 +35,7 @@
 #include "EapMsChapV2DbParameterNames.h"
 
 #include <EapTraceSymbian.h>
-#include <EapPluginTools.h>
+#include "EapPluginTools.h"
 
 const TUint KMaxSqlQueryLength = 512;
 const TInt KMicroSecsInAMinute = 60000000; // 60000000 micro seconds is 1 minute.
@@ -432,7 +432,14 @@ void EapMsChapV2DbUtils::SetConfigurationL(
 	if (aSettings.iShowPassWordPromptPresent)
 		{	
 		// If password was supplied set password prompting off
-		view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_prompt_literal), aSettings.iShowPassWordPrompt);		
+		if (aSettings.iShowPassWordPrompt == EFalse)
+			{
+				view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_prompt_literal), EEapDbFalse );
+			}
+		else
+			{
+				view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_prompt_literal), EEapDbTrue );
+			}		
 		}
 
 	// Session validity time
@@ -669,6 +676,10 @@ void EapMsChapV2DbUtils::DeleteConfigurationL(
 	TInt error(KErrNone);
 	TFileName aPrivateDatabasePathName;
 	
+	error = aFileServerSession.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::DeleteConfigurationL(): - aFileServerSession.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
 	EapPluginTools::CreateDatabaseLC(
 		aDatabase,
 		aFileServerSession,
@@ -722,7 +733,7 @@ void EapMsChapV2DbUtils::DeleteConfigurationL(
 
 	// Delete rows
 	if (view.FirstL())
-	{		
+	{
 		do {
 			view.DeleteL();
 		} while (view.NextL() != EFalse);

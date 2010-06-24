@@ -11,12 +11,12 @@
 *
 * Contributors:
 *
-* Description:  EAP and WLAN authentication protocols.
+* Description:  Message queue for EAP-server and -clients.
 *
 */
 
 /*
-* %version: 11 %
+* %version: 14 %
 */
 
 
@@ -32,12 +32,28 @@ EAP_FUNC_EXPORT EapMessageBuffer::EapMessageBuffer(abs_eap_am_tools_c * const to
 	, iRequestType(EEapNone)
 	, iData(0)
 {
+	EAP_TRACE_DEBUG(
+		iTools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("EapMessageBuffer::EapMessageBuffer(): this=0x%08x\n"),
+		this));
+
+	EAP_TRACE_RETURN_STRING(iTools, "returns: EapMessageBuffer::EapMessageBuffer()");
 }
 
 //----------------------------------------------------------------------------
 
 EAP_FUNC_EXPORT EapMessageBuffer::~EapMessageBuffer()
 {
+	EAP_TRACE_DEBUG(
+		iTools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("EapMessageBuffer::~EapMessageBuffer(): this=0x%08x, iData=0x%08x\n"),
+		this,
+		iData));
+
+	EAP_TRACE_RETURN_STRING(iTools, "returns: EapMessageBuffer::~EapMessageBuffer()");
+
 	iRequestType = EEapNone;
 	delete iData;
 	iData = 0;
@@ -50,7 +66,9 @@ EAP_FUNC_EXPORT TInt EapMessageBuffer::CopyData(TEapRequests message, const void
 	EAP_TRACE_DEBUG(
 		iTools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("EapMessageBuffer::CopyData(): message=%d, data=0x%08x, length=%d\n"),
+		(EAPL("EapMessageBuffer::CopyData(): this=0x%08x, iData=0x%08x, message=%d, data=0x%08x, length=%d\n"),
+		this,
+		iData,
 		message,
 		data,
 		length));
@@ -62,10 +80,19 @@ EAP_FUNC_EXPORT TInt EapMessageBuffer::CopyData(TEapRequests message, const void
 	TUint buffer_size = length;
 	if (buffer_size == 0)
 	{
-		buffer_size = 1;
+		// Allocate at least one byte.
+		++buffer_size;
 	}
 
+	delete iData;
 	iData = HBufC8::New(buffer_size);
+
+	EAP_TRACE_DEBUG(
+		iTools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("EapMessageBuffer::CopyData(): this=0x%08x, iData=0x%08x\n"),
+		this,
+		iData));
 
 	if (iData == 0)
 	{
@@ -129,13 +156,48 @@ EAP_FUNC_EXPORT TEapRequests EapMessageBuffer::GetRequestType() const
 EAP_FUNC_EXPORT EapMessageQueue::EapMessageQueue(abs_eap_am_tools_c * const tools)
 	: iTools(tools)
 {
+	EAP_TRACE_DEBUG(
+		iTools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("EapMessageQueue::EapMessageQueue(): this=0x%08x, iEapMessageQueue.Count()=%d\n"),
+		this,
+		iEapMessageQueue.Count()));
+
+	EAP_TRACE_RETURN_STRING(iTools, "returns: EapMessageQueue::EapMessageQueue()");
+
 }
 
 //----------------------------------------------------------------------------
 
 EAP_FUNC_EXPORT EapMessageQueue::~EapMessageQueue()
 {
-    DeleteFirstMessage();
+	EAP_TRACE_DEBUG(
+		iTools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("EapMessageQueue::~EapMessageQueue(): this=0x%08x, iEapMessageQueue.Count()=%d\n"),
+		this,
+		iEapMessageQueue.Count()));
+
+	EAP_TRACE_RETURN_STRING(iTools, "returns: EapMessageQueue::~EapMessageQueue()");
+
+	TInt aCount = iEapMessageQueue.Count();
+
+	while (aCount > 0)
+	{
+		EAP_TRACE_DEBUG(
+			iTools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("EapMessageQueue::~EapMessageQueue(): Removes iEapMessageQueue[0].iRequestType=%d=%s, iEapMessageQueue.Count()=%d\n"),
+			iEapMessageQueue[0]->GetRequestType(),
+			EapServerStrings::GetEapRequestsString(iEapMessageQueue[0]->GetRequestType()),
+			iEapMessageQueue.Count()));
+
+		delete iEapMessageQueue[0];
+		iEapMessageQueue.Remove(0);
+
+		aCount = iEapMessageQueue.Count();
+	}
+
 	iEapMessageQueue.Close();
 }
 
@@ -146,7 +208,8 @@ EAP_FUNC_EXPORT TInt EapMessageQueue::AddMessage(TEapRequests message, const voi
 	EAP_TRACE_DEBUG(
 		iTools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("EapMessageQueue::AddMessage(): message=%d, data=0x%08x, length=%d, iEapMessageQueue.Count()=%d\n"),
+		(EAPL("EapMessageQueue::AddMessage(): this=0x%08x, message=%d, data=0x%08x, length=%d, iEapMessageQueue.Count()=%d\n"),
+		this,
 		message,
 		data,
 		length,
@@ -190,8 +253,6 @@ EAP_FUNC_EXPORT TInt EapMessageQueue::AddMessage(TEapRequests message, const voi
 			error));
 
 		delete buffer;
-
-		return error;
 	}
 
 	return error;
@@ -204,7 +265,8 @@ EAP_FUNC_EXPORT EapMessageBuffer * EapMessageQueue::GetFirstMessage()
 	EAP_TRACE_DEBUG(
 		iTools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("EapMessageQueue::GetFirstMessage()\n")));
+		(EAPL("EapMessageQueue::GetFirstMessage(): this=0x%08x\n"),
+		this));
 
 	EAP_TRACE_RETURN_STRING(iTools, "returns: EapMessageQueue::GetFirstMessage()");
 
@@ -238,7 +300,8 @@ EAP_FUNC_EXPORT TInt EapMessageQueue::DeleteFirstMessage()
 	EAP_TRACE_DEBUG(
 		iTools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("EapMessageQueue::DeleteFirstMessage()\n")));
+		(EAPL("EapMessageQueue::DeleteFirstMessage(): this=0x%08x\n"),
+		this));
 
 	EAP_TRACE_RETURN_STRING(iTools, "returns: EapMessageQueue::DeleteFirstMessage()");
 

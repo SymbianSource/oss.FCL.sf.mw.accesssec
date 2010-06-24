@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 47.1.6 %
+* %version: 47.1.10 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -131,6 +131,10 @@ eap_am_type_gsmsim_symbian_c::eap_am_type_gsmsim_symbian_c(
 
 void eap_am_type_gsmsim_symbian_c::ConstructL()
 {
+	TInt error = m_session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("eap_am_type_gsmsim_symbian_c::ConstructL(): - m_session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
 	// Open/create database
 	EapSimDbUtils::OpenDatabaseL(m_database, m_session, m_index_type, m_index, m_tunneling_type);	
 	
@@ -357,7 +361,7 @@ void eap_am_type_gsmsim_symbian_c::store_reauth_parametersL(
 
 //--------------------------------------------------
 
-eap_status_e eap_am_type_gsmsim_symbian_c::authentication_finished(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_gsmsim_symbian_c::authentication_finished(
 	const bool true_when_successful,
 	const eap_gsmsim_authentication_type_e authentication_type,
 	const eap_type_gsmsim_identity_type identity_type)
@@ -659,7 +663,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_gsmsim_symbian_c::configure()
 	{
 		eap_variable_data_c simulator_sim_algorithm(m_am_tools);
 
-		eap_status_e status = m_partner->read_configure(
+		eap_status_e status = type_configure_read(
 			cf_str_EAP_GSMSIM_simulator_sim_algorithm.get_field(),
 			&simulator_sim_algorithm);
 		if (status == eap_status_ok
@@ -696,7 +700,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_gsmsim_symbian_c::configure()
 	}
 	
 	{
-		eap_status_e status = m_partner->read_configure(
+		eap_status_e status = type_configure_read(
 			cf_str_EAP_GSMSIM_simulator_sim_ki.get_field(),
 			&m_simulator_sim_ki);
 		if (status == eap_status_ok
@@ -745,7 +749,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_gsmsim_symbian_c::configure()
 		// Read Maximum Session Validity Time from the config file
 		eap_variable_data_c sessionTimeFromFile(m_am_tools);
 		
-		eap_status_e status = m_partner->read_configure(
+		eap_status_e status = type_configure_read(
 			cf_str_EAP_GSMSIM_max_session_validity_time.get_field(),
 			&sessionTimeFromFile);
 		
@@ -1644,7 +1648,7 @@ eap_status_e eap_am_type_gsmsim_symbian_c::complete_SIM_imsi_L(
 //--------------------------------------------------
 
 //
-eap_status_e eap_am_type_gsmsim_symbian_c::cancel_SIM_IMSI_or_pseudonym_or_reauthentication_id_query()
+EAP_FUNC_EXPORT eap_status_e eap_am_type_gsmsim_symbian_c::cancel_SIM_IMSI_or_pseudonym_or_reauthentication_id_query()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 #if defined (USE_EAP_GSMSIM_INTERFACE) && !defined(__WINS__)
@@ -2008,7 +2012,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_gsmsim_symbian_c::query_SIM_kc_sres(
 //-------------------------------------------------
 
 //
-eap_status_e eap_am_type_gsmsim_symbian_c::cancel_SIM_kc_sres_query()
+EAP_FUNC_EXPORT eap_status_e eap_am_type_gsmsim_symbian_c::cancel_SIM_kc_sres_query()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 		
@@ -2539,7 +2543,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_gsmsim_symbian_c::query_imsi_from_usern
 //--------------------------------------------------
 
 //
-eap_status_e eap_am_type_gsmsim_symbian_c::cancel_imsi_from_username_query()
+EAP_FUNC_EXPORT eap_status_e eap_am_type_gsmsim_symbian_c::cancel_imsi_from_username_query()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);

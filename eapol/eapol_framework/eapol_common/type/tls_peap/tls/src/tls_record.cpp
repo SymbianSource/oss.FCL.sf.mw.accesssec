@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 195 %
+* %version: 197 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -60,7 +60,7 @@
 	EAP_STATUS_RETURN(tools, eap_status_return_and_create_tls_protocol_alert((status)))
 
 
-eap_status_e tls_record_c::eap_status_return_and_create_tls_protocol_alert(
+EAP_FUNC_EXPORT eap_status_e tls_record_c::eap_status_return_and_create_tls_protocol_alert(
 	const eap_status_e status)
 {
 	if (status != eap_status_ok
@@ -272,6 +272,18 @@ EAP_FUNC_EXPORT tls_record_c::tls_record_c(
 		 (m_is_client == true ? "client": "server")));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: tls_record_c::tls_record_c()");
+
+#if defined(USE_FAST_EAP_TYPE)
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("TLS: tls_record_c::tls_record_c(): EAP-FAST enabled.")));
+#else
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("TLS: tls_record_c::tls_record_c(): EAP-FAST disabled.")));
+#endif //#if defined(USE_FAST_EAP_TYPE)
 
 	if (receive_network_id == 0
 		|| receive_network_id->get_is_valid_data() == false)
@@ -1190,7 +1202,7 @@ EAP_FUNC_EXPORT eap_status_e tls_record_c::set_nai_realm(
 
 //--------------------------------------------------
 
-void tls_record_c::send_error_notification(const eap_status_e error)
+EAP_FUNC_EXPORT void tls_record_c::send_error_notification(const eap_status_e error)
 {
 	// Notifies the lower level of an authentication error.
 

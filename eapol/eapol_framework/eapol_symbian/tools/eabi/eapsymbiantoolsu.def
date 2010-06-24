@@ -3,7 +3,7 @@ EXPORTS
 	_ZN14EapPluginTools15GetPrivatePathLER4TBufILi256EE @ 2 NONAME
 	_ZN14EapPluginTools16CleanupImplArrayEPv @ 3 NONAME
 	_ZN14EapPluginTools16CreateDatabaseLCER16RDbNamedDatabaseR3RFsRiRK7TDesC16R4TBufILi256EE @ 4 NONAME
-	_ZN14EapPluginTools18ListAllEapPluginsLERK16TEapExpandedTypeR13RPointerArrayIS0_E @ 5 NONAME
+	_ZN14EapPluginTools18ListAllEapPluginsLE10TIndexTypeRK16TEapExpandedTypeR13RPointerArrayIS1_E @ 5 NONAME
 	_ZN14EapPluginToolsC1Ev @ 6 NONAME
 	_ZN14EapPluginToolsC2Ev @ 7 NONAME
 	_ZN14EapPluginToolsD0Ev @ 8 NONAME
@@ -21,20 +21,20 @@ EXPORTS
 	_ZN16TEapExpandedTypeC2ERK6TDesC8 @ 20 NONAME
 	_ZN16TEapExpandedTypeC2ERKS_ @ 21 NONAME
 	_ZN16TEapExpandedTypeC2Ev @ 22 NONAME
-	_ZN16TEapExpandedTypeD1Ev @ 23 NONAME
-	_ZN16TEapExpandedTypeD2Ev @ 24 NONAME
-	_ZN16TEapExpandedTypeaSERK6TBufC8ILi8EE @ 25 NONAME
-	_ZN16TEapExpandedTypeaSERK6TDesC8 @ 26 NONAME
-	_ZN16TEapExpandedTypeaSERKS_ @ 27 NONAME
-	_ZNK16TEapExpandedType11GetVendorIdEv @ 28 NONAME
-	_ZNK16TEapExpandedType13GetVendorTypeEv @ 29 NONAME
-	_ZNK16TEapExpandedType7CompareERKS_ @ 30 NONAME
-	_ZNK16TEapExpandedType8GetValueEv @ 31 NONAME
-	_ZNK16TEapExpandedTypeeqERKS_ @ 32 NONAME
-	_ZNK16TEapExpandedTypeneERKS_ @ 33 NONAME
-	_ZTI14EapPluginTools @ 34 NONAME
-	_ZTV14EapPluginTools @ 35 NONAME
-	_ZN16TEapExpandedTypeD0Ev @ 36 NONAME
-	_ZTI16TEapExpandedType @ 37 NONAME
+	_ZN16TEapExpandedTypeD0Ev @ 23 NONAME
+	_ZN16TEapExpandedTypeD1Ev @ 24 NONAME
+	_ZN16TEapExpandedTypeD2Ev @ 25 NONAME
+	_ZN16TEapExpandedTypeaSERK6TBufC8ILi8EE @ 26 NONAME
+	_ZN16TEapExpandedTypeaSERK6TDesC8 @ 27 NONAME
+	_ZN16TEapExpandedTypeaSERKS_ @ 28 NONAME
+	_ZNK16TEapExpandedType11GetVendorIdEv @ 29 NONAME
+	_ZNK16TEapExpandedType13GetVendorTypeEv @ 30 NONAME
+	_ZNK16TEapExpandedType7CompareERKS_ @ 31 NONAME
+	_ZNK16TEapExpandedType8GetValueEv @ 32 NONAME
+	_ZNK16TEapExpandedTypeeqERKS_ @ 33 NONAME
+	_ZNK16TEapExpandedTypeneERKS_ @ 34 NONAME
+	_ZTI14EapPluginTools @ 35 NONAME
+	_ZTI16TEapExpandedType @ 36 NONAME
+	_ZTV14EapPluginTools @ 37 NONAME
 	_ZTV16TEapExpandedType @ 38 NONAME
 

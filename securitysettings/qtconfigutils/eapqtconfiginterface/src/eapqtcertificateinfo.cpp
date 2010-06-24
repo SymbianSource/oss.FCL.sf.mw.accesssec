@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -17,16 +17,28 @@
  */
 
 /*
- * %version: 5 %
+ * %version: 6 %
  */
 
-#include "eapqtcertificateinfo.h"
+// System includes
+#include <eapqtcertificateinfo.h>
+
+// User includes
 #include "eapqtcertificateinfo_p.h"
 
-//----------------------------------------------------------------------------
-//              EapQtCertificateInfo                
-//----------------------------------------------------------------------------
+/*!
+ *  \class EapQtCertificateInfo
+ *  \brief Public implementation of certificate information data
+ *         structure for EAP QT configuration interface
+ */
 
+// External function prototypes
+
+// Local constants
+
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
 
 EapQtCertificateInfo::EapQtCertificateInfo() :
     d_ptr(new EapQtCertificateInfoPrivate)
@@ -52,7 +64,7 @@ EapQtCertificateInfo& EapQtCertificateInfo::operator=(const EapQtCertificateInfo
     return *this;
 }
 
-QVariant EapQtCertificateInfo::value(ItemId id) const
+QVariant EapQtCertificateInfo::value(const ItemId id) const
 {
     // check for valid range, otherwise memory is consumed for no reason
     if(id >= ItemIdLast) {
@@ -62,15 +74,18 @@ QVariant EapQtCertificateInfo::value(ItemId id) const
     return d_ptr->value(id);
 }
 
-void EapQtCertificateInfo::setValue(ItemId id, QVariant newValue)
+void EapQtCertificateInfo::setValue(const ItemId id, const QVariant &newValue) const
 {
     // check for valid range, otherwise memory is consumed for no reason
-    if(id < ItemIdLast) {
+    if (id < ItemIdLast) {
         d_ptr->setValue(id, newValue);
-    } else {
+    }
+    else {
         qDebug("ERROR: EapQtCertificateInfo::setValue - invalid id!");
     }
-    return;
-
 }
 
+void EapQtCertificateInfo::clear() const
+{
+    d_ptr->clear();
+}

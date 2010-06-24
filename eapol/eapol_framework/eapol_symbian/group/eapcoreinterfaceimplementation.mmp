@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8 %
+* %version: 9 %
 */
 
 #include <platform_paths.hrh>
@@ -29,6 +29,8 @@ TARGETTYPE PLUGIN
 TARGET	EapCoreInterfaceImplementation.dll
 UID		0x10009D8D 0x20026FCD
 SECUREID 0x20026FCD
+
+deffile eapcoreinterfaceimplementation.def
 
 SOURCEPATH  ../eap_if/data
 START RESOURCE 20026fcd.rss
@@ -63,5 +65,6 @@ SOURCE EapCoreInterfaceImplementation.cpp
 SOURCE EapClientIf.cpp
 
 LIBRARY		euser.lib ecom.lib eapclientif.lib eaptools.lib eaptrace.lib eapsymbiantools.lib
+
 
 // end

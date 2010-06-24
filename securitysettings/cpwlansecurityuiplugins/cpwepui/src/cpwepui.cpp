@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 22 %
+ * %version: tr1cfwln#24 %
  */
 
 //User Includes
@@ -248,24 +248,22 @@ void CpWepUi::createWEPKeyGroup(int index)
     switch(index)
         {
         case KFirstKey:
-            textId  = hbTrId("txt_occ_subhead_wep_key_1");
+            textId  = hbTrId("txt_occ_setlabel_wep_key_1");
             break;
             
-            
         case KSecondKey:
-            textId  = hbTrId("txt_occ_subhead_wep_key_2");
+            textId  = hbTrId("txt_occ_setlabel_wep_key_2");
             break;
             
         case KThirdKey:
-            textId  = hbTrId("txt_occ_subhead_wep_key_3");
+            textId  = hbTrId("txt_occ_setlabel_wep_key_3");
             break;
             
         case KFourthKey:
-            textId  = hbTrId("txt_occ_subhead_wep_key_4");
+            textId  = hbTrId("txt_occ_setlabel_wep_key_4");
             break;
         }
         
-   
     mWepKeyText[index] = new CpSettingFormItemData(
             HbDataFormModelItem::TextItem,
             textId, mUi);
@@ -410,12 +408,12 @@ void CpWepUi::wepKeyTextChanged(int index)
     OstTraceFunctionEntry1(CPWEPUI_WEPKEYTEXTCHANGED_ENTRY,this);
 
     QVariant value = mWepKeyText[index]->contentWidgetData("text");
+    QString key = value.toString();
 
-    WepKeyValidator::KeyStatus keystatus = WepKeyValidator::validateWepKey(
-            value.toString());
+    WepKeyValidator::KeyStatus keystatus = WepKeyValidator::validateWepKey(key);
 
-    if (keystatus == WepKeyValidator::KeyStatusOk) {
-        QString key = value.toString();
+    // allow storing an empty key to enable clearing WEP keys
+    if (keystatus == WepKeyValidator::KeyStatusOk || key.length() == 0) {
 
         //If key is valid set the format of the key
         setKeyFormat(key, index);

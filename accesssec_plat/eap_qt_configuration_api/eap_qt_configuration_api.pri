@@ -7,7 +7,7 @@
 # at the URL "http://www.eclipse.org/legal/epl-v10.html".
 #
 # Initial Contributors:
-# 	Nokia Corporation - initial contribution.
+# Nokia Corporation - initial contribution.
 #
 # Contributors:
 #
@@ -15,7 +15,7 @@
 #	EAP Qt configuration API project include
 #
 
-# %version: 2 %
+# %version: 5 %
 
 
 PLATFORM_HEADERS += \
@@ -26,4 +26,5 @@ PLATFORM_HEADERS += \
     eap_qt_configuration_api/inc/eapqtpluginhandle.h \
     eap_qt_configuration_api/inc/eapqtplugininfo.h \
     eap_qt_configuration_api/inc/eapqtvalidator.h \
-    eap_qt_configuration_api/inc/eapqtconfigdefs.h
+    eap_qt_configuration_api/inc/eapqtconfigexport.h \
+    eap_qt_configuration_api/inc/eapqtpacstoreconfig.h

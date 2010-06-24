@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -18,7 +18,7 @@
  */
 
 /*
- * %version: 9 %
+ * %version: 11 %
  */
 
 // System includes
@@ -36,15 +36,7 @@
 
 // Local constants
 
-// Order numbers
-static const int order_eapmschapv2(10);
-static const int order_pap(20);
-static const int order_plainmschapv2(30);
-static const int order_eapgtc(40);
-static const int order_leap(50);
-
-Q_EXPORT_PLUGIN2(CpEapUserPasswordPlugin, CpEapUserPasswordPlugin)
-;
+Q_EXPORT_PLUGIN2(CpEapUserPasswordPlugin, CpEapUserPasswordPlugin);
 
 // ======== LOCAL FUNCTIONS ========
 
@@ -96,20 +88,30 @@ QList<EapQtPluginInfo> CpEapUserPasswordPlugin::pluginInfo()
     qDebug("CpEapUserPasswordPlugin: provide plugin info");
     QList<EapQtPluginInfo> ret;
 
-    ret.append(EapQtPluginInfo(EapQtPluginHandle::PluginEapMschapv2,  
-        EapUiStrings::EapMschapv2, order_eapmschapv2) );
-    
-    ret.append(EapQtPluginInfo(EapQtPluginHandle::PluginPap, 
-        EapUiStrings::Pap, order_pap) );
+    ret.append(EapQtPluginInfo(
+        EapQtPluginHandle::PluginEapMschapv2,
+        EapQtUiConstants::StringEapMschapv2,
+        EapQtUiConstants::OrderEapMschapv2));
 
-    ret.append(EapQtPluginInfo(EapQtPluginHandle::PluginPlainMschapv2,
-        EapUiStrings::Mschapv2, order_plainmschapv2) );
+    ret.append(EapQtPluginInfo(
+        EapQtPluginHandle::PluginPap,
+        EapQtUiConstants::StringPap,
+        EapQtUiConstants::OrderPap));
 
-    ret.append(EapQtPluginInfo(EapQtPluginHandle::PluginEapGtc, 
-        EapUiStrings::EapGtc, order_eapgtc) );
+    ret.append(EapQtPluginInfo(
+        EapQtPluginHandle::PluginPlainMschapv2,
+        EapQtUiConstants::StringMschapv2,
+        EapQtUiConstants::OrderMschapv2));
 
-    ret.append(EapQtPluginInfo(EapQtPluginHandle::PluginLeap, 
-        EapUiStrings::Leap, order_leap) );
+    ret.append(EapQtPluginInfo(
+        EapQtPluginHandle::PluginEapGtc,
+        EapQtUiConstants::StringEapGtc,
+        EapQtUiConstants::OrderEapGtc));
+
+    ret.append(EapQtPluginInfo(
+        EapQtPluginHandle::PluginLeap,
+        EapQtUiConstants::StringLeap,
+        EapQtUiConstants::OrderLeap));
 
     return ret;
 }

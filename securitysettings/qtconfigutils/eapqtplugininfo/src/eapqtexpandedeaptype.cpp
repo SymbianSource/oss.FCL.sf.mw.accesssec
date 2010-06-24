@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -17,15 +17,27 @@
  */
 
 /*
- * %version: 12 %
+ * %version: 13 %
  */
 
-#include "eapqtexpandedeaptype.h"
+// System includes
+#include <eapqtexpandedeaptype.h>
+
+// User includes
 #include "eapqtexpandedeaptype_p.h"
 
-//----------------------------------------------------------------------------
-//              EapQtExpandedEapType                
-//----------------------------------------------------------------------------
+/*!
+ *  \class EapQtExpandedEapType
+ *  \brief Public implementation of expanded EAP type QT data structure
+ */
+
+// External function prototypes
+
+// Local constants
+
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
 
 EapQtExpandedEapType::EapQtExpandedEapType() :
     d_ptr(new EapQtExpandedEapTypePrivate)
@@ -37,12 +49,12 @@ EapQtExpandedEapType::EapQtExpandedEapType(const Type type) :
 {
 }
 
-EapQtExpandedEapType::EapQtExpandedEapType(const QByteArray data) :
+EapQtExpandedEapType::EapQtExpandedEapType(const QByteArray &data) :
     d_ptr(new EapQtExpandedEapTypePrivate(data))
 {
 }
 
-EapQtExpandedEapType::EapQtExpandedEapType(const EapQtExpandedEapType & type) :
+EapQtExpandedEapType::EapQtExpandedEapType(const EapQtExpandedEapType &type) :
     d_ptr(new EapQtExpandedEapTypePrivate)
 {
     d_ptr->mData = type.d_ptr->mData;
@@ -84,4 +96,3 @@ EapQtExpandedEapType& EapQtExpandedEapType::operator=(const EapQtExpandedEapType
     }
     return *this;
 }
-

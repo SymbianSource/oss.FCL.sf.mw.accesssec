@@ -16,13 +16,13 @@
 */
 
 /*
-* %version: 54 %
+* %version: 57 %
 */
 
 // This is enumeration of EAPOL source code.
 #if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 	#undef EAP_FILE_NUMBER_ENUM
-	#define EAP_FILE_NUMBER_ENUM 605 
+	#define EAP_FILE_NUMBER_ENUM 739 
 	#undef EAP_FILE_NUMBER_DATE 
 	#define EAP_FILE_NUMBER_DATE 1127594498 
 #endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
@@ -78,8 +78,10 @@ CEapGeneric::CEapGeneric(
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapGeneric::CEapGeneric(): this=0x%08x.\n"),
-		this));
+		(EAPL("CEapGeneric::CEapGeneric(): this=0x%08x, aIndexType=%d, aIndex=%d.\n"),
+		this,
+		aIndexType,
+		aIndex));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapGeneric::CEapGeneric()");
 }
@@ -159,20 +161,21 @@ CEapGeneric::~CEapGeneric()
 #ifdef USE_EAP_SIMPLE_CONFIG
 
 eap_base_type_c* CEapGeneric::GetStackInterfaceL(abs_eap_am_tools_c* const aTools, 
-											   abs_eap_base_type_c* const aPartner,
-											   const bool is_client_when_true,
-											   const eap_am_network_id_c * const receive_network_id,
+											   abs_eap_base_type_c* const /* aPartner */,
+											   const bool /* is_client_when_true */,
+											   const eap_am_network_id_c * const /* receive_network_id */,
 											   abs_eap_configuration_if_c * const /*configuration_if*/)
 	
 #else
 	
 eap_base_type_c* CEapGeneric::GetStackInterfaceL(abs_eap_am_tools_c* const aTools, 
-											abs_eap_base_type_c* const aPartner,
-											const bool is_client_when_true,
-											const eap_am_network_id_c * const receive_network_id)
+											abs_eap_base_type_c* const /* aPartner */,
+											const bool /* is_client_when_true */,
+											const eap_am_network_id_c * const /* receive_network_id */)
 	
 #endif // #ifdef USE_EAP_SIMPLE_CONFIG
 {
+	EAP_UNREFERENCED_PARAMETER(aTools);
 	// This class does not have stack interface.
 	EAP_TRACE_DEBUG(
 		m_am_tools,
@@ -551,15 +554,18 @@ void CEapGeneric::SetConfigurationL(const EAPSettings& aSettings)
 
 	TInt error(KErrNone);
 
+	internal_settings->m_IndexType = iIndexType;
+	internal_settings->m_Index = iIndex;
+
+	internal_settings->m_TunnelingTypePresent = iTunnelingTypePresent;
+	internal_settings->m_TunnelingType = iTunnelingType;
+
 	error = CEapConversion::ConvertEAPSettingsToInternalType(
 		m_am_tools,
 		&aSettings,
 		internal_settings);
 	if(error == KErrNone)
 	{
-		internal_settings->m_IndexType = iIndexType;
-		internal_settings->m_Index = iIndex;
-
 		TInt error =  CEapConversion::ConvertExpandedEAPTypeToInternalType(
 			&iEapType,
 			&(internal_settings->m_EAPType));
@@ -570,9 +576,6 @@ void CEapGeneric::SetConfigurationL(const EAPSettings& aSettings)
 			(void)EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(error));
 			User::Leave(error);
 		}
-
-		internal_settings->m_TunnelingTypePresent = iTunnelingTypePresent;
-		internal_settings->m_TunnelingType = iTunnelingType;
 
 		iCompletionStatus = eap_status_process_general_error;
 

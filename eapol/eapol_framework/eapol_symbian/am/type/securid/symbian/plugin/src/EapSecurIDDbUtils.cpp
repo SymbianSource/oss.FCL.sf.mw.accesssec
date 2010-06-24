@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 24 %
+* %version: 28 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -35,7 +35,7 @@
 #include "EapSecurIDDbParameterNames.h"
 
 #include <EapTraceSymbian.h>
-#include <EapPluginTools.h>
+#include "EapPluginTools.h"
 
 const TUint KMaxSqlQueryLength = 512;
 

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 125 %
+* %version: 137 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -35,16 +35,16 @@
 #include <x500dn.h>
 #include <x509cert.h>
 #include <x509certext.h>
-#include <EapAutomatic.h>
-#include <EapPluginTools.h>
+
+#include "EapPluginTools.h"
 #include "EapConversion.h"
+#include "EapAutomatic.h"
 
 #ifdef USE_FAST_EAP_TYPE
 #include "pac_store_db_parameters.h"
 #endif //#ifdef USE_FAST_EAP_TYPE
 
 #include <EapTraceSymbian.h>
-#include <EapPluginTools.h>
 
 #include "EapTlsPeapCertFetcher.h"
 
@@ -166,7 +166,7 @@ void EapTlsPeapUtils::OpenTlsDatabaseL(
 	//| EAP_TLS_PEAP_manual_username				| VARCHAR(255)     | cf_str_EAP_TLS_PEAP_manual_username_literal			|//
 	//| EAP_TLS_PEAP_cipher_suite					| UNSIGNED INTEGER | cf_str_EAP_TLS_PEAP_cipher_suite_literal	    |//
 	//| EAP_TLS_server_authenticates_client			| UNSIGNED INTEGER | cf_str_TLS_server_authenticates_client_policy_in_client_literal |//
-	//| CA_cert_label								| VARCHAR(255)     | KCACertLabelOld	    |//
+	//| CA_cert_label								| VARCHAR(255)     | KCACertLabel	    |//
 	//| client_cert_label							| VARCHAR(255)     | KClientCertLabel	    |//
 	//| EAP_TLS_PEAP_saved_session_id				| BINARY(32)       | cf_str_EAP_TLS_PEAP_saved_session_id_literal		    |//
 	//| EAP_TLS_PEAP_saved_master_secret			| BINARY(48)       | cf_str_EAP_TLS_PEAP_saved_master_secret_literal	    |//
@@ -216,7 +216,7 @@ void EapTlsPeapUtils::OpenTlsDatabaseL(
 		&cf_str_EAP_TLS_PEAP_manual_username_literal, KMaxUsernameLengthInDB,
 		&cf_str_EAP_TLS_PEAP_cipher_suite_literal, 
 		&cf_str_TLS_server_authenticates_client_policy_in_client_literal,
-		&KCACertLabelOld, KMaxCertLabelLengthInDB,
+		&KCACertLabel, KMaxCertLabelLengthInDB,
 		&KClientCertLabel, KMaxCertLabelLengthInDB,
 		&cf_str_EAP_TLS_PEAP_saved_session_id_literal, KMaxSessionIdLengthInDB,
 		&cf_str_EAP_TLS_PEAP_saved_master_secret_literal, KMaxMasterSecretLengthInDB,
@@ -424,7 +424,7 @@ void EapTlsPeapUtils::OpenTlsDatabaseL(
 		
 		view.SetColL(colSet->ColNo(cf_str_TLS_server_authenticates_client_policy_in_client_literal), default_EAP_TLS_server_authenticates_client);
 		
-		view.SetColL(colSet->ColNo(KCACertLabelOld), default_CA_cert_label);
+		view.SetColL(colSet->ColNo(KCACertLabel), default_CA_cert_label);
 		view.SetColL(colSet->ColNo(KClientCertLabel), default_client_cert_label);
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal), default_EAP_TLS_PEAP_verify_certificate_realm);
@@ -433,7 +433,7 @@ void EapTlsPeapUtils::OpenTlsDatabaseL(
 		
 		view.SetColL(colSet->ColNo(KTLSLastFullAuthTime), default_FullAuthTime);		
 
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TLS_Privacy);		
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TTLS_Privacy);		
 
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal), default_EAP_TLS_PEAP_use_automatic_ca_certificate);
 
@@ -556,7 +556,7 @@ void EapTlsPeapUtils::OpenPeapDatabaseL(
 	//| PEAP_accepted_tunneled_client_types			   	| VARBINARY(240) 	| cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal      |//
 	//| PEAP_unaccepted_tunneled_client_types		   	| VARBINARY(240) 	| cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal      |//
 	//| EAP_TLS_server_authenticates_client		        | UNSIGNED INTEGER 	| cf_str_TLS_server_authenticates_client_policy_in_client_literal|//
-	//| CA_cert_label								    | VARCHAR(255)     	| KCACertLabelOld	   |//
+	//| CA_cert_label								    | VARCHAR(255)     	| KCACertLabel	   |//
 	//| client_cert_label							    | VARCHAR(255)     	| KClientCertLabel	   |//
 	//| EAP_TLS_PEAP_saved_session_id				    | BINARY(32)       	| cf_str_EAP_TLS_PEAP_saved_session_id_literal		   |//
 	//| EAP_TLS_PEAP_saved_master_secret			    | BINARY(48)       	| cf_str_EAP_TLS_PEAP_saved_master_secret_literal	   |//
@@ -614,7 +614,7 @@ void EapTlsPeapUtils::OpenPeapDatabaseL(
 		&cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, KMaxTunneledTypeStringLengthInDB,
 		&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal, KMaxTunneledTypeStringLengthInDB,
 		&cf_str_TLS_server_authenticates_client_policy_in_client_literal,
-		&KCACertLabelOld, KMaxCertLabelLengthInDB,
+		&KCACertLabel, KMaxCertLabelLengthInDB,
 		&KClientCertLabel, KMaxCertLabelLengthInDB,
 		&cf_str_EAP_TLS_PEAP_saved_session_id_literal, KMaxSessionIdLengthInDB,
 		&cf_str_EAP_TLS_PEAP_saved_master_secret_literal,  KMaxMasterSecretLengthInDB,
@@ -838,7 +838,7 @@ void EapTlsPeapUtils::OpenPeapDatabaseL(
 		view.SetColL(colSet->ColNo(cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal), default_PEAP_tunneled_types);
 		
 		view.SetColL(colSet->ColNo(cf_str_TLS_server_authenticates_client_policy_in_client_literal), default_EAP_PEAP_TTLS_server_authenticates_client);
-		view.SetColL(colSet->ColNo(KCACertLabelOld), default_CA_cert_label);
+		view.SetColL(colSet->ColNo(KCACertLabel), default_CA_cert_label);
 		view.SetColL(colSet->ColNo(KClientCertLabel), default_client_cert_label);	
 
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal), default_EAP_TLS_PEAP_verify_certificate_realm);
@@ -847,7 +847,7 @@ void EapTlsPeapUtils::OpenPeapDatabaseL(
 		
 		view.SetColL(colSet->ColNo(KPEAPLastFullAuthTime), default_FullAuthTime);
 
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TLS_Privacy);						
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TTLS_Privacy);						
 
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal), default_EAP_TLS_PEAP_use_automatic_ca_certificate);
 
@@ -973,7 +973,7 @@ void EapTlsPeapUtils::OpenTtlsDatabaseL(
 	//| PEAP_accepted_tunneled_client_types			| VARBINARY(240) 	| cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal      |//
 	//| PEAP_unaccepted_tunneled_client_types		| VARBINARY(240) 	| cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal      |//
 	//| EAP_TLS_server_authenticates_client		    | UNSIGNED INTEGER 	| cf_str_TLS_server_authenticates_client_policy_in_client_literal|//
-	//| CA_cert_label								| VARCHAR(255)     	| KCACertLabelOld	   |//
+	//| CA_cert_label								| VARCHAR(255)     	| KCACertLabel	   |//
 	//| client_cert_label							| VARCHAR(255)     	| KClientCertLabel	   |//
 	//| EAP_TLS_PEAP_saved_session_id				| BINARY(32)       	| cf_str_EAP_TLS_PEAP_saved_session_id_literal		   |//
 	//| EAP_TLS_PEAP_saved_master_secret			| BINARY(48)       	| cf_str_EAP_TLS_PEAP_saved_master_secret_literal	   |//
@@ -1046,7 +1046,7 @@ void EapTlsPeapUtils::OpenTtlsDatabaseL(
         &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, KMaxTunneledTypeStringLengthInDB,
         &cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,	KMaxTunneledTypeStringLengthInDB,	
         &cf_str_TLS_server_authenticates_client_policy_in_client_literal,
-        &KCACertLabelOld, KMaxCertLabelLengthInDB,
+        &KCACertLabel, KMaxCertLabelLengthInDB,
         &KClientCertLabel, KMaxCertLabelLengthInDB,
         &cf_str_EAP_TLS_PEAP_saved_session_id_literal, KMaxSessionIdLengthInDB,
         &cf_str_EAP_TLS_PEAP_saved_master_secret_literal, KMaxMasterSecretLengthInDB,
@@ -1356,7 +1356,7 @@ void EapTlsPeapUtils::OpenTtlsDatabaseL(
 		view.SetColL(colSet->ColNo(cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal), default_PEAP_tunneled_types);		
 		
 		view.SetColL(colSet->ColNo(cf_str_TLS_server_authenticates_client_policy_in_client_literal), default_EAP_PEAP_TTLS_server_authenticates_client);
-		view.SetColL(colSet->ColNo(KCACertLabelOld), default_CA_cert_label);
+		view.SetColL(colSet->ColNo(KCACertLabel), default_CA_cert_label);
 		
 		view.SetColL(colSet->ColNo(KClientCertLabel), default_client_cert_label);	
 
@@ -1366,7 +1366,7 @@ void EapTlsPeapUtils::OpenTtlsDatabaseL(
 		
 		view.SetColL(colSet->ColNo(KTTLSLastFullAuthTime), default_FullAuthTime);				
 
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TLS_Privacy);
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TTLS_Privacy);
 
 
 		view.SetColL( colSet->ColNo(
@@ -1891,8 +1891,8 @@ void EapTlsPeapUtils::OpenFastDatabaseL(
 		view.SetColL(colSet->ColNo(cf_str_EAP_FAST_max_session_validity_time_literal), default_MaxSessionTime);
 		
 		view.SetColL(colSet->ColNo(KFASTLastFullAuthTime), default_FullAuthTime);
-		
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TLS_Privacy);		
+
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TTLS_Privacy);		
 
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal), default_EAP_TLS_PEAP_use_automatic_ca_certificate);
 
@@ -2198,6 +2198,11 @@ void EapTlsPeapUtils::ReadUintRowsToArrayL(
 					// Store the line
 					TUint tmp = view.ColUint(KDefaultColumnInView_One);
 					aArray.Append(tmp);
+
+					EAP_TRACE_DEBUG_SYMBIAN(
+						(_L("EapTlsPeapUtils::ReadUintRowsToArrayL(): TUint=%d\n"),
+						tmp));
+
 				}
 				break;
 			default:
@@ -2780,10 +2785,7 @@ void EapTlsPeapUtils::SetConfigurationL(
 		&& aSettings.iEAPExpandedType != (*EapExpandedTypeTtls.GetType())
 #ifdef USE_FAST_EAP_TYPE
 		&& aSettings.iEAPExpandedType != (*EapExpandedTypeFast.GetType())
-#else
-#warning USE_FAST_EAP_TYPE not defined
-#endif
-	
+#endif //#ifdef USE_FAST_EAP_TYPE
 		&& aSettings.iEAPExpandedType != (*EapExpandedTypeTtlsPap.GetType())
 		)
 	{
@@ -3359,12 +3361,12 @@ void EapTlsPeapUtils::SetConfigurationL(
 
 		// Delete old rows
 		if (view.FirstL())
-		{		
+		{
 			do {
 				view.DeleteL();
 			} while (view.NextL() != EFalse);
 		}	
-		
+
 		// Get column set so we get the correct column numbers
 		colSet = view.ColSetL();
 		CleanupStack::PushL(colSet);
@@ -3373,13 +3375,13 @@ void EapTlsPeapUtils::SetConfigurationL(
 		
 		for (TInt i = 0; i < aSettings.iCipherSuites.Count(); i++)
 		{
-			view.InsertL();			
+			view.InsertL();
 			view.SetColL(colSet->ColNo(KServiceType), static_cast<TUint>(aIndexType));
-			view.SetColL(colSet->ColNo(KServiceIndex), static_cast<TUint>(aIndex));			
+			view.SetColL(colSet->ColNo(KServiceIndex), static_cast<TUint>(aIndex));
 			view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
 			view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
 			view.SetColL(colSet->ColNo(KCipherSuite), aSettings.iCipherSuites[i]);
-			view.PutL();	
+			view.PutL();
 		}
 		
 		CleanupStack::PopAndDestroy(colSet);
@@ -3420,7 +3422,7 @@ void EapTlsPeapUtils::SetConfigurationL(
 
 		// Delete old rows
 		if (view.FirstL())
-		{		
+		{
 			do {
 				view.DeleteL();
 			} while (view.NextL() != EFalse);
@@ -3508,7 +3510,7 @@ void EapTlsPeapUtils::SetConfigurationL(
 		
 		// Delete old rows
 		if (view.FirstL())
-		{		
+		{
 			do {
 				view.DeleteL();
 			} while (view.NextL() != EFalse);
@@ -3890,6 +3892,18 @@ void EapTlsPeapUtils::GetConfigurationL(
 		// Password existence.
 		aSettings.iPasswordExistPresent = ETrue;
 		aSettings.iPasswordExist = ! view.IsColNull(colSet->ColNo(cf_str_EAP_TLS_PEAP_ttls_pap_password_literal));
+
+		aSettings.iShowPassWordPromptPresent = ETrue;
+
+		TUint aShow = view.ColUint( colSet->ColNo( cf_str_EAP_TLS_PEAP_ttls_pap_password_prompt_literal ) );
+		if ( aShow == EPapPasswordPromptOn)
+		{
+			aSettings.iShowPassWordPrompt = ETrue;
+		}
+		else
+		{
+			aSettings.iShowPassWordPrompt = EFalse;
+		}
 
 #if defined(USE_EAP_PASSWORD_READ_FROM_DATABASE)
         // Password
@@ -4466,7 +4480,7 @@ void EapTlsPeapUtils::GetConfigurationL(
 
 		if (error == KErrNone)
 		{
-			TRAP(error, (aPluginTool.ListAllEapPluginsL(aSymbTunnelingType, aPlugins)));
+			TRAP(error, (aPluginTool.ListAllEapPluginsL(aIndexType, aSymbTunnelingType, aPlugins)));
 			if (error != KErrNone)
 			{
 				EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::GetConfigurationL(): aPluginTool.ListAllEapPluginsL() failed, EAP-type=0xfe%06x%08x, index_type=%d, index=%d, error=%d.\n"),
@@ -4709,21 +4723,22 @@ void EapTlsPeapUtils::CopySettingsL(
 	CDbColSet* colSet = view.ColSetL();
 	CleanupStack::PushL(colSet);
 
-  if (view.FirstL())
-  	{       
-  	do 
+	if (view.FirstL())
+	{
+		do
   		{
-  		view.GetL();
+	  		view.GetL();
+
 			if (view.ColUint(colSet->ColNo(KServiceType)) == static_cast<TUint>(aDestIndexType)
 				&& view.ColUint(colSet->ColNo(KServiceIndex)) == static_cast<TUint>(aDestIndex)
 				&& view.ColUint(colSet->ColNo(KTunnelingTypeVendorId)) == aDestTunnelingType.get_vendor_id()
 				&& view.ColUint(colSet->ColNo(KTunnelingType)) == aDestTunnelingType.get_vendor_type())
 				{  		
-      			EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::CopySettingsL - Delete old records\n") ) );
-      			view.DeleteL();
+      				EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::CopySettingsL - Delete old records\n") ) );
+      				view.DeleteL();
     			}
-      		} while (view.NextL() != EFalse);
-  		}
+		} while (view.NextL() != EFalse);
+	}
 	
 	view.Close();
 	CleanupStack::PopAndDestroy(2); // view, colset
@@ -4879,6 +4894,10 @@ void EapTlsPeapUtils::DeleteConfigurationL(
 	TInt error(KErrNone);
 	TFileName aPrivateDatabasePathName;
 	
+	error = aFileServerSession.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL(): - aFileServerSession.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
 	EapPluginTools::CreateDatabaseLC(
 		aDatabase,
 		aFileServerSession,
@@ -4942,7 +4961,7 @@ void EapTlsPeapUtils::DeleteConfigurationL(
 
 	// Delete rows
 	if (view.FirstL())
-	{		
+	{
 		do {
 			view.DeleteL();
 		} while (view.NextL() != EFalse);
@@ -4968,8 +4987,7 @@ void EapTlsPeapUtils::DeleteConfigurationL(
 	//--------------------- Deletion 2 ----------------------------//
 	
 	// For all EAPs delete the User cert table
-
-//	KSQL2 is "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d"
+	//	KSQL2 is "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d"
 	
 	sqlStatement.Format(KSQL,
 		&usercerts, 
@@ -4989,7 +5007,7 @@ void EapTlsPeapUtils::DeleteConfigurationL(
 	User::LeaveIfError(view.EvaluateAll());
 	
 	if (view.FirstL())
-	{		
+	{
 		do {
 			view.DeleteL();
 		} while (view.NextL() != EFalse);
@@ -5023,7 +5041,7 @@ void EapTlsPeapUtils::DeleteConfigurationL(
 	User::LeaveIfError(view.EvaluateAll());
 	
 	if (view.FirstL())
-	{		
+	{
 		do {
 			view.DeleteL();
 		} while (view.NextL() != EFalse);
@@ -5057,7 +5075,7 @@ void EapTlsPeapUtils::DeleteConfigurationL(
 	User::LeaveIfError(view.EvaluateAll());
 	
 	if (view.FirstL())
-	{		
+	{
 		do {
 			view.DeleteL();
 		} while (view.NextL() != EFalse);
@@ -5094,7 +5112,7 @@ void EapTlsPeapUtils::DeleteConfigurationL(
 		User::LeaveIfError(view.EvaluateAll());
 		
 		if (view.FirstL())
-		{		
+		{
 			do {
 				view.DeleteL();
 			} while (view.NextL() != EFalse);
@@ -5108,7 +5126,6 @@ void EapTlsPeapUtils::DeleteConfigurationL(
 
 #endif // End: #ifdef USE_FAST_EAP_TYPE	
 
-	// Close database
 	CleanupStack::PopAndDestroy(buf);
 	CleanupStack::PopAndDestroy(&aDatabase);
 	CleanupStack::PopAndDestroy(&aFileServerSession);

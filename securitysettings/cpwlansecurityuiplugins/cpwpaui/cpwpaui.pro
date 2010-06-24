@@ -1,20 +1,21 @@
+#
 # Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
-# under the terms of the License "Eclipse Public License v1.0"
+# under the terms of "Eclipse Public License v1.0"
 # which accompanies this distribution, and is available
 # at the URL "http://www.eclipse.org/legal/epl-v10.html".
 #
 # Initial Contributors:
-# 	Nokia Corporation - initial contribution.
+# Nokia Corporation - initial contribution.
 #
 # Contributors:
 #
 # Description:
-# 	Control Panel UI for WPA/WPA2 only Security mode
-#
-# %version: 15 %
-#
+#   Control Panel plugin for WPA/WPA2 WLAN security mode
+
+# %version: tr1cfwln#17 %
+
 
 TEMPLATE = lib
 TARGET = cpwpaui
@@ -22,34 +23,33 @@ TARGET = cpwpaui
 DEPENDPATH += 
 
 INCLUDEPATH += \ 
-	$$MW_LAYER_SYSTEMINCLUDE \
-    $$OS_LAYER_SYSTEMINCLUDE \
     ../inc
     
 CONFIG += \
-	hb \
+    hb \
     plugin
     
 LIBS += \
-	-lcpframework \
+    -lcpframework \
     -lcpwpacmnui \
     -lconnection_settings_shim \
     -leapqtconfiginterface
     
-MOC_DIR = _moc
-RCC_DIR = _rcc
-OBJECTS_DIR = _objects
+MOC_DIR     = _build
+RCC_DIR     = _build
+OBJECTS_DIR = _build
 
 # Input
 HEADERS += \
-	traces/OstTraceDefinitions.h \
+    traces/OstTraceDefinitions.h \
     inc/cpwpaui.h
     
-SOURCES += src/cpwpaui.cpp
+SOURCES += \
+    src/cpwpaui.cpp
 
 symbian: 
 { 
-	TARGET.CAPABILITY = CAP_GENERAL_DLL
+    TARGET.CAPABILITY = CAP_GENERAL_DLL
     TARGET.EPOCALLOWDLLDATA = 1
     TARGET.UID3 = 0x2002C301
 
@@ -59,7 +59,7 @@ symbian:
     for(qtplugin, qtplugins.sources):BLD_INF_RULES.prj_exports += "./$$qtplugin $$deploy.path$$qtplugins.path/$$basename(qtplugin)"
     
     BLD_INF_RULES.prj_exports += \
-    	"rom/cpwpaui.iby CORE_MW_LAYER_IBY_EXPORT_PATH(cpwpaui.iby)"
+      "rom/cpwpaui.iby CORE_MW_LAYER_IBY_EXPORT_PATH(cpwpaui.iby)"
 }
 
 symbian:

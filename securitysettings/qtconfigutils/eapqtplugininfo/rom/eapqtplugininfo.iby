@@ -1,23 +1,23 @@
 /*
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
-* This component and the accompanying materials are made available
-* under the terms of the License "Eclipse Public License v1.0"
-* which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
-*
-* Initial Contributors:
-* Nokia Corporation - initial contribution.
-*
-* Contributors:
-*
+ * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+ * All rights reserved.
+ * This component and the accompanying materials are made available
+ * under the terms of "Eclipse Public License v1.0"
+ * which accompanies this distribution, and is available
+ * at the URL "http://www.eclipse.org/legal/epl-v10.html".
+ *
+ * Initial Contributors:
+ * Nokia Corporation - initial contribution.
+ *
+ * Contributors:
+ *
 * Description: 
 *   EAP method configuration QT interface
 *
 */
 
 /*
-* %version: 2 %
+* %version: 4 %
 */
 
 #ifndef EAPQTPLUGININFO_IBY
@@ -28,7 +28,7 @@
 
 #ifdef __PROTOCOL_WLAN
 
-file=ABI_DIR\BUILD_DIR\eapqtplugininfo.dll 	SHARED_LIB_DIR\eapqtplugininfo.dll
+file=ABI_DIR/BUILD_DIR/eapqtplugininfo.dll 	SHARED_LIB_DIR/eapqtplugininfo.dll
 
 #endif  // __PROTOCOL_WLAN
 

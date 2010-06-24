@@ -16,7 +16,7 @@
 */
 
 /*
- * %version:  3 %
+ * %version:  4 %
  */
  
 #ifndef CPEAPSIMAKAUI_IBY
@@ -27,7 +27,7 @@
 
 #ifdef __PROTOCOL_WLAN
 
-file=ABI_DIR\BUILD_DIR\cpeapsimakaui.dll SHARED_LIB_DIR\cpeapsimakaui.dll
+file=ABI_DIR/BUILD_DIR/cpeapsimakaui.dll SHARED_LIB_DIR/cpeapsimakaui.dll
 data=/epoc32/data/c/resource/qt/plugins/controlpanel/eapsecurity/cpeapsimakaui.qtplugin   resource/qt/plugins/controlpanel/eapsecurity/cpeapsimakaui.qtplugin 
 
 #endif // __PROTOCOL_WLAN

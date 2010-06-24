@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 33.1.2 %
+* %version: 33.1.3 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -1301,7 +1301,7 @@ EAP_FUNC_EXPORT eap_status_e simple_config_payloads_c::reset()
 
 //--------------------------------------------------
 
-simple_config_payloads_c * simple_config_payloads_c::copy() const
+EAP_FUNC_EXPORT simple_config_payloads_c * simple_config_payloads_c::copy() const
 {
 	EAP_TRACE_DEBUG(
 		m_am_tools,

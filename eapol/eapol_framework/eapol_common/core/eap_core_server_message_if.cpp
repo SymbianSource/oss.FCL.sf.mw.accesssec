@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 29 %
+* %version: 32 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -677,7 +677,7 @@ EAP_FUNC_EXPORT eap_status_e eap_core_server_message_if_c::load_module(
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eap_core_server_message_if_c::unload_module(const eap_type_value_e type)
+EAP_FUNC_EXPORT eap_status_e eap_core_server_message_if_c::unload_module(const eap_type_value_e /* type*/)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -941,8 +941,8 @@ EAP_FUNC_EXPORT eap_status_e eap_core_server_message_if_c::read_configure(
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e eap_core_server_message_if_c::write_configure(
-	const eap_configuration_field_c * const field,
-	eap_variable_data_c * const data)
+	const eap_configuration_field_c * const /* field */,
+	eap_variable_data_c * const /* data */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -978,6 +978,8 @@ EAP_FUNC_EXPORT bool eap_core_server_message_if_c::get_is_valid()
 EAP_FUNC_EXPORT eap_status_e eap_core_server_message_if_c::timer_expired(
 	const u32_t id, void *data)
 {
+	EAP_UNREFERENCED_PARAMETER(id);
+	EAP_UNREFERENCED_PARAMETER(data);
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
@@ -1001,6 +1003,8 @@ EAP_FUNC_EXPORT eap_status_e eap_core_server_message_if_c::timer_expired(
 EAP_FUNC_EXPORT eap_status_e eap_core_server_message_if_c::timer_delete_data(
 	const u32_t id, void *data)
 {
+	EAP_UNREFERENCED_PARAMETER(id);
+	EAP_UNREFERENCED_PARAMETER(data);
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
@@ -1246,7 +1250,7 @@ EAP_FUNC_EXPORT eap_status_e eap_core_server_message_if_c::get_eap_type_list(
 
 /// @see abs_eap_core_c::add_rogue_ap().
 EAP_FUNC_EXPORT eap_status_e eap_core_server_message_if_c::add_rogue_ap(
-	eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list)
+	eap_array_c<eap_rogue_ap_entry_c> & /* rogue_ap_list */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -1857,11 +1861,11 @@ eap_status_e eap_core_server_message_if_c::set_eap_database_reference_values(
 #if defined(USE_EAP_SIMPLE_CONFIG)
 
 EAP_FUNC_EXPORT eap_status_e eap_core_server_message_if_c::save_simple_config_session(
-	const simple_config_state_e state,
+	const simple_config_state_e /* state */,
 	EAP_TEMPLATE_CONST eap_array_c<simple_config_credential_c> * const credential_array,
-	const eap_variable_data_c * const new_password,
-	const simple_config_Device_Password_ID_e Device_Password_ID,
-	const simple_config_payloads_c * const other_configuration)
+	const eap_variable_data_c * const /* new_password */,
+	const simple_config_Device_Password_ID_e /* Device_Password_ID */,
+	const simple_config_payloads_c * const /* other_configuration */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 

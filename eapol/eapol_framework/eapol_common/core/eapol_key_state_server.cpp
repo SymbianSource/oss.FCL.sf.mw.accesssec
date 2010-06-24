@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 49 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -48,7 +48,7 @@
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::create_4_way_handshake_message_1(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::create_4_way_handshake_message_1(
 	eap_buf_chain_wr_c * const sent_packet,
 	const u32_t eapol_header_offset,
 	u32_t * const data_length,
@@ -303,7 +303,7 @@ eap_status_e eapol_key_state_c::create_4_way_handshake_message_1(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::create_4_way_handshake_message_3(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::create_4_way_handshake_message_3(
 	eap_buf_chain_wr_c * const sent_packet,
 	const u32_t eapol_header_offset,
 	u32_t * const data_length,
@@ -897,7 +897,7 @@ eap_status_e eapol_key_state_c::send_RC4_eapol_key_message(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::send_RC4_eapol_key_messages()
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::send_RC4_eapol_key_messages()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -948,7 +948,7 @@ eap_status_e eapol_key_state_c::send_RC4_eapol_key_messages()
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::start_4_way_handshake(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::start_4_way_handshake(
 	const eap_am_network_id_c * const receive_network_id)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1140,7 +1140,7 @@ eap_status_e eapol_key_state_c::start_4_way_handshake(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::process_4_way_handshake_message_2_payloads(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_2_payloads(
 	const eap_am_network_id_c * const receive_network_id,
 	eapol_RSNA_key_header_c * const eapol_key_message,
 	const u32_t packet_length)
@@ -1315,7 +1315,7 @@ eap_status_e eapol_key_state_c::process_4_way_handshake_message_2_payloads(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::process_4_way_handshake_message_0(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_0(
 	const eap_am_network_id_c * const receive_network_id,
 	eapol_RSNA_key_header_c * const eapol_key_message,
 	const u32_t /* packet_length */)
@@ -1427,7 +1427,7 @@ eap_status_e eapol_key_state_c::process_4_way_handshake_message_0(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::process_4_way_handshake_message_2(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_2(
 	const eap_am_network_id_c * const receive_network_id,
 	eapol_RSNA_key_header_c * const eapol_key_message,
 	const u32_t packet_length)
@@ -1598,7 +1598,7 @@ eap_status_e eapol_key_state_c::process_4_way_handshake_message_2(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::process_4_way_handshake_message_4(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_4(
 	const eap_am_network_id_c * const receive_network_id,
 	eapol_RSNA_key_header_c * const eapol_key_message,
 	const u32_t packet_length)
@@ -1869,7 +1869,7 @@ eap_status_e eapol_key_state_c::process_4_way_handshake_message_4(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::create_group_key_handshake_message_1(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::create_group_key_handshake_message_1(
 	eap_buf_chain_wr_c * const sent_packet,
 	const u32_t eapol_header_offset,
 	u32_t * const data_length,
@@ -2157,7 +2157,7 @@ eap_status_e eapol_key_state_c::create_group_key_handshake_message_1(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::process_group_key_handshake_message_0(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_group_key_handshake_message_0(
 	const eap_am_network_id_c * const receive_network_id,
 	eapol_RSNA_key_header_c * const eapol_key_message,
 	const u32_t packet_length)
@@ -2289,7 +2289,7 @@ eap_status_e eapol_key_state_c::process_group_key_handshake_message_0(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::process_group_key_handshake_message_2(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_group_key_handshake_message_2(
 	const eap_am_network_id_c * const receive_network_id,
 	eapol_RSNA_key_header_c * const eapol_key_message,
 	const u32_t packet_length)

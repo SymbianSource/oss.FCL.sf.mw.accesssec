@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 8 %
 */
 
 #if !defined(_GSMSIM_CORE_H_)
@@ -1516,8 +1516,6 @@ private:
 #endif //#if defined(USE_EAP_TYPE_SERVER_GSMSIM)
 
 
-#if defined(USE_EAP_TRACE)
-
 	/**
 	 * This function traces the EAP packet.
 	 */
@@ -1526,6 +1524,8 @@ private:
 		const eap_am_network_id_c * const receive_network_id,
 		eap_header_wr_c * const received_eap,
 		const u32_t eap_packet_length);
+
+#if defined(USE_EAP_TRACE)
 
 	#define EAP_GSMSIM_PACKET_TRACE(prefix, receive_network_id, received_eap, eap_packet_length) \
 			packet_trace((prefix), (receive_network_id), (received_eap), (eap_packet_length))

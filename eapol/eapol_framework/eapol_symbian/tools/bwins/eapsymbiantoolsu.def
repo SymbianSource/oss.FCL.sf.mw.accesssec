@@ -10,9 +10,9 @@ EXPORTS
 	??0TEapExpandedType@@QAE@XZ @ 9 NONAME ; TEapExpandedType::TEapExpandedType(void)
 	?GetPrivatePathL@EapPluginTools@@SAXAAV?$TBuf@$0BAA@@@@Z @ 10 NONAME ; void EapPluginTools::GetPrivatePathL(class TBuf<256> &)
 	??0TEapExpandedType@@QAE@ABVTDesC8@@@Z @ 11 NONAME ; TEapExpandedType::TEapExpandedType(class TDesC8 const &)
-	?ListAllEapPluginsL@EapPluginTools@@QAEXABVTEapExpandedType@@AAV?$RPointerArray@VTEapExpandedType@@@@@Z @ 12 NONAME ; void EapPluginTools::ListAllEapPluginsL(class TEapExpandedType const &, class RPointerArray<class TEapExpandedType> &)
-	??9TEapExpandedType@@QBE_NABV0@@Z @ 13 NONAME ; bool TEapExpandedType::operator!=(class TEapExpandedType const &) const
-	??8TEapExpandedType@@QBE_NABV0@@Z @ 14 NONAME ; bool TEapExpandedType::operator==(class TEapExpandedType const &) const
+	??9TEapExpandedType@@QBE_NABV0@@Z @ 12 NONAME ; bool TEapExpandedType::operator!=(class TEapExpandedType const &) const
+	??8TEapExpandedType@@QBE_NABV0@@Z @ 13 NONAME ; bool TEapExpandedType::operator==(class TEapExpandedType const &) const
+	?ListAllEapPluginsL@EapPluginTools@@QAEXW4TIndexType@@ABVTEapExpandedType@@AAV?$RPointerArray@VTEapExpandedType@@@@@Z @ 14 NONAME ; void EapPluginTools::ListAllEapPluginsL(enum TIndexType, class TEapExpandedType const &, class RPointerArray<class TEapExpandedType> &)
 	??4TEapExpandedType@@QAEAAV0@ABVTDesC8@@@Z @ 15 NONAME ; class TEapExpandedType & TEapExpandedType::operator=(class TDesC8 const &)
 	??0TEapExpandedType@@QAE@PBV0@@Z @ 16 NONAME ; TEapExpandedType::TEapExpandedType(class TEapExpandedType const *)
 	??4TEapExpandedType@@QAEAAV0@ABV?$TBufC8@$07@@@Z @ 17 NONAME ; class TEapExpandedType & TEapExpandedType::operator=(class TBufC8<8> const &)

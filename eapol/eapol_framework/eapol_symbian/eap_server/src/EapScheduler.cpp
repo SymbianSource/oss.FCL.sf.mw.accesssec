@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16 %
+* %version: 18 %
 */
 
 #include "EapScheduler.h"
@@ -188,6 +188,7 @@ CEapScheduler::~CEapScheduler()
 
 void CEapScheduler::Error(TInt aError) const
     {
+    EAP_UNREFERENCED_PARAMETER(aError);
     EAP_TRACE_DEBUG_SYMBIAN((_L("CEapScheduler::Error(): aError=%d"),
 		aError));
 

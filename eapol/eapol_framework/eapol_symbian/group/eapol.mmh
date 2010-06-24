@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 48.1.17 %
+* %version: 48.1.18 %
 */
 
 //-------------------------------------------------------------------
@@ -171,6 +171,10 @@ MACRO USE_EAP_TIMER_QUEUE_TRACE=1
 // Removes include statements for stdint.h
 MACRO EAP_NO_STDINT_H_HEADER=1
 #define EAP_NO_STDINT_H_HEADER
+
+// This is disabled because QT leaks memory and EAP-server panics on __UHEAP_MARKEND always.
+// Define this after QT fixes memory leks.
+//MACRO USE_EAP_HEAP_CHECK=1
 
 //-------------------------------------------------------------------
 // End of File

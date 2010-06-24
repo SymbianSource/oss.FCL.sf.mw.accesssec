@@ -11,21 +11,23 @@
 *
 * Contributors:
 *
-* Description: 
-*
+* Description: User authentication Dialog
 */
 
+/*
+ * %version: 3 %
+ */
 
 #ifndef __EAPUSERNAMEPWDDIALOG_H__
 #define __EAPUSERNAMEPWDDIALOG_H__
 
-#include <HbTranslator>
 #include <HbInputDialog>
-#include <HbLineEdit>
-#include <HbAction>
 #include <hbdevicedialoginterface.h>
 
 class EapQtValidator;
+class HbTranslator;
+class HbLineEdit;
+class HbAction;
 
 class EapUsernamePwdDialog: public HbInputDialog, public HbDeviceDialogInterface
     {
@@ -85,10 +87,10 @@ class EapUsernamePwdDialog: public HbInputDialog, public HbDeviceDialogInterface
         HbLineEdit *mEdit2;
         
         /* Pointer to the user name validator object */
-        EapQtValidator *mUnameValidator;
+        QScopedPointer<EapQtValidator> mUnameValidator;
                 
         /* Pointer to the password validator object */
-        EapQtValidator *mPwdValidator;
+        QScopedPointer<EapQtValidator> mPwdValidator;
                 
         /* Pointer to the HbTranslator */
         QScopedPointer<HbTranslator> mTranslator;

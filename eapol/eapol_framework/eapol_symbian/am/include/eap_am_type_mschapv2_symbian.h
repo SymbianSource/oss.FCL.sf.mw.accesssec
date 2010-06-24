@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16.1.7 %
+* %version: 16.1.8 %
 */
 
 #ifndef _EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H_
@@ -206,6 +206,7 @@ public:
 
 	EAP_FUNC_IMPORT void DlgComplete( TInt aStatus );
 
+	TInt IsDlgReadyToCompleteL();
 
 }; // class eap_am_type_mschapv2_symbian_c
 

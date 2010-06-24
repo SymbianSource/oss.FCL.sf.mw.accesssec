@@ -11,15 +11,29 @@
 *
 * Contributors:
 *
-* Description: Prompt Dialog plugin implementation
+* Description: Eap Dialog Plugin implementation
 *
 */
 
+/*
+* %version: 8 %
+*/
 
 #include <hbdevicedialoginterface.h>
 #include <QVariantMap>
 #include "eapdialogplugin.h"
 #include "eapusernamepwddialog.h"
+#include "eapquerydialog.h"
+#include "eappasswordquerydialog.h"
+#include "eapfastinstallpacquerydialog.h"
+#include "eapfastpacstorepwquerydialog.h"
+#include "eapfastpacfilepwquerydialog.h"
+#include "eapfastcreatemasterkeyquerydialog.h"
+#include "eapfastprovwaitnotedialog.h"
+#include "eapmschapv2pwdexpirednotedialog.h"
+#include "eapmschapv2oldpwddialog.h"
+#include "eapmschapv2newpwddialog.h"
+#include "eapfastprovnotsuccessnotedialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #endif
@@ -82,10 +96,61 @@ HbDeviceDialogInterface *EapDialogPlugin::createDeviceDialog(
         qDebug("EapDialogPlugin::createDeviceDialog: new EapUsernamePwdDialog");
         return ( new EapUsernamePwdDialog(parameters) );
         }
-    else 
+    else if ( deviceDialogType.compare("com.nokia.eap.querydialog/1.0") == 0 ) 
+        { 
+        qDebug("EapDialogPlugin::createDeviceDialog: new EapQueryDialog");
+        return ( new EapQueryDialog(parameters) );
+        }
+    else if ( deviceDialogType.compare("com.nokia.eap.passwordquerydialog/1.0") == 0 ) 
+        { 
+        qDebug("EapDialogPlugin::createDeviceDialog: new EapPasswordQueryDialog");
+        return ( new EapPasswordQueryDialog(parameters) );
+        }
+    else if ( deviceDialogType.compare("com.nokia.eap.fastinstallpacquerydialog/1.0") == 0 )
         {
-        qDebug("EapDialogPlugin::createDeviceDialog: ELSE --> ERRORISMO");
-        }       
+        qDebug("EapDialogPlugin::createDeviceDialog: new EapFastInstallPacQueryDialog");
+        return ( new EapFastInstallPacQueryDialog(parameters) );
+        }
+    else if ( deviceDialogType.compare("com.nokia.eap.fastpacstorepwquerydialog/1.0") == 0 )
+        {
+        qDebug("EapDialogPlugin::createDeviceDialog: new EapFastPacStorePwQueryDialog");
+        return ( new EapFastPacStorePwQueryDialog(parameters));
+        }   
+    else if ( deviceDialogType.compare("com.nokia.eap.fastcreatemasterkeyquerydialog/1.0") == 0 )
+        {
+        qDebug("EapDialogPlugin::createDeviceDialog: new EapFastCreateMasterKeyQueryDialog");
+        return ( new EapFastCreateMasterKeyQueryDialog(parameters) );
+        }  
+    else if ( deviceDialogType.compare("com.nokia.eap.fastpacfilepwquerydialog/1.0") == 0 )
+        {
+        qDebug("EapDialogPlugin::createDeviceDialog: new EapFastPacFilePwQueryDialog");
+        return ( new EapFastPacFilePwQueryDialog(parameters) );
+        }
+    else if ( deviceDialogType.compare("com.nokia.eap.fastprovwaitnotedialog/1.0") == 0 )
+        {
+        qDebug("EapDialogPlugin::createDeviceDialog: new EapFastProvWaitNoteDialog");
+        return ( new EapFastProvWaitNoteDialog(parameters) );
+        }  
+    else if ( deviceDialogType.compare("com.nokia.eap.mschapv2passwordexpirednotedialog/1.0") == 0 )
+        {
+        qDebug("EapDialogPlugin::createDeviceDialog: new EapMschapv2PwdExpNoteDialog");
+        return ( new EapMschapv2PwdExpNoteDialog(parameters) );
+        }  
+    else if ( deviceDialogType.compare("com.nokia.eap.mschapv2oldpassworddialog/1.0") == 0 )
+        {
+        qDebug("EapDialogPlugin::createDeviceDialog: new EapMschapv2OldPwdDialog");
+        return ( new EapMschapv2OldPwdDialog(parameters) );
+        }  
+    else if ( deviceDialogType.compare("com.nokia.eap.mschapv2newpassworddialog/1.0") == 0 )
+        {
+        qDebug("EapDialogPlugin::createDeviceDialog: new EapMschapv2NewPwdDialog");
+        return ( new EapMschapv2NewPwdDialog(parameters) );
+        }  
+    else if ( deviceDialogType.compare("com.nokia.eap.fastshowprovnotsuccessnotedialog/1.0") == 0 )
+        {
+        qDebug("EapDialogPlugin::createDeviceDialog: new EapFastProvNotSuccessNoteDialog");
+        return ( new EapFastProvNotSuccessNoteDialog(parameters) );
+        }   
     OstTraceFunctionExit0( EAPDIALOGPLUGIN_CREATEDEVICEDIALOG_EXIT );
     qDebug("EapDialogPlugin::createDeviceDialog EXIT");
     

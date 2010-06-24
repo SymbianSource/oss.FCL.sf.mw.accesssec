@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 23 %
+* %version: 24 %
 */
 
 #include <platform_paths.hrh>
@@ -28,6 +28,8 @@ TARGETTYPE    PLUGIN
 
 TARGET	eapgeneric.dll
 UID		0x10009d8d 0x20026FD1
+
+deffile eapgeneric.def
 
 SOURCEPATH    ../am/type/generic/symbian/plugin/src
 SOURCE		EapGeneric.cpp 
@@ -86,6 +88,7 @@ LIBRARY	eikdlg.lib
 LIBRARY	eikcore.lib
 LIBRARY	hlplch.lib
 LIBRARY		featmgr.lib
+
 
 //-------------------------------------------------------------------
 // End of File

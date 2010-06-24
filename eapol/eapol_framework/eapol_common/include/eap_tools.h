@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 12 %
 */
 
 #if !defined( _EAP_TOOLS_H_ )
@@ -417,13 +417,12 @@ inline eap_status_e eap_write_u64_t_host_order(
 		#define EAP_TRACE_DEBUG(object_name, flags, _parameter_list_) \
 				if (object_name != 0 && ((*(object_name)).get_trace_mask() & ((flags) | eap_am_tools_c::eap_trace_mask_error))) \
 				{ \
-					if (((*(object_name)).get_trace_mask() & ((flags) & eap_am_tools_c::eap_trace_mask_error))) \
+					if (((*(object_name)).get_trace_mask() & (flags))) \
 					{ \
-						(*(object_name)).formatted_print(EAPL("ERROR: source: %s:%d\n"), __FILE__, __LINE__); \
-						(*(object_name)).formatted_print _parameter_list_ ; \
-					} \
-					else if (((*(object_name)).get_trace_mask() & (flags))) \
-					{ \
+						if (((*(object_name)).get_trace_mask() & ((flags) & eap_am_tools_c::eap_trace_mask_error))) \
+						{ \
+							(*(object_name)).formatted_print(EAPL("ERROR: source: %s:%d\n"), __FILE__, __LINE__); \
+						} \
 						(*(object_name)).formatted_print _parameter_list_ ; \
 					} \
 					else \

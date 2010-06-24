@@ -2,12 +2,12 @@
 # Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
-# under the terms of the License "Eclipse Public License v1.0"
+# under the terms of "Eclipse Public License v1.0"
 # which accompanies this distribution, and is available
 # at the URL "http://www.eclipse.org/legal/epl-v10.html".
 #
 # Initial Contributors:
-# 	Nokia Corporation - initial contribution.
+# Nokia Corporation - initial contribution.
 #
 # Contributors:
 #
@@ -15,7 +15,7 @@
 #	EAP method configuration QT interface
 #
 
-# %version: 18 %
+# %version: 25 %
 
 
 TEMPLATE            = lib
@@ -36,9 +36,6 @@ MOC_DIR     = _build
 RCC_DIR     = _build
 OBJECTS_DIR = _build
 
-# path to def files
-defFilePath = .
-
 INCLUDEPATH += \
     ../../inc
    
@@ -46,10 +43,13 @@ HEADERS += \
     inc/eapqtcertificateinfo_p.h \
     inc/eapqtconfig_p.h \
     inc/eapqtconfiginterface_p.h \
+    inc/eapqtpacstoreconfig_p.h \
+    inc/eapqtvalidatorpacstorepassword.h \
+    inc/eapqtvalidatorpacstorepasswordconfirm.h \
     inc/eapqtvalidatorpassword.h \
     inc/eapqtvalidatorrealm.h \
     inc/eapqtvalidatorusername.h
-     
+    
 SOURCES += \
     src/eapqtconfiginterface.cpp \
     src/eapqtconfiginterface_p.cpp \
@@ -59,19 +59,24 @@ SOURCES += \
     src/eapqtconfig_p.cpp \
     src/eapqtvalidatorpassword.cpp \
     src/eapqtvalidatorrealm.cpp \
-    src/eapqtvalidatorusername.cpp
+    src/eapqtvalidatorusername.cpp \
+    src/eapqtpacstoreconfig.cpp \
+    src/eapqtpacstoreconfig_p.cpp \
+    src/eapqtvalidatorpacstorepassword.cpp \
+    src/eapqtvalidatorpacstorepasswordconfirm.cpp
     
 # qt libs
 LIBS += \
     -leapqtplugininfo
     
 symbian { 
+    # path to def files
+    defFilePath = .
     
     # symbian libs
     LIBS += \
         -leapsymbiantools \
         -leaptools \
-        -leaptrace \
         -lecom \
         -lcmmanager
     
@@ -79,7 +84,7 @@ symbian {
     TARGET.EPOCALLOWDLLDATA = 1
     
     TARGET.CAPABILITY = CAP_GENERAL_DLL
-                
+                    
     BLD_INF_RULES.prj_exports += \ 
   		"rom/eapqtconfiginterface.iby CORE_MW_LAYER_IBY_EXPORT_PATH(eapqtconfiginterface.iby)"
 

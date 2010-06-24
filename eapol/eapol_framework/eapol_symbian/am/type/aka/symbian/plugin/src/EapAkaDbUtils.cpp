@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 47 %
+* %version: 54 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -35,7 +35,7 @@
 #include "eap_type_aka_types.h"
 
 #include <EapTraceSymbian.h>
-#include <EapPluginTools.h>
+#include "EapPluginTools.h"
 
 const TInt KMaxSqlQueryLength = 2048;
 const TInt KMicroSecsInAMinute = 60000000; // 60000000 micro seconds is 1 minute.
@@ -742,6 +742,10 @@ void EapAkaDbUtils::DeleteConfigurationL(
 	TInt error(KErrNone);
 	TFileName aPrivateDatabasePathName;
 	
+	error = aFileServerSession.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapAkaDbUtils::DeleteConfigurationL(): - aFileServerSession.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
 	EapPluginTools::CreateDatabaseLC(
 		aDatabase,
 		aFileServerSession,
@@ -794,7 +798,7 @@ void EapAkaDbUtils::DeleteConfigurationL(
 
 	// Delete rows
 	if (view.FirstL())
-	{		
+	{
 		do {
 			view.DeleteL();
 		} while (view.NextL() != EFalse);

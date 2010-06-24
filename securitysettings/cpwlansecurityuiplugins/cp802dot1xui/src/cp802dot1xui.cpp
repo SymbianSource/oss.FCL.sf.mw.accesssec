@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -11,13 +11,13 @@
  *
  * Contributors:
  *
- * Description: .
+ * Description:
  *    Control Panel QT UI for 802_Dot_1x configuration
  *
  */
 
 /*
- * %version: 7 %
+ * %version: tr1cfwln#8 %
  */
 
 //User Includes

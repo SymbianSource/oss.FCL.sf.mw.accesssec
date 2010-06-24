@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -12,21 +12,36 @@
  * Contributors:
  *
  * Description: 
- *   EAP method validator: realm
+ *   EAP method realm format validator
  *
  */
 
 /*
- * %version: 6 %
+ * %version: 8 %
  */
 
+// System includes
 #include <HbEditorInterface>
 #include <HbLineEdit>
 
+// User includes
 #include "eapqtvalidatorrealm.h"
 #include "eapqtconfiginterface_p.h"
 
-EapQtValidatorRealm::EapQtValidatorRealm(EapQtExpandedEapType type) :
+/*!
+ *  \class EapQtValidatorRealm
+ *  \brief EAP method realm format validator
+ */
+
+// External function prototypes
+
+// Local constants
+
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+EapQtValidatorRealm::EapQtValidatorRealm(const EapQtExpandedEapType& type) :
     mEapType(type)
 {
 }
@@ -35,8 +50,10 @@ EapQtValidatorRealm::~EapQtValidatorRealm()
 {
 }
 
-EapQtValidator::Status EapQtValidatorRealm::validate(QVariant value)
+EapQtValidator::Status EapQtValidatorRealm::validate(const QVariant& value)
 {
+    qDebug("EapQtValidatorRealm::validate()");
+
     Status status(StatusOk);
 
     switch (mEapType.type()) {
@@ -59,7 +76,7 @@ EapQtValidator::Status EapQtValidatorRealm::validate(QVariant value)
     return status;
 }
 
-EapQtValidator::Status EapQtValidatorRealm::validateGeneral(QVariant value)
+EapQtValidator::Status EapQtValidatorRealm::validateGeneral(const QVariant& value)
 {
     Status status(StatusOk);
     QString str = value.toString();
@@ -82,8 +99,10 @@ EapQtValidator::Status EapQtValidatorRealm::validateGeneral(QVariant value)
     return status;
 }
 
-void EapQtValidatorRealm::updateEditor(HbLineEdit *edit)
+void EapQtValidatorRealm::updateEditor(HbLineEdit* const edit)
 {
+    qDebug("EapQtValidatorRealm::updateEditor()");
+
     Q_ASSERT(edit);
     if(edit == NULL) {
         return;
@@ -107,7 +126,7 @@ void EapQtValidatorRealm::updateEditor(HbLineEdit *edit)
     }
 }
 
-void EapQtValidatorRealm::updateEditorGeneral(HbLineEdit *edit)
+void EapQtValidatorRealm::updateEditorGeneral(HbLineEdit* const edit)
 {
     qDebug("EapQtValidatorRealm::updateEditorGeneral()");
 

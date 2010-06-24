@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -11,16 +11,17 @@
 *
 * Contributors:
 *
-* Description:  EAP and WLAN authentication protocols.
+* Description:  Data type for EAP-settings configuration on Symbian.
 *
 */
 
 /*
-* %version: 41 %
+* %version: 44 %
 */
 
 #include <e32debug.h>
-#include "EapSettings.h"
+#include <EapSettings.h>
+
 #include "EapTraceSymbian.h"
 #include "eap_am_export.h"
 
@@ -39,14 +40,18 @@ EAP_FUNC_EXPORT EapCertificateEntry::EapCertificateEntry()
 , iSubjectKeyIdPresent(EFalse)
 , iIsValid(EFalse)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapCertificateEntry::EapCertificateEntry()")));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapCertificateEntry::EapCertificateEntry(): this=0x%08x"),
+		this));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapCertificateEntry::EapCertificateEntry()"));
 }
 
 //-------------------------------------------------------------------------------------
 
 EAP_FUNC_EXPORT EapCertificateEntry::~EapCertificateEntry()
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapCertificateEntry::~EapCertificateEntry()")));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapCertificateEntry::~EapCertificateEntry(): this=0x%08x"),
+		this));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapCertificateEntry::~EapCertificateEntry()"));
 }
 
 //-------------------------------------------------------------------------------------
@@ -443,7 +448,7 @@ EAP_FUNC_EXPORT TInt EapCertificateEntry::SetSubjectName(const TBuf<KGeneralStri
 	iSubjectName.Copy(aSubjectName);
 	if (iSubjectName.Length() != aSubjectName.Length())
 	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapCertificateEntry::SetLabel(): iSubjectName.Copy(): No memory.\n")));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapCertificateEntry::SetSubjectName(): iSubjectName.Copy(): No memory.\n")));
 		return KErrNoMemory;
 	}
 
@@ -459,7 +464,7 @@ EAP_FUNC_EXPORT TInt EapCertificateEntry::SetIssuerName(const TBuf<KGeneralStrin
 	iIssuerName.Copy(aIssuerName);
 	if (iIssuerName.Length() != aIssuerName.Length())
 	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapCertificateEntry::SetLabel(): iIssuerName.Copy(): No memory.\n")));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapCertificateEntry::SetIssuerName(): iIssuerName.Copy(): No memory.\n")));
 		return KErrNoMemory;
 	}
 
@@ -475,7 +480,7 @@ EAP_FUNC_EXPORT TInt EapCertificateEntry::SetSerialNumber(const TBuf<KGeneralStr
 	iSerialNumber.Copy(aSerialNumber);
 	if (iSerialNumber.Length() != aSerialNumber.Length())
 	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapCertificateEntry::SetLabel(): iSerialNumber.Copy(): No memory.\n")));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapCertificateEntry::SetSerialNumber(): iSerialNumber.Copy(): No memory.\n")));
 		return KErrNoMemory;
 	}
 
@@ -491,7 +496,7 @@ EAP_FUNC_EXPORT TInt EapCertificateEntry::SetThumbprint(const TBuf<KThumbprintMa
 	iThumbprint.Copy(aThumbprint);
 	if (iThumbprint.Length() != aThumbprint.Length())
 	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapCertificateEntry::SetLabel(): iThumbprint.Copy(): No memory.\n")));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapCertificateEntry::SetThumbprint(): iThumbprint.Copy(): No memory.\n")));
 		return KErrNoMemory;
 	}
 
@@ -621,7 +626,7 @@ EAP_FUNC_EXPORT TInt EapCertificateEntry::SetPrimaryName(const TBuf<KMaxCertName
 	iPrimaryName.Copy(aPrimaryName);
 	if (iPrimaryName.Length() != aPrimaryName.Length())
 	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapCertificateEntry::operator = (): iPrimaryName.Copy(): No memory.\n")));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapCertificateEntry::SetPrimaryName(): iPrimaryName.Copy(): No memory.\n")));
 		return KErrNoMemory;
 	}
 
@@ -637,7 +642,7 @@ EAP_FUNC_EXPORT TInt EapCertificateEntry::SetSecondaryName(const TBuf<KMaxCertNa
 	iSecondaryName.Copy(aSecondaryName);
 	if (iSecondaryName.Length() != aSecondaryName.Length())
 	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapCertificateEntry::operator = (): iSecondaryName.Copy(): No memory.\n")));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapCertificateEntry::SetSecondaryName(): iSecondaryName.Copy(): No memory.\n")));
 		return KErrNoMemory;
 	}
 
@@ -653,7 +658,7 @@ EAP_FUNC_EXPORT TInt EapCertificateEntry::SetSubjectKeyId(const TKeyIdentifier &
 	iSubjectKeyId.Copy(aSubjectKeyId);
 	if (iSubjectKeyId.Length() != aSubjectKeyId.Length())
 	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapCertificateEntry::operator = (): iSubjectKeyId.Copy(): No memory.\n")));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapCertificateEntry::SetSubjectKeyId(): iSubjectKeyId.Copy(): No memory.\n")));
 		return KErrNoMemory;
 	}
 
@@ -733,14 +738,18 @@ EAP_FUNC_EXPORT EAPSettings::EAPSettings()
 , iUseIdentityPrivacyPresent(EFalse)
 , iUseIdentityPrivacy(EFalse)
 {
-    EAP_TRACE_DEBUG_SYMBIAN((_L("EAPSettings::EAPSettings()")));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EAPSettings::EAPSettings(): this=0x%08x"),
+		this));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EAPSettings::EAPSettings()"));
 }
 
 //-------------------------------------------------------------------------------------
 
 EAP_FUNC_EXPORT EAPSettings::~EAPSettings()
 {
-    EAP_TRACE_DEBUG_SYMBIAN((_L("EAPSettings::~EAPSettings(): starts")));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EAPSettings::~EAPSettings(): this=0x%08x"),
+		this));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EAPSettings::~EAPSettings()"));
 
     EAP_TRACE_DEBUG_SYMBIAN((_L("EAPSettings::~EAPSettings(): calls iCipherSuites.Close()")));
 	iCipherSuites.Close(); // The Close() function must be called before RArray object is destroyed.
@@ -755,8 +764,6 @@ EAP_FUNC_EXPORT EAPSettings::~EAPSettings()
 
     EAP_TRACE_DEBUG_SYMBIAN((_L("EAPSettings::~EAPSettings(): calls iDisabledEncapsulatedEAPExpandedTypes.Close()")));
 	iDisabledEncapsulatedEAPExpandedTypes.Close(); // The Close() function must be called before RArray object is destroyed.
-
-    EAP_TRACE_DEBUG_SYMBIAN((_L("EAPSettings::~EAPSettings(): ends")));
 }
 
 //-------------------------------------------------------------------------------------
@@ -864,6 +871,8 @@ EAP_FUNC_EXPORT void EAPSettings::trace() const
 		iCipherSuitesPresent));
 	if (iCipherSuitesPresent)
 	{
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EAPSettings::trace():     iCipherSuites=%d"),
+			iCipherSuites.Count()));
 		for (ind = 0ul; ind < iCipherSuites.Count(); ++ind)
 		{
 			EAP_TRACE_DEBUG_SYMBIAN((_L("EAPSettings::trace():     iCipherSuites[%d]=%d"),
@@ -900,6 +909,8 @@ EAP_FUNC_EXPORT void EAPSettings::trace() const
 		iEnabledEncapsulatedEAPExpandedTypesPresent));
 	if (iEnabledEncapsulatedEAPExpandedTypesPresent)
 	{
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EAPSettings::trace():     iEnabledEncapsulatedEAPExpandedTypes=%d"),
+			iEnabledEncapsulatedEAPExpandedTypes.Count()));
 		for (ind = 0ul; ind < iEnabledEncapsulatedEAPExpandedTypes.Count(); ++ind)
 		{
 			EAP_TRACE_DEBUG_SYMBIAN((_L("EAPSettings::trace():     iEnabledEncapsulatedEAPExpandedTypes[%d]=0xfe%06x%08x"),
@@ -913,6 +924,8 @@ EAP_FUNC_EXPORT void EAPSettings::trace() const
 		iDisabledEncapsulatedEAPExpandedTypesPresent));
 	if (iDisabledEncapsulatedEAPExpandedTypesPresent)
 	{
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EAPSettings::trace():     iDisabledEncapsulatedEAPExpandedTypes=%d"),
+			iDisabledEncapsulatedEAPExpandedTypes.Count()));
 		for (ind = 0ul; ind < iDisabledEncapsulatedEAPExpandedTypes.Count(); ++ind)
 		{
 			EAP_TRACE_DEBUG_SYMBIAN((_L("EAPSettings::trace():     iDisabledEncapsulatedEAPExpandedTypes[%d]=0xfe%06x%08x"),

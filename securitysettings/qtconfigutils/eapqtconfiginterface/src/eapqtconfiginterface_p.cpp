@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -17,9 +17,10 @@
  */
 
 /*
- * %version: 41 %
+ * %version: 49 %
  */
 
+// System includes
 #include <QDir>
 #include <QList>
 #include <QVariant>
@@ -28,24 +29,34 @@
 #include <QLocale>
 #include <QCoreApplication>
 #include <QDebug>
-
 #include <cmmanager.h>
 #include <cmpluginwlandef.h>
 #include <EapGeneralSettings.h>
-
 #include <eapqtplugininfo.h>
 #include <eapqtcertificateinfo.h>
 
+// User includes
 #include "cpeapplugininterface.h"
 #include "eapqtconfiginterface_p.h"
-
-// validators
 #include "eapqtvalidatorpassword.h"
 #include "eapqtvalidatorusername.h"
 #include "eapqtvalidatorrealm.h"
+#include "eapqtvalidatorpacstorepassword.h"
+#include "eapqtvalidatorpacstorepasswordconfirm.h"
 
-static const QString eapPluginDir("\\resource\\qt\\plugins\\controlpanel\\eapsecurity");
+/*!
+ *  \class EapQtConfigInterfacePrivate
+ *  \brief Private implementation of EAP QT configuration interface
+ */
+
+// External function prototypes
+
+// Local constants
 static const QString eapTranslationFile("cpeapuiplugins");
+
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
 
 EapQtConfigInterfacePrivate::EapQtConfigInterfacePrivate() :
   mValidatorInstance(true),
@@ -59,10 +70,9 @@ EapQtConfigInterfacePrivate::EapQtConfigInterfacePrivate() :
   mEapDbIndexValid(false)
 {
     qDebug("EapQtConfigInterfacePrivate() - created validator instance, this = 0x%08x", this);
-
 }
 
-EapQtConfigInterfacePrivate::EapQtConfigInterfacePrivate(/* EapQtConfigInterface *configIf, */
+EapQtConfigInterfacePrivate::EapQtConfigInterfacePrivate(
     const EapQtConfigInterface::EapBearerType bearerType, const int iapId) :  
   mValidatorInstance(false),
   mLastOuterHandle(EapQtPluginHandle::PluginUndefined),
@@ -75,7 +85,6 @@ EapQtConfigInterfacePrivate::EapQtConfigInterfacePrivate(/* EapQtConfigInterface
   mEapDbIndexValid(false)
 {
     qDebug("EapQtConfigInterfacePrivate() - creating non-validator instance, this = 0x%08x", this);
-
 
     switch (bearerType) {
     case EapQtConfigInterface::EapBearerTypeVpn:
@@ -111,7 +120,6 @@ EapQtConfigInterfacePrivate::~EapQtConfigInterfacePrivate()
 void EapQtConfigInterfacePrivate::shutdown()
 {
     qDebug("EapQtConfigInterfacePrivate::shutdown(), this = 0x%08x", this);
-
 
     mOuterEapsOn.Close();
     mOuterEapsOff.Close();
@@ -227,7 +235,6 @@ bool EapQtConfigInterfacePrivate::setEapWlanDbIndex(const int iapId)
 {
     qDebug("EapQtConfigInterfacePrivate::setEapWlanDbIndex - requested id: %d, this = 0x%08x", iapId, this);
 
-
     RCmManager cmm;
     TRAPD(err, cmm.OpenL());
     if (err != KErrNone) {
@@ -274,7 +281,6 @@ void EapQtConfigInterfacePrivate::appendEapTypes(const RArray<TEapExpandedType>*
 {
     qDebug("EapQtConfigInterfacePrivate::appendEapTypes(), this = 0x%08x", this);
 
-
     Q_ASSERT(eapTypes);
     Q_ASSERT(eapList);
 
@@ -293,7 +299,6 @@ void EapQtConfigInterfacePrivate::appendEapTypes(const RArray<TEapExpandedType>*
 QList<EapQtPluginInfo> EapQtConfigInterfacePrivate::supportedOuterTypes()
 {
     qDebug("EapQtConfigInterfacePrivate::supportedOuterTypes(), this = 0x%08x", this);
-
 
     checkInstanceThrowing();
 
@@ -359,6 +364,10 @@ QList<EapQtPluginInfo> EapQtConfigInterfacePrivate::supportedOuterTypes()
         }
     }
 
+    // sort the list
+    qSort(mSupportedOuterTypes.begin(), mSupportedOuterTypes.end(),
+        EapQtConfigInterfacePrivate::pluginLessThan);
+
     qDebug("EapQtConfigInterfacePrivate - supportedOuterTypes: supported EAP count: %d",
         mSupportedOuterTypes.count());
 
@@ -385,10 +394,9 @@ bool EapQtConfigInterfacePrivate::isUiSupported(const QByteArray &eapType, int &
 }
 
 QList<EapQtPluginInfo> EapQtConfigInterfacePrivate::supportedInnerTypes(
-    const EapQtPluginHandle& outer)
+    const EapQtPluginHandle &outer)
 {
     qDebug("EapQtConfigInterfacePrivate::supportedInnerTypes(), this = 0x%08x", this);
-
 
     checkInstanceThrowing();
 
@@ -453,6 +461,13 @@ QList<EapQtPluginInfo> EapQtConfigInterfacePrivate::supportedInnerTypes(
 
     mLastOuterHandle = outer;
 
+    // sort the list
+    qSort(mSupportedInnerTypes.begin(), mSupportedInnerTypes.end(),
+        EapQtConfigInterfacePrivate::pluginLessThan);
+
+    qDebug("EapQtConfigInterfacePrivate - supportedInnerTypes: supported EAP count: %d",
+        mSupportedInnerTypes.count());
+
     return mSupportedInnerTypes;
 }
 
@@ -461,7 +476,6 @@ void EapQtConfigInterfacePrivate::copyCertificateInfo(
     QList<EapQtCertificateInfo>* const certInfos)
 {
     qDebug("EapQtConfigInterfacePrivate::copyCertificateInfo(), this = 0x%08x", this);
-
 
     Q_ASSERT(certEntries);
     Q_ASSERT(certInfos);
@@ -474,6 +488,9 @@ void EapQtConfigInterfacePrivate::copyCertificateInfo(
     int ind = 0;
 
     for (ind = 0; ind < certEntries->Count(); ind++) {
+
+        // cleanup cert
+        cert.clear();
 
         EapCertificateEntry* certPtr = (*certEntries)[ind];
 
@@ -547,15 +564,13 @@ bool EapQtConfigInterfacePrivate::fetchCertificates(QList<EapQtCertificateInfo>*
 {
     qDebug("EapQtConfigInterfacePrivate::fetchCertificates(), this = 0x%08x", this);
 
-
-    Q_ASSERT(caInfos != NULL || clientInfos != NULL || !mEapGsIf.isNull());
+    Q_ASSERT(caInfos != NULL || clientInfos != NULL);
+    Q_ASSERT(!mEapGsIf.isNull());
 
     TInt err(KErrNone);
     RPointerArray<EapCertificateEntry> clientCerts;
     RPointerArray<EapCertificateEntry> caCerts;
 
-    // lists are always queried again as the user might have installed new certificates
-    // during the life time of the object
     err = mEapGsIf->GetCertificateLists(clientCerts, caCerts);
     if (err != KErrNone) {
         qDebug("EapQtConfigInterfacePrivate - fetchCertificates failed: %d", err);
@@ -578,40 +593,47 @@ bool EapQtConfigInterfacePrivate::fetchCertificates(QList<EapQtCertificateInfo>*
     return true;
 }
 
+bool EapQtConfigInterfacePrivate::updateCertificates() {
+
+    qDebug("EapQtConfigInterfacePrivate::updateCertificates(), this = 0x%08x", this);
+
+    checkInstanceThrowing();
+
+    // empty current state
+    mCaCertificates.clear();
+    mUserCertificates.clear();
+
+    return fetchCertificates(&mCaCertificates, &mUserCertificates);
+}
+
 QList<EapQtCertificateInfo> EapQtConfigInterfacePrivate::certificateAuthorityCertificates()
 {
     qDebug("EapQtConfigInterfacePrivate::certificateAuthorityCertificates(), this = 0x%08x", this);
 
-
     checkInstanceThrowing();
 
-    QList<EapQtCertificateInfo> list;
-    if (!fetchCertificates(&list, 0)) {
-        // query failed
-        list.clear();
+    // update only if the list is empty
+    if(mCaCertificates.length() == 0) {
+        qDebug() << "EapQtConfigInterfacePrivate::certificateAuthorityCertificates() - updates certificate lists";
+        updateCertificates();
     }
-    return list;
+
+    return mCaCertificates;
 }
 
 QList<EapQtCertificateInfo> EapQtConfigInterfacePrivate::userCertificates()
 {
     qDebug("EapQtConfigInterfacePrivate::userCertificates(), this = 0x%08x", this);
 
-
-    checkInstanceThrowing();
-
-    QList<EapQtCertificateInfo> list;
-    if (!fetchCertificates(0, &list)) {
-        // query failed
-        list.clear();
-    }
-    return list;
+    // use the CA certificates method, it will update both the lists
+    // if CA list is empty
+    (void) certificateAuthorityCertificates();
+    return mUserCertificates;
 }
 
-void EapQtConfigInterfacePrivate::getEapTypeIf(const EapQtPluginHandle& pluginHandle)
+void EapQtConfigInterfacePrivate::getEapTypeIf(const EapQtPluginHandle &pluginHandle)
 {
     qDebug("EapQtConfigInterfacePrivate::getEapTypeIf(), this = 0x%08x", this);
-
 
     // dig up the EAP type in TEapExpandedType format
     TEapExpandedType eapServerType;
@@ -659,11 +681,10 @@ void EapQtConfigInterfacePrivate::getEapTypeIf(const EapQtPluginHandle& pluginHa
 // if OuterType is not defined, pluginHandle is for an outer type
 // if InnerType is defined, the defined inner types in config are activated for pluginHandle
 // if InnerType is not defined, the pluginHandle does not activate any inner type (or they do not exist)
-bool EapQtConfigInterfacePrivate::saveConfiguration(const EapQtPluginHandle& pluginHandle,
-    EapQtConfig& config)
+bool EapQtConfigInterfacePrivate::saveConfiguration(const EapQtPluginHandle &pluginHandle,
+    const EapQtConfig &config)
 {
     qDebug("EapQtConfigInterfacePrivate::saveConfiguration(), this = 0x%08x", this);
-
 
     checkInstanceThrowing();
 
@@ -672,31 +693,33 @@ bool EapQtConfigInterfacePrivate::saveConfiguration(const EapQtPluginHandle& plu
         return false;
     }
 
-    // only check if EAP ui is supported here,
-    // getEapTypeIf checks the EAP server support
-    int dummy = 0;
-    if (!isUiSupported(pluginHandle.type().eapExpandedData(), dummy)) {
-        qDebug(
-            "ERROR: EapQtConfigInterfacePrivate::saveConfiguration() - UI not supported for the requested EAP");
-        return false;
+    // set tunneling type & check if the requested EAP is supported
+    // if we are configuring outer type, OuterType == QVariant::Invalid or
+    // EapQtPluginHandle::PluginUndefined
+
+    EapQtPluginHandle tmpOuterHandle;
+    QVariant varValue = config.value(EapQtConfig::OuterType);
+    if (varValue != QVariant::Invalid && !(varValue.value<EapQtPluginHandle> () == EapQtPluginHandle::PluginUndefined)) {
+        tmpOuterHandle = varValue.value<EapQtPluginHandle> ();
+        // check if supported
+        if(!isSupportedInnerType(tmpOuterHandle, pluginHandle)) {
+            qDebug("ERROR: EapQtConfigInterfacePrivate::saveConfiguration() - not supported outer/inner type combination");
+            return false;
+        }
+    }
+    else {
+        tmpOuterHandle = EapQtPluginHandle::PluginUndefined;
+        // check if supported
+        if(!isSupportedOuterType(pluginHandle)) {
+            qDebug("ERROR: EapQtConfigInterfacePrivate::saveConfiguration() - not supported outer type");
+            return false;
+        }
     }
 
     getEapTypeIf(pluginHandle);
     if (mEapTypeIf.isNull()) {
         qDebug("ERROR: EapQtConfigInterfacePrivate::saveConfiguration() - getEapTypeIf failed");
         return false;
-    }
-
-    // set tunneling type
-    // if we are configuring outer type, OuterType == Invalid or EapQtPluginHandle::PluginUndefined
-
-    EapQtPluginHandle tmpOuterHandle;
-    QVariant varValue = config.value(EapQtConfig::OuterType);
-    if (varValue != QVariant::Invalid) {
-        tmpOuterHandle = varValue.value<EapQtPluginHandle> ();
-    }
-    else {
-        tmpOuterHandle = EapQtPluginHandle::PluginUndefined;
     }
 
     TEapExpandedType tmpOuterEap;
@@ -733,8 +756,8 @@ bool EapQtConfigInterfacePrivate::saveConfiguration(const EapQtPluginHandle& plu
 }
 
 // config must be empty when calling
-bool EapQtConfigInterfacePrivate::readConfiguration(const EapQtPluginHandle& outerHandle,
-    const EapQtPluginHandle& pluginHandle, EapQtConfig& config)
+bool EapQtConfigInterfacePrivate::readConfiguration(const EapQtPluginHandle &outerHandle,
+    const EapQtPluginHandle &pluginHandle, EapQtConfig &config)
 {
     qDebug("EapQtConfigInterfacePrivate::readConfiguration(), this = 0x%08x", this);
 
@@ -748,13 +771,17 @@ bool EapQtConfigInterfacePrivate::readConfiguration(const EapQtPluginHandle& out
         return false;
     }
 
-    // only check if UI is supported for pluginHandle here,
-    // getEapTypeIf checks the EAP server support
-    int dummy = 0;
-    if (!isUiSupported(pluginHandle.type().eapExpandedData(), dummy)) {
-        qDebug(
-            "ERROR: EapQtConfigInterfacePrivate::readConfiguration - UI not supported for the requested EAP");
-        return false;
+    // check EAP type support
+    if(!(outerHandle == EapQtPluginHandle::PluginUndefined)) {
+        if(!isSupportedInnerType(outerHandle, pluginHandle)) {
+            qDebug("ERROR: EapQtConfigInterfacePrivate::readConfiguration() - not supported outer/inner type combination");
+            return false;
+        }
+    } else {
+        if(!isSupportedOuterType(pluginHandle)) {
+            qDebug("ERROR: EapQtConfigInterfacePrivate::readConfiguration() - not supported outer type");
+            return false;
+        }
     }
 
     getEapTypeIf(pluginHandle);
@@ -808,11 +835,9 @@ TBool EapQtConfigInterfacePrivate::convertToTbool(bool value)
     return (value ? ETrue : EFalse);
 }
 
-void EapQtConfigInterfacePrivate::copyToEapSettings(EapQtConfig& config, EAPSettings& eapSettings)
+void EapQtConfigInterfacePrivate::copyToEapSettings(const EapQtConfig &config, EAPSettings &eapSettings)
 {
-
     qDebug("EapQtConfigInterfacePrivate::copyToEapSettings(), this = 0x%08x", this);
-
 
     int ind = 0;
 
@@ -926,6 +951,12 @@ void EapQtConfigInterfacePrivate::copyToEapSettings(EapQtConfig& config, EAPSett
         eapSettings.iPEAPv0Allowed = convertToTbool(varValue.toBool());
         qDebug() << "EapQtConfigInterfacePrivate - copyToEapSettings PeapVersion0Allowed: "
             << varValue.toBool();
+    } else {
+        // in any other case disable PEAP version;
+        // no need to set eapSettings.iPEAPVersionsPresent,
+        // it will be set if one of the other PEAP versions is enabled,
+        // otherwise this setting is redundant and can be ignored
+        eapSettings.iPEAPv0Allowed = EFalse;
     }
 
     varValue = config.value(EapQtConfig::PeapVersion1Allowed);
@@ -934,6 +965,12 @@ void EapQtConfigInterfacePrivate::copyToEapSettings(EapQtConfig& config, EAPSett
         eapSettings.iPEAPv1Allowed = convertToTbool(varValue.toBool());
         qDebug() << "EapQtConfigInterfacePrivate - copyToEapSettings PeapVersion1Allowed: "
             << varValue.toBool();
+    } else {
+        // in any other case disable PEAP version;
+        // no need to set eapSettings.iPEAPVersionsPresent,
+        // it will be set if one of the other PEAP versions is enabled,
+        // otherwise this setting is redundant and can be ignored
+        eapSettings.iPEAPv1Allowed = EFalse;
     }
 
     varValue = config.value(EapQtConfig::PeapVersion2Allowed);
@@ -942,6 +979,12 @@ void EapQtConfigInterfacePrivate::copyToEapSettings(EapQtConfig& config, EAPSett
         eapSettings.iPEAPv2Allowed = convertToTbool(varValue.toBool());
         qDebug() << "EapQtConfigInterfacePrivate - copyToEapSettings PeapVersion2Allowed: "
             << varValue.toBool();
+    } else {
+        // in any other case disable PEAP version;
+        // no need to set eapSettings.iPEAPVersionsPresent,
+        // it will be set if one of the other PEAP versions is enabled,
+        // otherwise this setting is redundant and can be ignored
+        eapSettings.iPEAPv2Allowed = EFalse;
     }
 
     varValue = config.value(EapQtConfig::ProvisioningModeAuthenticated);
@@ -965,7 +1008,8 @@ void EapQtConfigInterfacePrivate::copyToEapSettings(EapQtConfig& config, EAPSett
     varValue = config.value(EapQtConfig::PACGroupReference);
     // do not copy if too large string
     if (varValue.type() == QVariant::String && varValue.toString().count() <= StringMaxLength) {
-        // not supported
+        eapSettings.iPACGroupReference.Copy(varValue.toString().utf16());
+        eapSettings.iPACGroupReferencePresent = ETrue;
         qDebug() << "EapQtConfigInterfacePrivate - copyToEapSettings PACGroupReference: "
             << varValue.toString();
     }
@@ -1037,11 +1081,12 @@ void EapQtConfigInterfacePrivate::copyToEapSettings(EapQtConfig& config, EAPSett
         qDebug() << "EapQtConfigInterfacePrivate::copyToEapSettings() - CipherSuites present";
         QList<QVariant> varCiphers = varValue.toList();
 
+        // clears the ciphersuite configuration if the provided list is empty
+        eapSettings.iCipherSuitesPresent = ETrue;
+
         for (ind = 0; ind < varCiphers.count(); ind++) {
             // check that the item is of correct type (int also accepted to not be too strict)
             if (varCiphers[ind].type() == QVariant::UInt || varCiphers[ind].type() == QVariant::Int) {
-                // set to true only if at least item cipher is ok
-                eapSettings.iCipherSuitesPresent = ETrue;
                 eapSettings.iCipherSuites.Append(varCiphers[ind].toUInt());
                 qDebug(
                     "EapQtConfigInterfacePrivate::copyToEapSettings() - CipherSuites at %d: 0x%08x",
@@ -1049,6 +1094,13 @@ void EapQtConfigInterfacePrivate::copyToEapSettings(EapQtConfig& config, EAPSett
             }
         }
     }
+
+    // set always to true to support clearing previously configured CA/user certificates
+    // if the EAP method in question does not use certificates,
+    // EAP server will ignore the setting;
+    // CA/user certificates get cleared if EapQtConfig::Authority/UserCertificate is QVariant::Invalid or
+    // the provided lists are empty
+    eapSettings.iCertificatesPresent = ETrue;
 
     varValue = config.value(EapQtConfig::AuthorityCertificate);
     if (varValue.type() == QVariant::List) {
@@ -1060,8 +1112,6 @@ void EapQtConfigInterfacePrivate::copyToEapSettings(EapQtConfig& config, EAPSett
         for (ind = 0; ind < varCerts.count(); ind++) {
             // check that the item is of correct type
             if (varCerts[ind].canConvert<EapQtCertificateInfo> ()) {
-                // set to true only if at least one item is ok
-                eapSettings.iCertificatesPresent = ETrue;
                 appendCertificateInfo(true, varCerts[ind].value<EapQtCertificateInfo> (),
                     &(eapSettings.iCertificates));
                 qDebug()
@@ -1079,8 +1129,6 @@ void EapQtConfigInterfacePrivate::copyToEapSettings(EapQtConfig& config, EAPSett
         for (ind = 0; ind < varCerts.count(); ind++) {
             // check that the item is of correct type
             if (varCerts[ind].canConvert<EapQtCertificateInfo> ()) {
-                // set to true only if at least one item is ok
-                eapSettings.iCertificatesPresent = ETrue;
                 appendCertificateInfo(false, varCerts[ind].value<EapQtCertificateInfo> (),
                     &(eapSettings.iCertificates));
                 qDebug()
@@ -1096,7 +1144,6 @@ void EapQtConfigInterfacePrivate::appendCertificateInfo(bool isCaCertificate,
     const EapQtCertificateInfo& certInfo, RPointerArray<EapCertificateEntry>* const certList)
 {
     qDebug("EapQtConfigInterfacePrivate::appendCertificateInfo(), this = 0x%08x", this);
-
 
     Q_ASSERT(certList);
 
@@ -1200,7 +1247,7 @@ void EapQtConfigInterfacePrivate::appendCertificateInfo(bool isCaCertificate,
     (void) certEntry.take();
 }
 
-void EapQtConfigInterfacePrivate::copyFromEapSettings(EAPSettings& eapSettings, EapQtConfig& config)
+void EapQtConfigInterfacePrivate::copyFromEapSettings(EAPSettings &eapSettings, EapQtConfig &config)
 {
     qDebug("EapQtConfigInterfacePrivate::copyFromEapSettings(), this = 0x%08x", this);
 
@@ -1483,7 +1530,6 @@ QList<EapQtPluginHandle> EapQtConfigInterfacePrivate::selectedOuterTypes()
 {
     qDebug("EapQtConfigInterfacePrivate::selectedOuterTypes(), this = 0x%08x", this);
 
-
     checkInstanceThrowing();
 
     if (!mEapDbIndexValid) {
@@ -1512,10 +1558,9 @@ QList<EapQtPluginHandle> EapQtConfigInterfacePrivate::selectedOuterTypes()
     return selectedOuterTypes;
 }
 
-bool EapQtConfigInterfacePrivate::isSupportedOuterType(const EapQtPluginHandle& handle)
+bool EapQtConfigInterfacePrivate::isSupportedOuterType(const EapQtPluginHandle &handle)
 {
     qDebug("EapQtConfigInterfacePrivate::isSupportedOuterType(), this = 0x%08x", this);
-
 
     checkInstanceThrowing();
 
@@ -1535,10 +1580,9 @@ bool EapQtConfigInterfacePrivate::isSupportedOuterType(const EapQtPluginHandle& 
 }
 
 bool EapQtConfigInterfacePrivate::setSelectedOuterTypes(
-    const QList<EapQtPluginHandle>& outerHandles)
+    const QList<EapQtPluginHandle> &outerHandles)
 {
     qDebug("EapQtConfigInterfacePrivate::setSelectedOuterTypes()");
-
 
     checkInstanceThrowing();
 
@@ -1591,11 +1635,10 @@ bool EapQtConfigInterfacePrivate::setSelectedOuterTypes(
     return ret;
 }
 
-bool EapQtConfigInterfacePrivate::isSupportedInnerType(const EapQtPluginHandle& outerHandle,
-    const EapQtPluginHandle& innerHandle)
+bool EapQtConfigInterfacePrivate::isSupportedInnerType(const EapQtPluginHandle &outerHandle,
+    const EapQtPluginHandle &innerHandle)
 {
     qDebug("EapQtConfigInterfacePrivate::isSupportedInnerType(), this = 0x%08x", this);
-
 
     checkInstanceThrowing();
 
@@ -1613,7 +1656,6 @@ bool EapQtConfigInterfacePrivate::isSupportedInnerType(const EapQtPluginHandle& 
 bool EapQtConfigInterfacePrivate::deleteConfiguration()
 {
     qDebug("EapQtConfigInterfacePrivate::deleteConfiguration(), this = 0x%08x", this);
-
 
     checkInstanceThrowing();
 
@@ -1637,7 +1679,8 @@ void EapQtConfigInterfacePrivate::loadPlugins()
 
     checkInstanceThrowing();
 
-    QDir pluginsDir(eapPluginDir);
+    // plugin directory defined in cpeapplugininterface.h
+    QDir pluginsDir(CpEapPluginInterfacePluginDirectory);
     foreach( QString fileName, pluginsDir.entryList(QDir::Files) )
         {
             QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
@@ -1655,13 +1698,25 @@ void EapQtConfigInterfacePrivate::loadPlugins()
     for (iter = mPlugins.begin(); iter != mPlugins.end(); ++iter) {
         mPluginInfos.append((*iter)->pluginInfo());
     }
+
+    // sort the UI plugins according to their order number
+    qSort(mPluginInfos.begin(), mPluginInfos.end(), EapQtConfigInterfacePrivate::pluginLessThan);
+
+    qDebug("EapQtConfigInterfacePrivate - loadPlugins: supported EAP plugin count: %d",
+        mPluginInfos.count());
 }
 
-CpBaseSettingView *EapQtConfigInterfacePrivate::uiInstance(const EapQtPluginHandle& outerHandle,
-    const EapQtPluginHandle& pluginHandle)
+bool EapQtConfigInterfacePrivate::pluginLessThan(
+    const EapQtPluginInfo &plugin1,
+    const EapQtPluginInfo &plugin2)
+{
+    return plugin1.orderNumber() < plugin2.orderNumber();
+}
+
+CpBaseSettingView *EapQtConfigInterfacePrivate::uiInstance(const EapQtPluginHandle &outerHandle,
+    const EapQtPluginHandle &pluginHandle)
 {
     qDebug("EapQtConfigInterfacePrivate::uiInstance(), this = 0x%08x", this);
-
 
     checkInstanceThrowing();
 
@@ -1725,11 +1780,14 @@ EapQtConfigInterface::EapBearerType EapQtConfigInterfacePrivate::getEapBearer()
     return ret;
 }
 
-EapQtValidator *EapQtConfigInterfacePrivate::validatorEap(EapQtExpandedEapType type,
-    EapQtConfig::SettingsId id)
+EapQtValidator *EapQtConfigInterfacePrivate::validatorEap(const EapQtExpandedEapType &type,
+    const EapQtConfig::SettingsId id)
 {
     qDebug("EapQtConfigInterfacePrivate::validatorEap(), this = 0x%08x", this);
 
+    qDebug() << "EapQtConfigInterfacePrivate::validatorEap() - requested EAP: "
+        << type.eapExpandedData().toHex();
+    qDebug() << "EapQtConfigInterfacePrivate::validatorEap() - setting: " << id;
 
     EapQtValidator *ret = NULL;
 
@@ -1787,6 +1845,41 @@ EapQtValidator *EapQtConfigInterfacePrivate::validatorEap(EapQtExpandedEapType t
     default:
         ret = NULL;
 
+    }
+
+    qDebug() << "EapQtConfigInterfacePrivate::validatorEap() - is returning NULL: " << (ret == NULL);
+
+    return ret;
+}
+
+bool EapQtConfigInterfacePrivate::readPacStoreConfiguration(EapQtPacStoreConfig& /* config */)
+{
+    // not supported
+    return false;
+}
+
+bool EapQtConfigInterfacePrivate::savePacStoreConfiguration(const EapQtPacStoreConfig& /* config */)
+{
+    // not supported
+    return false;
+}
+
+EapQtValidator *EapQtConfigInterfacePrivate::validatorPacStore(
+    const EapQtPacStoreConfig::PacStoreSettings id)
+{
+    qDebug("EapQtConfigInterfacePrivate::validatorPacStore(), this = 0x%08x", this);
+
+    EapQtValidator *ret = NULL;
+
+    switch (id) {
+    case EapQtPacStoreConfig::PacStorePassword:
+        ret = new EapQtValidatorPacStorePassword();
+        break;
+    case EapQtPacStoreConfig::PacStorePasswordConfirmation:
+        ret = new EapQtValidatorPacStorePasswordConfirm();
+        break;
+    default:
+        ret = NULL;
     }
 
     return ret;

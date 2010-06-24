@@ -15,6 +15,10 @@
  *   EAP String definitions for the Notifier
  *
  */
+ 
+/*
+ * %version: 2 %
+ */
 
 
 #ifndef EAPAUTHUISTRINGS_H

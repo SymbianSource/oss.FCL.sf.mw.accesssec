@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 28 %
+* %version: 29 %
 */
 
 #include "eap_tools.h"
@@ -442,12 +442,19 @@ eap_status_e eap_am_plugin_symbian_c::get_configuration(const eap_method_setting
 				error_completion_function));
 	}
 
+	complete_settings->m_EAPType = internal_settings->m_EAPType;
+	complete_settings->m_IndexType = internal_settings->m_IndexType;
+	complete_settings->m_Index = internal_settings->m_Index;
+	complete_settings->m_completion_status = eap_status_ok;
+
 	error = CEapConversion::ConvertEAPSettingsToInternalType(
 		m_am_tools,
 		local_settings,
 		complete_settings);
 	if (error != KErrNone)
 	{
+		complete_settings->m_completion_status = m_am_tools->convert_am_error_to_eapol_error(error);
+
 		return EAP_STATUS_RETURN(
 			m_am_tools,
 			error_complete(
@@ -455,11 +462,6 @@ eap_status_e eap_am_plugin_symbian_c::get_configuration(const eap_method_setting
 				internal_settings,
 				error_completion_function));
 	}
-
-	complete_settings->m_EAPType = internal_settings->m_EAPType;
-	complete_settings->m_IndexType = internal_settings->m_IndexType;
-	complete_settings->m_Index = internal_settings->m_Index;
-	complete_settings->m_completion_status = eap_status_ok;
 
 	eap_status_e status = m_partner->complete_get_configuration(complete_settings);
 

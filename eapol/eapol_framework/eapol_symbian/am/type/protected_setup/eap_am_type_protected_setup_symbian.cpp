@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18.1.4.1.9 %
+* %version: 18.1.4.1.12 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -53,9 +53,9 @@ static const char EAP_AM_TYPE_SIMPLE_CONFIG_MEMORY_STORE_KEY[] = "eap_am_type_si
 EAP_FUNC_EXPORT CEapAmProtectedSetupSymbian::CEapAmProtectedSetupSymbian(
 	abs_eap_am_tools_c * const tools,
 	abs_eap_base_type_c * const partner,
-	const TIndexType aIndexType,
+	const TIndexType /* aIndexType */,
 	const TInt aIndex,
-	const eap_type_value_e aTunnelingType,	
+	const eap_type_value_e /* aTunnelingType */,
 	const eap_type_value_e eap_type,
 	const bool is_client_when_true,
 	const eap_am_network_id_c * const receive_network_id,
@@ -138,7 +138,7 @@ void CEapAmProtectedSetupSymbian::ConstructL()
 
 //--------------------------------------------------
 
-CEapAmProtectedSetupSymbian* CEapAmProtectedSetupSymbian::NewL(
+EAP_FUNC_EXPORT CEapAmProtectedSetupSymbian* CEapAmProtectedSetupSymbian::NewL(
 	abs_eap_am_tools_c * const tools,
 	abs_eap_base_type_c * const partner,
 	const TIndexType aIndexType,
@@ -253,7 +253,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::configure()
 	{
 		eap_variable_data_c use_manual_username(m_am_tools);
 
-		eap_status_e status = m_partner->read_configure(
+		eap_status_e status = type_configure_read(
 			cf_str_EAP_SIMPLE_CONFIG_use_manual_username.get_field(),
 			&use_manual_username);
 		if (status == eap_status_ok
@@ -273,7 +273,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::configure()
 
 	if (m_use_manual_username == true)
 	{
-		eap_status_e status = m_partner->read_configure(
+		eap_status_e status = type_configure_read(
 			cf_str_EAP_SIMPLE_CONFIG_manual_username.get_field(),
 			&m_manual_username);
 		if (status == eap_status_ok
@@ -470,12 +470,12 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::authentication_finishe
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::query_eap_identity(
-	const eap_am_network_id_c * const receive_network_id,
+	const eap_am_network_id_c * const /* receive_network_id */,
 	const u8_t eap_identifier,
-	bool * const use_manual_username,
+	bool * const /* use_manual_username */,
 	eap_variable_data_c * const manual_username,
-	bool *const use_manual_realm,
-	eap_variable_data_c * const manual_realm
+	bool *const /* use_manual_realm */,
+	eap_variable_data_c * const /* manual_realm */
 	)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -644,7 +644,6 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::type_configure_read(
 		} // if (!wanted_field.compare(&type_field))
 
 
-	// NOTE: This is for simulation.
 	// Read is routed to partner object.
 	status = m_partner->read_configure(
 			field,

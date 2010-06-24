@@ -432,4 +432,5 @@ EXPORTS
 	?save_parameters@eapol_key_state_c@@AAE?AW4eap_status_e@@W4eapol_key_authentication_type_e@@PBVeap_variable_data_c@@1W4eapol_RSNA_cipher_e@eapol_RSNA_key_header_c@@2@Z @ 431 NONAME ; enum eap_status_e eapol_key_state_c::save_parameters(enum eapol_key_authentication_type_e, class eap_variable_data_c const *, class eap_variable_data_c const *, enum eapol_RSNA_key_header_c::eapol_RSNA_cipher_e, enum eapol_RSNA_key_header_c::eapol_RSNA_cipher_e)
 	?timer_expired@eapol_key_state_c@@UAE?AW4eap_status_e@@KPAX@Z @ 432 NONAME ; enum eap_status_e eapol_key_state_c::timer_expired(unsigned long, void *)
 	?process_group_key_handshake_message_2@eapol_key_state_c@@AAE?AW4eap_status_e@@PBVeap_am_network_id_c@@PAVeapol_RSNA_key_header_c@@K@Z @ 433 NONAME ; enum eap_status_e eapol_key_state_c::process_group_key_handshake_message_2(class eap_am_network_id_c const *, class eapol_RSNA_key_header_c *, unsigned long)
+	??1eapol_am_wlan_authentication_c@@UAE@XZ @ 434 NONAME ; eapol_am_wlan_authentication_c::~eapol_am_wlan_authentication_c(void)
 

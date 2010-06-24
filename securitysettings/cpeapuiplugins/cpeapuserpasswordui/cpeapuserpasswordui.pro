@@ -2,7 +2,7 @@
 # Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
-# under the terms of the License "Eclipse Public License v1.0"
+# under the terms of "Eclipse Public License v1.0"
 # which accompanies this distribution, and is available
 # at the URL "http://www.eclipse.org/legal/epl-v10.html".
 #
@@ -16,12 +16,12 @@
 #   settings plugin.  
 #
 
-# %version: 11 %
+# %version: 13 %
 
 
 TEMPLATE = lib
 TARGET = cpeapuserpasswordui
-DEPENDPATH +=
+
 INCLUDEPATH += \
     ../../inc
     
@@ -33,9 +33,9 @@ LIBS += -lcpframework \
         -leapqtconfiginterface \
         -leapqtplugininfo
 
-MOC_DIR    = _moc
-RCC_DIR    = _rcc
-OBJECTS_DIR= _objects
+MOC_DIR    = _build
+RCC_DIR    = _build
+OBJECTS_DIR= _build
 
 # Sources
 HEADERS +=  \

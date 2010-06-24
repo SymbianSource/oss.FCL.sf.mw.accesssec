@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 45 %
+* %version: 46 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -1727,7 +1727,7 @@ eap_status_e eap_type_mschapv2_c::generate_authenticator_response(
 
 	m_am_tools->memmove(authenticator_response, "S=", 2);
 	u32_t length = EAP_MSCHAPV2_SHA1_DIGEST_SIZE * 2;
-	m_am_tools->convert_bytes_to_hex_ascii(
+	(void)m_am_tools->convert_bytes_to_hex_ascii(
 		digest, 
 		EAP_MSCHAPV2_SHA1_DIGEST_SIZE,
 		authenticator_response + 2,

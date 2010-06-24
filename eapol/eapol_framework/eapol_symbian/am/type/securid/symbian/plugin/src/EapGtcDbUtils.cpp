@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 38 %
+* %version: 45 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -36,7 +36,7 @@
 #include "EapSecurIDDbParameterNames.h"
 
 #include <EapTraceSymbian.h>
-#include <EapPluginTools.h>
+#include "EapPluginTools.h"
 
 const TUint KMaxSqlQueryLength = 512;
 const TInt KMicroSecsInAMinute = 60000000; // 60000000 micro seconds is 1 minute.
@@ -458,7 +458,10 @@ void EapGtcDbUtils::SetConfigurationL(
 	if (aSettings.iShowPassWordPromptPresent)
 		{	
 		// If password was supplied set password prompting off
-		view.SetColL(colSet->ColNo(cf_str_EAP_GTC_passcode_prompt_literal), aSettings.iShowPassWordPrompt);		
+		if (aSettings.iShowPassWordPrompt != EFalse)
+			view.SetColL(colSet->ColNo(cf_str_EAP_GTC_passcode_prompt_literal), EEapDbTrue);		
+		else
+			view.SetColL(colSet->ColNo(cf_str_EAP_GTC_passcode_prompt_literal), EEapDbFalse);		
 		}
 		
 	view.PutL();
@@ -673,6 +676,10 @@ void EapGtcDbUtils::DeleteConfigurationL(
 	TInt error(KErrNone);
 	TFileName aPrivateDatabasePathName;
 	
+	error = aFileServerSession.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::DeleteConfigurationL(): - aFileServerSession.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
 	EapPluginTools::CreateDatabaseLC(
 		aDatabase,
 		aFileServerSession,
