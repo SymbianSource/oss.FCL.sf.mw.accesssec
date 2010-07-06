@@ -19,6 +19,14 @@
 * %version: %
 */
 
+// This is enumeration of EAPOL source code.
+#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
+	#undef EAP_FILE_NUMBER_ENUM
+	#define EAP_FILE_NUMBER_ENUM 765 
+	#undef EAP_FILE_NUMBER_DATE 
+	#define EAP_FILE_NUMBER_DATE 1127594498 
+#endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
+
 #include "eap_am_tools.h"
 #include "eap_am_export.h"
 #include "eap_pac_store_message_base.h"

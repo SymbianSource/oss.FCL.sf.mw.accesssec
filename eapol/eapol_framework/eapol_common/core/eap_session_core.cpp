@@ -16,13 +16,13 @@
 */
 
 /*
-* %version: 33 %
+* %version: 36 %
 */
 
 // This is enumeration of EAPOL source code.
 #if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 	#undef EAP_FILE_NUMBER_ENUM
-	#define EAP_FILE_NUMBER_ENUM 60 
+	#define EAP_FILE_NUMBER_ENUM 731 
 	#undef EAP_FILE_NUMBER_DATE 
 	#define EAP_FILE_NUMBER_DATE 1127594498 
 #endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
@@ -1276,7 +1276,7 @@ eap_status_e eap_session_core_c::asynchronous_init_remove_eap_session(
 //--------------------------------------------------
 
 //
-eap_status_e eap_session_core_c::asynchronous_init_remove_eap_session(
+EAP_FUNC_EXPORT eap_status_e eap_session_core_c::asynchronous_init_remove_eap_session(
 	const eap_network_id_selector_c * const state_selector)
 {
 	EAP_TRACE_DEBUG(
@@ -1448,7 +1448,7 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::set_session_timeout(
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e eap_session_core_c::set_eap_database_reference_values(
-	const eap_variable_data_c * const reference)
+	const eap_variable_data_c * const /* reference */)
 {
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_not_supported);
 }
@@ -1456,10 +1456,10 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::set_eap_database_reference_valu
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e eap_session_core_c::get_802_11_authentication_mode(
-	const eap_am_network_id_c * const receive_network_id,
-	const eapol_key_authentication_type_e authentication_type,
-	const eap_variable_data_c * const SSID,
-	const eap_variable_data_c * const preshared_key)
+	const eap_am_network_id_c * const /* receive_network_id */,
+	const eapol_key_authentication_type_e /* authentication_type */,
+	const eap_variable_data_c * const /* SSID */,
+	const eap_variable_data_c * const /* preshared_key */)
 {
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_not_supported);
 }

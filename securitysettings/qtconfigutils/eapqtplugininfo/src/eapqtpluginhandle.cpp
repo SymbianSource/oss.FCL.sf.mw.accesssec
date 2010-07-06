@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -12,16 +12,28 @@
  * Contributors:
  *
  * Description: 
- *   Control Panel EAP plugin information
+ *   Handle to EAP plugin information
  *
  */
 
 /*
- * %version: 15 %
+ * %version: 16 %
  */
 
-#include "eapqtpluginhandle.h"
+// System includes
+#include <eapqtpluginhandle.h>
+
+// User includes
 #include "eapqtpluginhandle_p.h"
+
+/*!
+ *  \class EapQtPluginHandle
+ *  \brief Public implementation of handle to EAP plugin information
+ */
+
+// External function prototypes
+
+// Local constants
 
 struct EapQtPluginHandleMapper
 {
@@ -29,6 +41,8 @@ struct EapQtPluginHandleMapper
     int mUid;
 };
 
+// mapper from EapQtPluginHandle::Plugin to default
+// EapQtExpandedEapType & protocol plugin implementation UID pair
 static const EapQtPluginHandleMapper handleMapper[EapQtPluginHandle::PluginLast] = { 
     {EapQtExpandedEapType::TypeUndefined,     0x00000000},
     {EapQtExpandedEapType::TypeEapAka,        0x102073c2},
@@ -44,6 +58,7 @@ static const EapQtPluginHandleMapper handleMapper[EapQtPluginHandle::PluginLast]
     {EapQtExpandedEapType::TypePlainMschapv2, 0x101f8e7b}
 };
 
+// mapper from EapQtExpandedEapType::Type to EapQtPluginHandle::Plugin
 static const EapQtPluginHandle::Plugin typeMapper[EapQtExpandedEapType::TypeLast] = {
     EapQtPluginHandle::PluginUndefined, 
     EapQtPluginHandle::PluginEapAka,
@@ -55,23 +70,22 @@ static const EapQtPluginHandle::Plugin typeMapper[EapQtExpandedEapType::TypeLast
     EapQtPluginHandle::PluginEapSim,
     EapQtPluginHandle::PluginEapTls, 
     EapQtPluginHandle::PluginEapTtls,
-    EapQtPluginHandle::PluginUndefined, /* no wps plugin */ 
+    EapQtPluginHandle::PluginUndefined, /* wps does not have a plugin */
     EapQtPluginHandle::PluginPap,
     EapQtPluginHandle::PluginPlainMschapv2 
 };
 
+// ======== LOCAL FUNCTIONS ========
 
+// ======== MEMBER FUNCTIONS ========
 
-//----------------------------------------------------------------------------
-//              EapQtPluginHandle
-//----------------------------------------------------------------------------
 EapQtPluginHandle::EapQtPluginHandle() :
     d_ptr(new EapQtPluginHandlePrivate(handleMapper[PluginUndefined].mType,
         handleMapper[PluginUndefined].mUid))
 {
 }
 
-EapQtPluginHandle::EapQtPluginHandle(Plugin id) :
+EapQtPluginHandle::EapQtPluginHandle(const Plugin id) :
     d_ptr(NULL)
 {
     Plugin localId;
@@ -85,12 +99,12 @@ EapQtPluginHandle::EapQtPluginHandle(Plugin id) :
         handleMapper[localId].mUid));
 }
 
-EapQtPluginHandle::EapQtPluginHandle(EapQtExpandedEapType type, int uid) :
+EapQtPluginHandle::EapQtPluginHandle(const EapQtExpandedEapType& type, const int uid) :
     d_ptr(new EapQtPluginHandlePrivate(type, uid))
 {
 }
 
-EapQtPluginHandle::EapQtPluginHandle(EapQtExpandedEapType type) :
+EapQtPluginHandle::EapQtPluginHandle(const EapQtExpandedEapType& type) :
     d_ptr(new EapQtPluginHandlePrivate(type, handleMapper[typeMapper[type.type()]].mUid))
 {
 }
@@ -120,12 +134,6 @@ EapQtPluginHandle::Plugin EapQtPluginHandle::pluginId() const
     return typeMapper[d_ptr->mType.type()];
 }
 
-bool EapQtPluginHandle::operator==(const EapQtPluginHandle &other) const
-{
-    return (other.d_ptr->mProtocolImplementationUid == d_ptr->mProtocolImplementationUid)
-        && (other.d_ptr->mType == d_ptr->mType);
-}
-
 EapQtPluginHandle& EapQtPluginHandle::operator=(const EapQtPluginHandle &handle)
 {
     // check if assigning to myself
@@ -135,3 +143,14 @@ EapQtPluginHandle& EapQtPluginHandle::operator=(const EapQtPluginHandle &handle)
     return *this;
 }
 
+bool EapQtPluginHandle::operator ==(const EapQtPluginHandle &right_type_value) const
+{
+    return (right_type_value.d_ptr->mProtocolImplementationUid == d_ptr->mProtocolImplementationUid)
+        && (right_type_value.d_ptr->mType == d_ptr->mType);
+}
+
+bool EapQtPluginHandle::operator !=(const EapQtPluginHandle &right_type_value) const
+{
+    return (right_type_value.d_ptr->mProtocolImplementationUid != d_ptr->mProtocolImplementationUid)
+        || (right_type_value.d_ptr->mType != d_ptr->mType);
+}

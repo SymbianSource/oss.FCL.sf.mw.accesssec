@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8.1.7 %
+* %version: 8.1.8 %
 */
 
 #include <platform_paths.hrh>
@@ -71,5 +71,6 @@ DEBUGLIBRARY    flogger.lib
 TARGETTYPE    NONE
 
 #endif //#if defined(USE_EAPOL_WLAN_AUTHENTICATION_MESSAGE_IF)
+
 
 // End

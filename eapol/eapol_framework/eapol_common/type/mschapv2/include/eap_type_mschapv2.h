@@ -141,16 +141,16 @@ private:
 
 	void send_error_notification(const eap_status_e error);
 
-	eap_status_e finish_successful_authentication();
+	EAP_FUNC_IMPORT eap_status_e finish_successful_authentication();
 
 	eap_status_e finish_unsuccessful_authentication(
 		const bool authentication_cancelled);
 
-	eap_status_e complete_eap_identity_query();
+	EAP_FUNC_IMPORT eap_status_e complete_eap_identity_query();
 
-	eap_status_e complete_failure_retry_response();
+	EAP_FUNC_IMPORT eap_status_e complete_failure_retry_response();
 
-	eap_status_e complete_change_password_query();
+	EAP_FUNC_IMPORT eap_status_e complete_change_password_query();
 
 	eap_status_e client_packet_process(
 		eap_header_wr_c * const eap, ///< This is pointer to EAP header and data.

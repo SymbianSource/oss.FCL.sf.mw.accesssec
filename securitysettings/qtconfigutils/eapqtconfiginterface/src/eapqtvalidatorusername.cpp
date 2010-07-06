@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -12,21 +12,36 @@
  * Contributors:
  *
  * Description: 
- *   EAP method validator: username
+ *   EAP method username format validator
  *
  */
 
 /*
- * %version: 7 %
+ * %version: 11 %
  */
 
+// System includes
 #include <HbEditorInterface>
 #include <HbLineEdit>
 
+// User includes
 #include "eapqtvalidatorusername.h"
 #include "eapqtconfiginterface_p.h"
 
-EapQtValidatorUsername::EapQtValidatorUsername(EapQtExpandedEapType type) :
+/*!
+ *  \class EapQtValidatorUsername
+ *  \brief EAP method username format validator
+ */
+
+// External function prototypes
+
+// Local constants
+
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+EapQtValidatorUsername::EapQtValidatorUsername(const EapQtExpandedEapType& type) :
     mEapType(type)
 {
 }
@@ -35,8 +50,10 @@ EapQtValidatorUsername::~EapQtValidatorUsername()
 {
 }
 
-EapQtValidator::Status EapQtValidatorUsername::validate(QVariant value)
+EapQtValidator::Status EapQtValidatorUsername::validate(const QVariant& value)
 {
+    qDebug("EapQtValidatorUsername::validate()");
+
     Status status(StatusOk);
 
     switch (mEapType.type()) {
@@ -49,17 +66,20 @@ EapQtValidator::Status EapQtValidatorUsername::validate(QVariant value)
     case EapQtExpandedEapType::TypeEapTtls:
     case EapQtExpandedEapType::TypeLeap:
     case EapQtExpandedEapType::TypePeap:
+    case EapQtExpandedEapType::TypePap:
+    case EapQtExpandedEapType::TypePlainMschapv2:
         status = validateGeneral(value);
         break;
     default:
         // for methods that do not have a realm
         status = StatusInvalid;
+        break;
     }
 
     return status;
 }
 
-EapQtValidator::Status EapQtValidatorUsername::validateGeneral(QVariant value)
+EapQtValidator::Status EapQtValidatorUsername::validateGeneral(const QVariant& value)
 {
     Status status(StatusOk);
     QString str = value.toString();
@@ -67,6 +87,9 @@ EapQtValidator::Status EapQtValidatorUsername::validateGeneral(QVariant value)
     // input must be of correct type
     if (value.type() != QVariant::String) {
         status = StatusInvalid;
+    }
+    else if (str.length() <= 0 && !isEmptyAllowed()) {
+        status = StatusTooShort;
     }
     // zero length username is ok
     else if (str.length() > EapQtConfigInterfacePrivate::StringMaxLength) {
@@ -81,8 +104,32 @@ EapQtValidator::Status EapQtValidatorUsername::validateGeneral(QVariant value)
     return status;
 }
 
-bool EapQtValidatorUsername::validateCharacters(QString& str)
+bool EapQtValidatorUsername::isEmptyAllowed()
 {
+    qDebug("EapQtValidatorUsername::isEmptyAllowed()");
+
+    bool ret(true);
+
+    switch (mEapType.type()) {
+    case EapQtExpandedEapType::TypeEapGtc:
+    case EapQtExpandedEapType::TypeEapMschapv2:
+    case EapQtExpandedEapType::TypeLeap:
+    case EapQtExpandedEapType::TypePap:
+    case EapQtExpandedEapType::TypePlainMschapv2:
+        ret = false;
+        break;
+    default:
+        // other methods can have empty username
+        break;
+    }
+
+    return ret;
+}
+
+bool EapQtValidatorUsername::validateCharacters(const QString& str)
+{
+    qDebug("EapQtValidatorUsername::validateCharacters()");
+
     bool ret(true);
 
     switch (mEapType.type()) {
@@ -104,8 +151,10 @@ bool EapQtValidatorUsername::validateCharacters(QString& str)
     return ret;
 }
 
-void EapQtValidatorUsername::updateEditor(HbLineEdit *edit)
+void EapQtValidatorUsername::updateEditor(HbLineEdit* const edit)
 {
+    qDebug("EapQtValidatorUsername::updateEditor()");
+
     Q_ASSERT(edit);
     if(edit == NULL) {
         return;
@@ -121,15 +170,17 @@ void EapQtValidatorUsername::updateEditor(HbLineEdit *edit)
     case EapQtExpandedEapType::TypeEapTtls:
     case EapQtExpandedEapType::TypeLeap:
     case EapQtExpandedEapType::TypePeap:
+    case EapQtExpandedEapType::TypePap:
+    case EapQtExpandedEapType::TypePlainMschapv2:
         updateEditorGeneral(edit);
         // falls through on purpose
     default:
-        // no realm for other types
+        // no editor preferences for other types
         break;
     }
 }
 
-void EapQtValidatorUsername::updateEditorGeneral(HbLineEdit *edit)
+void EapQtValidatorUsername::updateEditorGeneral(HbLineEdit* const edit)
 {
     qDebug("EapQtValidatorUsername::updateEditorGeneral()");
 

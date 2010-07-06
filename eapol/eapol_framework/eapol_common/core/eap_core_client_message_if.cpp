@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 29 %
+* %version: 32 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -565,6 +565,8 @@ EAP_FUNC_EXPORT eap_status_e eap_core_client_message_if_c::set_eap_database_refe
 EAP_FUNC_EXPORT eap_status_e eap_core_client_message_if_c::timer_expired(
 	const u32_t id, void *data)
 {
+	EAP_UNREFERENCED_PARAMETER(id);
+	EAP_UNREFERENCED_PARAMETER(data);
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
@@ -588,6 +590,8 @@ EAP_FUNC_EXPORT eap_status_e eap_core_client_message_if_c::timer_expired(
 EAP_FUNC_EXPORT eap_status_e eap_core_client_message_if_c::timer_delete_data(
 	const u32_t id, void *data)
 {
+	EAP_UNREFERENCED_PARAMETER(id);
+	EAP_UNREFERENCED_PARAMETER(data);
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
@@ -738,7 +742,7 @@ EAP_FUNC_EXPORT eap_status_e eap_core_client_message_if_c::remove_eap_session(
 
 //--------------------------------------------------
 
-eap_status_e eap_core_client_message_if_c::get_802_11_authentication_mode(
+EAP_FUNC_EXPORT eap_status_e eap_core_client_message_if_c::get_802_11_authentication_mode(
 	const eap_am_network_id_c * const receive_network_id,
 	const eapol_key_authentication_type_e authentication_type,
 	const eap_variable_data_c * const SSID,

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 88 %
+* %version: 94 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -50,11 +50,9 @@
 
 #include "EapolDbDefaults.h"
 #include "EapolDbParameterNames.h"
-
 #include "EapConversion.h"
 #include "EapConfigToolsSymbian.h"
-
-#include <EapPluginTools.h>
+#include "EapPluginTools.h"
 
 #include <wdbifwlansettings.h>
 
@@ -597,7 +595,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::set_wlan_pa
 //--------------------------------------------------
 
 //
-void eapol_am_wlan_authentication_symbian_c::state_notification(
+EAP_FUNC_EXPORT void eapol_am_wlan_authentication_symbian_c::state_notification(
 	const abs_eap_state_notification_c * const state)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -684,7 +682,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::get_wlan_co
 
 EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::authentication_finished(
 	const bool when_true_successfull,
-	const eap_type_value_e eap_type,
+	const eap_type_value_e /* eap_type */,
 	const eapol_key_authentication_type_e authentication_type)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1212,7 +1210,7 @@ void eapol_am_wlan_authentication_symbian_c::SavePSKL(TPSKEntry& entry)
 	
 	// Delete old row and also rows that have no associated IAP settings.
 	if (view.FirstL())
-	{		
+	{
 		do {
 			view.GetL();
 

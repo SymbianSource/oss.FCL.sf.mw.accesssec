@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 21 %
+* %version: 22 %
 */
 
 #include <e32base.h>
@@ -294,7 +294,7 @@ TBool CEapFastPacStoreImpl::IsMasterKeyAndPasswordMatchingL(
     EAP_TRACE_DEBUG_SYMBIAN(
      (_L("CEapFastPacStoreImpl::IsMasterKeyAndPasswordMatchingL")));  
 
-	iPacStorePassword->set_copy_of_buffer(aPassword8.Ptr(), aPassword8.Size());
+	(void)iPacStorePassword->set_copy_of_buffer(aPassword8.Ptr(), aPassword8.Size());
 
 	eap_status_e status = iPartner->is_master_key_and_password_matching(
 		iPacStorePassword
@@ -332,7 +332,7 @@ TInt CEapFastPacStoreImpl::CreateAndSaveMasterKeyL(
      (_L("CEapFastPacStoreImpl::CreateAndSaveMasterKeyL")));  
 
 	
-	iPacStorePassword->set_copy_of_buffer(aPassword8.Ptr(), aPassword8.Size());
+	(void)iPacStorePassword->set_copy_of_buffer(aPassword8.Ptr(), aPassword8.Size());
 
 	eap_status_e status = iPartner->create_and_save_master_key(
 		iPacStorePassword
@@ -369,7 +369,7 @@ TBool CEapFastPacStoreImpl::ComparePacStorePasswordL(
     EAP_TRACE_DEBUG_SYMBIAN(
      (_L("CEapFastPacStoreImpl::ComparePacStorePasswordL")));  
 
-	iPacStorePassword->set_copy_of_buffer(aPassword8.Ptr(), aPassword8.Size());
+	(void)iPacStorePassword->set_copy_of_buffer(aPassword8.Ptr(), aPassword8.Size());
 
 	eap_status_e status = iPartner->compare_pac_store_password(
 		iPacStorePassword);
@@ -435,7 +435,7 @@ TInt CEapFastPacStoreImpl::SetPacStorePasswordL(
     EAP_TRACE_DEBUG_SYMBIAN(
      (_L("CEapFastPacStoreImpl::SetPacStorePasswordL")));  
 
-	iPacStorePassword->set_copy_of_buffer(aPassword8.Ptr(), aPassword8.Size());
+	(void)iPacStorePassword->set_copy_of_buffer(aPassword8.Ptr(), aPassword8.Size());
 	
 	eap_status_e status = iPartner->set_pac_store_password(
 		iPacStorePassword

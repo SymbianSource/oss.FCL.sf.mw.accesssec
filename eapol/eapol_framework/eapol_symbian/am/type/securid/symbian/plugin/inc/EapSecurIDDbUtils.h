@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 6.1.6 %
+* %version: 6.1.7 %
 */
 
 #ifndef EAPSECURIDDBUTILS_H

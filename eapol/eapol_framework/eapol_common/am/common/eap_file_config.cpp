@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 33 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -131,9 +131,10 @@ EAP_FUNC_EXPORT bool eap_config_value_c::get_is_valid() const
 
 EAP_FUNC_EXPORT eap_file_config_c::eap_file_config_c(
 	abs_eap_am_tools_c* const tools)
-: m_am_tools(tools)
-, m_config_map(tools, this)
-, m_is_valid(false)
+  : m_am_tools(tools)
+  , m_config_map(tools, this)
+  , m_value_buffer(tools)
+  , m_is_valid(false)
 {
 	EAP_UNREFERENCED_PARAMETER(TRACE_FLAGS_CONFIGURE_DATA); // in release
 	
@@ -164,7 +165,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::configure(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
+eap_status_e eap_file_config_c::expand_environment_variables(
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map,
 	const eap_variable_data_c * const original_value,
 	eap_variable_data_c * const expanded_value
@@ -183,21 +184,17 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
 	const u8_t env_char = '$';
 	const u8_t char_left_parenthesis = '(';
 	const u8_t char_right_parenthesis = ')';
-
-	eap_variable_data_c tmp_value_buffer(m_am_tools);
-	if (tmp_value_buffer.get_is_valid() == false)
-	{
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-	}
-
-	status = tmp_value_buffer.set_buffer_length(MAX_LINE_LENGTH);
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-
 	bool expanded_value_when_true = false;
+
+	if (m_value_buffer.get_buffer_length() < MAX_LINE_LENGTH)
+	{
+		status = m_value_buffer.set_buffer_length(MAX_LINE_LENGTH);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+	}
 
 	status = expanded_value->set_copy_of_buffer(original_value);
 	if (status != eap_status_ok)
@@ -525,7 +522,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
 					if (configure_option.get_is_valid_data() == true
 						&& configure_option.get_data_length() > 0ul)
 					{
-						tmp_value_buffer.reset();
+						m_value_buffer.reset_start_offset_and_data_length();
 
 						u32_t tmp_index = 0ul;
 
@@ -534,7 +531,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
 							u32_t length_of_begin = env_start-start_of_value;
 							if (length_of_begin > 0ul)
 							{
-								status = tmp_value_buffer.set_copy_of_buffer(
+								status = m_value_buffer.set_copy_of_buffer(
 									expanded_value->get_data(length_of_begin),
 									length_of_begin);
 								if (status != eap_status_ok)
@@ -549,7 +546,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
 
 						if (configure_option.get_data_length() > 0ul)
 						{
-							status = tmp_value_buffer.add_data(&configure_option);
+							status = m_value_buffer.add_data(&configure_option);
 							if (status != eap_status_ok)
 							{
 								EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -564,7 +561,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
 							u32_t length_of_end = tmp_end-(env_end+1);
 							if (length_of_end > 0ul)
 							{
-								status = tmp_value_buffer.add_data(
+								status = m_value_buffer.add_data(
 									(env_end+1),
 									length_of_end);
 								if (status != eap_status_ok)
@@ -577,10 +574,10 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
 							}
 						}
 
-						if (tmp_value_buffer.get_is_valid_data() == true
-							&& tmp_value_buffer.get_data_length() > 0ul)
+						if (m_value_buffer.get_is_valid_data() == true
+							&& m_value_buffer.get_data_length() > 0ul)
 						{
-							status = expanded_value->set_copy_of_buffer(&tmp_value_buffer);
+							status = expanded_value->set_copy_of_buffer(&m_value_buffer);
 							if (status != eap_status_ok)
 							{
 								EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -650,10 +647,11 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT u8_t * eap_file_config_c::read_hex_byte(
+u8_t * eap_file_config_c::read_hex_byte(
 	u8_t * cursor,
 	const u8_t * const end,
-	u8_t * const hex_byte)
+	u8_t * const hex_byte, // This buffer is one byte in length.
+	const u32_t hex_byte_length)
 {
 	u8_t * start = cursor;
 	bool stop = false;
@@ -676,14 +674,15 @@ EAP_FUNC_EXPORT u8_t * eap_file_config_c::read_hex_byte(
 
 	if (cursor <= end)
 	{
-		u32_t target_length = sizeof(*hex_byte);
+		u32_t target_length = hex_byte_length;
 
 		eap_status_e status = m_am_tools->convert_hex_ascii_to_bytes(
 			start,
 			cursor-start,
 			hex_byte,
 			&target_length);
-		if (status != eap_status_ok)
+		if (status != eap_status_ok
+			|| target_length != hex_byte_length)
 		{
 			return 0;
 		}
@@ -696,7 +695,7 @@ EAP_FUNC_EXPORT u8_t * eap_file_config_c::read_hex_byte(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT u8_t * eap_file_config_c::read_u32_t(
+u8_t * eap_file_config_c::read_u32_t(
 	u8_t * cursor,
 	const u8_t * const end,
 	u32_t * const integer)
@@ -755,7 +754,7 @@ EAP_FUNC_EXPORT u8_t * eap_file_config_c::read_u32_t(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::convert_value(
+eap_status_e eap_file_config_c::convert_value(
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map,
 	const eap_variable_data_c * const value_buffer,
 	const eap_configure_type_e type,
@@ -870,27 +869,64 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::convert_value(
 				return EAP_STATUS_RETURN(m_am_tools, status);
 			}
 			
+			status = value_data->set_buffer_length((expanded_value_buffer.get_data_length()+1)/3);
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			status = value_data->set_data_length(value_data->get_buffer_length());
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			u8_t * const target = value_data->get_data(value_data->get_buffer_length());
+			if (target == 0)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+			}
+
+			u32_t ind_target(0ul);
+
 			u8_t * cursor = expanded_value_buffer.get_data(expanded_value_buffer.get_data_length());
+			if (cursor == 0)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+			}
+
 			const u8_t * const cursor_end = cursor + expanded_value_buffer.get_data_length();
-			
+
+			// Only one byte is needed. This is because coverity complains of using "u8_t hex_byte".
+			const u32_t BUFFER_SIZE=1ul;
+			u8_t hex_byte[BUFFER_SIZE];
+
 			while(cursor < cursor_end)
 			{
-				u8_t hex_byte = 0;
 				cursor = read_hex_byte(
 					cursor,
 					cursor_end,
-					&hex_byte);
+					hex_byte,
+					BUFFER_SIZE);
 				if (cursor == 0)
 				{
 					break;
 				}
 
-				status = value_data->add_data(&hex_byte, sizeof(hex_byte));
-				if (status != eap_status_ok)
-				{
-					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-					return EAP_STATUS_RETURN(m_am_tools, status);
-				}
+				// Here we read only one byte.
+				target[ind_target] = hex_byte[0];
+				++ind_target;
+			}
+
+			status = value_data->set_buffer_length(ind_target);
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, status);
 			}
 		}
 		else if (type == eap_configure_type_u32array)
@@ -903,6 +939,12 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::convert_value(
 			}
 			
 			u8_t * cursor = expanded_value_buffer.get_data(expanded_value_buffer.get_data_length());
+			if (cursor == 0)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+			}
+
 			const u8_t * const cursor_end = cursor + expanded_value_buffer.get_data_length();
 			
 			while(cursor < cursor_end)
@@ -936,7 +978,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::convert_value(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::store_configure(
+eap_status_e eap_file_config_c::store_configure(
 	abs_eap_am_file_input_c * const file,
 	const eap_variable_data_c * const line,
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map)
@@ -1441,7 +1483,7 @@ eap_status_e eap_file_config_c::find_rvalue(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::cnf_parse_value(
+eap_status_e eap_file_config_c::cnf_parse_value(
 	const eap_variable_data_c * const found_type_value,
 	const eap_variable_data_c * const found_type_name,
 	eap_configure_type_e * const parsed_type,
@@ -1610,7 +1652,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::cnf_parse_value(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::cnf_get_string(
+eap_status_e eap_file_config_c::cnf_get_string(
 	const eap_variable_data_c * const param,
 	eap_variable_data_c * const param_name,
 	eap_variable_data_c * const param_value,
@@ -1686,7 +1728,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::cnf_get_string(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_subsections(
+eap_status_e eap_file_config_c::read_subsections(
 	abs_eap_am_file_input_c * const file,
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map)
 {
@@ -1722,7 +1764,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_subsections(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_section(
+eap_status_e eap_file_config_c::read_section(
 	abs_eap_am_file_input_c * const file,
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map)
 {
@@ -1776,42 +1818,38 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_section(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::remove_spaces(eap_variable_data_c * const buffer)
+eap_status_e eap_file_config_c::remove_spaces(eap_variable_data_c * const buffer)
 {
-	eap_variable_data_c tmp(m_am_tools);
-	if (tmp.get_is_valid() == false)
+	if (buffer == 0
+		|| buffer->get_is_valid() == false)
 	{
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
 	}
 
-	eap_status_e status(eap_status_ok);
+	u32_t length = buffer->get_data_length();
+	const u8_t * source = buffer->get_data(length);
+	u8_t * destination = buffer->get_data(length);
+	u32_t ind_dest(0ul);
 
-	for (u32_t ind = 0ul; ind < buffer->get_data_length(); ind++)
+	for (u32_t ind = 0ul; ind < length; ind++)
 	{
-		u8_t * const character = buffer->get_data_offset(ind, sizeof(u8_t));
-		if (character == 0)
-		{
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		const u8_t character = source[ind];
 
-		if (m_am_tools->isspace(*character) == false)
+		if (m_am_tools->isspace(character) == false)
 		{
-			status = tmp.add_data(character, sizeof(*character));
-			if (status != eap_status_ok)
-			{
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
+			destination[ind_dest] = character;
+			++ind_dest;
 		}
 	} // for()
 
-	status = buffer->set_copy_of_buffer(&tmp);
+	eap_status_e status = buffer->set_data_length(ind_dest);
 
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::remove_leading_spaces(
+eap_status_e eap_file_config_c::remove_leading_spaces(
 	eap_variable_data_c * const line)
 {
 	if (line->get_data_length() == 0)
@@ -1846,7 +1884,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::remove_leading_spaces(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::file_read_line(
+eap_status_e eap_file_config_c::file_read_line(
 	abs_eap_am_file_input_c * const file,
 	eap_variable_data_c * const line)
 {
@@ -1959,7 +1997,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::file_read_line(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::get_subsect(
+eap_status_e eap_file_config_c::get_subsect(
 	abs_eap_am_file_input_c * const file,
 	eap_variable_data_c * const line)
 {
@@ -2034,7 +2072,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::get_subsect(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_configure(
+eap_status_e eap_file_config_c::read_configure(
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map,
 	const eap_configuration_field_c * const field,
 	eap_variable_data_c* const data,
@@ -2096,7 +2134,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_configure(
 //-----------------------------------------------------------------
 
 eap_status_e eap_file_config_c::read_all_configurations(
-	const eap_configuration_field_c * const field,
+	const eap_configuration_field_c * const /* field */,
 	eap_variable_data_c* const data,
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map)
 {
@@ -2575,7 +2613,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_configuration_message(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_configure(
+eap_status_e eap_file_config_c::read_configure(
 	const eap_configuration_field_c * const field,
 	eap_variable_data_c* const data,
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map,

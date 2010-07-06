@@ -58,7 +58,7 @@ public:
 	//--------------------------------------------------
 
 	// 
-	virtual ~eapol_am_wlan_authentication_c();
+	EAP_FUNC_IMPORT virtual ~eapol_am_wlan_authentication_c();
 
 	/// @param tools: Constructor takes parameter tools that is pointer to adaptation of the platform.
 	/// @param is_client_when_true: Second parameter is true when object is client and false when object is server.

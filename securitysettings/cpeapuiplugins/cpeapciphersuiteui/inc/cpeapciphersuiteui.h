@@ -2,7 +2,7 @@
 * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
-* under the terms of the License "Eclipse Public License v1.0"
+* under the terms of "Eclipse Public License v1.0"
 * which accompanies this distribution, and is available
 * at the URL "http://www.eclipse.org/legal/epl-v10.html".
 *
@@ -17,36 +17,47 @@
 */
 
 /*
-* %version: 2 %
+* %version: 3 %
 */
 
 
 #ifndef CP_EAP_CIPHERSUITE_UI_H
 #define CP_EAP_CIPHERSUITE_UI_H
 
-/*!
- * @addtogroup group_eap_cipher_suite
- * @{
- */
-
+// System includes
 #include <QVariant>
-#include "cpsettingformitemdata.h"
+#include <cpsettingformitemdata.h>
+
+// User includes
+
+// Forward declarations
+class CpEapCiphersuiteUiPrivate;
+
+// External data types
+
+// Constants
 
 
+//If BUILD_CP_EAP_CIPHERSUITE_UI_DLL macro is defined 
+// in the project file,
+//The dll is exported, 
+//otherwise, 
+//the dll will be imported(used)
 #ifdef BUILD_CP_EAP_CIPHERSUITE_UI_DLL
 #define CP_EAP_CIPHERSUITE_UI_EXPORT Q_DECL_EXPORT
 #else
 #define CP_EAP_CIPHERSUITE_UI_EXPORT Q_DECL_IMPORT
 #endif
 
-class CpEapCiphersuiteUiPrivate;
 
 /*!
+ * @addtogroup group_eap_cipher_suite
+ * @{
  */
 class CP_EAP_CIPHERSUITE_UI_EXPORT CpEapCiphersuiteUi: public CpSettingFormItemData
 {
 public:
-    CpEapCiphersuiteUi(CpItemDataHelper &dataHelpper, QVariant &ciphersuites);
+    CpEapCiphersuiteUi( QVariant &ciphersuites );
     ~CpEapCiphersuiteUi();
 
     QVariant ciphersuites();
@@ -54,9 +65,8 @@ public:
 private:
     Q_DISABLE_COPY(CpEapCiphersuiteUi)
     CpEapCiphersuiteUi();
-    CpEapCiphersuiteUiPrivate* d_ptr;
+    QScopedPointer<CpEapCiphersuiteUiPrivate> d_ptr;
 };
-
 
 /*! @} */
 

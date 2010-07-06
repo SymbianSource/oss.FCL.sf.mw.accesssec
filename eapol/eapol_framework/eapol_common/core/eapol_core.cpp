@@ -16,13 +16,13 @@
 */
 
 /*
-* %version: 97 %
+* %version: 100 %
 */
 
 // This is enumeration of EAPOL source code.
 #if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 	#undef EAP_FILE_NUMBER_ENUM
-	#define EAP_FILE_NUMBER_ENUM 48 
+	#define EAP_FILE_NUMBER_ENUM 747 
 	#undef EAP_FILE_NUMBER_DATE 
 	#define EAP_FILE_NUMBER_DATE 1127594498 
 #endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
@@ -106,6 +106,18 @@ EAP_FUNC_EXPORT eapol_core_c::eapol_core_c(
 		dynamic_cast<abs_eap_base_timer_c *>(this),
 		__DATE__,
 		__TIME__));
+
+#if defined(EAP_USE_WPXM)
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eapol_core_c::eapol_core_c(): WPX enabled.")));
+#else
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eapol_core_c::eapol_core_c(): WPX disabled.")));
+#endif //#if defined(EAP_USE_WPXM)
 
 	if (m_partner != 0)
 	{
@@ -1594,7 +1606,7 @@ eap_status_e eapol_core_c::generate_new_pmksa(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_core_c::read_reassociation_parameters(
+EAP_FUNC_EXPORT eap_status_e eapol_core_c::read_reassociation_parameters(
 	const eap_am_network_id_c * const old_receive_network_id, ///< source includes remote address, destination includes local address.
 	const eap_am_network_id_c * const new_receive_network_id, ///< source includes remote address, destination includes local address.
 	const eapol_key_authentication_type_e authentication_type,
@@ -1838,7 +1850,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::start_reassociation(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_core_c::complete_reassociation(
+EAP_FUNC_EXPORT eap_status_e eapol_core_c::complete_reassociation(
 	const eapol_wlan_authentication_state_e reassociation_result,
 	const eap_am_network_id_c * const receive_network_id,
 	const eapol_key_authentication_type_e authentication_type,
@@ -2551,7 +2563,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::remove_eapol_key_state(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_core_c::asynchronous_init_remove_eapol_key_state(
+EAP_FUNC_EXPORT eap_status_e eapol_core_c::asynchronous_init_remove_eapol_key_state(
 	const eap_am_network_id_c * const send_network_id)
 {
 	EAP_TRACE_DEBUG(

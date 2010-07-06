@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11.1.9 %
+* %version: 11.1.10 %
 */
 
 #include <platform_paths.hrh>
@@ -30,6 +30,8 @@ VENDORID VID_DEFAULT
 
 // ECom Dll recognition UID followed by the unique UID for this dll
 UID 0x10009D8D 0x10200ec9
+
+deffile eapvpnif.def
 
 SOURCEPATH ../am/eapvpnif/src
 //SOURCE		eap_vpn_if_main.cpp
@@ -70,5 +72,6 @@ END
 
 LIBRARY euser.lib ECom.lib eaptools.lib eaptrace.lib eapsymbiantools.lib edbms.lib efsrv.lib PlatformEnv.lib
 DEBUGLIBRARY    flogger.lib
+
 
 // End

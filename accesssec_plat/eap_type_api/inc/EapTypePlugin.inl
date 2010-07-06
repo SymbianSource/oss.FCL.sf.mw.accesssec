@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 5 %
+* %version: 6 %
 */
 
 /* The meaning and bit positions used in "opaque_data" field in ECOM implementation
@@ -112,6 +112,11 @@ inline CEapTypePlugin* CEapTypePlugin::NewL(const TDesC8& aCue, TIndexType aInde
 
 inline CEapTypePlugin::~CEapTypePlugin()
 {
+    EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTypePlugin::~CEapTypePlugin(): this=0x%08x"),
+		this));
+
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTypePlugin::~CEapTypePlugin()"));
+
 	// Unload DLL
     REComSession::DestroyedImplementation(iDtor_ID_Key);
 }

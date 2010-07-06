@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 30.1.14 %
+* %version: 30.1.25 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -201,18 +201,15 @@ void eap_am_type_mschapv2_symbian_c::ConstructL()
 {
 	// NOTE: Do not use m_partner here without null check
 
+	TInt error = m_session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("eap_am_type_mschapv2_symbian_c::ConstructL(): - m_session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
 	// Open/create the database
 	EapMsChapV2DbUtils::OpenDatabaseL(m_database, m_session, m_index_type, m_index, m_tunneling_type);
 
 	m_username_password_io_ptr = new(ELeave) CEapAuthNotifier::TEapDialogInfo;
 	m_username_password_io_pckg_ptr = new(ELeave) TPckg<CEapAuthNotifier::TEapDialogInfo> (*m_username_password_io_ptr);
-
-		EAP_TRACE_DATA_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eap_am_type_mschapv2_symbian_c::ConstructL m_username_password_io_pckg_ptr"),
-			m_username_password_io_pckg_ptr->Ptr(),
-			m_username_password_io_pckg_ptr->Size()));	
 
 	CActiveScheduler::Add(this);
 
@@ -684,7 +681,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_mschapv2_symbian_c::type_configure_writ
 
 //--------------------------------------------------
 
-eap_status_e eap_am_type_mschapv2_symbian_c::update_username_password()
+EAP_FUNC_EXPORT eap_status_e eap_am_type_mschapv2_symbian_c::update_username_password()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	eap_status_e status(eap_status_ok);
@@ -854,7 +851,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_mschapv2_symbian_c::configure()
 		// Read Maximum Session Validity Time from the config file
 		eap_variable_data_c sessionTimeFromFile(m_am_tools);
 		
-		eap_status_e status = m_partner->read_configure(
+		eap_status_e status = type_configure_read(
 			cf_str_EAP_MSCHAPv2_max_session_validity_time.get_field(),
 			&sessionTimeFromFile);
 		
@@ -892,88 +889,227 @@ eap_status_e eap_am_type_mschapv2_symbian_c::show_username_password_dialog(
 		bool & password_prompt_enabled,
 		bool is_identity_query)    
 {
+	eap_status_e status = eap_status_ok;
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_am_type_mschapv2_symbian_c::show_username_password_dialog - start, password_prompt_enabled=%d,is_identity_query=%d\n"),
 		password_prompt_enabled, is_identity_query));
-			
+
 	m_username_utf8 = &username_utf8;
 	m_password_utf8 = &password_utf8;
 	m_password_prompt_enabled = &password_prompt_enabled;
 	m_is_identity_query = is_identity_query;
 
-		if (*m_password_prompt_enabled == true)
-			{
-			m_username_password_io_ptr->iPasswordPromptEnabled = ETrue; 
-			}
-		else
-			{
-			m_username_password_io_ptr->iPasswordPromptEnabled = EFalse; 
-			}
+	if (*m_password_prompt_enabled == true)
+	{
+		m_username_password_io_ptr->iPasswordPromptEnabled = ETrue; 
+	}
+	else
+	{
+		m_username_password_io_ptr->iPasswordPromptEnabled = EFalse; 
+	}
 
-		if (m_is_identity_query == true)
-			{
-			m_username_password_io_ptr->iIsIdentityQuery = ETrue; 
-			}
-		else
-			{
-			m_username_password_io_ptr->iIsIdentityQuery = EFalse; 
-			}
-
-
-		eap_variable_data_c tmp_username_unicode(m_am_tools);
-		eap_status_e status = m_am_tools->convert_utf8_to_unicode(tmp_username_unicode, *m_username_utf8);
-		if (status != eap_status_ok)
-			{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-			}
-
-		m_username_password_io_ptr->iUsername.Copy(
-			reinterpret_cast<TUint16 *> (
-				tmp_username_unicode.get_data(tmp_username_unicode.get_data_length())),
-				tmp_username_unicode.get_data_length() / 2); // 8bit -> 16bit
+	if (m_is_identity_query == true)
+	{
+		m_username_password_io_ptr->iIsIdentityQuery = ETrue; 
+	}
+	else
+	{
+		m_username_password_io_ptr->iIsIdentityQuery = EFalse; 
+	}
 
 
-		m_state = EHandlingUsernamePasswordQuery;
+	eap_variable_data_c tmp_username_unicode(m_am_tools);
+	status = m_am_tools->convert_utf8_to_unicode(tmp_username_unicode, *m_username_utf8);
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	m_username_password_io_ptr->iUsername.Copy(
+		reinterpret_cast<TUint16 *> (
+		tmp_username_unicode.get_data(tmp_username_unicode.get_data_length())),
+		tmp_username_unicode.get_data_length() / 2); // 8bit -> 16bit
+
+
+	m_state = EHandlingUsernamePasswordQuery;
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
 		(EAPL(" eap_am_type_mschapv2_symbian_c::show_username_password_dialog - before m_notifier.StartNotifierAndGetResponse()\n")));		
 
-	    TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
-	    
-	    m_username_password_io_ptr->iPassword.Zero();
-	    
-	    if (iEapAuthNotifier == 0)
-	    	{
-	    	TRAPD(err, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
-	  		if (err)
-	  			{
-	  				return eap_status_authentication_failure;
-	  			}
-	    	}
-	    else
-		   	{
-			 	iEapAuthNotifier->Cancel();
-	     	}
-	
-	    TRAPD(err1, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeMsChapV2UsernamePasswordDialog, m_username_password_io_ptr, aEapType));
-  		if (err1)
-  			{
-  				return eap_status_authentication_failure;
-  			}
-	    	
+	TInt err1 = KErrNone;
 
+	TRAPD(err, err1 = IsDlgReadyToCompleteL());
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_mschapv2_symbian_c::show_username_password_dialog(): err=%d, result= %d\n"),
+		err,
+		err1));
+
+	if (*m_password_prompt_enabled == true || err || err1 == KErrCancel)
+	{
+		TEapExpandedType aEapType(*EapExpandedTypeMsChapv2.GetType());
+		m_username_password_io_ptr->iPassword.Zero();
+		if (iEapAuthNotifier == 0)
+		{
+			TRAPD(err, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
+			if (err)
+			{
+				return eap_status_authentication_failure;
+			}
+		}
+		else
+		{
+			iEapAuthNotifier->Cancel();
+		}
+
+		TRAPD(err1, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeMsChapV2UsernamePasswordDialog, m_username_password_io_ptr, aEapType));
+		if (err1)
+		{
+			return eap_status_authentication_failure;
+		}
+	}
+	else
+	{
+		DlgComplete( status );
+		return status;	
+	}
 
 	return eap_status_pending_request;
 }
 
 //--------------------------------------------------
 
+TInt eap_am_type_mschapv2_symbian_c::IsDlgReadyToCompleteL()
+	{
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_mschapv2_symbian_c::IsDlgReadyToCompleteL(): m_index_type=%d, m_index=%d, m_tunneling_type=0xfe%06x%08x\n"),
+		m_index_type,
+		m_index,
+		m_tunneling_type.get_vendor_id(),
+		m_tunneling_type.get_vendor_type()));
+
+	TInt status = KErrNone;
+	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
+	TPtr sqlStatement = buf->Des();
+	
+	// Query all the relevant parameters
+	_LIT(KSQLQuery, "SELECT %S, %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
+	
+	sqlStatement.Format(
+		KSQLQuery,
+		&cf_str_EAP_MSCHAPV2_password_prompt_literal,
+		&cf_str_EAP_MSCHAPV2_username_literal,
+		&cf_str_EAP_MSCHAPV2_password_literal,
+		&KMsChapV2TableName,
+		&KServiceType,
+		m_index_type, 
+		&KServiceIndex,
+		m_index,
+		&KTunnelingTypeVendorId,
+		m_tunneling_type.get_vendor_id(),
+		&KTunnelingType, 
+		m_tunneling_type.get_vendor_type());
+	
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_mschapv2_symbian_c::IsDlgReadyToCompleteL(): Opens view\n")));
+
+	RDbView view;
+	// Evaluate view
+	User::LeaveIfError(view.Prepare(m_database, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
+	CleanupClosePushL(view);
+	
+	User::LeaveIfError(view.EvaluateAll());
+	
+	// Get the first (and only) row
+	view.FirstL();
+	view.GetL();
+	
+	// Get column set so we get the correct column numbers
+	CDbColSet* colSet = view.ColSetL();
+	CleanupStack::PushL(colSet);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_leap_symbian_c::IsDlgReadyToCompleteL(): Reads database\n")));
+
+	TPtrC username = view.ColDes(colSet->ColNo( cf_str_EAP_MSCHAPV2_username_literal ) );
+
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_mschapv2_symbian_c::IsDlgReadyToCompleteL(): username"),
+		username.Ptr(),
+		username.Size()));
+
+	TPtrC password = view.ColDes(colSet->ColNo( cf_str_EAP_MSCHAPV2_password_literal ) );
+
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_mschapv2_symbian_c::IsDlgReadyToCompleteL(): password"),
+		password.Ptr(),
+		password.Size()));
+
+	TUint prompt = view.ColUint(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_prompt_literal));
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_mschapv2_symbian_c::IsDlgReadyToCompleteL(): prompt=%d\n"),
+		prompt));
+
+
+	if ((EEapDbFalse != prompt)
+		 || (username.Size() == 0) 
+		 || (password.Size() == 0))
+		{
+
+		if (username.Size() == 0)
+			{
+			m_username_password_io_ptr->iUsername.Zero();
+			}
+		else
+			{
+			m_username_password_io_ptr->iUsername.Copy(username);
+			}
+
+		status = KErrCancel;
+		}
+	else
+		{
+		status = KErrNone;	
+		m_username_password_io_ptr->iUsername.Copy(username);
+		m_username_password_io_ptr->iPassword.Copy(password);
+		}
+		
+	CleanupStack::PopAndDestroy(colSet); // Delete colSet.
+	CleanupStack::PopAndDestroy(&view); // Close view.
+	CleanupStack::PopAndDestroy(buf); // Delete buf.
+		
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_mschapv2_symbian_c::IsDlgReadyToCompleteL(): status=%d\n"),
+		status));
+
+	return status;
+	}
+	
 eap_status_e eap_am_type_mschapv2_symbian_c::show_change_password_dialog(
 		eap_variable_data_c & /* username */,
 		eap_variable_data_c & /* old_password */,

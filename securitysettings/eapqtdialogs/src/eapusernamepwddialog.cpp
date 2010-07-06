@@ -11,14 +11,22 @@
 *
 * Contributors:
 *
-* Description: Dialog implementation
+* Description:   User authentication Dialog implementation
 *
 */
+
+/*
+ * %version: 4 %
+ */
 
 #include <eapqtvalidator.h>
 #include <eapqtexpandedeaptype.h>
 #include <eapqtconfiginterface.h>
 #include <eapqtconfig.h>
+#include <HbParameterLengthLimiter>
+#include <HbTranslator>
+#include <HbLineEdit>
+#include <HbAction>
 #include "eapusernamepwddialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
@@ -33,16 +41,15 @@ EapUsernamePwdDialog::EapUsernamePwdDialog(const QVariantMap &parameters)
  mEdit2(NULL), 
  mUnameValidator(NULL),
  mPwdValidator(NULL),
- mTranslator(new HbTranslator("eapprompts"))
+ mTranslator(new HbTranslator("eapprompts")),
+ mClose(false),
+ mOkActionPressed(false)
 {
     OstTraceFunctionEntry0( EAPUSERNAMEPWDDIALOG_EAPUSERNAMEPWDDIALOG_ENTRY );
     qDebug("EapUsernamePwdDialog::EapUsernamePwdDialog ENTER");
         
     createDialog(parameters);
-    
-    mClose = false;
-    mOkActionPressed = false;
-    
+        
     OstTraceFunctionExit0( EAPUSERNAMEPWDDIALOG_EAPUSERNAMEPWDDIALOG_EXIT );
     qDebug("EapUsernamePwdDialog::EapUsernamePwdDialog EXIT");
 }
@@ -55,13 +62,15 @@ void EapUsernamePwdDialog::createDialog(const QVariantMap &parameters )
     OstTraceFunctionEntry0( EAPUSERNAMEPWDDIALOG_CREATEDIALOG_ENTRY );
     qDebug("EapUsernamePwdDialog::createDialog ENTER");
      
-    QString keyauthmethod = QString("authmethod");    
-    QString keyuname = QString("username");
-    QString keyeaptype = QString("eaptype");
+    QString keyauthmethod("authmethod");    
+    QString keyuname("username");
+    QString keyeaptype("eaptype");
         
-    QString unamestr = QString("");
-    QString authMethodstr = QString("FOO");
-       
+    QString unamestr;
+    QString authMethodstr;
+    
+    //Get default username (if exists) and 
+    //auth method strings from parameters   
     if ( parameters.empty() == false ) {
         if ( parameters.contains(keyuname) ) {
             QVariant variant = parameters.value(keyuname);
@@ -73,8 +82,8 @@ void EapUsernamePwdDialog::createDialog(const QVariantMap &parameters )
             }    
         } 
     
-    QString labelText1 = QString(hbTrId("txt_occ_dialog_1_user_name").arg(authMethodstr));
-    QString labelText2 = QString(hbTrId("txt_occ_dialog_password"));
+    QString labelText1(HbParameterLengthLimiter(hbTrId("txt_occ_dialog_1_user_name")).arg(authMethodstr));
+    QString labelText2(HbParameterLengthLimiter(hbTrId("txt_occ_dialog_password")));
     
     //Set the dialog to be on the screen until user reacts
     //by pressing any of the Action buttons
@@ -89,41 +98,50 @@ void EapUsernamePwdDialog::createDialog(const QVariantMap &parameters )
     
     this->setPromptText(labelText2, 1);   
     mEdit2 = this->lineEdit(1);        
-            
-    QByteArray ba;
     
+    //Get the EAP type for the Line Edits (Validator)
+    QByteArray ba;
     if ( parameters.contains(keyeaptype) ) {
         QVariant variant = parameters.value(keyeaptype);
         ba = variant.toByteArray();
         } 
-    Q_ASSERT( ba.isEmpty() == false );
-    
+    Q_ASSERT( ba.isEmpty() == false );    
     EapQtExpandedEapType e_type(ba);
     EapQtConfigInterface eap_config_if;
     
-    mUnameValidator = eap_config_if.validatorEap(e_type,
-                EapQtConfig::Username);
+    mUnameValidator.reset(eap_config_if.validatorEap(e_type,
+                EapQtConfig::Username));
+    Q_ASSERT( mUnameValidator.isNull() == false );
+   
     mUnameValidator->updateEditor(mEdit1);
         
-    mPwdValidator = eap_config_if.validatorEap(e_type,
-                EapQtConfig::Password);    
+    mPwdValidator.reset(eap_config_if.validatorEap(e_type,
+                EapQtConfig::Password));
+    Q_ASSERT( mPwdValidator.isNull() == false );
+        
     mPwdValidator->updateEditor(mEdit2);
-        
-    QList<QAction*> action_list = this->actions();
-        
+    
+    //Remove all default actions from the dialog 
+    QList<QAction*> action_list = this->actions();    
     for ( int i = 0; i < action_list.count(); i++ ) {
         this->removeAction(action_list.at(i));
         } 
     
+    //Add a new Ok button action 
     HbAction* actionOk = new HbAction(hbTrId("txt_common_button_ok"),this); 
     this->addAction(actionOk);
+    //Add a new Cancel button action
     HbAction* actionCancel = new HbAction(hbTrId("txt_common_button_cancel"),this);
     this->addAction( actionCancel );    
-     
+    
+    //Disconnect action Ok from the default SLOT and connect to 
+    //a SLOT owned by this class 
     disconnect(actionOk, SIGNAL(triggered()),this, SLOT(close()));
     bool connected = connect(actionOk, SIGNAL(triggered()), this, SLOT(okPressed()));
     Q_ASSERT(connected == true);
     
+    //Disconnect action Cancel from the default SLOT and connect to 
+    //a SLOT owned by this class 
     disconnect(actionCancel, SIGNAL(triggered()),this, SLOT(close()));
     connected = connect(actionCancel, SIGNAL(triggered()), this, SLOT(cancelPressed()));
     Q_ASSERT(connected == true);
@@ -148,14 +166,14 @@ EapUsernamePwdDialog::~EapUsernamePwdDialog()
     qDebug("EapUsernamePwdDialog::~EapUsernamePwdDialog");
     
     //The dialog widgets are deleted as the dialog is deleted
-    delete mPwdValidator;
-    delete mUnameValidator;
+    // mPwdValidator:   scoped pointer deleted automatically
+    // mUnameValidator: scoped pointer deleted automatically
     
     OstTraceFunctionExit0( EAPUSERNAMEPWDDIALOG_DEAPUSERNAMEPWDDIALOG_EXIT );
 }
 
 /**
- * Line edit validator
+ * Line Edit Validator 
  */
 bool EapUsernamePwdDialog::validate() const
 {
@@ -187,17 +205,9 @@ void EapUsernamePwdDialog::okPressed()
             mOkActionPressed = true;
             
             QVariantMap data;
-    
-            QString editStr1 = mEdit1->text();
-    
-            QString editStr2 = mEdit2->text();
-        
-            QVariant variant1(editStr1);
-    
-            QVariant variant2(editStr2);
-    
-            data["username"] = variant1;
-            data["password"] = variant2;
+     
+            data["username"] = mEdit1->text();
+            data["password"] = mEdit2->text();
       
             qDebug("EapUsernamePwdDialog::okPressed: emit deviceDialogData");
     
@@ -232,9 +242,7 @@ void EapUsernamePwdDialog::closingDialog()
 {
     OstTraceFunctionEntry0( EAPUSERNAMEPWDDIALOG_CLOSINGDIALOG_ENTRY );
     qDebug("EapUsernamePwdDialog::closingDialog ENTER");
- 
-    closeDeviceDialog(false);
-    
+     
     qDebug("EapUsernamePwdDialog::closingDialog EXIT");
     OstTraceFunctionExit0( EAPUSERNAMEPWDDIALOG_CLOSINGDIALOG_EXIT );
 }

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 31 %
+* %version: 35 %
 */
 
 #include "EapServer.h"
@@ -238,14 +238,19 @@ CEapServer::~CEapServer()
 		abs_eap_am_tools_c::delete_abs_eap_am_tools_c(iTools);
 	}
 
+    EAP_TRACE_DEBUG_SYMBIAN((_L("REComSession::FinalClose(): start")));
+
 	REComSession::FinalClose();
+
+    EAP_TRACE_DEBUG_SYMBIAN((_L("REComSession::FinalClose(): ready")));
+
 	}
 
 //----------------------------------------------------------------------------
 
 // from CServer
 
-CSession2* CEapServer::NewSessionL(const TVersion& /* aVersion */, const RMessage2 &aMessage) const
+CSession2* CEapServer::NewSessionL(const TVersion& /* aVersion */, const RMessage2& /* aMessage */) const
     {
 	EAP_TRACE_DEBUG(
 		iTools, 
@@ -354,6 +359,7 @@ void CEapServer::DecrementSessions()
 
 void CEapServer::PanicClient(TInt aPanic) const
 {
+	EAP_UNREFERENCED_PARAMETER(aPanic);
 	EAP_TRACE_DEBUG(
 		iTools, 
 		TRACE_FLAGS_DEFAULT, 

@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 18 %
+ * %version: 21 %
  */
 
 #ifndef CPEAPUSERPASSWORDUI_H
@@ -34,6 +34,7 @@
 // Forward declarations
 class HbDataForm;
 class HbDataFormModel;
+class HbDataFormModelItem;
 class CpSettingFormItemData;
 class HbLineEdit;
 class EapQtValidator;
@@ -47,7 +48,7 @@ class EapQtValidator;
  * @{
  */
 
-class CpEapUserPasswordUi: public CpBaseSettingView
+class CpEapUserPasswordUi : public CpBaseSettingView
 {
 Q_OBJECT
 
@@ -64,11 +65,16 @@ protected:
     void close();
     
 private:
-    void initializeUserPasswordUi();
+    void createUi();
+    void createUsername();
+    void createPassword();
+    
     bool checkStateToBool(const int state);
     int boolToCheckState(const bool state);
-    void storeSettings();
+    
+    bool storeSettings();
     bool validate();
+    bool validateUsername();
     bool validatePasswordGroup();
     
 private slots:
@@ -77,20 +83,40 @@ private slots:
     void passwordChanged();
     
 private:
+    //! Pointer to EapQtConfigInterface
     QScopedPointer <EapQtConfigInterface> mConfigIf;
+    //! Plugin info
     EapQtPluginInfo mPluginInfo;
+    //! Outer handle
     EapQtPluginHandle mOuterHandle;
+    //! Current EAP configuration
+    EapQtConfig mEapConfig;
+    
+    //! Dataform
     HbDataForm *mForm;
+    //! Datform model
     HbDataFormModel *mModel;
+    //! Control Panel item data helper for username-password plugins
+    CpItemDataHelper *mItemDataHelper;
+    //! Username-password settings group
+    HbDataFormModelItem *mGroupItem;
+    //! Username lineEdit
     CpSettingFormItemData *mUsername;
+    //! Prompt password checkBox
     CpSettingFormItemData *mPasswordPrompt;
+    //! Password lineEdit
     CpSettingFormItemData *mPassword;
 
+    //! Realm validator
     QScopedPointer<EapQtValidator> mValidatorUsername;
+    //! Password validator
     QScopedPointer<EapQtValidator> mValidatorPassword;
     
+    //! Password is stored
     bool mPasswordStored;
+    //! Password is saved
     bool mPasswordChanged;
+    //! Password lineEdit
     HbLineEdit *mPasswordEdit;
         
 };

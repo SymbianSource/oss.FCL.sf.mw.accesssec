@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -18,7 +18,7 @@
  */
 
 /*
- * %version:  8 %
+ * %version:  10 %
  */
 
 // System includes
@@ -38,12 +38,7 @@
 
 // Local constants
 
-// Order numbers
-static const int order_eapsim(60);
-static const int order_eapaka(70);
-
-Q_EXPORT_PLUGIN2(CpEapSimAkaPlugin, CpEapSimAkaPlugin)
-;
+Q_EXPORT_PLUGIN2(CpEapSimAkaPlugin, CpEapSimAkaPlugin);
 
 // ======== LOCAL FUNCTIONS ========
 
@@ -93,11 +88,15 @@ QList<EapQtPluginInfo> CpEapSimAkaPlugin::pluginInfo()
     qDebug("CpEapSimAkaPlugin: provide plugin info");
     QList<EapQtPluginInfo> ret;
 
-    ret.append(EapQtPluginInfo(EapQtPluginHandle::PluginEapSim,  
-        EapUiStrings::EapSim, order_eapsim) );
-    
-    ret.append(EapQtPluginInfo(EapQtPluginHandle::PluginEapAka, 
-        EapUiStrings::EapAka, order_eapaka) );
+    ret.append(EapQtPluginInfo(
+        EapQtPluginHandle::PluginEapSim,
+        EapQtUiConstants::StringEapSim,
+        EapQtUiConstants::OrderEapSim));
+
+    ret.append(EapQtPluginInfo(
+        EapQtPluginHandle::PluginEapAka,
+        EapQtUiConstants::StringEapAka,
+        EapQtUiConstants::OrderEapAka));
 
     return ret;
 }

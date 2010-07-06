@@ -11,10 +11,13 @@
 *
 * Contributors:
 *
-* Description: 
+* Description: Eap Dialog Plugin
 *
 */
 
+/*
+* %version: 3 %
+*/
 
 #ifndef ____EAPDIALOG_H__PLUGIN_H__
 #define ____EAPDIALOG_H__PLUGIN_H__
@@ -22,7 +25,6 @@
 #include <QObject>
 #include <hbdevicedialogplugin.h>
 
-class EapUsernamePwdDialog;
 
 class EapDialogPlugin : public HbDeviceDialogPlugin
 {

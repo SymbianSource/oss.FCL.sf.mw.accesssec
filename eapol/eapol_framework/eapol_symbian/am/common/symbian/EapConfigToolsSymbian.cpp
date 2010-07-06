@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -11,18 +11,18 @@
 *
 * Contributors:
 *
-* Description:  EAP and WLAN authentication protocols.
+* Description:  Some tools used in Symbian.
 *
 */
 
 /*
-* %version: 2 %
+* %version: 6 %
 */
 
 // This is enumeration of EAPOL source code.
 #if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 	#undef EAP_FILE_NUMBER_ENUM
-	#define EAP_FILE_NUMBER_ENUM 151 
+	#define EAP_FILE_NUMBER_ENUM 725 
 	#undef EAP_FILE_NUMBER_DATE 
 	#define EAP_FILE_NUMBER_DATE 1127594498 
 #endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
@@ -35,7 +35,7 @@
 
 #include "EapConversion.h"
 
-#include <EapPluginTools.h>
+#include "EapPluginTools.h"
 
 //--------------------------------------------------
 
@@ -196,7 +196,7 @@ eap_status_e EapConfigToolsSymbian::EapReadDefaultConfigFileSymbian(
 						(EAPL("Opens configure file %s\n"),
 						file_name_c_data.get_data(file_name_c_data.get_data_length())));
 				}
-				else if (status != eap_status_ok)
+				else
 				{
 					// Second try open from Z: disk.
 					status = fileio->file_open(

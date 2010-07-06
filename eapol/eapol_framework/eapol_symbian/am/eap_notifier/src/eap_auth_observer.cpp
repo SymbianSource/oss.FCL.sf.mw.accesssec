@@ -26,12 +26,11 @@
 // ---------------------------------------------------------
 //
 CEapAuthObserver* CEapAuthObserver::NewL( 
-    CEapAuthNotifier* aNotifier,
-    CEapAuthNotifier::EEapNotifierType aType )
+    CEapAuthNotifier* aNotifier )
     {
     RDebug::Print(_L("CEapAuthObserver::NewL") );
     
-    CEapAuthObserver* self = new ( ELeave ) CEapAuthObserver( aNotifier, aType );
+    CEapAuthObserver* self = new ( ELeave ) CEapAuthObserver( aNotifier );
     return self;
     }
 
@@ -40,10 +39,8 @@ CEapAuthObserver* CEapAuthObserver::NewL(
 // ---------------------------------------------------------
 //
 CEapAuthObserver::CEapAuthObserver( 
-    CEapAuthNotifier* aNotifier,
-    CEapAuthNotifier::EEapNotifierType aType ): 
-    iNotifier( aNotifier ),
-    iType(aType)
+    CEapAuthNotifier* aNotifier  ): 
+    iNotifier( aNotifier )
     {
     RDebug::Print(_L("CEapAuthObserver::CEapAuthObserver") );
     }
@@ -55,6 +52,17 @@ CEapAuthObserver::CEapAuthObserver(
 CEapAuthObserver::~CEapAuthObserver()
     {
     RDebug::Print(_L("CEapAuthObserver::~CEapAuthObserver") );
+    }
+
+// ---------------------------------------------------------
+// CEapAuthObserver::SetNotifierType
+// ---------------------------------------------------------
+//
+void CEapAuthObserver::SetNotifierType( CEapAuthNotifier::EEapNotifierType aType )
+    {
+    RDebug::Print(_L("CEapAuthObserver::setNotifierType") );
+    
+    iType = aType;
     }
 
 // ---------------------------------------------------------
@@ -90,14 +98,14 @@ void CEapAuthObserver::DataReceived( CHbSymbianVariantMap& aData )
         RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypeMsChapV2UsernamePasswordDialog") );
         UsernamePasswordDlgDataReceived(aData);
         }
-    else if ( iType == CEapAuthNotifier::EEapNotifierTypeGTCSecurIDPasscodeQueryUidDialog )
+    else if ( iType == CEapAuthNotifier::EEapNotifierTypeGTCQueryDialog )
         {
-        RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypeGTCSecurIDPasscodeQueryUidDialog") ); 
+        RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypeGTCQueryDialog") ); 
         PwdQueryDataReceived(aData);
         }
-    else if ( iType == CEapAuthNotifier::EEapNotifierTypePapChallengeReplyQueryDialog )
+    else if ( iType == CEapAuthNotifier::EEapNotifierTypePapAuthQueryDialog )
         {
-        RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypePapChallengeReplyQueryDialog") ); 
+        RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypePapAuthQueryDialog") ); 
         PwdQueryDataReceived(aData);
         }
     else if ( iType == CEapAuthNotifier::EEapNotifierTypeFastPacStorePwQueryDialog )

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10 %
+* %version: 11 %
 */
 
 #include "eap_am_tools.h"
@@ -196,7 +196,8 @@ EAP_FUNC_EXPORT CPacStoreIf* CPacStoreIf::new_CPacStoreIf(
     const u32_t MTU,
     AbsEapSendInterface * client)
     {
-    
+    EAP_UNREFERENCED_PARAMETER(is_client_when_true);
+    EAP_UNREFERENCED_PARAMETER(MTU);
     eap_pac_store_server_message_if_c *server =  eap_pac_store_server_message_if_c::new_eap_pac_store_server_message_if_c(
         tools);
     

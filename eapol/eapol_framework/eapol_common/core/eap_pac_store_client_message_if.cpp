@@ -16,8 +16,16 @@
 */
 
 /*
-* %version: %
+* %version: 7 %
 */
+
+// This is enumeration of EAPOL source code.
+#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
+	#undef EAP_FILE_NUMBER_ENUM
+	#define EAP_FILE_NUMBER_ENUM 766 
+	#undef EAP_FILE_NUMBER_DATE 
+	#define EAP_FILE_NUMBER_DATE 1127594498 
+#endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 
 #include "eap_am_tools.h"
 #include "eap_tools.h"
@@ -177,7 +185,7 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::process_message(
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::open_pac_store(
-		const eap_status_e completion_status)
+		const eap_status_e /* completion_status */)
 		{
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -223,7 +231,7 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::open_pac_store(
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::destroy_pac_store(
-		const eap_status_e completion_status)
+		const eap_status_e /* completion_status */)
 		{
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -267,7 +275,7 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::destroy_pac_stor
 		}
 //--------------------------------------------------------------------------------------------
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::create_device_seed(
-		const eap_status_e completion_status)
+		const eap_status_e /* completion_status */)
 		{
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -312,7 +320,7 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::create_device_se
 
 //--------------------------------------------------
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::is_master_key_present(
-		const eap_status_e completion_status)
+		const eap_status_e /* completion_status */)
 		{
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -355,7 +363,7 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::is_master_key_pr
 //--------------------------------------------------
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::is_master_key_and_password_matching(
 		const eap_variable_data_c * const pac_store_password
-		,const eap_status_e completion_status)
+		,const eap_status_e /* completion_status */)
 		{
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -407,7 +415,7 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::is_master_key_an
 //--------------------------------------------------
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::create_and_save_master_key(
 		const eap_variable_data_c * const pac_store_password
-		,const eap_status_e completion_status)
+		,const eap_status_e /* completion_status */)
 		{
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -551,7 +559,7 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::is_pacstore_pass
 //--------------------------------------------------
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::set_pac_store_password(
 		const eap_variable_data_c * const pac_store_password
-		,const eap_status_e completion_status)
+		,const eap_status_e /* completion_status */)
 		{
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 

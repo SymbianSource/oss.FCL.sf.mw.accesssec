@@ -16,13 +16,13 @@
 */
 
 /*
-* %version: 11 %
+* %version: 13 %
 */
 
 // This is enumeration of EAPOL source code.
 #if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 	#undef EAP_FILE_NUMBER_ENUM
-	#define EAP_FILE_NUMBER_ENUM 48 
+	#define EAP_FILE_NUMBER_ENUM 744 
 	#undef EAP_FILE_NUMBER_DATE 
 	#define EAP_FILE_NUMBER_DATE 1127594498 
 #endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
@@ -101,7 +101,7 @@ EAP_FUNC_EXPORT eap_general_settings_server_message_if_c::eap_general_settings_s
 
 //
 EAP_FUNC_EXPORT eap_status_e eap_general_settings_server_message_if_c::configure(
-	const eap_variable_data_c * const client_configuration)
+	const eap_variable_data_c * const /* client_configuration */)
 {
 	EAP_ASSERT(m_am_tools->get_global_mutex()->get_is_reserved() == true);
 
@@ -451,6 +451,8 @@ EAP_FUNC_EXPORT bool eap_general_settings_server_message_if_c::get_is_valid()
 EAP_FUNC_EXPORT eap_status_e eap_general_settings_server_message_if_c::timer_expired(
 	const u32_t id, void *data)
 {
+	EAP_UNREFERENCED_PARAMETER(id);
+	EAP_UNREFERENCED_PARAMETER(data);
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
@@ -474,6 +476,8 @@ EAP_FUNC_EXPORT eap_status_e eap_general_settings_server_message_if_c::timer_exp
 EAP_FUNC_EXPORT eap_status_e eap_general_settings_server_message_if_c::timer_delete_data(
 	const u32_t id, void *data)
 {
+	EAP_UNREFERENCED_PARAMETER(id);
+	EAP_UNREFERENCED_PARAMETER(data);
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(

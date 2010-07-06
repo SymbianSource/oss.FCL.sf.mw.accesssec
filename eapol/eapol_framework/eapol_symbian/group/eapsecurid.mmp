@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16.1.13 %
+* %version: 16.1.14 %
 */
 
 #include <platform_paths.hrh>
@@ -28,6 +28,8 @@ TARGETTYPE    PLUGIN
 
 TARGET        eapsecurid.dll
 UID	          0x10009d8d 0x101F8E74
+
+deffile eapsecurid.def
 
 SOURCEPATH    ../am/type/securid/symbian/plugin/src
 
@@ -79,6 +81,9 @@ LIBRARY		HbWidgets.lib
 LIBRARY   eap_notifier.lib
 
 LANG		  SC
+
+
+//-------------------------------------------------------------------
 
 //-------------------------------------------------------------------
 // End of File

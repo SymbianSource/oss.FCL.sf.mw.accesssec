@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 47 %
+* %version: 48 %
 */
 
 //-------------------------------------------------------------------
@@ -25,7 +25,7 @@
 #include "eapol.mmh"
 
 //-------------------------------------------------------------------
-CAPABILITY ALL -TCB
+CAPABILITY CAP_GENERAL_DLL
 VENDORID VID_DEFAULT
 
 TARGET			eapol.dll
@@ -117,6 +117,7 @@ LIBRARY		euser.lib hash.lib random.lib cryptography.lib efsrv.lib asn1.lib edbms
 LIBRARY   charconv.lib 
 
 MACRO USE_EAP_INTERFACE_EXPORTS
+
 
 //-------------------------------------------------------------------
 // End of File

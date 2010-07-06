@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 28 %
+* %version: 30 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -246,11 +246,14 @@ void CEapMsChapV2::SetIndexL(
 
 	RFs session;
 	
-	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-		
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::SetIndexL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+
 	EapMsChapV2DbUtils::SetIndexL(
 		db, 
 		iIndexType, 
@@ -262,6 +265,9 @@ void CEapMsChapV2::SetIndexL(
 	
 	iIndexType = aIndexType;
 	iIndex = aIndex;
+
+	db.Close();
+	session.Close();
 
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
@@ -276,11 +282,14 @@ void CEapMsChapV2::SetConfigurationL(const EAPSettings& aSettings)
 
 	RFs session;
 	
-	// This also creates the IAP entry if it doesn't exist
-	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::SetConfigurationL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	// This also creates the IAP entry if it doesn't exist
+	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 
 	EapMsChapV2DbUtils::SetConfigurationL(
 		db,
@@ -289,6 +298,9 @@ void CEapMsChapV2::SetConfigurationL(const EAPSettings& aSettings)
 		iIndex,
 		iTunnelingType);		
 		
+	db.Close();
+	session.Close();
+
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 }
@@ -302,11 +314,14 @@ void CEapMsChapV2::GetConfigurationL(EAPSettings& aSettings)
 
 	RFs session;
 	
-	// This also creates the IAP entry if it doesn't exist
-	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::GetConfigurationL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	// This also creates the IAP entry if it doesn't exist
+	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 
 	EapMsChapV2DbUtils::GetConfigurationL(
 		db,
@@ -315,6 +330,9 @@ void CEapMsChapV2::GetConfigurationL(EAPSettings& aSettings)
 		iIndex,
 		iTunnelingType);
 		
+	db.Close();
+	session.Close();
+
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 }
@@ -345,11 +363,14 @@ void CEapMsChapV2::CopySettingsL(
 
 	RFs session;
 	
-	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-		
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::CopySettingsL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+
 	EapMsChapV2DbUtils::CopySettingsL(
 		db,
 		iIndexType,
@@ -359,6 +380,9 @@ void CEapMsChapV2::CopySettingsL(
 		aDestinationIndex, 
 		iTunnelingType);
 		
+	db.Close();
+	session.Close();
+
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 	

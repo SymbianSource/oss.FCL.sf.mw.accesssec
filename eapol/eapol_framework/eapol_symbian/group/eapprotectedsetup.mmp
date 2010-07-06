@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 15 %
+* %version: 16 %
 */
 
 #include <platform_paths.hrh>
@@ -28,6 +28,8 @@ TARGETTYPE    PLUGIN
 
 TARGET        eapprotectedsetup.dll
 UID	      0x10009d8d 0x2000b003
+
+deffile eapprotectedsetup.def
 
 SOURCEPATH    ../am/type/protected_setup/symbian/plugin/src
 
@@ -80,6 +82,9 @@ MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
 LIBRARY		euser.lib ecom.lib eaptools.lib eaptrace.lib eapsymbiantools.lib 
 LIBRARY		cone.lib eikcoctl.lib
 LIBRARY		etelmm.lib etel.lib	// For ETel connection
+
+
+
 
 //-------------------------------------------------------------------
 // End of File

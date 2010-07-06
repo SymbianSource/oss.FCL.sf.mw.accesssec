@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 7 %
+* %version: 9 %
 */
 
 #if !defined(_EAPPLUGINTOOLS_H_)
@@ -24,6 +24,7 @@
 
 #include <d32dbms.h>
 #include <EapExpandedType.h>
+#include <EapTypeDefinitions.h>
 
 /** @file */
 
@@ -38,7 +39,7 @@ public:
 
 	IMPORT_C virtual ~EapPluginTools();
 
-	IMPORT_C void ListAllEapPluginsL(const TEapExpandedType & aTunnelingEapType, RPointerArray<TEapExpandedType> & aPlugins);
+	IMPORT_C void ListAllEapPluginsL(const TIndexType aIndexType, const TEapExpandedType & aTunnelingEapType, RPointerArray<TEapExpandedType> & aPlugins);
 
 	IMPORT_C static void CleanupImplArray( TAny* aAny );
 

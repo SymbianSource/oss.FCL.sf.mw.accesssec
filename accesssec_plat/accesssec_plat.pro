@@ -7,15 +7,15 @@
 # at the URL "http://www.eclipse.org/legal/epl-v10.html".
 #
 # Initial Contributors:
-# 	Nokia Corporation - initial contribution.
+# Nokia Corporation - initial contribution.
 #
 # Contributors:
 #
 # Description:
 #	Project file for accesssec_plat Qt exports
+#
 
-# %version: 1 %
-
+# %version: 2 %
 
 TEMPLATE = subdirs
 

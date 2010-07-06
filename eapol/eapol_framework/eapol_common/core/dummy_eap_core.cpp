@@ -16,13 +16,13 @@
 */
 
 /*
-* %version: %
+* %version: 5 %
 */
 
 // This is enumeration of EAPOL source code.
 #if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 	#undef EAP_FILE_NUMBER_ENUM
-	#define EAP_FILE_NUMBER_ENUM 44 
+	#define EAP_FILE_NUMBER_ENUM 716 
 	#undef EAP_FILE_NUMBER_DATE 
 	#define EAP_FILE_NUMBER_DATE 1127594498 
 #endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
@@ -68,7 +68,7 @@ EAP_FUNC_EXPORT dummy_eap_core_c::dummy_eap_core_c(
 	abs_eap_am_tools_c * const tools,
 	abs_eap_core_c * const partner,
 	const bool is_client_when_true,
-	const eap_am_network_id_c * const receive_network_id,
+	const eap_am_network_id_c * const /* receive_network_id */,
 	const bool is_tunneled_eap)
 	: m_partner(partner)
 	, m_am_tools(tools)
@@ -211,8 +211,8 @@ EAP_FUNC_EXPORT void dummy_eap_core_c::ignore_notifications()
 //--------------------------------------------------
 
 //
-eap_status_e dummy_eap_core_c::initialize_asynchronous_init_remove_eap_session(
-	const u32_t remove_session_timeout)
+EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::initialize_asynchronous_init_remove_eap_session(
+	const u32_t /* remove_session_timeout */)
 {
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
@@ -228,7 +228,7 @@ eap_status_e dummy_eap_core_c::initialize_asynchronous_init_remove_eap_session(
 
 //--------------------------------------------------
 
-eap_status_e dummy_eap_core_c::cancel_asynchronous_init_remove_eap_session()
+EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::cancel_asynchronous_init_remove_eap_session()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -241,7 +241,7 @@ eap_status_e dummy_eap_core_c::cancel_asynchronous_init_remove_eap_session()
 //--------------------------------------------------
 
 //
-eap_status_e dummy_eap_core_c::asynchronous_init_remove_eap_session()
+EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::asynchronous_init_remove_eap_session()
 {
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
@@ -258,7 +258,7 @@ eap_status_e dummy_eap_core_c::asynchronous_init_remove_eap_session()
 
 //
 eap_status_e dummy_eap_core_c::init_end_of_session(
-	const abs_eap_state_notification_c * const state)
+	const abs_eap_state_notification_c * const /* state */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -278,7 +278,7 @@ eap_status_e dummy_eap_core_c::init_end_of_session(
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT void dummy_eap_core_c::state_notification(
-	const abs_eap_state_notification_c * const state)
+	const abs_eap_state_notification_c * const /* state */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -291,9 +291,9 @@ EAP_FUNC_EXPORT void dummy_eap_core_c::state_notification(
 
 //
 EAP_FUNC_EXPORT eap_base_type_c * dummy_eap_core_c::load_type(
-	const eap_type_value_e type,
-	const eap_type_value_e tunneling_type,
-	const eap_am_network_id_c * const receive_network_id)
+	const eap_type_value_e /* type */,
+	const eap_type_value_e /* tunneling_type */,
+	const eap_am_network_id_c * /* const receive_network_id */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -305,7 +305,7 @@ EAP_FUNC_EXPORT eap_base_type_c * dummy_eap_core_c::load_type(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::check_is_valid_eap_type(const eap_type_value_e eap_type)
+EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::check_is_valid_eap_type(const eap_type_value_e /* eap_type */)
 {
 		eap_status_e status = eap_status_process_general_error;
 
@@ -315,7 +315,7 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::check_is_valid_eap_type(const eap
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::get_eap_type_list(
-	eap_array_c<eap_type_value_e> * const eap_type_list)
+	eap_array_c<eap_type_value_e> * const /* eap_type_list */)
 {
 		eap_status_e status = eap_status_process_general_error;
 
@@ -325,7 +325,7 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::get_eap_type_list(
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::initialize_session_timeout(const u32_t session_timeout_ms)
+EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::initialize_session_timeout(const u32_t /* session_timeout_ms */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -350,8 +350,8 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::cancel_session_timeout()
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT void dummy_eap_core_c::trace_eap_packet(
-	eap_const_string prefix,
-	const eap_header_wr_c * const eap_header)
+	eap_const_string /* prefix */,
+	const eap_header_wr_c * /* const eap_header */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -364,9 +364,9 @@ EAP_FUNC_EXPORT void dummy_eap_core_c::trace_eap_packet(
 #if defined(USE_EAP_CORE_SERVER)
 
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::restart_with_new_type(
-	const eap_type_value_e used_eap_type,
-	const eap_am_network_id_c * const receive_network_id,
-	const u8_t eap_identifier)
+	const eap_type_value_e /* used_eap_type */,
+	const eap_am_network_id_c * /* const receive_network_id */,
+	const u8_t /* eap_identifier */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -380,8 +380,8 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::restart_with_new_type(
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::client_proposes_eap_types(
-	const eap_am_network_id_c * const receive_network_id,
-	const u8_t eap_identifier)
+	const eap_am_network_id_c * const /* receive_network_id */,
+	const u8_t /* eap_identifier */)
 {
 
 	/**
@@ -397,10 +397,10 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::client_proposes_eap_types(
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::packet_process_type(
-	const eap_type_value_e used_eap_type,
-	const eap_am_network_id_c * const receive_network_id,
-	eap_general_header_base_c * const packet_data,
-	const u32_t packet_length)
+	const eap_type_value_e /* used_eap_type */,
+	const eap_am_network_id_c * /* const receive_network_id */,
+	eap_general_header_base_c * /* const packet_data */,
+	const u32_t /* packet_length */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -447,9 +447,9 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::packet_process_type(
  * }
  */
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::packet_process(
-	const eap_am_network_id_c * const receive_network_id,
-	eap_general_header_base_c * const packet_data,
-	const u32_t packet_length)
+	const eap_am_network_id_c * /* const receive_network_id */,
+	eap_general_header_base_c * /* const packet_data */,
+	const u32_t /* packet_length */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -472,11 +472,11 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::packet_process(
 
 //
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::packet_send(
-	const eap_am_network_id_c * const send_network_id,
-	eap_buf_chain_wr_c * const sent_packet,
-	const u32_t header_offset,
-	const u32_t data_length,
-	const u32_t buffer_length)
+	const eap_am_network_id_c * const /* send_network_id */,
+	eap_buf_chain_wr_c * const /* sent_packet */,
+	const u32_t /* header_offset */,
+	const u32_t /* data_length */,
+	const u32_t /* buffer_length */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -489,12 +489,12 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::packet_send(
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::resend_packet(
-	const eap_am_network_id_c * const send_network_id,
-	eap_buf_chain_wr_c * const sent_packet,
-	const u32_t header_offset,
-	const u32_t data_length,
-	const u32_t buffer_length,
-	const u32_t retransmission_counter)
+	const eap_am_network_id_c * const /* send_network_id */,
+	eap_buf_chain_wr_c * const /* sent_packet */,
+	const u32_t /* header_offset */,
+	const u32_t /* data_length */,
+	const u32_t /* buffer_length */,
+	const u32_t /* retransmission_counter */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -519,13 +519,13 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::cancel_retransmission()
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::init_retransmission(
-	const eap_am_network_id_c * const send_network_id,
-	eap_buf_chain_wr_c * const sent_packet,
-	const u32_t header_offset,
-	const u32_t data_length,
-	const eap_code_value_e eap_code,
-	const u8_t eap_identifier,
-	const eap_type_value_e eap_type
+	const eap_am_network_id_c * const /* send_network_id */,
+	eap_buf_chain_wr_c * const /* sent_packet */,
+	const u32_t /* header_offset */,
+	const u32_t /* data_length */,
+	const eap_code_value_e /* eap_code */,
+	const u8_t /* eap_identifier */,
+	const eap_type_value_e /* eap_type */
 	)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -594,6 +594,8 @@ EAP_FUNC_EXPORT u32_t dummy_eap_core_c::get_header_offset(
 	u32_t * const MTU,
 	u32_t * const trailer_length)
 {
+	EAP_UNREFERENCED_PARAMETER(MTU);
+	EAP_UNREFERENCED_PARAMETER(trailer_length);
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	const u32_t offset = 0;
@@ -614,12 +616,12 @@ EAP_FUNC_EXPORT u32_t dummy_eap_core_c::get_header_offset(
 
 //
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::load_module(
-	const eap_type_value_e type,
-	const eap_type_value_e tunneling_type,
-	abs_eap_base_type_c * const partner,
-	eap_base_type_c ** const handler,
-	const bool is_client_when_true,
-	const eap_am_network_id_c * const receive_network_id)
+	const eap_type_value_e /* type */,
+	const eap_type_value_e /* tunneling_type */,
+	abs_eap_base_type_c * /* const partner */,
+	eap_base_type_c ** const /* handler */,
+	const bool /* is_client_when_true */,
+	const eap_am_network_id_c * const /* receive_network_id */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -670,6 +672,8 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::shutdown_operation(
 	eap_base_type_c * const handler,
 	abs_eap_am_tools_c * const m_am_tools)
 {
+	EAP_UNREFERENCED_PARAMETER(handler);
+
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_UNREFERENCED_PARAMETER(m_am_tools);
@@ -702,7 +706,7 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::shutdown()
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::unload_module(const eap_type_value_e type)
+EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::unload_module(const eap_type_value_e /* type */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -715,7 +719,7 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::unload_module(const eap_type_valu
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::eap_acknowledge(
-	const eap_am_network_id_c * const receive_network_id)
+	const eap_am_network_id_c * const /* receive_network_id */)
 {
 	// Any Network Protocol packet is accepted as a success indication.
 	// This is described in RFC 2284 "PPP Extensible Authentication Protocol (EAP)".
@@ -732,8 +736,8 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::eap_acknowledge(
 
 //
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::restart_authentication(
-	const eap_am_network_id_c * const send_network_id,
-	const bool is_client_when_true)
+	const eap_am_network_id_c * const /* send_network_id */,
+	const bool /* is_client_when_true */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -749,7 +753,7 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::restart_authentication(
 
 //
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::send_eap_identity_request(
-	const eap_am_network_id_c * const receive_network_id)
+	const eap_am_network_id_c * const /* receive_network_id */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -775,9 +779,9 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::send_eap_identity_request(
 
 //
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::send_eap_nak_response(
-	const eap_am_network_id_c * const receive_network_id,
-	const u8_t eap_identifier,
-	const eap_array_c<eap_type_value_e> * const eap_type_list)
+	const eap_am_network_id_c * const /* receive_network_id */,
+	const u8_t /* eap_identifier */,
+	const eap_array_c<eap_type_value_e> * const /* eap_type_list */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -798,8 +802,8 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::send_eap_nak_response(
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::packet_data_crypto_keys(
-	const eap_am_network_id_c * const send_network_id,
-	const eap_master_session_key_c * const master_session_key
+	const eap_am_network_id_c * const /* send_network_id */,
+	const eap_master_session_key_c * const /* master_session_key */
 	)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -813,8 +817,8 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::packet_data_crypto_keys(
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::read_configure(
-	const eap_configuration_field_c * const field,
-	eap_variable_data_c * const data)
+	const eap_configuration_field_c * const /* field */,
+	eap_variable_data_c * const /* data */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -827,8 +831,8 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::read_configure(
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::write_configure(
-	const eap_configuration_field_c * const field,
-	eap_variable_data_c * const data)
+	const eap_configuration_field_c * const /* field */,
+	eap_variable_data_c * const /* data */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -842,7 +846,7 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::write_configure(
 
 //
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::timer_expired(
-	const u32_t id, void *data)
+	const u32_t /* id */, void * /* data */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -857,7 +861,7 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::timer_expired(
 
 //
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::timer_delete_data(
-	const u32_t id, void *data)
+	const u32_t /* id */, void * /* data */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -874,6 +878,7 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::reset_operation(
 	eap_base_type_c * const handler,
 	abs_eap_am_tools_c * const m_am_tools)
 {
+	EAP_UNREFERENCED_PARAMETER(handler);
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_UNREFERENCED_PARAMETER(m_am_tools);
@@ -925,9 +930,9 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::reset()
 
 // 
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::handle_eap_identity_request(
-	const eap_type_value_e used_eap_type,
-	const u8_t eap_identifier,
-	const eap_am_network_id_c * const receive_network_id)
+	const eap_type_value_e /* used_eap_type */,
+	const u8_t /* eap_identifier */,
+	const eap_am_network_id_c * const /* receive_network_id */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -943,11 +948,11 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::handle_eap_identity_request(
 
 // 
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::handle_eap_identity_response(
-	eap_base_type_c * const handler,
+	eap_base_type_c * const /* handler */,
 	const eap_type_value_e used_eap_type,
-	const eap_am_network_id_c * const receive_network_id,
-	eap_header_wr_c * const eap,
-	const u32_t packet_length)
+	const eap_am_network_id_c * const /* receive_network_id */,
+	eap_header_wr_c * const /* eap */,
+	const u32_t /* packet_length */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	EAP_UNREFERENCED_PARAMETER(used_eap_type); 
@@ -966,8 +971,8 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::handle_eap_identity_response(
 
 //
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::send_eap_success(
-	const eap_am_network_id_c * const send_network_id,
-	const u8_t eap_identifier)
+	const eap_am_network_id_c * const /* send_network_id */,
+	const u8_t /* eap_identifier */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -985,8 +990,8 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::send_eap_success(
 
 //
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::send_eap_failure(
-	const eap_am_network_id_c * const send_network_id,
-	const u8_t eap_identifier)
+	const eap_am_network_id_c * const /* send_network_id */,
+	const u8_t /* eap_identifier */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -1002,8 +1007,8 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::send_eap_failure(
 
 //
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::send_eap_notification_response(
-	const eap_am_network_id_c * const send_network_id,
-	const u8_t eap_identifier)
+	const eap_am_network_id_c * const /* send_network_id */,
+	const u8_t /* eap_identifier */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -1018,9 +1023,9 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::send_eap_notification_response(
 
 //
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::create_eap_identity_response(
-	eap_buf_chain_wr_c * const response_packet,
-	const eap_variable_data_c * const identity,
-	const u8_t eap_identifier
+	eap_buf_chain_wr_c * const /* response_packet */,
+	const eap_variable_data_c * const /* identity */,
+	const u8_t /* eap_identifier */
 	)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1035,9 +1040,9 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::create_eap_identity_response(
 
 //
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::send_eap_identity_response(
-	const eap_am_network_id_c * const send_network_id,
-	const eap_variable_data_c * const identity,
-	const u8_t eap_identifier
+	const eap_am_network_id_c * const /* send_network_id */,
+	const eap_variable_data_c * const /* identity */,
+	const u8_t /* eap_identifier */
 	)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1052,7 +1057,7 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::send_eap_identity_response(
 
 //
 eap_status_e dummy_eap_core_c::set_eap_identity_routing_info_and_nai_decoration(
-	eap_variable_data_c * const identity)
+	eap_variable_data_c * const /* identity */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -1067,8 +1072,8 @@ eap_status_e dummy_eap_core_c::set_eap_identity_routing_info_and_nai_decoration(
 
 //
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::complete_eap_identity_query(
-	const eap_am_network_id_c * const send_network_id,
-	const eap_variable_data_c * const identity,
+	const eap_am_network_id_c * const /* send_network_id */,
+	const eap_variable_data_c * const /* identity */,
 	const u8_t /*eap_identifier*/) // Remove eap_identifier parameter.
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1081,7 +1086,7 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::complete_eap_identity_query(
 
 //
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::get_saved_eap_identity(
-	eap_variable_data_c * const identity)
+	eap_variable_data_c * const /* identity */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -1095,7 +1100,7 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::get_saved_eap_identity(
 
 //
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::set_session_timeout(
-	const u32_t session_timeout_ms)
+	const u32_t /* session_timeout_ms */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -1149,7 +1154,7 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::cancel_timer(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::set_authentication_role(const bool when_true_set_client)
+EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::set_authentication_role(const bool /* when_true_set_client */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -1160,7 +1165,7 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::set_authentication_role(const boo
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::add_rogue_ap(
-	eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list)
+	eap_array_c<eap_rogue_ap_entry_c> & /* rogue_ap_list */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 

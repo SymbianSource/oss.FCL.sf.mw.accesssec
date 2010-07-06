@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 23 %
+* %version: 25 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -209,11 +209,14 @@ void CEapSecurID::SetIndexL(
 
 	RFs session;
 	
-	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-		
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapSecurID::SetIndexL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+
 	EapGtcDbUtils::SetIndexL(
 		db, 
 		iIndexType, 
@@ -226,6 +229,9 @@ void CEapSecurID::SetIndexL(
 	iIndexType = aIndexType;
 	iIndex = aIndex;
 
+	db.Close();
+	session.Close();
+
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 }
@@ -236,11 +242,14 @@ void CEapSecurID::SetConfigurationL(const EAPSettings& aSettings)
 
 	RFs session;
 	
-	// This also creates the IAP entry if it doesn't exist
-	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapSecurID::SetConfigurationL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	// This also creates the IAP entry if it doesn't exist
+	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 
 	EapGtcDbUtils::SetConfigurationL(
 		db,
@@ -248,6 +257,9 @@ void CEapSecurID::SetConfigurationL(const EAPSettings& aSettings)
 		iIndexType,
 		iIndex,
 		iTunnelingType);		
+
+	db.Close();
+	session.Close();
 
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
@@ -259,11 +271,14 @@ void CEapSecurID::GetConfigurationL(EAPSettings& aSettings)
 
 	RFs session;
 	
-	// This also creates the IAP entry if it doesn't exist
-	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapSecurID::GetConfigurationL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	// This also creates the IAP entry if it doesn't exist
+	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 
 	EapGtcDbUtils::GetConfigurationL(
 		db,
@@ -271,6 +286,9 @@ void CEapSecurID::GetConfigurationL(EAPSettings& aSettings)
 		iIndexType,
 		iIndex,
 		iTunnelingType);
+
+	db.Close();
+	session.Close();
 
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
@@ -299,11 +317,14 @@ void CEapSecurID::CopySettingsL(
 
 	RFs session;
 	
-	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-		
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapSecurID::CopySettingsL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+
 	EapGtcDbUtils::CopySettingsL(
 		db,
 		iIndexType,
@@ -312,6 +333,9 @@ void CEapSecurID::CopySettingsL(
 		aDestinationIndexType, 
 		aDestinationIndex, 
 		iTunnelingType);
+
+	db.Close();
+	session.Close();
 
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);

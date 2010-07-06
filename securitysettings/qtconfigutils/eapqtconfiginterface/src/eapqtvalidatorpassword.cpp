@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -12,33 +12,48 @@
  * Contributors:
  *
  * Description: 
- *   EAP method validator: password
+ *   EAP method password format validator
  *
  */
 
 /*
- * %version: 7 %
+ * %version: 9 %
  */
 
+// System includes
 #include <HbEditorInterface>
 #include <HbLineEdit>
 
+// User includes
 #include "eapqtvalidatorpassword.h"
 #include "eapqtconfiginterface_p.h"
 
-EapQtValidatorPassword::EapQtValidatorPassword(EapQtExpandedEapType type) :
+/*!
+ *  \class EapQtValidatorPassword
+ *  \brief EAP method password format validator
+ */
+
+// External function prototypes
+
+// Local constants
+
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+EapQtValidatorPassword::EapQtValidatorPassword(const EapQtExpandedEapType& type) :
     mEapType(type)
 {
-    qDebug("EapQtValidatorPassword::EapQtValidatorPassword()");
 }
 
 EapQtValidatorPassword::~EapQtValidatorPassword()
 {
-    qDebug("EapQtValidatorPassword::~EapQtValidatorPassword()");
 }
 
-EapQtValidator::Status EapQtValidatorPassword::validate(QVariant value)
+EapQtValidator::Status EapQtValidatorPassword::validate(const QVariant& value)
 {
+    qDebug("EapQtValidatorPassword::validate()");
+
     Status status(StatusOk);
 
     switch (mEapType.type()) {
@@ -57,7 +72,7 @@ EapQtValidator::Status EapQtValidatorPassword::validate(QVariant value)
     return status;
 }
 
-EapQtValidator::Status EapQtValidatorPassword::validateGeneral(QVariant value)
+EapQtValidator::Status EapQtValidatorPassword::validateGeneral(const QVariant& value)
 {
     Status status(StatusOk);
     QString str = value.toString();
@@ -67,7 +82,7 @@ EapQtValidator::Status EapQtValidatorPassword::validateGeneral(QVariant value)
         status = StatusInvalid;
     }
     // zero length password is not ok
-    else if (str.length() == 0) {
+    else if (str.length() <= 0) {
         status = StatusTooShort;
     }
     // check maximum length
@@ -81,8 +96,10 @@ EapQtValidator::Status EapQtValidatorPassword::validateGeneral(QVariant value)
     return status;
 }
 
-void EapQtValidatorPassword::updateEditor(HbLineEdit *edit)
+void EapQtValidatorPassword::updateEditor(HbLineEdit* const edit)
 {
+    qDebug("EapQtValidatorPassword::updateEditor()");
+
     Q_ASSERT(edit);
     if(edit == NULL) {
         return;
@@ -102,7 +119,7 @@ void EapQtValidatorPassword::updateEditor(HbLineEdit *edit)
     }
 }
 
-void EapQtValidatorPassword::updateEditorGeneral(HbLineEdit *edit)
+void EapQtValidatorPassword::updateEditorGeneral(HbLineEdit* const edit)
 {
     qDebug("EapQtValidatorPassword::updateEditorGeneral()");
 

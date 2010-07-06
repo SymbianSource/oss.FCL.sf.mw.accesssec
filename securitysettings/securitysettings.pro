@@ -12,9 +12,10 @@
 # Contributors:
 #
 # Description:
+#   Project definition file for accesssec package QT components
 #
-
-# %version: 6 %
+# %version: 7 %
+#
 
 TEMPLATE = subdirs
 

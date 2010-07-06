@@ -353,7 +353,7 @@ public:
 	bool get_includes_other_version_than_1();
 
 
-	bool get_is_valid() const;
+	EAP_FUNC_IMPORT bool get_is_valid() const;
 
 	//--------------------------------------------------
 }; // class aka_payloads_c

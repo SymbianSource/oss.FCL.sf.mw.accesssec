@@ -16,7 +16,7 @@
 */
 
 /*
-* %version:  39 %
+* %version:  40 %
 */
 
 #include "EapServerProcessHandler.h"
@@ -45,7 +45,12 @@ CEapServerProcessHandler::CEapServerProcessHandler()
 #endif //#if defined(USE_FAST_EAP_TYPE)
 , iEapMessageQueue(0)
 {
-
+	EAP_TRACE_DEBUG(
+		iTools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapServerProcessHandler::CEapServerProcessHandler(): this=0x%08x\n"),
+		this));
+	EAP_TRACE_RETURN_STRING(iTools, "returns: CEapServerProcessHandler::CEapServerProcessHandler()");
 }
 
 //----------------------------------------------------------------------------

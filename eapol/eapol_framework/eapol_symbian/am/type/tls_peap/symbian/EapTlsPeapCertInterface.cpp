@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 38.1.24 %
+* %version: 38.1.26 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -145,56 +145,64 @@ CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface()
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iMatchingUserCerts.ResetAndDestroy()\n")));
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iMatchingUserCerts.ResetAndDestroy(): count=%d\n"),
+		iMatchingUserCerts.Count()));
 
 	iMatchingUserCerts.ResetAndDestroy();
 
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iMatchingUserCertInfos.ResetAndDestroy()\n")));
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iMatchingUserCertInfos.ResetAndDestroy(): count=%d\n"),
+		iMatchingUserCertInfos.Count()));
 
 	iMatchingUserCertInfos.ResetAndDestroy();
 	
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iAllowedUserCerts.ResetAndDestroy()\n")));
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iAllowedUserCerts.ResetAndDestroy(): count=%d\n"),
+		iAllowedUserCerts.Count()));
 
 	iAllowedUserCerts.ResetAndDestroy();
 
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iAllowedCACerts.ResetAndDestroy()\n")));
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iAllowedCACerts.ResetAndDestroy(): count=%d\n"),
+		iAllowedCACerts.Count()));
 
 	iAllowedCACerts.ResetAndDestroy();
 
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iRootCerts.ResetAndDestroy()\n")));
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iRootCerts.ResetAndDestroy(): count=%d\n"),
+		iRootCerts.Count()));
 
 	iRootCerts.ResetAndDestroy();
 
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iUserCertChain.ResetAndDestroy()\n")));
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iUserCertChain.ResetAndDestroy(): count=%d\n"),
+		iUserCertChain.Count()));
 
 	iUserCertChain.ResetAndDestroy();
 	
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iCertAuthorities.ResetAndDestroy()\n")));
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iCertAuthorities.ResetAndDestroy(): count=%d\n"),
+		iCertAuthorities.Count()));
 
 	iCertAuthorities.ResetAndDestroy();
 	
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iCertInfos.Reset()\n")));
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iCertInfos.Reset(): count=%d\n"),
+		iCertInfos.Count()));
 
 	TInt i(0);
 	for (i = 0; i < iCertInfos.Count(); i++)
@@ -206,7 +214,8 @@ CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface()
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iKeyInfos.Reset()\n")));
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iKeyInfos.Reset(): count=%d\n"),
+		iKeyInfos.Count()));
 
 	for (i = 0; i < iKeyInfos.Count(); i++)
 	{
@@ -1113,23 +1122,16 @@ void CEapTlsPeapCertInterface::RunL()
 					(EAPL("CEapTlsPeapCertInterface::RunL(): EGetMatchingCertsInitialize - No matching Certificates.\n")));
 			
 				// No matching certs
-				
-				RPointerArray<EapCertificateEntry>* tmp = NULL;
-				
-				tmp = new (ELeave) RPointerArray<EapCertificateEntry>(1);
-				if (tmp == 0)
-				{
-					// Timeout handles error situation
-					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));					
-				}
-				
+			
+				// Timeout handles error situation
+				RPointerArray<EapCertificateEntry> empty(sizeof(EapCertificateEntry));
+
 				m_am_tools->enter_global_mutex();
-				
-				iParent->complete_get_matching_certificates(*tmp, eap_status_illegal_certificate); //Failure
-				
+
+				iParent->complete_get_matching_certificates(empty, eap_status_illegal_certificate); //Failure
+
 				m_am_tools->leave_global_mutex();
 
-				delete tmp;
 				break;
 			}
 
@@ -1142,21 +1144,24 @@ void CEapTlsPeapCertInterface::RunL()
 
 			iEncodedCertificate->Des().SetLength(0);
 			
-			TRAPD(error, iEncodedCertificate = iEncodedCertificate->ReAllocL(iCertInfos[iUserCertIndex]->Size()));
+			HBufC8 * tmpCert = 0;
+			TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(iCertInfos[iUserCertIndex]->Size()));
 			if (error != KErrNone)
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 
-				RPointerArray<EapCertificateEntry> tmp(sizeof(EapCertificateEntry));
+				RPointerArray<EapCertificateEntry> empty(sizeof(EapCertificateEntry));
 
 				m_am_tools->enter_global_mutex();
 
-				iParent->complete_get_matching_certificates(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
 
 				m_am_tools->leave_global_mutex();
 
 				break;
 			}
+
+			iEncodedCertificate = tmpCert;
 
 			iCertPtr.Set(iEncodedCertificate->Des());
 
@@ -1182,11 +1187,11 @@ void CEapTlsPeapCertInterface::RunL()
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				
-				RPointerArray<EapCertificateEntry> tmp(sizeof(EapCertificateEntry));
+				RPointerArray<EapCertificateEntry> empty(sizeof(EapCertificateEntry));
 											
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_get_matching_certificates(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 
@@ -1198,32 +1203,31 @@ void CEapTlsPeapCertInterface::RunL()
 				delete cert;
 				EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				
-				RPointerArray<EapCertificateEntry> tmp(sizeof(EapCertificateEntry));
+				RPointerArray<EapCertificateEntry> empty(sizeof(EapCertificateEntry));
 
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_get_matching_certificates(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 							
 				break;
 			}
-			
+
 			// No need to validate iCertInfos here as the execution doesn't come to this case if iCertInfos
 			// is empty, check is done in the above case.
-						
+
 			EapCertificateEntry * entry = new EapCertificateEntry;
-			entry = new (ELeave) EapCertificateEntry;
-			if (entry == 0 || error != KErrNone)
+			if (entry == 0)
 			{
 				// Timeout handles error situation
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));					
 
-				RPointerArray<EapCertificateEntry> tmp(sizeof(EapCertificateEntry));
+				RPointerArray<EapCertificateEntry> empty(sizeof(EapCertificateEntry));
 
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_get_matching_certificates(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 
@@ -1240,14 +1244,16 @@ void CEapTlsPeapCertInterface::RunL()
 			{
 				EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				
-				RPointerArray<EapCertificateEntry> tmp(sizeof(EapCertificateEntry));
+				RPointerArray<EapCertificateEntry> empty(sizeof(EapCertificateEntry));
 
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_get_matching_certificates(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 							
+				delete entry;
+
 				break;
 			}
 
@@ -1390,21 +1396,24 @@ void CEapTlsPeapCertInterface::RunL()
 
 				iEncodedCertificate->Des().SetLength(0);
 
-				TRAPD(error, iEncodedCertificate = iEncodedCertificate->ReAllocL(iCertInfos[iUserCertIndex]->Size()));
+				HBufC8 * tmpCert = 0;
+				TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(iCertInfos[iUserCertIndex]->Size()));
 				if (error != KErrNone)
 				{
 					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				
-					RPointerArray<EapCertificateEntry> tmp(sizeof(EapCertificateEntry));
+					RPointerArray<EapCertificateEntry> empty(sizeof(EapCertificateEntry));
 
 					m_am_tools->enter_global_mutex();
 					
-					iParent->complete_get_matching_certificates(tmp, eap_status_allocation_error); //Failure
+					iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
 					
 					m_am_tools->leave_global_mutex();
 					
 					break;
 				}
+
+				iEncodedCertificate = tmpCert;
 				
 				iCertPtr.Set(iEncodedCertificate->Des());
 
@@ -1440,11 +1449,11 @@ void CEapTlsPeapCertInterface::RunL()
 			{ 
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				
-				RPointerArray<CX509Certificate> tmp;
+				RPointerArray<CX509Certificate> empty;
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1483,11 +1492,11 @@ void CEapTlsPeapCertInterface::RunL()
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: EReadCertList iCertInfos.Count = 0.\n")));			
 				
-				RPointerArray<CX509Certificate> tmp;
+				RPointerArray<CX509Certificate> empty;
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(tmp, eap_status_illegal_certificate); //Failure
+				iParent->complete_read_own_certificate(empty, eap_status_illegal_certificate); //Failure
 				
 				m_am_tools->leave_global_mutex();
 
@@ -1502,21 +1511,24 @@ void CEapTlsPeapCertInterface::RunL()
 			
 			iEncodedCertificate->Des().SetLength(0);
 
-			TRAPD(error, iEncodedCertificate = iEncodedCertificate->ReAllocL(info->Size()));
+			HBufC8 * tmpCert = 0;
+			TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(info->Size()));
 			if (error != KErrNone)
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
 				
-				RPointerArray<CX509Certificate> tmp;
+				RPointerArray<CX509Certificate> empty;
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
 				break;
 			}
+
+			iEncodedCertificate = tmpCert;
 				
 			iCertPtr.Set(iEncodedCertificate->Des());
 			
@@ -1541,11 +1553,11 @@ void CEapTlsPeapCertInterface::RunL()
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
 				
-				RPointerArray<CX509Certificate> tmp;
+				RPointerArray<CX509Certificate> empty;
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1558,11 +1570,11 @@ void CEapTlsPeapCertInterface::RunL()
 				delete cert;
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
 				
-				RPointerArray<CX509Certificate> tmp;
+				RPointerArray<CX509Certificate> empty;
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1619,11 +1631,11 @@ void CEapTlsPeapCertInterface::RunL()
 			{ 
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				
-				RPointerArray<CX509Certificate> tmp;
+				RPointerArray<CX509Certificate> empty;
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1688,21 +1700,25 @@ void CEapTlsPeapCertInterface::RunL()
 			iState = ECreateCertChain;
 			
 			iEncodedCertificate->Des().SetLength(0);
-			TRAPD(error, iEncodedCertificate = iEncodedCertificate->ReAllocL(info->Size()));
+
+			HBufC8 * tmpCert = 0;
+			TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(info->Size()));
 			if (error != KErrNone)
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
 				
-				RPointerArray<CX509Certificate> tmp;
+				RPointerArray<CX509Certificate> empty;
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
 				break;
 			}
+
+			iEncodedCertificate = tmpCert;
 				
 			iCertPtr.Set(iEncodedCertificate->Des());
 			
@@ -1728,11 +1744,11 @@ void CEapTlsPeapCertInterface::RunL()
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
 				
-				RPointerArray<CX509Certificate> tmp;
+				RPointerArray<CX509Certificate> empty;
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1813,11 +1829,11 @@ void CEapTlsPeapCertInterface::RunL()
 				delete cert;
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
 				
-				RPointerArray<CX509Certificate> tmp;
+				RPointerArray<CX509Certificate> empty;
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1875,10 +1891,10 @@ void CEapTlsPeapCertInterface::RunL()
 							if (error != KErrNone)
 							{				
 				
-								RPointerArray<CX509Certificate> tmp;
+								RPointerArray<CX509Certificate> empty;
 								m_am_tools->enter_global_mutex();
 								
-								iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
+								iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
 								
 								m_am_tools->leave_global_mutex();
 				
@@ -1888,11 +1904,11 @@ void CEapTlsPeapCertInterface::RunL()
 							TRAP(error, signParams = CSigningKeyParameters::NewL());
 							if (error != KErrNone)
 							{				
-								RPointerArray<CX509Certificate> tmp;
+								RPointerArray<CX509Certificate> empty;
 				
 								m_am_tools->enter_global_mutex();
 								
-								iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
+								iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
 								
 								m_am_tools->leave_global_mutex();				
 
@@ -1902,11 +1918,11 @@ void CEapTlsPeapCertInterface::RunL()
 							TRAP(error, signParams->SetDSAParamsL(*dsaParams));
 							if (error != KErrNone)
 							{				
-								RPointerArray<CX509Certificate> tmp;
+								RPointerArray<CX509Certificate> empty;
 								
 								m_am_tools->enter_global_mutex();
 								
-								iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
+								iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
 								
 								m_am_tools->leave_global_mutex();
 				
@@ -1918,10 +1934,10 @@ void CEapTlsPeapCertInterface::RunL()
 							TRAP(error, iUserCertChain[iUserCertChain.Count()-1]->SetParametersL(*signParams));
 							if (error != KErrNone)
 							{
-								RPointerArray<CX509Certificate> tmp;
+								RPointerArray<CX509Certificate> empty;
 								m_am_tools->enter_global_mutex();
 								
-								iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
+								iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
 								
 								m_am_tools->leave_global_mutex();				
 							
@@ -1939,11 +1955,12 @@ void CEapTlsPeapCertInterface::RunL()
 								delete dsaParams;
 								delete signParams;
 								EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
-								RPointerArray<CX509Certificate> tmp;
+
+								RPointerArray<CX509Certificate> empty;
 								
 								m_am_tools->enter_global_mutex();
 								
-								iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
+								iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
 								
 								m_am_tools->leave_global_mutex();
 				
@@ -1984,24 +2001,26 @@ void CEapTlsPeapCertInterface::RunL()
 					(EAPL("CEapTlsPeapCertInterface::RunL()- ECreateCertChain - Before Retrieve(): iCAIndex=%d, size=%d\n"),
 					iCAIndex, info->Size()));			
 
-				
-				
 				iEncodedCertificate->Des().SetLength(0);
-				TRAPD(error, iEncodedCertificate = iEncodedCertificate->ReAllocL(info->Size()));
+
+				HBufC8 * tmpCert = 0;
+				TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(info->Size()));
 				if (error != KErrNone)
 				{
 					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
 				
-					RPointerArray<CX509Certificate> tmp;
+					RPointerArray<CX509Certificate> empty;
 					
 					m_am_tools->enter_global_mutex();
 					
-					iParent->complete_read_ca_certificate(tmp, eap_status_allocation_error); //Failure
+					iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
 					
 					m_am_tools->leave_global_mutex();
 				
 					break;
 				}
+
+				iEncodedCertificate = tmpCert;
 				
 				iCertPtr.Set(iEncodedCertificate->Des());
 			
@@ -2036,11 +2055,12 @@ void CEapTlsPeapCertInterface::RunL()
 			if (error != KErrNone)
 			{ 
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
-				RPointerArray<CX509Certificate> tmp;
+
+				RPointerArray<CX509Certificate> empty;
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_ca_certificate(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2077,11 +2097,12 @@ void CEapTlsPeapCertInterface::RunL()
 			if (iCertInfos.Count() == 0)
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: EReadCACertList iCertInfos.Count = 0.\n")));
-				RPointerArray<CX509Certificate> tmp;
+
+				RPointerArray<CX509Certificate> empty;
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_ca_certificate(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2095,19 +2116,23 @@ void CEapTlsPeapCertInterface::RunL()
 			
 			iEncodedCertificate->Des().SetLength(0);
 
-			TRAPD(error, iEncodedCertificate = iEncodedCertificate->ReAllocL(info->Size()));
+			HBufC8 * tmpCert = 0;
+			TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(info->Size()));
 			if (error != KErrNone)
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
-				RPointerArray<CX509Certificate> tmp;
+
+				RPointerArray<CX509Certificate> empty;
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_ca_certificate(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
 			}
+
+			iEncodedCertificate = tmpCert;
 				
 			iCertPtr.Set(iEncodedCertificate->Des());
 			
@@ -2138,11 +2163,12 @@ void CEapTlsPeapCertInterface::RunL()
 			if (error != KErrNone)
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
-				RPointerArray<CX509Certificate> tmp;
+
+				RPointerArray<CX509Certificate> empty;
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_ca_certificate(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2154,11 +2180,12 @@ void CEapTlsPeapCertInterface::RunL()
 			{
 				delete cert;
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
-				RPointerArray<CX509Certificate> tmp;
+
+				RPointerArray<CX509Certificate> empty;
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_ca_certificate(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2189,11 +2216,12 @@ void CEapTlsPeapCertInterface::RunL()
 			if (error != KErrNone)
 			{ 
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
-				CPKIXValidationResult* tmp = 0;
+
+				const CPKIXValidationResult * const empty = 0;
 				
 				m_am_tools->enter_global_mutex();
 
-				iParent->complete_validate_chain(*tmp, eap_status_ca_certificate_unknown); //Failure.
+				iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
 
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2255,19 +2283,15 @@ void CEapTlsPeapCertInterface::RunL()
 				// Create new validation result for this failure case. 
 				// CPKIXValidationResult does include a Reset-member function
 				// but it is not in x500.lib as the documentation says.
-				CPKIXValidationResult* validationResult = 0;
-				TRAPD(error, validationResult = CPKIXValidationResult::NewL());
-				if (error != KErrNone)
-				{
-					// Do nothing. Session timeout takes care of cleanup...
-					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
-				}
+				const CPKIXValidationResult * const empty = 0;
+
+				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: No cert infos\n")));
+
 				m_am_tools->enter_global_mutex();
 
-				iParent->complete_validate_chain(*validationResult, eap_status_ca_certificate_unknown); //Failure.
+				iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
 
 				m_am_tools->leave_global_mutex();
-				delete validationResult;
 				break;
 			}
 
@@ -2279,20 +2303,24 @@ void CEapTlsPeapCertInterface::RunL()
 				iState = EValidateChainGetCACert;
 
 				iEncodedCertificate->Des().SetLength(0);
-				TRAPD(error, iEncodedCertificate = iEncodedCertificate->ReAllocL(info->Size()));
+
+				HBufC8 * tmpCert = 0;
+				TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(info->Size()));
 				if (error != KErrNone)
 				{
 					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 					
-					CPKIXValidationResult* tmp = 0;
+					const CPKIXValidationResult * const empty = 0;
 					
 					m_am_tools->enter_global_mutex();
 
-					iParent->complete_validate_chain(*tmp, eap_status_ca_certificate_unknown); //Failure.
+					iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
 
 					m_am_tools->leave_global_mutex();
 					break;
 				}
+
+				iEncodedCertificate = tmpCert;
 
 				iCertPtr.Set(iEncodedCertificate->Des());
 
@@ -2317,12 +2345,13 @@ void CEapTlsPeapCertInterface::RunL()
 			TRAPD(error, cert = CX509Certificate::NewL(iEncodedCertificate->Des()));
 			if (error != KErrNone)
 			{
-				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
-				CPKIXValidationResult* tmp = 0;
+				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
+
+				const CPKIXValidationResult * const empty = 0;
 				
 				m_am_tools->enter_global_mutex();
 
-				iParent->complete_validate_chain(*tmp, eap_status_ca_certificate_unknown); //Failure.
+				iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
 
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2332,12 +2361,13 @@ void CEapTlsPeapCertInterface::RunL()
 			if (iRootCerts.Append(cert) != KErrNone)
 			{
 				delete cert;
-				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
-				CPKIXValidationResult* tmp = 0;
+				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
+
+				const CPKIXValidationResult * const empty = 0;
 				
 				m_am_tools->enter_global_mutex();
 
-				iParent->complete_validate_chain(*tmp, eap_status_ca_certificate_unknown); //Failure.
+				iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
 
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2353,11 +2383,12 @@ void CEapTlsPeapCertInterface::RunL()
 				if (error != KErrNone)
 				{
 					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: EAP-TLS error %d.\n"), error));
-					CPKIXValidationResult* tmp = 0;
+
+					const CPKIXValidationResult * const empty = 0;
 					
 					m_am_tools->enter_global_mutex();
 
-					iParent->complete_validate_chain(*tmp, eap_status_ca_certificate_unknown); //Failure.
+					iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
 
 					m_am_tools->leave_global_mutex();
 					break;
@@ -2377,12 +2408,13 @@ void CEapTlsPeapCertInterface::RunL()
 				if (error != KErrNone)
 				{
 					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Error in certificate validation in EAP-TLS, error = %d.\n"),
-						error));			
-					CPKIXValidationResult* tmp = 0;
+						error));
+
+					const CPKIXValidationResult * const empty = 0;
 					
 					m_am_tools->enter_global_mutex();
 
-					iParent->complete_validate_chain(*tmp, eap_status_ca_certificate_unknown); //Failure.
+					iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
 
 					m_am_tools->leave_global_mutex();
 					break;
@@ -2397,19 +2429,24 @@ void CEapTlsPeapCertInterface::RunL()
 				iState = EValidateChainGetCACert;
 				
 				iEncodedCertificate->Des().SetLength(0);
-				TRAPD(error, iEncodedCertificate = iEncodedCertificate->ReAllocL(info->Size()));
+
+				HBufC8 * tmpCert = 0;
+				TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(info->Size()));
 				if (error != KErrNone)
 				{
-					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
-					CPKIXValidationResult* tmp = 0;
+					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
+
+					const CPKIXValidationResult * const empty = 0;
 					
 					m_am_tools->enter_global_mutex();
 
-					iParent->complete_validate_chain(*tmp, eap_status_ca_certificate_unknown); //Failure.
+					iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
 
 					m_am_tools->leave_global_mutex();
 					break;
 				}
+
+				iEncodedCertificate = tmpCert;
 				
 				iCertPtr.Set(iEncodedCertificate->Des());
 			
@@ -2432,8 +2469,8 @@ void CEapTlsPeapCertInterface::RunL()
 			iValidationResult->Error().iReason));
 		
 		m_am_tools->enter_global_mutex();
-		
-		iParent->complete_validate_chain(*iValidationResult, eap_status_ok);
+
+		iParent->complete_validate_chain(iValidationResult, eap_status_ok);
 
 		m_am_tools->leave_global_mutex();
 		// Ignore error because there is nothing that can be done.

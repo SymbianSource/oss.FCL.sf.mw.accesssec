@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 46 %
+* %version: 49 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -111,7 +111,7 @@ EAP_FUNC_EXPORT eap_base_type_c * ethernet_core_c::load_type(const eap_type_valu
 
 //
 EAP_FUNC_EXPORT eap_status_e ethernet_core_c::packet_process(
-	const eap_am_network_id_c * const receive_network_id,
+	const eap_am_network_id_c * const /* receive_network_id */,
 	eap_general_header_base_c * const packet_data,
 	const u32_t packet_length)
 {
@@ -512,7 +512,7 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::start_preauthentication(
 //--------------------------------------------------
 
 //
-eap_status_e ethernet_core_c::read_reassociation_parameters(
+EAP_FUNC_EXPORT eap_status_e ethernet_core_c::read_reassociation_parameters(
 	const eap_am_network_id_c * const old_receive_network_id, ///< source includes remote address, destination includes local address.
 	const eap_am_network_id_c * const new_receive_network_id, ///< source includes remote address, destination includes local address.
 	const eapol_key_authentication_type_e authentication_type,
@@ -566,7 +566,7 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::start_reassociation(
 //--------------------------------------------------
 
 //
-eap_status_e ethernet_core_c::complete_reassociation(
+EAP_FUNC_EXPORT eap_status_e ethernet_core_c::complete_reassociation(
 	const eapol_wlan_authentication_state_e reassociation_result,
 	const eap_am_network_id_c * const receive_network_id,
 	const eapol_key_authentication_type_e authentication_type,

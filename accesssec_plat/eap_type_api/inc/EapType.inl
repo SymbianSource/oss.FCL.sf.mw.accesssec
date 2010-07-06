@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 22 %
 */
 
 #include "EapTraceSymbian.h"
@@ -56,6 +56,11 @@ inline CEapType* CEapType::NewL(const TIndexType aIndexType, const TInt aIndex, 
 
 inline CEapType::~CEapType()
 {
+    EAP_TRACE_DEBUG_SYMBIAN((_L("CEapType::~CEapType(): this=0x%08x"),
+		this));
+
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapType::~CEapType()"));
+
 	// Unload DLL
     REComSession::DestroyedImplementation(iDtor_ID_Key);
 }

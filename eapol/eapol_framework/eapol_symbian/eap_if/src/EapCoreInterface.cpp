@@ -16,13 +16,13 @@
 */
 
 /*
-* %version: 19 %
+* %version: 21 %
 */
 
 #include "EapCoreInterface.h"
 #include "eap_am_tools.h"
 #include "EapolUID.h"
-#include <EapPluginTools.h>
+#include "EapPluginTools.h"
 
 CEapCoreInterface::CEapCoreInterface(const u32_t MTU):
   iClient(NULL)
@@ -78,7 +78,7 @@ EAP_FUNC_EXPORT CEapProcessInterface* CEapCoreInterface::ConstrucL(abs_eap_am_to
 
 EAP_FUNC_EXPORT eap_am_message_if_c * new_eap_am_client_message_if_c(
         abs_eap_am_tools_c * const tools,
-        const bool is_client_when_true,
+        const bool /* is_client_when_true */,
         const u32_t MTU)
     {   
      CEapCoreInterface * aEapCoreInterface = 0;

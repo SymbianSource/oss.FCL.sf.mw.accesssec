@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 33 %
+* %version: 34 %
 */
 
 #include "REapSession.h"
@@ -538,7 +538,7 @@ TInt CSendHandler::RunError(TInt aError)
 //----------------------------------------------------------------
 //----------------------------------------------------------------
 
-void CEapolPacketHandler::EapolHandleL(const TDesC8& data)
+void CEapolPacketHandler::EapolHandleL(const TDesC8& /* data */)
     {
     EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapolPacketHandler::EapolHandleL(): (do nothing now)")));           
     }

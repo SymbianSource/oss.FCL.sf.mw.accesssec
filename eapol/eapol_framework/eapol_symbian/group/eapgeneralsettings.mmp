@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 21 %
+* %version: 22 %
 */
 
 #include <platform_paths.hrh>
@@ -28,6 +28,8 @@ TARGETTYPE    PLUGIN
 
 TARGET	eapgeneralsettings.dll
 UID		0x10009d8d 0x20026FD6
+
+deffile eapgeneralsettings.def
 
 SOURCEPATH  ../eap_if/data
 START RESOURCE 20026fd6.rss
@@ -74,6 +76,7 @@ LIBRARY	eikdlg.lib
 LIBRARY	eikcore.lib
 LIBRARY	hlplch.lib
 LIBRARY		featmgr.lib
+
 
 //-------------------------------------------------------------------
 // End of File

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 15.1.11 %
+* %version: 15.1.14 %
 */
 
 #include <platform_paths.hrh>
@@ -28,6 +28,8 @@ TARGETTYPE    PLUGIN
 
 TARGET        eapmschapv2.dll
 UID	          0x10009d8d 0x101F8E66
+
+deffile eapmschapv2.def
 
 SOURCEPATH    ../am/type/mschapv2/symbian/plugin/src
 
@@ -91,10 +93,6 @@ LIBRARY   eap_notifier.lib
 LANG		  SC
 
 
-// exports unfrozen in winscw
-#if defined(WINSCW)
-EXPORTUNFROZEN
-#endif
 
 //-------------------------------------------------------------------
 

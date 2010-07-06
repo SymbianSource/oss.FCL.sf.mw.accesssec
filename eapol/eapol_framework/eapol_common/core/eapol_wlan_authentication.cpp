@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 114 %
+* %version: 115 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -2436,6 +2436,7 @@ EAP_FUNC_EXPORT u32_t eapol_wlan_authentication_c::get_header_offset(
 EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::unload_module(
 	const eap_type_value_e type)
 {
+	EAP_UNREFERENCED_PARAMETER(type);
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
@@ -2581,6 +2582,12 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::load_module(
 		const bool is_client_when_true,
 		const eap_am_network_id_c * const receive_network_id)
 {	
+	EAP_UNREFERENCED_PARAMETER(type);
+	EAP_UNREFERENCED_PARAMETER(tunneling_type);
+	EAP_UNREFERENCED_PARAMETER(eap_type_if);
+	EAP_UNREFERENCED_PARAMETER(receive_network_id);
+	EAP_UNREFERENCED_PARAMETER(partner);
+	EAP_UNREFERENCED_PARAMETER(is_client_when_true);
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
@@ -3316,7 +3323,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::cancel_all_timers()
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::check_is_valid_eap_type(
-	const eap_type_value_e eap_type)
+	const eap_type_value_e /* eap_type */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -3353,7 +3360,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::check_is_valid_eap_typ
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::get_eap_type_list(
-	eap_array_c<eap_type_value_e> * const eap_type_list)
+	eap_array_c<eap_type_value_e> * const /* eap_type_list */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -4024,7 +4031,7 @@ eap_status_e eapol_wlan_authentication_c::complete_check_pmksa_cache(
 //
 EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::complete_get_802_11_authentication_mode(
 		const eap_status_e completion_status,
-		const eap_am_network_id_c * const receive_network_id,
+		const eap_am_network_id_c * const /* receive_network_id */,
 		const eapol_key_802_11_authentication_mode_e mode)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);

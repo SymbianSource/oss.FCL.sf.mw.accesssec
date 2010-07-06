@@ -115,7 +115,7 @@ public:
 	/**
 	 * This function returns the header length of TLV.
 	 */
-	static u32_t get_header_length();
+	EAP_FUNC_IMPORT static u32_t get_header_length();
 
 	/**
 	 * This function returns pointer to the offset of data of TLV.

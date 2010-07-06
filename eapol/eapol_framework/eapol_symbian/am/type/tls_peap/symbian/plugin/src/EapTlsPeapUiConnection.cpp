@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 35 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -453,7 +453,7 @@ TInt CEapTlsPeapUiConnection::CreatePacStoreMasterKey(
 // ----------------------------------------------------------
 
 void CEapTlsPeapUiConnection::GetPacStorePasswordL(
-	TDes8 & aPassword8)
+	TDes8 & /* aPassword8 */)
 {
 	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiConnection::GetPacStorePasswordL()\n")));
 	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiConnection::GetPacStorePasswordL()\n"));

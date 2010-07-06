@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 44.1.17 %
+* %version: 44.1.18 %
 */
 
 #include <platform_paths.hrh>
@@ -28,6 +28,8 @@ TARGETTYPE    PLUGIN
 
 TARGET        eaptlspeap.dll
 UID	      0x10009d8d 0x101f8e4c
+
+deffile eaptlspeap.def
 
 SOURCEPATH    ../am/type/tls_peap/symbian/plugin/src
 
@@ -156,6 +158,7 @@ LIBRARY     charconv.lib
 LIBRARY		HbCore.lib
 LIBRARY		HbWidgets.lib
 LIBRARY   eap_notifier.lib
+
 
 //-------------------------------------------------------------------
 // End of File

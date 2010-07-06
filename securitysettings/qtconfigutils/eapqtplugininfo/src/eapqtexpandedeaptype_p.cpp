@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -17,15 +17,27 @@
  */
 
 /*
- * %version: 5 %
+ * %version: 6 %
  */
 
-#include "eapqtexpandedeaptype_p.h"
+// System includes
 #include <EapExpandedType.h>
 
-//----------------------------------------------------------------------------
-//              EapQtExpandedEapTypePrivate                
-//----------------------------------------------------------------------------
+// User includes
+#include "eapqtexpandedeaptype_p.h"
+
+/*!
+ *  \class EapQtExpandedEapTypePrivate
+ *  \brief Private implementation of expanded EAP type QT data structure
+ */
+
+// External function prototypes
+
+// Local constants
+
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
 
 EapQtExpandedEapTypePrivate::EapQtExpandedEapTypePrivate()
 {
@@ -130,7 +142,7 @@ EapQtExpandedEapTypePrivate::EapQtExpandedEapTypePrivate(const EapQtExpandedEapT
     mData.append(reinterpret_cast<const char*> (tmpType.Ptr()), tmpType.Length());
 }
 
-EapQtExpandedEapTypePrivate::EapQtExpandedEapTypePrivate(const QByteArray data)
+EapQtExpandedEapTypePrivate::EapQtExpandedEapTypePrivate(const QByteArray &data)
 {
     mData = data;
 

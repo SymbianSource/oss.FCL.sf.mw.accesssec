@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -11,12 +11,12 @@
 *
 * Contributors:
 *
-* Description:  Project definition file for project EAPOL
+* Description:  Project definition file for tools library.
 *
 */
 
 /*
-* %version: 9 %
+* %version: 10 %
 */
 
 //-------------------------------------------------------------------
@@ -25,7 +25,8 @@
 #include "../../group/eapol.mmh"
 
 //-------------------------------------------------------------------
-CAPABILITY ALL -TCB
+
+CAPABILITY CAP_GENERAL_DLL
 VENDORID VID_DEFAULT
 
 TARGET			eapsymbiantools.dll
@@ -42,7 +43,6 @@ SOURCE EapPluginTools.cpp
 
 LANG	SC
 
-//USERINCLUDE ..
 USERINCLUDE ../../am/type/symbian/plugin/include
 USERINCLUDE ../../am/common
 USERINCLUDE ../../../eapol_common/am/common
@@ -55,9 +55,6 @@ USERINCLUDE ../../../eapol_common/type/tls_peap/tls/include
 USERINCLUDE ../../../eapol_common/type/simple_config/simple_config/include
 USERINCLUDE ../../../eapol_common/type/simple_config/eap/include
 
-#if defined(EAP_USE_WPXM)
-USERINCLUDE ../../../eapol_common/wpx_include
-#endif //#if defined(EAP_USE_WPXM)
 USERINCLUDE ../../eap_if/include
 USERINCLUDE ../../eap_server/include
 
@@ -76,6 +73,7 @@ LIBRARY		euser.lib hash.lib random.lib cryptography.lib efsrv.lib asn1.lib edbms
 LIBRARY     charconv.lib 
 
 MACRO USE_EAP_INTERFACE_EXPORTS
+
 
 //-------------------------------------------------------------------
 // End of File

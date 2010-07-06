@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -11,18 +11,18 @@
 *
 * Contributors:
 *
-* Description:  EAP and WLAN authentication protocols.
+* Description:  Conversion functions between common code and Symbian code.
 *
 */
 
 /*
-* %version: 41 %
+* %version: 50 %
 */
 
 // This is enumeration of EAPOL source code.
 #if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 	#undef EAP_FILE_NUMBER_ENUM
-	#define EAP_FILE_NUMBER_ENUM 605 
+	#define EAP_FILE_NUMBER_ENUM 738 
 	#undef EAP_FILE_NUMBER_DATE 
 	#define EAP_FILE_NUMBER_DATE 1127594498 
 #endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
@@ -190,14 +190,14 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertFromInternalToBuf16(
 	// aInBuf8 is UTF8 string, unicode max length is
 	// then the length of UTF8 string.
 	// NOTE, HBufC16 length means count of 16-bit objects.
-	HBufC16 * aOutBuf16 = HBufC16::New(inBufPtrC8.Size());
-	if (aOutBuf16 == 0)
+	HBufC16 * outBuf16 = HBufC16::New(inBufPtrC8.Size());
+	if (outBuf16 == 0)
 	{
 		EAP_UNREFERENCED_PARAMETER(tools);
 		return KErrNoMemory;
 	}
 
-	TPtr16 outBufPtr16 = aOutBuf16->Des();
+	TPtr16 outBufPtr16 = outBuf16->Des();
 
 	CnvUtfConverter::ConvertToUnicodeFromUtf8(outBufPtr16, inBufPtrC8);
 
@@ -210,8 +210,8 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertFromInternalToBuf16(
 	    outBufPtr16.Ptr(),
 		outBufPtr16.Size()));
 
-    delete aOutBuf16;
-    aOutBuf16 = NULL;
+    delete outBuf16;
+    outBuf16 = NULL;
 
     return KErrNone;
 }
@@ -231,6 +231,11 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertFromBuf16ToInternal(
 		input16->Size()));
 
 	EAP_TRACE_RETURN_STRING(tools, "returns: CEapConversion::ConvertFromBuf16ToInternal()");
+
+	if (tools == 0)
+	{
+		return KErrArgument;
+	}
 
     // "In UTF-8, characters are encoded using sequences of 1 to 6 octets."
     // RFC2279 - UTF-8
@@ -254,12 +259,6 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertFromBuf16ToInternal(
     delete aOutBuf8;
     aOutBuf8 = NULL;
     
-	if (status != eap_status_ok)
-	{
-		return (tools->convert_eapol_error_to_am_error(
-			EAP_STATUS_RETURN(tools, status)));
-	}
-
     EAP_TRACE_DATA_DEBUG(
 		tools,
 		TRACE_FLAGS_DEFAULT,
@@ -267,7 +266,8 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertFromBuf16ToInternal(
 	    target8->get_data(),
 		target8->get_data_length()));
 
-	return KErrNone;
+	return (tools->convert_eapol_error_to_am_error(
+			EAP_STATUS_RETURN(tools, status)));
 }
 
 // ----------------------------------------------------------
@@ -286,7 +286,11 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertEAPTypesToInternalTypes(
 
 	eap_status_e status(eap_status_ok);
 
-	if (EncapsulatedEAPTypes == 0
+        if (tools == 0)
+        {
+                return KErrGeneral;
+        }
+        if (EncapsulatedEAPTypes == 0
 		|| target == 0)
 	{
 		return (tools->convert_eapol_error_to_am_error(
@@ -398,12 +402,8 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertInternalTypeToExpandedEAPType(
 	TInt error = EncapsulatedExpandedEAPType->SetValue(
 		source->get_vendor_id(),
 		source->get_vendor_type());
-	if (error != KErrNone)
-	{
-		return error;
-	}
 
-	return KErrNone;
+	return error;
 }
 
 // ----------------------------------------------------------
@@ -547,6 +547,11 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertInternalTypesToHBufC8(
 	}
 
 	*EncapsulatedExpandedEAPTypesData = HBufC8::New(source->get_object_count()*KEapExpandedTypeLength);
+
+	eap_automatic_variable_c<HBufC8> automatic_EncapsulatedExpandedEAPTypesData(
+		tools,
+		*EncapsulatedExpandedEAPTypesData);
+
 	TPtr8 aDbBinaryColumnValuePtr = (*EncapsulatedExpandedEAPTypesData)->Des();			
 
 	TEapExpandedType EapType;
@@ -572,6 +577,9 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertInternalTypesToHBufC8(
 
 		aDbBinaryColumnValuePtr.Append(EapType.GetValue());
 	}
+
+
+	automatic_EncapsulatedExpandedEAPTypesData.do_not_free_variable();
 
 	return KErrNone;
 }
@@ -1063,9 +1071,13 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertEAPSettingsToInternalType(
 
 	if (aSettings->iUsernamePresent)
 	{
-		internal_settings->m_UsernamePresent = true;
+		TInt error = ConvertFromBuf16ToInternal(tools, &(aSettings->iUsername), &(internal_settings->m_Username_fix));
+		if (error)
+		{
+			return error;
+		}
 
-		ConvertFromBuf16ToInternal(tools, &(aSettings->iUsername), &(internal_settings->m_Username_fix));
+		internal_settings->m_UsernamePresent = true;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1088,18 +1100,26 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertEAPSettingsToInternalType(
 
 	if (aSettings->iPasswordPresent)
 	{
-		internal_settings->m_PasswordPresent = true;
+		TInt error = ConvertFromBuf16ToInternal(tools, &(aSettings->iPassword), &(internal_settings->m_Password));
+		if (error)
+		{
+			return error;
+		}
 
-		ConvertFromBuf16ToInternal(tools, &(aSettings->iPassword), &(internal_settings->m_Password));
+		internal_settings->m_PasswordPresent = true;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	if (aSettings->iRealmPresent)
 	{
-		internal_settings->m_RealmPresent = true;
+		TInt error = ConvertFromBuf16ToInternal(tools, &(aSettings->iRealm), &(internal_settings->m_Realm));
+		if (error)
+		{
+			return error;
+		}
 
-		ConvertFromBuf16ToInternal(tools, &(aSettings->iRealm), &(internal_settings->m_Realm));
+		internal_settings->m_RealmPresent = true;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1163,10 +1183,14 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertEAPSettingsToInternalType(
 
 	if (aSettings->iCipherSuitesPresent)
 	{
-		ConvertCipherSuitesToInternalType(
+		TInt error = ConvertCipherSuitesToInternalType(
 			tools,
 			&(aSettings->iCipherSuites),
 			&(internal_settings->m_CipherSuites));
+		if (error)
+		{
+			return error;
+		}
 
 		internal_settings->m_CipherSuitesPresent = true;
 	}
@@ -1209,10 +1233,14 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertEAPSettingsToInternalType(
 
 	if (aSettings->iCertificatesPresent)
 	{
-		ConvertCertificatesToInternalType(
+		TInt error = ConvertCertificatesToInternalType(
 			tools,
 			&(aSettings->iCertificates),
 			&(internal_settings->m_Certificates));
+		if (error)
+		{
+			return error;
+		}
 
 		internal_settings->m_CertificatesPresent = true;
 	}
@@ -1221,10 +1249,14 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertEAPSettingsToInternalType(
 
 	if (aSettings->iEnabledEncapsulatedEAPExpandedTypesPresent)
 	{
-		ConvertExpandedEAPTypesToInternalTypes(
+		TInt error = ConvertExpandedEAPTypesToInternalTypes(
 			tools,
 			&(aSettings->iEnabledEncapsulatedEAPExpandedTypes),
 			&(internal_settings->m_EnabledEncapsulatedEAPTypes));
+		if (error)
+		{
+			return error;
+		}
 
 		internal_settings->m_EnabledEncapsulatedEAPTypesPresent = true;
 	}
@@ -1233,10 +1265,14 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertEAPSettingsToInternalType(
 
 	if (aSettings->iDisabledEncapsulatedEAPExpandedTypesPresent)
 	{
-		ConvertExpandedEAPTypesToInternalTypes(
+		TInt error = ConvertExpandedEAPTypesToInternalTypes(
 			tools,
 			&(aSettings->iDisabledEncapsulatedEAPExpandedTypes),
 			&(internal_settings->m_DisabledEncapsulatedEAPTypes));
+		if (error)
+		{
+			return error;
+		}
 
 		internal_settings->m_DisabledEncapsulatedEAPTypesPresent = true;
 	}
@@ -1277,9 +1313,13 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertEAPSettingsToInternalType(
 
 	if (aSettings->iPACGroupReferencePresent)
 	{
-		internal_settings->m_RealmPresent = true;
+		TInt error = ConvertFromBuf16ToInternal(tools, &(aSettings->iPACGroupReference), &(internal_settings->m_PACGroupReference));
+		if (error)
+		{
+			return error;
+		}
 
-		ConvertFromBuf16ToInternal(tools, &(aSettings->iPACGroupReference), &(internal_settings->m_PACGroupReference));
+		internal_settings->m_RealmPresent = true;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1463,9 +1503,13 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertInternalTypeToEAPSettings(
 
 	if (internal_settings->m_UsernamePresent == true)
 	{
-		aSettings->iUsernamePresent = ETrue;
+		TInt error = ConvertFromInternalToBuf16(tools, &(internal_settings->m_Username_fix), &(aSettings->iUsername));
+		if (error)
+		{
+			return error;
+		}
 
-		ConvertFromInternalToBuf16(tools, &(internal_settings->m_Username_fix), &(aSettings->iUsername));
+		aSettings->iUsernamePresent = ETrue;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1488,18 +1532,26 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertInternalTypeToEAPSettings(
 
 	if (internal_settings->m_PasswordPresent == true)
 	{
-		aSettings->iPasswordPresent = ETrue;
+		TInt error = ConvertFromInternalToBuf16(tools, &(internal_settings->m_Password), &(aSettings->iPassword));
+		if (error)
+		{
+			return error;
+		}
 
-		ConvertFromInternalToBuf16(tools, &(internal_settings->m_Password), &(aSettings->iPassword));
+		aSettings->iPasswordPresent = ETrue;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	if (internal_settings->m_RealmPresent == true)
 	{
-		aSettings->iRealmPresent = ETrue;
+		TInt error = ConvertFromInternalToBuf16(tools, &(internal_settings->m_Realm), &(aSettings->iRealm));
+		if (error)
+		{
+			return error;
+		}
 
-		ConvertFromInternalToBuf16(tools, &(internal_settings->m_Realm), &(aSettings->iRealm));
+		aSettings->iRealmPresent = ETrue;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1563,10 +1615,14 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertInternalTypeToEAPSettings(
 
 	if (internal_settings->m_CipherSuitesPresent == true)
 	{
-		ConvertInternalTypeToCipherSuites(
+		TInt error = ConvertInternalTypeToCipherSuites(
 			tools,
 			&(internal_settings->m_CipherSuites),
 			&(aSettings->iCipherSuites));
+		if (error)
+		{
+			return error;
+		}
 
 		aSettings->iCipherSuitesPresent = ETrue;
 	}
@@ -1609,17 +1665,29 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertInternalTypeToEAPSettings(
 
 	if (internal_settings->m_CertificatesPresent == true)
 	{
-		ConvertInternalTypeToCertificates(
+		TInt error = KErrNone;
+		
+		error = ConvertInternalTypeToCertificates(
 			tools,
 			eap_certificate_entry_c::eap_certificate_type_user,
 			&(internal_settings->m_Certificates),
 			&(aSettings->iCertificates));
 
-		ConvertInternalTypeToCertificates(
+		if (error)
+			{
+			return error;	
+			}
+			
+		error = ConvertInternalTypeToCertificates(
 			tools,
 			eap_certificate_entry_c::eap_certificate_type_CA,
 			&(internal_settings->m_Certificates),
 			&(aSettings->iCertificates));
+
+		if (error)
+			{
+			return error;	
+			}
 
 		aSettings->iCertificatesPresent = ETrue;
 	}
@@ -1628,10 +1696,14 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertInternalTypeToEAPSettings(
 
 	if (internal_settings->m_EnabledEncapsulatedEAPTypesPresent == true)
 	{
-		ConvertInternalTypesToExpandedEAPTypes(
+		TInt error = ConvertInternalTypesToExpandedEAPTypes(
 			tools,
 			&(internal_settings->m_EnabledEncapsulatedEAPTypes),
 			&(aSettings->iEnabledEncapsulatedEAPExpandedTypes));
+		if (error)
+		{
+			return error;
+		}
 
 		aSettings->iEnabledEncapsulatedEAPExpandedTypesPresent = ETrue;
 	}
@@ -1640,10 +1712,14 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertInternalTypeToEAPSettings(
 
 	if (internal_settings->m_DisabledEncapsulatedEAPTypesPresent == true)
 	{
-		ConvertInternalTypesToExpandedEAPTypes(
+		TInt error = ConvertInternalTypesToExpandedEAPTypes(
 			tools,
 			&(internal_settings->m_DisabledEncapsulatedEAPTypes),
 			&(aSettings->iDisabledEncapsulatedEAPExpandedTypes));
+		if (error)
+		{
+			return error;
+		}
 
 		aSettings->iDisabledEncapsulatedEAPExpandedTypesPresent = ETrue;
 	}
@@ -1684,9 +1760,13 @@ EAP_FUNC_EXPORT TInt CEapConversion::ConvertInternalTypeToEAPSettings(
 
 	if (internal_settings->m_PACGroupReferencePresent == true)
 	{
-		aSettings->iPACGroupReferencePresent = ETrue;
+		TInt error = ConvertFromInternalToBuf16(tools, &(internal_settings->m_PACGroupReference), &(aSettings->iPACGroupReference));
+		if (error)
+		{
+			return error;
+		}
 
-		ConvertFromInternalToBuf16(tools, &(internal_settings->m_PACGroupReference), &(aSettings->iPACGroupReference));
+		aSettings->iPACGroupReferencePresent = ETrue;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

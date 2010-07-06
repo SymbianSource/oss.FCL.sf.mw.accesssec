@@ -21,6 +21,14 @@
 
 #if defined(USE_EAP_TLS_SESSION_TICKET)
 
+// This is enumeration of EAPOL source code.
+#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
+	#undef EAP_FILE_NUMBER_ENUM
+	#define EAP_FILE_NUMBER_ENUM 762 
+	#undef EAP_FILE_NUMBER_DATE 
+	#define EAP_FILE_NUMBER_DATE 1127594498 
+#endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
+
 #include "tls_extension.h"
 
 /** @file */

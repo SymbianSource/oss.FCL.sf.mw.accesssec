@@ -11,8 +11,12 @@
 *
 * Contributors:
 *
-* Description: Eap Dialog implementation
+* Description: EAP Auth Notifier
 *
+*/
+
+/*
+* %version: 3 %
 */
 
 #ifndef __EAPAUTHNOTIFIER_H__
@@ -33,7 +37,7 @@ class MNotificationCallback
         virtual void DlgComplete( TInt aStatus ) = 0;
     };
 
-class TEapExpandedType;
+class TEapExpandedType; 
 class CEapAuthObserver;
 
 
@@ -44,10 +48,10 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
         enum EEapNotifierType
         {
             EEapNotifierTypeLEapUsernamePasswordDialog, 
-            EEapNotifierTypeGTCSecurIDPasscodeQueryUidDialog,
             EEapNotifierTypeGTCQueryDialog,
             EEapNotifierTypePapAuthQueryDialog,
-            EEapNotifierTypePapChallengeReplyQueryDialog, 
+            EEapNotifierTypePapChallengeDialog, 
+            EEapNotifierTypeGtcChallengeDialog, 
             EEapNotifierTypeFastInstallPacQueryDialog,
             EEapNotifierTypeFastPacStorePwQueryDialog,
             EEapNotifierTypeFastCreateMasterkeyQueryDialog, 
@@ -141,6 +145,11 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
         CEapAuthNotifier( MNotificationCallback& aClient );
         
         /**
+        * ConstructL
+        */
+        void ConstructL();
+        
+        /**
         * Set data for the UsernamePassword Dialog(s)
         * @param  aPasswordInfo    data to be filled
         * @param  aEapType         Eap type to be used
@@ -152,7 +161,7 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
             TEapDialogInfo* aPasswordInfo,
             TEapExpandedType& aEapType,
             CHbSymbianVariantMap* aMap,
-            TDesC& aAuthMethod );
+            const TDesC& aAuthMethod );
                 
         
         /**
@@ -165,7 +174,7 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
         void SetQueryDialogDataL( 
             TEapDialogInfo* aEapInfo,
             CHbSymbianVariantMap* aMap,
-            TDesC& aAuthMethod );
+            const TDesC& aAuthMethod );
         
        /**
         * Set data for the Install Pac query Dialog(s)
@@ -207,28 +216,29 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
         void SetPasswordQueryDataL( 
             TEapExpandedType& aEapType,
             CHbSymbianVariantMap* aMap,
-            TDesC& aAuthMethod );
+            const TDesC& aAuthMethod );
         
     private:
+        
+        /** For callback */
+        MNotificationCallback& iClient;  
+        
         /** Pointer to the device dialog interface for handling the dialog */
         CHbDeviceDialogSymbian* iDialog;
         /** The observer to handle the data received from the orbit dialog */
         CEapAuthObserver* iObserver;
-        
-        TEapDialogInfo* iEapInfo;
-        
-        // for callback
-        MNotificationCallback& iClient;  
-        
+                        
         /* Information if request was already completed, in case the
          * observer receives the data signal and the signal about closing the
          * dialog.
          */
         TBool iCompleted;
         
-        /* Information if request was already cancelled.
-         */
+        /** Information if request was already cancelled.*/
         TBool iCancelled;
+        
+        /** Pointer to the Eap Dialog Info structure */
+        TEapDialogInfo* iEapInfo;
         
     
     };

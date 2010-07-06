@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 51 %
+* %version: 57 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -34,7 +34,7 @@
 #include "EapSimDbParameterNames.h"
 
 #include <EapTraceSymbian.h>
-#include <EapPluginTools.h>
+#include "EapPluginTools.h"
 
 const TInt KMaxSqlQueryLength = 2048;
 const TInt KMicroSecsInAMinute = 60000000; // 60000000 micro seconds is 1 minute.
@@ -748,6 +748,10 @@ void EapSimDbUtils::DeleteConfigurationL(
 	TInt error(KErrNone);
 	TFileName aPrivateDatabasePathName;
 	
+	error = aFileServerSession.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSimDbUtils::DeleteConfigurationL(): - aFileServerSession.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
 	EapPluginTools::CreateDatabaseLC(
 		aDatabase,
 		aFileServerSession,
@@ -768,18 +772,12 @@ void EapSimDbUtils::DeleteConfigurationL(
 		User::LeaveIfError(error);
 	}
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSimDbUtils::DeleteConfigurationL(): calls aDatabase.Open()\n")));
-
 	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSimDbUtils::DeleteConfigurationL(): Opened private DB for EAP-SIM. error=%d\n"), error));
 
 	User::LeaveIfError(error);
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSimDbUtils::DeleteConfigurationL(): calls sqlStatement.Format()\n")));
 
 	// Main settings table
 	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
@@ -799,21 +797,13 @@ void EapSimDbUtils::DeleteConfigurationL(
 	// Evaluate view
 	RDbView view;
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSimDbUtils::DeleteConfigurationL(): calls view.Prepare()\n")));
-
 	error = view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited);
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSimDbUtils::DeleteConfigurationL(): view.Prepare(), error=%d\n"), error));
 
 	User::LeaveIfError(error);
 
 	CleanupClosePushL(view);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSimDbUtils::DeleteConfigurationL(): calls view.EvaluateAll()\n")));
-
 	error = view.EvaluateAll();
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSimDbUtils::DeleteConfigurationL(): view.EvaluateAll(), error=%d\n"), error));
 
 	User::LeaveIfError(error);
 
@@ -829,27 +819,15 @@ void EapSimDbUtils::DeleteConfigurationL(
 		while (view.NextL() != EFalse);
 
 		EAP_TRACE_DEBUG_SYMBIAN((_L("EapSimDbUtils::DeleteConfigurationL(): All rows deleted.\n")));
-
 	}
 	else
 	{
 		EAP_TRACE_DEBUG_SYMBIAN((_L("EapSimDbUtils::DeleteConfigurationL(): No rows to delete.\n")));
 	}
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSimDbUtils::DeleteConfigurationL(): calls CleanupStack::PopAndDestroy(&view)\n")));
-
 	CleanupStack::PopAndDestroy(&view);
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSimDbUtils::DeleteConfigurationL(): calls CleanupStack::PopAndDestroy(buf)\n")));
-
 	CleanupStack::PopAndDestroy(buf);
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSimDbUtils::DeleteConfigurationL(): calls CleanupStack::PopAndDestroy(&aDatabase)\n")));
-
 	CleanupStack::PopAndDestroy(&aDatabase);
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSimDbUtils::DeleteConfigurationL(): calls CleanupStack::PopAndDestroy(&aFileServerSession)\n")));
-
 	CleanupStack::PopAndDestroy(&aFileServerSession);
 }
 

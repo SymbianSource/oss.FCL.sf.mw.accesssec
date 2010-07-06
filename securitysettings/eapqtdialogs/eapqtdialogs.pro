@@ -14,6 +14,8 @@
 # Description: EAP Dialog build file
 #
 #
+# %version: 12 %
+#
 
 TEMPLATE = lib
 TARGET = eapdialogplugin
@@ -25,15 +27,38 @@ DEPENDPATH += .
 DESTDIR = $${HB_BUILD_DIR}/plugins/devicedialogs
 
 # directories for generated files
-MOC_DIR     = _moc
-RCC_DIR     = _rcc
-OBJECTS_DIR = _obj
+MOC_DIR     = _build
+RCC_DIR     = _build
+OBJECTS_DIR = _build
+
 HEADERS += inc/eapdialogplugin.h \
-           inc/eapusernamepwddialog.h  \ 
+           inc/eapquerydialog.h \
+           inc/eappasswordquerydialog.h \
+           inc/eapusernamepwddialog.h  \
+           inc/eapfastprovwaitnotedialog.h \
+           inc/eapmschapv2pwdexpirednotedialog.h \
+           inc/eapmschapv2oldpwddialog.h \
+           inc/eapmschapv2newpwddialog.h \
+           inc/eapfastprovnotsuccessnotedialog.h \
+           inc/eapfastinstallpacquerydialog.h \
+           inc/eapfastpacstorepwquerydialog.h \
+           inc/eapfastpacfilepwquerydialog.h \
+           inc/eapfastcreatemasterkeyquerydialog.h \
            traces/OstTraceDefinitions.h
 
 SOURCES += src/eapdialogplugin.cpp \
-           src/eapusernamepwddialog.cpp
+           src/eapquerydialog.cpp \
+           src/eappasswordquerydialog.cpp \
+           src/eapusernamepwddialog.cpp \
+           src/eapfastprovwaitnotedialog.cpp \
+           src/eapmschapv2oldpwddialog.cpp \
+           src/eapmschapv2newpwddialog.cpp \
+           src/eapmschapv2pwdexpirednotedialog.cpp \
+           src/eapfastprovnotsuccessnotedialog.cpp \
+           src/eapfastinstallpacquerydialog.cpp \
+           src/eapfastpacstorepwquerydialog.cpp \
+           src/eapfastpacfilepwquerydialog.cpp \
+           src/eapfastcreatemasterkeyquerydialog.cpp
 
 symbian: {
     TARGET.EPOCALLOWDLLDATA = 1
@@ -46,7 +71,7 @@ symbian: {
     pluginstub.path = /resource/plugins/devicedialogs
     DEPLOYMENT += pluginstub
 }
+
 TRANSLATIONS = eapprompts.ts
 
 LIBS  += -leapqtconfiginterface -leapqtplugininfo
-

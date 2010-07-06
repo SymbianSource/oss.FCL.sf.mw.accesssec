@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 24 %
+* %version: 26 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -205,11 +205,14 @@ void CEapSim::SetIndexL(
 
 	RFs session;
 	
-	EapSimDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-		
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapSim::SetIndexL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	EapSimDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+
 	EapSimDbUtils::SetIndexL(
 		db, 
 		iIndexType, 
@@ -222,6 +225,9 @@ void CEapSim::SetIndexL(
 	iIndexType = aIndexType;
 	iIndex = aIndex;
 	
+	db.Close();
+	session.Close();
+
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 }
@@ -232,11 +238,14 @@ void CEapSim::SetConfigurationL(const EAPSettings& aSettings)
 
 	RFs session;
 	
-	// This also creates the IAP entry if it doesn't exist
-	EapSimDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapSim::SetConfigurationL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	// This also creates the IAP entry if it doesn't exist
+	EapSimDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 
 	EapSimDbUtils::SetConfigurationL(
 		db,
@@ -245,6 +254,9 @@ void CEapSim::SetConfigurationL(const EAPSettings& aSettings)
 		iIndex,
 		iTunnelingType);		
 		
+	db.Close();
+	session.Close();
+
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 }
@@ -255,11 +267,14 @@ void CEapSim::GetConfigurationL(EAPSettings& aSettings)
 
 	RFs session;
 	
-	// This also creates the IAP entry if it doesn't exist
-	EapSimDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapSim::SetConfigurationL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	// This also creates the IAP entry if it doesn't exist
+	EapSimDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 
 	EapSimDbUtils::GetConfigurationL(
 		db,
@@ -268,6 +283,9 @@ void CEapSim::GetConfigurationL(EAPSettings& aSettings)
 		iIndex,
 		iTunnelingType);
 		
+	db.Close();
+	session.Close();
+
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 }
@@ -295,11 +313,14 @@ void CEapSim::CopySettingsL(
 
 	RFs session;
 	
-	EapSimDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-		
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapSim::CopySettingsL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	EapSimDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+
 	EapSimDbUtils::CopySettingsL(
 		db,
 		iIndexType,
@@ -309,6 +330,9 @@ void CEapSim::CopySettingsL(
 		aDestinationIndex, 
 		iTunnelingType);
 		
+	db.Close();
+	session.Close();
+
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 	

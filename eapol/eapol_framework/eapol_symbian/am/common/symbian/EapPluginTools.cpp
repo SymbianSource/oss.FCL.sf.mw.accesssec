@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -11,19 +11,20 @@
 *
 * Contributors:
 *
-* Description:  EAP and WLAN authentication protocols.
+* Description:  Tools for plugin handling on Symbian.
 *
 */
 
 /*
-* %version: 11 %
+* %version: 19 %
 */
 
 #include <EapTraceSymbian.h>
-#include <EapAutomatic.h>
-#include <EapPluginTools.h>
 #include <EapTypePlugin.h>
 #include <ecom.h>
+
+#include "EapPluginTools.h"
+#include "EapAutomatic.h"
 
 /** @file */
 
@@ -58,7 +59,7 @@ EXPORT_C void EapPluginTools::CleanupImplArray( TAny* aAny )
 
 // ----------------------------------------------------------------------
 
-EXPORT_C void EapPluginTools::ListAllEapPluginsL(const TEapExpandedType & aTunnelingEapType, RPointerArray<TEapExpandedType> & aPlugins)
+EXPORT_C void EapPluginTools::ListAllEapPluginsL(const TIndexType aIndexType, const TEapExpandedType & aTunnelingEapType, RPointerArray<TEapExpandedType> & aPlugins)
 {
 	EAP_TRACE_DEBUG_SYMBIAN((_L("EapPluginTools::ListAllEapPluginsL(): this=0x%08x, aTunnelingEapType=0xfe%06x%08x.\n"),
 		this,
@@ -74,9 +75,7 @@ EXPORT_C void EapPluginTools::ListAllEapPluginsL(const TEapExpandedType & aTunne
 
 	REComSession::ListImplementationsL( KEapTypeInterfaceUid, aEapArray );
 
-	// EAP plugin interface dialog should show only the EAP types that allowed
-	// outside EAP-PEAP, EAP-TTLS and EAP-FAST.
-
+	// Checks which plugins are allowed inside the tunneling EAP-methods and which are allowed outer most EAP-methods.
 	for( TInt counter = 0; counter < aEapArray.Count(); counter++ )
 	{
 		TEapExpandedType plugin_type(aEapArray[counter]->DataType());
@@ -88,9 +87,10 @@ EXPORT_C void EapPluginTools::ListAllEapPluginsL(const TEapExpandedType & aTunne
 
 		TBool aNotAllowed(EFalse);
 
-		if (aTunnelingEapType == (*EapExpandedTypeNone.GetType()))
+		if (aIndexType == ELan
+			&& aTunnelingEapType == (*EapExpandedTypeNone.GetType()))
 		{
-			// Filter out the EAP types which are NOT allowed outside PEAP, TTLS or FAST.
+			// Filter out the EAP types which are NOT allowed outside PEAP, TTLS or FAST on WLAN.
 			if( CEapTypePlugin::IsDisallowedOutsidePEAP( *aEapArray[counter] ) )
 			{
 				EAP_TRACE_DEBUG_SYMBIAN((_L("EapPluginTools::ListAllEapPluginsL(): aEapArray[%d] EAP-type=0xfe%06x%08x, IsDisallowedOutsidePEAP()\n"),
@@ -145,6 +145,7 @@ EXPORT_C void EapPluginTools::ListAllEapPluginsL(const TEapExpandedType & aTunne
 		}
 	}
 
+	// Adds allowed EAP-methods to an array.
 	for (TInt ind = 0; ind < aEapArray.Count(); ind++ )
 	{
 		TEapExpandedType * eap_type = new TEapExpandedType;
@@ -170,21 +171,15 @@ EXPORT_C void EapPluginTools::GetPrivatePathL(
 	RFs& aFileServerSession,
 	TFileName& aPrivateDatabasePathName)
 {
-	// Reads the private folder.
+	// Reads the private folder. Caller must connect file server before calling this function.
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapPluginTools::GetPrivatePathL(): - calls aFileServerSession.Connect()\n")));
-
-	TInt error = aFileServerSession.Connect();
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapPluginTools::GetPrivatePathL(): - aFileServerSession.Connect(), error=%d\n"), error));
-
-	User::LeaveIfError(error);
+	CleanupClosePushL(aFileServerSession);
 
 	EAP_TRACE_DEBUG_SYMBIAN((_L("EapPluginTools::GetPrivatePathL(): - calls aFileServerSession.PrivatePath()\n")));
 
 	aPrivateDatabasePathName.SetLength(0);
 
-	error = aFileServerSession.PrivatePath(aPrivateDatabasePathName);
+	TInt error = aFileServerSession.PrivatePath(aPrivateDatabasePathName);
 
 	EAP_TRACE_DEBUG_SYMBIAN((_L("EapPluginTools::GetPrivatePathL(): - aFileServerSession.PrivatePath(), error=%d\n"), error));
 
@@ -193,6 +188,8 @@ EXPORT_C void EapPluginTools::GetPrivatePathL(
 	EAP_TRACE_DATA_DEBUG_SYMBIAN(("aPrivateDatabasePathName",
 		aPrivateDatabasePathName.Ptr(),
 		aPrivateDatabasePathName.Size()));
+
+	CleanupStack::Pop(&aFileServerSession);
 }
 
 // ----------------------------------------------------------------------
@@ -204,9 +201,19 @@ EXPORT_C void EapPluginTools::GetPrivatePathL(
 
 	RFs aFileServerSession;
 
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapPluginTools::GetPrivatePathL(): - calls aFileServerSession.Connect()\n")));
+
+	TInt error = aFileServerSession.Connect();
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapPluginTools::GetPrivatePathL(): - aFileServerSession.Connect(), error=%d\n"), error));
+
+	User::LeaveIfError(error);
+
 	EapPluginTools::GetPrivatePathL(
 		aFileServerSession,
 		aPrivateDatabasePathName);
+
+	aFileServerSession.Close();
 }
 
 // ----------------------------------------------------------------------
@@ -218,13 +225,14 @@ EXPORT_C void EapPluginTools::CreateDatabaseLC(
 	const TDesC& aDatabaseName,
 	TFileName& aPrivateDatabasePathName)
 {
-	CleanupClosePushL(aFileServerSession);
-	CleanupClosePushL(aDatabase);
+	// Caller must connect file server before calling this function.
 
 	// aDatabase is pushed to the cleanup stack even though they may be member
 	// variables of the calling class and would be closed in the destructor anyway. This ensures
 	// that if they are not member variables they will be closed. Closing the handle twice
 	// does no harm.	
+	CleanupClosePushL(aFileServerSession);
+	CleanupClosePushL(aDatabase);
 
 	// Create the private database in the private folder of EAP-server.
 

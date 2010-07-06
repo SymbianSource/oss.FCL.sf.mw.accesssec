@@ -11,14 +11,18 @@
 *
 * Contributors:
 *
-* Description: EAP Auth notitier implementation
+* Description: EAP Auth Notitier implementation
 *
+*/
+
+/*
+* %version: 3 %
 */
 
 // INCLUDE FILES
 #include <hb/hbcore/hbsymbianvariant.h>
 #include <e32debug.h> 
-#include <EapExpandedType.h> 
+#include <EapExpandedType.h>  
 #include "eap_auth_notifier.h"
 #include "eap_auth_observer.h"
 #include "eap_auth_ui_strings.h"
@@ -54,14 +58,14 @@ _LIT(KTypeshowprovnotsuccdlg,"com.nokia.eap.fastshowprovnotsuccessnotedialog/1.0
 // ---------------------------------------------------------
 //
 CEapAuthNotifier::CEapAuthNotifier( MNotificationCallback& aClient )
-    :iClient(aClient)
+    :iClient(aClient),
+     iDialog(NULL),
+     iObserver(NULL),   
+     iCompleted(EFalse),
+     iCancelled(EFalse) 
     {
     RDebug::Print(_L("CEapAuthNotifier::CEapAuthNotifier DLL++") );
     
-    iCompleted = EFalse; 
-    iCancelled = EFalse;
-    iObserver = NULL;
-    iDialog = NULL;
     }
 
 // ---------------------------------------------------------
@@ -94,12 +98,29 @@ CEapAuthNotifier::~CEapAuthNotifier()
 // CEapAuthNotifier* CEapAuthNotifier::NewL
 // ---------------------------------------------------------
 //
-EXPORT_C CEapAuthNotifier* CEapAuthNotifier::NewL( MNotificationCallback& aClient )
+EXPORT_C CEapAuthNotifier* CEapAuthNotifier::NewL( 
+    MNotificationCallback& aClient )
     {
     RDebug::Print(_L("CEapAuthNotifier::NewL"));
     
-    CEapAuthNotifier* self = new ( ELeave ) CEapAuthNotifier( aClient );
+    CEapAuthNotifier* self = 
+        new ( ELeave ) CEapAuthNotifier( aClient );
+    CleanupStack::PushL( self );
+    self->ConstructL();
+    CleanupStack::Pop( self );
     return self;
+    }
+
+// ---------------------------------------------------------
+// CEapAuthNotifier::ConstructL
+// ---------------------------------------------------------
+//
+void CEapAuthNotifier::ConstructL()
+    {
+    RDebug::Print(_L("CEapAuthNotifier::ConstructL"));
+    //Observer is needed in order to get the user inputs
+    iObserver = CEapAuthObserver::NewL( this ); 
+    iDialog = CHbDeviceDialogSymbian::NewL();    
     }
 
 // ---------------------------------------------------------
@@ -120,10 +141,9 @@ EXPORT_C void CEapAuthNotifier::StartL(
     iCancelled = EFalse;
     iCompleted = EFalse;
     iEapInfo = aEapInfo;
-        
-    // Observer is needed in order to get the user inputs
-    iObserver = CEapAuthObserver::NewL( this, aType ); 
-    iDialog = CHbDeviceDialogSymbian::NewL();
+            
+    //Method must be called before using the observer  
+    iObserver->SetNotifierType(aType);
         
     //The variant map is needed to construct the dialog correctly,
     CHbSymbianVariantMap* map = CHbSymbianVariantMap::NewL();
@@ -159,29 +179,29 @@ EXPORT_C void CEapAuthNotifier::StartL(
         SetUsernamePasswordDataL( aEapInfo, aEapType, map, authMethod );  
         EapNtfType.Copy(KTypeunamepwddlg);
         }   
-    else if ( aType == EEapNotifierTypeGTCSecurIDPasscodeQueryUidDialog )
-        {
-        authMethod.Copy(EapAuthUiStrings::EapGtc);
-        SetPasswordQueryDataL( aEapType, map, authMethod );
-        EapNtfType.Copy(KTypepwdquerydlg);
-        }
-    else if ( aType == EEapNotifierTypePapChallengeReplyQueryDialog )
-        {
-        authMethod.Copy(EapAuthUiStrings::Pap);
-        SetPasswordQueryDataL( aEapType, map, authMethod );
-        EapNtfType.Copy(KTypepwdquerydlg);
-        }
-    else if ( aType == EEapNotifierTypeGTCQueryDialog )
+    else if ( aType == EEapNotifierTypeGtcChallengeDialog )
         {
         authMethod.Copy(EapAuthUiStrings::EapGtc);
         SetQueryDialogDataL( aEapInfo, map, authMethod );
         EapNtfType.Copy(KTypequerydlg);
+        }    
+    else if ( aType == EEapNotifierTypePapChallengeDialog )
+        {
+        authMethod.Copy(EapAuthUiStrings::Pap);
+        SetQueryDialogDataL( aEapInfo, map, authMethod );
+        EapNtfType.Copy(KTypequerydlg);
+        }
+    else if ( aType == EEapNotifierTypeGTCQueryDialog )
+        {
+        authMethod.Copy(EapAuthUiStrings::EapGtc);
+        SetPasswordQueryDataL( aEapType, map, authMethod );
+        EapNtfType.Copy(KTypepwdquerydlg); 
         }
     else if ( aType == EEapNotifierTypePapAuthQueryDialog )
         {
         authMethod.Copy(EapAuthUiStrings::Pap);
-        SetQueryDialogDataL( aEapInfo, map, authMethod );
-        EapNtfType.Copy(KTypequerydlg);    
+        SetPasswordQueryDataL( aEapType, map, authMethod );
+        EapNtfType.Copy(KTypepwdquerydlg); 
         }
     else if ( aType == EEapNotifierTypeFastInstallPacQueryDialog ) 
         {
@@ -229,7 +249,8 @@ EXPORT_C void CEapAuthNotifier::StartL(
         }
 
     RDebug::Print(_L("CEapAuthNotifier::StartL: Load the Dialog NOW!"));
-    // Show the dialog.
+    
+    //Show the dialog.
     error = iDialog->Show( EapNtfType, *map, iObserver );
     
     User::LeaveIfError( error );
@@ -330,7 +351,7 @@ void CEapAuthNotifier::SetFastInstallPacQueryDialogDataL(
 void CEapAuthNotifier::SetQueryDialogDataL( 
     TEapDialogInfo* aEapInfo,
     CHbSymbianVariantMap* aMap,
-    TDesC& aAuthMethod )
+    const TDesC& aAuthMethod )
     {
     TInt error;  
     TBuf<KVariableLength> key1(KAuthmethod);
@@ -372,11 +393,11 @@ void CEapAuthNotifier::SetQueryDialogDataL(
 void CEapAuthNotifier::SetPasswordQueryDataL( 
     TEapExpandedType& aEapType,
     CHbSymbianVariantMap* aMap,
-    TDesC& aAuthMethod )
+    const TDesC& aAuthMethod )
     {
     TInt error;  
     TBuf<KVariableLength> key2(KAuthmethod);
-    TBuf<KVariableLength> key3(KEaptype);
+    TBuf<KVariableLength> key3(KEaptype); 
     CHbSymbianVariant *variant = NULL;
     
     RDebug::Print(_L("CEapAuthNotifier::SetPasswordQueryData: ENTERING"));
@@ -407,7 +428,7 @@ void CEapAuthNotifier::SetUsernamePasswordDataL(
     TEapDialogInfo* aEapInfo,
     TEapExpandedType& aEapType,
     CHbSymbianVariantMap* aMap,
-    TDesC& aAuthMethod )
+    const TDesC& aAuthMethod )
     {
     TInt error;  
     TBuf<KVariableLength> key1(KUsername);
@@ -497,7 +518,7 @@ void CEapAuthNotifier::SetSelectedOldPassword ( TEapDialogInfo& aPasswordInfo )
     }
 
 // ---------------------------------------------------------
-// void CEapAuthNotifier::CompleteL( TInt aStatus )
+// void CEapAuthNotifier::Complete( TInt aStatus )
 // ---------------------------------------------------------
 //
 void CEapAuthNotifier::CompleteL( TInt aStatus )

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12 %
+* %version: 14 %
 */
 
 #include "eap_tools.h"
@@ -68,6 +68,8 @@ eap_am_pac_store_symbian_c::eap_am_pac_store_symbian_c(
 		TRACE_FLAGS_DEFAULT,
 		(EAPL("eap_am_pac_store_symbian_c::eap_am_pac_store_symbian_c(): this=0x%08x.\n"),
 		this));
+		
+	return;
 }
 
 // ----------------------------------------------------------------------
@@ -90,7 +92,7 @@ eap_am_pac_store_symbian_c::~eap_am_pac_store_symbian_c()
 
 // ----------------------------------------------------------------------
 
-bool eap_am_pac_store_symbian_c::get_is_valid()
+EAP_FUNC_EXPORT bool eap_am_pac_store_symbian_c::get_is_valid()
 {
 	EAP_TRACE_DEBUG(
 		m_am_tools,
@@ -489,6 +491,4 @@ EAP_FUNC_EXPORT eap_status_e eap_am_pac_store_symbian_c::destroy_pac_store()
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
 	}
 
-
-// ----------------------------------------------------------------------
 // End

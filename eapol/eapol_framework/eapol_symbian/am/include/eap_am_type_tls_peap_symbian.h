@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 109 %
+* %version: 112 %
 */
 
 #if !defined(_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H_)
@@ -62,6 +62,7 @@ class eap_file_config_c;
 
 const TInt KMaxLabelLength = 64;
 const TInt KMaxDatabaseTableName = 64;
+const TInt KOffsetCorrection = 1;
 
 #if defined(USE_FAST_EAP_TYPE)
 const char KEapFastPacProvisResultKey[] = "eap_am_type_tls_peap_symbian_c prov. result";
@@ -71,11 +72,10 @@ const u32_t KEapFastPacProvisResultDefaultTimeout = 10000; // in milliseconds = 
 
 /// This class is interface to adaptation module of EAP/TLS and PEAP.
 class EAP_EXPORT eap_am_type_tls_peap_symbian_c
-: public CActive, public eap_am_type_tls_peap_c
-,public abs_eap_base_timer_c
-	, public MNotificationCallback
-
-
+: public CActive
+, public eap_am_type_tls_peap_c
+, public abs_eap_base_timer_c
+, public MNotificationCallback
 {
 
 public:
@@ -87,8 +87,10 @@ public:
     EEapFastPacProvisResultSuccess  /* 1 */  
     };
 #endif
+
 private: // data
-//--------------------------------------------------
+
+	//--------------------------------------------------
 
 	RFs m_session;
 
@@ -419,10 +421,6 @@ private: // methods
 
 	void send_error_notification(const eap_status_e error);
 
-	eap_status_e show_certificate_selection_dialog();
-
-	eap_status_e show_manual_identity_dialog();
-
 	void ResetSessionIdL();
 	
 	/**
@@ -472,8 +470,6 @@ private: // methods
 	
 	eap_status_e CompleteFilePasswordQueryL();
 	
-	eap_status_e CompleteNotifierL();
-		
 	eap_status_e CompleteFilePasswordQuery();
 	
 	eap_status_e FinalCompleteReadPACStoreDataL(eap_status_e status);
@@ -571,6 +567,13 @@ private: // methods
     void CompleteCreateDeviceSeedL( TInt aStatus );
 #endif
 	
+	eap_status_e select_cipher_suite(
+		const bool select_all_cipher_suites,
+		const tls_cipher_suites_e test_cipher_suite,
+		const TAlgorithmId testcertAlgorithm,
+		const TAlgorithmId certAlgorithm,
+		eap_array_c<u16_t> * cipher_suites);
+
 //--------------------------------------------------
 protected: // methods
 //--------------------------------------------------
@@ -824,7 +827,7 @@ public: // methods
 	eap_status_e complete_read_ca_certificate(
 		const RPointerArray<CX509Certificate>& aCertChain, eap_status_e aStatus);
 
-	void complete_validate_chain(CPKIXValidationResult& aValidationResult, eap_status_e aStatus);
+	void complete_validate_chain(const CPKIXValidationResult * const aValidationResult, const eap_status_e aStatus);
 
 	void complete_get_matching_certificates(RPointerArray<EapCertificateEntry>& aMatchingCerts, eap_status_e aStatus);
 

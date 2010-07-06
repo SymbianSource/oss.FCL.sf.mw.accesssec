@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 52 %
+* %version: 60 %
 */
 
 #include "eap_tools.h"
@@ -31,9 +31,9 @@
 #include "EapTraceSymbian.h"
 #include "EapConversion.h"
 #include "EapTlsPeapCertFetcher.h"
-#include <EapAutomatic.h>
-#include <EapPluginTools.h>
+#include "EapPluginTools.h"
 #include <EapTypePlugin.h>
+#include "EapAutomatic.h"
 
 /** @file */
 
@@ -815,15 +815,15 @@ void eap_am_general_settings_symbian_c::DeleteGeneralSettingsDataL(
 		if (view.FirstL())
 		{
 			CDbColSet* colSet = view.ColSetL();
-			CleanupStack::PushL(colSet);		
+			CleanupStack::PushL(colSet);
 
 			do {
 				view.GetL();
 
 				if (view.ColUint32(colSet->ColNo(KServiceType)) == static_cast<TUint>(indexType)
 						&& view.ColUint32(colSet->ColNo(KServiceIndex)) == static_cast<TUint>(index))
-				{	
-					view.DeleteL();	
+				{
+					view.DeleteL();
 				}
 				
 			} while (view.NextL() != EFalse);
@@ -1416,7 +1416,7 @@ eap_status_e eap_am_general_settings_symbian_c::get_eap_methods(const eap_method
 
 	TEapExpandedType aTunnelingType(*EapExpandedTypeNone.GetType());
 
-	TRAP(error, (aPluginTool.ListAllEapPluginsL(aTunnelingType, plugins_array)));
+	TRAP(error, (aPluginTool.ListAllEapPluginsL(static_cast<TIndexType>(internal_settings->m_IndexType), aTunnelingType, plugins_array)));
 	if (error != KErrNone)
 	{
 		EAP_TRACE_ERROR(
@@ -1998,7 +1998,7 @@ eap_status_e eap_am_general_settings_symbian_c::delete_all_eap_settings(const ea
 			internal_settings->m_Index));
 
 		// This will list all outer EAP-methods because aTunnelingType = None.
-		TRAP(error, (aPluginTool.ListAllEapPluginsL(aTunnelingType, plugins_array)));
+		TRAP(error, (aPluginTool.ListAllEapPluginsL(static_cast<TIndexType>(internal_settings->m_IndexType), aTunnelingType, plugins_array)));
 		if (error != KErrNone)
 		{
 			EAP_TRACE_ERROR(
@@ -2041,7 +2041,7 @@ eap_status_e eap_am_general_settings_symbian_c::delete_all_eap_settings(const ea
 				internal_settings->m_Index));
 
 			// This will list all inner EAP-methods of EAP-type.
-			TRAP(error, (aPluginTool.ListAllEapPluginsL(plugins_array[ind_outer], tunneled_plugins)));
+			TRAP(error, (aPluginTool.ListAllEapPluginsL(static_cast<TIndexType>(internal_settings->m_IndexType), plugins_array[ind_outer], tunneled_plugins)));
 			if (error != KErrNone)
 			{
 				EAP_TRACE_ERROR(
@@ -2086,7 +2086,7 @@ eap_status_e eap_am_general_settings_symbian_c::delete_all_eap_settings(const ea
 					static_cast<TIndexType>(internal_settings->m_IndexType),
 					internal_settings->m_Index)));
 
-				// This will automatocally delete eapType.
+				// This will automatically delete eapType.
 				eap_automatic_variable_c<CEapTypePlugin> automatic_eap_type(
 					m_am_tools,
 					eapType);
@@ -2169,7 +2169,7 @@ eap_status_e eap_am_general_settings_symbian_c::delete_all_eap_settings(const ea
 					static_cast<TIndexType>(internal_settings->m_IndexType),
 					internal_settings->m_Index)));
 
-				// This will automatocally delete eapType.
+				// This will automatically delete eapType.
 				eap_automatic_variable_c<CEapTypePlugin> automatic_eap_type(
 					m_am_tools,
 					eapType);
@@ -2377,7 +2377,7 @@ eap_status_e eap_am_general_settings_symbian_c::copy_all_eap_settings(const eap_
 			internal_settings->m_DestinationIndex));
 
 		// This will list all outer EAP-methods because aTunnelingType = None.
-		TRAP(error, (aPluginTool.ListAllEapPluginsL(aTunnelingType, plugins)));
+		TRAP(error, (aPluginTool.ListAllEapPluginsL(static_cast<TIndexType>(internal_settings->m_IndexType), aTunnelingType, plugins)));
 		if (error != KErrNone)
 		{
 			EAP_TRACE_ERROR(
@@ -2424,7 +2424,7 @@ eap_status_e eap_am_general_settings_symbian_c::copy_all_eap_settings(const eap_
 				internal_settings->m_DestinationIndex));
 
 			// This will list all inner EAP-methods of EAP-type.
-			TRAP(error, (aPluginTool.ListAllEapPluginsL(plugins[ind_outer], tunneled_plugins)));
+			TRAP(error, (aPluginTool.ListAllEapPluginsL(static_cast<TIndexType>(internal_settings->m_IndexType), plugins[ind_outer], tunneled_plugins)));
 			if (error != KErrNone)
 			{
 				EAP_TRACE_ERROR(
@@ -2473,7 +2473,7 @@ eap_status_e eap_am_general_settings_symbian_c::copy_all_eap_settings(const eap_
 					static_cast<TIndexType>(internal_settings->m_IndexType),
 					internal_settings->m_Index)));
 
-				// This will automatocally delete eapType.
+				// This will automatically delete eapType.
 				eap_automatic_variable_c<CEapTypePlugin> automatic_eap_type(
 					m_am_tools,
 					eapType);
@@ -2566,7 +2566,7 @@ eap_status_e eap_am_general_settings_symbian_c::copy_all_eap_settings(const eap_
 					static_cast<TIndexType>(internal_settings->m_IndexType),
 					internal_settings->m_Index)));
 
-				// This will automatocally delete eapType.
+				// This will automatically delete eapType.
 				eap_automatic_variable_c<CEapTypePlugin> automatic_eap_type(
 					m_am_tools,
 					eapType);

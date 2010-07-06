@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 61 %
+* %version: 64 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -61,9 +61,11 @@
 // The version number of this interface. At the moment this version number is
 // common for all three plug-in interfaces.
 const TUint KInterfaceVersion = 1;
-const u8_t EAP_RAS_SOURCE[] = "ras_src";
-const u8_t EAP_RAS_DESTINATION[] = "ras_des";
 
+#if defined(USE_FAST_EAP_TYPE)
+	const u8_t EAP_RAS_SOURCE[] = "ras_src";
+	const u8_t EAP_RAS_DESTINATION[] = "ras_des";
+#endif //#if defined(USE_FAST_EAP_TYPE)
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -304,6 +306,8 @@ tls_application_eap_fast_c* CEapTlsPeap::GetTlsInterfaceL(abs_eap_am_tools_c* co
 		User::Leave(KErrGeneral);
 	}
 	
+	amEapType->configure();
+	
 	EAP_TRACE_DEBUG_SYMBIAN(
 		(_L("CEapTlsPeap::GetTlsInterfaceL - created eap_am_type_tls_peap_symbian_c \n")));
 
@@ -320,42 +324,16 @@ tls_application_eap_fast_c* CEapTlsPeap::GetTlsInterfaceL(abs_eap_am_tools_c* co
 			receive_network_id,
 			amEapType);
 		
-		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("CEapTlsPeap::GetTlsInterfaceL - created tls_application_eap_fast_c \n")));			
-		application->start_initialize_PAC_store();
+		if (application)
+			{
+			application->configure();
+		
+			EAP_TRACE_DEBUG_SYMBIAN(
+				(_L("CEapTlsPeap::GetTlsInterfaceL - created tls_application_eap_fast_c \n")));			
+			application->start_initialize_PAC_store();
+			}
 	}
 
-	
-	/*
-	{
-		// PEAP, TTLS and FAST.
-
-		eap_core_c* eap_core = new eap_core_c(
-			aTools,
-			0,
-			is_client_when_true,
-			receive_network_id,
-			true);
-		if (eap_core == 0)
-		{
-			// Out of memory
-			amEapType->shutdown();
-			delete amEapType;
-			User::Leave(KErrNoMemory);
-		} 
-		else if (eap_core->get_is_valid() == false)
-		{
-			// Out of memory
-			eap_core->shutdown();
-			delete eap_core;
-			amEapType->shutdown();
-			delete amEapType;
-			User::Leave(KErrGeneral);
-		}
-		
-		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("CEapTlsPeap::GetTlsInterfaceL - created eap_core_c \n")));
-		*/
 
 	EAP_TRACE_DEBUG_SYMBIAN(
 		(_L("CEapTlsPeap::GetTlsInterfaceL - Creating tls_record_c \n")));
@@ -860,11 +838,14 @@ void CEapTlsPeap::SetIndexL(
 
 	RFs session;
 
-    EapTlsPeapUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType, iEapType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-	
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::SetIndexL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+    EapTlsPeapUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType, iEapType);
+
 	TPtrC settings;
 	TPtrC usercerts;
 	TPtrC cacerts;
@@ -1002,6 +983,8 @@ void CEapTlsPeap::SetIndexL(
 #endif // End: #ifdef USE_FAST_EAP_TYPE
 		
 	db.Close();
+	session.Close();
+
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 	
@@ -1094,12 +1077,15 @@ void CEapTlsPeap::SetConfigurationL(const EAPSettings& aSettings)
 	RDbNamedDatabase db;
 
 	RFs session;
-	
-	// This also creates the IAP entry if it doesn't exist
-	EapTlsPeapUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType, iEapType);
-	
+
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::SetConfigurationL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	// This also creates the IAP entry if it doesn't exist
+	EapTlsPeapUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType, iEapType);
 
 	EapTlsPeapUtils::SetConfigurationL(
 		db,
@@ -1109,6 +1095,9 @@ void CEapTlsPeap::SetConfigurationL(const EAPSettings& aSettings)
 		iTunnelingType,
 		iEapType);		
 		
+	db.Close();
+	session.Close();
+
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 }
@@ -1124,11 +1113,14 @@ void CEapTlsPeap::GetConfigurationL(EAPSettings& aSettings)
 
 	RFs session;
 	
-	// This also creates the IAP entry if it doesn't exist
-	EapTlsPeapUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType, iEapType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::GetConfigurationL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	// This also creates the IAP entry if it doesn't exist
+	EapTlsPeapUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType, iEapType);
 
 	EapTlsPeapUtils::GetConfigurationL(
 		db,
@@ -1139,6 +1131,8 @@ void CEapTlsPeap::GetConfigurationL(EAPSettings& aSettings)
 		iEapType);
 		
 	db.Close();
+	session.Close();
+
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 }
@@ -1176,11 +1170,14 @@ void CEapTlsPeap::CopySettingsL(
 
 	RFs session;
 	
-	EapTlsPeapUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType, iEapType);
-	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-	
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::CopySettingsL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	EapTlsPeapUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType, iEapType);
+
 	TPtrC settings;
 	TPtrC usercerts;
 	TPtrC cacerts;
@@ -1318,6 +1315,8 @@ void CEapTlsPeap::CopySettingsL(
 #endif // End: #ifdef USE_FAST_EAP_TYPE	
 	
 	db.Close();
+	session.Close();
+
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 	
