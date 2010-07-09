@@ -11,19 +11,33 @@
 *
 * Contributors:
 *
-* Description: EAP Auth Notifier
+* Description: EAP Authentication Notifier
 *
 */
 
 /*
-* %version: 3 %
+* %version: 15 %
 */
 
 #ifndef __EAPAUTHNOTIFIER_H__
 #define __EAPAUTHNOTIFIER_H__
 
+// System includes
 #include <e32base.h>
 #include <hb/hbcore/hbdevicedialogsymbian.h>
+
+// User includes
+
+// Forward declarations
+
+class TEapExpandedType; 
+class CEapAuthObserver;
+
+// External data types
+
+//Global function prototypes
+
+//Constants
 
 const TUint KMaxNotifItemLength = 256;
 const TUint KMaxUiDataLength = 1024;
@@ -34,17 +48,24 @@ const TUint KMaxUiDataLength = 1024;
 class MNotificationCallback
     {
     public:
+       /**
+        * Notify for the client that the Dialog is complete
+        *
+        * @param  aStatus status
+        * return  -
+        */
         virtual void DlgComplete( TInt aStatus ) = 0;
     };
 
-class TEapExpandedType; 
-class CEapAuthObserver;
-
-
+/**
+ * EAP Notifier
+ */
 NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
     {
     public:
+        // Data types
         
+        /** EAP Notifier types */
         enum EEapNotifierType
         {
             EEapNotifierTypeLEapUsernamePasswordDialog, 
@@ -68,6 +89,7 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
             EEapNotifierTypeGTCUsernamePasswordDialog,
         }; 
         
+        /**  EAP Notifier Data struct */
         struct TEapDialogInfo
         {
             TBool iPasswordPromptEnabled;
@@ -78,7 +100,7 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
             TBool iIsFirstQuery;
             TBuf16<KMaxUiDataLength> iUidata;
         };
-          
+                     
         /**
         * Two-phased constructor.
         */
@@ -88,9 +110,11 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
         * Destructor
         */
         ~CEapAuthNotifier();
-        
+    
+    public:          
         /**
         * Start the Notifier
+        *
         * @param  aType            notifier type
         * @param  aPasswordInfo    data to be filled
         * @param  aEapType         eap type
@@ -102,14 +126,15 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
         
         /**
         * Cancel() the notifier
+        *
         * @param  -
         * return -
         */
         IMPORT_C void Cancel();
-        
-    public:           
+                 
         /**
         * CompleteL the notifier is complete
+        *
         * @param  aStatus status
         * return  -
         */
@@ -117,6 +142,7 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
         
         /**
         * Sets the selected user name and password of the presented dialog
+        *
         * @param  aPasswordInfo password 
         * return  -
         */
@@ -124,6 +150,7 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
                 
         /**
         * Sets the selected password of the presented dialog
+        *
         * @param  aPasswordInfo password 
         * return  -
         */
@@ -132,6 +159,7 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
         
         /**
         * Sets the selected Old password of the presented dialog
+        *
         * @param  aPasswordInfo old password 
         * return  -
         */
@@ -151,10 +179,11 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
         
         /**
         * Set data for the UsernamePassword Dialog(s)
+        *
         * @param  aPasswordInfo    data to be filled
         * @param  aEapType         Eap type to be used
         * @param  aMap             Pointer to variant data
-        * @param  aAuthMethod      Auth method to be used
+        * @param  aAuthMethod      Authentication method to be used
         * return -
         */
         void SetUsernamePasswordDataL( 
@@ -166,9 +195,10 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
         
         /**
         * Set data for the query Dialog(s)
+        *
         * @param  aEapInfo         data to be filled
         * @param  aMap             Pointer to variant data
-        * @param  aAuthMethod      Auth method to be used
+        * @param  aAuthMethod      Authentication method to be used
         * return -
         */
         void SetQueryDialogDataL( 
@@ -178,6 +208,7 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
         
        /**
         * Set data for the Install Pac query Dialog(s)
+        *
         * @param  aEapInfo         data to be filled
         * @param  aMap             Pointer to variant data
         * return -
@@ -188,29 +219,32 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
         
        /**
         * Set data for the Pac file query Dialog(s)
+        *
         * @param  aEapInfo         data to be filled
         * @param  aMap             Pointer to variant data
         * return -
         */
-        void setFastPacFileQueryPwDialogDataL( 
+        void SetFastPacFileQueryPwDialogDataL( 
             TEapDialogInfo* aEapInfo,
             CHbSymbianVariantMap* aMap );
         
        /**
         * Set data for the prov wait note Dialog(s)
+        *
         * @param  aMap                  Pointer to variant data
-        * @param  aAuthProvWaitNote     Tells whether aut or unauth 
+        * @param  aAuthProvWaitNote     Tells whether auth or unauth 
         * return -
         */
-        void setFastProvWaitNoteDialogDataL( 
+        void SetFastProvWaitNoteDialogDataL( 
             CHbSymbianVariantMap* aMap,
             TBool aAuthProvWaitNote );
                     
        /**
         * Set data for the Password Dialog(s)
+        *
         * @param  aEapType         Eap type to be used
         * @param  aMap             Pointer to variant data
-        * @param  aAuthMethod      Auth method to be used
+        * @param  aAuthMethod      Authentication method to be used
         * return -
         */
         void SetPasswordQueryDataL( 
@@ -218,26 +252,38 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
             CHbSymbianVariantMap* aMap,
             const TDesC& aAuthMethod );
         
-    private:
+    private: // Data
         
-        /** For callback */
+        /** 
+         * For callback 
+         */
         MNotificationCallback& iClient;  
         
-        /** Pointer to the device dialog interface for handling the dialog */
+        /** 
+         * Pointer to the device dialog interface for handling the dialog 
+         */
         CHbDeviceDialogSymbian* iDialog;
-        /** The observer to handle the data received from the orbit dialog */
+        
+        /** 
+         * The observer to handle the data received from the orbit dialog 
+         */
         CEapAuthObserver* iObserver;
                         
-        /* Information if request was already completed, in case the
+        /** 
+         * Information if request was already completed, in case the
          * observer receives the data signal and the signal about closing the
          * dialog.
          */
         TBool iCompleted;
         
-        /** Information if request was already cancelled.*/
+        /**
+         * Information if request was already cancelled.
+         */
         TBool iCancelled;
         
-        /** Pointer to the Eap Dialog Info structure */
+        /** 
+         * Pointer to the Eap Dialog Info structure 
+         */
         TEapDialogInfo* iEapInfo;
         
     

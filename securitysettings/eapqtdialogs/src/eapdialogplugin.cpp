@@ -16,11 +16,14 @@
 */
 
 /*
-* %version: 8 %
+* %version: 9 %
 */
 
+// System includes
 #include <hbdevicedialoginterface.h>
 #include <QVariantMap>
+
+// User includes
 #include "eapdialogplugin.h"
 #include "eapusernamepwddialog.h"
 #include "eapquerydialog.h"
@@ -38,11 +41,18 @@
 #ifdef OST_TRACE_COMPILER_IN_USE
 #endif
 
+/*!
+ * \class EapDialogPlugin
+ * \brief Implements Eap Dialog Plugin. 
+ */
+
+// External function prototypes
 
 Q_EXPORT_PLUGIN2(eapdialogplugin, EapDialogPlugin)
 
+// Local constants
 
-// This plugin implements one device dialog type
+//! This plugin implements several device dialog types
 static const struct {
     const char *mTypeString;
 } dialogInfos[] = {
@@ -60,9 +70,13 @@ static const struct {
     {"com.nokia.eap.fastshowprovnotsuccessnotedialog/1.0"}
 };
 
-/**
- * Constructor
- */ 
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+/*!
+ * Constructor.
+ */
 EapDialogPlugin::EapDialogPlugin()
 {
     OstTraceFunctionEntry0( EAPDIALOGPLUGIN_EAPDIALOGPLUGIN_ENTRY );
@@ -71,7 +85,7 @@ EapDialogPlugin::EapDialogPlugin()
     OstTraceFunctionExit0( EAPDIALOGPLUGIN_EAPDIALOGPLUGIN_EXIT );
 }
 
-/**
+/*!
  * Destructor
  */ 
 EapDialogPlugin::~EapDialogPlugin()
@@ -81,8 +95,12 @@ EapDialogPlugin::~EapDialogPlugin()
     OstTraceFunctionExit0( EAPDIALOGPLUGIN_DEAPDIALOGPLUGIN_EXIT );
 }
 
-/**
+/*!
  * Create device dialog widget
+ *
+ * @param [in]  deviceDialogType Tells which Dialog to create
+ * @param [in]  parameters Parameters for the Construction of the dialog.
+ * @return  created dialog widget
  */ 
 HbDeviceDialogInterface *EapDialogPlugin::createDeviceDialog(
     const QString &deviceDialogType,
@@ -90,76 +108,85 @@ HbDeviceDialogInterface *EapDialogPlugin::createDeviceDialog(
 {  
     OstTraceFunctionEntry0( EAPDIALOGPLUGIN_CREATEDEVICEDIALOG_ENTRY );
     qDebug("EapDialogPlugin::createDeviceDialog ENTER");
+    
+    HbDeviceDialogInterface* dialog = NULL; 
         
-    if ( deviceDialogType.compare("com.nokia.eap.usernamepassworddialog/1.0") == 0 ) 
+    if ( deviceDialogType.compare(dialogInfos[0].mTypeString) == 0 ) 
         {
         qDebug("EapDialogPlugin::createDeviceDialog: new EapUsernamePwdDialog");
-        return ( new EapUsernamePwdDialog(parameters) );
+        dialog = new EapUsernamePwdDialog(parameters);
         }
-    else if ( deviceDialogType.compare("com.nokia.eap.querydialog/1.0") == 0 ) 
+    else if ( deviceDialogType.compare(dialogInfos[1].mTypeString) == 0 ) 
         { 
         qDebug("EapDialogPlugin::createDeviceDialog: new EapQueryDialog");
-        return ( new EapQueryDialog(parameters) );
+        dialog = new EapQueryDialog(parameters);   
         }
-    else if ( deviceDialogType.compare("com.nokia.eap.passwordquerydialog/1.0") == 0 ) 
+    else if ( deviceDialogType.compare(dialogInfos[2].mTypeString) == 0 ) 
         { 
         qDebug("EapDialogPlugin::createDeviceDialog: new EapPasswordQueryDialog");
-        return ( new EapPasswordQueryDialog(parameters) );
+        dialog = new EapPasswordQueryDialog(parameters);
         }
-    else if ( deviceDialogType.compare("com.nokia.eap.fastinstallpacquerydialog/1.0") == 0 )
+    else if ( deviceDialogType.compare(dialogInfos[3].mTypeString) == 0 )
         {
         qDebug("EapDialogPlugin::createDeviceDialog: new EapFastInstallPacQueryDialog");
-        return ( new EapFastInstallPacQueryDialog(parameters) );
+        dialog = new EapFastInstallPacQueryDialog(parameters);
         }
-    else if ( deviceDialogType.compare("com.nokia.eap.fastpacstorepwquerydialog/1.0") == 0 )
+    else if ( deviceDialogType.compare(dialogInfos[4].mTypeString) == 0 )
         {
         qDebug("EapDialogPlugin::createDeviceDialog: new EapFastPacStorePwQueryDialog");
-        return ( new EapFastPacStorePwQueryDialog(parameters));
+        dialog = new EapFastPacStorePwQueryDialog(parameters);
         }   
-    else if ( deviceDialogType.compare("com.nokia.eap.fastcreatemasterkeyquerydialog/1.0") == 0 )
+    else if ( deviceDialogType.compare(dialogInfos[5].mTypeString) == 0 )
         {
         qDebug("EapDialogPlugin::createDeviceDialog: new EapFastCreateMasterKeyQueryDialog");
-        return ( new EapFastCreateMasterKeyQueryDialog(parameters) );
+        dialog = new EapFastCreateMasterKeyQueryDialog(parameters);
         }  
-    else if ( deviceDialogType.compare("com.nokia.eap.fastpacfilepwquerydialog/1.0") == 0 )
+    else if ( deviceDialogType.compare(dialogInfos[6].mTypeString) == 0 )
         {
         qDebug("EapDialogPlugin::createDeviceDialog: new EapFastPacFilePwQueryDialog");
-        return ( new EapFastPacFilePwQueryDialog(parameters) );
+        dialog = new EapFastPacFilePwQueryDialog(parameters);
         }
-    else if ( deviceDialogType.compare("com.nokia.eap.fastprovwaitnotedialog/1.0") == 0 )
+    else if ( deviceDialogType.compare(dialogInfos[7].mTypeString) == 0 )
         {
         qDebug("EapDialogPlugin::createDeviceDialog: new EapFastProvWaitNoteDialog");
-        return ( new EapFastProvWaitNoteDialog(parameters) );
+        dialog = new EapFastProvWaitNoteDialog(parameters);
         }  
-    else if ( deviceDialogType.compare("com.nokia.eap.mschapv2passwordexpirednotedialog/1.0") == 0 )
+    else if ( deviceDialogType.compare(dialogInfos[8].mTypeString) == 0 )
         {
         qDebug("EapDialogPlugin::createDeviceDialog: new EapMschapv2PwdExpNoteDialog");
-        return ( new EapMschapv2PwdExpNoteDialog(parameters) );
+        dialog = new EapMschapv2PwdExpNoteDialog(parameters);
         }  
-    else if ( deviceDialogType.compare("com.nokia.eap.mschapv2oldpassworddialog/1.0") == 0 )
+    else if ( deviceDialogType.compare(dialogInfos[9].mTypeString) == 0 )
         {
         qDebug("EapDialogPlugin::createDeviceDialog: new EapMschapv2OldPwdDialog");
-        return ( new EapMschapv2OldPwdDialog(parameters) );
+        dialog = new EapMschapv2OldPwdDialog(parameters);
         }  
-    else if ( deviceDialogType.compare("com.nokia.eap.mschapv2newpassworddialog/1.0") == 0 )
+    else if ( deviceDialogType.compare(dialogInfos[10].mTypeString) == 0 )
         {
         qDebug("EapDialogPlugin::createDeviceDialog: new EapMschapv2NewPwdDialog");
-        return ( new EapMschapv2NewPwdDialog(parameters) );
+        dialog = new EapMschapv2NewPwdDialog(parameters);
         }  
-    else if ( deviceDialogType.compare("com.nokia.eap.fastshowprovnotsuccessnotedialog/1.0") == 0 )
+    else if ( deviceDialogType.compare(dialogInfos[11].mTypeString) == 0 )
         {
         qDebug("EapDialogPlugin::createDeviceDialog: new EapFastProvNotSuccessNoteDialog");
-        return ( new EapFastProvNotSuccessNoteDialog(parameters) );
+        dialog = new EapFastProvNotSuccessNoteDialog(parameters);
         }   
     OstTraceFunctionExit0( EAPDIALOGPLUGIN_CREATEDEVICEDIALOG_EXIT );
     qDebug("EapDialogPlugin::createDeviceDialog EXIT");
     
-    return NULL;
+    return dialog;
 }
 
-/**
- * Check if client is allowed to use device dialog widget
- */
+/*!
+ * Check if client is allowed to use device dialog widget. For the meantime
+ * this plugin doesn't perform operations that may compromise security.
+ * All clients are allowed to use.
+ *
+ * @param [in]  deviceDialogType Tells which Dialog type
+ * @param [in]  parameters Device dialog parameters
+ * @param [in]  securityInfo Information for Security check
+ * @return  returns always true
+ */ 
 bool EapDialogPlugin::accessAllowed(const QString &deviceDialogType,
     const QVariantMap &parameters, const QVariantMap &securityInfo) const
 {
@@ -169,13 +196,16 @@ bool EapDialogPlugin::accessAllowed(const QString &deviceDialogType,
     Q_UNUSED(parameters)
     Q_UNUSED(securityInfo)
 
-    // This plugin doesn't perform operations that may compromise security.
-    // All clients are allowed to use.
     return true;
 }
 
-/**
+/*!
  * Return information of device dialog the plugin creates
+ *
+ * @param [in]  deviceDialogType Tells which Dialog type
+ * @param [in]  parameters Device dialog parameters
+ * @param [in,out]  info Structure the plugin fills with an information 
+ * @return  returns always true
  */ 
 bool EapDialogPlugin::deviceDialogInfo(const QString &deviceDialogType,
     const QVariantMap &parameters, DeviceDialogInfo *info) const
@@ -195,8 +225,10 @@ bool EapDialogPlugin::deviceDialogInfo(const QString &deviceDialogType,
     return true;
 }
 
-/**
- * Return device dialog types this plugin implements
+/*!
+ * Returns a list of device dialog types the plugin implements. 
+ *
+ * @return returns device dialog types this plugin implements
  */ 
 QStringList EapDialogPlugin::deviceDialogTypes() const
 {
@@ -213,8 +245,10 @@ QStringList EapDialogPlugin::deviceDialogTypes() const
     return types;
 }
 
-/**
+/*!
  * Return plugin flags
+ *
+ * @return returns plugin flags
  */ 
 EapDialogPlugin::PluginFlags EapDialogPlugin::pluginFlags() const
 {
@@ -223,8 +257,10 @@ EapDialogPlugin::PluginFlags EapDialogPlugin::pluginFlags() const
     return NoPluginFlags;
 }
 
-/**
+/*!
  * The last error is not stored, not supported
+ *
+ * @return returns always 0
  */ 
 int EapDialogPlugin::error() const
 {

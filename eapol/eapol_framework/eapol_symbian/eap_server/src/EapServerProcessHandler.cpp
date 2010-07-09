@@ -16,7 +16,7 @@
 */
 
 /*
-* %version:  40 %
+* %version:  41 %
 */
 
 #include "EapServerProcessHandler.h"
@@ -152,7 +152,7 @@ void CEapServerProcessHandler::SaveMessage(TEapRequests message, const void * co
 
 	EAP_TRACE_DATA_DEBUG(
 		iTools,
-		TRACE_FLAGS_DEFAULT,
+		EAP_TRACE_FLAGS_NEVER,
 		(EAPL("CEapServerProcessHandler::SaveMessage()"),
 		data,
 		length));

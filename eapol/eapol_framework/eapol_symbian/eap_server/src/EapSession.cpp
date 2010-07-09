@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 31 %
+* %version: 32 %
 */
 
 
@@ -264,7 +264,7 @@ void CEapSession::ServiceL(const RMessage2& aMessage)
 
 	EAP_TRACE_DATA_DEBUG(
 		iTools,
-		TRACE_FLAGS_DEFAULT,
+		EAP_TRACE_FLAGS_NEVER,
 		(EAPL("CEapSession::ServiceL()"),
 		aData,
 		aLength));

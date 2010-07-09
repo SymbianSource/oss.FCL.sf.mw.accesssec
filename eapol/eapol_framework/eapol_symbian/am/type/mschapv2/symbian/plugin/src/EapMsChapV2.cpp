@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 30 %
+* %version: 31 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -329,6 +329,16 @@ void CEapMsChapV2::GetConfigurationL(EAPSettings& aSettings)
 		iIndexType,
 		iIndex,
 		iTunnelingType);
+
+	// Plain-MsChapv2 and EAP-MsChapv2 uses the same database.
+	// Here we set the correct authentication method to read settings.
+	error = CEapConversion::ConvertInternalTypeToExpandedEAPType(
+		&iEapType,
+		&aSettings.iEAPExpandedType);
+	if (error != KErrNone)
+	{
+		User::Leave(error);
+	}
 		
 	db.Close();
 	session.Close();

@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 49 %
+ * %version: 52 %
  */
 
 // System includes
@@ -437,7 +437,9 @@ QList<EapQtPluginInfo> EapQtConfigInterfacePrivate::supportedInnerTypes(
     TRAPD(err, mEapTypeIf->GetConfigurationL(eapSettings));
     // getEapTypeIf has set mCurrentServerEapType correctly for comparison
     if (err != KErrNone || eapSettings.iEAPExpandedType != mCurrentServerEapType) {
-        qDebug("ERROR: EapQtConfigInterfacePrivate::supportedInnerTypes - GetConfigurationL failed");
+        qDebug()
+            << "ERROR: EapQtConfigInterfacePrivate::supportedInnerTypes - GetConfigurationL failed, code:"
+            << err;
         // clear the instance so that the next attempt starts from scratch
         mEapTypeIf.reset(NULL);
         // return empty list
@@ -814,7 +816,12 @@ bool EapQtConfigInterfacePrivate::readConfiguration(const EapQtPluginHandle &out
 
     // check if failed or something strange happened (incorrect EAP type settings received)  
     if (err != KErrNone || eapSettings.iEAPExpandedType != mCurrentServerEapType) {
-        qDebug("ERROR: EapQtConfigInterfacePrivate - readConfiguration: GetConfigurationL failed");
+        qDebug()
+            << "ERROR: EapQtConfigInterfacePrivate - readConfiguration: GetConfigurationL failed"
+            << "wanted EAP:" << pluginHandle.type().eapExpandedData().toHex()
+            << "- got EAP vendor ID:" << eapSettings.iEAPExpandedType.GetVendorId()
+            << ", vendor type" << eapSettings.iEAPExpandedType.GetVendorType() << ", error code:"
+            << err;
         // clear the instance so that the next attempt starts from scratch
         mEapTypeIf.reset(NULL);
         mCurrentServerEapType = *EapExpandedTypeNone.GetType();
@@ -889,7 +896,8 @@ void EapQtConfigInterfacePrivate::copyToEapSettings(const EapQtConfig &config, E
     varValue = config.value(EapQtConfig::PasswordClear);
     if (varValue.type() == QVariant::Bool) {
         eapSettings.iPasswordExistPresent = ETrue;
-        eapSettings.iPasswordExist = convertToTbool(varValue.toBool());
+        // eapSettings.iPasswordExist = false cleans the password from database, true does nothing
+        eapSettings.iPasswordExist = convertToTbool(!varValue.toBool());
         qDebug() << "EapQtConfigInterfacePrivate - copyToEapSettings PasswordClear: "
             << varValue.toBool();
     }
@@ -1057,6 +1065,7 @@ void EapQtConfigInterfacePrivate::copyToEapSettings(const EapQtConfig &config, E
         QList<QVariant> varList = varValue.toList();
         TEapExpandedType tmpEap;
         EapQtPluginHandle tmpHandle;
+        TUint err(KErrNone);
 
         for (ind = 0; ind < varList.count(); ind++) {
             if (varList[ind].canConvert<EapQtPluginHandle> ()) {
@@ -1066,7 +1075,15 @@ void EapQtConfigInterfacePrivate::copyToEapSettings(const EapQtConfig &config, E
                 tmpHandle = varList[ind].value<EapQtPluginHandle> ();
                 tmpEap.SetValue(tmpHandle.type().eapExpandedData().data(),
                     tmpHandle.type().eapExpandedData().length());
-                eapSettings.iEnabledEncapsulatedEAPExpandedTypes.Append(tmpEap);
+                err = eapSettings.iEnabledEncapsulatedEAPExpandedTypes.Append(tmpEap);
+                if(err != KErrNone)
+                {
+                    qDebug() << "ERROR: EapQtConfigInterfacePrivate::copyToEapSettings() - RArray::Append failed for inner types";
+                    eapSettings.iEnabledEncapsulatedEAPExpandedTypes.Reset();
+                    // no dynamic memory allocated for tmpEap, just continue with
+                    // the rest of the settings; EapSettings takes care of deallocations in its destructor
+                    break;
+                }
 
                 qDebug()
                     << "EapQtConfigInterfacePrivate::copyToEapSettings() - Added to InnerType: "
@@ -1083,11 +1100,22 @@ void EapQtConfigInterfacePrivate::copyToEapSettings(const EapQtConfig &config, E
 
         // clears the ciphersuite configuration if the provided list is empty
         eapSettings.iCipherSuitesPresent = ETrue;
+        TUint err(KErrNone);
 
         for (ind = 0; ind < varCiphers.count(); ind++) {
             // check that the item is of correct type (int also accepted to not be too strict)
             if (varCiphers[ind].type() == QVariant::UInt || varCiphers[ind].type() == QVariant::Int) {
-                eapSettings.iCipherSuites.Append(varCiphers[ind].toUInt());
+
+                err = eapSettings.iCipherSuites.Append(varCiphers[ind].toUInt());
+                if(err != KErrNone)
+                {
+                    qDebug() << "ERROR: EapQtConfigInterfacePrivate::copyToEapSettings() - RArray::Append failed for ciphersuites";
+                    eapSettings.iCipherSuites.Reset();
+                    // continue with the rest of the settings, no dynamic
+                    // memory allocated for varCiphers[ind].toUInt()
+                    break;
+                }
+
                 qDebug(
                     "EapQtConfigInterfacePrivate::copyToEapSettings() - CipherSuites at %d: 0x%08x",
                     ind, varCiphers[ind].toUInt());
@@ -1236,15 +1264,21 @@ void EapQtConfigInterfacePrivate::appendCertificateInfo(bool isCaCertificate,
             << varValue.toByteArray().toHex();
     }
 
-    // EapSettings destructor takes care of deallocating the entry
-    certList->Append(certEntry.data());
+    TUint err = certList->Append(certEntry.data());
+    if (err != KErrNone) {
+        qDebug() << "ERROR: EapQtConfigInterfacePrivate::appendCertificateInfo()"
+            << "- RPointerArray::Append failed for certificate entry";
+        // scoped certEntry pointer deleted automatically
+        // no need to touch the array, it is handled by the caller
+    }
+    else {
+        qDebug() << "EapQtConfigInterfacePrivate::appendCertificateInfo()"
+            << "- *** certificate appended to list";
+        // remove the ownerhsip from scoped pointer, entry owned by the array now
+        (void) certEntry.take();
+    }
 
-    qDebug()
-        << "EapQtConfigInterfacePrivate::appendCertificateInfo()"
-        << "- *** certificate appended to list";
-
-    // all ok, remove the ownerhsip from scoped pointer
-    (void) certEntry.take();
+    // EapSettings destructor takes care of deallocating the array entries
 }
 
 void EapQtConfigInterfacePrivate::copyFromEapSettings(EAPSettings &eapSettings, EapQtConfig &config)
@@ -1373,12 +1407,18 @@ void EapQtConfigInterfacePrivate::copyFromEapSettings(EAPSettings &eapSettings, 
             // only enabled certificates are reported
             if (eapSettings.iCertificates[ind]->GetCertType() == EapCertificateEntry::EUser
                 && eapSettings.iCertificates[ind]->GetIsEnabled() != EFalse) {
-                serverClientCerts.Append(eapSettings.iCertificates[ind]);
+                // no need to check the return value for failures,
+                // serverClientCerts does not own the pointed data,
+                // eapSettings owns and deallocates it
+                (void) serverClientCerts.Append(eapSettings.iCertificates[ind]);
             }
             // only enabled certificates are reported
             else if (eapSettings.iCertificates[ind]->GetCertType() == EapCertificateEntry::ECA
                 && eapSettings.iCertificates[ind]->GetIsEnabled() != EFalse) {
-                serverCaCerts.Append(eapSettings.iCertificates[ind]);
+                // no need to check the return value for failures,
+                // serverCaCerts does not own the pointed data,
+                // eapSettings owns and deallocates it
+                (void) serverCaCerts.Append(eapSettings.iCertificates[ind]);
             }
             else {
                 qDebug()
@@ -1604,6 +1644,7 @@ bool EapQtConfigInterfacePrivate::setSelectedOuterTypes(
 
     // pick only the supported ones from outerHandles
     TEapExpandedType tmpEap;
+    TUint err(KErrNone);
     for (int ind = 0; ind < mSupportedOuterTypes.count(); ind++) {
         if (outerHandles.contains(mSupportedOuterTypes[ind].pluginHandle())) {
 
@@ -1613,7 +1654,14 @@ bool EapQtConfigInterfacePrivate::setSelectedOuterTypes(
                 mSupportedOuterTypes[ind].pluginHandle().type().eapExpandedData().length());
 
             // add to mOuterEapsOn
-            mOuterEapsOn.Append(tmpEap);
+            err = mOuterEapsOn.Append(tmpEap);
+            if(err != KErrNone)
+            {
+                qDebug() << "ERROR: EapQtConfigInterfacePrivate - setSelectedOuterTypes RArray::Append failed";
+                // reset the array, no dynamic memory allocated for tmpEap
+                mOuterEapsOn.Reset();
+                return false;
+            }
 
             qDebug()
                 << "EapQtConfigInterfacePrivate - setSelectedOuterTypes adding to enabledOuterHandles: "
@@ -1625,7 +1673,7 @@ bool EapQtConfigInterfacePrivate::setSelectedOuterTypes(
 
     // set selection to EAP server, no need to have correct content in mOuterEapsOff,  
     // EAP server handles it, mOuterEapsOn is only important
-    TUint err = mEapGsIf->SetEapMethods(mOuterEapsOn, mOuterEapsOff);
+    err = mEapGsIf->SetEapMethods(mOuterEapsOn, mOuterEapsOff);
     if (err != KErrNone) {
         qDebug("EapQtConfigInterfacePrivate::setSelectedOuterTypes() - SetEapMethods failed: %d",
             err);

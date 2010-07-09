@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 6 %
+* %version: 7 %
 */
 
 #if !defined(_EAPPLUGINDBDEFAULTS_H_)

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 45 %
+* %version: 47 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -84,7 +84,7 @@ void EapGtcDbUtils::OpenDatabaseL(
 
 	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): - Opened private DB for EAP-AKA. error=%d\n"), error));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): - Opened private DB for EAP-GTC. error=%d\n"), error));
 
 	User::LeaveIfError(error);
 
@@ -432,7 +432,6 @@ void EapGtcDbUtils::SetConfigurationL(
 	{
 		// Clear password from database.
 		view.SetColL(colSet->ColNo(cf_str_EAP_GTC_passcode_literal), KNullPasswordData);
-		view.PutL();
 		view.SetColNullL(colSet->ColNo(cf_str_EAP_GTC_passcode_literal));
 	}
 

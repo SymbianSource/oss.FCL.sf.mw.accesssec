@@ -16,19 +16,34 @@
 */
 
 /*
-* %version: 3 %
+* %version: 4 %
 */
 
 #ifndef __EAPPASSWORDQUERYDIALOG_H__
 #define __EAPPASSWORDQUERYDIALOG_H__
 
 
+// System includes
 #include <HbInputDialog>
 #include <hbdevicedialoginterface.h>
 
+// User includes
+
+// Forward declarations
 class HbTranslator;
 class HbLineEdit;
 class EapQtValidator;
+
+// External data types
+
+// Constants
+
+/*!
+   @addtogroup group_eap_password_query_dialog
+   @{
+ */
+
+// Class declaration
 
 class EapPasswordQueryDialog: public HbInputDialog, public HbDeviceDialogInterface
     {
@@ -44,17 +59,18 @@ class EapPasswordQueryDialog: public HbInputDialog, public HbDeviceDialogInterfa
         void createDialog( const QVariantMap &parameters );
         
         /* Device dialog parameters to be set while dialog is displayed.
-         * Not supported.
+         * Not supported. (from HbDeviceDialogInterface)
          */
         bool setDeviceDialogParameters(const QVariantMap &parameters);
         
-        /* Not supported */
+        /* Not supported. (from HbDeviceDialogInterface)*/
         int deviceDialogError() const;
         
-        /* Closes the device dialog */
+        /* Closes the device dialog. (from HbDeviceDialogInterface) */
         void closeDeviceDialog(bool byClient);
         
-        /* Returns a pointer to this dialog widget */
+        /* Returns a pointer to this dialog widget.
+           (from HbDeviceDialogInterface)*/
         HbPopup *deviceDialogWidget() const;
                 
     signals:
@@ -80,23 +96,26 @@ class EapPasswordQueryDialog: public HbInputDialog, public HbDeviceDialogInterfa
         
         Q_DISABLE_COPY(EapPasswordQueryDialog)
    
-    private:
-        /* Pointer to the line edit 1 object */
+    private: //data
+        // NOT OWNED
+        //! Pointer to the line edit 1 object
         HbLineEdit *mEdit;
-                
-        /* Pointer to the password validator object */
+        
+        // OWNED           
+        //! Pointer to the password validator object
         QScopedPointer<EapQtValidator> mPwdValidator;
         
-        /* Pointer to the main HbTranslator */
+        //! Pointer to the main HbTranslator
         QScopedPointer<HbTranslator> mTranslator;
                 
-        /* Tells whether close has already been called for the dialog */
+        //! Tells whether close has already been called for the dialog */
         bool mClose;
         
-        /* Tells whether Ok Action has already been pressed */
+        //! Tells whether Ok Action has already been pressed
         bool mOkActionPressed;
     };
 
+/*! @} */
 
 #endif // __EAPPASSWORDQUERYDIALOG_H__
 

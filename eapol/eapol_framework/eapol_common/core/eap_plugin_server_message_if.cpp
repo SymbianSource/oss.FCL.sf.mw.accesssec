@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 13 %
+* %version: 14 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -219,9 +219,16 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::send_message(eap_pr
 {
 	// Sends message data composed of Attribute-Value Pairs.
 
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		(EAPL("eap_plugin_server_message_if_c::send_message(): this = 0x%08x => 0x%08x.\n"),
+		this,
+		dynamic_cast<abs_eap_base_timer_c *>(this)));
+
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
-		EAP_TRACE_FLAGS_MESSAGE_DATA,
+		EAP_TRACE_FLAGS_NEVER,
 		(EAPL("eap_core_client_message_if_c::send_message()"),
 		message->get_message_data(),
 		message->get_message_data_length()));
@@ -274,7 +281,7 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::process_message(eap
 
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
-		EAP_TRACE_FLAGS_MESSAGE_DATA,
+		EAP_TRACE_FLAGS_NEVER,
 		(EAPL("eap_plugin_server_message_if_c::process_message()"),
 		message->get_message_data(),
 		message->get_message_data_length()));
@@ -404,7 +411,7 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::process_data(const 
 {
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
-		EAP_TRACE_FLAGS_MESSAGE_DATA,
+		EAP_TRACE_FLAGS_NEVER,
 		(EAPL("eap_plugin_server_message_if_c::process_data()"),
 		data,
 		length));

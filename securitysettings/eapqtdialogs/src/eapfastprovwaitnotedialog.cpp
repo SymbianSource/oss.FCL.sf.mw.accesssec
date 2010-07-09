@@ -16,18 +16,35 @@
 */
 
 /*
-* %version: 2 %
+* %version: 3 %
 */
 
+// System includes
 #include <HbTranslator>
+
+// User includes
 #include "eapfastprovwaitnotedialog.h"
 #include "OstTraceDefinitions.h"
-#include <QGraphicsLinearLayout>
 #ifdef OST_TRACE_COMPILER_IN_USE
 #endif
 
-/**
- * The constructor
+/*!
+ * \class EapFastProvWaitNoteDialog
+ * \brief Implements Fast Provisioning Wait Notification Dialog. 
+ */
+
+// External function prototypes
+
+// Local constants
+ 
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+/*!
+ * Constructor.
+ * 
+ * @param [in]  parameters Parameters for the Constructor.
  */
 EapFastProvWaitNoteDialog::EapFastProvWaitNoteDialog(const QVariantMap &parameters)
 :mTranslator(new HbTranslator("eapprompts"))
@@ -41,8 +58,10 @@ EapFastProvWaitNoteDialog::EapFastProvWaitNoteDialog(const QVariantMap &paramete
     qDebug("EapFastProvWaitNoteDialog::EapFastProvWaitNoteDialog EXIT");
 }
    
-/**
+/*!
  * The construction of the dialog
+ *
+ * @param [in] parameters Parameters for the Construction of the dialog.
  */ 
 void EapFastProvWaitNoteDialog::createDialog(const QVariantMap &parameters )
 {
@@ -84,8 +103,8 @@ void EapFastProvWaitNoteDialog::createDialog(const QVariantMap &parameters )
     qDebug("EapFastProvWaitNoteDialog::createDialog EXIT");
 }
 
-/**
- * Destructor
+/*!
+ * Destructor.
  */
 EapFastProvWaitNoteDialog::~EapFastProvWaitNoteDialog()
 {
@@ -98,9 +117,8 @@ EapFastProvWaitNoteDialog::~EapFastProvWaitNoteDialog()
     OstTraceFunctionExit0( EAPFASTPROVWAITNOTEDIALOG_DEAPFASTPROVWAITNOTEDIALOG_EXIT );
 }
 
-/**
+/*!
  * Function is called when the dialog is about to close
- * 
  */
 void EapFastProvWaitNoteDialog::closingDialog()
 {
@@ -113,9 +131,13 @@ void EapFastProvWaitNoteDialog::closingDialog()
     OstTraceFunctionExit0( EAPFASTPROVWAITNOTEDIALOG_CLOSINGDIALOG_EXIT );
 }
 
-/**
- * Updating the dialog during its showing is not allowed.
- */ 
+/*!
+ * Device dialog parameters to be set while dialog is displayed.
+ * Not supported. 
+ *
+ * @param [in] parameters NOT USED
+ * @return true always.
+ */  
 bool EapFastProvWaitNoteDialog::setDeviceDialogParameters
                 (const QVariantMap &parameters)
 {
@@ -128,8 +150,10 @@ bool EapFastProvWaitNoteDialog::setDeviceDialogParameters
     return true;
 }
 
-/**
- * Not supported, 0 always returned
+/*!
+ * Not supported
+ *
+ * @return 0 always returned.
  */
 int EapFastProvWaitNoteDialog::deviceDialogError() const
 {
@@ -138,8 +162,10 @@ int EapFastProvWaitNoteDialog::deviceDialogError() const
     return 0;
 }
 
-/**
+/*!
  * Dialog is closed and the signal about closing is emitted
+ *
+ * @param [in] byClient indicates when the user closes the dialog
  */
 void EapFastProvWaitNoteDialog::closeDeviceDialog(bool byClient)
 {   
@@ -154,8 +180,10 @@ void EapFastProvWaitNoteDialog::closeDeviceDialog(bool byClient)
     OstTraceFunctionExit0( EAPFASTPROVWAITNOTEDIALOG_CLOSEDEVICEDIALOG_EXIT );
 }
 
-/**
+/*!
  * This dialog widget is returned to the caller
+ *
+ * @return this dialog widget
  */
 HbPopup *EapFastProvWaitNoteDialog::deviceDialogWidget() const
 {

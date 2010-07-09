@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 137 %
+* %version: 140 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -94,7 +94,7 @@ void EapTlsPeapUtils::OpenDatabaseL(
 		OpenFastDatabaseL(aDatabase, aFileServerSession, aIndexType, aIndex, aTunnelingType);
 	} 
 #endif // #if defined(USE_FAST_EAP_TYPE)
-	else if ( aEapType == eap_type_ttls_plain_pap )
+	else if ( aEapType == eap_expanded_type_ttls_plain_pap.get_type() )
 	{
 		OpenTtlsDatabaseL( aDatabase, aFileServerSession, aIndexType, aIndex, aTunnelingType);
 	}
@@ -2121,14 +2121,21 @@ void EapTlsPeapUtils::ReadCertRowsToArrayL(
 				TPtrC8 ptr2 = view.ColDes8(colSet->ColNo(KSubjectKeyIdentifier)); // This is for authentication and uses Symbian subjectkey id.
 				certInfo->SetSubjectKeyId(ptr2);
 
-				aArray.Append(certInfo);
-				
-				EAP_TRACE_DEBUG_SYMBIAN((_L("ReadCertRowsToArrayL - Appended Cert with label=%S\n"),
-					certInfo->GetLabel()));
-				
+				TInt error = aArray.Append(certInfo);
+
+				EAP_TRACE_DEBUG_SYMBIAN((_L("ReadCertRowsToArrayL - Appended Cert with label=%S, error=%d\n"),
+					certInfo->GetLabel(),
+					error));
+
 				EAP_TRACE_DATA_DEBUG_SYMBIAN(("ReadCertRowsToArrayL - Appended Cert's SubjectKeyID:",
 					certInfo->GetSubjectKeyId().Ptr(),
 					certInfo->GetSubjectKeyId().Length()));
+
+				if (error != KErrNone)
+				{
+					delete certInfo;
+					User::Leave(error);
+				}
 			}	
 
 		} while (view.NextL() != EFalse);		
@@ -2197,12 +2204,17 @@ void EapTlsPeapUtils::ReadUintRowsToArrayL(
 				{
 					// Store the line
 					TUint tmp = view.ColUint(KDefaultColumnInView_One);
-					aArray.Append(tmp);
+					TInt error = aArray.Append(tmp);
 
 					EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("EapTlsPeapUtils::ReadUintRowsToArrayL(): TUint=%d\n"),
-						tmp));
+						(_L("EapTlsPeapUtils::ReadUintRowsToArrayL(): TUint=%d, error=%d\n"),
+						tmp,
+						error));
 
+					if (error != KErrNone)
+					{
+						User::Leave(error);
+					}
 				}
 				break;
 			default:
@@ -2366,7 +2378,7 @@ void EapTlsPeapUtils::SetTunnelingExpandedEapDataL(
 	} 
 #endif
 
-	else if ( aEapType == eap_type_ttls_plain_pap )
+	else if ( aEapType == eap_expanded_type_ttls_plain_pap.get_type() )
 	{
 		sqlStatement.Format(KSQLQueryRow,
 			&cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
@@ -2391,7 +2403,7 @@ void EapTlsPeapUtils::SetTunnelingExpandedEapDataL(
 		// Unsupported EAP type
 		User::Leave(KErrNotSupported);
 	}	
-			
+
 	RDbView view;
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 	CleanupClosePushL(view);
@@ -2401,7 +2413,7 @@ void EapTlsPeapUtils::SetTunnelingExpandedEapDataL(
 
 	TInt enabledEAPCount = aEnabledEAPArrary.Count();
 	TInt disabledEAPCount = aDisabledEAPArrary.Count();
-	
+
 	HBufC8 *acceptedDbText = HBufC8::NewLC( KEapExpandedTypeLength * enabledEAPCount ); // 8 bytes (64 bits) for an EAP type.
 	HBufC8 *unacceptedDbText = HBufC8::NewLC( KEapExpandedTypeLength * disabledEAPCount ); // 8 bytes (64 bits) for an EAP type.
 	
@@ -2545,7 +2557,7 @@ void EapTlsPeapUtils::GetTunnelingExpandedEapDataL(
 	} 
 #endif
 
-	else if (aEapType == eap_type_ttls_plain_pap )
+	else if (aEapType == eap_expanded_type_ttls_plain_pap.get_type() )
 	{
 		sqlStatement.Format(KSQLQueryRow,
 			&cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
@@ -2625,7 +2637,7 @@ void EapTlsPeapUtils::GetTunnelingExpandedEapDataL(
 			expandedEAPTmp->GetVendorId(),
 			expandedEAPTmp->GetVendorType()));
 
-		aEnabledEAPArrary.Append(expandedEAPTmp);
+		aEnabledEAPArrary.AppendL(expandedEAPTmp);
 
 		index = index + KEapExpandedTypeLength;
 	}
@@ -2650,7 +2662,7 @@ void EapTlsPeapUtils::GetTunnelingExpandedEapDataL(
 			expandedEAPTmp->GetVendorId(),
 			expandedEAPTmp->GetVendorType()));
 
-		aDisabledEAPArrary.Append(expandedEAPTmp);
+		aDisabledEAPArrary.AppendL(expandedEAPTmp);
 
 		index = index + KEapExpandedTypeLength;
 	}
@@ -2848,7 +2860,7 @@ void EapTlsPeapUtils::SetConfigurationL(
 		lastFullAuthTime.Set(KFASTLastFullAuthTime);
 	}
 #endif
-	else if (aEapType == eap_type_ttls_plain_pap)
+	else if (aEapType == eap_expanded_type_ttls_plain_pap.get_type())
 	{
 		settings.Set( KTtlsDatabaseTableName );
 		maxSessionTime.Set( cf_str_EAP_TLS_PEAP_ttls_pap_max_session_validity_time_literal );
@@ -2905,7 +2917,7 @@ void EapTlsPeapUtils::SetConfigurationL(
 	//////////////////////////////////////////
 	// This is only for plain PAP settings. //
 	//////////////////////////////////////////
-	if ( aEapType == eap_type_ttls_plain_pap )
+	if ( aEapType == eap_expanded_type_ttls_plain_pap.get_type() )
 	{
 		// Username
 		if ( aSettings.iUsernamePresent )
@@ -2935,7 +2947,6 @@ void EapTlsPeapUtils::SetConfigurationL(
 		{
 			// Clear password from database.
 			view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_ttls_pap_password_literal), KNullPasswordData);
-			view.PutL();
 			view.SetColNullL(colSet->ColNo(cf_str_EAP_TLS_PEAP_ttls_pap_password_literal));
 		}
 
@@ -3013,7 +3024,7 @@ void EapTlsPeapUtils::SetConfigurationL(
 		
 	    EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL(): Return PAP\n") ) );		
 	    return; 
-	} // if ( aEapVendorType == eap_type_ttls_plain_pap )
+	} // if ( aEapVendorType == eap_expanded_type_ttls_plain_pap.get_type() )
 
 
 	if (aSettings.iUseAutomaticCACertificatePresent)
@@ -3822,7 +3833,7 @@ void EapTlsPeapUtils::GetConfigurationL(
 		maxSessionTime.Set(cf_str_EAP_FAST_max_session_validity_time_literal);
 	}
 #endif
-	else if (aEapType == eap_type_ttls_plain_pap)
+	else if (aEapType == eap_expanded_type_ttls_plain_pap.get_type())
 	{
 		settings.Set( KTtlsDatabaseTableName );
 		maxSessionTime.Set( cf_str_EAP_TLS_PEAP_ttls_pap_max_session_validity_time_literal );
@@ -3881,7 +3892,7 @@ void EapTlsPeapUtils::GetConfigurationL(
 	//////////////////////////////////////////
 	// This is only for plain PAP settings. //
 	//////////////////////////////////////////
-	if ( aEapType == eap_type_ttls_plain_pap )
+	if ( aEapType == eap_expanded_type_ttls_plain_pap.get_type() )
 	{		
 	    // Username
 	    TPtrC username = view.ColDes( colSet->ColNo(
@@ -4234,7 +4245,7 @@ void EapTlsPeapUtils::GetConfigurationL(
 		do {
 			view.GetL();
 			{				
-				aSettings.iCipherSuites.Append(view.ColUint(colSet->ColNo(KCipherSuite)));
+				aSettings.iCipherSuites.AppendL(view.ColUint(colSet->ColNo(KCipherSuite)));
 			}
 		} while (view.NextL() != EFalse);
 	}
@@ -4877,7 +4888,7 @@ void EapTlsPeapUtils::DeleteConfigurationL(
 		ciphersuites.Set(KFastAllowedCipherSuitesDatabaseTableName);
 	}
 #endif
-	else if (aEapType == eap_type_ttls_plain_pap)
+	else if (aEapType == eap_expanded_type_ttls_plain_pap.get_type())
 	{
 		dbname.Set( KTtlsDatabaseName );
 		settings.Set( KTtlsDatabaseTableName );
@@ -4974,7 +4985,7 @@ void EapTlsPeapUtils::DeleteConfigurationL(
 	//////////////////////////////////////////
 	// This is only for plain PAP settings. //
 	//////////////////////////////////////////
-	if ( aEapType == eap_type_ttls_plain_pap )
+	if ( aEapType == eap_expanded_type_ttls_plain_pap.get_type() )
 	{
 		CleanupStack::PopAndDestroy(buf);
 		CleanupStack::PopAndDestroy(&aDatabase);
@@ -5278,7 +5289,7 @@ void EapTlsPeapUtils::GetEapSettingsDataL(
 		generalSettingsTableName = KPeapDatabaseTableName;	
 	}
 	else if (aEapType == eap_type_ttls
-		|| aEapType == eap_type_ttls_plain_pap)
+		|| aEapType == eap_expanded_type_ttls_plain_pap.get_type())
 	{
 		generalSettingsTableName = KTtlsDatabaseTableName;
 	}
@@ -5551,7 +5562,7 @@ void EapTlsPeapUtils::SetEapSettingsDataL(
 		generalSettingsTableName = KPeapDatabaseTableName;
 	}
 	else if (aEapType == eap_type_ttls
-		|| aEapType == eap_type_ttls_plain_pap)
+		|| aEapType == eap_expanded_type_ttls_plain_pap.get_type())
 	{
 		generalSettingsTableName = KTtlsDatabaseTableName;
 	}

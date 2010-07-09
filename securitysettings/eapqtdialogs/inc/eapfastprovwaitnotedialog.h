@@ -16,16 +16,31 @@
 */
 
 /*
-* %version: 2 %
+* %version: 3 %
 */
 
 #ifndef __EAPFASTPROVWAITNOTEDIALOG_H__
 #define __EAPFASTPROVWAITNOTEDIALOG_H__
 
+// System includes
 #include <HbNotificationDialog>
 #include <hbdevicedialoginterface.h>
 
+// User includes
+
+// Forward declarations
 class HbTranslator;
+
+// External data types
+
+// Constants
+
+/*!
+   @addtogroup group_eap_fast_prov_wait_note_dialog
+   @{
+ */
+
+// Class declaration
 
 class EapFastProvWaitNoteDialog: public HbNotificationDialog, public HbDeviceDialogInterface
     {
@@ -42,17 +57,18 @@ class EapFastProvWaitNoteDialog: public HbNotificationDialog, public HbDeviceDia
         void createDialog(const QVariantMap &parameters );
         
         /* Device dialog parameters to be set while dialog is displayed.
-         * Not supported.
+         * Not supported. (from HbDeviceDialogInterface)
          */
         bool setDeviceDialogParameters(const QVariantMap &parameters);
         
-        /* Not supported */
+        /* Not supported. (from HbDeviceDialogInterface) */
         int deviceDialogError() const;
         
-        /* Closes the device dialog */
+        /* Closes the device dialog. (from HbDeviceDialogInterface) */
         void closeDeviceDialog(bool byClient);
         
-        /* Returns a pointer to this dialog widget */
+        /* Returns a pointer to this dialog widget.
+           (from HbDeviceDialogInterface) */
         HbPopup *deviceDialogWidget() const;
                 
     signals:
@@ -71,9 +87,15 @@ class EapFastProvWaitNoteDialog: public HbNotificationDialog, public HbDeviceDia
                 
         Q_DISABLE_COPY(EapFastProvWaitNoteDialog)
         
-        /* Pointer to the HbTranslator */
+    private:// data
+        // NOT OWNED
+        
+        // OWNED        
+        //! Pointer to the HbTranslator
         QScopedPointer<HbTranslator> mTranslator;
    
     };
+    
+/*! @} */
 
 #endif // __EAPFASTPROVWAITNOTEDIALOG_H__

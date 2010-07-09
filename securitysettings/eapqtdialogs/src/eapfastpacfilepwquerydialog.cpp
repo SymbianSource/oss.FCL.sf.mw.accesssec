@@ -11,25 +11,44 @@
 *
 * Contributors:
 *
-* Description: Fast Pac File Password Query Dialog implementation
+* Description: EAP-FAST PAC File Password Query Dialog implementation
 *
 */
 
 /*
-* %version: 3 %
+* %version: 4 %
 */
 
+// System includes
 #include <HbTranslator>
 #include <HbAction>
 #include <HbParameterLengthLimiter>
+
+// User includes
 #include "eapfastpacfilepwquerydialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #endif
 
 
-/**
- * The constructor
+/*!
+ * \class EapFastPacFilePwQueryDialog
+ * \brief Implements EAP-FAST PAC File Password Query Dialog. 
+ */
+
+// External function prototypes
+
+// Local constants
+static const uint PacFilePwQueryTimeout = 60000;
+ 
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+/*!
+ * Constructor.
+ * 
+ * @param [in]  parameters Parameters for the Constructor.
  */
 EapFastPacFilePwQueryDialog::EapFastPacFilePwQueryDialog(const QVariantMap &parameters) 
  :mEdit(NULL), 
@@ -46,8 +65,10 @@ EapFastPacFilePwQueryDialog::EapFastPacFilePwQueryDialog(const QVariantMap &para
     qDebug("EapFastPacFilePwQueryDialog::EapFastPacFilePwQueryDialog EXIT");
 }
     
-/**
+/*!
  * The construction of the dialog
+ *
+ * @param [in] parameters Parameters for the Construction of the dialog.
  */ 
 void EapFastPacFilePwQueryDialog::createDialog(const QVariantMap &parameters )
 {
@@ -71,7 +92,7 @@ void EapFastPacFilePwQueryDialog::createDialog(const QVariantMap &parameters )
     //Set the dialog to be on the screen for 60 seconds, unless
     //the user reacts earlier
     this->setModal(true);
-    this->setTimeout(60000);
+    this->setTimeout(PacFilePwQueryTimeout);
     this->setDismissPolicy(HbPopup::NoDismiss);
     this->setPromptText(mainText, 0);   
     mEdit = this->lineEdit(0);
@@ -114,8 +135,8 @@ void EapFastPacFilePwQueryDialog::createDialog(const QVariantMap &parameters )
     qDebug("EapFastPacFilePwQueryDialog::createDialog EXIT");
 }
 
-/**
- * Destructor
+/*!
+ * Destructor.
  */
 EapFastPacFilePwQueryDialog::~EapFastPacFilePwQueryDialog()
 {
@@ -126,7 +147,7 @@ EapFastPacFilePwQueryDialog::~EapFastPacFilePwQueryDialog()
     OstTraceFunctionExit0( EAPFASTPACFILEQUERYDIALOG_DEAPFASTPACFILEQUERYDIALOG_EXIT );
 }
 
-/**
+/*!
  * Function is called when the Ok Action button is pressed
  */
 void EapFastPacFilePwQueryDialog::okPressed()
@@ -151,7 +172,7 @@ void EapFastPacFilePwQueryDialog::okPressed()
     qDebug("EapFastPacFilePwQueryDialog::okPressed EXIT");
 }
 
-/**
+/*!
  * Function is called when the Cancel Action button is pressed
  */
 void EapFastPacFilePwQueryDialog::cancelPressed()
@@ -167,9 +188,8 @@ void EapFastPacFilePwQueryDialog::cancelPressed()
     OstTraceFunctionExit0( EAPFASTPACFILEQUERYDIALOG_CANCELPRESSED_EXIT );
 }
 
-/**
+/*!
  * Function is called when the dialog is about to close
- * 
  */
 void EapFastPacFilePwQueryDialog::closingDialog()
 {
@@ -180,9 +200,13 @@ void EapFastPacFilePwQueryDialog::closingDialog()
     OstTraceFunctionExit0( EAPFASTPACFILEQUERYDIALOG_CLOSINGDIALOG_EXIT );
 }
 
-/**
- * Updating the dialog during its showing is not allowed.
- */ 
+/*!
+ * Device dialog parameters to be set while dialog is displayed.
+ * Not supported. 
+ *
+ * @param [in] parameters NOT USED
+ * @return true always.
+ */
 bool EapFastPacFilePwQueryDialog::setDeviceDialogParameters
                 (const QVariantMap &parameters)
 {
@@ -195,8 +219,10 @@ bool EapFastPacFilePwQueryDialog::setDeviceDialogParameters
     return true;
 }
 
-/**
- * Not supported, 0 always returned
+/*!
+ * Not supported
+ *
+ * @return 0 always returned.
  */
 int EapFastPacFilePwQueryDialog::deviceDialogError() const
 {
@@ -205,8 +231,10 @@ int EapFastPacFilePwQueryDialog::deviceDialogError() const
     return 0;
 }
 
-/**
+/*!
  * Dialog is closed and the signal about closing is emitted
+ *
+ * @param [in] byClient indicates when the user closes the dialog
  */
 void EapFastPacFilePwQueryDialog::closeDeviceDialog(bool byClient)
 {   
@@ -224,8 +252,10 @@ void EapFastPacFilePwQueryDialog::closeDeviceDialog(bool byClient)
     OstTraceFunctionExit0( EAPFASTPACFILEQUERYDIALOG_CLOSEDEVICEDIALOG_EXIT );
 }
 
-/**
+/*!
  * This dialog widget is returned to the caller
+ *
+ * @return this dialog widget
  */
 HbPopup *EapFastPacFilePwQueryDialog::deviceDialogWidget() const
 {

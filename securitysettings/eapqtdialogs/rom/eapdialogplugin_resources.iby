@@ -11,12 +11,12 @@
  *
  * Contributors:
  *
- * Description:
+ * Description: Resource description file for the EAP Dialogs
  * 
  */
  
  /*
-  * %version: 1 %
+  * %version: 5 %
   */
 
 #ifndef EAPDIALOGPLUGIN_RESOURCES_IBY

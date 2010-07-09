@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 17 %
+* %version: 18 %
 */
 
 #if !defined(_EAP_EXPANDED_TYPE_H_)
@@ -66,12 +66,6 @@ enum eap_type_ietf_values_e
 	eap_type_fast               = 43, ///< This is EAP-FAST type.
 #endif //#if defined(USE_FAST_EAP_TYPE)
 
-	eap_type_ttls_plain_pap     = 98, // This is for TTLS/PAP.
-
-#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
-	eap_type_plain_mschapv2     = 99, ///< This is used to indicate plain MSChapv2 inside TTLS tunnel.
-#endif //#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
-
 	eap_type_saesim             = 252, ///< This is just a test EAP-type.
 	eap_type_dummy_sim          = 253, ///< This is just a test EAP-type.
 
@@ -91,9 +85,9 @@ enum eap_type_vendor_type_e
 {
 	eap_type_vendor_type_secure_easy_setup = 10,
 	eap_type_vendor_type_WFA_simple_config = 1,
-	eap_type_vendor_type_ttls_plain_pap_hack = eap_type_ttls_plain_pap, // This is for TTLS/PAP.
+	eap_type_vendor_type_ttls_plain_pap_hack = 98, // This is for TTLS/PAP.
 #if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
-	eap_type_vendor_type_plain_MSCHAPv2_hack = eap_type_plain_mschapv2, // This is for plain MCHAPv2 and TTLS
+	eap_type_vendor_type_plain_MSCHAPv2_hack = 99, // This is for plain MCHAPv2 and TTLS
 #endif //#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
 };
 

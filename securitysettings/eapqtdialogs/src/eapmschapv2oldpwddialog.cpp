@@ -11,23 +11,46 @@
 *
 * Contributors:
 *
-* Description: EAP-MSCHAPv2 Old Password Input Dialog implementation
+* Description: 
+*   EAP-MSCHAPv2 Old Password Input Dialog implementation
 *
 */
 
+/*
+* %version: 5 %
+*/
+
+// System includes
 #include <HbAction>
 #include <HbTranslator>
 #include <eapqtvalidator.h>
 #include <eapqtexpandedeaptype.h>
 #include <eapqtconfiginterface.h>
 #include <eapqtconfig.h>
+
+// User includes
 #include "eapmschapv2oldpwddialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #endif
 
-/**
- * The constructor
+/*!
+ * \class EapMschapv2OldPwdDialog
+ * \brief Implements EAP-MSCHAPv2 Old Password Input Dialog. 
+ */
+
+// External function prototypes
+
+// Local constants
+ 
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+/*!
+ * Constructor.
+ * 
+ * @param [in]  parameters Parameters for the Constructor.
  */
 EapMschapv2OldPwdDialog::EapMschapv2OldPwdDialog(const QVariantMap &parameters) 
  :mEdit(NULL), 
@@ -45,8 +68,10 @@ EapMschapv2OldPwdDialog::EapMschapv2OldPwdDialog(const QVariantMap &parameters)
     qDebug("EapMschapv2OldPwdDialog::EapMschapv2OldPwdDialog EXIT");
 }
     
-/**
+/*!
  * The construction of the dialog
+ *
+ * @param [in] parameters Parameters for the Construction of the dialog.
  */ 
 void EapMschapv2OldPwdDialog::createDialog(const QVariantMap &parameters )
 {
@@ -111,7 +136,7 @@ void EapMschapv2OldPwdDialog::createDialog(const QVariantMap &parameters )
     qDebug("EapMschapv2OldPwdDialog::createDialog EXIT");
 }
 
-/**
+/*!
  * Destructor
  */
 EapMschapv2OldPwdDialog::~EapMschapv2OldPwdDialog()
@@ -124,8 +149,10 @@ EapMschapv2OldPwdDialog::~EapMschapv2OldPwdDialog()
     OstTraceFunctionExit0( EAPMSCHAPV2OLDPWDDIALOG_DEAPMSCHAPV2OLDPWDDIALOG_EXIT );
 }
 
-/**
+/*!
  * Line edit validator
+ *
+ * @return true if content is valid.
  */
 bool EapMschapv2OldPwdDialog::validate() const
 {
@@ -142,12 +169,12 @@ bool EapMschapv2OldPwdDialog::validate() const
     return valid;
 }
 
-/**
+/*!
  * Function is called when the Ok Action button is pressed
  */
 void EapMschapv2OldPwdDialog::okPressed()
 {
-    OstTraceFunctionEntry0( EAPMSCHAPV2OLDPWDDIALOG_FIRSTBUTTONPRESSED_ENTRY );
+    OstTraceFunctionEntry0( EAPMSCHAPV2OLDPWDDIALOG_OKPRESSED_ENTRY );
     qDebug("EapMschapv2OldPwdDialog::okPressed ENTER");
     
     if ( validate() == true  && mOkActionPressed == false ) {
@@ -164,11 +191,11 @@ void EapMschapv2OldPwdDialog::okPressed()
         closeDeviceDialog(true);
         }
 
-    OstTraceFunctionExit0( EAPMSCHAPV2OLDPWDDIALOG_FIRSTBUTTONPRESSED_EXIT );
+    OstTraceFunctionExit0( EAPMSCHAPV2OLDPWDDIALOG_OKPRESSED_EXIT );
     qDebug("EapMschapv2OldPwdDialog::okPressed EXIT");
 }
 
-/**
+/*!
  * Function is called when the Cancel Action button is pressed
  */
 void EapMschapv2OldPwdDialog::cancelPressed()
@@ -184,9 +211,8 @@ void EapMschapv2OldPwdDialog::cancelPressed()
     OstTraceFunctionExit0( EAPMSCHAPV2OLDPWDDIALOG_CANCELPRESSED_EXIT );
 }
 
-/**
+/*!
  * Function is called when the dialog is about to close
- * 
  */
 void EapMschapv2OldPwdDialog::closingDialog()
 {
@@ -198,8 +224,12 @@ void EapMschapv2OldPwdDialog::closingDialog()
     OstTraceFunctionExit0( EAPMSCHAPV2OLDPWDDIALOG_CLOSINGDIALOG_EXIT );
 }
 
-/**
- * Updating the dialog during its showing is not allowed.
+/*!
+ * Device dialog parameters to be set while dialog is displayed.
+ * Not supported. 
+ *
+ * @param [in] parameters NOT USED
+ * @return true always.
  */ 
 bool EapMschapv2OldPwdDialog::setDeviceDialogParameters
                 (const QVariantMap &parameters)
@@ -213,8 +243,10 @@ bool EapMschapv2OldPwdDialog::setDeviceDialogParameters
     return true;
 }
 
-/**
- * Not supported, 0 always returned
+/*!
+ * Not supported
+ *
+ * @return 0 always returned.
  */
 int EapMschapv2OldPwdDialog::deviceDialogError() const
 {
@@ -223,8 +255,10 @@ int EapMschapv2OldPwdDialog::deviceDialogError() const
     return 0;
 }
 
-/**
+/*!
  * Dialog is closed and the signal about closing is emitted
+ *
+ * @param [in] byClient indicates when the user closes the dialog
  */
 void EapMschapv2OldPwdDialog::closeDeviceDialog(bool byClient)
 {   
@@ -241,8 +275,10 @@ void EapMschapv2OldPwdDialog::closeDeviceDialog(bool byClient)
     OstTraceFunctionExit0( EAPMSCHAPV2OLDPWDDIALOG_CLOSEDEVICEDIALOG_EXIT );
 }
 
-/**
+/*!
  * This dialog widget is returned to the caller
+ *
+ * @return this dialog widget
  */
 HbPopup *EapMschapv2OldPwdDialog::deviceDialogWidget() const
 {

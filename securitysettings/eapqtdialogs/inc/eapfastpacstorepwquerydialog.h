@@ -11,22 +11,37 @@
 *
 * Contributors:
 *
-* Description: Fast Pac Store Password Query Dialog
+* Description: EAP-FAST PAC Store Password Query Dialog
 *
 */
 
 /*
-* %version: 3 %
+* %version: 4 %
 */
 
 #ifndef __EAPFASTPACSTOREPWQUERYDIALOG_H__
 #define __EAPFASTPACSTOREPWQUERYDIALOG_H__
 
+// System includes
 #include <HbInputDialog>
 #include <hbdevicedialoginterface.h>
 
+// User includes
+
+// Forward declarations
 class HbTranslator;
 class EapQtValidator;
+
+// External data types
+
+// Constants
+
+/*!
+   @addtogroup group_eap_fast_pac_store_pwd_query_dialog
+   @{
+ */
+
+// Class declaration
 
 class EapFastPacStorePwQueryDialog: public HbInputDialog, public HbDeviceDialogInterface
     {
@@ -38,21 +53,22 @@ class EapFastPacStorePwQueryDialog: public HbInputDialog, public HbDeviceDialogI
         /* Destructor */
         ~EapFastPacStorePwQueryDialog();
         
-        /* Function creates the actual dialog widget */
-        void createDialog( const QVariantMap &parameters );
+        /* Function creates the actual dialog widget. */
+        void createDialog();
         
         /* Device dialog parameters to be set while dialog is displayed.
-         * Not supported.
+         * Not supported. (from HbDeviceDialogInterface)
          */
         bool setDeviceDialogParameters(const QVariantMap &parameters);
         
-        /* Not supported */
+        /* Not supported. (from HbDeviceDialogInterface) */
         int deviceDialogError() const;
         
-        /* Closes the device dialog */
+        /* Closes the device dialog. (from HbDeviceDialogInterface)*/
         void closeDeviceDialog(bool byClient);
         
-        /* Returns a pointer to this dialog widget */
+        /* Returns a pointer to this dialog widget.
+           (from HbDeviceDialogInterface) */
         HbPopup *deviceDialogWidget() const;
                 
     signals:
@@ -78,24 +94,27 @@ class EapFastPacStorePwQueryDialog: public HbInputDialog, public HbDeviceDialogI
         
         Q_DISABLE_COPY(EapFastPacStorePwQueryDialog)
    
-    private:
-        /* Pointer to the line edit object */
+    private: // data
+        // NOT OWNED
+        //! Pointer to the line edit object
         HbLineEdit *mEdit;
                 
-        /* Pointer to the password validator object */
+        // OWNED        
+        //! Pointer to the password validator object
         QScopedPointer<EapQtValidator> mPwdValidator;
                 
-        /* Pointer to the HbTranslator */
+        //! Pointer to the HbTranslator
         QScopedPointer<HbTranslator> mTranslator;
         
-        /* Pointer to the error message HbTranslator */
+        //! Pointer to the error message HbTranslator
         QScopedPointer<HbTranslator> mErrMsgTranslator;
         
-        /* Tells whether close has already been called for the dialog */
+        //! Tells whether close has already been called for the dialog
         bool mClose;
         
     };
 
+/*! @} */
 
 #endif // __EAPFASTPACSTOREPWQUERYDIALOG_H__
 

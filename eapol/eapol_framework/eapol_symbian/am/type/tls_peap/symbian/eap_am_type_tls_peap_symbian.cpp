@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 247.2.68 %
+* %version: 256 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -249,7 +249,7 @@ eap_am_type_tls_peap_symbian_c::eap_am_type_tls_peap_symbian_c(
 		m_db_cipher_suite_table_name = KPeapAllowedCipherSuitesDatabaseTableName;
 		m_db_name = KPeapDatabaseName;	
 	}
-	else if (m_current_eap_type == eap_type_ttls_plain_pap
+	else if (m_current_eap_type == eap_expanded_type_ttls_plain_pap.get_type()
 			|| m_current_eap_type == eap_type_ttls)
 	{
 		m_db_table_name = KTtlsDatabaseTableName;
@@ -320,7 +320,7 @@ eap_am_type_tls_peap_symbian_c* eap_am_type_tls_peap_symbian_c::NewL(
 		&& aEapType != eap_type_ttls
 #endif // #if defined(USE_TTLS_EAP_TYPE)
 
-	    && aEapType != eap_type_ttls_plain_pap
+	    && aEapType != eap_expanded_type_ttls_plain_pap.get_type()
 		
 #if defined (USE_FAST_EAP_TYPE)
 		&& aEapType != eap_type_fast
@@ -1771,7 +1771,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::configure()
 				cf_str_EAP_TTLS_max_session_validity_time.get_field(),
 				&sessionTimeFromFile);
 		}
-		else if (m_current_eap_type == eap_type_ttls_plain_pap)
+		else if (m_current_eap_type == eap_expanded_type_ttls_plain_pap.get_type())
 		{
 			// read PAP session time
 			status = type_configure_read(
@@ -3360,7 +3360,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::type_configure_read
 		|| m_current_eap_type == eap_type_fast
 #endif
 
-		|| m_current_eap_type == eap_type_ttls_plain_pap
+		|| m_current_eap_type == eap_expanded_type_ttls_plain_pap.get_type()
 	
 		)
 	{
@@ -5317,7 +5317,7 @@ void eap_am_type_tls_peap_symbian_c::complete_get_matching_certificates(
 				return;	
 			}
 
-			TInt error = m_allowed_user_certs.Append(entry->Copy());
+			TInt error = m_allowed_user_certs.Append(entry);
 			if (error != KErrNone)
 			{
 				EAP_TRACE_DEBUG(
@@ -5335,6 +5335,8 @@ void eap_am_type_tls_peap_symbian_c::complete_get_matching_certificates(
 					0, 
 					false, 
 					0);
+
+				delete entry;
 				
 				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
 				return;		
@@ -6814,7 +6816,7 @@ bool eap_am_type_tls_peap_symbian_c::is_session_validL()
 		lastFullAuthTimeString.Set(KFASTLastFullAuthTime);
 	}
 #endif
-	else if (m_current_eap_type == eap_type_ttls_plain_pap)
+	else if (m_current_eap_type == eap_expanded_type_ttls_plain_pap.get_type())
 	{
 	    // we should not come here, ttls pap has its own
 	    // method for checking session validity
@@ -6986,7 +6988,7 @@ void eap_am_type_tls_peap_symbian_c::store_authentication_timeL()
 	{
 		lastFullAuthTimeString.Set(KTTLSLastFullAuthTime);
 	}
-	else if (m_current_eap_type == eap_type_ttls_plain_pap)
+	else if (m_current_eap_type == eap_expanded_type_ttls_plain_pap.get_type())
 	{
 		lastFullAuthTimeString.Set( KTTLSPAPLastFullAuthTime );
 	}

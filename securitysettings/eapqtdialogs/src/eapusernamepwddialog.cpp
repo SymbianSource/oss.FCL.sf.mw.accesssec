@@ -11,14 +11,16 @@
 *
 * Contributors:
 *
-* Description:   User authentication Dialog implementation
+* Description:   
+*   User authentication Dialog implementation
 *
 */
 
 /*
- * %version: 4 %
+ * %version: 5 %
  */
 
+// System includes
 #include <eapqtvalidator.h>
 #include <eapqtexpandedeaptype.h>
 #include <eapqtconfiginterface.h>
@@ -27,14 +29,31 @@
 #include <HbTranslator>
 #include <HbLineEdit>
 #include <HbAction>
+
+// User includes
 #include "eapusernamepwddialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 
 #endif
 
-/**
- * The constructor
+/*!
+ * \class EapUsernamePwdDialog
+ * \brief Implements Username Password Input Dialog. 
+ */
+
+// External function prototypes
+
+// Local constants
+ 
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+/*!
+ * Constructor.
+ * 
+ * @param [in]  parameters Parameters for the Constructor.
  */
 EapUsernamePwdDialog::EapUsernamePwdDialog(const QVariantMap &parameters) 
  :mEdit1(NULL), 
@@ -54,8 +73,10 @@ EapUsernamePwdDialog::EapUsernamePwdDialog(const QVariantMap &parameters)
     qDebug("EapUsernamePwdDialog::EapUsernamePwdDialog EXIT");
 }
     
-/**
+/*!
  * The construction of the dialog
+ *
+ * @param [in] parameters Parameters for the Construction of the dialog.
  */ 
 void EapUsernamePwdDialog::createDialog(const QVariantMap &parameters )
 {
@@ -92,10 +113,13 @@ void EapUsernamePwdDialog::createDialog(const QVariantMap &parameters )
     this->setDismissPolicy(HbPopup::NoDismiss);    
     this->setAdditionalRowVisible(true);
     
+    //Set the first Line Edit (user name) to be on the screen
     this->setPromptText(labelText1, 0);   
     mEdit1 = this->lineEdit(0);
+    //Set default user name string
     mEdit1->setText(unamestr);
     
+    //Set the second Line Edit (password) to be on the screen also
     this->setPromptText(labelText2, 1);   
     mEdit2 = this->lineEdit(1);        
     
@@ -157,7 +181,7 @@ void EapUsernamePwdDialog::createDialog(const QVariantMap &parameters )
     qDebug("EapUsernamePwdDialog::createDialog EXIT");
 }
 
-/**
+/*!
  * Destructor
  */
 EapUsernamePwdDialog::~EapUsernamePwdDialog()
@@ -172,8 +196,10 @@ EapUsernamePwdDialog::~EapUsernamePwdDialog()
     OstTraceFunctionExit0( EAPUSERNAMEPWDDIALOG_DEAPUSERNAMEPWDDIALOG_EXIT );
 }
 
-/**
- * Line Edit Validator 
+/*!
+ * Line edit validator
+ *
+ * @return true if content is valid.
  */
 bool EapUsernamePwdDialog::validate() const
 {
@@ -192,7 +218,7 @@ bool EapUsernamePwdDialog::validate() const
     return valid;
 }
 
-/**
+/*!
  * Function is called when the Ok Action button is pressed
  */
 void EapUsernamePwdDialog::okPressed()
@@ -218,7 +244,7 @@ void EapUsernamePwdDialog::okPressed()
     qDebug("EapUsernamePwdDialog::okPressed EXIT");
 }
 
-/**
+/*!
  * Function is called when the Cancel Action button is pressed
  */
 void EapUsernamePwdDialog::cancelPressed()
@@ -234,9 +260,8 @@ void EapUsernamePwdDialog::cancelPressed()
     OstTraceFunctionExit0( EAPUSERNAMEPWDDIALOG_CANCELPRESSED_EXIT );
 }
 
-/**
+/*!
  * Function is called when the dialog is about to close
- * 
  */
 void EapUsernamePwdDialog::closingDialog()
 {
@@ -247,9 +272,13 @@ void EapUsernamePwdDialog::closingDialog()
     OstTraceFunctionExit0( EAPUSERNAMEPWDDIALOG_CLOSINGDIALOG_EXIT );
 }
 
-/**
- * Updating the dialog during its showing is not allowed.
- */ 
+/*!
+ * Device dialog parameters to be set while dialog is displayed.
+ * Not supported. 
+ *
+ * @param [in] parameters NOT USED
+ * @return true always.
+ */  
 bool EapUsernamePwdDialog::setDeviceDialogParameters
                 (const QVariantMap &parameters)
 {
@@ -262,8 +291,10 @@ bool EapUsernamePwdDialog::setDeviceDialogParameters
     return true;
 }
 
-/**
- * Not supported, 0 always returned
+/*!
+ * Not supported
+ *
+ * @return 0 always returned.
  */
 int EapUsernamePwdDialog::deviceDialogError() const
 {
@@ -272,8 +303,10 @@ int EapUsernamePwdDialog::deviceDialogError() const
     return 0;
 }
 
-/**
+/*!
  * Dialog is closed and the signal about closing is emitted
+ *
+ * @param [in] byClient indicates when the user closes the dialog
  */
 void EapUsernamePwdDialog::closeDeviceDialog(bool byClient)
 {   
@@ -291,8 +324,10 @@ void EapUsernamePwdDialog::closeDeviceDialog(bool byClient)
     OstTraceFunctionExit0( EAPUSERNAMEPWDDIALOG_CLOSEDEVICEDIALOG_EXIT );
 }
 
-/**
+/*!
  * This dialog widget is returned to the caller
+ *
+ * @return this dialog widget
  */
 HbPopup *EapUsernamePwdDialog::deviceDialogWidget() const
 {

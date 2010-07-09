@@ -16,9 +16,10 @@
 */
 
 /*
-* %version: 4 %
+* %version: 5 %
 */
 
+// System includes
 #include <HbTranslator>
 #include <HbLineEdit>
 #include <HbAction>
@@ -28,14 +29,31 @@
 #include <eapqtexpandedeaptype.h>
 #include <eapqtconfiginterface.h>
 #include <eapqtconfig.h>
+
+// User includes
 #include "eappasswordquerydialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #endif
 
+/*!
+ * \class EapPasswordQueryDialog
+ * \brief Implements Password Query Dialog. 
+ */
 
-/**
- * The constructor
+// External function prototypes
+
+// Local constants
+ 
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+
+/*!
+ * Constructor.
+ * 
+ * @param [in]  parameters Parameters for the Constructor.
  */
 EapPasswordQueryDialog::EapPasswordQueryDialog(const QVariantMap &parameters) 
  :mEdit(NULL), 
@@ -53,8 +71,10 @@ EapPasswordQueryDialog::EapPasswordQueryDialog(const QVariantMap &parameters)
     qDebug("EapPasswordQueryDialog::EapPasswordQueryDialog EXIT");
 }
     
-/**
+/*!
  * The construction of the dialog
+ *
+ * @param [in] parameters Parameters for the Construction of the dialog.
  */ 
 void EapPasswordQueryDialog::createDialog(const QVariantMap &parameters )
 {
@@ -138,7 +158,7 @@ void EapPasswordQueryDialog::createDialog(const QVariantMap &parameters )
     qDebug("EapPasswordQueryDialog::createDialog EXIT");
 }
 
-/**
+/*!
  * Destructor
  */
 EapPasswordQueryDialog::~EapPasswordQueryDialog()
@@ -151,8 +171,10 @@ EapPasswordQueryDialog::~EapPasswordQueryDialog()
     OstTraceFunctionExit0( EAPPASSWORDQUERYDIALOG_DEAPPASSWORDQUERYDIALOG_EXIT );
 }
 
-/**
+/*!
  * Line edit validator
+ *
+ * @return true if content is valid.
  */
 bool EapPasswordQueryDialog::validate() const
 {
@@ -170,7 +192,7 @@ bool EapPasswordQueryDialog::validate() const
     return valid;
 }
 
-/**
+/*!
  * Function is called when the Ok Action button is pressed
  */
 void EapPasswordQueryDialog::okPressed()
@@ -195,7 +217,7 @@ void EapPasswordQueryDialog::okPressed()
     qDebug("EapPasswordQueryDialog::okPressed EXIT");
 }
 
-/**
+/*!
  * Function is called when the Cancel Action button is pressed
  */
 void EapPasswordQueryDialog::cancelPressed()
@@ -211,9 +233,8 @@ void EapPasswordQueryDialog::cancelPressed()
     OstTraceFunctionExit0( EAPPASSWORDQUERYDIALOG_CANCELPRESSED_EXIT );
 }
 
-/**
+/*!
  * Function is called when the dialog is about to close
- * 
  */
 void EapPasswordQueryDialog::closingDialog()
 {
@@ -225,9 +246,13 @@ void EapPasswordQueryDialog::closingDialog()
     OstTraceFunctionExit0( EAPPASSWORDQUERYDIALOG_CLOSINGDIALOG_EXIT );
 }
 
-/**
- * Updating the dialog during its showing is not allowed.
- */ 
+/*!
+ * Device dialog parameters to be set while dialog is displayed.
+ * Not supported. 
+ *
+ * @param [in] parameters NOT USED
+ * @return true always.
+ */  
 bool EapPasswordQueryDialog::setDeviceDialogParameters
                 (const QVariantMap &parameters)
 {
@@ -240,8 +265,10 @@ bool EapPasswordQueryDialog::setDeviceDialogParameters
     return true;
 }
 
-/**
- * Not supported, 0 always returned
+/*!
+ * Not supported
+ *
+ * @return 0 always returned.
  */
 int EapPasswordQueryDialog::deviceDialogError() const
 {
@@ -250,8 +277,10 @@ int EapPasswordQueryDialog::deviceDialogError() const
     return 0;
 }
 
-/**
+/*!
  * Dialog is closed and the signal about closing is emitted
+ *
+ * @param [in] byClient indicates when the user closes the dialog
  */
 void EapPasswordQueryDialog::closeDeviceDialog(bool byClient)
 {   
@@ -269,8 +298,10 @@ void EapPasswordQueryDialog::closeDeviceDialog(bool byClient)
     OstTraceFunctionExit0( EAPPASSWORDQUERYDIALOG_CLOSEDEVICEDIALOG_EXIT );
 }
 
-/**
+/*!
  * This dialog widget is returned to the caller
+ *
+ * @return this dialog widget
  */
 HbPopup *EapPasswordQueryDialog::deviceDialogWidget() const
 {
