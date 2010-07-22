@@ -1,0 +1,58 @@
+/*
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for eapauthserverexe
+*
+*/
+
+/*
+* %version:  14 %
+*/
+
+#include <platform_paths.hrh>
+#include "eapol.mmh"
+
+TARGET 		EapAuthServerExe.exe
+TARGETTYPE 	exe
+TARGETPATH    /System/Libs
+UID           0x1000008c 0x20026fcb
+CAPABILITY    CAP_SERVER CommDD NetworkControl
+VENDORID      VID_DEFAULT
+
+USERINCLUDE ../../eapol_symbian/am/include
+USERINCLUDE ../../wapi_symbian/wapi_client/include/
+USERINCLUDE ../../wapi_symbian/wapi_server/include/
+USERINCLUDE ../../wapi_symbian/wapi_adaptation/
+USERINCLUDE ../eap_if/include
+USERINCLUDE ../eap_server/include
+USERINCLUDE ../../eapol_common/am/include
+USERINCLUDE ../../eapol_common/include
+USERINCLUDE ../../eapol_common/type/simple_config/simple_config/include
+
+SYSTEMINCLUDE /epoc32/include/ecom
+SYSTEMINCLUDE /epoc32/include/kernel 
+SYSTEMINCLUDE /epoc32/include/libc
+SYSTEMINCLUDE /epoc32/include/libc/netinet
+
+SOURCEPATH ../eap_server/src/
+SOURCE EapServerExe.cpp
+
+MW_LAYER_SYSTEMINCLUDE
+
+
+LIBRARY 		euser.lib ecom.lib EapAuthServer.lib
+
+
+EPOCSTACKSIZE 0x4000
+
+// End of file.

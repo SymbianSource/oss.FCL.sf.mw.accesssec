@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 9 %
+* %version: %
 */
 
 #if !defined(_ABS_EAP_AM_TYPE_SIMPLE_CONFIG_H_)

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 3.1.2 %
+* %version: %
 */
 
 // INCLUDES
@@ -51,6 +51,7 @@ class EAP_EXPORT eap_am_tools_symbian_c
 private:
 
 #if defined(USE_EAP_FILE_TRACE)
+
 	/// File server used in filetrace.
 	RFs m_Fs;
 
@@ -59,7 +60,11 @@ private:
 
 	/// File name used in filetrace.
 	TBuf<64> m_filename;
+
 #endif //#if defined(USE_EAP_FILE_TRACE)
+
+	/// Prefix string used in filetrace.
+	eap_variable_data_c m_prefix_string;
 
 	u64_t m_start_ticks;
 
@@ -162,6 +167,9 @@ public:
 
 	EAP_FUNC_IMPORT bool get_is_timer_thread_active();
 
+
+	EAP_FUNC_IMPORT eap_status_e set_trace_prefix(
+		const eap_variable_data_c * const prefix8bit);
 
 	EAP_FUNC_IMPORT eap_status_e set_trace_file_name(const eap_variable_data_c * const trace_output_file);
 

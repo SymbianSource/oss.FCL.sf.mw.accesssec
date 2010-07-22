@@ -1,0 +1,171 @@
+/*
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for EAP-tools project.
+*
+*/
+
+/*
+* %version: 12 %
+*/
+
+//-------------------------------------------------------------------
+
+#include <platform_paths.hrh>
+#include "../../group/eapol.mmh"
+
+//-------------------------------------------------------------------
+
+CAPABILITY CAP_GENERAL_DLL
+VENDORID VID_DEFAULT
+
+TARGET			eaptools.dll
+TARGETTYPE		dll
+UID			0x1000008d  0x20026FC8
+
+deffile eaptools.def
+
+SOURCEPATH ../../am/common/symbian 
+SOURCE dll_entry.cpp
+SOURCE eap_am_tools_symbian.cpp
+
+SOURCEPATH ../../am/common/symbian
+SOURCE eap_am_crypto_symbian.cpp
+SOURCE eap_am_mutex_symbian.cpp
+SOURCE EapConversion.cpp
+SOURCE EapExpandedType.cpp
+SOURCE EapMessageQueue.cpp
+SOURCE EapSettings.cpp
+
+SOURCEPATH ../../eap_server/src/
+SOURCE EapServerStrings.cpp
+
+SOURCEPATH	../../am/common/DSS_random
+SOURCE dss_random_symbian.cpp
+
+#if defined(USE_EAP_ASSERT_STACK_TRACE)
+SOURCEPATH ../../../eapol_common/am/common/stack
+SOURCE eap_am_stack_trace.cpp
+#endif //#if defined(USE_EAP_ASSERT_STACK_TRACE)
+
+SOURCEPATH	../../../eapol_common/am/common/crypto/md4
+SOURCE eap_am_crypto_md4.cpp
+
+SOURCEPATH	../../../eapol_common/am/common/crypto/rc4
+SOURCE eap_am_crypto_rc4.cpp
+
+SOURCEPATH	../../../eapol_common/am/common/crypto/sha1
+SOURCE eap_am_crypto_sha1.cpp
+
+SOURCEPATH	../../../eapol_common/am/common/crypto/sha-256
+SOURCE eap_am_crypto_sha_256.cpp
+
+SOURCEPATH	../../../eapol_common/am/common
+SOURCE eap_am_memory.cpp
+SOURCE eap_am_network_id.cpp
+SOURCE eap_am_tools.cpp
+SOURCE eap_timer_queue.cpp
+SOURCE eap_am_memory_store.cpp
+SOURCE eap_am_memory_store_data.cpp
+SOURCE abs_eap_am_mutex.cpp
+SOURCE eap_file_config.cpp
+
+SOURCEPATH	../../am/common/file_io/symbian
+SOURCE eap_am_file_input_symbian.cpp
+
+LIBRARY bafl.lib
+
+///////////////////////////////////////////////////////////////////
+
+LANG	SC
+
+SOURCEPATH	../../../eapol_common/common
+SOURCE eap_base_type.cpp
+SOURCE eap_buffer.cpp
+SOURCE eap_crypto_api.cpp
+SOURCE eap_header.cpp
+SOURCE eap_expanded_type.cpp
+SOURCE eap_header_string.cpp
+SOURCE eap_state_notification.cpp
+SOURCE eap_tools.cpp
+SOURCE eap_status_string.cpp
+SOURCE eap_variable_data.cpp
+SOURCE eap_master_session_key.cpp
+SOURCE eap_general_header_base.cpp
+SOURCE eap_rogue_ap_entry.cpp
+SOURCE eap_memory_store_variable_data.cpp
+SOURCE eapol_session_key.cpp
+SOURCE eap_network_id_selector.cpp
+SOURCE eapol_ethernet_header.cpp
+SOURCE eapol_header.cpp
+SOURCE eap_tlv_header.cpp
+SOURCE eap_tlv_message_data.cpp
+SOURCE eap_method_settings.cpp
+
+SOURCEPATH	../../../eapol_common/core
+SOURCE eap_core.cpp
+SOURCE eap_core_nak_info.cpp
+SOURCE eap_core_retransmission.cpp
+SOURCE eap_session_core.cpp
+SOURCE eap_type_selection.cpp
+SOURCE eap_process_tlv_message_data.cpp
+SOURCE eap_session_core_base.cpp
+
+SOURCEPATH	../../am/eap_test_timer/symbian 
+SOURCE eap_test_timer.cpp
+
+SOURCEPATH ../../../eapol_common/type/tls_peap/tls/src
+SOURCE tls_peap_tlv_header.cpp
+
+SOURCEPATH ../../../eapol_common/type/simple_config/simple_config/src
+SOURCE simple_config_credential.cpp
+SOURCE simple_config_types.cpp
+
+USERINCLUDE ..
+USERINCLUDE ../../am/type/symbian/plugin/include
+USERINCLUDE ../../am/common
+USERINCLUDE ../../../eapol_common/am/common
+USERINCLUDE ../../am/include
+USERINCLUDE ../../../eapol_common/am/include
+USERINCLUDE ../../../eapol_common/include
+USERINCLUDE ../../../eapol_common/type
+USERINCLUDE ../../../eapol_common/am/common/DSS_random
+USERINCLUDE ../../../eapol_common/type/tls_peap/tls/include
+USERINCLUDE ../../../eapol_common/type/simple_config/simple_config/include
+USERINCLUDE ../../../eapol_common/type/simple_config/eap/include
+
+#if defined(EAP_USE_WPXM)
+USERINCLUDE ../../../eapol_common/wpx_include
+#endif //#if defined(EAP_USE_WPXM)
+USERINCLUDE ../../eap_if/include
+USERINCLUDE ../../eap_server/include
+
+
+SYSTEMINCLUDE	/epoc32/include/ecom
+SYSTEMINCLUDE	/epoc32/include/kernel 
+SYSTEMINCLUDE	/epoc32/include/libc
+SYSTEMINCLUDE	/epoc32/include/libc/netinet
+
+
+MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
+
+// Note, do not add eapsymbiantools.lib here. This library cannot use eapsymbiantools.lib because eapsymbiantools.lib already uses eaptools.lib.
+LIBRARY		ecom.lib
+LIBRARY		eaptrace.lib
+LIBRARY		euser.lib hash.lib random.lib cryptography.lib efsrv.lib asn1.lib edbms.lib
+LIBRARY     charconv.lib
+
+MACRO USE_EAP_INTERFACE_EXPORTS
+
+//-------------------------------------------------------------------
+// End of File

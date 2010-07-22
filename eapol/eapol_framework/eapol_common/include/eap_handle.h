@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8 %
+* %version: %
 */
 
 #error Do not use this anymore.

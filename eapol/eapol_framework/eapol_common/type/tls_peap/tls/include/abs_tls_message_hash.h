@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8 %
+* %version: %
 */
 
 #if !defined(_ABS_TLS_MESSAGE_HASH_H_)

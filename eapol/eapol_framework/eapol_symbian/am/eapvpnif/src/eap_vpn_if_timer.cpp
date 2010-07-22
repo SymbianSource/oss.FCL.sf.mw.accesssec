@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 13 %
+* %version: %
 */
 
 // INCLUDE FILES

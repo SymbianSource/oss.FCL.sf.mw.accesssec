@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8.1.2 %
+* %version: %
 */
 
 // This is enumeration of EAPOL source code.
@@ -32,13 +32,12 @@
 #include "eap_am_memory.h"
 #include "eap_tools.h"
 #include "eap_am_export.h"
-#include "abs_eap_core.h"
-#include "eap_core.h"
 #include "eap_base_type.h"
 #include "eap_variable_data.h"
 #include "abs_eap_base_timer.h"
 #include "eap_core_retransmission.h"
 #include "eap_buffer.h"
+#include "eap_am_network_id.h"
 
 //--------------------------------------------------
 

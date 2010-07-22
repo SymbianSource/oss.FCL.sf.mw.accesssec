@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 15.1.3 %
+* %version: 25 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -37,8 +37,9 @@
 #include <EapTypeInfo.h>
 #include "EapGtcDbUtils.h"
 
-
 #include "eap_am_tools_symbian.h"
+#include "EapConversion.h"
+#include "EapTraceSymbian.h"
 
 // LOCAL CONSTANTS
 
@@ -150,21 +151,13 @@ TUint CEapSecurID::GetInterfaceVersion()
 
 // ----------------------------------------------------------
 
-TInt CEapSecurID::InvokeUiL()
-{
-	TInt buttonId(0);
-	return buttonId;
-}
-
-// ----------------------------------------------------------
-
-CEapTypeInfo* CEapSecurID::GetInfoLC()
+CEapTypeInfo* CEapSecurID::GetInfoL()
 {
 	CEapTypeInfo* info = new(ELeave) CEapTypeInfo(
 		(TDesC&) KReleaseDate,
 		(TDesC&) KEapTypeVersion,
 		(TDesC&) KManufacturer);
-	CleanupStack::PushL(info);
+
 	return info;
 }
 
@@ -177,19 +170,20 @@ void CEapSecurID::DeleteConfigurationL()
 
 // ----------------------------------------------------------
 
-void CEapSecurID::SetTunnelingType(const TInt aTunnelingType)
-{
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	// Vendor id is eap_type_vendor_id_ietf always in this plugin.
-	iTunnelingType.set_eap_type_values(eap_type_vendor_id_ietf, aTunnelingType);
-
-#else
-
-	iTunnelingType = static_cast<eap_type_value_e>(aTunnelingType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-}
+void CEapSecurID::SetTunnelingType(const TEapExpandedType aTunnelingType)
+    {
+    EAP_TRACE_DATA_DEBUG_SYMBIAN(
+        (EAPL("CEapSecurID::SetTunnelingType - tunneling type"),
+        aTunnelingType.GetValue().Ptr(), aTunnelingType.GetValue().Length()));
+    
+    eap_type_value_e aInternalType;
+    
+    TInt err = CEapConversion::ConvertExpandedEAPTypeToInternalType(
+            &aTunnelingType,
+            &aInternalType);
+    
+    iTunnelingType = aInternalType;
+    }
 
 // ----------------------------------------------------------
 void CEapSecurID::SetIndexL(
@@ -213,13 +207,16 @@ void CEapSecurID::SetIndexL(
 
 	RDbNamedDatabase db;
 
-	RDbs session;
-	
-	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+	RFs session;
 	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-		
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapSecurID::SetIndexL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+
 	EapGtcDbUtils::SetIndexL(
 		db, 
 		iIndexType, 
@@ -232,22 +229,27 @@ void CEapSecurID::SetIndexL(
 	iIndexType = aIndexType;
 	iIndex = aIndex;
 
-	CleanupStack::PopAndDestroy(2); // db
-	
-		
+	db.Close();
+	session.Close();
+
+	CleanupStack::PopAndDestroy(&db);
+	CleanupStack::PopAndDestroy(&session);
 }
 
 void CEapSecurID::SetConfigurationL(const EAPSettings& aSettings)
 {
 	RDbNamedDatabase db;
 
-	RDbs session;	
-	
-	// This also creates the IAP entry if it doesn't exist
-	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+	RFs session;
 	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapSecurID::SetConfigurationL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	// This also creates the IAP entry if it doesn't exist
+	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 
 	EapGtcDbUtils::SetConfigurationL(
 		db,
@@ -255,21 +257,28 @@ void CEapSecurID::SetConfigurationL(const EAPSettings& aSettings)
 		iIndexType,
 		iIndex,
 		iTunnelingType);		
-		
-	CleanupStack::PopAndDestroy(2); // db, session
+
+	db.Close();
+	session.Close();
+
+	CleanupStack::PopAndDestroy(&db);
+	CleanupStack::PopAndDestroy(&session);
 }
 
 void CEapSecurID::GetConfigurationL(EAPSettings& aSettings)
 {
 	RDbNamedDatabase db;
 
-	RDbs session;
-	
-	// This also creates the IAP entry if it doesn't exist
-	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+	RFs session;
 	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapSecurID::GetConfigurationL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	// This also creates the IAP entry if it doesn't exist
+	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 
 	EapGtcDbUtils::GetConfigurationL(
 		db,
@@ -277,8 +286,12 @@ void CEapSecurID::GetConfigurationL(EAPSettings& aSettings)
 		iIndexType,
 		iIndex,
 		iTunnelingType);
-		
-	CleanupStack::PopAndDestroy(2); // db, session
+
+	db.Close();
+	session.Close();
+
+	CleanupStack::PopAndDestroy(&db);
+	CleanupStack::PopAndDestroy(&session);
 }
 
 void CEapSecurID::CopySettingsL(
@@ -302,13 +315,16 @@ void CEapSecurID::CopySettingsL(
 
 	RDbNamedDatabase db;
 
-	RDbs session;
-	
-	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+	RFs session;
 	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-		
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapSecurID::CopySettingsL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	EapGtcDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+
 	EapGtcDbUtils::CopySettingsL(
 		db,
 		iIndexType,
@@ -317,9 +333,12 @@ void CEapSecurID::CopySettingsL(
 		aDestinationIndexType, 
 		aDestinationIndex, 
 		iTunnelingType);
-		
-	CleanupStack::PopAndDestroy(2); // db
-	
+
+	db.Close();
+	session.Close();
+
+	CleanupStack::PopAndDestroy(&db);
+	CleanupStack::PopAndDestroy(&session);
 }
 
 

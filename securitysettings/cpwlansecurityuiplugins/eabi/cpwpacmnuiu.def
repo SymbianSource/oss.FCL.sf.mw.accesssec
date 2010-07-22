@@ -1,0 +1,8 @@
+EXPORTS
+	_ZN10CpWpaCmnUi16validateSettingsEv @ 1 NONAME
+	_ZN10CpWpaCmnUi8createUiEP20EapQtConfigInterfaceP22CmConnectionMethodShim @ 2 NONAME
+	_ZN10CpWpaCmnUiC1EN13CMManagerShim11WlanSecModeER16CpItemDataHelper @ 3 NONAME
+	_ZN10CpWpaCmnUiC2EN13CMManagerShim11WlanSecModeER16CpItemDataHelper @ 4 NONAME
+	_ZN10CpWpaCmnUiD1Ev @ 5 NONAME
+	_ZN10CpWpaCmnUiD2Ev @ 6 NONAME
+

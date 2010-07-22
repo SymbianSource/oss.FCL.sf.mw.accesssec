@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -17,24 +17,24 @@
  */
 
 /*
- * %version: 16 %
+ * %version: tr1cfwln#24 %
  */
 
 //User Includes
 #include "cpwepui.h"
+#include "wepkeyvalidator.h"
+
 
 // System includes
 #include <QStringList>
-#include <cpsettingformentryitemdata.h>
 #include <cpitemdatahelper.h>
-#include <HbDataForm> 
-#include <HbDeviceNotificationDialog> 
-#include <QLocale>
-#include <QCoreApplication>
 #include <cmconnectionmethod_shim.h>
-#include <cmpluginwlandef.h>
 #include <cmmanagerdefines_shim.h>
+#include <HbLineEdit>
+#include <HbTranslator>
+#include <HbEditorInterface>
 
+//Trace Definition
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cpwepuiTraces.h"
@@ -45,6 +45,23 @@
 //security mode
 static const int UI_ORDER_WEP = 10;
 
+//! Index of first WEP key
+static const int KFirstKey = 0;
+
+//! Index of second WEP key
+static const int KSecondKey = 1;
+
+//! Index of third WEP key
+static const int KThirdKey = 2;
+
+//! Index of fourth WEP key
+static const int KFourthKey = 3;
+
+//!Maximum allowed length for WEP keys, in hex mode
+static const int KMaxKeyLength  = 26;
+
+
+
 /*!
  \class CpWepUi
  \brief CpWepUi implements the WEP Security Settings Control Panel Plugin
@@ -52,15 +69,20 @@ static const int UI_ORDER_WEP = 10;
  */
 //Contructs WEP object
 CpWepUi::CpWepUi() :
-    mUi(NULL), mNewKeySelected(0), mTranslator(NULL), mCmCM(NULL), mCmId(0)
+    mUi(NULL),
+    mNewKeySelected(0), 
+    mTranslator(new HbTranslator("cpwlansecsettingsplugin")),
+    mCmCM(NULL), 
+    mCmId(0)    
 {
-    mTranslator = new QTranslator(this);
-    mTranslator->load(":/loc/wlan_en_GB.qm");
-    qApp->installTranslator(mTranslator);
-
-    /* Install localization
-     mTranslator = QSharedPointer<HbTranslator> (
-     new HbTranslator("wlan_en_GB"));*/
+    //Initialize array members
+    for(int index=0;index<KMaxNumberofKeys;index++)
+    {
+        mWepKey[index] = NULL;
+        mWepKeyText[index] = NULL;   
+        mkeyFormat[index] = EFormatHex;
+    }
+      
 }
 
 //Deletes all objects WEP owns
@@ -69,6 +91,7 @@ CpWepUi::~CpWepUi()
     OstTraceFunctionEntry1(CPWEPUI_CPWEPUI_ENTRY,this);
     //Elements like mUi and components that belong to it
     //, are taken care by the parent
+    delete mTranslator;
     OstTraceFunctionExit1(CPWEPUI_CPWEPUI_EXIT,this);
 }
 
@@ -82,8 +105,8 @@ CpWepUi::~CpWepUi()
  */
 CMManagerShim::WlanSecMode CpWepUi::securityMode() const
 {
-    OstTraceFunctionEntry1(CPWEPUI_MODE_ENTRY,this);
-    OstTraceFunctionExit1(CPWEPUI_MODE_EXIT,this);
+    OstTraceFunctionEntry1(CPWEPUI_SECURITYMODE_ENTRY,this);
+    OstTraceFunctionExit1(CPWEPUI_SECURITYMODE_EXIT,this);
     //return security mode
     return CMManagerShim::WlanSecModeWep;
 }
@@ -97,22 +120,19 @@ CMManagerShim::WlanSecMode CpWepUi::securityMode() const
  */
 QString CpWepUi::securityModeTextId() const
 {
-    OstTraceFunctionEntry1(CPWEPUI_LOCALIZATION_ID_ENTRY,this);
-    OstTraceFunctionExit1(CPWEPUI_LOCALIZATION_ID_EXIT,this);
+    OstTraceFunctionEntry1( CPWEPUI_SECURITYMODETEXTID_ENTRY, this );
+    OstTraceFunctionExit1( CPWEPUI_SECURITYMODETEXTID_EXIT, this );
     return "txt_occ_setlabel_wlan_security_mode_val_wep";
 }
 
 /*! 
- Sets the database reference (WLAN Service Table ID).
+ Sets the database reference Iap id.
 
  \param id Database reference
  */
 void CpWepUi::setReference(CmConnectionMethodShim *cmCm, uint id)
 {
     OstTraceFunctionEntry1(CPWEPUI_SETREFERENCE_ENTRY,this);
-
-    // Assuming that id is the connection method Id/IAP Id.
-    //mCmId - Not used currently
     mCmId = id;
 
     //mCmCM is not deleted assuming CmManager owns it.
@@ -136,7 +156,7 @@ int CpWepUi::orderNumber() const
 /*!
  * Returns the fully constructed Ui Group , for WEP security plugin
  * 
- * \param \param dataHelper to add Connections
+ * \param dataHelper to add Connections
  * 
  * \return The WEP UI
  */
@@ -150,6 +170,9 @@ CpSettingFormItemData* CpWepUi::uiInstance(CpItemDataHelper &dataHelpper)
     if (err != KErrNone) {
         OstTrace1( TRACE_ERROR, CPWEPUI_UIINSTANCE, "LoadFromDataBase returned %d", err );
     }
+    
+    //Store the address of the Data Helper
+    mItemDataHelper = &dataHelpper;
 
     mUi = new CpSettingFormItemData(HbDataFormModelItem::GroupItem, hbTrId(
             "txt_occ_subhead_security_settings"));
@@ -169,115 +192,122 @@ CpSettingFormItemData* CpWepUi::uiInstance(CpItemDataHelper &dataHelpper)
             this, SLOT(wepKeyInUseChanged(int)));
     mUi->appendChild(wepKeyInUse);
 
-    createWEPKeyOneGroup(dataHelpper);
+    //Create Ui for all 4 WEP keys
+    createWEPKeyGroup(KFirstKey);
 
-    createWEPKeyTwoGroup(dataHelpper);
+    createWEPKeyGroup(KSecondKey);
 
-    createWEPKeyThreeGroup(dataHelpper);
+    createWEPKeyGroup(KThirdKey);
 
-    createWEPKeyFourGroup(dataHelpper);
+    createWEPKeyGroup(KFourthKey);
+    
+    //Add Connections(signals)
+    addConnections(dataHelpper);
 
     OstTraceFunctionExit1(CPWEPUI_UIINSTANCE_EXIT,this);
     return mUi;
 }
 
+
 /*!
- * Create Ui element with text edit for WEP KEY One
+   Validates current security settings. This function is called whenever
+   user tries to exit from the settings view. If the plugin determines
+   that some settings need editing before considered valid, it shall
+   return false. A dialog will be shown to the user indicating that
+   settings are still incomplete and asking if he/she wishes to exit
+   anyway.
+
+   \return True if security settings for WEP are valid, false if not.
+*/
+bool CpWepUi::validateSettings()
+{
+    bool ret(false);
+    //Check the latest string entered for the WEP key in the text box
+    QVariant keyValue = mWepKeyText[mNewKeySelected]->contentWidgetData("text");
+    QString keyString = keyValue.toString();
+    
+    WepKeyValidator::KeyStatus keystatus = WepKeyValidator::validateWepKey(keyString);
+    
+    //Check if key is  valid and not of zero length 
+    if(keystatus==WepKeyValidator::KeyStatusOk) {
+        ret = true;
+    }
+    return ret;
+}
+
+/*!
+ * Create Ui element with text edit for WEP KEYS
  * 
- * \param dataHelper to add Connections
- */
-void CpWepUi::createWEPKeyOneGroup(CpItemDataHelper &dataHelpper)
+ * \param index of the WEP key
+ * */
+void CpWepUi::createWEPKeyGroup(int index)
     {
-    OstTraceFunctionEntry1(CPWEPUI_CREATEWEPKEYONEGROUP_ENTRY,this);
-    mWepKeyText[KFirstKey] = new CpSettingFormItemData(
+    OstTraceFunctionEntry1(CPWEPUI_CREATEWEPKEYGROUP_ENTRY,this);
+    QString textId;
+    
+    switch(index)
+        {
+        case KFirstKey:
+            textId  = hbTrId("txt_occ_setlabel_wep_key_1");
+            break;
+            
+        case KSecondKey:
+            textId  = hbTrId("txt_occ_setlabel_wep_key_2");
+            break;
+            
+        case KThirdKey:
+            textId  = hbTrId("txt_occ_setlabel_wep_key_3");
+            break;
+            
+        case KFourthKey:
+            textId  = hbTrId("txt_occ_setlabel_wep_key_4");
+            break;
+        }
+        
+    mWepKeyText[index] = new CpSettingFormItemData(
             HbDataFormModelItem::TextItem,
-            hbTrId("txt_occ_subhead_wep_key_1"), mUi);
+            textId, mUi);
 
-    if (mKeyData[KFirstKey].length() != 0) {
-        mWepKeyText[KFirstKey]->setContentWidgetData("text",
-                mKeyData[KFirstKey]);
+    if (mKeyData[index].length() != 0) {
+        mWepKeyText[index]->setContentWidgetData("text",
+                mKeyData[index]);
     }
-    mWepKeyText[KFirstKey]->setContentWidgetData("echoMode", 2);
-    mWepKeyText[KFirstKey]->setContentWidgetData("smileysEnabled", "false");
+    mWepKeyText[index]->setContentWidgetData("echoMode",HbLineEdit::PasswordEchoOnEdit);
+    mWepKeyText[index]->setContentWidgetData("smileysEnabled", "false");
 
+    
+    mUi->appendChild(mWepKeyText[index]);
+    OstTraceFunctionExit1(CPWEPUI_CREATEWEPKEYGROUP_EXIT,this);
+    }
+
+
+/*!
+ * Add signals to all the text Edit of WEP key groups.
+ *  
+ *  \param dataHelper ; to add Connections
+ */
+void CpWepUi::addConnections(CpItemDataHelper &dataHelpper)
+    {
+    OstTraceFunctionEntry1( CPWEPUI_ADDCONNECTIONS_ENTRY, this );
+    
     dataHelpper.addConnection(mWepKeyText[KFirstKey],
-            SIGNAL( editingFinished ()), this, SLOT(wepKeyOneChanged() ));
-
-    mUi->appendChild(mWepKeyText[KFirstKey]);
-    OstTraceFunctionExit1(CPWEPUI_CREATEWEPKEYONEGROUP_EXIT,this);
-    }
-
-/*!
- * Create Ui element with text edit for WEP KEY Two
- * \param dataHelper to add Connections
- */
-void CpWepUi::createWEPKeyTwoGroup(CpItemDataHelper &dataHelpper)
-{
-    OstTraceFunctionEntry1(CPWEPUI_CREATEWEPKEYTWOGROUP_ENTRY,this);
-    mWepKeyText[KSecondKey] = new CpSettingFormItemData(
-            HbDataFormModelItem::TextItem,
-            hbTrId("txt_occ_subhead_wep_key_2"), mUi);
-
-    if (mKeyData[KSecondKey].length() != 0) {
-        mWepKeyText[KSecondKey]->setContentWidgetData("text",
-                mKeyData[KSecondKey]);
-    }
-    mWepKeyText[KSecondKey]->setContentWidgetData("echoMode", 2);
-    mWepKeyText[KSecondKey]->setContentWidgetData("smileysEnabled", "false");
+                SIGNAL( editingFinished ()), this, SLOT(wepKeyOneChanged() ));
+    
     dataHelpper.addConnection(mWepKeyText[KSecondKey],
-            SIGNAL( editingFinished ()), this, SLOT(wepKeyTwoChanged() ));
-
-    mUi->appendChild(mWepKeyText[KSecondKey]);
-    OstTraceFunctionExit1(CPWEPUI_CREATEWEPKEYTWOGROUP_EXIT,this);
-}
-
-/*!
- * Create Ui element with text edit for WEP KEY Three
- * \param dataHelper to add Connections
- */
-void CpWepUi::createWEPKeyThreeGroup(CpItemDataHelper &dataHelpper)
-{
-    OstTraceFunctionEntry1(CPWEPUI_CREATEWEPKEYTHREEGROUP_ENTRY,this);
-    mWepKeyText[KThirdKey] = new CpSettingFormItemData(
-            HbDataFormModelItem::TextItem,
-            hbTrId("txt_occ_subhead_wep_key_3"), mUi);
-
-    if (mKeyData[KThirdKey].length() != 0) {
-        mWepKeyText[KThirdKey]->setContentWidgetData("text",
-                mKeyData[KThirdKey]);
-    }
-    mWepKeyText[KThirdKey]->setContentWidgetData("echoMode", 2);
-    mWepKeyText[KThirdKey]->setContentWidgetData("smileysEnabled", "false");
+               SIGNAL( editingFinished ()), this, SLOT(wepKeyTwoChanged() ));
+    
     dataHelpper.addConnection(mWepKeyText[KThirdKey],
-            SIGNAL( editingFinished ()), this, SLOT(wepKeyThreeChanged() ));
-
-    mUi->appendChild(mWepKeyText[KThirdKey]);
-    OstTraceFunctionExit1(CPWEPUI_CREATEWEPKEYTHREEGROUP_EXIT,this);
-}
-
-/*!
- * Create Ui element with text edit for WEP KEY  Four
- * \param dataHelper to add Connections
- */
-void CpWepUi::createWEPKeyFourGroup(CpItemDataHelper &dataHelpper)
-{
-    OstTraceFunctionEntry1(CPWEPUI_CREATEWEPKEYFOURGROUP_ENTRY,this);
-    mWepKeyText[KFourthKey] = new CpSettingFormItemData(
-            HbDataFormModelItem::TextItem,
-            hbTrId("txt_occ_subhead_wep_key_4"), mUi);
-
-    if (mKeyData[KFourthKey].length() != 0) {
-        mWepKeyText[KFourthKey]->setContentWidgetData("text",
-                mKeyData[KFourthKey]);
-    }
-    mWepKeyText[KFourthKey]->setContentWidgetData("echoMode", 2);
-    mWepKeyText[KFourthKey]->setContentWidgetData("smileysEnabled", "false");
+               SIGNAL( editingFinished ()), this, SLOT(wepKeyThreeChanged() ));
+    
     dataHelpper.addConnection(mWepKeyText[KFourthKey],
-            SIGNAL( editingFinished ()), this, SLOT(wepKeyFourChanged() ));
+                SIGNAL( editingFinished ()), this, SLOT(wepKeyFourChanged() ));
+    
+    dataHelpper.connectToForm(SIGNAL(itemShown (const QModelIndex &) ), 
+            this, SLOT(setEditorPreferences(const QModelIndex &)));
+ 
+    OstTraceFunctionExit1( CPWEPUI_ADDCONNECTIONS_EXIT, this );
+    }
 
-    mUi->appendChild(mWepKeyText[KFourthKey]);
-    OstTraceFunctionExit1(CPWEPUI_CREATEWEPKEYFOURGROUP_EXIT,this);
-}
 
 /*!
  * Slot to handle , if a different wep key (index) 
@@ -295,6 +325,9 @@ void CpWepUi::wepKeyInUseChanged(int wepKeyInUse)
         OstTrace1( TRACE_ERROR, CPWEPUI_WEPKEYINUSECHANGED, "Error wepKeyInUse returned %d", err );
     }
     tryUpdate();
+    
+    //Store the wep key in use
+    mNewKeySelected = wepKeyInUse;
     OstTraceFunctionExit1(CPWEPUI_WEPKEYINUSECHANGED_EXIT,this);
 }
 
@@ -375,12 +408,12 @@ void CpWepUi::wepKeyTextChanged(int index)
     OstTraceFunctionEntry1(CPWEPUI_WEPKEYTEXTCHANGED_ENTRY,this);
 
     QVariant value = mWepKeyText[index]->contentWidgetData("text");
+    QString key = value.toString();
 
-    WepKeyValidator::KeyStatus keystatus = WepKeyValidator::validateWepKey(
-            value.toString());
+    WepKeyValidator::KeyStatus keystatus = WepKeyValidator::validateWepKey(key);
 
-    if (keystatus == WepKeyValidator::KeyStatusOk) {
-        QString key = value.toString();
+    // allow storing an empty key to enable clearing WEP keys
+    if (keystatus == WepKeyValidator::KeyStatusOk || key.length() == 0) {
 
         //If key is valid set the format of the key
         setKeyFormat(key, index);
@@ -400,11 +433,35 @@ void CpWepUi::wepKeyTextChanged(int index)
         commitWEPkeys(index);
     }
     else {
+        OstTrace0( TRACE_ERROR, CPWEPUI_WEPKEYTEXTCHANGED_ERROR, "CpWepUi::wepKeyTextChanged Invalid WEP Key Input" );        
         showMessageBox(HbMessageBox::MessageTypeWarning, hbTrId(
                 "txt_occ_info_invalid_input"));
     }
     OstTraceFunctionExit1(CPWEPUI_WEPKEYTEXTCHANGED_EXIT,this);
 }
+
+/*!
+ * Slot that configures the editor settings for all WEP key fields.
+ * This slot is invoked whenever a new item(s) are shown in the current view 
+ * 
+ * \param modelIndex Index of the current item in the  model
+ */
+void CpWepUi::setEditorPreferences(const QModelIndex &modelIndex)
+{
+    
+    HbDataFormModelItem *item = mItemDataHelper->modelItemFromModelIndex(modelIndex);
+
+    HbSmileyTheme smiley;
+    /* Configure settings only for text fields*/
+    if(item->type() == HbDataFormModelItem::TextItem) {
+        HbLineEdit *edit = qobject_cast<HbLineEdit*>(mItemDataHelper->widgetFromModelIndex(modelIndex));           
+        HbEditorInterface editInterface(edit);    
+        editInterface.setInputConstraints(HbEditorConstraintLatinAlphabetOnly);
+        edit->setInputMethodHints(Qt::ImhNoPredictiveText);    
+        edit->setMaxLength(KMaxKeyLength);
+        }
+}
+
 
 /*!
  * Store the WEP key in Comms
@@ -508,7 +565,7 @@ void CpWepUi::loadFieldsFromDataBase()
     mKeyData.insert(KFirstKey, mCmCM->getString8Attribute(
             CMManagerShim::WlanWepKey1InHex));
 
-    mKeyData.insert(KSecondKey, mCmCM->getString8Attribute(
+    mKeyData.insert(KSecondKey,mCmCM->getString8Attribute(
             CMManagerShim::WlanWepKey2InHex));
 
     mKeyData.insert(KThirdKey, mCmCM->getString8Attribute(

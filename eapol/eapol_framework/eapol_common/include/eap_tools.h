@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8.1.2 %
+* %version: 12 %
 */
 
 #if !defined( _EAP_TOOLS_H_ )
@@ -347,6 +347,8 @@ inline eap_status_e eap_write_u64_t_host_order(
 
 	#define EAP_TRACE_RETURN_STRING(object_name, string) EAP_NULL_FUNCTION
 
+	#define EAP_TRACE_RETURN_STRING_FLAGS(object_name, flags, string) EAP_NULL_FUNCTION
+
 	#define EAP_TRACE_DATA_ERROR(object_name, flags, _parameter_list_) EAP_NULL_FUNCTION
 
 	#define EAP_TRACE_DATA_DEBUG(object_name, flags, _parameter_list_) EAP_NULL_FUNCTION
@@ -415,13 +417,12 @@ inline eap_status_e eap_write_u64_t_host_order(
 		#define EAP_TRACE_DEBUG(object_name, flags, _parameter_list_) \
 				if (object_name != 0 && ((*(object_name)).get_trace_mask() & ((flags) | eap_am_tools_c::eap_trace_mask_error))) \
 				{ \
-					if (((*(object_name)).get_trace_mask() & ((flags) & eap_am_tools_c::eap_trace_mask_error))) \
+					if (((*(object_name)).get_trace_mask() & (flags))) \
 					{ \
-						(*(object_name)).formatted_print(EAPL("ERROR: source: %s:%d\n"), __FILE__, __LINE__); \
-						(*(object_name)).formatted_print _parameter_list_ ; \
-					} \
-					else if (((*(object_name)).get_trace_mask() & (flags))) \
-					{ \
+						if (((*(object_name)).get_trace_mask() & ((flags) & eap_am_tools_c::eap_trace_mask_error))) \
+						{ \
+							(*(object_name)).formatted_print(EAPL("ERROR: source: %s:%d\n"), __FILE__, __LINE__); \
+						} \
 						(*(object_name)).formatted_print _parameter_list_ ; \
 					} \
 					else \
@@ -467,6 +468,9 @@ inline eap_status_e eap_write_u64_t_host_order(
 		#define EAP_TRACE_RETURN_STRING(object_name, string) \
 			eap_automatic_trace_string_c __eap_trace_function_returns__(object_name, string);
 
+		#define EAP_TRACE_RETURN_STRING_FLAGS(object_name, flags, string) \
+			eap_automatic_trace_string_c __eap_trace_function_returns__(object_name, flags, string);
+
 		/**
 		 * This flag indicates that the debug traces are active.
 		 * Functions can use this flag to deduce whether debug related
@@ -483,6 +487,8 @@ inline eap_status_e eap_write_u64_t_host_order(
 		#define EAP_TRACE_FORMAT(object_name, _parameter_list_) EAP_NULL_FUNCTION
 
 		#define EAP_TRACE_RETURN_STRING(object_name, string) EAP_NULL_FUNCTION
+
+		#define EAP_TRACE_RETURN_STRING_FLAGS(object_name, flags, string) EAP_NULL_FUNCTION
 
 	#endif
 

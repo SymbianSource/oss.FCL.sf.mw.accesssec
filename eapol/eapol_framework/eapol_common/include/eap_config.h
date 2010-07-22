@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 4.1.2 %
+* %version: %
 */
 
 #if !defined(_EAP_CONFIG_H_)
@@ -497,6 +497,13 @@ EAP_CONFIGURATION_FIELD(
 	false);
 
 
+EAP_CONFIGURATION_FIELD(
+	cf_str_EAPOL_TEST_use_pmkid_in_ie,
+	"EAPOL_TEST_use_pmkid_in_ie",
+	eap_configure_type_boolean,
+	false);
+
+
 /**
  *  This hex data configuration option value client MAC address for test use.
  */
@@ -688,6 +695,27 @@ EAP_CONFIGURATION_FIELD(
 		eap_configure_type_boolean,
 		false);
 #endif //#if defined(USE_EAP_CONFIGURATION_TO_SKIP_USER_INTERACTIONS)
+
+
+/**
+ *  This special configuration option reads all defines configuration options.
+ *  Data is in message format. Please see eap_tlv_message_data_c.
+ */
+EAP_CONFIGURATION_FIELD(
+	cf_str_EAP_read_all_configurations,
+	"EAP_read_all_configurations",
+	eap_configure_type_all_configurations,
+	false);
+
+
+const u8_t EAP_WPS_CONFIGURATION_MEMORY_STORE_KEY[] = "eap_am_type_protected_setup shared key";
+
+enum eap_type_protected_setup_stored_e
+{
+	eap_type_protected_setup_stored_none,
+	eap_type_protected_setup_stored_preshared_key,
+	eap_type_protected_setup_stored_ssid,
+};
 
 
 /** @} */ // End of group Common_EAP_config_options.

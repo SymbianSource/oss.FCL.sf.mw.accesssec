@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 7 %
+* %version: %
 */
 
 #ifndef _EAPMSCHAPV2GLOBAL_H_
@@ -24,9 +24,9 @@
 
 // LOCAL CONSTANTS
 
-_LIT(KReleaseDate, "20040829:"); // Must be in format YYYYMMDD: (dates and months start from 0)
+_LIT(KReleaseDate, ""); // Must be in format YYYYMMDD: (dates and months start from 0)
 _LIT(KEapTypeVersion, "1.0");
-_LIT(KManufacturer, "Nokia");
+_LIT(KManufacturer, "");
 _LIT(KNokiaSignature, "");
 _LIT(KExtraInfo1, "");
 _LIT(KExtraInfo2, "");

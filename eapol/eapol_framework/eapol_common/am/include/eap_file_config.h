@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11.1.2 %
+* %version: 18 %
 */
 
 #ifndef _FILECONFIG_H
@@ -26,6 +26,8 @@
 #include "eap_configuration_field.h"
 #include "abs_eap_am_file_input.h"
 
+class eap_tlv_header_c;
+
 
 template <class Type>
 Type minimum( Type a, Type b )
@@ -34,7 +36,7 @@ Type minimum( Type a, Type b )
 }
 
 
-class eap_config_value_c
+class EAP_EXPORT eap_config_value_c
 {
 private:
 
@@ -50,25 +52,29 @@ private:
 
 public:
 
-	virtual ~eap_config_value_c();
+	EAP_FUNC_IMPORT virtual ~eap_config_value_c();
 
-	eap_config_value_c(
+	EAP_FUNC_IMPORT eap_config_value_c(
 		abs_eap_am_tools_c* const tools);
 
-	void set_subsection(
+	EAP_FUNC_IMPORT void set_subsection(
 		eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const subsection_map);
 
-	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * get_subsection();
+	EAP_FUNC_IMPORT eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * get_subsection();
 
-	eap_variable_data_c * get_data();
+	EAP_FUNC_IMPORT eap_variable_data_c * get_data();
 
-	void set_type(const eap_configure_type_e type);
+	EAP_FUNC_IMPORT const eap_variable_data_c * get_const_data() const;
 
-	eap_configure_type_e get_type();
+	EAP_FUNC_IMPORT void set_type(const eap_configure_type_e type);
 
-	void object_increase_reference_count();
+	EAP_FUNC_IMPORT eap_configure_type_e get_type();
 
-	bool get_is_valid();
+	EAP_FUNC_IMPORT eap_configure_type_e get_const_type() const;
+
+	EAP_FUNC_IMPORT void object_increase_reference_count();
+
+	EAP_FUNC_IMPORT bool get_is_valid() const;
 
 };
 
@@ -139,86 +145,103 @@ class EAP_EXPORT eap_file_config_c
 {
   
  private:
+
 	abs_eap_am_tools_c* const m_am_tools;
 
 	/// This stores eap_config_value_c objects using eap_variable_data selector.
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> m_config_map;
 
+	eap_variable_data_c m_value_buffer;
+
 	bool m_is_valid;
 
-	EAP_FUNC_IMPORT eap_status_e expand_environment_variables(
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	eap_status_e expand_environment_variables(
 		eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map,
 		const eap_variable_data_c * const value,
 		eap_variable_data_c * const expanded_value
 		);
 
-	EAP_FUNC_IMPORT eap_status_e remove_spaces(eap_variable_data_c * const buffer);
+	eap_status_e remove_spaces(eap_variable_data_c * const buffer);
 
-	EAP_FUNC_IMPORT eap_status_e remove_leading_spaces(eap_variable_data_c * const line);
+	eap_status_e remove_leading_spaces(eap_variable_data_c * const line);
 
-	EAP_FUNC_IMPORT eap_status_e read_section(
+	eap_status_e read_section(
 		abs_eap_am_file_input_c * const file,
 		eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map);
 
-	EAP_FUNC_IMPORT eap_status_e  read_subsections(
+	eap_status_e read_subsections(
 		abs_eap_am_file_input_c * const file,
 		eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map);
 
-	EAP_FUNC_IMPORT eap_status_e get_subsect(
+	eap_status_e get_subsect(
 		abs_eap_am_file_input_c * const file,
 		eap_variable_data_c * const line);
 
-	EAP_FUNC_IMPORT eap_status_e convert_value(
+	eap_status_e convert_value(
 		eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map,
 		const eap_variable_data_c * const value_buffer,
 		const eap_configure_type_e type,
 		eap_variable_data_c * const value_data);
 
-	EAP_FUNC_IMPORT eap_status_e store_configure(
+	eap_status_e store_configure(
 		abs_eap_am_file_input_c * const file,
 		const eap_variable_data_c * const line,
 		eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map);
 
-	EAP_FUNC_IMPORT eap_status_e cnf_parse_value(
+	eap_status_e cnf_parse_value(
 		const eap_variable_data_c * const found_type_value,
 		const eap_variable_data_c * const found_type_name,
 		eap_configure_type_e * const parsed_type,
 		eap_variable_data_c * const parsed_type_value,
 		const bool is_environment_variable);
 
-	EAP_FUNC_IMPORT eap_status_e cnf_get_string(
+	eap_status_e cnf_get_string(
 		const eap_variable_data_c * const param,
 		eap_variable_data_c * const param_name,
 		eap_variable_data_c * const param_value,
 		eap_configure_type_e * const type);
 
-	EAP_FUNC_IMPORT eap_status_e find_rvalue(
+	eap_status_e find_rvalue(
 		const eap_variable_data_c * const config_param,
 		bool * const read_env_value,
 		eap_variable_data_c * const param_name,
 		eap_variable_data_c * const param_value
 		);
 
-	EAP_FUNC_IMPORT u8_t * read_hex_byte(u8_t * cursor, const u8_t * const end, u8_t * const hex_byte);
+	u8_t * read_hex_byte(
+		u8_t * cursor,
+		const u8_t * const end,
+		u8_t * const hex_byte,
+		const u32_t hex_byte_length);
 
-	EAP_FUNC_IMPORT u8_t * read_u32_t(u8_t * cursor, const u8_t * const end, u32_t * const hex_byte);
+	u8_t * read_u32_t(u8_t * cursor, const u8_t * const end, u32_t * const hex_byte);
 
-	EAP_FUNC_IMPORT eap_status_e read_configure(
+	eap_status_e read_configure(
 		eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map,
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c* const data,
 		eap_configure_type_e * const configuration_data_type,
 		const bool existence_test);
 
-	EAP_FUNC_IMPORT eap_status_e file_read_line(
+	eap_status_e file_read_line(
 		abs_eap_am_file_input_c * const file,
 		eap_variable_data_c * const line);
 
-	EAP_FUNC_IMPORT eap_status_e read_configure(
+	eap_status_e read_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c* const data,
 		eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map,
 		const bool check_subsection_when_true);
+
+	eap_status_e read_all_configurations(
+		const eap_configuration_field_c * const field,
+		eap_variable_data_c* const data,
+		eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map);
+
+	eap_status_e add_option(
+		const eap_tlv_header_c * const option_header);
 
  public:
 
@@ -229,6 +252,9 @@ class EAP_EXPORT eap_file_config_c
 
 	EAP_FUNC_IMPORT eap_status_e configure(
 		abs_eap_am_file_input_c * const file);
+
+	EAP_FUNC_IMPORT eap_status_e read_configuration_message(
+		const eap_variable_data_c * const configuration_message);
 
 	EAP_FUNC_IMPORT eap_status_e read_configure(
 		const eap_configuration_field_c * const field,

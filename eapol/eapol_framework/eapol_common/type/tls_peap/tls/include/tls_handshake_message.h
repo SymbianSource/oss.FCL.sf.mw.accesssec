@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12 %
+* %version: %
 */
 
 #if !defined(_TLS_HANDSHAKE_MESSAGE_H_)

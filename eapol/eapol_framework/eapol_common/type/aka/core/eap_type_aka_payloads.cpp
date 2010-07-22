@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12 %
+* %version: 9.1.3 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -307,7 +307,7 @@ EAP_FUNC_EXPORT bool aka_payloads_c::check_payloads(
 		&& check_one_payload(NEXT_REAUTH_ID, get_NEXT_REAUTH_ID()) == true
 		&& check_one_payload(NOTIFICATION, get_NOTIFICATION()) == true
 		&& check_one_payload(COUNTER, get_COUNTER()) == true
-		&& check_one_payload(COUNTER_TOO_SMALL, get_COUNTER_TOO_SMALL()) == true
+		&& check_one_payload(COUNTER_TOO_SMALL, get_counter_too_small()) == true
 		&& check_one_payload(CLIENT_ERROR_CODE, get_CLIENT_ERROR_CODE()) == true
 		&& check_one_payload(RESULT_IND, get_RESULT_IND()) == true
 		&& check_one_payload(CHECKCODE, get_CHECKCODE()) == true

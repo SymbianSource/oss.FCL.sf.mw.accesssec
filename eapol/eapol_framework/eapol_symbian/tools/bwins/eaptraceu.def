@@ -1,0 +1,3 @@
+EXPORTS
+	?eap_trace_data_symbian@@YAXPBDPBXI@Z @ 1 NONAME ; void eap_trace_data_symbian(char const *, void const *, unsigned int)
+

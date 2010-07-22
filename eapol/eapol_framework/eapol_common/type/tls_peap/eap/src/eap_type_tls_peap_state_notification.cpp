@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10 %
+* %version: %
 */
 
 // This is enumeration of EAPOL source code.
@@ -64,8 +64,6 @@ EAP_FUNC_EXPORT eap_type_tls_peap_state_notification_c::eap_type_tls_peap_state_
 }
 
 
-#if defined(USE_EAP_EXPANDED_TYPES)
-
 EAP_FUNC_EXPORT eap_type_tls_peap_state_notification_c::eap_type_tls_peap_state_notification_c(
 	abs_eap_am_tools_c * const tools,
 	const eap_am_network_id_c * const send_network_id,
@@ -90,8 +88,6 @@ EAP_FUNC_EXPORT eap_type_tls_peap_state_notification_c::eap_type_tls_peap_state_
 		allow_send_eap_success)
 {
 }
-
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 
 
 EAP_FUNC_EXPORT eap_type_tls_peap_state_notification_c::eap_type_tls_peap_state_notification_c(

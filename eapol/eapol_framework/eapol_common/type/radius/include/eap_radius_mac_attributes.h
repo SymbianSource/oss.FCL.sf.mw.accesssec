@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 9 %
+* %version: %
 */
 
 #if !defined(_EAP_TYPE_RADIUS_MAC_ATTRIBUTES_H_)

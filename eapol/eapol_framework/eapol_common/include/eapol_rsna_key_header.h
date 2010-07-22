@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 7 %
+* %version: %
 */
 
 #if !defined(_EAPOL_RSNA_KEY_HEADER_H_)

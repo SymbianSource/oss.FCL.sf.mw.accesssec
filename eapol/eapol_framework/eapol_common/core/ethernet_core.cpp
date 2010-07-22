@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 28.1.2 %
+* %version: 49 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -126,6 +126,36 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::packet_process(
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 	}
 
+#if defined(EAPOL_SKIP_ETHERNET_HEADER)
+
+	{
+		eapol_header_wr_c eapol(
+			m_am_tools,
+			packet_data->get_header_buffer(packet_data->get_header_buffer_length()),
+			packet_data->get_header_buffer_length());
+		if (eapol.get_is_valid() == false)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, eap_status_header_corrupted);
+		}
+
+		status = m_eapol_core->packet_process(
+			receive_network_id,
+			&eapol,
+			packet_length);
+
+		EAP_GENERAL_HEADER_COPY_ERROR_PARAMETERS(packet_data, &eapol);
+
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("####################################################################\n")));
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+#else
+
 	if (packet_length < eapol_ethernet_header_rd_c::get_header_length())
 	{
 		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("####################################################################\n")));
@@ -180,7 +210,7 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::packet_process(
 	if (eth_header.get_type() == eapol_ethernet_type_pae
 		|| eth_header.get_type() == eapol_ethernet_type_preauthentication)
 	{
-		eap_am_network_id_c receive_network_id(
+		eap_am_network_id_c a_receive_network_id(
 			m_am_tools,
 			eth_header.get_source(),
 			eth_header.get_source_length(),
@@ -201,7 +231,7 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::packet_process(
 		}
 
 		status = m_eapol_core->packet_process(
-			&receive_network_id,
+			&a_receive_network_id,
 			&eapol,
 			packet_length-eapol_ethernet_header_rd_c::get_header_length());
 
@@ -219,6 +249,9 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::packet_process(
 		(EAPL("####################################################################\n")));
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
+
+#endif //#if defined(EAPOL_SKIP_ETHERNET_HEADER)
+
 }
 
 //--------------------------------------------------
@@ -242,6 +275,24 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::packet_send(
 	{
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
 	}
+
+#if defined(EAPOL_SKIP_ETHERNET_HEADER)
+
+	{
+		sent_packet->set_is_client(m_is_client);
+
+		eap_status_e status = m_partner->packet_send(
+			send_network_id,
+			sent_packet,
+			header_offset,
+			data_length,
+			buffer_length);
+
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+#else
 
 	if (header_offset < eapol_ethernet_header_wr_c::get_header_length())
 	{
@@ -320,6 +371,9 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::packet_send(
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
+
+#endif //#if defined(EAPOL_SKIP_ETHERNET_HEADER)
+
 }
 
 //--------------------------------------------------
@@ -331,11 +385,22 @@ EAP_FUNC_EXPORT u32_t ethernet_core_c::get_header_offset(
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
+#if defined(EAPOL_SKIP_ETHERNET_HEADER)
+
+	const u32_t offset = m_partner->get_header_offset(MTU, trailer_length);
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return offset;
+
+#else
+
 	const u32_t offset = m_partner->get_header_offset(MTU, trailer_length);
 	(*MTU) -= eapol_ethernet_header_wr_c::get_header_length();
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return offset+eapol_ethernet_header_wr_c::get_header_length();
+
+#endif //#if defined(EAPOL_SKIP_ETHERNET_HEADER)
 }
 
 //--------------------------------------------------
@@ -447,7 +512,7 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::start_preauthentication(
 //--------------------------------------------------
 
 //
-eap_status_e ethernet_core_c::read_reassociation_parameters(
+EAP_FUNC_EXPORT eap_status_e ethernet_core_c::read_reassociation_parameters(
 	const eap_am_network_id_c * const old_receive_network_id, ///< source includes remote address, destination includes local address.
 	const eap_am_network_id_c * const new_receive_network_id, ///< source includes remote address, destination includes local address.
 	const eapol_key_authentication_type_e authentication_type,
@@ -501,7 +566,7 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::start_reassociation(
 //--------------------------------------------------
 
 //
-eap_status_e ethernet_core_c::complete_reassociation(
+EAP_FUNC_EXPORT eap_status_e ethernet_core_c::complete_reassociation(
 	const eapol_wlan_authentication_state_e reassociation_result,
 	const eap_am_network_id_c * const receive_network_id,
 	const eapol_key_authentication_type_e authentication_type,
@@ -778,8 +843,6 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::cancel_all_authentication_sessions
 
 //--------------------------------------------------
 
-#if defined(USE_EAPOL_KEY_STATE)
-
 //
 EAP_FUNC_EXPORT eap_status_e ethernet_core_c::check_pmksa_cache(
 	eap_array_c<eap_am_network_id_c> * const bssid_sta_receive_network_ids,
@@ -805,11 +868,8 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::check_pmksa_cache(
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
-#endif // #if defined(USE_EAPOL_KEY_STATE)
-
 //--------------------------------------------------
 
-#if defined(USE_EAPOL_KEY_STATE)
 /**
  * This function removes PMKSA from cache.
  * @param receive_network_id carries the MAC addresses.
@@ -833,11 +893,8 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::remove_pmksa_from_cache(
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
-#endif // #if defined(USE_EAPOL_KEY_STATE)
-
 //--------------------------------------------------
 
-#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 /**
  * Function creates a state for later use. This is for optimazing 4-Way Handshake.
  * @param receive_network_id carries the MAC addresses.
@@ -861,11 +918,8 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::create_state(
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
-#endif //#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
 //--------------------------------------------------
 
-#if defined(USE_EAPOL_KEY_STATE)
 /**
  * @param receive_network_id carries the MAC addresses.
  * MAC address of Authenticator should be in source address. MAC address of Supplicant should be in destination address.
@@ -900,16 +954,14 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::association(
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
-#endif // #if defined(USE_EAPOL_KEY_STATE)
-
 //--------------------------------------------------
 
-#if defined(USE_EAPOL_KEY_STATE)
 /**
  * @param receive_network_id carries the MAC addresses.
  * MAC address of Authenticator should be in source address. MAC address of Supplicant should be in destination address.
  */
 EAP_FUNC_EXPORT eap_status_e ethernet_core_c::disassociation(
+	const bool complete_to_lower_layer,
 	const eap_am_network_id_c * const receive_network_id
 	)
 {
@@ -918,12 +970,11 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::disassociation(
 	EAP_ASSERT(m_am_tools->get_global_mutex()->get_is_reserved() == true);
 
 	status = m_eapol_core->disassociation(
+		complete_to_lower_layer,
 		receive_network_id);
 
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
-
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 //--------------------------------------------------
 
@@ -957,4 +1008,158 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::tkip_mic_failure(
 
 //--------------------------------------------------
 
+EAP_FUNC_EXPORT eap_status_e ethernet_core_c::complete_check_pmksa_cache(
+	EAP_TEMPLATE_CONST eap_array_c<eap_am_network_id_c> * const bssid_sta_receive_network_ids)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	const eap_status_e status = m_partner->complete_check_pmksa_cache(
+		bssid_sta_receive_network_ids);
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
+#if defined(USE_EAP_SIMPLE_CONFIG)
+
+EAP_FUNC_EXPORT eap_status_e ethernet_core_c::save_simple_config_session(
+	const simple_config_state_e state,
+	EAP_TEMPLATE_CONST eap_array_c<simple_config_credential_c> * const credential_array,
+	const eap_variable_data_c * const new_password,
+	const simple_config_Device_Password_ID_e Device_Password_ID,
+	const simple_config_payloads_c * const other_configuration)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("%s: ethernet_core_c::save_simple_config_session().\n"),
+		 (m_is_client == true) ? "client": "server"));
+
+	const eap_status_e status = m_partner->save_simple_config_session(
+		state,
+		credential_array,
+		new_password,
+		Device_Password_ID,
+		other_configuration);
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+#endif // #if defined(USE_EAP_SIMPLE_CONFIG)
+
+//--------------------------------------------------
+
+//
+EAP_FUNC_EXPORT eap_status_e ethernet_core_c::set_eap_database_reference_values(
+	const eap_variable_data_c * const reference)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("ethernet_core_c::set_eap_database_reference_values()\n")));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: ethernet_core_c::set_eap_database_reference_values()");
+
+	eap_status_e status = m_eapol_core->set_eap_database_reference_values(reference);
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
+//
+EAP_FUNC_EXPORT eap_status_e ethernet_core_c::get_802_11_authentication_mode(
+	const eap_am_network_id_c * const receive_network_id,
+	const eapol_key_authentication_type_e authentication_type,
+	const eap_variable_data_c * const SSID,
+	const eap_variable_data_c * const preshared_key)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("ethernet_core_c::get_802_11_authentication_mode()\n")));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: ethernet_core_c::get_802_11_authentication_mode()");
+
+	eap_status_e status = m_eapol_core->get_802_11_authentication_mode(
+		receive_network_id,
+		authentication_type,
+		SSID,
+		preshared_key);
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
+//
+EAP_FUNC_EXPORT eap_status_e ethernet_core_c::complete_get_802_11_authentication_mode(
+		const eap_status_e completion_status,
+		const eap_am_network_id_c * const receive_network_id,
+		const eapol_key_802_11_authentication_mode_e mode)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("ethernet_core_c::complete_get_802_11_authentication_mode()\n")));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: ethernet_core_c::complete_get_802_11_authentication_mode()");
+
+	eap_status_e status(eap_status_ok);
+
+	if (m_partner != 0)
+	{
+		status = m_partner->complete_get_802_11_authentication_mode(
+			completion_status,
+			receive_network_id,
+			mode);
+	}
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
+//
+EAP_FUNC_EXPORT eap_status_e ethernet_core_c::complete_disassociation(
+	const bool complete_to_lower_layer,
+	const eap_am_network_id_c * const receive_network_id)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("ethernet_core_c::complete_disassociation()\n")));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: ethernet_core_c::complete_disassociation()");
+
+	eap_status_e status(eap_status_ok);
+
+	if (m_partner != 0)
+	{
+		status = m_partner->complete_disassociation(
+			complete_to_lower_layer,
+			receive_network_id);
+	}
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
 // End.

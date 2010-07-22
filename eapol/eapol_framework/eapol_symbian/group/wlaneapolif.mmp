@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8.2.3 %
+* %version: 8.1.8 %
 */
 
 #include <platform_paths.hrh>
@@ -63,7 +63,7 @@ START RESOURCE	2000b05a.rss
 TARGET wlaneapolif.rsc
 END
 
-LIBRARY euser.lib ECom.lib eapol.lib edbms.lib efsrv.lib
+LIBRARY euser.lib ECom.lib eapol.lib edbms.lib efsrv.lib eaptools.lib eaptrace.lib eapsymbiantools.lib
 DEBUGLIBRARY    flogger.lib
 
 #else
@@ -71,5 +71,6 @@ DEBUGLIBRARY    flogger.lib
 TARGETTYPE    NONE
 
 #endif //#if defined(USE_EAPOL_WLAN_AUTHENTICATION_MESSAGE_IF)
+
 
 // End

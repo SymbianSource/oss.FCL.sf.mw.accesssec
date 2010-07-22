@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 59.1.4 %
+* %version: 94 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -39,26 +39,24 @@
 #include "eapol_key_types.h"
 #include "eap_timer_queue.h"
 #include "eap_crypto_api.h"
-#include "abs_eapol_wlan_database_reference_if.h"
+#include "abs_eap_database_reference_if.h"
 #include "abs_eap_state_notification.h"
 #include "eap_state_notification.h"
 #include "eap_automatic_variable.h"
 #include "eap_base_type.h"
+#include "abs_eap_am_message_if.h"
+#include "eap_am_message_if.h"
+#include "eap_core_client_message_if.h"
 
 #include "EapolDbDefaults.h"
 #include "EapolDbParameterNames.h"
+#include "EapConversion.h"
+#include "EapConfigToolsSymbian.h"
+#include "EapPluginTools.h"
+
+#include <wdbifwlansettings.h>
 
 const TUint KMaxSqlQueryLength = 2048;
-
-#ifdef USE_EAP_EXPANDED_TYPES
-
-const TUint KExpandedEAPSize = 8;
-
-#else
-
-const TUint KMaxEapCueLength = 3;
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 //--------------------------------------------------
 
@@ -70,6 +68,7 @@ EAP_FUNC_EXPORT eapol_am_wlan_authentication_symbian_c::~eapol_am_wlan_authentic
 		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eapol_am_wlan_authentication_symbian_c::~eapol_am_wlan_authentication_symbian_c(): this = 0x%08x\n"),
 		this));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::~eapol_am_wlan_authentication_symbian_c()");
 }
 
 //--------------------------------------------------
@@ -77,10 +76,8 @@ EAP_FUNC_EXPORT eapol_am_wlan_authentication_symbian_c::~eapol_am_wlan_authentic
 // 
 EAP_FUNC_EXPORT eapol_am_wlan_authentication_symbian_c::eapol_am_wlan_authentication_symbian_c(
 	abs_eap_am_tools_c * const tools,
-	const bool is_client_when_true,
-	const abs_eapol_wlan_database_reference_if_c * const wlan_database_reference)
-: CActive(CActive::EPriorityStandard)
-, m_am_partner(0)
+	const bool is_client_when_true)
+: m_am_partner(0)
 #if defined(USE_EAP_SIMPLE_CONFIG)
 , m_configuration_if(0)
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
@@ -89,12 +86,8 @@ EAP_FUNC_EXPORT eapol_am_wlan_authentication_symbian_c::eapol_am_wlan_authentica
 , m_SSID(tools)
 , m_wpa_preshared_key(tools)
 , m_wpa_preshared_key_hash(tools)
-, m_wlan_database_reference(wlan_database_reference)
-#ifdef USE_EAP_EXPANDED_TYPES
-, m_eap_type_array(tools)
-#endif
+, m_database_reference(tools)
 , m_receive_network_id(tools)
-, m_security_mode(Wpa)
 , m_selected_eapol_key_authentication_type(eapol_key_authentication_type_none)
 , m_WPA_override_enabled(false)
 , m_is_client(is_client_when_true)
@@ -102,6 +95,13 @@ EAP_FUNC_EXPORT eapol_am_wlan_authentication_symbian_c::eapol_am_wlan_authentica
 
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eapol_am_wlan_authentication_symbian_c::eapol_am_wlan_authentication_symbian_c(): this = 0x%08x\n"),
+		this));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::eapol_am_wlan_authentication_symbian_c()");
 
 	m_is_valid = true;
 
@@ -113,6 +113,13 @@ EAP_FUNC_EXPORT eapol_am_wlan_authentication_symbian_c::eapol_am_wlan_authentica
 EAP_FUNC_EXPORT bool eapol_am_wlan_authentication_symbian_c::get_is_valid()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eapol_am_wlan_authentication_symbian_c::get_is_valid(): this = 0x%08x\n"),
+		this));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::get_is_valid()");
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return m_is_valid;
@@ -126,57 +133,44 @@ void eapol_am_wlan_authentication_symbian_c::TryInitDatabaseL()
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
 		(EAPL("eapol_am_wlan_authentication_symbian_c::TryOpenDatabaseL()\n")));	
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::TryInitDatabaseL()");
 		
 	// 1. Open/create a database	
 	RDbNamedDatabase db;
 
-#ifdef SYMBIAN_SECURE_DBMS
-	
 	// Create the secure shared database (if necessary) with the specified secure policy.
 	// Database will be created in the data caging path for DBMS (C:\private\100012a5).
-	
-	TInt err = db.Create(m_session, KDatabaseName, KSecureUIDFormat);
+
+	TFileName aPrivateDatabasePathName;
+
+	EapPluginTools::GetPrivatePathL(
+		m_session,
+		aPrivateDatabasePathName);
+
+	aPrivateDatabasePathName.Append(KEapolDatabaseName);
+
+	EAP_TRACE_DATA_DEBUG_SYMBIAN(("aPrivateDatabasePathName",
+		aPrivateDatabasePathName.Ptr(),
+		aPrivateDatabasePathName.Size()));
+
+	TInt error = db.Create(m_session, aPrivateDatabasePathName);
 	
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("TryOpenDatabaseL() - Created Secure DB for eapol.dat. err=%d\n"), err ));	
+		(EAPL("TryOpenDatabaseL() - Created Secure DB for eapol.dat. error=%d\n"), error ));	
 		
-	if(err == KErrNone)
+	if(error == KErrNone)
 	{	
 		db.Close();
 		
-	} else if (err != KErrAlreadyExists) 
+	} else if (error != KErrAlreadyExists) 
 	{
-		User::LeaveIfError(err);
+		User::LeaveIfError(error);
 	}
 	
-	User::LeaveIfError(db.Open(m_session, KDatabaseName, KSecureUIDFormat));	
+	User::LeaveIfError(db.Open(m_session, aPrivateDatabasePathName));	
 		
-#else
-	// For non-secured database. The database will be created in the old location (c:\system\data).
-	
-	// Create the database (if necessary)		
-	TInt err = db.Create(m_fs, KDatabaseName);
-	
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("TryOpenDatabaseL() - Created Non-Secure DB for eapol.dat. err=%d\n"), err ));	
-	
-	if(err == KErrNone)
-	{
-		db.Close();
-		
-	} else if (err != KErrAlreadyExists) 
-	{
-		User::LeaveIfError(err);
-	}
-		
-	User::LeaveIfError(db.Open(m_session, KDatabaseName));
-	    
-#endif // #ifdef SYMBIAN_SECURE_DBMS		
-
 	CleanupClosePushL(db);
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
@@ -198,18 +192,18 @@ void eapol_am_wlan_authentication_symbian_c::TryInitDatabaseL()
 											 %S VARBINARY(255))");
 	sqlStatement.Format(KSQLCreateTable2, &KEapolPSKTableName, 
 		&KServiceType, &KServiceIndex, &KSSID, &KPassword, &KPSK);
-	err = db.Execute(sqlStatement);
-	if (err != KErrNone && err != KErrAlreadyExists)
+	error = db.Execute(sqlStatement);
+	if (error != KErrNone && error != KErrAlreadyExists)
 	{
-		User::Leave(err);
+		User::Leave(error);
 	}
 	
-	CleanupStack::PopAndDestroy(); // buf
+	CleanupStack::PopAndDestroy(buf);
 	
 	// If compacting is not done the database will start growing
 	db.Compact();
 	
-	CleanupStack::PopAndDestroy(); // Close database
+	CleanupStack::PopAndDestroy(&db);
 }
 
 //--------------------------------------------------
@@ -219,15 +213,28 @@ void eapol_am_wlan_authentication_symbian_c::InitDatabaseL()
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("eapol_am_wlan_authentication_symbian_c::OpenDatabaseL()\n")));
+		(EAPL("eapol_am_wlan_authentication_symbian_c::InitDatabaseL()\n")));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::InitDatabaseL()");
 
 	// Create the database (if necessary)
-	TRAPD(err, TryInitDatabaseL());
-	if (err != KErrNone)
+	TRAPD(error, TryInitDatabaseL());
+	if (error != KErrNone)
 	{
 		// Because of error remove the database file.
-		err = m_fs.Delete(KDatabaseName);
-		if(err != KErrNone)
+		TFileName aPrivateDatabasePathName;
+
+		EapPluginTools::GetPrivatePathL(
+			m_session,
+			aPrivateDatabasePathName);
+
+		aPrivateDatabasePathName.Append(KEapolDatabaseName);
+
+		EAP_TRACE_DATA_DEBUG_SYMBIAN(("aPrivateDatabasePathName",
+			aPrivateDatabasePathName.Ptr(),
+			aPrivateDatabasePathName.Size()));
+
+		error = m_session.Delete(aPrivateDatabasePathName);
+		if(error != KErrNone)
 		{
 			User::Leave(KErrCorrupt);
 		}		
@@ -250,8 +257,10 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::configure()
 		 (m_is_client == true) ? "client": "server",
 		 this,
 		 dynamic_cast<abs_eap_base_timer_c *>(this)));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::configure()");
 
 	TInt error(KErrNone);
+	eap_status_e status(eap_status_process_general_error);
 
 	// Open the database session
 	error = m_session.Connect();
@@ -262,8 +271,9 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::configure()
 		EAP_TRACE_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("RDbs::Connect() failed %d.\n"),
-			status));
+			(EAPL("ERROR: RDbs::Connect() failed %d=%s.\n"),
+			status,
+			eap_status_string_c::get_status_string(status)));
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
@@ -273,8 +283,8 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::configure()
 		TRACE_FLAGS_DEFAULT,
 		(EAPL("Database session initialized...\n")));
 
-	// Connect to FS
-	error = m_fs.Connect();
+	// Initialize database
+	TRAP(error, InitDatabaseL());
 	if (error != KErrNone)
 	{
 		eap_status_e status(m_am_tools->convert_am_error_to_eapol_error(error));
@@ -282,28 +292,9 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::configure()
 		EAP_TRACE_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("RFs::Connect() failed %d.\n"),
-			status));
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("Fileserver session initialized...\n")));
-
-	// Initialize database
-	TRAPD(err, InitDatabaseL());
-	if (err != KErrNone)
-	{
-		eap_status_e status(m_am_tools->convert_am_error_to_eapol_error(error));
-
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("InitDatabaseL failed %d.\n"),
-			status));
+			(EAPL("ERROR: InitDatabaseL failed %d=%s.\n"),
+			status,
+			eap_status_string_c::get_status_string(status)));
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
@@ -315,169 +306,14 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::configure()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if defined(USE_EAP_FILECONFIG)
+	status = EapConfigToolsSymbian::EapReadDefaultConfigFileSymbian(
+		m_am_tools,
+		&m_fileconfig);
+	if (status != eap_status_ok)
 	{
-		eap_am_file_input_symbian_c * const fileio = new eap_am_file_input_symbian_c(m_am_tools);
-
-		eap_automatic_variable_c<eap_am_file_input_symbian_c> automatic_fileio(m_am_tools, fileio);
-
-		if (fileio != 0
-			&& fileio->get_is_valid() == true)
-		{
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("Initialize file configuration.\n")));
-
-			eap_variable_data_c file_name_c_data(m_am_tools);
-
-			eap_status_e status(eap_status_process_general_error);
-
-			{
-				#if defined(EAPOL_SYMBIAN_VERSION_7_0_s)
-					eap_const_string const FILECONFIG_FILENAME_C
-						= "c:\\system\\data\\eap.conf";
-				#else
-					eap_const_string const FILECONFIG_FILENAME_C
-						= "c:\\private\\101F8EC5\\eap.conf";
-				#endif
-
-				status = file_name_c_data.set_copy_of_buffer(
-					FILECONFIG_FILENAME_C,
-					m_am_tools->strlen(FILECONFIG_FILENAME_C));
-				if (status != eap_status_ok)
-				{
-					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-					return EAP_STATUS_RETURN(m_am_tools, status);
-				}
-
-				status = file_name_c_data.add_end_null();
-				if (status != eap_status_ok)
-				{
-					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-					return EAP_STATUS_RETURN(m_am_tools, status);
-				}
-			}
-
-			eap_variable_data_c file_name_z_data(m_am_tools);
-
-			{
-				#if defined(EAPOL_SYMBIAN_VERSION_7_0_s)
-					eap_const_string const FILECONFIG_FILENAME_Z
-						= "z:\\system\\data\\eap.conf";
-				#else
-					eap_const_string const FILECONFIG_FILENAME_Z
-						= "z:\\private\\101F8EC5\\eap.conf";
-				#endif
-
-				status = file_name_z_data.set_copy_of_buffer(
-					FILECONFIG_FILENAME_Z,
-					m_am_tools->strlen(FILECONFIG_FILENAME_Z));
-				if (status != eap_status_ok)
-				{
-					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-					return EAP_STATUS_RETURN(m_am_tools, status);
-				}
-
-				status = file_name_z_data.add_end_null();
-				if (status != eap_status_ok)
-				{
-					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-					return EAP_STATUS_RETURN(m_am_tools, status);
-				}
-			}
-
-
-
-			if (status == eap_status_ok)
-			{
-				// First try open from C: disk.
-				status = fileio->file_open(
-					&file_name_c_data,
-					eap_file_io_direction_read);
-				if (status == eap_status_ok)
-				{
-					EAP_TRACE_DEBUG(
-						m_am_tools,
-						TRACE_FLAGS_DEFAULT,
-						(EAPL("Opens configure file %s\n"),
-						file_name_c_data.get_data(file_name_c_data.get_data_length())));
-				}
-				else if (status != eap_status_ok)
-				{
-					// Second try open from Z: disk.
-					status = fileio->file_open(
-						&file_name_z_data,
-						eap_file_io_direction_read);
-					if (status == eap_status_ok)
-					{
-						EAP_TRACE_DEBUG(
-							m_am_tools,
-							TRACE_FLAGS_DEFAULT,
-							(EAPL("Opens configure file %s\n"),
-							 file_name_z_data.get_data(file_name_z_data.get_data_length())));
-					}
-				}
-
-				if (status == eap_status_ok)
-				{
-					// Some of the files were opened.
-
-					m_fileconfig = new eap_file_config_c(m_am_tools);
-					if (m_fileconfig != 0
-						&& m_fileconfig->get_is_valid() == true)
-					{
-						status = m_fileconfig->configure(fileio);
-						if (status != eap_status_ok)
-						{
-							EAP_TRACE_DEBUG(
-								m_am_tools,
-								TRACE_FLAGS_DEFAULT,
-								(EAPL("ERROR: Configure read from %s failed.\n"),
-								file_name_c_data.get_data(file_name_c_data.get_data_length())));
-						}
-						else
-						{
-							EAP_TRACE_DEBUG(
-								m_am_tools,
-								TRACE_FLAGS_DEFAULT,
-								(EAPL("Configure read from %s\n"),
-								file_name_c_data.get_data(file_name_c_data.get_data_length())));
-						}
-					}
-					else
-					{
-						// No file configuration.
-						delete m_fileconfig;
-						m_fileconfig = 0;
-
-						EAP_TRACE_DEBUG(
-							m_am_tools,
-							TRACE_FLAGS_DEFAULT,
-							(EAPL("ERROR: Cannot create configure object for file %s\n"),
-							file_name_c_data.get_data(file_name_c_data.get_data_length())));
-					}
-				}
-				else
-				{
-					EAP_TRACE_DEBUG(
-						m_am_tools,
-						TRACE_FLAGS_DEFAULT,
-						(EAPL("ERROR: Cannot open configure file neither %s nor %s\n"),
-						file_name_c_data.get_data(file_name_c_data.get_data_length()),
-						file_name_z_data.get_data(file_name_z_data.get_data_length())));
-				}
-			}
-		}
-		else
-		{
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("Skips file configuration.\n")));
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
-#endif //#if defined(USE_EAP_FILECONFIG)
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -485,7 +321,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::configure()
 	{
 		eap_variable_data_c trace_output_file(m_am_tools);
 
-		eap_status_e status = read_configure(
+		status = read_configure(
 			cf_str_EAP_TRACE_output_file_name.get_field(),
 			&trace_output_file);
 		if (status == eap_status_ok
@@ -509,9 +345,33 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::configure()
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	{
+		eap_variable_data_c EAP_TRACE_enable_timer_traces(m_am_tools);
+
+		status = read_configure(
+			cf_str_EAP_TRACE_enable_timer_traces.get_field(),
+			&EAP_TRACE_enable_timer_traces);
+		if (status == eap_status_ok
+			&& EAP_TRACE_enable_timer_traces.get_is_valid_data() == true)
+		{
+			u32_t *enable_timer_traces = reinterpret_cast<u32_t *>(
+				EAP_TRACE_enable_timer_traces.get_data(sizeof(u32_t)));
+			if (enable_timer_traces != 0
+				&& *enable_timer_traces != 0)
+			{
+				m_am_tools->set_trace_mask(
+					m_am_tools->get_trace_mask()
+					| TRACE_FLAGS_TIMER
+					);
+			}
+		}
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	{
 		eap_variable_data_c EAP_TRACE_enable_timer_queue_traces(m_am_tools);
 
-		eap_status_e status = read_configure(
+		status = read_configure(
 			cf_str_EAP_TRACE_enable_timer_queue_traces.get_field(),
 			&EAP_TRACE_enable_timer_queue_traces);
 		if (status == eap_status_ok
@@ -524,16 +384,18 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::configure()
 			{
 				m_am_tools->set_trace_mask(
 					m_am_tools->get_trace_mask()
-					| eap_am_tools_c::eap_trace_mask_timer_queue
+					| TRACE_FLAGS_TIMER_QUEUE
 					);
 			}
 		}
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	{
 		eap_variable_data_c EAP_TRACE_enable_function_traces(m_am_tools);
 
-		eap_status_e status = read_configure(
+		status = read_configure(
 			cf_str_EAP_TRACE_enable_function_traces.get_field(),
 			&EAP_TRACE_enable_function_traces);
 		if (status == eap_status_ok
@@ -565,50 +427,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::configure()
 
 //--------------------------------------------------
 
-eap_status_e eapol_am_wlan_authentication_symbian_c::reset_eap_plugins()
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eapol_am_wlan_authentication_symbian_c::reset_eap_plugins(): %s, this = 0x%08x => 0x%08x\n"),
-		 (m_is_client == true) ? "client": "server",
-		 this,
-		 dynamic_cast<abs_eap_base_timer_c *>(this)));
-
-	// Unload all loaded plugins
-	for(int ind = 0; ind < m_plugin_if_array.Count(); ind++)
-	{
-		delete m_plugin_if_array[ind];
-	}
-
-	m_plugin_if_array.Close();
-
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	m_enabled_expanded_eap_array.ResetAndDestroy();
-
-	m_disabled_expanded_eap_array.ResetAndDestroy();
-	
-	m_eap_type_array.reset();
-	
-#else
-
-	// Delete the IAP EAP type info array
-	m_iap_eap_array.ResetAndDestroy();
-	
-	m_eap_type_array.Close();	
-	
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
-}
-
-
-//--------------------------------------------------
-
 EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::shutdown()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -620,14 +438,12 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::shutdown()
 		 (m_is_client == true) ? "client": "server",
 		 this,
 		 dynamic_cast<abs_eap_base_timer_c *>(this)));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::shutdown()");
 
 	m_session.Close();
-	m_fs.Close();
 
 	delete m_fileconfig;
 	m_fileconfig = 0;
-
-	(void) reset_eap_plugins();
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
@@ -650,6 +466,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::set_am_part
 		(EAPL("eapol_am_wlan_authentication_simulator_c::set_am_partner(): %s, this = 0x%08x\n"),
 		 (m_is_client == true) ? "client": "server",
 		 this));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::set_am_partner()");
 
 	m_am_partner = am_partner;
 
@@ -663,24 +480,25 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::set_am_part
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::reset_eap_configuration()
+EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::reset_wpa_configuration()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eapol_am_wlan_authentication_symbian_c::reset_eap_configuration(): %s, this = 0x%08x\n"),
+		(EAPL("eapol_am_wlan_authentication_symbian_c::reset_wpa_configuration(): %s, this = 0x%08x\n"),
 		 (m_is_client == true) ? "client": "server",
 		 this));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::reset_wpa_configuration()");
 
-	TRAPD(error, ReadEAPSettingsL());
+	TRAPD(error, ReadWPASettingsL());
 	if (error != KErrNone)
 	{
 		EAP_TRACE_ERROR(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("EAP settings reading from CommDb failed or cancelled(err %d).\n"), error));
+			(EAPL("EAP settings reading from CommDb failed or cancelled(error %d).\n"), error));
 
 		eap_status_e status(m_am_tools->convert_am_error_to_eapol_error(error));
 
@@ -700,6 +518,7 @@ void eapol_am_wlan_authentication_symbian_c::send_error_notification(const eap_s
 		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eapol_am_wlan_authentication_symbian_c::send_error_notification, error=%d\n"),
 		error));	
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::send_error_notification()");
 
 	eap_general_state_variable_e general_state_variable(eap_general_state_authentication_error);
 	
@@ -748,6 +567,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::set_wlan_pa
 		 (m_is_client == true) ? "client": "server",
 		 this,
 		 dynamic_cast<abs_eap_base_timer_c *>(this)));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::set_wlan_parameters()");
 
 	m_WPA_override_enabled = WPA_override_enabled;
 
@@ -775,10 +595,17 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::set_wlan_pa
 //--------------------------------------------------
 
 //
-void eapol_am_wlan_authentication_symbian_c::state_notification(
+EAP_FUNC_EXPORT void eapol_am_wlan_authentication_symbian_c::state_notification(
 	const abs_eap_state_notification_c * const state)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eapol_am_wlan_authentication_symbian_c::state_notification(): this = 0x%08x\n"),
+		this));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::state_notification()");
 
 	EAP_UNREFERENCED_PARAMETER(state);
 
@@ -799,6 +626,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::association
 		 (m_is_client == true) ? "client": "server",
 		 this,
 		 dynamic_cast<abs_eap_base_timer_c *>(this)));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::association()");
 
 	eap_status_e status = m_receive_network_id.set_copy_of_network_id(receive_network_id);
 
@@ -822,185 +650,11 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::disassociat
 		 (m_is_client == true) ? "client": "server",
 		 this,
 		 dynamic_cast<abs_eap_base_timer_c *>(this)));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::disassociation()");
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
 }
-
-//--------------------------------------------------
-
-#ifdef USE_EAP_EXPANDED_TYPES
-
-EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::get_selected_eap_types(
-	eap_array_c<eap_type_selection_c> * const selected_eap_types)
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eapol_am_wlan_authentication_symbian_c::get_selected_eap_types(): %s, this = 0x%08x => 0x%08x\n"),
-		 (m_is_client == true) ? "client": "server",
-		 this,
-		 dynamic_cast<abs_eap_base_timer_c *>(this)));
-
-	eap_status_e status = selected_eap_types->reset();
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-
-	eap_header_string_c eap_string;
-	EAP_UNREFERENCED_PARAMETER(eap_string);
-
-	// We need to return only the EAP types available as enabled types.
-	// It means only the ones available in m_enabled_expanded_eap_array.
-	
-	for (TInt i = 0; i < m_enabled_expanded_eap_array.Count(); i++)
-	{	
-		TBuf8<KExpandedEAPSize> tmpExpEAP(m_enabled_expanded_eap_array[i]->EapExpandedType);
-
-		EAP_TRACE_DEBUG(
-			m_am_tools, 
-			TRACE_FLAGS_DEFAULT, 
-			(EAPL("eapol_am_wlan_authentication_symbian_c::get_selected_eap_types:Enabled expanded EAP type at index=%d\n"),
-			 i));
-
-		EAP_TRACE_DATA_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("Enabled expanded EAP type"),
-			tmpExpEAP.Ptr(),
-			tmpExpEAP.Size()));
-
-		// This is for one expanded EAP type (for the above one).
-		eap_expanded_type_c expandedEAPType;
-				
-		// Read the expanded EAP type details from an item in m_enabled_expanded_eap_array.
-		status = eap_expanded_type_c::read_type(m_am_tools,
-												0,
-												tmpExpEAP.Ptr(),
-												tmpExpEAP.Size(),
-												&expandedEAPType);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		// Add EAP-type to list.
-		eap_type_selection_c * selection = new eap_type_selection_c(
-			m_am_tools,
-			expandedEAPType,
-			true);
-		if (selection != 0)
-		{
-			status = selected_eap_types->add_object(selection, true);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
-			
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("get_selected_eap_types(): added EAP-type=0x%08x=%s\n"),
-				expandedEAPType.get_vendor_type(),
-				eap_string.get_eap_type_string(expandedEAPType)));			
-		}
-		else
-		{
-			// On error we ignore this EAP-type.
-			EAP_TRACE_DEBUG(
-				m_am_tools, 
-				TRACE_FLAGS_DEFAULT, 
-				(EAPL("Some problem with EAP type at index %d in m_enabled_expanded_eap_array\n"),
-				 i));
-		}
-	}
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
-}
-
-//--------------------------------------------------
-
-#else // for non-expanded (normal EAP types)
-
-//--------------------------------------------------
-
-EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::get_selected_eap_types(
-	eap_array_c<eap_type_selection_c> * const selected_eap_types)
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eapol_am_wlan_authentication_symbian_c::get_selected_eap_types(): %s, this = 0x%08x => 0x%08x\n"),
-		 (m_is_client == true) ? "client": "server",
-		 this,
-		 dynamic_cast<abs_eap_base_timer_c *>(this)));
-
-	eap_status_e status = selected_eap_types->reset();
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-
-	eap_header_string_c eap_string;
-	EAP_UNREFERENCED_PARAMETER(eap_string);
-
-	TEap *eapType = 0; 
-
-	for (TInt i = 0; i < m_iap_eap_array.Count(); i++)
-	{
-		// Check if type is enabled
-		eapType = m_iap_eap_array[i];
-		if (eapType->Enabled == 1)
-		{	
-			TLex8 tmp(eapType->UID);
-			TInt val(0);
-			tmp.Val(val);
-
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("get_selected_eap_types(): adds EAP-type=0x%08x=%s\n"),
-				static_cast<eap_type_ietf_values_e>(val),
-				eap_string.get_eap_type_string(
-					static_cast<eap_type_value_e>(
-						static_cast<eap_type_ietf_values_e>(val)))));
-
-			// Add EAP-type to list.
-			eap_type_selection_c * selection = new eap_type_selection_c(
-				m_am_tools,
-				static_cast<eap_type_value_e>(static_cast<eap_type_ietf_values_e>(val)),
-				true);
-			if (selection != 0)
-			{
-				status = selected_eap_types->add_object(selection, true);
-				if (status != eap_status_ok)
-				{
-					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-					return EAP_STATUS_RETURN(m_am_tools, status);
-				}
-			}
-			else
-			{
-				// On error we ignore this EAP-type.
-			}
-		}
-	}
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
-}
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 //--------------------------------------------------
 
@@ -1016,6 +670,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::get_wlan_co
 		 (m_is_client == true) ? "client": "server",
 		 this,
 		 dynamic_cast<abs_eap_base_timer_c *>(this)));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::get_wlan_configuration()");
 
 	eap_status_e status = wpa_preshared_key_hash->set_copy_of_buffer(&m_wpa_preshared_key_hash);
 
@@ -1027,7 +682,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::get_wlan_co
 
 EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::authentication_finished(
 	const bool when_true_successfull,
-	const eap_type_value_e eap_type,
+	const eap_type_value_e /* eap_type */,
 	const eapol_key_authentication_type_e authentication_type)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1039,46 +694,13 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::authenticat
 		 (m_is_client == true) ? "client": "server",
 		 this,
 		 dynamic_cast<abs_eap_base_timer_c *>(this)));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::authentication_finished()");
 
 	if (when_true_successfull == true)
 	{
 		if (authentication_type != eapol_key_authentication_type_RSNA_PSK
 			&& authentication_type != eapol_key_authentication_type_WPA_PSK)
 		{
-
-#ifdef USE_EAP_EXPANDED_TYPES
-
-			// This moves the successful type to be the top priority type in IAP settings.
-			TRAPD(err, SetToTopPriorityL(eap_type));
-			if (err != KErrNone)
-			{
-				// Just log the error. 
-				EAP_TRACE_DEBUG(
-					m_am_tools,
-					TRACE_FLAGS_DEFAULT, 
-					(EAPL("state_notification: SetToTopPriorityL() Expanded EAP type - leave with error=%d!\n"),
-					err));
-			}
-
-#else // For normal EAP types
-					
-			TEap eap;
-			eap.Enabled = ETrue;
-			eap.UID.Num(static_cast<TInt>(convert_eap_type_to_u32_t(eap_type)));
-			
-			// This moves the successful type to be the top priority type in IAP settings.
-			TRAPD(err, SetToTopPriorityL(&eap));
-			if (err != KErrNone)
-			{
-				// Just log the error. 
-				EAP_TRACE_DEBUG(
-					m_am_tools,
-					TRACE_FLAGS_DEFAULT, 
-					(EAPL("state_notification: SetToTopPriorityL leaved!\n")));
-			}
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
 			// Move the active eap type index to the first type
 			m_am_partner->set_current_eap_index(0ul);
 		}
@@ -1103,19 +725,11 @@ eap_status_e eapol_am_wlan_authentication_symbian_c::read_database_reference_val
 		 (m_is_client == true) ? "client": "server",
 		 this,
 		 dynamic_cast<abs_eap_base_timer_c *>(this)));
-
-	eap_variable_data_c database_reference(m_am_tools);
-
-	eap_status_e status = m_wlan_database_reference->get_wlan_database_reference_values(&database_reference);
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::read_database_reference_values()");
 
 	const eapol_wlan_database_reference_values_s * const database_reference_values
 		= reinterpret_cast<eapol_wlan_database_reference_values_s *>(
-		database_reference.get_data(sizeof(eapol_wlan_database_reference_values_s)));
+		m_database_reference.get_data(sizeof(eapol_wlan_database_reference_values_s)));
 	if (database_reference_values == 0)
 	{
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1138,351 +752,6 @@ eap_status_e eapol_am_wlan_authentication_symbian_c::read_database_reference_val
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::load_module(
-	const eap_type_value_e type,
-	const eap_type_value_e tunneling_type,
-	abs_eap_base_type_c * const partner,
-	eap_base_type_c ** const eap_type_if,
-	const bool is_client_when_true,
-	const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
-	)
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eapol_am_wlan_authentication_symbian_c::load_module(type %d=%s, tunneling_type %d=%s)\n"),
-		convert_eap_type_to_u32_t(type),
-		eap_header_string_c::get_eap_type_string(type),
-		convert_eap_type_to_u32_t(tunneling_type),
-		eap_header_string_c::get_eap_type_string(tunneling_type)));
-
-	eap_status_e status(eap_status_process_general_error);
-	
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	CEapType* eapType = 0;
-	TInt error(KErrNone);
-
-	// Check if this EAP type has already been loaded
-	TInt eapArrayIndex = find<eap_type_value_e>(
-		&m_eap_type_array,
-		&type,
-		m_am_tools);
-
-	if (eapArrayIndex >= 0)
-	{
-		// We found the entry in the array.
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eapol_am_wlan_authentication_symbian_c::load_module(type %d=%s, tunneling_type %d=%s) already loaded.\n"),
-			convert_eap_type_to_u32_t(type),
-			eap_header_string_c::get_eap_type_string(type),
-			convert_eap_type_to_u32_t(tunneling_type),
-			eap_header_string_c::get_eap_type_string(tunneling_type)));
-
-		// Yep. It was loaded already.
-		eapType = m_plugin_if_array[eapArrayIndex];		
-	}
-	else 
-	{
-		TIndexType index_type(ELan);
-		TUint index(0UL);
-
-		status = read_database_reference_values(
-			&index_type,
-			&index);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eapol_am_wlan_authentication_symbian_c::load_module(type %d=%s, tunneling_type %d=%s) load new, index type=%d, index=%d.\n"),
-			convert_eap_type_to_u32_t(type),
-			eap_header_string_c::get_eap_type_string(type),
-			convert_eap_type_to_u32_t(tunneling_type),
-			eap_header_string_c::get_eap_type_string(tunneling_type),
-			index_type,
-			index));
-
-		TBuf8<KExpandedEAPSize> ExpandedCue;
-		
-		// Some indirect way of forming the 8 byte string of an EAP type for the cue is needed here.		
-		TUint8 tmpExpCue[KExpandedEAPSize];
-
-		// This is to make the tmpExpCue in 8 byte string with correct vendor type and vendor id details.
-		status = eap_expanded_type_c::write_type(m_am_tools,
-												0, // index should be zero here.
-												tmpExpCue,
-												KExpandedEAPSize,
-												true,
-												type);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("load_module: eap_expanded_type_c::write_type failed \n")));
-		
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-		
-		// Now copy the 8 byte string to the real expanded cue.
-		ExpandedCue.Copy(tmpExpCue, KExpandedEAPSize);
-
-		EAP_TRACE_DATA_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("EAPOL:eapol_am_wlan_authentication_symbian_c::load_module: Expanded CUE:"),
-			ExpandedCue.Ptr(),
-			ExpandedCue.Size()));
-
-
-		// We must have a trap here since the EAPOL core knows nothing about Symbian.
-		TRAP(error, (eapType = CEapType::NewL(
-			ExpandedCue,
-			index_type,
-			index)));	
-		if (error != KErrNone
-			|| eapType == 0)
-		{
-			// Interface not found or implementation creation function failed
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("ECom could not find/initiate implementation.\n")));
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-	}
-
-#else // For normal EAP types
-	
-	TBuf8<KMaxEapCueLength> cue;
-	cue.Num(static_cast<TInt>(convert_eap_type_to_u32_t(type)));
-	CEapType* eapType = 0;
-	TInt error(KErrNone);
-
-	// Check if this EAP type has already been loaded
-	TInt eapArrayIndex = m_eap_type_array.Find(type);
-	if (eapArrayIndex != KErrNotFound)
-	{
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eapol_am_wlan_authentication_symbian_c::load_module(type %d=%s, tunneling_type %d=%s) already loaded.\n"),
-			convert_eap_type_to_u32_t(type),
-			eap_header_string_c::get_eap_type_string(type),
-			convert_eap_type_to_u32_t(tunneling_type),
-			eap_header_string_c::get_eap_type_string(tunneling_type)));
-
-		// Yep. It was loaded already.
-		eapType = m_plugin_if_array[eapArrayIndex];		
-	}
-	else 
-	{
-		TIndexType index_type(ELan);
-		TUint index(0UL);
-
-		status = read_database_reference_values(
-			&index_type,
-			&index);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eapol_am_wlan_authentication_symbian_c::load_module(type %d=%s, tunneling_type %d=%s) load new, index type=%d, index=%d.\n"),
-			convert_eap_type_to_u32_t(type),
-			eap_header_string_c::get_eap_type_string(type),
-			convert_eap_type_to_u32_t(tunneling_type),
-			eap_header_string_c::get_eap_type_string(tunneling_type),
-			index_type,
-			index));
-
-		// We must have a trap here since the EAPOL core knows nothing about Symbian.
-		TRAP(error, (eapType = CEapType::NewL(
-			cue,
-			index_type,
-			index)));	
-		if (error != KErrNone
-			|| eapType == 0)
-		{
-			// Interface not found or implementation creation function failed
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("ECom could not find/initiate implementation.\n")));
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-	}
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
-	// Set the tunneling type
-	eapType->SetTunnelingType(convert_eap_type_to_u32_t(tunneling_type));
-
-	// Create the EAP protocol interface implementation.
-	
-#ifdef USE_EAP_SIMPLE_CONFIG
-
-	TRAP(error, (*eap_type_if = eapType->GetStackInterfaceL(m_am_tools, 
-		partner, 
-		is_client_when_true, 
-		receive_network_id,
-		this)));
-
-#else
-
-	TRAP(error, (*eap_type_if = eapType->GetStackInterfaceL(m_am_tools, 
-		partner, 
-		is_client_when_true, 
-		receive_network_id)));
-
-#endif // #ifdef USE_EAP_SIMPLE_CONFIG
-	
-		
-	if (error != KErrNone 
-		|| *eap_type_if == 0 
-		|| (*eap_type_if)->get_is_valid() == false)
-	{
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("Could not create EAP type interface instance. Error: %d\n"), error));
-
-		status = eap_status_allocation_error;
-		// Unload DLL (two ways, depending whether this type was already loaded...)
-		if  (eapArrayIndex == KErrNotFound)
-		{
-			// No need to call shutdown here because GetStackInterfaceL has done it.
-			delete eapType;
-		}
-		else
-		{
-			unload_module(type);
-		}
-		// Note: even in error cases eap_core_c deletes eap_type_if
-	}
-	else
-	{
-		status = eap_status_ok;
-		if (eapArrayIndex  == KErrNotFound)
-		{
-			// Add plugin information to the member arrays. There is no need to store eap_type pointer because
-			// the stack takes care of its deletion.
-			if (m_plugin_if_array.Append(eapType) != KErrNone)
-			{
-				delete eapType;
-				status = eap_status_allocation_error;
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);				
-			}
-			
-#ifdef USE_EAP_EXPANDED_TYPES
-
-			eap_type_value_e * tmpEAPType = new eap_type_value_e();
-			if(tmpEAPType == NULL)
-			{
-				EAP_TRACE_DEBUG(
-					m_am_tools,
-					TRACE_FLAGS_DEFAULT,
-					(EAPL("eapol_am_wlan_authentication_symbian_c::load_module() eap_type_value_e creation failed\n")));
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);				
-			}
-			
-			*tmpEAPType = type;
-			
-			status = m_eap_type_array.add_object(tmpEAPType, true);
-			
-			if (status != eap_status_ok)			
-
-#else // For normal EAP type.			
-			
-			if (m_eap_type_array.Append(type) != KErrNone)
-
-#endif // #ifdef USE_EAP_EXPANDED_TYPES			
-			{
-				// Remove the eap type added just previously
-				m_plugin_if_array.Remove(m_plugin_if_array.Count() - 1);
-				delete eapType;
-				status = eap_status_allocation_error;
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);				
-			}
-		} 
-	}
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, status);
-}
-
-//--------------------------------------------------
-
-EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::unload_module(
-	const eap_type_value_e type)
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eapol_am_wlan_authentication_symbian_c::unload_module(): %s, this = 0x%08x => 0x%08x\n"),
-		 (m_is_client == true) ? "client": "server",
-		 this,
-		 dynamic_cast<abs_eap_base_timer_c *>(this)));
-
-	eap_status_e status(eap_status_type_does_not_exists_error);
-
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	// Check if this EAP type has already been loaded
-	TInt index = find<eap_type_value_e>(
-		&m_eap_type_array,
-		&type,
-		m_am_tools);
-		
-	if (index >= 0)
-	{
-		// EAP was loaded before.
-		
-		delete m_plugin_if_array[index];
-		m_plugin_if_array.Remove(index);
-		
-		status = m_eap_type_array.remove_object(index);
-	}
-
-#else // For normal EAP types.
-
-	TInt index = m_eap_type_array.Find(type);
-	if (index != KErrNotFound)
-	{
-		delete m_plugin_if_array[index];
-		m_plugin_if_array.Remove(index);
-		m_eap_type_array.Remove(index);
-		status = eap_status_ok;			
-	}
-
-#endif // #ifdef USE_EAP_EXPANDED_TYPES
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, status);
-}
-
-//--------------------------------------------------
-
 EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::read_configure(
 	const eap_configuration_field_c * const field,
 	eap_variable_data_c * const data)
@@ -1497,7 +766,8 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::read_config
 		 (m_is_client == true) ? "client": "server",
 		 this,
 		 dynamic_cast<abs_eap_base_timer_c *>(this)));
-	
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eapol_am_wlan_authentication_symbian_c::read_configure()");
+
 	// Trap must be set here because the OS independent portion of EAPOL
 	// that calls this function does not know anything about Symbian.	
 	eap_status_e status(eap_status_ok);
@@ -1515,7 +785,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::read_config
 	if (status != eap_status_ok)
 	{
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return status;
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 	
 	status = type_field.set_buffer(
@@ -1526,220 +796,55 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::read_config
 	if (status != eap_status_ok)
 	{
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return status;
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
-
-	eap_type_value_e aSelectedEapType;
-	
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	if (!wanted_field.compare(&type_field))
-	{
-		TInt ind; 
-
-		// First check do we have read configuration from databases.
-		if (m_enabled_expanded_eap_array.Count() == 0)
-		{
-			EAP_TRACE_ERROR(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("EAP settings not read from CommsDat\n")));
-
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_process_general_error);
-		}
-
-		// Now we need to return here the next EAP type we should try		
-		for (ind = m_am_partner->get_current_eap_index(); ind < m_enabled_expanded_eap_array.Count(); ind++)
-		{
-			// Find the highest priority EAP with index "ind".
-			
-			TBuf8<KExpandedEAPSize> tmpExpEAP(m_enabled_expanded_eap_array[ind]->EapExpandedType);
-			
-			status = data->set_copy_of_buffer(tmpExpEAP.Ptr(), tmpExpEAP.Size());			
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);			
-			}
-
-			EAP_TRACE_DATA_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("EAPOL:eapol_am_wlan_authentication_symbian_c::read_configure: Trying EAP type:"),
-				tmpExpEAP.Ptr(),
-				tmpExpEAP.Size()));
-			status = eap_expanded_type_c::read_type(m_am_tools,
-					0,
-					tmpExpEAP.Ptr(),
-					tmpExpEAP.Size(),
-					&aSelectedEapType);
-			if (status == eap_status_ok)
-			{
-				break;
-			}
-		}
-
-		// Set the index of new EAP type we are trying now.
-		m_am_partner->set_current_eap_index(ind);
-		
-		if (ind >= m_enabled_expanded_eap_array.Count())
-		{
-			// Not found any other EAP type as enabled.
-			// Send WLM notification because there is no way that the authentication
-			// can be successful if we don't have any EAP types to use...
-			if (m_is_client)
-			{
-				EAP_TRACE_ERROR(
-					m_am_tools,
-					TRACE_FLAGS_DEFAULT,
-					(EAPL("ERROR: read_configure: No configured EAP types or all tried unsuccessfully.\n")));
-			}
-
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_configure_field);
-		}
-	
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);		
-	}
-
-#else // For normal non-expanded EAP
-
-	if (!wanted_field.compare(&type_field))
-	{
-		TInt ind; 
-
-		// First check do we have read configuration from databases.
-		if (m_iap_eap_array.Count() == 0)
-		{
-			EAP_TRACE_ERROR(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("EAP settings not read from CommDb\n")));
-
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_process_general_error);
-		}
-
-		// We need to return here the next EAP type we should try		
-		for (ind = m_am_partner->get_current_eap_index(); ind < m_iap_eap_array.Count(); ind++)
-		{
-			// Find the first enabled EAP type (highest priority)
-			TEap *eapType = m_iap_eap_array[ind];			
-			if (eapType->Enabled == 1)
-			{
-				// Convert the string to integer
-				TLex8 tmp(eapType->UID);
-				TInt val(0);
-				tmp.Val(val);
-				status = data->set_copy_of_buffer(reinterpret_cast<u8_t *>(&val), sizeof(TUint));
-				if (status != eap_status_ok)
-				{
-					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-					return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);			
-				}
-
-				EAP_TRACE_DEBUG(
-					m_am_tools,
-					TRACE_FLAGS_DEFAULT,
-					(EAPL("EAPOL: Trying EAP type: %d.\n"), val));
-				aSelectedEapType = val;
-				break;
-			}
-		}
-
-		m_am_partner->set_current_eap_index(ind);
-		if (ind >= m_iap_eap_array.Count())
-		{
-			// Not found
-			// Send WLM notification because there is no way that the authentication
-			// can be successful if we don't have any EAP types to use...
-			if (m_is_client)
-			{
-				EAP_TRACE_ERROR(
-					m_am_tools,
-					TRACE_FLAGS_DEFAULT,
-					(EAPL("ERROR: No configured EAP types or all tried unsuccessfully.\n")));
-			}
-
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_configure_field);
-		}
-	
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);		
-	}
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	// It was something else than EAP type. Read it from eapol DB.
 	_LIT( KEapolTableName, "eapol" );
-	TRAPD( err, read_configureL(
-		KDatabaseName,
+
+	TFileName aPrivateDatabasePathName;
+
+	TRAPD(err, EapPluginTools::GetPrivatePathL(
+		m_session,
+		aPrivateDatabasePathName));
+		
+	if (err)
+		{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(err));
+		}
+
+	aPrivateDatabasePathName.Append(KEapolDatabaseName);
+
+	EAP_TRACE_DATA_DEBUG_SYMBIAN(("aPrivateDatabasePathName",
+		aPrivateDatabasePathName.Ptr(),
+		aPrivateDatabasePathName.Size()));
+
+	TRAPD( error, read_configureL(
+		aPrivateDatabasePathName,
 		KEapolTableName,
 		field->get_field(),
 		field->get_field_length(),
 		data) );
+
 	// Try to read it for eap fast DB	
-	HBufC8* fieldBuf = HBufC8::NewLC( field->get_field_length() );
+	HBufC8* fieldBuf = HBufC8::New( field->get_field_length() );
+
+	eap_automatic_variable_c<HBufC8> automatic_fieldBuf(
+		m_am_tools,
+		fieldBuf);
+
+	if (fieldBuf == 0)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
 	TPtr8 fieldPtr = fieldBuf->Des();
 	fieldPtr.Copy( reinterpret_cast<const TUint8 *> ( field->get_field() ));
 
-	_LIT8(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal, "EAP_TLS_PEAP_use_identity_privacy");
-	
-	if ( err != KErrNone &&
-		 fieldPtr.Compare( cf_str_EAP_TLS_PEAP_use_identity_privacy_literal() ) == 0 ) 
-		{
-		if (aSelectedEapType == eap_type_tls)
-			{
-			_LIT(KGeneralSettingsDBTableName, "KTlsDatabaseTableName");
-			TRAP( err, read_configureL(
-					KDatabaseName,
-					KGeneralSettingsDBTableName,
-					field->get_field(),
-					field->get_field_length(),
-					data) );		
-
-			}
-		if (aSelectedEapType == eap_type_peap)
-			{
-			_LIT(KGeneralSettingsDBTableName, "KPeapDatabaseTableName"); 
-			TRAP( err, read_configureL(
-					KDatabaseName,
-					KGeneralSettingsDBTableName,
-					field->get_field(),
-					field->get_field_length(),
-					data) );		
-			}
-		if (aSelectedEapType == eap_type_ttls)
-			{
-			_LIT(KGeneralSettingsDBTableName, "KTtlsDatabaseTableName"); 
-			TRAP( err, read_configureL(
-					KDatabaseName,
-					KGeneralSettingsDBTableName,
-					field->get_field(),
-					field->get_field_length(),
-					data) );		
-			}
-#if defined (USE_FAST_EAP_TYPE)
-		if ( aSelectedEapType == eap_type_fast)
-			{
-			_LIT(KFastGeneralSettingsDBTableName, "eapfast_general_settings"); 
-			TRAP( err, read_configureL(
-			KFastDatabaseName,
-			KFastGeneralSettingsDBTableName,
-			field->get_field(),
-			field->get_field_length(),
-			data) );		
-			}
-#endif
-		}
-	CleanupStack::PopAndDestroy( fieldBuf );
-
-	if (err != KErrNone) 
+	if (error != KErrNone) 
 	{
-		status = m_am_tools->convert_am_error_to_eapol_error(err);
+		status = m_am_tools->convert_am_error_to_eapol_error(error);
 
 #if defined(USE_EAP_FILECONFIG)
 		if (m_fileconfig != 0
@@ -1752,6 +857,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::read_config
 		}
 #endif //#if defined(USE_EAP_FILECONFIG)
 	}
+
 	m_am_tools->trace_configuration(
 		status,
 		field,
@@ -1771,15 +877,27 @@ void eapol_am_wlan_authentication_symbian_c::read_configureL(
 	eap_variable_data_c * const data)
 {	
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-	
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eapol_am_wlan_authentication_symbian_c::read_configureL(): %s, this = 0x%08x => 0x%08x\n"),
+		 (m_is_client == true) ? "client": "server",
+		 this,
+		 dynamic_cast<abs_eap_base_timer_c *>(this)));
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eapol_am_wlan_authentication_symbian_c::read_configureL()");
+
 	// Open database
 	RDbNamedDatabase db;
 
-#ifdef SYMBIAN_SECURE_DBMS
-	User::LeaveIfError(db.Open(m_session, aDbName, KSecureUIDFormat));	
-#else			
-	User::LeaveIfError(db.Open(m_session, aDbName));
-#endif // #ifdef SYMBIAN_SECURE_DBMS		
+	TInt error = db.Open(m_session, aDbName);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eapol_am_wlan_authentication_symbian_c::read_configureL(): db.Open(), error = %d\n"),
+		 error));
+
+	User::LeaveIfError(error);
 	
 	CleanupClosePushL(db);
 
@@ -1822,7 +940,8 @@ void eapol_am_wlan_authentication_symbian_c::read_configureL(
 					status = data->set_copy_of_buffer(asciiString.Ptr(), asciiString.Size());
 					if (status != eap_status_ok)
 					{
-						User::Leave(KErrNoMemory);
+						User::Leave(m_am_tools->convert_eapol_error_to_am_error(
+							EAP_STATUS_RETURN(m_am_tools, status)));
 					}
 				} 
 				else 
@@ -1839,7 +958,8 @@ void eapol_am_wlan_authentication_symbian_c::read_configureL(
 				status = data->set_copy_of_buffer((const unsigned char *) &value, sizeof(value));
 				if (status != eap_status_ok)
 				{
-					User::Leave(KErrNoMemory);
+					User::Leave(m_am_tools->convert_eapol_error_to_am_error(
+						EAP_STATUS_RETURN(m_am_tools, status)));
 				}
 			}
 			break;
@@ -1847,7 +967,7 @@ void eapol_am_wlan_authentication_symbian_c::read_configureL(
 			EAP_TRACE_DEBUG(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
-				(EAPL("read_configureL: Unexpected column type.\n")));
+				(EAPL("ERROR: read_configureL: Unexpected column type.\n")));
 			User::Panic(_L("EAPOL"), 1);			
 		}
 	} 
@@ -1857,12 +977,17 @@ void eapol_am_wlan_authentication_symbian_c::read_configureL(
 		EAP_TRACE_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("read_configureL: Could not find configuration parameter.\n")));
-		User::Leave(KErrNotFound);
+			(EAPL("ERROR: read_configureL: Could not find configuration parameter.\n")));
+		User::Leave(m_am_tools->convert_eapol_error_to_am_error(
+							EAP_STATUS_RETURN(m_am_tools, eap_status_not_found)));
 	}		
 	
 	// Close database
-	CleanupStack::PopAndDestroy(5); // view, 3 buffers and database
+	CleanupStack::PopAndDestroy(&view);
+	CleanupStack::PopAndDestroy(buf);
+	CleanupStack::PopAndDestroy(unicodebuf);
+	CleanupStack::PopAndDestroy(asciibuf);
+	CleanupStack::PopAndDestroy(&db);
 
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1892,6 +1017,13 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::set_timer(
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eapol_am_wlan_authentication_symbian_c::set_timer(): this = 0x%08x\n"),
+		this));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::set_timer()");
+
 	const eap_status_e status = m_am_tools->am_set_timer(
 		p_initializer, 
 		p_id, 
@@ -1910,6 +1042,13 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::cancel_time
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eapol_am_wlan_authentication_symbian_c::cancel_timer(): this = 0x%08x\n"),
+		this));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::cancel_timer()");
+
 	const eap_status_e status = m_am_tools->am_cancel_timer(
 		p_initializer, 
 		p_id);
@@ -1924,6 +1063,13 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::cancel_all_
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eapol_am_wlan_authentication_symbian_c::cancel_all_timers(): this = 0x%08x\n"),
+		this));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::cancel_all_timers()");
+
 	const eap_status_e status = m_am_tools->am_cancel_all_timers();
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1932,315 +1078,39 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::cancel_all_
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::check_is_valid_eap_type(const eap_type_value_e eap_type)
+void eapol_am_wlan_authentication_symbian_c::RetrievePSKL(TPSKEntry& entry)
 {
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	eap_header_string_c eap_string;
-	EAP_UNREFERENCED_PARAMETER(eap_string);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eapol_am_wlan_authentication_symbian_c::check_is_valid_eap_type():  %s, this = 0x%08x => 0x%08x, EAP-type=0x%08x=%s\n"),
-		 (m_is_client == true) ? "client": "server",
-		 this,
-		 dynamic_cast<abs_eap_base_timer_c *>(this),
-		convert_eap_type_to_u32_t(eap_type),
-		eap_string.get_eap_type_string(eap_type)));
-
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	for (int i = 0; i < m_enabled_expanded_eap_array.Count(); i++)
-	{
-		TBuf8<KExpandedEAPSize> tmpExpEAP(m_enabled_expanded_eap_array[i]->EapExpandedType);
-
-		EAP_TRACE_DEBUG(
-			m_am_tools, 
-			TRACE_FLAGS_DEFAULT, 
-			(EAPL("eapol_am_wlan_authentication_symbian_c::check_is_valid_eap_type:Enabled expanded EAP type at index=%d\n"),
-			 i));
-
-		EAP_TRACE_DATA_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("Enabled expanded EAP type:"),
-			tmpExpEAP.Ptr(),
-			tmpExpEAP.Size()));
-
-		// This is for one expanded EAP type (for the above one).
-		eap_expanded_type_c expandedEAPType;
-				
-		// Read the expanded EAP type details for this item in m_enabled_expanded_eap_array.
-		eap_status_e status = eap_expanded_type_c::read_type(m_am_tools,
-												0,
-												tmpExpEAP.Ptr(),
-												tmpExpEAP.Size(),
-												&expandedEAPType);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		if (eap_type == expandedEAPType)
-		{
-			// This is Allowed and Valid.
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
-		}
-	}
-		 
-#else // For normal unexpanded EAP type
-
-	TEap *eapType = 0; 
-	
-	for (int i = 0; i < m_iap_eap_array.Count(); i++)
-	{
-		// Try next EAP type
-		eapType = m_iap_eap_array[i];
-		if (eapType->Enabled == 1)
-		{	
-			// Convert the string to integer
-			TLex8 tmp(eapType->UID);
-			TInt val(0);
-			tmp.Val(val);
-
-			if (eap_type == static_cast<eap_type_ietf_values_e>(val))
-			{
-				// Allowed
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
-			}
-		}
-	}
-	
-#endif // #ifdef USE_EAP_EXPANDED_TYPES
-	
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("ERROR: %s: check_is_valid_eap_type(): not supported EAP-type=0x%08x=%s\n"),
-		 (m_is_client == true ? "client": "server"),
-		 convert_eap_type_to_u32_t(eap_type),
-		 eap_string.get_eap_type_string(eap_type)));
-
-	
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_eap_type);
-}
-
-//--------------------------------------------------
-
-EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::get_eap_type_list(
-	eap_array_c<eap_type_value_e> * const eap_type_list)
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eapol_am_wlan_authentication_symbian_c::get_eap_type_list(): %s, this = 0x%08x => 0x%08x\n"),
-		 (m_is_client == true) ? "client": "server",
-		 this,
-		 dynamic_cast<abs_eap_base_timer_c *>(this)));
-
-
-	eap_status_e status(eap_status_illegal_eap_type);
-
-	status = eap_type_list->reset();
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-
-	eap_header_string_c eap_string;
-	EAP_UNREFERENCED_PARAMETER(eap_string);
-
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	// This function is same as get_selected_eap_types in behavior.
-
-	// We need to return only the EAP types available as enabled types.
-	// It means only the ones available in m_enabled_expanded_eap_array.
-	
-	for (TInt i = 0; i < m_enabled_expanded_eap_array.Count(); i++)
-	{	
-		TBuf8<KExpandedEAPSize> tmpExpEAP(m_enabled_expanded_eap_array[i]->EapExpandedType);
-
-		EAP_TRACE_DEBUG(
-			m_am_tools, 
-			TRACE_FLAGS_DEFAULT, 
-			(EAPL("eapol_am_wlan_authentication_symbian_c::get_eap_type_list:Enabled expanded EAP type at index=%d\n"),
-			 i));
-
-		EAP_TRACE_DATA_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("Enabled expanded EAP type:"),
-			tmpExpEAP.Ptr(),
-			tmpExpEAP.Size()));
-
-		// This is for one expanded EAP type (for the above one).
-		eap_expanded_type_c * expandedEAPType = new eap_type_value_e();
-				
-		// Read the expanded EAP type details from an item in m_enabled_expanded_eap_array.
-		status = eap_expanded_type_c::read_type(m_am_tools,
-												0,
-												tmpExpEAP.Ptr(),
-												tmpExpEAP.Size(),
-												expandedEAPType);
-		if (status != eap_status_ok)
-		{
-			delete expandedEAPType;
-			expandedEAPType = 0;
-
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		// Add EAP-type to list.		
-		status = eap_type_list->add_object(expandedEAPType, true);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}		
-			
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("get_eap_type_list():added EAP-type=0x%08x=%s\n"),
-			expandedEAPType->get_vendor_type(),
-			eap_string.get_eap_type_string(*expandedEAPType)));			
-	}
-
-#else // for normal EAP types.
-
-	TEap *eapType = 0; 
-
-	for (TInt i = 0; i < m_iap_eap_array.Count(); i++)
-	{
-		// Check if type is enabled
-		eapType = m_iap_eap_array[i];
-		if (eapType->Enabled == 1)
-		{	
-			TLex8 tmp(eapType->UID);
-			TInt val(0);
-			tmp.Val(val);
-
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("get_eap_type_list(): adds EAP-type=0x%08x=%s\n"),
-				static_cast<eap_type_ietf_values_e>(val),
-				eap_string.get_eap_type_string(
-					static_cast<eap_type_value_e>(
-						static_cast<eap_type_ietf_values_e>(val)))));
-
-			eap_type_value_e * const eap_type = new eap_type_value_e(
-				static_cast<eap_type_ietf_values_e>(val));
-			if (eap_type == 0)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-			}
-
-			status = eap_type_list->add_object(eap_type, true);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
-		}
-	}
-
-#endif // #ifdef USE_EAP_EXPANDED_TYPES
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, status);
-}
-
-//--------------------------------------------------
-
-//
-void eapol_am_wlan_authentication_symbian_c::RunL()
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);	
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eapol_am_wlan_authentication_symbian_c::RunL(): iStatus.Int() = %d\n"),
-		iStatus.Int()));
-
-	if (iStatus.Int() != KErrNone)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return;
-	}
-
-	// Authentication cancelled.
-	EAP_TRACE_ALWAYS(
-		m_am_tools,
-		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT,
-		(EAPL("Authentication cancelled.\n")));
-
-	eap_status_e status = m_am_partner->disassociation(
-		&m_receive_network_id);
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("set_timer(EAPOL_AM_CORE_TIMER_DELETE_STACK_ID) failed in RunL().\n")));
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return;
-	}
-	
-	// Reset index of current EAP-type.
-	m_am_partner->set_current_eap_index(0ul);
-
-	EAP_TRACE_ALWAYS(
-		m_am_tools,
-		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT,
-		(EAPL("Indication sent to WLM: EFailedCompletely.\n")));
-
-	m_am_partner->eapol_indication(
-		&m_receive_network_id,
-		eapol_wlan_authentication_state_failed_completely);
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-}
-
-//--------------------------------------------------
-
-//
-void eapol_am_wlan_authentication_symbian_c::DoCancel()
-{	
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eapol_am_wlan_authentication_symbian_c::DoCancel()\n")));
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-}
-
-//--------------------------------------------------
-
-void eapol_am_wlan_authentication_symbian_c::RetrievePSKL(TPSKEntry& entry)
-{
+		(EAPL("eapol_am_wlan_authentication_symbian_c::RetrievePSKL(): this = 0x%08x\n"),
+		this));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::RetrievePSKL()");
 
 	// Open database
 	RDbNamedDatabase db;
 
-#ifdef SYMBIAN_SECURE_DBMS
-	User::LeaveIfError(db.Open(m_session, KDatabaseName, KSecureUIDFormat));	
-#else			
-	User::LeaveIfError(db.Open(m_session, KDatabaseName));
-#endif // #ifdef SYMBIAN_SECURE_DBMS		
+	TFileName aPrivateDatabasePathName;
+
+	EapPluginTools::GetPrivatePathL(
+		m_session,
+		aPrivateDatabasePathName);
+
+	aPrivateDatabasePathName.Append(KEapolDatabaseName);
+
+	EAP_TRACE_DATA_DEBUG_SYMBIAN(("aPrivateDatabasePathName",
+		aPrivateDatabasePathName.Ptr(),
+		aPrivateDatabasePathName.Size()));
+
+	TInt error = db.Open(m_session, aPrivateDatabasePathName);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eapol_am_wlan_authentication_symbian_c::RetrievePSKL(): db.Open(), error = %d\n"),
+		 error));
+
+	User::LeaveIfError(error);
 	
 	CleanupClosePushL(db);
 
@@ -2273,13 +1143,22 @@ void eapol_am_wlan_authentication_symbian_c::RetrievePSKL(TPSKEntry& entry)
 	entry.password.Copy(view.ColDes8(4));
 	entry.psk.Copy(view.ColDes8(5));
 
-	CleanupStack::PopAndDestroy(3); // view, buf, database
+	CleanupStack::PopAndDestroy(&view);
+	CleanupStack::PopAndDestroy(sqlbuf);
+	CleanupStack::PopAndDestroy(&db);
 }
 
 //--------------------------------------------------
 
 void eapol_am_wlan_authentication_symbian_c::SavePSKL(TPSKEntry& entry)
 {
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eapol_am_wlan_authentication_symbian_c::SavePSKL(): this = 0x%08x\n"),
+		this));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::SavePSKL()");
+
 	// Connect to CommDBif so that we can delete PSK entries that have no IAP associated anymore.
 	CWLanSettings* wlan_settings = new(ELeave) CWLanSettings;
 	CleanupStack::PushL(wlan_settings);
@@ -2295,11 +1174,19 @@ void eapol_am_wlan_authentication_symbian_c::SavePSKL(TPSKEntry& entry)
 	// Open database
 	RDbNamedDatabase db;
 
-#ifdef SYMBIAN_SECURE_DBMS
-	User::LeaveIfError(db.Open(m_session, KDatabaseName, KSecureUIDFormat));	
-#else			
-	User::LeaveIfError(db.Open(m_session, KDatabaseName));
-#endif // #ifdef SYMBIAN_SECURE_DBMS		
+	TFileName aPrivateDatabasePathName;
+
+	EapPluginTools::GetPrivatePathL(
+		m_session,
+		aPrivateDatabasePathName);
+
+	aPrivateDatabasePathName.Append(KEapolDatabaseName);
+
+	EAP_TRACE_DATA_DEBUG_SYMBIAN(("aPrivateDatabasePathName",
+		aPrivateDatabasePathName.Ptr(),
+		aPrivateDatabasePathName.Size()));
+
+	User::LeaveIfError(db.Open(m_session, aPrivateDatabasePathName));	
 	
 	CleanupClosePushL(db);
 
@@ -2323,7 +1210,7 @@ void eapol_am_wlan_authentication_symbian_c::SavePSKL(TPSKEntry& entry)
 	
 	// Delete old row and also rows that have no associated IAP settings.
 	if (view.FirstL())
-	{		
+	{
 		do {
 			view.GetL();
 
@@ -2352,32 +1239,37 @@ void eapol_am_wlan_authentication_symbian_c::SavePSKL(TPSKEntry& entry)
 	
 	CleanupStack::PopAndDestroy( colSet ); // Delete colSet.	
 
-	CleanupStack::PopAndDestroy(4); // CWLanSettings, database, buffer, view
+	CleanupStack::PopAndDestroy(&view);
+	CleanupStack::PopAndDestroy(sqlbuf);
+	CleanupStack::PopAndDestroy(&db);
+	CleanupStack::PopAndDestroy(wlan_settings);
 
 }
 														 
 //--------------------------------------------------
 
 //
-void eapol_am_wlan_authentication_symbian_c::ReadEAPSettingsL()
+void eapol_am_wlan_authentication_symbian_c::ReadWPASettingsL()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eapol_am_wlan_authentication_symbian_c::ReadEAPSettingsL(): %s, this = 0x%08x => 0x%08x\n"),
+		(EAPL("eapol_am_wlan_authentication_symbian_c::ReadWPASettingsL(): %s, this = 0x%08x => 0x%08x\n"),
 		 (m_is_client == true) ? "client": "server",
 		 this,
 		 dynamic_cast<abs_eap_base_timer_c *>(this)));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::ReadWPASettingsL()");
 
 	eap_status_e status(eap_status_ok);
 
-	status = reset_eap_plugins();
-	if (status != eap_status_ok)
+	if (m_selected_eapol_key_authentication_type == eapol_key_authentication_type_WPS)
 	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		User::Leave(m_am_tools->convert_eapol_error_to_am_error(EAP_STATUS_RETURN(m_am_tools, status)));
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT, (EAPL("WPS does not use CommDbIf anymore.\n")));
+		return;
 	}
 
 	TIndexType index_type(ELan);
@@ -2397,253 +1289,28 @@ void eapol_am_wlan_authentication_symbian_c::ReadEAPSettingsL()
 		EAP_TRACE_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("Beginning to read IAP settings - Type: %d, Index: %d.\n"), index_type, index));
-
-		CWLanSettings* wlan_settings = new(ELeave) CWLanSettings;
-		CleanupStack::PushL(wlan_settings);
-		SWLANSettings wlanSettings;
-		if (wlan_settings->Connect() != KErrNone)
-		{
-			// Could not connect to CommDB			
-			User::Leave(KErrCouldNotConnect);
-		}
-
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT, (EAPL("Connected to CommDbIf.\n")));
-
-		if (wlan_settings->GetWlanSettingsForService(index, wlanSettings) != KErrNone)
-		{
-			wlan_settings->Disconnect();
-			User::Leave(KErrUnknown);
-		}
-
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("Got WLAN settings: wlanSettings.EnableWpaPsk=%d, m_WPA_override_enabled=%d\n"),
-			wlanSettings.EnableWpaPsk,
+			(EAPL("WLAN settings: m_WPA_override_enabled=%d\n"),
 			m_WPA_override_enabled));
 
 		EAP_TRACE_DATA_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("WPA-PSK"),
-			wlanSettings.WPAPreSharedKey.Ptr(),
-			wlanSettings.WPAPreSharedKey.Size()));
+			(EAPL("m_wpa_preshared_key"),
+			m_wpa_preshared_key.get_data(),
+			m_wpa_preshared_key.get_data_length()));
 
-#ifdef USE_EAP_EXPANDED_TYPES
-
-		EAP_TRACE_DEBUG(
+		EAP_TRACE_DATA_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("Beginning to read EAP Data using new Comm_DB_if for expanded eap type\n")));
-
-		wlan_settings->GetEapDataL(m_enabled_expanded_eap_array, m_disabled_expanded_eap_array);
-
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("Enabled EAP count=%d, Disabled EAP count=%d\n"),
-			m_enabled_expanded_eap_array.Count(), m_disabled_expanded_eap_array.Count()));
-
-			
-	
-#else
-		// Without expanded EAP type. Normal EAP type stuff.
-		wlan_settings->GetEapDataL(m_iap_eap_array);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
-		
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("Got EAP data:\n")));
-
-#ifdef USE_EAP_EXPANDED_TYPES
-
-		// Reading enabled.
-		for (TInt i = 0; i < m_enabled_expanded_eap_array.Count(); i++)
-		{	
-			TBuf8<KExpandedEAPSize> tmpExpEAP(m_enabled_expanded_eap_array[i]->EapExpandedType);
-
-			EAP_TRACE_DEBUG(
-				m_am_tools, 
-				TRACE_FLAGS_DEFAULT, 
-				(EAPL("eapol_am_wlan_authentication_symbian_c::ReadEAPSettingsL:Enabled expanded EAP type at index=%d\n"),
-				 i));
-
-			EAP_TRACE_DATA_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("Enabled expanded EAP type:"),
-				tmpExpEAP.Ptr(),
-				tmpExpEAP.Size()));
-		}
-
-		// Now reading disabled.
-		for (TInt i = 0; i < m_disabled_expanded_eap_array.Count(); i++)
-		{	
-			TBuf8<KExpandedEAPSize> tmpExpEAP(m_disabled_expanded_eap_array[i]->EapExpandedType);
-
-			EAP_TRACE_DEBUG(
-				m_am_tools, 
-				TRACE_FLAGS_DEFAULT, 
-				(EAPL("eapol_am_wlan_authentication_symbian_c::ReadEAPSettingsL:Disabled expanded EAP type at index=%d\n"),
-				 i));
-
-			EAP_TRACE_DATA_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("Disabled expanded EAP type:"),
-				tmpExpEAP.Ptr(),
-				tmpExpEAP.Size()));
-		}
-
-#else // Normal EAP type.
-
-		for (TInt i = 0; i < m_iap_eap_array.Count(); i++)
-		{
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("EAP type %d\n"),
-				i));
-
-			TLex8 tmp(m_iap_eap_array[i]->UID);
-			TInt val(0);
-			tmp.Val(val);
-		
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("  UID: %d\n"), val));
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("  Enabled: %d\n"),
-				m_iap_eap_array[i]->Enabled));
-		}
-
-#endif // #ifdef USE_EAP_EXPANDED_TYPES
-
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("End EAP data:\n")));
-
-
-#ifndef USE_EAP_EXPANDED_TYPES
-
-// There can not be a situation where all EAPs are disabled.
-
-		if (m_iap_eap_array.Count() == 0)
-		{
-
-#if defined(USE_EAP_ALLOW_ALL_EAP_TYPES_WHEN_NONE_IS_ACTIVATED_IN_CONFIGURATION)
-
-			// The EAP field was empty. Allow all types.
-
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("Empty EAP field -> enable all types.\n")));
-
-			RImplInfoPtrArray eapArray;
-			
-			REComSession::ListImplementationsL(KEapTypeInterfaceUid, eapArray);
-		
-			TEap *eap;
-			for (TInt i = 0; i < eapArray.Count(); i++)
-			{
-				eap = new(ELeave) TEap;
-				eap->UID.Copy(eapArray[i]->DataType());
-				eap->Enabled = ETrue;
-				m_iap_eap_array.Append(eap);
-			}
-
-			eapArray.ResetAndDestroy();
-
-#else
-
-			// The EAP field was empty. Allow EAP-SIM only.
-
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("Empty EAP field -> enable EAP-SIM only.\n")));
-
-			{
-				TBuf8<3> eap_sim_uid = _L8("018");
-
-				TEap *eap = new(ELeave) TEap;
-				eap->UID.Copy(eap_sim_uid);
-				eap->Enabled = ETrue;
-				m_iap_eap_array.Append(eap);
-			}
-
-#endif //#if defined(USE_EAP_ALLOW_ALL_EAP_TYPES_WHEN_NONE_IS_ACTIVATED_IN_CONFIGURATION)
-
-		}
-
-#endif // #ifndef USE_EAP_EXPANDED_TYPES
-
-		// Get security mode
-		if (m_WPA_override_enabled == false)
-		{
-			m_security_mode = static_cast<EWlanSecurityMode>(wlanSettings.SecurityMode);
-		}
-		else
-		{
-			// WPA override is enabled
-			m_security_mode = Wpa;
-		}
+			(EAPL("m_SSID"),
+			m_SSID.get_data(),
+			m_SSID.get_data_length()));
 
 		// Get WPA pre shared key & SSID
 		if (m_is_client == true
-			&& (wlanSettings.EnableWpaPsk
-				|| m_WPA_override_enabled == true)
 			&& (m_selected_eapol_key_authentication_type == eapol_key_authentication_type_RSNA_PSK
 				|| m_selected_eapol_key_authentication_type == eapol_key_authentication_type_WPA_PSK))
 		{
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("Uses WPAPSK: wlanSettings.EnableWpaPsk=%d\n"),
-				wlanSettings.EnableWpaPsk));
-
-			// When not using easy WLAN there is no WPA PSK override.
-			if (m_WPA_override_enabled == false)
-			{
-				status = m_wpa_preshared_key.set_copy_of_buffer(
-					wlanSettings.WPAPreSharedKey.Ptr(),
-					wlanSettings.WPAPreSharedKey.Size());
-				if (status != eap_status_ok)
-				{
-					send_error_notification(eap_status_key_error);
-					wlan_settings->Disconnect();
-					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-					User::Leave(m_am_tools->convert_eapol_error_to_am_error(EAP_STATUS_RETURN(m_am_tools, status)));
-				}
-
-				// Here we copy the SSID read from IAP.
-				TBuf8<K_Max_SSID_Length> tmp;
-				tmp.Copy(wlanSettings.SSID);
-				status = m_SSID.set_copy_of_buffer(tmp.Ptr(), tmp.Size());
-				if (status != eap_status_ok)
-				{
-					wlan_settings->Disconnect();
-					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-					User::Leave(m_am_tools->convert_eapol_error_to_am_error(EAP_STATUS_RETURN(m_am_tools, status)));
-				}
-			}
-			else
-			{
-				// In override mode SSID is stored to m_SSID
-				// and password is stored to m_wpa_preshared_key.
-			}
-
 			TPSKEntry pskEntry;
 			pskEntry.indexType = index_type;
 			pskEntry.index = index;
@@ -2651,12 +1318,12 @@ void eapol_am_wlan_authentication_symbian_c::ReadEAPSettingsL()
 			pskEntry.password.Zero();
 			pskEntry.psk.Zero();
 
-            TInt err(KErrNone);
+            TInt error(KErrNone);
 
 			// Retrieve saved PSK only when override is not in effect
-			TRAP(err, RetrievePSKL(pskEntry));
+			TRAP(error, RetrievePSKL(pskEntry));
 			
-			if (err != KErrNone
+			if (error != KErrNone
 				|| m_SSID.compare(pskEntry.ssid.Ptr(), pskEntry.ssid.Size()) != 0
 				|| m_wpa_preshared_key.compare(pskEntry.password.Ptr(), pskEntry.password.Size()) != 0)
 			{
@@ -2676,7 +1343,6 @@ void eapol_am_wlan_authentication_symbian_c::ReadEAPSettingsL()
 					if (status != eap_status_ok)
 					{
 						send_error_notification(eap_status_key_error);
-						wlan_settings->Disconnect();							
 						EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 						User::Leave(m_am_tools->convert_eapol_error_to_am_error(EAP_STATUS_RETURN(m_am_tools, status)));
 					}
@@ -2685,7 +1351,6 @@ void eapol_am_wlan_authentication_symbian_c::ReadEAPSettingsL()
 					if (status != eap_status_ok)
 					{
 						send_error_notification(eap_status_key_error);
-						wlan_settings->Disconnect();							
 						EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 						User::Leave(m_am_tools->convert_eapol_error_to_am_error(EAP_STATUS_RETURN(m_am_tools, status)));
 					}
@@ -2699,7 +1364,6 @@ void eapol_am_wlan_authentication_symbian_c::ReadEAPSettingsL()
 						|| target_length != EAPOL_WPA_PSK_LENGTH_BYTES)
 					{
 						send_error_notification(eap_status_key_error);
-						wlan_settings->Disconnect();							
 						EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 						User::Leave(m_am_tools->convert_eapol_error_to_am_error(EAP_STATUS_RETURN(m_am_tools, status)));
 					}
@@ -2716,7 +1380,6 @@ void eapol_am_wlan_authentication_symbian_c::ReadEAPSettingsL()
 					if (status != eap_status_ok)
 					{
 						send_error_notification(eap_status_key_error);
-						wlan_settings->Disconnect();							
 						EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 						User::Leave(m_am_tools->convert_eapol_error_to_am_error(EAP_STATUS_RETURN(m_am_tools, status)));
 					}
@@ -2770,7 +1433,6 @@ void eapol_am_wlan_authentication_symbian_c::ReadEAPSettingsL()
 				if (status != eap_status_ok)
 				{
 					send_error_notification(eap_status_key_error);
-					wlan_settings->Disconnect();
 					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 					User::Leave(m_am_tools->convert_eapol_error_to_am_error(EAP_STATUS_RETURN(m_am_tools, status)));
 				}
@@ -2797,17 +1459,6 @@ void eapol_am_wlan_authentication_symbian_c::ReadEAPSettingsL()
 					m_wpa_preshared_key_hash.get_data_length()));
 			}
 		}
-		
-		wlan_settings->Disconnect();
-		CleanupStack::PopAndDestroy(wlan_settings);
-
-		if (m_security_mode != Wlan8021x
-			&& m_security_mode != Wpa
-			&& m_security_mode != Wpa2Only)
-		{
-			// Unsupported mode
-			User::Leave(KErrNotSupported);
-		}
 	} 
 	else
 	{
@@ -2817,253 +1468,6 @@ void eapol_am_wlan_authentication_symbian_c::ReadEAPSettingsL()
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
-
-//--------------------------------------------------
-
-#ifdef USE_EAP_EXPANDED_TYPES
-
-void eapol_am_wlan_authentication_symbian_c::SetToTopPriorityL(const eap_type_value_e aEapType)
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eapol_am_wlan_authentication_symbian_c::SetToTopPriorityL() - for EXP EAP types\n")));
-
-	TIndexType index_type(ELan);
-	TUint index(0UL);
-	TInt priorityIndex (0);
-
-	eap_status_e status = read_database_reference_values(
-		&index_type,
-		&index);
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		User::Leave(m_am_tools->convert_eapol_error_to_am_error(EAP_STATUS_RETURN(m_am_tools, status)));
-	}
-
-	if (index_type == ELan)
-	{
-		for (TInt i = 0; i < m_enabled_expanded_eap_array.Count(); i++)
-		{
-			TBuf8<KExpandedEAPSize> tmpExpEAP(m_enabled_expanded_eap_array[i]->EapExpandedType);
-
-			EAP_TRACE_DEBUG(
-				m_am_tools, 
-				TRACE_FLAGS_DEFAULT, 
-				(EAPL("eapol_am_wlan_authentication_symbian_c::SetToTopPriorityL:Enabled expanded EAP type at index=%d\n"),
-				 i));
-
-			EAP_TRACE_DATA_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("Enabled expanded EAP type:"),
-				tmpExpEAP.Ptr(),
-				tmpExpEAP.Size()));
-
-			// This is for one expanded EAP type (for the above one).
-			eap_expanded_type_c expandedEAPType;
-					
-			// Read the expanded EAP type details for this item in m_enabled_expanded_eap_array.
-			eap_status_e status = eap_expanded_type_c::read_type(m_am_tools,
-													0,
-													tmpExpEAP.Ptr(),
-													tmpExpEAP.Size(),
-													&expandedEAPType);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				User::Leave(m_am_tools->convert_eapol_error_to_am_error(EAP_STATUS_RETURN(m_am_tools, status)));
-			}
-
-			if (aEapType == expandedEAPType)
-			{
-				// Found it. This is the EAP type which should be at top priority.
-				priorityIndex = i;
-				break;
-			}
-		}	
-				
-		if(priorityIndex == 0)
-		{
-			// This means this EAP type is already at the top priority.
-
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("eapol_am_wlan_authentication_symbian_c::SetToTopPriorityL() - This is already at top\n")));
-			
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return;
-		}
-
-		if (priorityIndex >= m_enabled_expanded_eap_array.Count())
-		{
-			// No such EAP type in enabled list. This should never happen.
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("ERROR: eapol_am_wlan_authentication_symbian_c::SetToTopPriorityL() - No such EAP in the enabled list\n")));
-			
-			User::Leave(KErrNotFound);					
-		}
-
-		CWLanSettings* wlan = new(ELeave) CWLanSettings;
-		CleanupStack::PushL(wlan);
-		SWLANSettings wlanSettings;
-		if (wlan->Connect() != KErrNone)
-		{
-			// Could not connect to CommDB			
-			User::Leave(KErrCouldNotConnect);
-		}
-		
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("SetToTopPriorityL():Connected to CommDbIf.\n")));
-
-		if (wlan->GetWlanSettingsForService(index, wlanSettings) != KErrNone)
-		{
-			wlan->Disconnect();
-			User::Leave(KErrUnknown);
-		}
-		
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("SetToTopPriorityL():Got WLAN settings.\n")));
-		
-		// Change the order
-		SEapExpandedType* TopPriorityEAP(m_enabled_expanded_eap_array[priorityIndex]);
-
-		m_enabled_expanded_eap_array.Remove(priorityIndex); // This does not delete the object	
-				
-		m_enabled_expanded_eap_array.Insert(TopPriorityEAP, 0); // Insert in the beginning.
-
-		wlan->SetEapDataL(m_enabled_expanded_eap_array, m_disabled_expanded_eap_array);
-		
-		wlan->Disconnect();
-
-		CleanupStack::PopAndDestroy(wlan);		
-	} 
-	else
-	{
-		// At the moment only LAN bearer is supported.
-
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eapol_am_wlan_authentication_symbian_c::SetToTopPriorityL() - LEAVE - only LAN bearer is supported\n")));
-		
-		User::Leave(KErrNotSupported);
-	}
-		
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-}
-
-#else // For normal EAP types
-
-void eapol_am_wlan_authentication_symbian_c::SetToTopPriorityL(const TEap* const aEapType)
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eapol_am_wlan_authentication_symbian_c::SetToTopPriorityL()\n")));
-
-	TIndexType index_type(ELan);
-	TUint index(0UL);
-
-	eap_status_e status = read_database_reference_values(
-		&index_type,
-		&index);
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		User::Leave(m_am_tools->convert_eapol_error_to_am_error(EAP_STATUS_RETURN(m_am_tools, status)));
-	}
-
-	if (index_type == ELan)
-	{
-		TInt i(0);
-		TBuf8<3> uid;
-		for (i = 0; i < m_iap_eap_array.Count(); i++)
-		{
-			TEap* eap = m_iap_eap_array[i];
-			if (eap->UID[0] == '0')
-			{
-				// Cut the leading zero
-				uid.Copy(eap->UID.Right(eap->UID.Length()-1));				
-			}
-			else
-			{
-				uid.Copy(eap->UID);
-			}
-			if (eap->Enabled == aEapType->Enabled
-				&& uid.Compare(aEapType->UID) == 0)
-			{
-				// Found
-				break;
-			}
-		}
-		if (i >= m_iap_eap_array.Count())
-		{
-			// This should never happen
-			User::Leave(KErrNotFound);					
-		}
-	
-		TLex8 tmp(aEapType->UID);
-		TInt val(0);
-		tmp.Val(val);
-
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Setting to top priority:\n")));
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Old index: %d\n"), i));
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("  UID: %d\n"), val));
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("  Enabled: %d\n"), aEapType->Enabled));
-	
-		if (i == 0)
-		{
-			// Already at the highest priority
-			return;
-		}
-
-		CWLanSettings* wlan = new(ELeave) CWLanSettings;
-		CleanupStack::PushL(wlan);
-		SWLANSettings wlanSettings;
-		if (wlan->Connect() != KErrNone)
-		{
-			// Could not connect to CommDB			
-			User::Leave(KErrCouldNotConnect);
-		}
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Connected to CommDbIf.\n")));
-
-		if (wlan->GetWlanSettingsForService(index, wlanSettings) != KErrNone)
-		{
-			wlan->Disconnect();
-			User::Leave(KErrUnknown);
-		}
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Got WLAN settings.\n")));
-		
-		// Change the order
-		TEap* eap = m_iap_eap_array[i];
-
-		m_iap_eap_array.Remove(i); // This does not delete the object	
-				
-		m_iap_eap_array.Insert(eap, 0);
-
-		wlan->SetEapDataL(m_iap_eap_array);
-		
-		wlan->Disconnect();
-
-		CleanupStack::PopAndDestroy(wlan);		
-	} 
-	else
-	{
-		// At the moment only LAN bearer is supported.
-		User::Leave(KErrNotSupported);
-	}
-		
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-}
-
-#endif // #ifdef USE_EAP_EXPANDED_TYPES 
 
 //--------------------------------------------------
 
@@ -3081,6 +1485,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::save_simple
 		TRACE_FLAGS_DEFAULT,
 		(EAPL("%s: eapol_am_wlan_authentication_simulator_c::save_simple_config_session()\n"),
 		(m_is_client == true ? "client": "server")));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::save_simple_config_session()");
 
 	eap_status_e status(eap_status_ok);
 
@@ -3099,22 +1504,126 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::save_simple
 
 //--------------------------------------------------
 
+EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::set_eap_database_reference_values(
+	const eap_variable_data_c * const reference)
+{
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("%s: eapol_am_wlan_authentication_symbian_c::set_eap_database_reference_values()\n"),
+		(m_is_client == true ? "client": "server")));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::set_eap_database_reference_values()");
+
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eapol_am_wlan_authentication_symbian_c::set_eap_database_reference_values(): reference"),
+		 reference->get_data(),
+		 reference->get_data_length()));
+
+	eap_status_e status = m_database_reference.set_copy_of_buffer(reference);
+
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
 EAP_FUNC_EXPORT eapol_am_wlan_authentication_c * eapol_am_wlan_authentication_c::new_eapol_am_wlan_authentication(
 	abs_eap_am_tools_c * const tools,
-	const bool is_client_when_true,
-	const abs_eapol_wlan_database_reference_if_c * const wlan_database_reference)
+	const bool is_client_when_true)
 {
 	EAP_TRACE_BEGIN(tools, TRACE_FLAGS_DEFAULT);
 
+	EAP_TRACE_DEBUG(
+		tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eapol_am_wlan_authentication_symbian_c::new_eapol_am_wlan_authentication()\n")));
+	EAP_TRACE_RETURN_STRING(tools, "returns: eapol_am_wlan_authentication_symbian_c::new_eapol_am_wlan_authentication()");
+
 	eapol_am_wlan_authentication_c * const wauth = new eapol_am_wlan_authentication_symbian_c(
 		tools,
-		is_client_when_true,
-		wlan_database_reference);
+		is_client_when_true);
 
 	EAP_TRACE_END(tools, TRACE_FLAGS_DEFAULT);
 	return wauth;
 }
 
+
+//--------------------------------------------------
+
+//
+eap_session_core_base_c * new_eap_core_client_message_if_c(
+	abs_eap_am_tools_c * const tools,
+	abs_eap_session_core_c * const partner,
+	const bool is_client_when_true,
+	const u32_t MTU)
+{
+	EAP_TRACE_DEBUG(
+		tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("new_eap_core_client_message_if_c()\n")));
+	EAP_TRACE_RETURN_STRING(tools, "returns: new_eap_core_client_message_if_c()");
+
+	eap_am_message_if_c *client_if = new_eap_am_client_message_if_c(
+		tools,
+		is_client_when_true,
+		MTU);
+
+	eap_automatic_variable_c<eap_am_message_if_c> automatic_server_if(
+		tools,
+		client_if);
+
+	if (client_if == 0
+		|| client_if->get_is_valid() == false)
+	{
+		// ERROR.
+		if (client_if != 0)
+		{
+			EAP_TRACE_DEBUG(
+				tools,
+				TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+				(EAPL("ERROR: calls: eap_session_core_base_c::new_eap_core_client_message_if_c(): client_if->shutdown(): %s.\n"),
+				(is_client_when_true == true) ? "client": "server"));
+
+			(void) client_if->shutdown();
+		}
+
+		return 0;
+	}
+
+	eap_core_client_message_if_c * new_session_core = new eap_core_client_message_if_c(tools, client_if, partner, is_client_when_true);
+
+	eap_automatic_variable_c<eap_core_client_message_if_c> automatic_new_session_core(
+		tools,
+		new_session_core);
+
+	if (new_session_core == 0
+		|| new_session_core->get_is_valid() == false)
+	{
+		// ERROR.
+		if (new_session_core != 0)
+		{
+			EAP_TRACE_DEBUG(
+				tools,
+				TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+				(EAPL("ERROR: calls: eap_session_core_base_c::new_eap_core_client_message_if_c(): new_session_core->shutdown(): %s.\n"),
+				(is_client_when_true == true) ? "client": "server"));
+
+			new_session_core->shutdown();
+		}
+
+		(void) client_if->shutdown();
+
+		return 0;
+	}
+
+	client_if->set_partner(new_session_core);
+
+	automatic_server_if.do_not_free_variable();
+	automatic_new_session_core.do_not_free_variable();
+
+	return new_session_core;
+}
 
 //--------------------------------------------------
 //--------------------------------------------------

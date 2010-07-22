@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 36.1.2 %
+* %version: %
 */
 
 #if !defined(_TLS_APPLICATION_EAP_CORE_H_)
@@ -598,9 +598,6 @@ public:
 	EAP_FUNC_IMPORT eap_status_e cancel_timer(
 		abs_eap_base_timer_c * const initializer, 
 		const u32_t id);
-
-	/// @see abs_eap_core_c::cancel_all_timers().
-	EAP_FUNC_IMPORT eap_status_e cancel_all_timers();
 
 	/// @see abs_eap_core_c::check_is_valid_eap_type().
 	EAP_FUNC_IMPORT eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);

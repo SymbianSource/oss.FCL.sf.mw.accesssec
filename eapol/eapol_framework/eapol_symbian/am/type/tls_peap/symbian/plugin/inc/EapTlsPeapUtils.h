@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 22.1.2 %
+* %version: 37 %
 */
 
 #ifndef _EAPTLSPEAPUTILS_H_
@@ -26,58 +26,24 @@
 #include <d32dbms.h>
 #include <EapType.h>
 #include "eap_am_tools_symbian.h"
-#include <CertEntry.h>
+#include <EapSettings.h>
 
 #include <unifiedcertstore.h>
 #include <mctwritablecertstore.h>
-
-#ifndef USE_EAP_EXPANDED_TYPES
-// This dependencay is needed only for non-expanded EAP types.
-#include <wdbifwlansettings.h>
-#endif //#ifndef USE_EAP_EXPANDED_TYPES
 
 #include "eap_type_tls_peap_types.h"
 #include "eap_header.h"
 
 // LOCAL CONSTANTS
 
-#ifdef USE_EAP_EXPANDED_TYPES
+// For EAP-TLS, EAP-PEAP, EAP-TTLS, EAP-FAST private database. Database will be in the private folder of EAP-server (20026FCB).
+// The maximum length of database name is 0x40 (KDbMaxName), which is defined in d32dbms.h.
 
-// Size of Expanded EAP Type
-const TUint8 KExpandedEAPTypeSize = 8;
+_LIT(KTlsDatabaseName, "eaptls.dat");
+_LIT(KPeapDatabaseName, "eappeap.dat");
+_LIT(KTtlsDatabaseName, "eapttls.dat");
+_LIT(KFastDatabaseName, "eapfast.dat");
 
-struct SExpandedEAPType
-{
-	// Unique ID for an expanded EAp type.
-	// This includes, Type (1 byte), Vendor-Id (3bytes) and Vendor-Type (4bytes).
-	TBuf8<KExpandedEAPTypeSize>    iExpandedEAPType;
-};
-
-typedef RPointerArray<SExpandedEAPType> RExpandedEapTypePtrArray;
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
-#ifdef SYMBIAN_SECURE_DBMS
-// For EAP TLS, PEAP, TTLS, FAST secure databases.
-// Full path is not needed. The database eaptls.dat will be saved in the 
-// data cage path for DBMS. So it will be in "\private\100012a5\eaptls.dat" in C: drive.
-// The maximum length of database name is 0x40 (KDbMaxName) , which is defined in d32dbms.h.
-
-_LIT(KTlsDatabaseName, "c:eaptls.dat");
-_LIT(KPeapDatabaseName, "c:eappeap.dat");
-_LIT(KTtlsDatabaseName, "c:eapttls.dat");
-_LIT(KFastDatabaseName, "c:eapfast.dat");
-
-_LIT(KSecureUIDFormat, "SECURE[102072e9]"); // For the security policy.
-
-#else
-
-_LIT(KTlsDatabaseName, "c:\\system\\data\\eaptls.dat");
-_LIT(KPeapDatabaseName, "c:\\system\\data\\eappeap.dat");
-_LIT(KTtlsDatabaseName, "c:\\system\\data\\eapttls.dat");
-_LIT(KFastDatabaseName, "c:\\system\\data\\eapfast.dat");
-
-#endif // #ifdef SYMBIAN_SECURE_DBMS
 
 // For TLS.
 _LIT(KTlsDatabaseTableName, "eaptls");
@@ -106,18 +72,20 @@ _LIT(KFastAllowedCipherSuitesDatabaseTableName, "eapfast_ciphersuites");
 
 enum TAlterTableCmd
 {
-EAddColumn,
-ERemoveColumn
+	EAddColumn,
+	ERemoveColumn
 };
 
 // CLASS DECLARATION
 class EapTlsPeapUtils 
 {
+
 public:	
+
 	static void OpenDatabaseL(
-		RDbNamedDatabase& aDatabase, 
-		RDbs& aSession, 
-		const TIndexType aIndexType, 
+		RDbNamedDatabase& aDatabase,
+		RFs& aFileServerSession,
+		const TIndexType aIndexType,
 		const TInt aIndex,
 		const eap_type_value_e aTunnelingType,
 		eap_type_value_e aEapType);
@@ -174,7 +142,7 @@ public:
 		const TIndexType aIndexType,
 		const TInt aIndex,
 		const eap_type_value_e aTunnelingType,
-		RArray<SCertEntry>& aArray);
+		RPointerArray<EapCertificateEntry>& aArray);
 
 	static void ReadUintRowsToArrayL(
 		RDbNamedDatabase& aDatabase,
@@ -186,14 +154,12 @@ public:
 		const eap_type_value_e aTunnelingType,
 		RArray<TUint>& aArray);
 
-#ifdef USE_EAP_EXPANDED_TYPES
-	
 	// Stores the tunneled EAP type (expanded) to the database.
 	static void SetTunnelingExpandedEapDataL(
 		RDbNamedDatabase& aDatabase,
 		eap_am_tools_symbian_c * const aTools,
-		RExpandedEapTypePtrArray &aEnabledEAPArrary,
-		RExpandedEapTypePtrArray &aDisabledEAPArrary,
+		RPointerArray<TEapExpandedType> &aEnabledEAPArrary,
+		RPointerArray<TEapExpandedType> &aDisabledEAPArrary,
 		const TIndexType aIndexType,
 		const TInt aIndex,
 		const eap_type_value_e aTunnelingType,
@@ -203,42 +169,18 @@ public:
 	static void GetTunnelingExpandedEapDataL(
 		RDbNamedDatabase& aDatabase,
 		eap_am_tools_symbian_c * const aTools,
-		RExpandedEapTypePtrArray &aEnabledEAPArrary,
-		RExpandedEapTypePtrArray &aDisabledEAPArrary,
+		RPointerArray<TEapExpandedType> &aEnabledEAPArrary,
+		RPointerArray<TEapExpandedType> &aDisabledEAPArrary,
 		const TIndexType aIndexType,
 		const TInt aIndex,
 		const eap_type_value_e aTunnelingType,
 		const eap_type_value_e aEapType);
-
-#else // For normal EAP types.
-
-	// This sets only the tunneling EAP types.
-	static void SetEapDataL(
-		RDbNamedDatabase& aDatabase,
-		eap_am_tools_symbian_c * const aTools,
-		TEapArray &aEaps,
-		const TIndexType aIndexType,
-		const TInt aIndex,
-		const eap_type_value_e aTunnelingType,
-		const eap_type_value_e aEapType);
-	
-	// This gets only the tunneling EAP types.	
-	static void GetEapDataL(
-		RDbNamedDatabase& aDatabase,
-		eap_am_tools_symbian_c * const aTools,
-		TEapArray &aEaps,
-		const TIndexType aIndexType,
-		const TInt aIndex,
-		const eap_type_value_e aTunnelingType,
-		const eap_type_value_e aEapType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	static TBool CompareTCertLabels(
 		const TCertLabel& item1, 
 		const TCertLabel& item2);
 
-	static TBool CompareSCertEntries(const SCertEntry& item1, const SCertEntry& item2);
+	static TBool CompareSCertEntries(const EapCertificateEntry& item1, const EapCertificateEntry& item2);
 
 	static TBool CipherSuiteUseRSAKeys(tls_cipher_suites_e aCipherSuite);
 
@@ -265,35 +207,38 @@ public:
 		const eap_variable_data_c * const aDbColumnValue);		
 
 private:
+
 	static void OpenTlsDatabaseL(
-		RDbNamedDatabase& aDatabase, 
-		RDbs& aSession, 
-		const TIndexType aIndexType, 
+		RDbNamedDatabase& aDatabase,
+		RFs& aFileServerSession,
+		const TIndexType aIndexType,
 		const TInt aIndex,
 		const eap_type_value_e aTunnelingType);
 
 	static void OpenPeapDatabaseL(
-		RDbNamedDatabase& aDatabase, 
-		RDbs& aSession, 
-		const TIndexType aIndexType, 
+		RDbNamedDatabase& aDatabase,
+		RFs& aFileServerSession,
+		const TIndexType aIndexType,
 		const TInt aIndex,
 		const eap_type_value_e aTunnelingType);
 
 #if defined(USE_TTLS_EAP_TYPE)
+
 	static void OpenTtlsDatabaseL(
-		RDbNamedDatabase& aDatabase, 
-		RDbs& aSession, 
-		const TIndexType aIndexType, 
+		RDbNamedDatabase& aDatabase,
+		RFs& aFileServerSession,
+		const TIndexType aIndexType,
 		const TInt aIndex,
 		const eap_type_value_e aTunnelingType);
+
 #endif // #if defined(USE_TTLS_EAP_TYPE)
 
 #if defined(USE_FAST_EAP_TYPE)
 
 	static void OpenFastDatabaseL(
-		RDbNamedDatabase& aDatabase, 
-		RDbs& aSession, 
-		const TIndexType aIndexType, 
+		RDbNamedDatabase& aDatabase,
+		RFs& aFileServerSession,
+		const TIndexType aIndexType,
 		const TInt aIndex,
 		const eap_type_value_e aTunnelingType);
 
@@ -303,6 +248,10 @@ private:
 		RDbNamedDatabase& aDatabase, 
 		TDesC& aTableName);	
 
+	static TInt FilterEapMethods(
+		RPointerArray<TEapExpandedType> * const aEAPTypes,
+		RPointerArray<TEapExpandedType> * const aPlugins);
+
 private:
 
 	static void AlterTableL(
@@ -311,7 +260,6 @@ private:
 			const TDesC& aTableName,
 			const TDesC& aColumnName,
 			const TDesC& aColumnDef );
-
 };
 
 #endif // _EAPTLSPEAPUTILS_H_

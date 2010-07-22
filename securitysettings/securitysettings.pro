@@ -12,12 +12,17 @@
 # Contributors:
 #
 # Description:
+#   Project definition file for accesssec package QT components
 #
-
-# %version: 2 %
+# %version: 7 %
+#
 
 TEMPLATE = subdirs
 
-SUBDIRS  += qtconfigutils cpwlansecurityuiplugins
+SUBDIRS += \
+  qtconfigutils \
+  cpwlansecurityuiplugins \
+  cpeapuiplugins \
+  eapqtdialogs
 
 CONFIG += ordered

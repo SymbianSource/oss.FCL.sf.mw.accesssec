@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 7 %
+* %version: %
 */
 
 #if !defined(_ABS_EAPOL_KEY_STATE_MAP_H_)

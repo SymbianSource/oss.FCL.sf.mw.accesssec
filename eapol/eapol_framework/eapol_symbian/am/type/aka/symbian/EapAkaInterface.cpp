@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 17 %
+* %version: 15.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -30,6 +30,7 @@
 // INCLUDE FILES
 #include "EapAkaInterface.h"
 #include "eap_type_aka_types.h"
+#include "eap_automatic_variable.h"
 
 #include <mmtsy_names.h>
 #include <etelmmerr.h>
@@ -45,6 +46,8 @@ CEapAkaInterface::CEapAkaInterface(abs_eap_am_tools_c* const aTools, eap_am_type
 , iMMETELConnectionStatus(EFalse)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapAkaInterface::CEapAkaInterface\n")));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapAkaInterface::CEapAkaInterface()");
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
 
@@ -76,18 +79,14 @@ void CEapAkaInterface::ConstructL()
 CEapAkaInterface::~CEapAkaInterface()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapAkaInterface::~CEapAkaInterface\n")));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapAkaInterface::~CEapAkaInterface()");
 
 	if(IsActive())
 	{
 		Cancel();		
 	}
 	
-	/*
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Closing RMobilePhone and MMETEL.\n")));
-	
-	iPhone.Close();
-	iServer.Close(); // Phone module is unloaded automatically when RTelServer session is closed
-	*/
 	DisconnectMMETel();
 	
 	delete iAuthenticationData;
@@ -101,8 +100,9 @@ CEapAkaInterface::~CEapAkaInterface()
 void CEapAkaInterface::QueryIMSIL()
 {	
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("AKA interface: Querying IMSI.\n")));
-	
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("AKA interface: CEapAkaInterface::QueryIMSIL()\n")));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapAkaInterface::QueryIMSIL()");
+
 	iQueryId = EQueryIMSI;
 		
 	// Create MMETEl connection.
@@ -123,7 +123,8 @@ void CEapAkaInterface::QueryIMSIL()
 void CEapAkaInterface::QueryRESL( eap_variable_data_c * const aRand, eap_variable_data_c * const aAUTN )
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("AKA interface: Querying RES, CK, IK and AUTS.\n")));
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("AKA interface: CEapAkaInterface::QueryRESL(), CK, IK and AUTS.\n")));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapAkaInterface::QueryRESL()");
 
 	iQueryId = EQueryRES;
 
@@ -184,12 +185,17 @@ void CEapAkaInterface::QueryRESL( eap_variable_data_c * const aRand, eap_variabl
  
 void CEapAkaInterface::DoCancel()
 {
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapAkaInterface::DoCancel() - Cancelling MMETEL query.\n") ) );
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapAkaInterface::DoCancel() - Cancelling MMETEL query, iQueryId=%d\n"),
+		iQueryId) );
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapAkaInterface::DoCancel()");
 
-	// Cancel the request.
-	iCustomAPI.CancelAsyncRequest( ECustomGetSimAuthenticationDataIPC );
-	
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapAkaInterface::DoCancel(): CANCELLED CUSTOM API REQUEST \n")));
+	if (iQueryId == EQueryRES)
+	{
+		// Cancel the request.
+		iCustomAPI.CancelAsyncRequest( ECustomGetSimAuthenticationDataIPC );
+
+		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapAkaInterface::DoCancel(): CANCELLED CUSTOM API REQUEST \n")));
+	}
 }
 
 //--------------------------------------------------
@@ -198,7 +204,10 @@ void CEapAkaInterface::RunL()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapAkaInterface::RunL(). iStatus.Int() =%d \n"), iStatus.Int() ));
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapAkaInterface::RunL(). iStatus.Int()=%d, iQueryId=%d\n"),
+		iStatus.Int(),
+		iQueryId));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapAkaInterface::RunL()");
 
 	
 	TInt error = KErrNone;
@@ -408,7 +417,8 @@ void CEapAkaInterface::RunL()
 TInt CEapAkaInterface::CreateMMETelConnectionL()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Creating MMETel connection.\n")));
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapAkaInterface::CreateMMETelConnectionL()\n")));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapAkaInterface::CreateMMETelConnectionL()");
 
 	TInt errorCode = KErrNone;
 	
@@ -470,6 +480,12 @@ TInt CEapAkaInterface::CreateMMETelConnectionL()
 
 void CEapAkaInterface::DisconnectMMETel()
 {
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapAkaInterface::DisconnectMMETel()\n")));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapAkaInterface::DisconnectMMETel()");
+
+	// Close the custom API since we don't need it any more.
+	iCustomAPI.Close();
+
     if( iMMETELConnectionStatus )
     {
 		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Closing RMobilePhone and MMETEL.\n")));

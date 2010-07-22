@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 13 %
+* %version: %
 */
 
 #if !defined(_EAP_AM_TYPE_AKA_H_)

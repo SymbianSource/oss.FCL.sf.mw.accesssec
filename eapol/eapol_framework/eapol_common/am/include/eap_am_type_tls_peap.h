@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16 %
+* %version: %
 */
 
 #if !defined(_EAP_AM_TYPE_TLS_PEAP_H_)

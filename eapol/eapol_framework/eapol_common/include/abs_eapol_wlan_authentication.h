@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 2.1.2 %
+* %version: 6 %
 */
 
 #if !defined(_ABS_WLAN_AUTHENTICATION_H_)
@@ -142,6 +142,11 @@ public:
 		const simple_config_payloads_c * const other_configuration) = 0;
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
 
+	virtual eap_status_e complete_check_pmksa_cache(
+		EAP_TEMPLATE_CONST eap_array_c<eap_am_network_id_c> * const bssid_sta_receive_network_ids) = 0;
+
+	virtual eap_status_e complete_disassociation(
+		const eap_am_network_id_c * const receive_network_id) = 0;
 
 	//--------------------------------------------------
 }; // class abs_eapol_wlan_authentication_c

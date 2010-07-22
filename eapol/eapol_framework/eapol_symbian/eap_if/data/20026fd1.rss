@@ -1,0 +1,57 @@
+/*
+* Copyright (c) 2000 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  ECom resources for the EapGeneral
+*
+*/
+
+/*
+* %version: 6 %
+*/
+
+#include <registryinfo.rh>
+#include "EapolUID.h"
+// ---------------------------------------------------------
+//   
+//    
+//    ECOM resource definitions for EapGeneric plugin
+//
+// ---------------------------------------------------------
+//
+RESOURCE REGISTRY_INFO theInfo
+	{
+	// UID for the DLL
+	dll_uid = EAP_GENERIC_DLL_UID;
+				
+	// Declare array of interface info
+	interfaces = 
+		{
+		INTERFACE_INFO
+			{
+			// UID of interface that is implemented
+			interface_uid = EAP_GENERIC_INTERFACE_UID;
+			implementations = 
+				{
+				// Info for EapGeneric
+				IMPLEMENTATION_INFO
+					{
+					implementation_uid = EAP_GENERIC_IMPLEMENTATION_UID;
+					version_no         = 1;
+					display_name       = "EapGeneric";
+					default_data       = "";
+					opaque_data        = "";
+					}
+				};
+			}
+		};
+	}

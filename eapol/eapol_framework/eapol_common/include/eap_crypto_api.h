@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11 %
+* %version: %
 */
 
 #if !defined( _EAP_CRYPTO_API_H_ )

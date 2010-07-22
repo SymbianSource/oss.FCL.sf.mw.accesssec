@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 13.1.2 %
+* %version: %
 */
 
 #if !defined(_EAP_AUTOMATIC_VARIABLE_H_)
@@ -244,6 +244,8 @@ private:
 	/// This is pointer to the string that will be traced on destructor.
 	eap_format_string m_string;
 
+	u32_t m_trace_flags;
+
 public:
 	
 	/**
@@ -257,7 +259,7 @@ public:
 		{
 			EAP_TRACE_DEBUG(
 				m_am_tools, 
-				TRACE_FLAGS_DEFAULT, 
+				m_trace_flags, 
 				(EAPL("<<< %s <<<\n"), m_string));
 		}
 
@@ -271,7 +273,23 @@ public:
 		abs_eap_am_tools_c * const tools,
 		eap_format_string string)
 		: m_am_tools(tools)
+		, m_string(string)
+		, m_trace_flags(TRACE_FLAGS_DEFAULT)
+	{
+		EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	}
+	
+	/**
+	 * The constructor sets the values for the member variables
+	 */	
+	eap_automatic_trace_string_c(
+		abs_eap_am_tools_c * const tools,
+		const u32_t flags,
+		eap_format_string string)
+		: m_am_tools(tools)
 		, m_string(string)	
+		, m_trace_flags(flags)
 	{
 		EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);

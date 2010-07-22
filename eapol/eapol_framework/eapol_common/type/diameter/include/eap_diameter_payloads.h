@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 13 %
+* %version: %
 */
 
 #if !defined(_EAP_DIAMETER_RESULT_H_)

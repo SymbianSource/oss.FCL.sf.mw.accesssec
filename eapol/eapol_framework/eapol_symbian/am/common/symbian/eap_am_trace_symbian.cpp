@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2005 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -11,29 +11,30 @@
 *
 * Contributors:
 *
-* Description:  EAP and WLAN authentication protocols.
+* Description:  Trace functions on Symbian.
 *
 */
 
 /*
-* %version: 7.1.3 %
+* %version: 16 %
 */
 
-#if defined(_DEBUG) || defined(DEBUG)
+#include "EapTraceSymbian.h"
+#include "eap_tools.h"
 
-#include "eap_am_trace_symbian.h"
+const TInt KMaxBufferSize = 512;
 
-const TInt KMaxBufferSize = 256;
+//-------------------------------------------------------------------------
 
-u8_t octet_to_ascii(i32_t octet)
+TUint8 octet_to_ascii(i32_t octet)
 {
 	if (0 <= octet && octet <= 9)
 	{
-		return static_cast<u8_t>('0' + octet);
+		return static_cast<TUint8>('0' + octet);
 	}
 	else if (10 <= octet && octet <= 16)
 	{
-		return static_cast<u8_t>('a' + (octet-10u));
+		return static_cast<TUint8>('a' + (octet-10u));
 	}
 	else
 	{
@@ -41,7 +42,9 @@ u8_t octet_to_ascii(i32_t octet)
 	}
 }
 
-void formatted_print(eap_format_string format, ...)
+//-------------------------------------------------------------------------
+
+void formatted_print(const char * const format, ...)
 {
 	EAP_UNREFERENCED_PARAMETER(format);
 
@@ -76,7 +79,7 @@ void formatted_print(eap_format_string format, ...)
 	TPtr8 m_trace_buf = trace_buf->Des();
 	TPtr16 m_trace_buf_16 = trace_buf_16->Des();
 
-	VA_LIST args;
+	VA_LIST args = {0, };
 	VA_START(args, format);
 	m_format_buf.Copy((const TUint8 *)format);
 	
@@ -111,7 +114,7 @@ void formatted_print(eap_format_string format, ...)
 		#if defined(USE_EAP_HARDWARE_TRACE_RAW_PRINT)
 			RDebug::RawPrint(m_trace_buf_16);
 		#else
-			formatted_print(_L("%S"), &m_trace_buf_16);
+			RDebug::Print(_L("%S"), &m_trace_buf_16);
 		#endif //#if defined(USE_EAP_HARDWARE_TRACE_RAW_PRINT)
 	}
 
@@ -126,18 +129,19 @@ void formatted_print(eap_format_string format, ...)
 
 }
 
+//-------------------------------------------------------------------------
 
-void trace_data(
-	eap_const_string prefix,
+EXPORT_C void eap_trace_data_symbian(
+	const char * const prefix,
 	const void * const p_data,
-	const u32_t data_length)
+	const TUint data_length)
 {
 
-	u8_t* m_tmp_buffer = NULL;	
-	u8_t* m_tmp_ascii_buffer = NULL;
+	TUint8* m_tmp_buffer = NULL;	
+	TUint8* m_tmp_ascii_buffer = NULL;
 		
-	m_tmp_buffer = new u8_t[KMaxBufferSize];	
-	m_tmp_ascii_buffer = new u8_t[KMaxBufferSize];
+	m_tmp_buffer = new TUint8[KMaxBufferSize];	
+	m_tmp_ascii_buffer = new TUint8[KMaxBufferSize];
 		
 	if( m_tmp_buffer == NULL || m_tmp_ascii_buffer == NULL)
 	{
@@ -150,16 +154,16 @@ void trace_data(
 		return;
 	}
 
-	u8_t *cursor = m_tmp_buffer;
-	u8_t *cursor_ascii = m_tmp_ascii_buffer;
+	TUint8 *cursor = m_tmp_buffer;
+	TUint8 *cursor_ascii = m_tmp_ascii_buffer;
 	
-	const u8_t *data = reinterpret_cast<const u8_t *>(p_data);
-	u32_t ind;
+	const TUint8 *data = reinterpret_cast<const TUint8 *>(p_data);
+	TUint ind;
 	bool must_print = false;
-	u32_t data_start = 0u;
+	TUint data_start = 0u;
 
-	const u32_t EAP_DATA_TRACE_BYTE_GROUP_SIZE = 1;
-	u32_t byte_group_size = EAP_DATA_TRACE_BYTE_GROUP_SIZE;
+	const TUint EAP_DATA_TRACE_BYTE_GROUP_SIZE = 1;
+	TUint byte_group_size = EAP_DATA_TRACE_BYTE_GROUP_SIZE;
 
 #if !defined(USE_EAP_DEBUG_TRACE)
 	// This does not trace the pointer of the data.
@@ -246,8 +250,24 @@ void trace_data(
 	
 	delete [] m_tmp_buffer;
 	delete [] m_tmp_ascii_buffer;
-}
 
+#if !defined(USE_EAP_DEBUG_TRACE)
+	// This does not trace the pointer of the data.
+	formatted_print(
+		"%s: data ends: %d (0x%x) bytes\n",
+		prefix,
+		data_length,
+		data_length);
+#else
+	formatted_print(
+		"%s: data ends 0x%08x: %d (0x%x) bytes\n",
+		prefix,
+		p_data,
+		data_length,
+		data_length);
 #endif
 
+}
+
+//-------------------------------------------------------------------------
 // End of file

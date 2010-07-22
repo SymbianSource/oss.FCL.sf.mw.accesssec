@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
- * under the terms of the License "Eclipse Public License v1.0"
+ * under the terms of "Eclipse Public License v1.0"
  * which accompanies this distribution, and is available
  * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 13 %
+ * %version: tr1cfwln#18 %
  */
 
 #ifndef CPWEPUI_H
@@ -27,23 +27,18 @@
 #include <cpsettingformitemdata.h>
 #include <QStringList>
 #include <HbMessageBox>
-//#include <HbTranslator>
-//#include <QSharedPointer>
-#include <QTranslator>
+#include <cpwlansecurityplugininterface.h>
 
 //User Includes
-#include "cpwlansecurityplugininterface.h"
-#include "wlansecuritycontrolpanelwepdefs.h"
-#include "wepkeyvalidator.h"
 
 // Forward declarations
-class QTranslator;
 class CmConnectionMethodShim;
-class CpWepKeyValidation;
-/*!
- * @addtogroup group_wlan_security_ui_plugin_wep
- * @{
- */
+class HbTranslator;
+class WepKeyValidator;
+
+//Constant declarations
+//!Maximum Number of Keys for WEP
+static const int KMaxNumberofKeys =  4;
 
 /*! 
  * Implements WEP plugin for Wlan security control panel  
@@ -71,8 +66,10 @@ public:
     int orderNumber() const;
     
     CpSettingFormItemData* uiInstance(CpItemDataHelper &dataHelper);
+    
+    bool validateSettings();
 
-public:
+private:
 
     enum WEPKeyFormat
         {
@@ -110,6 +107,10 @@ private:
         
     CMManagerShim::ConnectionMethodAttribute getWEPKeyEnum(int index);
     
+    void createWEPKeyGroup(int index);
+    
+    void addConnections(CpItemDataHelper &dataHelpper);
+    
 private slots:
 
     void wepKeyInUseChanged(int index);
@@ -121,6 +122,8 @@ private slots:
     void wepKeyThreeChanged();
 
     void wepKeyFourChanged();
+    
+    void setEditorPreferences(const QModelIndex &modelIndex);
 
 private:
 
@@ -140,11 +143,11 @@ private:
 
     //!Store the index of the current key in use   
     int mNewKeySelected;
+   
+    //!Translator for all the localisation Text Id's
+    HbTranslator* mTranslator;
 
-    //QSharedPointer<HbTranslator> mTranslator;
-    QTranslator* mTranslator;
-
-    //! Connection Settings Shim connection method pointer
+    //!Connection Settings Shim connection method pointer
     CmConnectionMethodShim *mCmCM;
 
     //! Connection method Id
@@ -155,6 +158,8 @@ private:
 
     //! Store Formats of WEP keys
     WEPKeyFormat mkeyFormat[KMaxNumberofKeys];
+        
+    CpItemDataHelper* mItemDataHelper;
     
     
 

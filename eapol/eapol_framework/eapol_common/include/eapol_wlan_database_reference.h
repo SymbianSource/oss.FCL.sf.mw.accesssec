@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 5 %
+* %version: %
 */
 
 #if !defined(_EAPOL_WLAN_DATABASE_REFERENCE_H_)

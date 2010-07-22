@@ -1,0 +1,46 @@
+/*
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for tools objects used by all other modules. This must be compiled first before any other module.
+*
+*/
+
+/*
+* %version: 4 %
+*/
+
+#ifndef _EAP_TOOLS_GROUP_BLD_INF_
+#define _EAP_TOOLS_GROUP_BLD_INF_
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+
+PRJ_MMPFILES
+
+// Eap Trace
+eaptrace.mmp
+
+// Eap Tools
+eaptools.mmp
+
+// Eap Tools for Symbian
+eapsymbiantools.mmp
+
+#endif //#ifndef _EAP_TOOLS_GROUP_BLD_INF_
+
+// End of file.

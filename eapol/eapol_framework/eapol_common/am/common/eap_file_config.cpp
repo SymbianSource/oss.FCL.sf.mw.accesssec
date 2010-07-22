@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 17.1.3 %
+* %version: 33 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -31,6 +31,9 @@
 #include "eap_am_memory.h"
 #include "eap_file_config.h"
 #include "eap_automatic_variable.h"
+#include "eap_tlv_message_data.h"
+#include "eap_process_tlv_message_data.h"
+#include "eap_config.h"
 
 #if defined(_WIN32) && !defined(__GNUC__)
 	#pragma warning( disable : 4355 ) // 'this' : used in base member initializer list
@@ -47,13 +50,13 @@
 //-----------------------------------------------------------------
 //-----------------------------------------------------------------
 
-eap_config_value_c::~eap_config_value_c()
+EAP_FUNC_EXPORT eap_config_value_c::~eap_config_value_c()
 {
 	delete m_subsection_map;
 	m_subsection_map = 0;
 }
 
-eap_config_value_c::eap_config_value_c(
+EAP_FUNC_EXPORT eap_config_value_c::eap_config_value_c(
 	abs_eap_am_tools_c* const tools)
 	: m_am_tools(tools)
 	, m_subsection_map(0)
@@ -61,6 +64,13 @@ eap_config_value_c::eap_config_value_c(
 	, m_type(eap_configure_type_none)
 	, m_is_valid(false)
 {
+	EAP_ASSERT(eap_configure_type_id[eap_configure_type_none].type == eap_configure_type_none);	
+	EAP_ASSERT(eap_configure_type_id[eap_configure_type_u32_t].type == eap_configure_type_u32_t);	
+	EAP_ASSERT(eap_configure_type_id[eap_configure_type_boolean].type == eap_configure_type_boolean);	
+	EAP_ASSERT(eap_configure_type_id[eap_configure_type_string].type == eap_configure_type_string);	
+	EAP_ASSERT(eap_configure_type_id[eap_configure_type_hex_data].type == eap_configure_type_hex_data);	
+	EAP_ASSERT(eap_configure_type_id[eap_configure_type_u32array].type == eap_configure_type_u32array);	
+
 	if (m_data.get_is_valid() == false)
 	{
 		return;
@@ -69,37 +79,47 @@ eap_config_value_c::eap_config_value_c(
 	m_is_valid = true;
 }
 
-void eap_config_value_c::set_subsection(
+EAP_FUNC_EXPORT void eap_config_value_c::set_subsection(
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const subsection_map)
 {
 	m_subsection_map = subsection_map;
 }
 
-eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * eap_config_value_c::get_subsection()
+EAP_FUNC_EXPORT eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * eap_config_value_c::get_subsection()
 {
 	return m_subsection_map;
 }
 
-eap_variable_data_c * eap_config_value_c::get_data()
+EAP_FUNC_EXPORT eap_variable_data_c * eap_config_value_c::get_data()
 {
 	return &m_data;
 }
 
-void eap_config_value_c::set_type(const eap_configure_type_e type)
+EAP_FUNC_EXPORT const eap_variable_data_c * eap_config_value_c::get_const_data() const
+{
+	return &m_data;
+}
+
+EAP_FUNC_EXPORT void eap_config_value_c::set_type(const eap_configure_type_e type)
 {
 	m_type = type;
 }
 
-eap_configure_type_e eap_config_value_c::get_type()
+EAP_FUNC_EXPORT eap_configure_type_e eap_config_value_c::get_type()
 {
 	return m_type;
 }
 
-void eap_config_value_c::object_increase_reference_count()
+EAP_FUNC_EXPORT eap_configure_type_e eap_config_value_c::get_const_type() const
+{
+	return m_type;
+}
+
+EAP_FUNC_EXPORT void eap_config_value_c::object_increase_reference_count()
 {
 }
 
-bool eap_config_value_c::get_is_valid()
+EAP_FUNC_EXPORT bool eap_config_value_c::get_is_valid() const
 {
 	return m_is_valid;
 }
@@ -111,9 +131,10 @@ bool eap_config_value_c::get_is_valid()
 
 EAP_FUNC_EXPORT eap_file_config_c::eap_file_config_c(
 	abs_eap_am_tools_c* const tools)
-: m_am_tools(tools)
-, m_config_map(tools, this)
-, m_is_valid(false)
+  : m_am_tools(tools)
+  , m_config_map(tools, this)
+  , m_value_buffer(tools)
+  , m_is_valid(false)
 {
 	EAP_UNREFERENCED_PARAMETER(TRACE_FLAGS_CONFIGURE_DATA); // in release
 	
@@ -144,7 +165,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::configure(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
+eap_status_e eap_file_config_c::expand_environment_variables(
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map,
 	const eap_variable_data_c * const original_value,
 	eap_variable_data_c * const expanded_value
@@ -163,21 +184,17 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
 	const u8_t env_char = '$';
 	const u8_t char_left_parenthesis = '(';
 	const u8_t char_right_parenthesis = ')';
-
-	eap_variable_data_c tmp_value_buffer(m_am_tools);
-	if (tmp_value_buffer.get_is_valid() == false)
-	{
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-	}
-
-	status = tmp_value_buffer.set_buffer_length(MAX_LINE_LENGTH);
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-
 	bool expanded_value_when_true = false;
+
+	if (m_value_buffer.get_buffer_length() < MAX_LINE_LENGTH)
+	{
+		status = m_value_buffer.set_buffer_length(MAX_LINE_LENGTH);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+	}
 
 	status = expanded_value->set_copy_of_buffer(original_value);
 	if (status != eap_status_ok)
@@ -505,7 +522,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
 					if (configure_option.get_is_valid_data() == true
 						&& configure_option.get_data_length() > 0ul)
 					{
-						tmp_value_buffer.reset();
+						m_value_buffer.reset_start_offset_and_data_length();
 
 						u32_t tmp_index = 0ul;
 
@@ -514,7 +531,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
 							u32_t length_of_begin = env_start-start_of_value;
 							if (length_of_begin > 0ul)
 							{
-								status = tmp_value_buffer.set_copy_of_buffer(
+								status = m_value_buffer.set_copy_of_buffer(
 									expanded_value->get_data(length_of_begin),
 									length_of_begin);
 								if (status != eap_status_ok)
@@ -529,7 +546,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
 
 						if (configure_option.get_data_length() > 0ul)
 						{
-							status = tmp_value_buffer.add_data(&configure_option);
+							status = m_value_buffer.add_data(&configure_option);
 							if (status != eap_status_ok)
 							{
 								EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -544,7 +561,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
 							u32_t length_of_end = tmp_end-(env_end+1);
 							if (length_of_end > 0ul)
 							{
-								status = tmp_value_buffer.add_data(
+								status = m_value_buffer.add_data(
 									(env_end+1),
 									length_of_end);
 								if (status != eap_status_ok)
@@ -557,10 +574,10 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
 							}
 						}
 
-						if (tmp_value_buffer.get_is_valid_data() == true
-							&& tmp_value_buffer.get_data_length() > 0ul)
+						if (m_value_buffer.get_is_valid_data() == true
+							&& m_value_buffer.get_data_length() > 0ul)
 						{
-							status = expanded_value->set_copy_of_buffer(&tmp_value_buffer);
+							status = expanded_value->set_copy_of_buffer(&m_value_buffer);
 							if (status != eap_status_ok)
 							{
 								EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -630,10 +647,11 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::expand_environment_variables(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT u8_t * eap_file_config_c::read_hex_byte(
+u8_t * eap_file_config_c::read_hex_byte(
 	u8_t * cursor,
 	const u8_t * const end,
-	u8_t * const hex_byte)
+	u8_t * const hex_byte, // This buffer is one byte in length.
+	const u32_t hex_byte_length)
 {
 	u8_t * start = cursor;
 	bool stop = false;
@@ -656,14 +674,15 @@ EAP_FUNC_EXPORT u8_t * eap_file_config_c::read_hex_byte(
 
 	if (cursor <= end)
 	{
-		u32_t target_length = sizeof(*hex_byte);
+		u32_t target_length = hex_byte_length;
 
 		eap_status_e status = m_am_tools->convert_hex_ascii_to_bytes(
 			start,
 			cursor-start,
 			hex_byte,
 			&target_length);
-		if (status != eap_status_ok)
+		if (status != eap_status_ok
+			|| target_length != hex_byte_length)
 		{
 			return 0;
 		}
@@ -676,7 +695,7 @@ EAP_FUNC_EXPORT u8_t * eap_file_config_c::read_hex_byte(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT u8_t * eap_file_config_c::read_u32_t(
+u8_t * eap_file_config_c::read_u32_t(
 	u8_t * cursor,
 	const u8_t * const end,
 	u32_t * const integer)
@@ -735,7 +754,7 @@ EAP_FUNC_EXPORT u8_t * eap_file_config_c::read_u32_t(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::convert_value(
+eap_status_e eap_file_config_c::convert_value(
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map,
 	const eap_variable_data_c * const value_buffer,
 	const eap_configure_type_e type,
@@ -850,27 +869,64 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::convert_value(
 				return EAP_STATUS_RETURN(m_am_tools, status);
 			}
 			
+			status = value_data->set_buffer_length((expanded_value_buffer.get_data_length()+1)/3);
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			status = value_data->set_data_length(value_data->get_buffer_length());
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			u8_t * const target = value_data->get_data(value_data->get_buffer_length());
+			if (target == 0)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+			}
+
+			u32_t ind_target(0ul);
+
 			u8_t * cursor = expanded_value_buffer.get_data(expanded_value_buffer.get_data_length());
+			if (cursor == 0)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+			}
+
 			const u8_t * const cursor_end = cursor + expanded_value_buffer.get_data_length();
-			
+
+			// Only one byte is needed. This is because coverity complains of using "u8_t hex_byte".
+			const u32_t BUFFER_SIZE=1ul;
+			u8_t hex_byte[BUFFER_SIZE];
+
 			while(cursor < cursor_end)
 			{
-				u8_t hex_byte = 0;
 				cursor = read_hex_byte(
 					cursor,
 					cursor_end,
-					&hex_byte);
+					hex_byte,
+					BUFFER_SIZE);
 				if (cursor == 0)
 				{
 					break;
 				}
 
-				status = value_data->add_data(&hex_byte, sizeof(hex_byte));
-				if (status != eap_status_ok)
-				{
-					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-					return EAP_STATUS_RETURN(m_am_tools, status);
-				}
+				// Here we read only one byte.
+				target[ind_target] = hex_byte[0];
+				++ind_target;
+			}
+
+			status = value_data->set_buffer_length(ind_target);
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, status);
 			}
 		}
 		else if (type == eap_configure_type_u32array)
@@ -883,6 +939,12 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::convert_value(
 			}
 			
 			u8_t * cursor = expanded_value_buffer.get_data(expanded_value_buffer.get_data_length());
+			if (cursor == 0)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+			}
+
 			const u8_t * const cursor_end = cursor + expanded_value_buffer.get_data_length();
 			
 			while(cursor < cursor_end)
@@ -916,7 +978,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::convert_value(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::store_configure(
+eap_status_e eap_file_config_c::store_configure(
 	abs_eap_am_file_input_c * const file,
 	const eap_variable_data_c * const line,
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map)
@@ -1262,6 +1324,13 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::store_configure(
 			 config->get_data()->get_data(), 
 			 config->get_data()->get_data_length()));
 
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("CONFIG: option type %d=%s\n"),
+			 config->get_type(),
+			 eap_configuration_field_c::get_configure_type_string(config->get_type())));
+
 		//-----------------------------------------------------------------------------
 
 	}
@@ -1414,7 +1483,7 @@ eap_status_e eap_file_config_c::find_rvalue(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::cnf_parse_value(
+eap_status_e eap_file_config_c::cnf_parse_value(
 	const eap_variable_data_c * const found_type_value,
 	const eap_variable_data_c * const found_type_name,
 	eap_configure_type_e * const parsed_type,
@@ -1542,6 +1611,11 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::cnf_parse_value(
 		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 	
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("\n")));
+
 	if (is_environment_variable == true)
 	{
 		#if defined(EAP_FILE_CONFIG_USE_CONSOLE_PRINTS)
@@ -1578,7 +1652,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::cnf_parse_value(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::cnf_get_string(
+eap_status_e eap_file_config_c::cnf_get_string(
 	const eap_variable_data_c * const param,
 	eap_variable_data_c * const param_name,
 	eap_variable_data_c * const param_value,
@@ -1654,7 +1728,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::cnf_get_string(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_subsections(
+eap_status_e eap_file_config_c::read_subsections(
 	abs_eap_am_file_input_c * const file,
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map)
 {
@@ -1690,7 +1764,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_subsections(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_section(
+eap_status_e eap_file_config_c::read_section(
 	abs_eap_am_file_input_c * const file,
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map)
 {
@@ -1744,42 +1818,38 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_section(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::remove_spaces(eap_variable_data_c * const buffer)
+eap_status_e eap_file_config_c::remove_spaces(eap_variable_data_c * const buffer)
 {
-	eap_variable_data_c tmp(m_am_tools);
-	if (tmp.get_is_valid() == false)
+	if (buffer == 0
+		|| buffer->get_is_valid() == false)
 	{
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
 	}
 
-	eap_status_e status(eap_status_ok);
+	u32_t length = buffer->get_data_length();
+	const u8_t * source = buffer->get_data(length);
+	u8_t * destination = buffer->get_data(length);
+	u32_t ind_dest(0ul);
 
-	for (u32_t ind = 0ul; ind < buffer->get_data_length(); ind++)
+	for (u32_t ind = 0ul; ind < length; ind++)
 	{
-		u8_t * const character = buffer->get_data_offset(ind, sizeof(u8_t));
-		if (character == 0)
-		{
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		const u8_t character = source[ind];
 
-		if (m_am_tools->isspace(*character) == false)
+		if (m_am_tools->isspace(character) == false)
 		{
-			status = tmp.add_data(character, sizeof(*character));
-			if (status != eap_status_ok)
-			{
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
+			destination[ind_dest] = character;
+			++ind_dest;
 		}
 	} // for()
 
-	status = buffer->set_copy_of_buffer(&tmp);
+	eap_status_e status = buffer->set_data_length(ind_dest);
 
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::remove_leading_spaces(
+eap_status_e eap_file_config_c::remove_leading_spaces(
 	eap_variable_data_c * const line)
 {
 	if (line->get_data_length() == 0)
@@ -1814,7 +1884,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::remove_leading_spaces(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::file_read_line(
+eap_status_e eap_file_config_c::file_read_line(
 	abs_eap_am_file_input_c * const file,
 	eap_variable_data_c * const line)
 {
@@ -1927,7 +1997,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::file_read_line(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::get_subsect(
+eap_status_e eap_file_config_c::get_subsect(
 	abs_eap_am_file_input_c * const file,
 	eap_variable_data_c * const line)
 {
@@ -2002,7 +2072,7 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::get_subsect(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_configure(
+eap_status_e eap_file_config_c::read_configure(
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map,
 	const eap_configuration_field_c * const field,
 	eap_variable_data_c* const data,
@@ -2063,7 +2133,487 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_configure(
 
 //-----------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_configure(
+eap_status_e eap_file_config_c::read_all_configurations(
+	const eap_configuration_field_c * const /* field */,
+	eap_variable_data_c* const data,
+	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map)
+{
+	eap_status_e status = eap_status_process_general_error;
+
+	/**
+	 * Here is a figure of message data composed of Attribute-Value Pairs (See eap_tlv_header_c).
+	 * Value data follows eap_tlv_message_data_c.
+	 * @code
+	 *  Configuration data:
+	 *  0                   1                   2                   3   
+	 *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ -+
+	 * |       Type = eap_tlv_message_type_configuration_option        |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |                             Length = 8+4+8+m+8+n              |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |       Type = eap_tlv_message_type_u32_t                       |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |                             Length = 4                        |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |          option type eap_configure_type_hex_data              |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |       Type = eap_tlv_message_type_variable_data               |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  | First configuration option
+	 * |                             Length = m                        |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |               Value (m octets) option name                    |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |       Type = eap_tlv_message_type_variable_data               |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |                             Length = n                        |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |               Value (n octets) option data                    |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ -+
+	 * |       Type = eap_tlv_message_type_configuration_option        |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |                             Length = 8+4+8+m+8+4              |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |       Type = eap_tlv_message_type_u32_t                       |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |                             Length = 4                        |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |          option type  eap_configure_type_u32_t                |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |       Type = eap_tlv_message_type_variable_data               |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  | Second configuration option
+	 * |                             Length = m                        |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |               Value (m octets) option name                    |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |       Type = eap_tlv_message_type_u32_t                       |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |                             Length = 4                        |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  |
+	 * |               Value option data 32-bit integer                |  |
+	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ -+
+	 *
+	 * @endcode
+	 * 
+	 */
+
+	u32_t size_of_data(0ul);
+	u32_t ind(0ul);
+
+	eap_process_tlv_message_data_c message(m_am_tools);
+
+	if (message.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	for (ind = 0ul; ind < config_map->get_atom_count(); ++ind)
+	{
+		const eap_state_map_atom_c<eap_config_value_c, eap_variable_data_c> * atom = config_map->get_atom(ind);
+		while (atom != 0)
+		{
+			u32_t size = message.get_payload_size(
+					atom->get_selector(),
+					atom->get_const_object());
+
+			if (size > 0ul)
+			{
+				// The extra size of header is added because the whole allocated message size includes all headers.
+				// The get_payload_size() function calculates only payload of the option without the main header.
+				size_of_data +=
+					size
+					+ eap_tlv_header_c::get_header_length();
+			}
+			else
+			{
+				// Some konfiguration objects are not included to message yet.
+			}
+
+			atom = atom->get_next_atom();
+		}
+	}
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CONFIG: data size %d\n"),
+		 size_of_data));
+
+	status = message.allocate_message_data_buffer(size_of_data);
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+
+	for (ind = 0ul; ind < config_map->get_atom_count(); ++ind)
+	{
+		const eap_state_map_atom_c<eap_config_value_c, eap_variable_data_c> * atom = config_map->get_atom(ind);
+		while (atom != 0)
+		{
+			status = message.add_parameter_data(atom->get_selector(), atom->get_const_object());
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			atom = atom->get_next_atom();
+		}
+	}
+
+	status = data->set_copy_of_buffer(
+		message.get_message_data(),
+		message.get_message_data_length());
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//-----------------------------------------------------------------
+
+eap_status_e eap_file_config_c::add_option(
+	const eap_tlv_header_c * const option_header)
+{
+	eap_status_e status = eap_status_process_general_error;
+
+	eap_process_tlv_message_data_c message(m_am_tools);
+
+	if (message.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	status = message.set_message_data(option_header->get_value_length(), option_header->get_value(option_header->get_value_length()));
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	eap_array_c<eap_tlv_header_c> parameters(m_am_tools);
+
+	status = message.parse_message_data(&parameters);
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	eap_config_value_c * config = new eap_config_value_c(m_am_tools);
+
+	eap_automatic_variable_c<eap_config_value_c>
+		automatic_config(m_am_tools, config);
+
+	if (config == 0
+		|| config->get_is_valid() == false)
+	{
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	u32_t parameter_index(0ul);
+
+	eap_variable_data_c selector(m_am_tools);
+	if (selector.get_is_valid() == false)
+	{
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	{
+		const eap_tlv_header_c * const a_option_header = parameters.get_object(parameter_index);
+		if (a_option_header == 0
+			|| a_option_header->get_type() != eap_tlv_message_type_u32_t)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+			status = eap_status_illegal_parameter;
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+
+		u32_t value(0ul);
+
+		status = message.get_parameter_data(
+			a_option_header,
+			&value);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+
+		config->set_type(static_cast<eap_configure_type_e>(value));
+	}
+
+	++parameter_index;
+	
+	{
+		const eap_tlv_header_c * const a_option_header = parameters.get_object(parameter_index);
+		if (a_option_header == 0
+			|| a_option_header->get_type() != eap_tlv_message_type_variable_data)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+			status = eap_status_illegal_parameter;
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+
+		status = message.get_parameter_data(
+			a_option_header,
+			&selector);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+	}
+	
+	++parameter_index;
+
+	switch(config->get_type())
+	{
+	case eap_configure_type_string:
+	case eap_configure_type_hex_data:
+		{
+			const eap_tlv_header_c * const a_option_header = parameters.get_object(parameter_index);
+			if (a_option_header == 0
+				|| a_option_header->get_type() != eap_tlv_message_type_variable_data)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+				status = eap_status_illegal_parameter;
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			status = message.get_parameter_data(
+				a_option_header,
+				config->get_data());
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+		}
+		break;
+	case eap_configure_type_u32_t:
+	case eap_configure_type_boolean:
+		{
+			const eap_tlv_header_c * const a_option_header = parameters.get_object(parameter_index);
+			if (a_option_header == 0
+				|| a_option_header->get_type() != eap_tlv_message_type_u32_t)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+				status = eap_status_illegal_parameter;
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			u32_t value(0ul);
+
+			status = message.get_parameter_data(
+				a_option_header,
+				&value);
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			status = config->get_data()->set_copy_of_buffer(&value, sizeof(value));
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+		}
+		break;
+	case eap_configure_type_u32array:
+		{
+			const eap_tlv_header_c * const a_option_header = parameters.get_object(parameter_index);
+			if (a_option_header == 0
+				|| a_option_header->get_type() != eap_tlv_message_type_array)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+				status = eap_status_illegal_parameter;
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			eap_process_tlv_message_data_c array_message(m_am_tools);
+
+			if (array_message.get_is_valid() == false)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			status = array_message.set_message_data(a_option_header->get_value_length(), a_option_header->get_value(a_option_header->get_value_length()));
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			eap_array_c<eap_tlv_header_c> array_parameters(m_am_tools);
+
+			status = array_message.parse_message_data(&array_parameters);
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			for (u32_t ind = 0ul; ind < array_parameters.get_object_count(); ++ind)
+			{
+				const eap_tlv_header_c * const a_option_header = array_parameters.get_object(ind);
+				if (a_option_header == 0
+					|| a_option_header->get_type() != eap_tlv_message_type_u32_t)
+				{
+					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+					status = eap_status_illegal_parameter;
+					return EAP_STATUS_RETURN(m_am_tools, status);
+				}
+
+				u32_t value(0ul);
+
+				status = array_message.get_parameter_data(
+					a_option_header,
+					&value);
+				if (status != eap_status_ok)
+				{
+					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+					return EAP_STATUS_RETURN(m_am_tools, status);
+				}
+
+				status = config->get_data()->add_data(&value, sizeof(value));
+				if (status != eap_status_ok)
+				{
+					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+					return EAP_STATUS_RETURN(m_am_tools, status);
+				}
+			}
+		}
+		break;
+	default:
+		break;
+	};
+
+	status = m_config_map.add_handler(&selector, config);
+	if (status == eap_status_ok)
+	{
+		automatic_config.do_not_free_variable();
+	}
+	else //if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("\n")));
+
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CONFIG MESSAGE: option added"),
+		 selector.get_data(),
+		 selector.get_data_length()));
+	
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("CONFIG MESSAGE: data"), 
+		 config->get_data()->get_data(), 
+		 config->get_data()->get_data_length()));
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CONFIG MESSAGE: option type %d=%s\n"),
+		 config->get_type(),
+		 eap_configuration_field_c::get_configure_type_string(config->get_type())));
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//-----------------------------------------------------------------
+
+EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_configuration_message(
+	const eap_variable_data_c * const configuration_message)
+{
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_file_config_c::read_configuration_message(): data=0x%08x, length=%d\n"),
+		configuration_message->get_data(),
+		configuration_message->get_data_length()));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_file_config_c::read_configuration_message()");
+
+	eap_status_e status = eap_status_process_general_error;
+
+	eap_process_tlv_message_data_c message(m_am_tools);
+
+	if (message.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	status = message.set_message_data(configuration_message->get_data_length(), configuration_message->get_data());
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	eap_array_c<eap_tlv_header_c> parameters(m_am_tools);
+
+	status = message.parse_message_data(&parameters);
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	for (u32_t ind = 0ul; ind < parameters.get_object_count(); ++ind)
+	{
+		const eap_tlv_header_c * const option_header = parameters.get_object(ind);
+		if (option_header == 0
+			|| option_header->get_type() != eap_tlv_message_type_configuration_option)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+			status = eap_status_illegal_parameter;
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+
+		status = add_option(option_header);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+	}
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//-----------------------------------------------------------------
+
+eap_status_e eap_file_config_c::read_configure(
 	const eap_configuration_field_c * const field,
 	eap_variable_data_c* const data,
 	eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const config_map,
@@ -2161,9 +2711,11 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_configure(
 				EAP_TRACE_DEBUG(
 					m_am_tools,
 					TRACE_FLAGS_DEFAULT,
-					(EAPL("WARNING: CONFIG: option type failed: required %d != actual %d\n"),
+					(EAPL("WARNING: CONFIG: option type failed: required %d=%s != actual %d=%s\n"),
 					 field->get_type(),
-					 config->get_type()));
+					 eap_configuration_field_c::get_configure_type_string(field->get_type()),
+					 config->get_type(),
+					 eap_configuration_field_c::get_configure_type_string(config->get_type())));
 				EAP_TRACE_DEBUG(
 					m_am_tools,
 					TRACE_FLAGS_DEFAULT,
@@ -2196,6 +2748,12 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_configure(
 				(EAPL("WARNING: CONFIG: option not found"),
 				 field->get_field(),
 				 field->get_field_length()));
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("WARNING: CONFIG: option type %d=%s\n"),
+				 field->get_type(),
+				 eap_configuration_field_c::get_configure_type_string(field->get_type())));
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_configure_field);
 		}
@@ -2219,11 +2777,26 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_configure(
 		 field->get_field(),
 		 field->get_field_length()));
 
-	eap_status_e status = read_configure(
-		field,
-		data,
-		&m_config_map,
-		true);
+	eap_status_e status(eap_status_process_general_error);
+
+	if (field->get_type() == eap_configure_type_all_configurations
+		&& field->compare(
+			m_am_tools,
+			cf_str_EAP_read_all_configurations.get_field()) == true)
+	{
+		status = read_all_configurations(
+			field,
+			data,
+			&m_config_map);
+	}
+	else
+	{
+		status = read_configure(
+			field,
+			data,
+			&m_config_map,
+			true);
+	}
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);

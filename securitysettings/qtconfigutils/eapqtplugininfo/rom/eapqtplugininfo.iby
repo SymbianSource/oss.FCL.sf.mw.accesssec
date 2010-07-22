@@ -1,31 +1,35 @@
 /*
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
-* This component and the accompanying materials are made available
-* under the terms of the License "Eclipse Public License v1.0"
-* which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
-*
-* Initial Contributors:
-* Nokia Corporation - initial contribution.
-*
-* Contributors:
-*
+ * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+ * All rights reserved.
+ * This component and the accompanying materials are made available
+ * under the terms of "Eclipse Public License v1.0"
+ * which accompanies this distribution, and is available
+ * at the URL "http://www.eclipse.org/legal/epl-v10.html".
+ *
+ * Initial Contributors:
+ * Nokia Corporation - initial contribution.
+ *
+ * Contributors:
+ *
 * Description: 
 *   EAP method configuration QT interface
 *
 */
 
 /*
-* %version: 2 %
+* %version: 4 %
 */
 
-#ifndef __EAPQTPLUGININFO_IBY__
-#define __EAPQTPLUGININFO_IBY__
+#ifndef EAPQTPLUGININFO_IBY
+#define EAPQTPLUGININFO_IBY
 
-#include <bldvariant.hrh>
 #include <data_caging_paths_for_iby.hrh>
+#include <bldvariant.hrh>
 
-file=ABI_DIR\BUILD_DIR\eapqtplugininfo.dll SHARED_LIB_DIR\eapqtplugininfo.dll
+#ifdef __PROTOCOL_WLAN
 
-#endif
+file=ABI_DIR/BUILD_DIR/eapqtplugininfo.dll 	SHARED_LIB_DIR/eapqtplugininfo.dll
+
+#endif  // __PROTOCOL_WLAN
+
+#endif  // EAPQTPLUGININFO_IBY

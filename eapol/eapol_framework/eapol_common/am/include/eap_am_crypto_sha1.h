@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10 %
+* %version: %
 */
 
 #if !defined( _EAP_AM_CRYPTO_SHA1_H_ )

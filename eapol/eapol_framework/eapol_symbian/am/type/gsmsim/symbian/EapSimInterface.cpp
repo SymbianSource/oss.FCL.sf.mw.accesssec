@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 15 %
+* %version: 13.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -30,6 +30,7 @@
 
 // INCLUDE FILES
 #include "EapSimInterface.h"
+#include "eap_automatic_variable.h"
 
 #include <mmtsy_names.h>
 #include "eap_sim_triplets.h" // For SIM_SRES_LENGTH.
@@ -46,6 +47,8 @@ CEapSimIsaInterface::CEapSimIsaInterface(abs_eap_am_tools_c* const aTools, eap_a
 , iMMETELConnectionStatus(EFalse)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapSimIsaInterface::CEapSimIsaInterface()\n")));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapSimIsaInterface::CEapSimIsaInterface()");
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
 
@@ -77,6 +80,8 @@ void CEapSimIsaInterface::ConstructL()
 CEapSimIsaInterface::~CEapSimIsaInterface()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapSimIsaInterface::~CEapSimIsaInterface()\n")));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapSimIsaInterface::~CEapSimIsaInterface()");
 
 	if(IsActive())
 	{
@@ -87,6 +92,7 @@ CEapSimIsaInterface::~CEapSimIsaInterface()
 	
 	iPhone.Close();
 	iServer.Close(); // Phone module is unloaded automatically when RTelServer session is closed
+	iCustomAPI.Close();	
 		
 	delete iAuthenticationData;
 	iAuthenticationData = NULL;
@@ -99,8 +105,9 @@ CEapSimIsaInterface::~CEapSimIsaInterface()
 void CEapSimIsaInterface::QueryIMSIL()
 {	
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ISA interface: Querying IMSI.\n")));
-	
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapSimIsaInterface::QueryIMSIL()\n")));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapSimIsaInterface::QueryIMSIL()");
+
 	iQueryId = EQueryIMSI;
 
 	// Create MMETEl connection.
@@ -121,7 +128,8 @@ void CEapSimIsaInterface::QueryIMSIL()
 void CEapSimIsaInterface::QueryKcAndSRESL(const TDesC8& aRand)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ISA interface: Querying Kc and SRES.\n")));
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapSimIsaInterface::QueryKcAndSRESL()\n")));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapSimIsaInterface::QueryKcAndSRESL()");
 
 	iQueryId = EQuerySRESandKC;
 
@@ -162,9 +170,13 @@ void CEapSimIsaInterface::QueryKcAndSRESL(const TDesC8& aRand)
 void CEapSimIsaInterface::DoCancel()
 {
 	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapSimIsaInterface::DoCancel() - Cancelling MMETEL query.\n") ) );
-	
-	// Cancel the request.
-	iCustomAPI.CancelAsyncRequest( ECustomGetSimAuthenticationDataIPC );
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapSimIsaInterface::DoCancel()");
+
+	if (iQueryId == EQuerySRESandKC)
+	{
+		// Cancel the request.
+		iCustomAPI.CancelAsyncRequest( ECustomGetSimAuthenticationDataIPC );
+	}
 }
 
 //--------------------------------------------------
@@ -172,8 +184,11 @@ void CEapSimIsaInterface::DoCancel()
 void CEapSimIsaInterface::RunL()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapSimIsaInterface::RunL(). iStatus.Int() =%d \n"), iStatus.Int() ));
-	
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapSimIsaInterface::RunL(). iStatus.Int()=%d, iQueryId=%d\n"),
+		iStatus.Int(),
+		iQueryId));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapSimIsaInterface::RunL()");
+
 	TInt error = KErrNone;
 	eap_variable_data_c imsi(m_am_tools); // Keeping it here to avoid "error" in ARMV5 build.
 	
@@ -286,7 +301,8 @@ void CEapSimIsaInterface::RunL()
 TInt CEapSimIsaInterface::CreateMMETelConnectionL()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Creating MMETel connection.\n")));
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapSimIsaInterface::CreateMMETelConnectionL()\n")));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapSimIsaInterface::CreateMMETelConnectionL()");
 
 	TInt errorCode = KErrNone;
 	

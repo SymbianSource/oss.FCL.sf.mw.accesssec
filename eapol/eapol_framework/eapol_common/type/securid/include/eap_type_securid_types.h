@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 13 %
+* %version: %
 */
 
 #ifndef SECURID_TYPES_H
@@ -47,7 +47,6 @@ EAP_CONFIGURATION_FIELD(
 	eap_configure_type_hex_data,
 	true);
 
-
 EAP_CONFIGURATION_FIELD(
 	cf_str_EAP_GTC_identity,
 	"EAP_GTC_identity",
@@ -61,6 +60,11 @@ EAP_CONFIGURATION_FIELD(
 	eap_configure_type_hex_data,
 	false);
 
+EAP_CONFIGURATION_FIELD(
+	cf_str_EAP_GTC_passcode_prompt,
+	"EAP_SECURID_passcode_prompt",
+	eap_configure_type_boolean,
+	false);
 
 EAP_CONFIGURATION_FIELD(
 	cf_str_EAP_SECURID_use_eap_expanded_type,

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 76.1.1.1.5 %
+* %version: 137 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -36,66 +36,68 @@
 #include <x509cert.h>
 #include <x509certext.h>
 
+#include "EapPluginTools.h"
+#include "EapConversion.h"
+#include "EapAutomatic.h"
+
 #ifdef USE_FAST_EAP_TYPE
 #include "pac_store_db_parameters.h"
 #endif //#ifdef USE_FAST_EAP_TYPE
 
-#include "eap_am_trace_symbian.h"
+#include <EapTraceSymbian.h>
+
 #include "EapTlsPeapCertFetcher.h"
 
 const TUint KMaxSqlQueryLength = 2048;
 const TInt	KMicroSecsInAMinute = 60000000; // 60000000 micro seconds is 1 minute.
 const TInt	KDefaultColumnInView_One = 1; // For DB view.
 const TInt 	KMaxEapDbTableNameLength = 64;
+
 // ================= MEMBER FUNCTIONS =======================
 
 void EapTlsPeapUtils::OpenDatabaseL(
-	RDbNamedDatabase& aDatabase, 
-	RDbs& aSession, 
+	RDbNamedDatabase& aDatabase,
+	RFs& aFileServerSession,
 	const TIndexType aIndexType,
-	const TInt aIndex, 
+	const TInt aIndex,
 	const eap_type_value_e aTunnelingType,
 	eap_type_value_e aEapType)
 {
-#ifdef USE_EAP_EXPANDED_TYPES
-
 	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::OpenDatabaseL -Start- aIndexType=%d, aIndex=%d, Tunneling vendor type=%d, Eap vendor type=%d \n"),
-		aIndexType,aIndex, aTunnelingType.get_vendor_type(), aEapType.get_vendor_type()));
-#else
+		(_L("EapTlsPeapUtils::OpenDatabaseL(): - Start - aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x, aEapType=0xfe%06x%08x\n"),
+		aIndexType,
+		aIndex,
+		aTunnelingType.get_vendor_id(),
+		aTunnelingType.get_vendor_type(),
+		aEapType.get_vendor_id(),
+		aEapType.get_vendor_type()));
 
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::OpenDatabaseL -Start- aIndexType=%d, aIndex=%d, aTunnelingType=%d, aEapType=%d \n"),
-		aIndexType,aIndex, aTunnelingType, aEapType));
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::OpenDatabaseL()\n"));
 
 	if (aEapType == eap_type_tls)
 	{
-		OpenTlsDatabaseL(aDatabase, aSession, aIndexType, aIndex, aTunnelingType);
+		OpenTlsDatabaseL(aDatabase, aFileServerSession, aIndexType, aIndex, aTunnelingType);
 	} 
 	else if (aEapType == eap_type_peap)
 	{
-		OpenPeapDatabaseL(aDatabase, aSession, aIndexType, aIndex, aTunnelingType);
+		OpenPeapDatabaseL(aDatabase, aFileServerSession, aIndexType, aIndex, aTunnelingType);
 	} 
 #if defined(USE_TTLS_EAP_TYPE)
 	else if (aEapType == eap_type_ttls)
 	{
-		OpenTtlsDatabaseL(aDatabase, aSession, aIndexType, aIndex, aTunnelingType);
+		OpenTtlsDatabaseL(aDatabase, aFileServerSession, aIndexType, aIndex, aTunnelingType);
 	} 
 #endif // #if defined(USE_TTLS_EAP_TYPE)
 #if defined(USE_FAST_EAP_TYPE)
 	else if (aEapType == eap_type_fast)
 	{
-		OpenFastDatabaseL(aDatabase, aSession, aIndexType, aIndex, aTunnelingType);
+		OpenFastDatabaseL(aDatabase, aFileServerSession, aIndexType, aIndex, aTunnelingType);
 	} 
 #endif // #if defined(USE_FAST_EAP_TYPE)
-	
 	else if ( aEapType == eap_type_ttls_plain_pap )
-		{
-		OpenTtlsDatabaseL( aDatabase, aSession, aIndexType, aIndex, aTunnelingType);
-		}
-	
+	{
+		OpenTtlsDatabaseL( aDatabase, aFileServerSession, aIndexType, aIndex, aTunnelingType);
+	}
 	else
 	{
 		// Unsupported EAP type
@@ -103,144 +105,118 @@ void EapTlsPeapUtils::OpenDatabaseL(
 	}	
 } // EapTlsPeapUtils::OpenDatabaseL()
 
+// ---------------------------------------------------------
+
 void EapTlsPeapUtils::OpenTlsDatabaseL(
-		RDbNamedDatabase& aDatabase, 
-		RDbs& aSession, 
-		const TIndexType aIndexType, 
-		const TInt aIndex,
-		const eap_type_value_e aTunnelingType)
+	RDbNamedDatabase& aDatabase,
+	RFs& aFileServerSession,
+	const TIndexType aIndexType,
+	const TInt aIndex,
+	const eap_type_value_e aTunnelingType)
 {
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
-
-#else
-
-	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
 	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::OpenTlsDatabaseL -Start- aIndexType=%d, aIndex=%d, Tunneling vendor type=%d \n"),
-		aIndexType,aIndex, aTunnelingVendorType));
+		(_L("EapTlsPeapUtils::OpenTlsDatabaseL(): - Start - aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
+		aIndexType,
+		aIndex,
+		aTunnelingType.get_vendor_id(),
+		aTunnelingType.get_vendor_type()));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::OpenTlsDatabaseL()\n"));
 
 	// 1. Open/create a database	
 	
-	// Connect to the DBMS server.
-	User::LeaveIfError(aSession.Connect());		
-	CleanupClosePushL(aSession);	
-	// aSession and aDatabase are pushed to the cleanup stack even though they may be member
-	// variables of the calling class and would be closed in the destructor anyway. This ensures
-	// that if they are not member variables they will be closed. Closing the handle twice
-	// does no harm.	
-	
-#ifdef SYMBIAN_SECURE_DBMS
-	
-	// Create the secure shared database with the specified secure policy.
-	// Database will be created in the data caging path for DBMS (C:\private\100012a5).
-	
-	TInt err = aDatabase.Create(aSession, KTlsDatabaseName, KSecureUIDFormat);
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTlsDatabaseL - Created Secure DB for eaptls.dat. err=%d\n"), err) );
-	
-	if(err == KErrNone)
-	{
-		aDatabase.Close();
-		
-	} else if (err != KErrAlreadyExists) 
-	{
-		User::LeaveIfError(err);
-	}
-	
-	User::LeaveIfError(aDatabase.Open(aSession, KTlsDatabaseName, KSecureUIDFormat));
-	CleanupClosePushL(aDatabase);		
-		
-#else
-	// For non-secured database. The database will be created in the old location (c:\system\data).
-	
-	RFs fsSession;		
-	User::LeaveIfError(fsSession.Connect());
-	CleanupClosePushL(fsSession);	
-	TInt err = aDatabase.Create(fsSession, KTlsDatabaseName);
+	TInt error(KErrNone);
+	TFileName aPrivateDatabasePathName;
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTlsDatabaseL - Created Non-Secure DB for eaptls.dat. err=%d\n"), err) );
-	
-	if(err == KErrNone)
+	EapPluginTools::CreateDatabaseLC(
+		aDatabase,
+		aFileServerSession,
+		error,
+		KTlsDatabaseName,
+		aPrivateDatabasePathName);
+
+	if(error == KErrNone)
 	{
 		aDatabase.Close();
-		
-	} else if (err != KErrAlreadyExists) 
+	}
+	else if (error != KErrAlreadyExists) 
 	{
-		User::LeaveIfError(err);
+		User::LeaveIfError(error);
 	}
 	
-	User::LeaveIfError(aDatabase.Open(fsSession, KTlsDatabaseName));
-	
-	CleanupStack::PopAndDestroy(); // close fsSession
-	
-	CleanupClosePushL(aDatabase);		
-	    
-#endif // #ifdef SYMBIAN_SECURE_DBMS
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTlsDatabaseL(): - calls aDatabase.Open()\n")));
+
+	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTlsDatabaseL(): - Opened private DB for EAP-TLS. error=%d\n"), error));
+
+	User::LeaveIfError(error);
 
 	// 2. Create the eaptls table to database (ignore error if exists)
 	
-// Table columns:
-//// NAME ////////////////////////////////////////// TYPE //////////// Constant ////////////////////
-//| ServiceType									| UNSIGNED INTEGER | KServiceType         |//
-//| ServiceIndex								| UNSIGNED INTEGER | KServiceIndex        |//
-//| TunnelingType								| UNSIGNED INTEGER | KTunnelingType		|//
-//| EAP_TLS_PEAP_use_manual_realm				| UNSIGNED INTEGER | cf_str_EAP_TLS_PEAP_use_manual_realm_literal      |//
-//| EAP_TLS_PEAP_manual_realm					| VARCHAR(255)     | cf_str_EAP_TLS_PEAP_manual_realm_literal				|//
-//| EAP_TLS_PEAP_use_manual_username			| UNSIGNED INTEGER | cf_str_EAP_TLS_PEAP_use_manual_username_literal   |//
-//| EAP_TLS_PEAP_manual_username				| VARCHAR(255)     | cf_str_EAP_TLS_PEAP_manual_username_literal			|//
-//| EAP_TLS_PEAP_cipher_suite					| UNSIGNED INTEGER | cf_str_EAP_TLS_PEAP_cipher_suite_literal	    |//
-//| EAP_TLS_server_authenticates_client			| UNSIGNED INTEGER | cf_str_TLS_server_authenticates_client_policy_in_client_literal |//
-//| CA_cert_label								| VARCHAR(255)     | KCACertLabelOld	    |//
-//| client_cert_label							| VARCHAR(255)     | KClientCertLabel	    |//
-//| EAP_TLS_PEAP_saved_session_id				| BINARY(32)       | cf_str_EAP_TLS_PEAP_saved_session_id_literal		    |//
-//| EAP_TLS_PEAP_saved_master_secret			| BINARY(48)       | cf_str_EAP_TLS_PEAP_saved_master_secret_literal	    |//
-//| EAP_TLS_PEAP_saved_cipher_suite				| UNSIGNED INTEGER | cf_str_EAP_TLS_PEAP_saved_cipher_suite_literal    |//
-//| EAP_TLS_PEAP_verify_certificate_realm		| UNSIGNED INTEGER | cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal		    |//
-//| EAP_TLS_max_session_validity_time			| BIGINT	   	 	| cf_str_EAP_TLS_max_session_validity_time_literal   |//
-//| EAP_TLS_last_full_authentication_time		| BIGINT	   		| KTLSLastFullAuthTime	   	|//	
-//| EAP_TLS_PEAP_use_identity_privacy	    	| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_identity_privacy_literal|//
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	// Table columns:
+	//// NAME ////////////////////////////////////////// TYPE //////////// Constant ////////////////////
+	//| ServiceType									| UNSIGNED INTEGER | KServiceType         |//
+	//| ServiceIndex								| UNSIGNED INTEGER | KServiceIndex        |//
+	//| TunnelingTypeVendorId                       | UNSIGNED INTEGER | KTunnelingTypeVendorId    |//
+	//| TunnelingType								| UNSIGNED INTEGER | KTunnelingType		|//
+	//| EAP_TLS_PEAP_use_manual_realm				| UNSIGNED INTEGER | cf_str_EAP_TLS_PEAP_use_manual_realm_literal      |//
+	//| EAP_TLS_PEAP_manual_realm					| VARCHAR(255)     | cf_str_EAP_TLS_PEAP_manual_realm_literal				|//
+	//| EAP_TLS_PEAP_use_manual_username			| UNSIGNED INTEGER | cf_str_EAP_TLS_PEAP_use_manual_username_literal   |//
+	//| EAP_TLS_PEAP_manual_username				| VARCHAR(255)     | cf_str_EAP_TLS_PEAP_manual_username_literal			|//
+	//| EAP_TLS_PEAP_cipher_suite					| UNSIGNED INTEGER | cf_str_EAP_TLS_PEAP_cipher_suite_literal	    |//
+	//| EAP_TLS_server_authenticates_client			| UNSIGNED INTEGER | cf_str_TLS_server_authenticates_client_policy_in_client_literal |//
+	//| CA_cert_label								| VARCHAR(255)     | KCACertLabel	    |//
+	//| client_cert_label							| VARCHAR(255)     | KClientCertLabel	    |//
+	//| EAP_TLS_PEAP_saved_session_id				| BINARY(32)       | cf_str_EAP_TLS_PEAP_saved_session_id_literal		    |//
+	//| EAP_TLS_PEAP_saved_master_secret			| BINARY(48)       | cf_str_EAP_TLS_PEAP_saved_master_secret_literal	    |//
+	//| EAP_TLS_PEAP_saved_cipher_suite				| UNSIGNED INTEGER | cf_str_EAP_TLS_PEAP_saved_cipher_suite_literal    |//
+	//| EAP_TLS_PEAP_verify_certificate_realm		| UNSIGNED INTEGER | cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal		    |//
+	//| EAP_TLS_max_session_validity_time			| BIGINT           | cf_str_EAP_TLS_max_session_validity_time_literal   |//
+	//| EAP_TLS_last_full_authentication_time		| BIGINT           | KTLSLastFullAuthTime	   	|//	
+	//| EAP_TLS_PEAP_use_identity_privacy	    	| UNSIGNED INTEGER | cf_str_EAP_TLS_PEAP_use_identity_privacy_literal|//
+	//| EAP_TLS_PEAP_use_automatic_ca_certificate	| UNSIGNED INTEGER | cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal|//
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////	
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 	
 	// Table creation is divided into two parts because otherwise the SQL string would get too long
-	_LIT(KSQLCreateTable1, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d),     \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d),     \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d),	  \
-											 %S VARCHAR(%d),     \
-											 %S BINARY(%d),		  \
-											 %S BINARY(%d),		  \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S BIGINT, \
-											 %S BIGINT, \
-											 %S UNSIGNED INTEGER)");
+	_LIT(KSQLCreateTable1, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d),     \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d),     \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d),	  \
+		 %S VARCHAR(%d),     \
+		 %S BINARY(%d),		  \
+		 %S BINARY(%d),		  \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S BIGINT, \
+		 %S BIGINT, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER)");
 											 
 	sqlStatement.Format(KSQLCreateTable1,
 		&KTlsDatabaseTableName,
 		&KServiceType,
 		&KServiceIndex,
+		&KTunnelingTypeVendorId,
 		&KTunnelingType,
 		&cf_str_EAP_TLS_PEAP_use_manual_realm_literal,
-		&cf_str_EAP_TLS_PEAP_manual_realm_literal, KMaxManualRealmLengthInDB,
+		&cf_str_EAP_TLS_PEAP_manual_realm_literal, KMaxRealmLengthInDB,
 		&cf_str_EAP_TLS_PEAP_use_manual_username_literal,
-		&cf_str_EAP_TLS_PEAP_manual_username_literal, KMaxManualUsernameLengthInDB,
+		&cf_str_EAP_TLS_PEAP_manual_username_literal, KMaxUsernameLengthInDB,
 		&cf_str_EAP_TLS_PEAP_cipher_suite_literal, 
 		&cf_str_TLS_server_authenticates_client_policy_in_client_literal,
-		&KCACertLabelOld, KMaxCertLabelLengthInDB,
+		&KCACertLabel, KMaxCertLabelLengthInDB,
 		&KClientCertLabel, KMaxCertLabelLengthInDB,
 		&cf_str_EAP_TLS_PEAP_saved_session_id_literal, KMaxSessionIdLengthInDB,
 		&cf_str_EAP_TLS_PEAP_saved_master_secret_literal, KMaxMasterSecretLengthInDB,
@@ -248,50 +224,56 @@ void EapTlsPeapUtils::OpenTlsDatabaseL(
 		&cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal,		
 		&cf_str_EAP_TLS_max_session_validity_time_literal,
 		&KTLSLastFullAuthTime,
-		&cf_str_EAP_TLS_PEAP_use_identity_privacy_literal);	
+		&cf_str_EAP_TLS_PEAP_use_identity_privacy_literal,
+		&cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal);	
 	
-	err = aDatabase.Execute(sqlStatement);
-	if (err == KErrAlreadyExists)
+	error = aDatabase.Execute(sqlStatement);
+	if (error == KErrAlreadyExists)
 	{
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTlsDatabaseL - Alter Table err=%d\n"), err) );
-	_LIT( KColumnDef, "UNSIGNED INTEGER" );
-	AlterTableL( aDatabase, EAddColumn , KTlsDatabaseTableName,
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTlsDatabaseL - Alter Table error=%d\n"), error) );
+		_LIT( KColumnDef, "UNSIGNED INTEGER" );
+		AlterTableL( aDatabase, EAddColumn , KTlsDatabaseTableName,
 			cf_str_EAP_TLS_PEAP_use_identity_privacy_literal, KColumnDef);
 	}
-	else if (err != KErrNone)
-		{
-		User::Leave(err);
-		}
+	else if (error != KErrNone)
+	{
+		User::Leave(error);
+	}
 
 	// Create table for _allowed_ user certificates
 	
-//// NAME ////////////////// TYPE ////////////// Constant ///////////
-//| ServiceType			| UNSIGNED INTEGER | KServiceType        |//
-//| ServiceIndex		| UNSIGNED INTEGER | KServiceIndex       |//
-//| TunnelingType		| UNSIGNED INTEGER | KTunnelingType		|//
-//| CertLabel			| VARCHAR(255)     | KCertLabel        |//	
-//| SubjectKeyId		| BINARY(20)	   | KSubjectKeyIdentifier |// This is Symbian subjectkey id
-//| ActualSubjectKeyId  | BINARY(20)	   | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
-//| SubjectName			| VARCHAR(255)     | KSubjectName        |//	
-//| IssuerName			| VARCHAR(255)     | KIssuerName        |//	
-//| SerialNumber		| VARCHAR(255)     | KSerialNumber        |//	
-//| Thumbprint			| BINARY(64)	   | KThumbprint        |//	
-//////////////////////////////////////////////////////////////////////////////////////////////////////	
+	//// NAME ////////////////// TYPE ////////////// Constant ///////////
+	//| ServiceType			  | UNSIGNED INTEGER | KServiceType        |//
+	//| ServiceIndex		  | UNSIGNED INTEGER | KServiceIndex       |//
+	//| TunnelingTypeVendorId | UNSIGNED INTEGER | KTunnelingTypeVendorId    |//
+	//| TunnelingType		  | UNSIGNED INTEGER | KTunnelingType		|//
+	//| CertLabel			  | VARCHAR(255)     | KCertLabel        |//	
+	//| SubjectKeyId		  | BINARY(20)       | KSubjectKeyIdentifier |// This is Symbian subjectkey id
+	//| ActualSubjectKeyId    | BINARY(20)       | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
+	//| SubjectName			  | VARCHAR(255)     | KSubjectName        |//	
+	//| IssuerName			  | VARCHAR(255)     | KIssuerName        |//	
+	//| SerialNumber		  | VARCHAR(255)     | KSerialNumber        |//	
+	//| Thumbprint			  | BINARY(64)       | KThumbprint        |//	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////	
 	
-	_LIT(KSQLCreateTable2, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d), \
-											 %S BINARY(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d))");											 
-											 
-	sqlStatement.Format(KSQLCreateTable2, &KTlsAllowedUserCertsDatabaseTableName, 
+	_LIT(KSQLCreateTable2, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d), \
+		 %S BINARY(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d))");
+
+	sqlStatement.Format(KSQLCreateTable2,
+		&KTlsAllowedUserCertsDatabaseTableName, 
 		&KServiceType, 
 		&KServiceIndex, 
+		&KTunnelingTypeVendorId,
 		&KTunnelingType, 
 		&KCertLabel, KMaxCertLabelLengthInDB,
 		&KSubjectKeyIdentifier, KMaxSubjectKeyIdLengthInDB,
@@ -301,41 +283,46 @@ void EapTlsPeapUtils::OpenTlsDatabaseL(
 		&KSerialNumber, KGeneralStringMaxLength,
 		&KThumbprint, KThumbprintMaxLength);
 				
-	err = aDatabase.Execute(sqlStatement);
-	if (err != KErrNone && err != KErrAlreadyExists)
+	error = aDatabase.Execute(sqlStatement);
+	if (error != KErrNone && error != KErrAlreadyExists)
 	{
-		User::Leave(err);
+		User::Leave(error);
 	}
 
 	// Create table for _allowed_ CA certs
 
-//// NAME ////////////////// TYPE ////////////// Constant ///////////
-//| ServiceType		    | UNSIGNED INTEGER | KServiceType        |//
-//| ServiceIndex		| UNSIGNED INTEGER | KServiceIndex       |//
-//| TunnelingType		| UNSIGNED INTEGER | KTunnelingType		|//
-//| CertLabel			| VARCHAR(255)     | KCACertLabel        |//	
-//| SubjectKeyId		| BINARY(255)	   | KSubjectKeyIdentifier |// This is Symbian subjectkey id
-//| ActualSubjectKeyId  | BINARY(20)	   | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
-//| SubjectName			| VARCHAR(255)     | KSubjectName        |//	
-//| IssuerName			| VARCHAR(255)     | KIssuerName        |//	
-//| SerialNumber		| VARCHAR(255)     | KSerialNumber        |//	
-//| Thumbprint			| BINARY(64)	   | KThumbprint        |//	
-//////////////////////////////////////////////////////////////////////////////////////////////////////	
+	//// NAME ////////////////// TYPE ////////////// Constant ///////////
+	//| ServiceType		      | UNSIGNED INTEGER | KServiceType        |//
+	//| ServiceIndex		  | UNSIGNED INTEGER | KServiceIndex       |//
+	//| TunnelingTypeVendorId | UNSIGNED INTEGER | KTunnelingTypeVendorId    |//
+	//| TunnelingType		  | UNSIGNED INTEGER | KTunnelingType		|//
+	//| CertLabel			  | VARCHAR(255)     | KCACertLabel        |//	
+	//| SubjectKeyId		  | BINARY(255)	     | KSubjectKeyIdentifier |// This is Symbian subjectkey id
+	//| ActualSubjectKeyId    | BINARY(20)	     | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
+	//| SubjectName			  | VARCHAR(255)     | KSubjectName        |//	
+	//| IssuerName			  | VARCHAR(255)     | KIssuerName        |//	
+	//| SerialNumber		  | VARCHAR(255)     | KSerialNumber        |//	
+	//| Thumbprint			  | BINARY(64)	     | KThumbprint        |//	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////	
 
-	_LIT(KSQLCreateTable3, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d), \
-											 %S BINARY(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d))");											 
-											 
-	sqlStatement.Format(KSQLCreateTable3, &KTlsAllowedCACertsDatabaseTableName, 
+	_LIT(KSQLCreateTable3, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d), \
+		 %S BINARY(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d))");
+
+	sqlStatement.Format(KSQLCreateTable3,
+		&KTlsAllowedCACertsDatabaseTableName, 
 		&KServiceType, 
-		&KServiceIndex, 
+		&KServiceIndex,
+		&KTunnelingTypeVendorId,
 		&KTunnelingType, 
 		&KCertLabel, KMaxCertLabelLengthInDB,
 		&KSubjectKeyIdentifier, KMaxSubjectKeyIdLengthInDB,
@@ -345,44 +332,58 @@ void EapTlsPeapUtils::OpenTlsDatabaseL(
 		&KSerialNumber, KGeneralStringMaxLength,
 		&KThumbprint, KThumbprintMaxLength);
 		
-	err = aDatabase.Execute(sqlStatement);
-	if (err != KErrNone && err != KErrAlreadyExists)
+	error = aDatabase.Execute(sqlStatement);
+	if (error != KErrNone && error != KErrAlreadyExists)
 	{
-		User::Leave(err);
+		User::Leave(error);
 	}
 
 	// Create table for allowed cipher suites
 
-//// NAME ///////////////// TYPE ////////////// Constant ///////////
-//| ServiceType			| UNSIGNED INTEGER | KServiceType        |//
-//| ServiceIndex		| UNSIGNED INTEGER | KServiceIndex       |//
-//| TunnelingType		| UNSIGNED INTEGER | KTunnelingType		|//
-//| CipherSuite			| UNSIGNED INTEGER | KCipherSuite        |//	
-//////////////////////////////////////////////////////////////////////////////////////////////////////	
+	//// NAME ///////////////// TYPE ////////////// Constant ///////////
+	//| ServiceType			  | UNSIGNED INTEGER | KServiceType        |//
+	//| ServiceIndex		  | UNSIGNED INTEGER | KServiceIndex       |//
+	//| TunnelingTypeVendorId | UNSIGNED INTEGER | KTunnelingTypeVendorId    |//
+	//| TunnelingType		  | UNSIGNED INTEGER | KTunnelingType		|//
+	//| CipherSuite			  | UNSIGNED INTEGER | KCipherSuite        |//	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////	
 	
-	_LIT(KSQLCreateTable4, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER)");
+	_LIT(KSQLCreateTable4, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER)");
 
-	sqlStatement.Format(KSQLCreateTable4, &KTlsAllowedCipherSuitesDatabaseTableName, 
+	sqlStatement.Format(KSQLCreateTable4,
+		&KTlsAllowedCipherSuitesDatabaseTableName, 
 		&KServiceType, 
-		&KServiceIndex, 
+		&KServiceIndex,
+		&KTunnelingTypeVendorId,
 		&KTunnelingType, 
 		&KCipherSuite);
-		
-	err = aDatabase.Execute(sqlStatement);
-	if (err != KErrNone && err != KErrAlreadyExists)
+
+	error = aDatabase.Execute(sqlStatement);
+	if (error != KErrNone && error != KErrAlreadyExists)
 	{
-		User::Leave(err);
+		User::Leave(error);
 	}
 	
 	// 4. Check if database table contains a row for this service type and id 
 		
-	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
 	
-	sqlStatement.Format(KSQLQueryRow, &cf_str_EAP_TLS_PEAP_cipher_suite_literal, &KTlsDatabaseTableName, 
-		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);	
+	sqlStatement.Format(KSQLQueryRow,
+		&cf_str_EAP_TLS_PEAP_cipher_suite_literal,
+		&KTlsDatabaseTableName, 
+		&KServiceType,
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aTunnelingType.get_vendor_type());	
 	
 	RDbView view;
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
@@ -410,19 +411,20 @@ void EapTlsPeapUtils::OpenTlsDatabaseL(
 		// Set the default values. The other three tables (certs, ca certs & cipher suites) are empty by default.
 		view.SetColL(colSet->ColNo(KServiceType), static_cast<TInt>(aIndexType));
 		view.SetColL(colSet->ColNo(KServiceIndex), aIndex);
-		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingVendorType);
+		view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
+		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_realm_literal), default_EAP_TLS_PEAP_use_manual_realm);
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_realm_literal), default_EAP_TLS_PEAP_manual_realm);
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_realm_literal), default_EAP_realm);
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_username_literal), default_EAP_TLS_PEAP_use_manual_username);
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_username_literal), default_EAP_TLS_PEAP_manual_username);
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_username_literal), default_EAP_username);
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_cipher_suite_literal), default_EAP_TLS_PEAP_cipher_suite);
 		
 		view.SetColL(colSet->ColNo(cf_str_TLS_server_authenticates_client_policy_in_client_literal), default_EAP_TLS_server_authenticates_client);
 		
-		view.SetColL(colSet->ColNo(KCACertLabelOld), default_CA_cert_label);
+		view.SetColL(colSet->ColNo(KCACertLabel), default_CA_cert_label);
 		view.SetColL(colSet->ColNo(KClientCertLabel), default_client_cert_label);
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal), default_EAP_TLS_PEAP_verify_certificate_realm);
@@ -431,11 +433,14 @@ void EapTlsPeapUtils::OpenTlsDatabaseL(
 		
 		view.SetColL(colSet->ColNo(KTLSLastFullAuthTime), default_FullAuthTime);		
 
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TLS_Privacy);		
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TTLS_Privacy);		
+
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal), default_EAP_TLS_PEAP_use_automatic_ca_certificate);
+
 		view.PutL();
 
-		CleanupStack::PopAndDestroy( colSet ); // Delete colSet.		
-		CleanupStack::PopAndDestroy( &view ); // Close view.
+		CleanupStack::PopAndDestroy( colSet );
+		CleanupStack::PopAndDestroy( &view );
 		
 		// Add default disabled cipher suites
 		_LIT(KSQLInsert2, "SELECT * FROM %S");
@@ -453,7 +458,8 @@ void EapTlsPeapUtils::OpenTlsDatabaseL(
 			view.InsertL();
 			view.SetColL(colSet->ColNo(KServiceType), static_cast<TInt>(aIndexType));
 			view.SetColL(colSet->ColNo(KServiceIndex), aIndex);			
-			view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingVendorType);
+			view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
+			view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
 			view.SetColL(colSet->ColNo(KCipherSuite), default_allowed_cipher_suites[i]);
 			view.PutL();
 			i++;
@@ -476,163 +482,139 @@ void EapTlsPeapUtils::OpenTlsDatabaseL(
 	tableName = KTlsAllowedCACertsDatabaseTableName;	
 	AddExtraCertColumnsL(aDatabase,tableName);
 	
-	CleanupStack::PopAndDestroy( buf ); // Delete buf or sqlStatement	
-	CleanupStack::Pop( &aDatabase );	
-	CleanupStack::Pop( &aSession );	
-	
+
 	aDatabase.Compact();
+
+	CleanupStack::PopAndDestroy( buf );
+	CleanupStack::Pop( &aDatabase );
+	CleanupStack::Pop( &aFileServerSession );
 }
 
+// ---------------------------------------------------------
+
 void EapTlsPeapUtils::OpenPeapDatabaseL(
-		RDbNamedDatabase& aDatabase, 
-		RDbs& aSession, 
-		const TIndexType aIndexType, 
-		const TInt aIndex,
-		const eap_type_value_e aTunnelingType)
+	RDbNamedDatabase& aDatabase,
+	RFs& aFileServerSession,
+	const TIndexType aIndexType,
+	const TInt aIndex,
+	const eap_type_value_e aTunnelingType)
 {
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
-
-#else
-
-	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
 	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::OpenPeapDatabaseL -Start- aIndexType=%d, aIndex=%d, Tunneling vendor type=%d \n"),
-		aIndexType,aIndex, aTunnelingVendorType));
+		(_L("EapTlsPeapUtils::OpenPeapDatabaseL(): - Start - aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
+		aIndexType,
+		aIndex,
+		aTunnelingType.get_vendor_id(),
+		aTunnelingType.get_vendor_type()));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::OpenPeapDatabaseL()\n"));
 
 	// 1. Open/create a database	
-	
-	// Connect to the DBMS server.
-	User::LeaveIfError(aSession.Connect());		
-	CleanupClosePushL(aSession);	
-	// aSession and aDatabase are pushed to the cleanup stack even though they may be member
-	// variables of the calling class and would be closed in the destructor anyway. This ensures
-	// that if they are not member variables they will be closed. Closing the handle twice
-	// does no harm.	
-	
-#ifdef SYMBIAN_SECURE_DBMS
-	
-	// Create the secure shared database with the specified secure policy.
-	// Database will be created in the data caging path for DBMS (C:\private\100012a5).
-	
-	TInt err = aDatabase.Create(aSession, KPeapDatabaseName, KSecureUIDFormat);
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenPeapDatabaseL - Created Secure DB for eappeap.dat. err=%d\n"), err) );
-	
-	if(err == KErrNone)
+
+	TInt error(KErrNone);
+	TFileName aPrivateDatabasePathName;
+
+	EapPluginTools::CreateDatabaseLC(
+		aDatabase,
+		aFileServerSession,
+		error,
+		KPeapDatabaseName,
+		aPrivateDatabasePathName);
+
+	if(error == KErrNone)
 	{
 		aDatabase.Close();
-		
-	} else if (err != KErrAlreadyExists) 
+	}
+	else if (error != KErrAlreadyExists) 
 	{
-		User::LeaveIfError(err);
+		User::LeaveIfError(error);
 	}
 	
-	User::LeaveIfError(aDatabase.Open(aSession, KPeapDatabaseName, KSecureUIDFormat));
-	CleanupClosePushL(aDatabase);		
-		
-#else
-	// For non-secured database. The database will be created in the old location (c:\system\data).
-	
-	RFs fsSession;		
-	User::LeaveIfError(fsSession.Connect());
-	CleanupClosePushL(fsSession);	
-	TInt err = aDatabase.Create(fsSession, KPeapDatabaseName);
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenPeapDatabaseL - Created Non-Secure DB for eappeap.dat. err=%d\n"), err) );
-	
-	if(err == KErrNone)
-	{
-		aDatabase.Close();
-		
-	} else if (err != KErrAlreadyExists) 
-	{
-		User::LeaveIfError(err);
-	}
-	
-	User::LeaveIfError(aDatabase.Open(fsSession, KPeapDatabaseName));
-	
-	CleanupStack::PopAndDestroy(); // close fsSession
-	
-	CleanupClosePushL(aDatabase);		
-	    
-#endif // #ifdef SYMBIAN_SECURE_DBMS
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenPeapDatabaseL(): - calls aDatabase.Open()\n")));
+
+	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenPeapDatabaseL(): - Opened private DB for EAP-PEAP. error=%d\n"), error));
+
+	User::LeaveIfError(error);
 
 	// 2. Create the eappeap table to database (ignore error if exists)
 	
-// Table columns:
-//// NAME /////////////////////////////////////////////// TYPE ////////////// Constant ///////////////////
-//| ServiceType										| UNSIGNED INTEGER 	| KServiceType        |//
-//| ServiceIndex									| UNSIGNED INTEGER 	| KServiceIndex       |//
-//| TunnelingType									| UNSIGNED INTEGER 	| KTunnelingType		|//
-//| EAP_TLS_PEAP_use_manual_realm					| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_manual_realm_literal      |//
-//| EAP_TLS_PEAP_manual_realm						| VARCHAR(255)     	| cf_str_EAP_TLS_PEAP_manual_realm_literal				|//
-//| EAP_TLS_PEAP_use_manual_username				| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_manual_username_literal   |//
-//| EAP_TLS_PEAP_manual_username					| VARCHAR(255)     	| cf_str_EAP_TLS_PEAP_manual_username_literal			|//
-//| EAP_TLS_PEAP_max_count_of_session_resumes		| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_max_count_of_session_resumes_literal    |//
-//| EAP_TLS_PEAP_cipher_suite						| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_cipher_suite_literal	   |//
-//| EAP_TLS_PEAP_used_PEAP_version					| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_used_PEAP_version_literal		    |//
-//| EAP_TLS_PEAP_accepted_PEAP_versions				| BINARY(12)	    | cf_str_EAP_TLS_PEAP_accepted_PEAP_versions_literal|//
-//| PEAP_accepted_tunneled_client_types			   	| VARBINARY(240) 	| cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal      |//
-//| PEAP_unaccepted_tunneled_client_types		   	| VARBINARY(240) 	| cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal      |//
-//| EAP_TLS_server_authenticates_client		        | UNSIGNED INTEGER 	| cf_str_TLS_server_authenticates_client_policy_in_client_literal|//
-//| CA_cert_label								    | VARCHAR(255)     	| KCACertLabelOld	   |//
-//| client_cert_label							    | VARCHAR(255)     	| KClientCertLabel	   |//
-//| EAP_TLS_PEAP_saved_session_id				    | BINARY(32)       	| cf_str_EAP_TLS_PEAP_saved_session_id_literal		   |//
-//| EAP_TLS_PEAP_saved_master_secret			    | BINARY(48)       	| cf_str_EAP_TLS_PEAP_saved_master_secret_literal	   |//
-//| EAP_TLS_PEAP_saved_cipher_suite				    | UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_saved_cipher_suite_literal   |//
-//| EAP_TLS_PEAP_verify_certificate_realm			| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal		   |//
-//| EAP_PEAP_max_session_validity_time				| BIGINT	   		| cf_str_EAP_PEAP_max_session_validity_time_literal   |//
-//| EAP_PEAP_last_full_authentication_time			| BIGINT	   		| KPEAPLastFullAuthTime	   	|//	
-//| EAP_TLS_PEAP_use_identity_privacy	    	    | UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_identity_privacy_literal|//
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	// Table columns:
+	//// NAME /////////////////////////////////////////////// TYPE ////////////// Constant ///////////////////
+	//| ServiceType										| UNSIGNED INTEGER 	| KServiceType        |//
+	//| ServiceIndex									| UNSIGNED INTEGER 	| KServiceIndex       |//
+	//| TunnelingTypeVendorId							| UNSIGNED INTEGER  | KTunnelingTypeVendorId    |//
+	//| TunnelingType									| UNSIGNED INTEGER 	| KTunnelingType		|//
+	//| EAP_TLS_PEAP_use_manual_realm					| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_manual_realm_literal      |//
+	//| EAP_TLS_PEAP_manual_realm						| VARCHAR(255)     	| cf_str_EAP_TLS_PEAP_manual_realm_literal				|//
+	//| EAP_TLS_PEAP_use_manual_username				| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_manual_username_literal   |//
+	//| EAP_TLS_PEAP_manual_username					| VARCHAR(255)     	| cf_str_EAP_TLS_PEAP_manual_username_literal			|//
+	//| EAP_TLS_PEAP_max_count_of_session_resumes		| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_max_count_of_session_resumes_literal    |//
+	//| EAP_TLS_PEAP_cipher_suite						| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_cipher_suite_literal	   |//
+	//| EAP_TLS_PEAP_used_PEAP_version					| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_used_PEAP_version_literal		    |//
+	//| EAP_TLS_PEAP_accepted_PEAP_versions				| BINARY(12)	    | cf_str_EAP_TLS_PEAP_accepted_PEAP_versions_literal|//
+	//| PEAP_accepted_tunneled_client_types			   	| VARBINARY(240) 	| cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal      |//
+	//| PEAP_unaccepted_tunneled_client_types		   	| VARBINARY(240) 	| cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal      |//
+	//| EAP_TLS_server_authenticates_client		        | UNSIGNED INTEGER 	| cf_str_TLS_server_authenticates_client_policy_in_client_literal|//
+	//| CA_cert_label								    | VARCHAR(255)     	| KCACertLabel	   |//
+	//| client_cert_label							    | VARCHAR(255)     	| KClientCertLabel	   |//
+	//| EAP_TLS_PEAP_saved_session_id				    | BINARY(32)       	| cf_str_EAP_TLS_PEAP_saved_session_id_literal		   |//
+	//| EAP_TLS_PEAP_saved_master_secret			    | BINARY(48)       	| cf_str_EAP_TLS_PEAP_saved_master_secret_literal	   |//
+	//| EAP_TLS_PEAP_saved_cipher_suite				    | UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_saved_cipher_suite_literal   |//
+	//| EAP_TLS_PEAP_verify_certificate_realm			| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal		   |//
+	//| EAP_PEAP_max_session_validity_time				| BIGINT	   		| cf_str_EAP_PEAP_max_session_validity_time_literal   |//
+	//| EAP_PEAP_last_full_authentication_time			| BIGINT	   		| KPEAPLastFullAuthTime	   	|//	
+	//| EAP_TLS_PEAP_use_identity_privacy	    		| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_identity_privacy_literal|//
+	//| EAP_TLS_PEAP_use_automatic_ca_certificate		| UNSIGNED INTEGER  | cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal|//
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////	
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
 	// Table creation is divided into two parts because otherwise the SQL string would get too long
-	_LIT(KSQLCreateTable1, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d),     \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d),     \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S BINARY(%d),		  \
-											 %S VARBINARY(%d),	  \
-											 %S VARBINARY(%d),	  \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d),	  \
-											 %S VARCHAR(%d),     \
-											 %S BINARY(%d),		  \
-											 %S BINARY(%d),		  \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S BIGINT, \
-											 %S BIGINT, \
-											 %S UNSIGNED INTEGER)");
+	_LIT(KSQLCreateTable1, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d),     \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d),     \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S BINARY(%d),		  \
+		 %S VARBINARY(%d),	  \
+		 %S VARBINARY(%d),	  \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d),	  \
+		 %S VARCHAR(%d),     \
+		 %S BINARY(%d),		  \
+		 %S BINARY(%d),		  \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S BIGINT, \
+		 %S BIGINT, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER)");
+
 	sqlStatement.Format(KSQLCreateTable1,
 		&KPeapDatabaseTableName,
 		&KServiceType,
 		&KServiceIndex,
+		&KTunnelingTypeVendorId,
 		&KTunnelingType,
 		&cf_str_EAP_TLS_PEAP_use_manual_realm_literal,
-		&cf_str_EAP_TLS_PEAP_manual_realm_literal, KMaxManualRealmLengthInDB,
+		&cf_str_EAP_TLS_PEAP_manual_realm_literal, KMaxRealmLengthInDB,
 		&cf_str_EAP_TLS_PEAP_use_manual_username_literal,
-		&cf_str_EAP_TLS_PEAP_manual_username_literal, KMaxManualUsernameLengthInDB,
+		&cf_str_EAP_TLS_PEAP_manual_username_literal, KMaxUsernameLengthInDB,
 		&cf_str_EAP_TLS_PEAP_cipher_suite_literal,
 		&cf_str_EAP_TLS_PEAP_used_PEAP_version_literal,
 		&cf_str_EAP_TLS_PEAP_accepted_PEAP_versions_literal, KMaxPEAPVersionsStringLengthInDB,
 		&cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, KMaxTunneledTypeStringLengthInDB,
 		&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal, KMaxTunneledTypeStringLengthInDB,
 		&cf_str_TLS_server_authenticates_client_policy_in_client_literal,
-		&KCACertLabelOld, KMaxCertLabelLengthInDB,
+		&KCACertLabel, KMaxCertLabelLengthInDB,
 		&KClientCertLabel, KMaxCertLabelLengthInDB,
 		&cf_str_EAP_TLS_PEAP_saved_session_id_literal, KMaxSessionIdLengthInDB,
 		&cf_str_EAP_TLS_PEAP_saved_master_secret_literal,  KMaxMasterSecretLengthInDB,
@@ -640,50 +622,56 @@ void EapTlsPeapUtils::OpenPeapDatabaseL(
 		&cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal,
 		&cf_str_EAP_PEAP_max_session_validity_time_literal,
 		&KPEAPLastFullAuthTime,	
-		&cf_str_EAP_TLS_PEAP_use_identity_privacy_literal);		
+		&cf_str_EAP_TLS_PEAP_use_identity_privacy_literal,
+		&cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal);		
 					
-	err = aDatabase.Execute(sqlStatement);
-	if (err == KErrAlreadyExists)
+	error = aDatabase.Execute(sqlStatement);
+	if (error == KErrAlreadyExists)
 		{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenPeapDatabaseL - Alter Table err=%d\n"), err) );
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenPeapDatabaseL - Alter Table error=%d\n"), error) );
 		_LIT( KColumnDef, "UNSIGNED INTEGER" );
 		AlterTableL( aDatabase, EAddColumn , KPeapDatabaseTableName,
 				cf_str_EAP_TLS_PEAP_use_identity_privacy_literal, KColumnDef);
 		}
-		else if (err != KErrNone)
+		else if (error != KErrNone)
 			{
-			User::Leave(err);
+			User::Leave(error);
 			}
 
 	// Create table for _allowed_ user certificates
 	
-//// NAME ////////////////// TYPE ////////////// Constant ///////////
-//| ServiceType			| UNSIGNED INTEGER | KServiceType        |//
-//| ServiceIndex		| UNSIGNED INTEGER | KServiceIndex       |//
-//| TunnelingType		| UNSIGNED INTEGER | KTunnelingType		|//
-//| CertLabel			| VARCHAR(255)     | KCACertLabel        |//	
-//| SubjectKeyId		| BINARY(20)	   | KSubjectKeyIdentifier |// This is Symbian subjectkey id
-//| ActualSubjectKeyId  | BINARY(20)	   | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
-//| SubjectName			| VARCHAR(255)     | KSubjectName        |//	
-//| IssuerName			| VARCHAR(255)     | KIssuerName        |//	
-//| SerialNumber		| VARCHAR(255)     | KSerialNumber        |//	
-//| Thumbprint			| BINARY(64)	   | KThumbprint        |//	
-//////////////////////////////////////////////////////////////////////////////////////////////////////	
+	//// NAME ////////////////// TYPE ////////////// Constant ///////////
+	//| ServiceType				| UNSIGNED INTEGER | KServiceType        |//
+	//| ServiceIndex			| UNSIGNED INTEGER | KServiceIndex       |//
+	//| TunnelingTypeVendorId	| UNSIGNED INTEGER | KTunnelingTypeVendorId    |//
+	//| TunnelingType			| UNSIGNED INTEGER | KTunnelingType		|//
+	//| CertLabel				| VARCHAR(255)     | KCACertLabel        |//	
+	//| SubjectKeyId			| BINARY(20)	   | KSubjectKeyIdentifier |// This is Symbian subjectkey id
+	//| ActualSubjectKeyId		| BINARY(20)	   | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
+	//| SubjectName				| VARCHAR(255)     | KSubjectName        |//	
+	//| IssuerName				| VARCHAR(255)     | KIssuerName        |//	
+	//| SerialNumber			| VARCHAR(255)     | KSerialNumber        |//	
+	//| Thumbprint				| BINARY(64)	   | KThumbprint        |//	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////	
 	
-	_LIT(KSQLCreateTable2, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d), \
-											 %S BINARY(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d))");											 
-											 
-	sqlStatement.Format(KSQLCreateTable2, &KPeapAllowedUserCertsDatabaseTableName, 
+	_LIT(KSQLCreateTable2, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d), \
+		 %S BINARY(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d))");
+
+	sqlStatement.Format(KSQLCreateTable2,
+		&KPeapAllowedUserCertsDatabaseTableName, 
 		&KServiceType, 
 		&KServiceIndex, 
+		&KTunnelingTypeVendorId,
 		&KTunnelingType, 
 		&KCertLabel, KMaxCertLabelLengthInDB,
 		&KSubjectKeyIdentifier, KMaxSubjectKeyIdLengthInDB,
@@ -693,41 +681,46 @@ void EapTlsPeapUtils::OpenPeapDatabaseL(
 		&KSerialNumber, KGeneralStringMaxLength,
 		&KThumbprint, KThumbprintMaxLength);
 		
-	err = aDatabase.Execute(sqlStatement);
-	if (err != KErrNone && err != KErrAlreadyExists)
+	error = aDatabase.Execute(sqlStatement);
+	if (error != KErrNone && error != KErrAlreadyExists)
 	{
-		User::Leave(err);
+		User::Leave(error);
 	}	
 
 	// Create table for _allowed_ CA certs
 
-//// NAME ////////////////// TYPE ////////////// Constant ///////////
-//| ServiceType			| UNSIGNED INTEGER | KServiceType        |//
-//| ServiceIndex		| UNSIGNED INTEGER | KServiceIndex       |//
-//| TunnelingType		| UNSIGNED INTEGER | KTunnelingType		|//
-//| CACertLabel			| VARCHAR(255)     | KCACertLabel        |//	
-//| SubjectKeyId		| BINARY(20)	   | KSubjectKeyIdentifier |// This is Symbian subjectkey id
-//| ActualSubjectKeyId  | BINARY(20)	   | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
-//| SubjectName			| VARCHAR(255)     | KSubjectName        |//	
-//| IssuerName			| VARCHAR(255)     | KIssuerName        |//	
-//| SerialNumber		| VARCHAR(255)     | KSerialNumber        |//	
-//| Thumbprint			| BINARY(64)	   | KThumbprint        |//	
-//////////////////////////////////////////////////////////////////////////////////////////////////////	
+	//// NAME ////////////////// TYPE ////////////// Constant ///////////
+	//| ServiceType				| UNSIGNED INTEGER | KServiceType        |//
+	//| ServiceIndex			| UNSIGNED INTEGER | KServiceIndex       |//
+	//| TunnelingTypeVendorId	| UNSIGNED INTEGER | KTunnelingTypeVendorId    |//
+	//| TunnelingType			| UNSIGNED INTEGER | KTunnelingType		|//
+	//| CACertLabel				| VARCHAR(255)     | KCACertLabel        |//	
+	//| SubjectKeyId			| BINARY(20)	   | KSubjectKeyIdentifier |// This is Symbian subjectkey id
+	//| ActualSubjectKeyId		| BINARY(20)	   | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
+	//| SubjectName				| VARCHAR(255)     | KSubjectName        |//	
+	//| IssuerName				| VARCHAR(255)     | KIssuerName        |//	
+	//| SerialNumber			| VARCHAR(255)     | KSerialNumber        |//	
+	//| Thumbprint				| BINARY(64)	   | KThumbprint        |//	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////	
 
-	_LIT(KSQLCreateTable3, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d), \
-											 %S BINARY(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d))");
+	_LIT(KSQLCreateTable3, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d), \
+		 %S BINARY(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d))");
 											 											 
-	sqlStatement.Format(KSQLCreateTable3, &KPeapAllowedCACertsDatabaseTableName, 
+	sqlStatement.Format(KSQLCreateTable3,
+		&KPeapAllowedCACertsDatabaseTableName, 
 		&KServiceType, 
-		&KServiceIndex, 
+		&KServiceIndex,
+		&KTunnelingTypeVendorId,
 		&KTunnelingType, 
 		&KCertLabel, KMaxCertLabelLengthInDB,
 		&KSubjectKeyIdentifier, KMaxSubjectKeyIdLengthInDB,
@@ -737,49 +730,66 @@ void EapTlsPeapUtils::OpenPeapDatabaseL(
 		&KSerialNumber, KGeneralStringMaxLength,
 		&KThumbprint, KThumbprintMaxLength);
 		
-	err = aDatabase.Execute(sqlStatement);
-	if (err != KErrNone && err != KErrAlreadyExists)
+	error = aDatabase.Execute(sqlStatement);
+	if (error != KErrNone && error != KErrAlreadyExists)
 	{
-		User::Leave(err);
+		User::Leave(error);
 	}
 
 	// Create table for _allowed_ cipher suites
 
-//// NAME ///////////////// TYPE ////////////// Constant ///////////
-//| ServiceType			| UNSIGNED INTEGER | KServiceType        |//
-//| ServiceIndex		| UNSIGNED INTEGER | KServiceIndex       |//
-//| TunnelingType		| UNSIGNED INTEGER | KTunnelingType		|//
-//| CipherSuite			| UNSIGNED INTEGER | KCipherSuite        |//	
-//////////////////////////////////////////////////////////////////////////////////////////////////////	
+	//// NAME ///////////////////// TYPE ////////////// Constant ///////////
+	//| ServiceType				| UNSIGNED INTEGER | KServiceType        |//
+	//| ServiceIndex			| UNSIGNED INTEGER | KServiceIndex       |//
+	//| TunnelingTypeVendorId	| UNSIGNED INTEGER | KTunnelingTypeVendorId    |//
+	//| TunnelingType			| UNSIGNED INTEGER | KTunnelingType		|//
+	//| CipherSuite				| UNSIGNED INTEGER | KCipherSuite        |//	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////	
 	
-	_LIT(KSQLCreateTable4, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER)");
+	_LIT(KSQLCreateTable4, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER)");
 
-	sqlStatement.Format(KSQLCreateTable4, &KPeapAllowedCipherSuitesDatabaseTableName, 
-		&KServiceType, &KServiceIndex, &KTunnelingType, &KCipherSuite);
-	err = aDatabase.Execute(sqlStatement);
-	if (err != KErrNone && err != KErrAlreadyExists)
+	sqlStatement.Format(KSQLCreateTable4,
+		&KPeapAllowedCipherSuitesDatabaseTableName, 
+		&KServiceType,
+		&KServiceIndex,
+		&KTunnelingTypeVendorId,
+		&KTunnelingType,
+		&KCipherSuite);
+
+	error = aDatabase.Execute(sqlStatement);
+	if (error != KErrNone && error != KErrAlreadyExists)
 	{
-		User::Leave(err);
+		User::Leave(error);
 	}
 
 	// 4. Check if database table contains a row for this service type and id 
 	 	
-	_LIT(KSQLQueryRow, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQLQueryRow, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
 	
-	sqlStatement.Format(KSQLQueryRow, &KPeapDatabaseTableName, 
-		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
-			
+	sqlStatement.Format(KSQLQueryRow,
+		&KPeapDatabaseTableName, 
+		&KServiceType,
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aTunnelingType.get_vendor_type());
+
 	RDbView view;
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 	// View must be closed when no longer needed
 	CleanupClosePushL(view);
 	User::LeaveIfError(view.EvaluateAll());
-	
+
 	// 5. If row is not found then add it
-	
+
 	TInt rows = view.CountL();
 	CleanupStack::PopAndDestroy(); // view
 	if (rows == 0)
@@ -798,13 +808,14 @@ void EapTlsPeapUtils::OpenPeapDatabaseL(
 		// Set the default values. The other three tables (certs, ca certs & cipher suites) are empty by default.
 		view.SetColL(colSet->ColNo(KServiceType), static_cast<TInt>(aIndexType));
 		view.SetColL(colSet->ColNo(KServiceIndex), aIndex);
-		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingVendorType);
+		view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
+		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_realm_literal), default_EAP_TLS_PEAP_use_manual_realm);
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_realm_literal), default_EAP_TLS_PEAP_manual_realm);
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_realm_literal), default_EAP_realm);
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_username_literal), default_EAP_TLS_PEAP_use_manual_username);
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_username_literal), default_EAP_TLS_PEAP_manual_username);
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_username_literal), default_EAP_username);
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_cipher_suite_literal), default_EAP_TLS_PEAP_cipher_suite);
 		
@@ -827,7 +838,7 @@ void EapTlsPeapUtils::OpenPeapDatabaseL(
 		view.SetColL(colSet->ColNo(cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal), default_PEAP_tunneled_types);
 		
 		view.SetColL(colSet->ColNo(cf_str_TLS_server_authenticates_client_policy_in_client_literal), default_EAP_PEAP_TTLS_server_authenticates_client);
-		view.SetColL(colSet->ColNo(KCACertLabelOld), default_CA_cert_label);
+		view.SetColL(colSet->ColNo(KCACertLabel), default_CA_cert_label);
 		view.SetColL(colSet->ColNo(KClientCertLabel), default_client_cert_label);	
 
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal), default_EAP_TLS_PEAP_verify_certificate_realm);
@@ -836,7 +847,9 @@ void EapTlsPeapUtils::OpenPeapDatabaseL(
 		
 		view.SetColL(colSet->ColNo(KPEAPLastFullAuthTime), default_FullAuthTime);
 
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TLS_Privacy);						
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TTLS_Privacy);						
+
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal), default_EAP_TLS_PEAP_use_automatic_ca_certificate);
 
 		view.PutL();
 		
@@ -859,14 +872,15 @@ void EapTlsPeapUtils::OpenPeapDatabaseL(
 			view.InsertL();
 			view.SetColL(colSet->ColNo(KServiceType), static_cast<TInt>(aIndexType));
 			view.SetColL(colSet->ColNo(KServiceIndex), aIndex);
-			view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingVendorType);
+			view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
+			view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
 			view.SetColL(colSet->ColNo(KCipherSuite), default_allowed_cipher_suites[i]);
 			view.PutL();
 			i++;
 		}
 		
-		CleanupStack::PopAndDestroy( colSet ); // Delete colSet.		
-		CleanupStack::PopAndDestroy( &view ); // Close view.
+		CleanupStack::PopAndDestroy( colSet );
+		CleanupStack::PopAndDestroy( &view );
 	} 
 	
 	// 6. Do the altering of tables here. 
@@ -882,11 +896,11 @@ void EapTlsPeapUtils::OpenPeapDatabaseL(
 	tableName = KPeapAllowedCACertsDatabaseTableName;	
 	AddExtraCertColumnsL(aDatabase,tableName);
 
-	CleanupStack::PopAndDestroy( buf ); // Delete buf or sqlStatement
-	CleanupStack::Pop( &aDatabase );	
-	CleanupStack::Pop( &aSession );	
-	
 	aDatabase.Compact();
+
+	CleanupStack::PopAndDestroy( buf );
+	CleanupStack::Pop( &aDatabase );
+	CleanupStack::Pop( &aFileServerSession );
 }
 
 #if defined(USE_TTLS_EAP_TYPE)
@@ -896,170 +910,143 @@ void EapTlsPeapUtils::OpenPeapDatabaseL(
 // ---------------------------------------------------------
 //
 void EapTlsPeapUtils::OpenTtlsDatabaseL(
-		RDbNamedDatabase& aDatabase, 
-		RDbs& aSession, 
-		const TIndexType aIndexType, 
-		const TInt aIndex,
-		const eap_type_value_e aTunnelingType)
+	RDbNamedDatabase& aDatabase,
+	RFs& aFileServerSession,
+	const TIndexType aIndexType,
+	const TInt aIndex,
+	const eap_type_value_e aTunnelingType)
 {
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
-
-#else
-
-	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
 	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::OpenTtlsDatabaseL -Start- aIndexType=%d, aIndex=%d, Tunneling vendor type=%d \n"),
-		aIndexType,aIndex, aTunnelingVendorType));
+		(_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): - Start - aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
+		aIndexType,
+		aIndex,
+		aTunnelingType.get_vendor_id(),
+		aTunnelingType.get_vendor_type()));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::OpenTtlsDatabaseL()\n"));
 
 	// 1. Open/create a database	
-	
-	// Connect to the DBMS server.
-	User::LeaveIfError(aSession.Connect());		
-	CleanupClosePushL(aSession);	
-	// aSession and aDatabase are pushed to the cleanup stack even though they may be member
-	// variables of the calling class and would be closed in the destructor anyway. This ensures
-	// that if they are not member variables they will be closed. Closing the handle twice
-	// does no harm.	
-	
-#ifdef SYMBIAN_SECURE_DBMS
-	
-	// Create the secure shared database with the specified secure policy.
-	// Database will be created in the data caging path for DBMS (C:\private\100012a5).
-	
-	TInt err = aDatabase.Create(aSession, KTtlsDatabaseName, KSecureUIDFormat);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL - Created Secure DB for eapttls.dat. err=%d\n"), err) );
-	
-	if(err == KErrNone)
+	TInt error(KErrNone);
+	TFileName aPrivateDatabasePathName;
+
+	EapPluginTools::CreateDatabaseLC(
+		aDatabase,
+		aFileServerSession,
+		error,
+		KTtlsDatabaseName,
+		aPrivateDatabasePathName);
+
+	if(error == KErrNone)
 	{
 		aDatabase.Close();
-		
-	} else if (err != KErrAlreadyExists) 
+	}
+	else if (error != KErrAlreadyExists) 
 	{
-		User::LeaveIfError(err);
+		User::LeaveIfError(error);
 	}
 	
-	User::LeaveIfError(aDatabase.Open(aSession, KTtlsDatabaseName, KSecureUIDFormat));
-	CleanupClosePushL(aDatabase);		
-		
-#else
-	// For non-secured database. The database will be created in the old location (c:\system\data).
-	
-	RFs fsSession;		
-	User::LeaveIfError(fsSession.Connect());
-	CleanupClosePushL(fsSession);	
-	TInt err = aDatabase.Create(fsSession, KTtlsDatabaseName);
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): - calls aDatabase.Open()\n")));
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL - Created Non-Secure DB for eapttls.dat. err=%d\n"), err) );
-	
-	if(err == KErrNone)
-	{
-		aDatabase.Close();
-		
-	} else if (err != KErrAlreadyExists) 
-	{
-		User::LeaveIfError(err);
-	}
-	
-	User::LeaveIfError(aDatabase.Open(fsSession, KTtlsDatabaseName));
-	
-	CleanupStack::PopAndDestroy(); // close fsSession
-	
-	CleanupClosePushL(aDatabase);		
-	    
-#endif // #ifdef SYMBIAN_SECURE_DBMS
+	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): - Opened private DB for EAP-TTLS. error=%d\n"), error));
+
+	User::LeaveIfError(error);
+
 
 	// 2. Create the eapttls table to database (ignore error if exists)
 	
-// Table columns:
-//// NAME //////////////////////////////////////////// TYPE ////////////// Constant ///////////////////
-//| ServiceType									| UNSIGNED INTEGER 	| KServiceType        |//
-//| ServiceIndex								| UNSIGNED INTEGER 	| KServiceIndex       |//
-//| TunnelingType								| UNSIGNED INTEGER 	| KTunnelingType		|//
-//| EAP_TLS_PEAP_use_manual_realm				| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_manual_realm_literal      |//
-//| EAP_TLS_PEAP_manual_realm					| VARCHAR(255)     	| cf_str_EAP_TLS_PEAP_manual_realm_literal				|//
-//| EAP_TLS_PEAP_use_manual_username			| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_manual_username_literal   |//
-//| EAP_TLS_PEAP_manual_username				| VARCHAR(255)     	| cf_str_EAP_TLS_PEAP_manual_username_literal			|//
-//| EAP_TLS_PEAP_cipher_suite					| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_cipher_suite_literal	   |//
-//| EAP_TLS_PEAP_used_PEAP_version				| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_used_PEAP_version_literal		    |//
-//| EAP_TLS_PEAP_accepted_PEAP_versions			| BINARY(12)	    | cf_str_EAP_TLS_PEAP_accepted_PEAP_versions_literal|//
-//| PEAP_accepted_tunneled_client_types			| VARBINARY(240) 	| cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal      |//
-//| PEAP_unaccepted_tunneled_client_types		| VARBINARY(240) 	| cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal      |//
-//| EAP_TLS_server_authenticates_client		    | UNSIGNED INTEGER 	| cf_str_TLS_server_authenticates_client_policy_in_client_literal|//
-//| CA_cert_label								| VARCHAR(255)     	| KCACertLabelOld	   |//
-//| client_cert_label							| VARCHAR(255)     	| KClientCertLabel	   |//
-//| EAP_TLS_PEAP_saved_session_id				| BINARY(32)       	| cf_str_EAP_TLS_PEAP_saved_session_id_literal		   |//
-//| EAP_TLS_PEAP_saved_master_secret			| BINARY(48)       	| cf_str_EAP_TLS_PEAP_saved_master_secret_literal	   |//
-//| EAP_TLS_PEAP_saved_cipher_suite				| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_saved_cipher_suite_literal   |//
-//| EAP_TLS_PEAP_verify_certificate_realm		| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal		   |//
-//| EAP_TTLS_max_session_validity_time			| BIGINT	   		| cf_str_EAP_TTLS_max_session_validity_time_literal   |//
-//| EAP_TTLS_last_full_authentication_time		| BIGINT	   		| KTTLSLastFullAuthTime	   	|//	
-//| EAP_TLS_PEAP_use_identity_privacy			| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_identity_privacy_literal		   |//
+	// Table columns:
+	//// NAME //////////////////////////////////////////// TYPE ////////////// Constant ///////////////////
+	//| ServiceType									| UNSIGNED INTEGER 	| KServiceType        |//
+	//| ServiceIndex								| UNSIGNED INTEGER 	| KServiceIndex       |//
+	//| TunnelingTypeVendorId                       | UNSIGNED INTEGER  | KTunnelingTypeVendorId    |//
+	//| TunnelingType								| UNSIGNED INTEGER 	| KTunnelingType		|//
+	//| EAP_TLS_PEAP_use_manual_realm				| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_manual_realm_literal      |//
+	//| EAP_TLS_PEAP_manual_realm					| VARCHAR(255)     	| cf_str_EAP_TLS_PEAP_manual_realm_literal				|//
+	//| EAP_TLS_PEAP_use_manual_username			| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_manual_username_literal   |//
+	//| EAP_TLS_PEAP_manual_username				| VARCHAR(255)     	| cf_str_EAP_TLS_PEAP_manual_username_literal			|//
+	//| EAP_TLS_PEAP_cipher_suite					| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_cipher_suite_literal	   |//
+	//| EAP_TLS_PEAP_used_PEAP_version				| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_used_PEAP_version_literal		    |//
+	//| EAP_TLS_PEAP_accepted_PEAP_versions			| BINARY(12)	    | cf_str_EAP_TLS_PEAP_accepted_PEAP_versions_literal|//
+	//| PEAP_accepted_tunneled_client_types			| VARBINARY(240) 	| cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal      |//
+	//| PEAP_unaccepted_tunneled_client_types		| VARBINARY(240) 	| cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal      |//
+	//| EAP_TLS_server_authenticates_client		    | UNSIGNED INTEGER 	| cf_str_TLS_server_authenticates_client_policy_in_client_literal|//
+	//| CA_cert_label								| VARCHAR(255)     	| KCACertLabel	   |//
+	//| client_cert_label							| VARCHAR(255)     	| KClientCertLabel	   |//
+	//| EAP_TLS_PEAP_saved_session_id				| BINARY(32)       	| cf_str_EAP_TLS_PEAP_saved_session_id_literal		   |//
+	//| EAP_TLS_PEAP_saved_master_secret			| BINARY(48)       	| cf_str_EAP_TLS_PEAP_saved_master_secret_literal	   |//
+	//| EAP_TLS_PEAP_saved_cipher_suite				| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_saved_cipher_suite_literal   |//
+	//| EAP_TLS_PEAP_verify_certificate_realm		| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal		   |//
+	//| EAP_TTLS_max_session_validity_time			| BIGINT	   		| cf_str_EAP_TTLS_max_session_validity_time_literal   |//
+	//| EAP_TTLS_last_full_authentication_time		| BIGINT	   		| KTTLSLastFullAuthTime	   	|//	
+	//| EAP_TLS_PEAP_use_identity_privacy			| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_identity_privacy_literal		   |//
 
 
-//| EAP_TLS_PEAP_ttls_pap_password_prompt               | UNSIGNED INTEGER  | cf_str_EAP_TLS_PEAP_ttls_pap_password_prompt_literal           |//
-//| EAP_TLS_PEAP_ttls_pap_username                      | VARCHAR(253)      | cf_str_EAP_TLS_PEAP_ttls_pap_username_literal                  |//
-//| EAP_TLS_PEAP_ttls_pap_password                      | VARCHAR(128)      | cf_str_EAP_TLS_PEAP_ttls_pap_password_literal                  |//
-//| EAP_TLS_PEAP_ttls_pap_max_session_validity_time		| BIGINT		   	| cf_str_EAP_TLS_PEAP_ttls_pap_max_session_validity_time_literal |//
-//| EAP_TLS_PEAP_ttls_pap_last_full_authentication_time	| BIGINT		   	| KTTLSPAPLastFullAuthTime	                             |//
+	//| EAP_TLS_PEAP_ttls_pap_password_prompt               | UNSIGNED INTEGER  | cf_str_EAP_TLS_PEAP_ttls_pap_password_prompt_literal           |//
+	//| EAP_TLS_PEAP_ttls_pap_username                      | VARCHAR(253)      | cf_str_EAP_TLS_PEAP_ttls_pap_username_literal                  |//
+	//| EAP_TLS_PEAP_ttls_pap_password                      | VARCHAR(128)      | cf_str_EAP_TLS_PEAP_ttls_pap_password_literal                  |//
+	//| EAP_TLS_PEAP_ttls_pap_max_session_validity_time		| BIGINT		   	| cf_str_EAP_TLS_PEAP_ttls_pap_max_session_validity_time_literal |//
+	//| EAP_TLS_PEAP_ttls_pap_last_full_authentication_time	| BIGINT		   	| KTTLSPAPLastFullAuthTime	                             |//
 
+	//| EAP_TLS_PEAP_use_automatic_ca_certificate		| UNSIGNED INTEGER  | cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal|//
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////	
 	
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 	
-// Table creation is divided into two parts because otherwise the SQL string would get too long
-	_LIT(KSQLCreateTable1,
-		"CREATE TABLE %S (%S UNSIGNED INTEGER, \
-			              %S UNSIGNED INTEGER, \
-			              %S UNSIGNED INTEGER, \
-			              %S UNSIGNED INTEGER, \
-			              %S VARCHAR(%d),     \
-			              %S UNSIGNED INTEGER, \
-			              %S VARCHAR(%d),     \
-			              %S UNSIGNED INTEGER, \
-			              %S UNSIGNED INTEGER, \
-			              %S BINARY(%d),		  \
-			              %S VARBINARY(%d),	  \
-			              %S VARBINARY(%d),	  \
-			              %S UNSIGNED INTEGER, \
-			              %S VARCHAR(%d),	  \
-			              %S VARCHAR(%d),     \
-			              %S BINARY(%d),		  \
-			              %S BINARY(%d),		  \
-			              %S UNSIGNED INTEGER, \
-			              %S UNSIGNED INTEGER, \
-			              %S BIGINT, \
-			              %S BIGINT, \
-				      			%S UNSIGNED INTEGER, \
-			              %S UNSIGNED INTEGER, \
-			              %S VARCHAR(%d), \
-			              %S VARCHAR(%d), \
-                    %S BIGINT, \
-                    %S BIGINT)");
+	// Table creation is divided into two parts because otherwise the SQL string would get too long
+	_LIT(KSQLCreateTable1, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d),     \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d),     \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S BINARY(%d),		  \
+		 %S VARBINARY(%d),	  \
+		 %S VARBINARY(%d),	  \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d),	  \
+		 %S VARCHAR(%d),     \
+		 %S BINARY(%d),		  \
+		 %S BINARY(%d),		  \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S BIGINT, \
+		 %S BIGINT, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+         %S BIGINT, \
+         %S BIGINT)");
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): sqlStatement.Format(KSQLCreateTable1)\n")) );
 
     sqlStatement.Format( KSQLCreateTable1,
         &KTtlsDatabaseTableName,
         &KServiceType,
         &KServiceIndex,
+		&KTunnelingTypeVendorId,
         &KTunnelingType,
         &cf_str_EAP_TLS_PEAP_use_manual_realm_literal,
-        &cf_str_EAP_TLS_PEAP_manual_realm_literal, KMaxManualRealmLengthInDB,
+        &cf_str_EAP_TLS_PEAP_manual_realm_literal, KMaxRealmLengthInDB,
         &cf_str_EAP_TLS_PEAP_use_manual_username_literal,
-        &cf_str_EAP_TLS_PEAP_manual_username_literal, KMaxManualUsernameLengthInDB,
+        &cf_str_EAP_TLS_PEAP_manual_username_literal, KMaxUsernameLengthInDB,
         &cf_str_EAP_TLS_PEAP_cipher_suite_literal,
         &cf_str_EAP_TLS_PEAP_used_PEAP_version_literal,
         &cf_str_EAP_TLS_PEAP_accepted_PEAP_versions_literal, KMaxPEAPVersionsStringLengthInDB,
         &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, KMaxTunneledTypeStringLengthInDB,
         &cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,	KMaxTunneledTypeStringLengthInDB,	
         &cf_str_TLS_server_authenticates_client_policy_in_client_literal,
-        &KCACertLabelOld, KMaxCertLabelLengthInDB,
+        &KCACertLabel, KMaxCertLabelLengthInDB,
         &KClientCertLabel, KMaxCertLabelLengthInDB,
         &cf_str_EAP_TLS_PEAP_saved_session_id_literal, KMaxSessionIdLengthInDB,
         &cf_str_EAP_TLS_PEAP_saved_master_secret_literal, KMaxMasterSecretLengthInDB,
@@ -1072,14 +1059,25 @@ void EapTlsPeapUtils::OpenTtlsDatabaseL(
         &cf_str_EAP_TLS_PEAP_ttls_pap_username_literal, KMaxPapUserNameLengthInDb,
         &cf_str_EAP_TLS_PEAP_ttls_pap_password_literal, KMaxPapPasswordLengthInDb,
         &cf_str_EAP_TLS_PEAP_ttls_pap_max_session_validity_time_literal,
-        &KTTLSPAPLastFullAuthTime );	
+        &KTTLSPAPLastFullAuthTime);	
 
 
 	
-	err = aDatabase.Execute(sqlStatement);
-	if (err == KErrAlreadyExists)
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): aDatabase.Execute()\n")) );
+
+	error = aDatabase.Execute(sqlStatement);
+	if (error == KErrNone)
 		{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL - Alter Table err=%d\n"), err) );
+		// SQL command will be too long if this is included to KSQLCreateTable1.
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): OK, Alter Table error=%d\n"), error) );
+		
+		_LIT( KColumnDef6, "UNSIGNED INTEGER" );
+		AlterTableL( aDatabase, EAddColumn , KTtlsDatabaseTableName,
+				cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal, KColumnDef6);
+		}
+	else if (error == KErrAlreadyExists)
+		{
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): Alter Table error=%d\n"), error) );
 		
 		_LIT( KColumnDef, "UNSIGNED INTEGER" );
 		AlterTableL( aDatabase, EAddColumn , KTtlsDatabaseTableName,
@@ -1114,41 +1112,54 @@ void EapTlsPeapUtils::OpenTtlsDatabaseL(
 		AlterTableL( aDatabase, EAddColumn , KTtlsDatabaseTableName,
 				KTTLSPAPLastFullAuthTime, KColumnDef5);
 				
+		_LIT( KColumnDef6, "UNSIGNED INTEGER" );
+		AlterTableL( aDatabase, EAddColumn , KTtlsDatabaseTableName,
+				cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal, KColumnDef6);
+				
 		}
-	else if (err != KErrNone)
+	else if (error != KErrNone)
 		{
-		User::Leave(err);
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::OpenTtlsDatabaseL(): aDatabase.Execute() failed error=%d\n"), error) );
+		
+		User::Leave(error);
 		}
 
 	// Create table for _allowed_ user certificates
 	
-//// NAME ////////////////// TYPE ////////////// Constant ///////////
-//| ServiceType		  	| UNSIGNED INTEGER | KServiceType        |//
-//| ServiceIndex		| UNSIGNED INTEGER | KServiceIndex       |//
-//| TunnelingType		| UNSIGNED INTEGER | KTunnelingType		|//
-//| CertLabel			| VARCHAR(255)     | KCACertLabel        |//	
-//| SubjectKeyId		| BINARY(20)	   | KSubjectKeyIdentifier |// This is Symbian subjectkey id
-//| ActualSubjectKeyId  | BINARY(20)	   | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
-//| SubjectName			| VARCHAR(255)     | KSubjectName        |//	
-//| IssuerName			| VARCHAR(255)     | KIssuerName        |//	
-//| SerialNumber		| VARCHAR(255)     | KSerialNumber        |//	
-//| Thumbprint			| BINARY(64)	   | KThumbprint        |//	
-//////////////////////////////////////////////////////////////////////////////////////////////////////	
+	//// NAME ////////////////// TYPE ////////////// Constant ///////////
+	//| ServiceType		  		| UNSIGNED INTEGER | KServiceType        |//
+	//| ServiceIndex			| UNSIGNED INTEGER | KServiceIndex       |//
+	//| TunnelingTypeVendorId	| UNSIGNED INTEGER  | KTunnelingTypeVendorId    |//
+	//| TunnelingType			| UNSIGNED INTEGER | KTunnelingType		|//
+	//| CertLabel				| VARCHAR(255)     | KCACertLabel        |//	
+	//| SubjectKeyId			| BINARY(20)	   | KSubjectKeyIdentifier |// This is Symbian subjectkey id
+	//| ActualSubjectKeyId		| BINARY(20)	   | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
+	//| SubjectName				| VARCHAR(255)     | KSubjectName        |//	
+	//| IssuerName				| VARCHAR(255)     | KIssuerName        |//	
+	//| SerialNumber			| VARCHAR(255)     | KSerialNumber        |//	
+	//| Thumbprint				| BINARY(64)	   | KThumbprint        |//	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////	
 	
-	_LIT(KSQLCreateTable2, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d), \
-											 %S BINARY(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d))");											 
-											 
-	sqlStatement.Format(KSQLCreateTable2, &KTtlsAllowedUserCertsDatabaseTableName, 
+	_LIT(KSQLCreateTable2, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d), \
+		 %S BINARY(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d))");
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): sqlStatement.Format(KSQLCreateTable2)\n")) );
+
+	sqlStatement.Format(KSQLCreateTable2,
+		&KTtlsAllowedUserCertsDatabaseTableName, 
 		&KServiceType, 
-		&KServiceIndex, 
+		&KServiceIndex,
+		&KTunnelingTypeVendorId,
 		&KTunnelingType, 
 		&KCertLabel, KMaxCertLabelLengthInDB,
 		&KSubjectKeyIdentifier, KMaxSubjectKeyIdLengthInDB,
@@ -1158,41 +1169,50 @@ void EapTlsPeapUtils::OpenTtlsDatabaseL(
 		&KSerialNumber, KGeneralStringMaxLength,
 		&KThumbprint, KThumbprintMaxLength);
 		
-	err = aDatabase.Execute(sqlStatement);
-	if (err != KErrNone && err != KErrAlreadyExists)
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): aDatabase.Execute()\n")) );
+
+	error = aDatabase.Execute(sqlStatement);
+	if (error != KErrNone && error != KErrAlreadyExists)
 	{
-		User::Leave(err);
+		User::Leave(error);
 	}	
 
 	// Create table for _allowed_ CA certs
 
-//// NAME ////////////////// TYPE ////////////// Constant ///////////
-//| ServiceType			| UNSIGNED INTEGER | KServiceType        |//
-//| ServiceIndex		| UNSIGNED INTEGER | KServiceIndex       |//
-//| TunnelingType		| UNSIGNED INTEGER | KTunnelingType		|//
-//| CACertLabel			| VARCHAR(255)     | KCACertLabel        |//	
-//| SubjectKeyId		| BINARY(20)	   | KSubjectKeyIdentifier |// This is Symbian subjectkey id
-//| ActualSubjectKeyId  | BINARY(20)	   | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
-//| SubjectName			| VARCHAR(255)     | KSubjectName        |//	
-//| IssuerName			| VARCHAR(255)     | KIssuerName        |//	
-//| SerialNumber		| VARCHAR(255)     | KSerialNumber        |//	
-//| Thumbprint			| BINARY(64)	   | KThumbprint        |//	
-//////////////////////////////////////////////////////////////////////////////////////////////////////	
+	//// NAME ////////////////// TYPE ////////////// Constant ///////////
+	//| ServiceType				| UNSIGNED INTEGER | KServiceType        |//
+	//| ServiceIndex			| UNSIGNED INTEGER | KServiceIndex       |//
+	//| TunnelingTypeVendorId	| UNSIGNED INTEGER | KTunnelingTypeVendorId    |//
+	//| TunnelingType			| UNSIGNED INTEGER | KTunnelingType		|//
+	//| CACertLabel				| VARCHAR(255)     | KCACertLabel        |//	
+	//| SubjectKeyId			| BINARY(20)	   | KSubjectKeyIdentifier |// This is Symbian subjectkey id
+	//| ActualSubjectKeyId		| BINARY(20)	   | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
+	//| SubjectName				| VARCHAR(255)     | KSubjectName        |//	
+	//| IssuerName				| VARCHAR(255)     | KIssuerName        |//	
+	//| SerialNumber			| VARCHAR(255)     | KSerialNumber        |//	
+	//| Thumbprint				| BINARY(64)	   | KThumbprint        |//	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////	
 
-	_LIT(KSQLCreateTable3, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d), \
-											 %S BINARY(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d))");
+	_LIT(KSQLCreateTable3, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d), \
+		 %S BINARY(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d))");
 											 
-	sqlStatement.Format(KSQLCreateTable3, &KTtlsAllowedCACertsDatabaseTableName, 
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): sqlStatement.Format(KSQLCreateTable3)\n")) );
+
+	sqlStatement.Format(KSQLCreateTable3,
+		&KTtlsAllowedCACertsDatabaseTableName, 
 		&KServiceType, 
-		&KServiceIndex, 
+		&KServiceIndex,
+		&KTunnelingTypeVendorId,
 		&KTunnelingType, 
 		&KCertLabel, KMaxCertLabelLengthInDB,
 		&KSubjectKeyIdentifier, KMaxSubjectKeyIdLengthInDB,
@@ -1202,58 +1222,101 @@ void EapTlsPeapUtils::OpenTtlsDatabaseL(
 		&KSerialNumber, KGeneralStringMaxLength,
 		&KThumbprint, KThumbprintMaxLength);
 		
-	err = aDatabase.Execute(sqlStatement);
-	if (err != KErrNone && err != KErrAlreadyExists)
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): aDatabase.Execute()\n")) );
+
+	error = aDatabase.Execute(sqlStatement);
+	if (error != KErrNone && error != KErrAlreadyExists)
 	{
-		User::Leave(err);
+		User::Leave(error);
 	}
 
 	// Create table for _allowed_ cipher suites
 
-//// NAME ///////////////// TYPE ////////////// Constant ///////////
-//| ServiceType			| UNSIGNED INTEGER | KServiceType        |//
-//| ServiceIndex		| UNSIGNED INTEGER | KServiceIndex       |//
-//| TunnelingType		| UNSIGNED INTEGER | KTunnelingType		|//
-//| CipherSuite			| UNSIGNED INTEGER | KCipherSuite        |//	
-//////////////////////////////////////////////////////////////////////////////////////////////////////	
+	//// NAME ///////////////// TYPE ////////////// Constant ///////////
+	//| ServiceType				| UNSIGNED INTEGER | KServiceType        |//
+	//| ServiceIndex			| UNSIGNED INTEGER | KServiceIndex       |//
+	//| TunnelingTypeVendorId	| UNSIGNED INTEGER | KTunnelingTypeVendorId    |//
+	//| TunnelingType			| UNSIGNED INTEGER | KTunnelingType		|//
+	//| CipherSuite				| UNSIGNED INTEGER | KCipherSuite        |//	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////	
 	
-	_LIT(KSQLCreateTable4, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER)");
+	_LIT(KSQLCreateTable4, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER)");
 
-	sqlStatement.Format(KSQLCreateTable4, &KTtlsAllowedCipherSuitesDatabaseTableName, 
-		&KServiceType, &KServiceIndex, &KTunnelingType, &KCipherSuite);
-	err = aDatabase.Execute(sqlStatement);
-	if (err != KErrNone && err != KErrAlreadyExists)
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): sqlStatement.Format(KSQLCreateTable4)\n")) );
+
+	sqlStatement.Format(KSQLCreateTable4,
+		&KTtlsAllowedCipherSuitesDatabaseTableName, 
+		&KServiceType,
+		&KServiceIndex,
+		&KTunnelingTypeVendorId,
+		&KTunnelingType,
+		&KCipherSuite);
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): aDatabase.Execute()\n")) );
+
+	error = aDatabase.Execute(sqlStatement);
+	if (error != KErrNone && error != KErrAlreadyExists)
 	{
-		User::Leave(err);
+		User::Leave(error);
 	}
 
 	// 4. Check if database table contains a row for this service type and id  	
 	
-	_LIT(KSQLQueryRow, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQLQueryRow, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
 
-	sqlStatement.Format(KSQLQueryRow, &KTtlsDatabaseTableName, 
-		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): sqlStatement.Format(KSQLQueryRow)\n")) );
+
+	sqlStatement.Format(KSQLQueryRow,
+		&KTtlsDatabaseTableName, 
+		&KServiceType,
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aTunnelingType.get_vendor_type());	
 			
 	RDbView view;
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): view.Prepare()\n")) );
+
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 	// View must be closed when no longer needed
 	CleanupClosePushL(view);
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): view.EvaluateAll()\n")) );
+
 	User::LeaveIfError(view.EvaluateAll());
 	
 	// 5. If row is not found then add it
 	
 	TInt rows = view.CountL();
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): view.CountL()=%d\n"),
+		rows));
+
 	CleanupStack::PopAndDestroy(); // view
 	if (rows == 0)
 	{
 		_LIT(KSQLInsert, "SELECT * FROM %S");
+
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): sqlStatement.Format(KSQLInsert)\n")) );
+
 		sqlStatement.Format(KSQLInsert, &KTtlsDatabaseTableName);	
+
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): view.Prepare()\n")) );
 
 		User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited, RDbView::EInsertOnly));
 		CleanupClosePushL(view);
+
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): view.InsertL()\n")) );
+
 		view.InsertL();
 
 		// Get column set so we get the correct column numbers
@@ -1263,13 +1326,14 @@ void EapTlsPeapUtils::OpenTtlsDatabaseL(
 		// Set the default values. The other three tables (certs, ca certs & cipher suites) are empty by default.
 		view.SetColL(colSet->ColNo(KServiceType), static_cast<TInt>(aIndexType));
 		view.SetColL(colSet->ColNo(KServiceIndex), aIndex);		
-		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingVendorType);
+		view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
+		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_realm_literal), default_EAP_TLS_PEAP_use_manual_realm);
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_realm_literal), default_EAP_TLS_PEAP_manual_realm);
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_realm_literal), default_EAP_realm);
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_username_literal), default_EAP_TLS_PEAP_use_manual_username);
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_username_literal), default_EAP_TLS_PEAP_manual_username);
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_username_literal), default_EAP_username);
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_cipher_suite_literal), default_EAP_TLS_PEAP_cipher_suite);
 
@@ -1292,7 +1356,7 @@ void EapTlsPeapUtils::OpenTtlsDatabaseL(
 		view.SetColL(colSet->ColNo(cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal), default_PEAP_tunneled_types);		
 		
 		view.SetColL(colSet->ColNo(cf_str_TLS_server_authenticates_client_policy_in_client_literal), default_EAP_PEAP_TTLS_server_authenticates_client);
-		view.SetColL(colSet->ColNo(KCACertLabelOld), default_CA_cert_label);
+		view.SetColL(colSet->ColNo(KCACertLabel), default_CA_cert_label);
 		
 		view.SetColL(colSet->ColNo(KClientCertLabel), default_client_cert_label);	
 
@@ -1302,7 +1366,7 @@ void EapTlsPeapUtils::OpenTtlsDatabaseL(
 		
 		view.SetColL(colSet->ColNo(KTTLSLastFullAuthTime), default_FullAuthTime);				
 
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TLS_Privacy);
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TTLS_Privacy);
 
 
 		view.SetColL( colSet->ColNo(
@@ -1325,15 +1389,26 @@ void EapTlsPeapUtils::OpenTtlsDatabaseL(
 			colSet->ColNo( KTTLSPAPLastFullAuthTime ),
 			KDefaultFullPapAuthTime );		
 
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): view.SetColL(cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal)\n")) );
+
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal), default_EAP_TLS_PEAP_use_automatic_ca_certificate);
 		
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): view.PutL()\n")) );
+
 		view.PutL();
 		
 		CleanupStack::PopAndDestroy(colSet); 
-		CleanupStack::PopAndDestroy( &view ); // Close view.
+		CleanupStack::PopAndDestroy( &view );
 
 		// Add default disabled cipher suites
 		_LIT(KSQLInsert2, "SELECT * FROM %S");
+
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): sqlStatement.Format(KSQLInsert2)\n")) );
+
 		sqlStatement.Format(KSQLInsert2, &KTtlsAllowedCipherSuitesDatabaseTableName);
+
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): view.Prepare()\n")) );
+
 		User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited, RDbView::EInsertOnly));
 		CleanupClosePushL(view);
 
@@ -1347,14 +1422,15 @@ void EapTlsPeapUtils::OpenTtlsDatabaseL(
 			view.InsertL();
 			view.SetColL(colSet->ColNo(KServiceType), static_cast<TInt>(aIndexType));
 			view.SetColL(colSet->ColNo(KServiceIndex), aIndex);		
-			view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingVendorType);			
+			view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
+			view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
 			view.SetColL(colSet->ColNo(KCipherSuite), default_allowed_cipher_suites[i]);
 			view.PutL();
 			i++;
 		}
 		
-		CleanupStack::PopAndDestroy( colSet ); // Delete colSet.		
-		CleanupStack::PopAndDestroy( &view ); // Close view.
+		CleanupStack::PopAndDestroy( colSet );
+		CleanupStack::PopAndDestroy( &view );
 	}
 	 
 	// 6. Do the altering of tables here. 
@@ -1364,18 +1440,21 @@ void EapTlsPeapUtils::OpenTtlsDatabaseL(
 
 	// For the table _allowed_ USER certificates
 	tableName = KTtlsAllowedUserCertsDatabaseTableName;	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): AddExtraCertColumnsL()\n")) );
 	AddExtraCertColumnsL(aDatabase,tableName);
 	
 	// For the table _allowed_ CA certificates	
 	tableName = KTtlsAllowedCACertsDatabaseTableName;	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): AddExtraCertColumnsL()\n")) );
 	AddExtraCertColumnsL(aDatabase,tableName);
 
-	CleanupStack::PopAndDestroy( buf ); // Delete buf or sqlStatement
-	CleanupStack::Pop( &aDatabase );	
-	CleanupStack::Pop( &aSession );
-	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenTtlsDatabaseL(): aDatabase.Compact()\n")) );
 	aDatabase.Compact();
-	
+
+	CleanupStack::PopAndDestroy( buf );
+	CleanupStack::Pop( &aDatabase );
+	CleanupStack::Pop( &aFileServerSession );
+
 } // EapTlsPeapUtils::OpenTtlsDatabaseL()
 
 #endif // #if defined(USE_TTLS_EAP_TYPE)
@@ -1387,117 +1466,83 @@ void EapTlsPeapUtils::OpenTtlsDatabaseL(
 // ---------------------------------------------------------
 //
 void EapTlsPeapUtils::OpenFastDatabaseL(
-	RDbNamedDatabase& aDatabase, 
-	RDbs& aSession, 
-	const TIndexType aIndexType, 
+	RDbNamedDatabase& aDatabase,
+	RFs& aFileServerSession,
+	const TIndexType aIndexType,
 	const TInt aIndex,
 	const eap_type_value_e aTunnelingType)
-    {
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
-
-#else
-
-	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
+{
 	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::OpenFastDatabaseL -Start- aIndexType=%d, aIndex=%d, Tunneling vendor type=%d \n"),
-		aIndexType,aIndex, aTunnelingVendorType));
+		(_L("EapTlsPeapUtils::OpenFastDatabaseL(): - Start - aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
+		aIndexType,
+		aIndex,
+		aTunnelingType.get_vendor_id(),
+		aTunnelingType.get_vendor_type()));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::OpenFastDatabaseL()\n"));
 
 	// 1. Open/create a database	
-	
-	// Connect to the DBMS server.
-	User::LeaveIfError(aSession.Connect());		
-	CleanupClosePushL(aSession);	
-	// aSession and aDatabase are pushed to the cleanup stack even though they may be member
-	// variables of the calling class and would be closed in the destructor anyway. This ensures
-	// that if they are not member variables they will be closed. Closing the handle twice
-	// does no harm.	
-	
-#ifdef SYMBIAN_SECURE_DBMS
-	
-	// Create the secure shared database with the specified secure policy.
-	// Database will be created in the data caging path for DBMS (C:\private\100012a5).
-	
-	TInt err = aDatabase.Create(aSession, KFastDatabaseName, KSecureUIDFormat);
 
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::OpenFastDatabaseL - Created Secure DB for eapfast.dat. err=%d (-11=DB created before)\n"),
-		err) );
-	
-	if(err == KErrNone)
+	TInt error(KErrNone);
+	TFileName aPrivateDatabasePathName;
+
+	EapPluginTools::CreateDatabaseLC(
+		aDatabase,
+		aFileServerSession,
+		error,
+		KFastDatabaseName,
+		aPrivateDatabasePathName);
+
+	if(error == KErrNone)
 	{
 		aDatabase.Close();
-		
-	} else if (err != KErrAlreadyExists) 
+	}
+	else if (error != KErrAlreadyExists) 
 	{
-		User::LeaveIfError(err);
+		User::LeaveIfError(error);
 	}
 	
-	User::LeaveIfError(aDatabase.Open(aSession, KFastDatabaseName, KSecureUIDFormat));
-	CleanupClosePushL(aDatabase);		
-		
-#else
-	// For non-secured database. The database will be created in the old location (c:\system\data).
-	
-	RFs fsSession;		
-	User::LeaveIfError(fsSession.Connect());
-	CleanupClosePushL(fsSession);	
-	TInt err = aDatabase.Create(fsSession, KFastDatabaseName);
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenFastDatabaseL(): - calls aDatabase.Open()\n")));
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenFastDatabaseL - Created Non-Secure DB for eapfast.dat. err=%d\n"), err) );
-	
-	if(err == KErrNone)
-	{
-		aDatabase.Close();
-		
-	} else if (err != KErrAlreadyExists) 
-	{
-		User::LeaveIfError(err);
-	}
-	
-	User::LeaveIfError(aDatabase.Open(fsSession, KFastDatabaseName));
-	
-	CleanupStack::PopAndDestroy(); // close fsSession
-	
-	CleanupClosePushL(aDatabase);		
-	    
-#endif // #ifdef SYMBIAN_SECURE_DBMS
+	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::OpenFastDatabaseL(): - Opened private DB for EAP-FAST. error=%d\n"), error));
+
+	User::LeaveIfError(error);
 
 	// 2. Create the eapfast tables to database (ignore error if exists)
 	
 	// Table 1: Create table for general settings of EAP-FAST.
 	
-// Table columns:
-//// NAME //////////////////////////////////////////// TYPE ////////////// Constant ///////////////////
-//| ServiceType									| UNSIGNED INTEGER 	| KServiceType        |//
-//| ServiceIndex								| UNSIGNED INTEGER 	| KServiceIndex       |//
-//| TunnelingType								| UNSIGNED INTEGER 	| KTunnelingType		|//
-//| EAP_TLS_PEAP_use_manual_realm				| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_manual_realm_literal      |//
-//| EAP_TLS_PEAP_manual_realm					| VARCHAR(255)     	| cf_str_EAP_TLS_PEAP_manual_realm_literal				|//
-//| EAP_TLS_PEAP_use_manual_username			| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_manual_username_literal   |//
-//| EAP_TLS_PEAP_manual_username				| VARCHAR(255)     	| cf_str_EAP_TLS_PEAP_manual_username_literal			|//
-//| EAP_TLS_PEAP_cipher_suite					| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_cipher_suite_literal	   |//
-//| EAP_TLS_PEAP_used_PEAP_version				| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_used_PEAP_version_literal		    |//
-//| EAP_TLS_PEAP_accepted_PEAP_versions			| BINARY(12)	    | cf_str_EAP_TLS_PEAP_accepted_PEAP_versions_literal|//
-//| PEAP_accepted_tunneled_client_types			| VARBINARY(240) 	| cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal      |//
-//| PEAP_unaccepted_tunneled_client_types		| VARBINARY(240) 	| cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal      |//
-//| EAP_TLS_server_authenticates_client		    | UNSIGNED INTEGER 	| cf_str_TLS_server_authenticates_client_policy_in_client_literal|//
-//| EAP_TLS_PEAP_saved_session_id				| BINARY(32)       	| cf_str_EAP_TLS_PEAP_saved_session_id_literal		   |//
-//| EAP_TLS_PEAP_saved_master_secret			| BINARY(48)       	| cf_str_EAP_TLS_PEAP_saved_master_secret_literal	   |//
-//| EAP_TLS_PEAP_saved_cipher_suite				| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_saved_cipher_suite_literal   |//
-//| EAP_TLS_PEAP_verify_certificate_realm		| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal		   |//
-//| EAP_FAST_max_session_validity_time			| BIGINT	   		| cf_str_EAP_FAST_max_session_validity_time_literal   |//
-//| EAP_FAST_last_full_authentication_time		| BIGINT	   		| KFASTLastFullAuthTime	   	|//	
-//| EAP_TLS_PEAP_use_identity_privacy			| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_identity_privacy_literal		   |//
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	// Table columns:
+	//// NAME //////////////////////////////////////////// TYPE ////////////// Constant ///////////////////
+	//| ServiceType									| UNSIGNED INTEGER 	| KServiceType        |//
+	//| ServiceIndex								| UNSIGNED INTEGER 	| KServiceIndex       |//
+	//| TunnelingTypeVendorId                       | UNSIGNED INTEGER  | KTunnelingTypeVendorId    |//
+	//| TunnelingType								| UNSIGNED INTEGER 	| KTunnelingType		|//
+	//| EAP_TLS_PEAP_use_manual_realm				| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_manual_realm_literal      |//
+	//| EAP_TLS_PEAP_manual_realm					| VARCHAR(255)     	| cf_str_EAP_TLS_PEAP_manual_realm_literal				|//
+	//| EAP_TLS_PEAP_use_manual_username			| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_manual_username_literal   |//
+	//| EAP_TLS_PEAP_manual_username				| VARCHAR(255)     	| cf_str_EAP_TLS_PEAP_manual_username_literal			|//
+	//| EAP_TLS_PEAP_cipher_suite					| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_cipher_suite_literal	   |//
+	//| EAP_TLS_PEAP_used_PEAP_version				| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_used_PEAP_version_literal		    |//
+	//| EAP_TLS_PEAP_accepted_PEAP_versions			| BINARY(12)	    | cf_str_EAP_TLS_PEAP_accepted_PEAP_versions_literal|//
+	//| PEAP_accepted_tunneled_client_types			| VARBINARY(240) 	| cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal      |//
+	//| PEAP_unaccepted_tunneled_client_types		| VARBINARY(240) 	| cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal      |//
+	//| EAP_TLS_server_authenticates_client		    | UNSIGNED INTEGER 	| cf_str_TLS_server_authenticates_client_policy_in_client_literal|//
+	//| EAP_TLS_PEAP_saved_session_id				| BINARY(32)       	| cf_str_EAP_TLS_PEAP_saved_session_id_literal		   |//
+	//| EAP_TLS_PEAP_saved_master_secret			| BINARY(48)       	| cf_str_EAP_TLS_PEAP_saved_master_secret_literal	   |//
+	//| EAP_TLS_PEAP_saved_cipher_suite				| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_saved_cipher_suite_literal   |//
+	//| EAP_TLS_PEAP_verify_certificate_realm		| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal		   |//
+	//| EAP_FAST_max_session_validity_time			| BIGINT	   		| cf_str_EAP_FAST_max_session_validity_time_literal   |//
+	//| EAP_FAST_last_full_authentication_time		| BIGINT	   		| KFASTLastFullAuthTime	   	|//	
+	//| EAP_TLS_PEAP_use_identity_privacy			| UNSIGNED INTEGER 	| cf_str_EAP_TLS_PEAP_use_identity_privacy_literal		   |//
+	//| EAP_TLS_PEAP_use_automatic_ca_certificate	| UNSIGNED INTEGER  | cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal|//
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////	
 
-/** moved to PAC store db, because time is the same for all IAPs **/	
-//| EAP_FAST_last_password_identity_time	| BIGINT	   		| KFASTLastPasswordIdentityTime	   	|//	
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+	/** moved to PAC store db, because time is the same for all IAPs **/	
+	//| EAP_FAST_last_password_identity_time	| BIGINT	   		| KFASTLastPasswordIdentityTime	   	|//	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////		
 	
 	
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
@@ -1506,35 +1551,40 @@ void EapTlsPeapUtils::OpenFastDatabaseL(
 	EAP_TRACE_DEBUG_SYMBIAN(
 		(_L("EapTlsPeapUtils::OpenFastDatabaseL - Creating the tables for EAP-FAST\n")));
 	
-	_LIT(KSQLCreateTable1, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d),     \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d),     \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S BINARY(%d),		  \
-											 %S VARBINARY(%d),	  \
-											 %S VARBINARY(%d),	  \
-											 %S UNSIGNED INTEGER, \
-											 %S BINARY(%d),		  \
-											 %S BINARY(%d),		  \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S BIGINT, \
-											 %S BIGINT, \
-											 %S UNSIGNED INTEGER)");
-	
-	sqlStatement.Format(KSQLCreateTable1, &KFastGeneralSettingsDBTableName,
+	_LIT(KSQLCreateTable1, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d),     \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d),     \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S BINARY(%d),		  \
+		 %S VARBINARY(%d),	  \
+		 %S VARBINARY(%d),	  \
+		 %S UNSIGNED INTEGER, \
+		 %S BINARY(%d),		  \
+		 %S BINARY(%d),		  \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S BIGINT, \
+		 %S BIGINT, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER)");
+
+	sqlStatement.Format(KSQLCreateTable1,
+		&KFastGeneralSettingsDBTableName,
 		&KServiceType,
 		&KServiceIndex,
+		&KTunnelingTypeVendorId,
 		&KTunnelingType,
 		&cf_str_EAP_TLS_PEAP_use_manual_realm_literal,
-		&cf_str_EAP_TLS_PEAP_manual_realm_literal, KMaxManualRealmLengthInDB,
+		&cf_str_EAP_TLS_PEAP_manual_realm_literal, KMaxRealmLengthInDB,
 		&cf_str_EAP_TLS_PEAP_use_manual_username_literal,
-		&cf_str_EAP_TLS_PEAP_manual_username_literal, KMaxManualUsernameLengthInDB,
+		&cf_str_EAP_TLS_PEAP_manual_username_literal, KMaxUsernameLengthInDB,
 		&cf_str_EAP_TLS_PEAP_cipher_suite_literal,
 		&cf_str_EAP_TLS_PEAP_used_PEAP_version_literal,
 		&cf_str_EAP_TLS_PEAP_accepted_PEAP_versions_literal, KMaxPEAPVersionsStringLengthInDB,
@@ -1547,15 +1597,16 @@ void EapTlsPeapUtils::OpenFastDatabaseL(
 		&cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal,
 		&cf_str_EAP_FAST_max_session_validity_time_literal,
 		&KFASTLastFullAuthTime,
-		&cf_str_EAP_TLS_PEAP_use_identity_privacy_literal);		
-	
+		&cf_str_EAP_TLS_PEAP_use_identity_privacy_literal,
+		&cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal);
+
 	EAP_TRACE_DEBUG_SYMBIAN(
 		(_L("EapTlsPeapUtils::OpenFastDatabaseL - SQL query formated OK\n")));
 	
-	err = aDatabase.Execute(sqlStatement);
-	if (err != KErrNone && err != KErrAlreadyExists)
+	error = aDatabase.Execute(sqlStatement);
+	if (error != KErrNone && error != KErrAlreadyExists)
 	{
-		User::Leave(err);
+		User::Leave(error);
 	}
 
 	EAP_TRACE_DEBUG_SYMBIAN(
@@ -1563,35 +1614,40 @@ void EapTlsPeapUtils::OpenFastDatabaseL(
 
 	// Table 2: Create table for Special settings of EAP-FAST.
 	
-// Table columns:
-//// NAME //////////////////////////////////////////// TYPE ////////////// Constant ///////////////////
-//| ServiceType									| UNSIGNED INTEGER 	| KServiceType        |//
-//| ServiceIndex								| UNSIGNED INTEGER 	| KServiceIndex       |//
-//| TunnelingType								| UNSIGNED INTEGER 	| KTunnelingType		|//
-//| EAP_FAST_allow_server_authenticated_provisioning_mode| UNSIGNED INTEGER	| cf_str_EAP_FAST_allow_server_authenticated_provisioning_mode_literal	   	|//	
-//| EAP_FAST_allow_server_unauthenticated_provisioning_mode_ADHP| UNSIGNED INTEGER	| cf_str_EAP_FAST_allow_server_unauthenticated_provisioning_mode_ADHP_literal	   	|//	
-//| EAP_FAST_Warn_ADHP_No_PAC					| UNSIGNED INTEGER	| KFASTWarnADHPNoPACP|//	
-//| EAP_FAST_Warn_ADHP_No_Matching_PAC			| UNSIGNED INTEGER	| KFASTWarnADHPNoMatchingPAC|//	
-//| EAP_FAST_Warn_Not_Default_Server			| UNSIGNED INTEGER	| KFASTWarnNotDefaultServer|//	
-//| EAP_FAST_PAC_Group_Import_Reference_Collection| VARCHAR(255)	| KFASTPACGroupImportReferenceCollection	   	|//	
-//| EAP_FAST_PAC_Group_DB_Reference_Collection	| BINARY(255)		| KFASTPACGroupDBReferenceCollection	   	|//		
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	// Table columns:
+	//// NAME //////////////////////////////////////////// TYPE ////////////// Constant ///////////////////
+	//| ServiceType									| UNSIGNED INTEGER 	| KServiceType        |//
+	//| ServiceIndex								| UNSIGNED INTEGER 	| KServiceIndex       |//
+	//| TunnelingTypeVendorId                       | UNSIGNED INTEGER  | KTunnelingTypeVendorId    |//
+	//| TunnelingType								| UNSIGNED INTEGER 	| KTunnelingType		|//
+	//| EAP_FAST_allow_server_authenticated_provisioning_mode| UNSIGNED INTEGER	| cf_str_EAP_FAST_allow_server_authenticated_provisioning_mode_literal	   	|//	
+	//| EAP_FAST_allow_server_unauthenticated_provisioning_mode_ADHP| UNSIGNED INTEGER	| cf_str_EAP_FAST_allow_server_unauthenticated_provisioning_mode_ADHP_literal	   	|//	
+	//| EAP_FAST_Warn_ADHP_No_PAC					| UNSIGNED INTEGER	| KFASTWarnADHPNoPAC|//
+	//| EAP_FAST_Warn_ADHP_No_Matching_PAC			| UNSIGNED INTEGER	| KFASTWarnADHPNoMatchingPAC|//	
+	//| EAP_FAST_Warn_Not_Default_Server			| UNSIGNED INTEGER	| KFASTWarnNotDefaultServer|//	
+	//| EAP_FAST_PAC_Group_Import_Reference_Collection| VARCHAR(255)	| KFASTPACGroupImportReferenceCollection	   	|//	
+	//| EAP_FAST_PAC_Group_DB_Reference_Collection	| BINARY(255)		| KFASTPACGroupDBReferenceCollection	   	|//		
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////	
 
 	
-	_LIT(KSQLCreateTable2, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d),     \
-											 %S BINARY(%d)		  )");
+	_LIT(KSQLCreateTable2, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d),     \
+		 %S BINARY(%d)		  )");
 											 
-	sqlStatement.Format(KSQLCreateTable2, &KFastSpecialSettingsDBTableName,
+	sqlStatement.Format(KSQLCreateTable2,
+		&KFastSpecialSettingsDBTableName,
 		&KServiceType,
 		&KServiceIndex,
+		&KTunnelingTypeVendorId,
 		&KTunnelingType,
 		&cf_str_EAP_FAST_allow_server_authenticated_provisioning_mode_literal,
 		&cf_str_EAP_FAST_allow_server_unauthenticated_provisioning_mode_ADHP_literal,
@@ -1604,10 +1660,10 @@ void EapTlsPeapUtils::OpenFastDatabaseL(
 	EAP_TRACE_DEBUG_SYMBIAN(
 		(_L("EapTlsPeapUtils::OpenFastDatabaseL - SQL query formated OK\n")));
 	
-	err = aDatabase.Execute(sqlStatement);
-	if (err != KErrNone && err != KErrAlreadyExists)
+	error = aDatabase.Execute(sqlStatement);
+	if (error != KErrNone && error != KErrAlreadyExists)
 	{
-		User::Leave(err);
+		User::Leave(error);
 	}
 
 	EAP_TRACE_DEBUG_SYMBIAN(
@@ -1615,33 +1671,38 @@ void EapTlsPeapUtils::OpenFastDatabaseL(
 	
 	// Table 3: Create table for _allowed_ user certificates
 	
-//// NAME ////////////////// TYPE ////////////// Constant ///////////
-//| ServiceType		  	| UNSIGNED INTEGER | KServiceType        |//
-//| ServiceIndex		| UNSIGNED INTEGER | KServiceIndex       |//
-//| TunnelingType		| UNSIGNED INTEGER | KTunnelingType		|//
-//| CertLabel			| VARCHAR(255)     | KCACertLabel        |//	
-//| SubjectKeyId		| BINARY(20)	   | KSubjectKeyIdentifier |// This is Symbian subjectkey id
-//| ActualSubjectKeyId  | BINARY(20)	   | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
-//| SubjectName			| VARCHAR(255)     | KSubjectName        |//	
-//| IssuerName			| VARCHAR(255)     | KIssuerName        |//	
-//| SerialNumber		| VARCHAR(255)     | KSerialNumber        |//	
-//| Thumbprint			| BINARY(64)	   | KThumbprint        |//	
-//////////////////////////////////////////////////////////////////////////////////////////////////////	
+	//// NAME ////////////////// TYPE ////////////// Constant ///////////
+	//| ServiceType		  		| UNSIGNED INTEGER | KServiceType        |//
+	//| ServiceIndex			| UNSIGNED INTEGER | KServiceIndex       |//
+	//| TunnelingTypeVendorId	| UNSIGNED INTEGER  | KTunnelingTypeVendorId    |//
+	//| TunnelingType			| UNSIGNED INTEGER | KTunnelingType		|//
+	//| CertLabel				| VARCHAR(255)     | KCACertLabel        |//	
+	//| SubjectKeyId			| BINARY(20)	   | KSubjectKeyIdentifier |// This is Symbian subjectkey id
+	//| ActualSubjectKeyId		| BINARY(20)	   | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
+	//| SubjectName				| VARCHAR(255)     | KSubjectName        |//	
+	//| IssuerName				| VARCHAR(255)     | KIssuerName        |//	
+	//| SerialNumber			| VARCHAR(255)     | KSerialNumber        |//	
+	//| Thumbprint				| BINARY(64)	   | KThumbprint        |//	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////	
 	
-	_LIT(KSQLCreateTable3, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d), \
-											 %S BINARY(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d))");											 
+	_LIT(KSQLCreateTable3, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d), \
+		 %S BINARY(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d))");											 
 											 
-	sqlStatement.Format(KSQLCreateTable3, &KFastAllowedUserCertsDatabaseTableName, 
+	sqlStatement.Format(KSQLCreateTable3,
+		&KFastAllowedUserCertsDatabaseTableName, 
 		&KServiceType, 
-		&KServiceIndex, 
+		&KServiceIndex,
+		&KTunnelingTypeVendorId,
 		&KTunnelingType, 
 		&KCertLabel, KMaxCertLabelLengthInDB,
 		&KSubjectKeyIdentifier, KMaxSubjectKeyIdLengthInDB,
@@ -1654,10 +1715,10 @@ void EapTlsPeapUtils::OpenFastDatabaseL(
 	EAP_TRACE_DEBUG_SYMBIAN(
 		(_L("EapTlsPeapUtils::OpenFastDatabaseL - SQL query formated OK\n")));
 	
-	err = aDatabase.Execute(sqlStatement);
-	if (err != KErrNone && err != KErrAlreadyExists)
+	error = aDatabase.Execute(sqlStatement);
+	if (error != KErrNone && error != KErrAlreadyExists)
 	{
-		User::Leave(err);
+		User::Leave(error);
 	}	
 
 	EAP_TRACE_DEBUG_SYMBIAN(
@@ -1665,33 +1726,38 @@ void EapTlsPeapUtils::OpenFastDatabaseL(
 	
 	// Table 4: Create table for _allowed_ CA certs
 
-//// NAME ////////////////// TYPE ////////////// Constant ///////////
-//| ServiceType			| UNSIGNED INTEGER | KServiceType        |//
-//| ServiceIndex		| UNSIGNED INTEGER | KServiceIndex       |//
-//| TunnelingType		| UNSIGNED INTEGER | KTunnelingType		|//
-//| CACertLabel			| VARCHAR(255)     | KCACertLabel        |//	
-//| SubjectKeyId		| BINARY(20)	   | KSubjectKeyIdentifier |// This is Symbian subjectkey id
-//| ActualSubjectKeyId  | BINARY(20)	   | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
-//| SubjectName			| VARCHAR(255)     | KSubjectName        |//	
-//| IssuerName			| VARCHAR(255)     | KIssuerName        |//	
-//| SerialNumber		| VARCHAR(255)     | KSerialNumber        |//	
-//| Thumbprint			| BINARY(64)	   | KThumbprint        |//	
-//////////////////////////////////////////////////////////////////////////////////////////////////////	
+	//// NAME ////////////////// TYPE ////////////// Constant ///////////
+	//| ServiceType				| UNSIGNED INTEGER | KServiceType        |//
+	//| ServiceIndex			| UNSIGNED INTEGER | KServiceIndex       |//
+	//| TunnelingTypeVendorId	| UNSIGNED INTEGER  | KTunnelingTypeVendorId    |//
+	//| TunnelingType			| UNSIGNED INTEGER | KTunnelingType		|//
+	//| CACertLabel				| VARCHAR(255)     | KCACertLabel        |//	
+	//| SubjectKeyId			| BINARY(20)	   | KSubjectKeyIdentifier |// This is Symbian subjectkey id
+	//| ActualSubjectKeyId		| BINARY(20)	   | KActualSubjectKeyIdentifier |// This is the actual subjectkeyid present in the certificate.
+	//| SubjectName				| VARCHAR(255)     | KSubjectName        |//	
+	//| IssuerName				| VARCHAR(255)     | KIssuerName        |//	
+	//| SerialNumber			| VARCHAR(255)     | KSerialNumber        |//	
+	//| Thumbprint				| BINARY(64)	   | KThumbprint        |//	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////	
 
-	_LIT(KSQLCreateTable4, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d), \
-											 %S BINARY(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S VARCHAR(%d), \
-											 %S BINARY(%d))");
+	_LIT(KSQLCreateTable4, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d), \
+		 %S BINARY(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S VARCHAR(%d), \
+		 %S BINARY(%d))");
 											 
-	sqlStatement.Format(KSQLCreateTable4, &KFastAllowedCACertsDatabaseTableName, 
+	sqlStatement.Format(KSQLCreateTable4,
+		&KFastAllowedCACertsDatabaseTableName, 
 		&KServiceType, 
-		&KServiceIndex, 
+		&KServiceIndex,
+		&KTunnelingTypeVendorId,
 		&KTunnelingType, 
 		&KCertLabel, KMaxCertLabelLengthInDB,
 		&KSubjectKeyIdentifier, KMaxSubjectKeyIdLengthInDB,
@@ -1704,10 +1770,10 @@ void EapTlsPeapUtils::OpenFastDatabaseL(
 	EAP_TRACE_DEBUG_SYMBIAN(
 		(_L("EapTlsPeapUtils::OpenFastDatabaseL - SQL query formated OK\n")));
 		
-	err = aDatabase.Execute(sqlStatement);
-	if (err != KErrNone && err != KErrAlreadyExists)
+	error = aDatabase.Execute(sqlStatement);
+	if (error != KErrNone && error != KErrAlreadyExists)
 	{
-		User::Leave(err);
+		User::Leave(error);
 	}
 
 	EAP_TRACE_DEBUG_SYMBIAN(
@@ -1715,24 +1781,33 @@ void EapTlsPeapUtils::OpenFastDatabaseL(
 	
 	// Table 5: Create table for _allowed_ cipher suites
 
-//// NAME ///////////////// TYPE ////////////// Constant ///////////
-//| ServiceType			| UNSIGNED INTEGER | KServiceType        |//
-//| ServiceIndex		| UNSIGNED INTEGER | KServiceIndex       |//
-//| TunnelingType		| UNSIGNED INTEGER | KTunnelingType		|//
-//| CipherSuite			| UNSIGNED INTEGER | KCipherSuite        |//	
-//////////////////////////////////////////////////////////////////////////////////////////////////////	
+	//// NAME ///////////////// TYPE ////////////// Constant ///////////
+	//| ServiceType				| UNSIGNED INTEGER | KServiceType        |//
+	//| ServiceIndex			| UNSIGNED INTEGER | KServiceIndex       |//
+	//| TunnelingTypeVendorId	| UNSIGNED INTEGER  | KTunnelingTypeVendorId    |//
+	//| TunnelingType			| UNSIGNED INTEGER | KTunnelingType		|//
+	//| CipherSuite				| UNSIGNED INTEGER | KCipherSuite        |//	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////	
 	
-	_LIT(KSQLCreateTable5, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER, \
-											 %S UNSIGNED INTEGER)");
+	_LIT(KSQLCreateTable5, "CREATE TABLE %S \
+		(%S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER, \
+		 %S UNSIGNED INTEGER)");
 
-	sqlStatement.Format(KSQLCreateTable5, &KFastAllowedCipherSuitesDatabaseTableName, 
-		&KServiceType, &KServiceIndex, &KTunnelingType, &KCipherSuite);
-	err = aDatabase.Execute(sqlStatement);
-	if (err != KErrNone && err != KErrAlreadyExists)
+	sqlStatement.Format(KSQLCreateTable5,
+		&KFastAllowedCipherSuitesDatabaseTableName, 
+		&KServiceType,
+		&KServiceIndex,
+		&KTunnelingTypeVendorId,
+		&KTunnelingType,
+		&KCipherSuite);
+
+	error = aDatabase.Execute(sqlStatement);
+	if (error != KErrNone && error != KErrAlreadyExists)
 	{
-		User::Leave(err);
+		User::Leave(error);
 	}
 
 	EAP_TRACE_DEBUG_SYMBIAN(
@@ -1740,10 +1815,18 @@ void EapTlsPeapUtils::OpenFastDatabaseL(
 	
 	// 4. Check if database table contains a row for this service type and id  	
 	
-	_LIT(KSQLQueryRow, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQLQueryRow, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
 
-	sqlStatement.Format(KSQLQueryRow, &KFastGeneralSettingsDBTableName, 
-		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);	
+	sqlStatement.Format(KSQLQueryRow,
+		&KFastGeneralSettingsDBTableName, 
+		&KServiceType,
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aTunnelingType.get_vendor_type());	
 			
 	RDbView view;
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
@@ -1772,13 +1855,14 @@ void EapTlsPeapUtils::OpenFastDatabaseL(
 		// Set the default values. The other three tables (certs, ca certs & cipher suites) are empty by default.
 		view.SetColL(colSet->ColNo(KServiceType), static_cast<TInt>(aIndexType));
 		view.SetColL(colSet->ColNo(KServiceIndex), aIndex);		
-		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingVendorType);
+		view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
+		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_realm_literal), default_EAP_TLS_PEAP_use_manual_realm);
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_realm_literal), default_EAP_TLS_PEAP_manual_realm);
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_realm_literal), default_EAP_realm);
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_username_literal), default_EAP_TLS_PEAP_use_manual_username);
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_username_literal), default_EAP_TLS_PEAP_manual_username);
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_username_literal), default_EAP_username);
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_cipher_suite_literal), default_EAP_TLS_PEAP_cipher_suite);
 
@@ -1807,8 +1891,10 @@ void EapTlsPeapUtils::OpenFastDatabaseL(
 		view.SetColL(colSet->ColNo(cf_str_EAP_FAST_max_session_validity_time_literal), default_MaxSessionTime);
 		
 		view.SetColL(colSet->ColNo(KFASTLastFullAuthTime), default_FullAuthTime);
-		
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TLS_Privacy);		
+
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), default_EAP_TLS_PEAP_TTLS_Privacy);		
+
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal), default_EAP_TLS_PEAP_use_automatic_ca_certificate);
 
 		view.PutL();
 		
@@ -1832,28 +1918,18 @@ void EapTlsPeapUtils::OpenFastDatabaseL(
 		// Set the default values.
 		view.SetColL(colSet->ColNo(KServiceType), static_cast<TInt>(aIndexType));
 		view.SetColL(colSet->ColNo(KServiceIndex), aIndex);		
-		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingVendorType);
+		view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
+		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
 
 		view.SetColL(colSet->ColNo(cf_str_EAP_FAST_allow_server_authenticated_provisioning_mode_literal),
 				default_EAP_FAST_Auth_Prov_Mode_Allowed);		
 	 	view.SetColL(colSet->ColNo(cf_str_EAP_FAST_allow_server_unauthenticated_provisioning_mode_ADHP_literal),
 	 			default_EAP_FAST_Unauth_Prov_Mode_Allowed);
-	 	
-        view.SetColL(colSet->ColNo(KFASTWarnADHPNoPAC),
-                default_EAP_FAST_Warn_ADHP_No_PAC);
-
-        view.SetColL(colSet->ColNo(KFASTWarnADHPNoMatchingPAC),
-                default_EAP_FAST_Warn_ADHP_No_Matching_PAC);
-
-        view.SetColL(colSet->ColNo(KFASTWarnNotDefaultServer),
-                default_EAP_FAST_Warn_Not_Default_Server);
-
-	 	
 							
 		view.PutL();
 		
 		CleanupStack::PopAndDestroy(colSet); 
-		CleanupStack::PopAndDestroy( &view ); // Close view.		
+		CleanupStack::PopAndDestroy( &view );
 		
 		//--------------------------------------------------------//
 		
@@ -1873,25 +1949,28 @@ void EapTlsPeapUtils::OpenFastDatabaseL(
 			view.InsertL();
 			view.SetColL(colSet->ColNo(KServiceType), static_cast<TInt>(aIndexType));
 			view.SetColL(colSet->ColNo(KServiceIndex), aIndex);		
-			view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingVendorType);			
+			view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
+			view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
 			view.SetColL(colSet->ColNo(KCipherSuite), default_allowed_cipher_suites[i]);
 			view.PutL();
 			i++;
 		}
 		
-		CleanupStack::PopAndDestroy( colSet ); // Delete colSet.		
-		CleanupStack::PopAndDestroy( &view ); // Close view.
+		CleanupStack::PopAndDestroy( colSet );
+		CleanupStack::PopAndDestroy( &view );
 	}
-	
-	CleanupStack::PopAndDestroy( buf ); // Delete buf or sqlStatement
-	CleanupStack::Pop( &aDatabase );	
-	CleanupStack::Pop( &aSession );
-	
+
 	aDatabase.Compact();
+
+	CleanupStack::PopAndDestroy( buf );
+	CleanupStack::Pop( &aDatabase );
+	CleanupStack::Pop( &aFileServerSession );
 	
-    } // EapTlsPeapUtils::OpenFastDatabaseL()
+} // EapTlsPeapUtils::OpenFastDatabaseL()
 
 #endif // #if defined(USE_FAST_EAP_TYPE)
+
+// ---------------------------------------------------------
 
 void EapTlsPeapUtils::SetIndexL(
 	RDbNamedDatabase& aDatabase,
@@ -1903,34 +1982,40 @@ void EapTlsPeapUtils::SetIndexL(
 	const TInt aNewIndex,
 	const eap_type_value_e aNewTunnelingType)
 {
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
-	TUint aNewTunnelingVendorType = aNewTunnelingType.get_vendor_type();
-
-#else
-
-	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
-	TUint aNewTunnelingVendorType = static_cast<TUint>(aNewTunnelingType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
 	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::SetIndexL -Start- aIndexType=%d, aIndex=%d, Tunneling vendor type=%d \n"),
-		aIndexType, aIndex, aTunnelingVendorType));
+		(_L("EapTlsPeapUtils::SetIndexL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x, aNewTunnelingType=0xfe%06x%08x\n"),
+		aIndexType,
+		aIndex,
+		aTunnelingType.get_vendor_id(),
+		aTunnelingType.get_vendor_type(),
+		aNewTunnelingType.get_vendor_id(),
+		aNewTunnelingType.get_vendor_type()));
 	
 	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::SetIndexL -Start- aNewIndexType=%d, aNewIndex=%d, New Tunneling vendor type=%d \n"),
-		aNewIndexType, aNewIndex, aNewTunnelingVendorType));
+		(_L("EapTlsPeapUtils::SetIndexL(): -Start- aNewIndexType=%d, aNewIndex=%d, aNewTunnelingType=%d \n"),
+		aNewIndexType,
+		aNewIndex,
+		aNewTunnelingType.get_vendor_id(),
+		aNewTunnelingType.get_vendor_type()));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::SetIndexL()\n"));
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
 	// First delete the target
-	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
 
-	sqlStatement.Format(KSQL, &aTableName, 
-		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);		
+	sqlStatement.Format(KSQL,
+		&aTableName, 
+		&KServiceType,
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aTunnelingType.get_vendor_type());		
 
 	RDbView view;
 	
@@ -1953,18 +2038,21 @@ void EapTlsPeapUtils::SetIndexL(
 				view.UpdateL();
 				
 			    view.SetColL(colSet->ColNo(KServiceType), static_cast<TUint>(aNewIndexType));
-    
     			view.SetColL(colSet->ColNo(KServiceIndex), static_cast<TUint>(aNewIndex));
-
-    			view.SetColL(colSet->ColNo(KTunnelingType), aNewTunnelingVendorType);
+				view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aNewTunnelingType.get_vendor_id());
+				view.SetColL(colSet->ColNo(KTunnelingType), aNewTunnelingType.get_vendor_type());
 				
 				view.PutL();
 			}
 		} while (view.NextL() != EFalse);
 	}
 			
-    CleanupStack::PopAndDestroy(3); // view, colset
+	CleanupStack::PopAndDestroy(colSet);
+	CleanupStack::PopAndDestroy(&view);
+	CleanupStack::PopAndDestroy(buf);
 }
+
+// ---------------------------------------------------------
 
 void EapTlsPeapUtils::ReadCertRowsToArrayL(
 	RDbNamedDatabase& aDatabase,
@@ -1973,27 +2061,34 @@ void EapTlsPeapUtils::ReadCertRowsToArrayL(
 	const TIndexType aIndexType,
 	const TInt aIndex,
 	const eap_type_value_e aTunnelingType,
-	RArray<SCertEntry>& aArray)
+	RPointerArray<EapCertificateEntry>& aArray)
 {
-#ifdef USE_EAP_EXPANDED_TYPES
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("EapTlsPeapUtils::ReadCertRowsToArrayL(): - Start - aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
+		aIndexType,
+		aIndex,
+		aTunnelingType.get_vendor_id(),
+		aTunnelingType.get_vendor_type()));
 
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::ReadCertRowsToArrayL()\n"));
 
-#else
-
-	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::ReadCertRowsToArrayL -Start")) );
+	CleanupClosePushL( aArray );
 
 	HBufC* buf = HBufC::NewLC(512);
 	TPtr sqlStatement = buf->Des();
 	
-	_LIT(KSQLQueryRow, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQLQueryRow, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
 	
-	sqlStatement.Format(KSQLQueryRow, &aTableName, &KServiceType, 
-		aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+	sqlStatement.Format(KSQLQueryRow,
+		&aTableName,
+		&KServiceType, 
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aTunnelingType.get_vendor_type());
 	
 	RDbView view;
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
@@ -2011,31 +2106,42 @@ void EapTlsPeapUtils::ReadCertRowsToArrayL(
 			view.GetL();
 			
 			{
-				SCertEntry certInfo;
+				EapCertificateEntry * const certInfo = new EapCertificateEntry;
+				if (certInfo == 0)
+				{
+					EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::ReadCertRowsToArrayL(): No memory\n")));
+					User::Leave(KErrNoMemory);
+				}
+
 				// Store the line
 				TPtrC ptr = view.ColDes(colSet->ColNo(KCertLabel));
 	
-				certInfo.iLabel.Copy(ptr);
+				certInfo->SetLabel(ptr);
 				
 				TPtrC8 ptr2 = view.ColDes8(colSet->ColNo(KSubjectKeyIdentifier)); // This is for authentication and uses Symbian subjectkey id.
-				certInfo.iSubjectKeyId.Copy(ptr2);
+				certInfo->SetSubjectKeyId(ptr2);
 
 				aArray.Append(certInfo);
 				
 				EAP_TRACE_DEBUG_SYMBIAN((_L("ReadCertRowsToArrayL - Appended Cert with label=%S\n"),
-				&(certInfo.iLabel)));
+					certInfo->GetLabel()));
 				
 				EAP_TRACE_DATA_DEBUG_SYMBIAN(("ReadCertRowsToArrayL - Appended Cert's SubjectKeyID:",
-					certInfo.iSubjectKeyId.Ptr(), certInfo.iSubjectKeyId.Size()));
+					certInfo->GetSubjectKeyId().Ptr(),
+					certInfo->GetSubjectKeyId().Length()));
 			}	
 
 		} while (view.NextL() != EFalse);		
 	}
 
 	// Close database
-	CleanupStack::PopAndDestroy(colSet); 
-	CleanupStack::PopAndDestroy(2); // view, buf
+	CleanupStack::PopAndDestroy(colSet);
+	CleanupStack::PopAndDestroy(&view);
+	CleanupStack::PopAndDestroy(buf);
+	CleanupStack::Pop( &aArray );
 }
+
+// ---------------------------------------------------------
 
 void EapTlsPeapUtils::ReadUintRowsToArrayL(
 	RDbNamedDatabase& aDatabase,
@@ -2047,30 +2153,38 @@ void EapTlsPeapUtils::ReadUintRowsToArrayL(
 	const eap_type_value_e aTunnelingType,
 	RArray<TUint>& aArray)
 {
-#ifdef USE_EAP_EXPANDED_TYPES
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("EapTlsPeapUtils::ReadUintRowsToArrayL(): - Start - aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
+		aIndexType,
+		aIndex,
+		aTunnelingType.get_vendor_id(),
+		aTunnelingType.get_vendor_type()));
 
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::ReadUintRowsToArrayL()\n"));
 
-#else
-
-	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::ReadUintRowsToArrayL -Start")) );
+	CleanupClosePushL( aArray );
 
 	HBufC* buf = HBufC::NewLC(512);
 	TPtr sqlStatement = buf->Des();
 	
-	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
 	
-	sqlStatement.Format(KSQLQueryRow, &aColumnName, &aTableName, 
-		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+	sqlStatement.Format(KSQLQueryRow,
+		&aColumnName,
+		&aTableName, 
+		&KServiceType,
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType,
+		aTunnelingType.get_vendor_type());
 	
 	RDbView view;
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 	CleanupClosePushL(view);
-	User::LeaveIfError(view.EvaluateAll());	
+	User::LeaveIfError(view.EvaluateAll());
 	
 	if (view.FirstL())
 	{		
@@ -2082,8 +2196,13 @@ void EapTlsPeapUtils::ReadUintRowsToArrayL(
 			case EDbColUint32:
 				{
 					// Store the line
-					TUint tmp = view.ColUint(KDefaultColumnInView_One);				
+					TUint tmp = view.ColUint(KDefaultColumnInView_One);
 					aArray.Append(tmp);
+
+					EAP_TRACE_DEBUG_SYMBIAN(
+						(_L("EapTlsPeapUtils::ReadUintRowsToArrayL(): TUint=%d\n"),
+						tmp));
+
 				}
 				break;
 			default:
@@ -2094,15 +2213,24 @@ void EapTlsPeapUtils::ReadUintRowsToArrayL(
 	}
 
 	// Close database
-	CleanupStack::PopAndDestroy(2); // view, buf
+	CleanupStack::PopAndDestroy(&view);
+	CleanupStack::PopAndDestroy(buf);
+	CleanupStack::Pop( &aArray );
 }
+
+// ---------------------------------------------------------
 
 // Don't use this finction as Label is not saved for certificates saved by SetConfigurationL().
 // Provisioning (OMA DM etc) use SetConfigurationL() to save certificate details.
 
 TBool EapTlsPeapUtils::CompareTCertLabels(const TCertLabel& item1, const TCertLabel& item2)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::CompareTCertLabels-Start")) );
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("EapTlsPeapUtils::CompareTCertLabels(): item1=\"%S\", item2=\"%S\"\n"),
+		&item1,
+		&item2));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::CompareTCertLabels()\n"));
 
 	if (item1 == item2)
 	{
@@ -2114,22 +2242,36 @@ TBool EapTlsPeapUtils::CompareTCertLabels(const TCertLabel& item1, const TCertLa
 	}
 }
 
-TBool EapTlsPeapUtils::CompareSCertEntries(const SCertEntry& item1, const SCertEntry& item2)
+// ---------------------------------------------------------
+
+TBool EapTlsPeapUtils::CompareSCertEntries(const EapCertificateEntry& item1, const EapCertificateEntry& item2)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("\nEapTlsPeapUtils::CompareSCertEntries, Label_1=%S, Label_2=%S"),
-	&(item1.iLabel), &(item2.iLabel)));
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("EapTlsPeapUtils::CompareSCertEntries(): item1.Label=\"%S\", item2.Label=\"%S\"\n"),
+		item1.GetLabel(),
+		item2.GetLabel()));
 
-	EAP_TRACE_DATA_DEBUG_SYMBIAN(("EapTlsPeapUtils::CompareSCertEntries, SubjectKeyID_1:",
-		item1.iSubjectKeyId.Ptr(), item1.iSubjectKeyId.Size()));
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("EapTlsPeapUtils::CompareSCertEntries(): item1.Label=\"%S\", item2.Label=\"%S\"\n"),
+		item1.GetLabel(),
+		item2.GetLabel()));
 
-	EAP_TRACE_DATA_DEBUG_SYMBIAN(("EapTlsPeapUtils::CompareSCertEntries, SubjectKeyID_2:",
-		item2.iSubjectKeyId.Ptr(), item2.iSubjectKeyId.Size()));
+	EAP_TRACE_DATA_DEBUG_SYMBIAN(("EapTlsPeapUtils::CompareSCertEntries(): SubjectKeyID_1:",
+		item1.GetSubjectKeyId().Ptr(),
+		item1.GetSubjectKeyId().Length()));
 
-	if (item1.iLabel == item2.iLabel ||
-		item1.iLabel.Length() == 0 ||
-		item2.iLabel.Length() == 0 ) // Label is not saved when certs are saved using OMA DM.
+	EAP_TRACE_DATA_DEBUG_SYMBIAN(("EapTlsPeapUtils::CompareSCertEntries(): SubjectKeyID_2:",
+		item2.GetSubjectKeyId().Ptr(),
+		item2.GetSubjectKeyId().Length()));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::CompareSCertEntries()\n"));
+
+
+	if (*(item1.GetLabel()) == *(item2.GetLabel())
+		|| item1.GetLabel()->Length() == 0
+		|| item2.GetLabel()->Length() == 0 ) // Label is not saved when certs are saved using OMA DM.
 	{
-		if (item1.iSubjectKeyId == item2.iSubjectKeyId)
+		if (item1.GetSubjectKeyId() == item2.GetSubjectKeyId())
 		{
 			EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::CompareSCertEntries, Certs matched\n")));
 		
@@ -2140,414 +2282,111 @@ TBool EapTlsPeapUtils::CompareSCertEntries(const SCertEntry& item1, const SCertE
 	return EFalse;
 }
 
-
-#ifndef USE_EAP_EXPANDED_TYPES 
-// There are separate functions (SetTunnelingExpandedEapDataL and GetTunnelingExpandedEapDataL) if USE_EAP_EXPANDED_TYPES is defined.
-
-/**
-* Sets EAP data to a binary string record in commsdat.
-* The old format (NOT USED NOW) is "+123,- 34", + means enabled, - disabled, then id, id is always 3 characters for easy parsing.
-* In the new format each EAP type is saved as an unsigned integer of 32 bits ( TUint).
-* There is separate binary strings for accepted (enabled) and unaccepted (disabled) tunneled EAP types.
-*/
- 
-void EapTlsPeapUtils::SetEapDataL(
-	RDbNamedDatabase& aDatabase,
-	eap_am_tools_symbian_c * const /*aTools*/,
-	TEapArray &aEaps,
-	const TIndexType aIndexType,
-	const TInt aIndex,
-	const eap_type_value_e aTunnelingType,
-	const eap_type_value_e aEapType)
-{
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
-	TUint aEapVendorType = aEapType.get_vendor_type();
-
-#else
-
-	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
-	TUint aEapVendorType = static_cast<TUint>(aEapType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::SetEapDataL aIndexType=%d, aIndex=%d, Tunneling vendor type=%d, Eap vendor type=%d, No: of tunneled EAP types=%d \n"),
-		aIndexType,aIndex, aTunnelingVendorType, aEapVendorType, aEaps.Count()) );
-
-	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
-	TPtr sqlStatement = buf->Des();
-	
-	_LIT(KSQLQueryRow, "SELECT %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
-	
-	if (aEapType == eap_type_peap)
-	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal,
-			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KPeapDatabaseTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
-	} 
-#if defined(USE_TTLS_EAP_TYPE)
-	else if (aEapType == eap_type_ttls)
-	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
-			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KTtlsDatabaseTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
-	} 
-#endif
-
-	else if (aEapType == eap_type_ttls_plain_pap)
-	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
-			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KTtlsDatabaseTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
-	} 
-
-#if defined(USE_FAST_EAP_TYPE)
-	else if (aEapType == eap_type_fast)
-	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
-			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KFastGeneralSettingsDBTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
-	} 
-#endif
-	else
-	{
-		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("EapTlsPeapUtils::SetEapDataL - Unsupported EAP type =%d \n"),
-			 aEapVendorType));
-			 
-		// Unsupported EAP type
-		User::Leave(KErrNotSupported);
-	}	
-			
-	RDbView view;
-	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
-	CleanupClosePushL(view);
-	User::LeaveIfError(view.EvaluateAll());	
-	User::LeaveIfError(view.FirstL());	
-	view.UpdateL();
-
-	TInt eapCount = aEaps.Count();
-	
-	HBufC8 *acceptedDbText = HBufC8::NewLC( (sizeof(TUint)) * eapCount ); // 4 bytes (32 bits) for an EAP type, Need to save as TUInt (4 bytes).
-	HBufC8 *unacceptedDbText = HBufC8::NewLC( (sizeof(TUint)) * eapCount ); // 4 bytes (32 bits) for an EAP type, Need to save as TUInt (4 bytes).
-	
-	TPtr8 acceptedPtr(acceptedDbText->Des());
-	TPtr8 unacceptedPtr(unacceptedDbText->Des());
-	
-	TBuf8<3> UidTmp;
-		
-	for(TInt i = 0 ; i< eapCount; i++)
-	{
-		UidTmp.Copy(aEaps[i]->UID);
-		
-		TLex8 eapUidLex( UidTmp.Right(2) ); // Only last two characters determines the EAP type.
-		TUint eapTypeUint = 0;
-		
-		User::LeaveIfError( eapUidLex.Val(eapTypeUint, EDecimal) );	
-		
-		TPtrC8 tempEAPtype( reinterpret_cast<TUint8*>(&eapTypeUint), sizeof(TUint) );
-		
-		if( aEaps[i]->Enabled )
-		{
-			// Fill in accepted tunneled type.
-			acceptedPtr.Append( tempEAPtype );			
-		}
-		else
-		{
-			// Fill in unaccepted tunneled type.
-			unacceptedPtr.Append( tempEAPtype);			
-		}			
-	}
-	
-	// Save the strings in the DB.
-	
-	// Get column set so we get the correct column numbers
-	CDbColSet* colSet = view.ColSetL();
-	CleanupStack::PushL(colSet);			
-	
-	// Validate length of strings
-	if(acceptedPtr.Length() > KMaxTunneledTypeStringLengthInDB 
-		|| unacceptedPtr.Length() > KMaxTunneledTypeStringLengthInDB)
-	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetEapDataL - Too long Tunneled EAP type string \n") ) );
-
-		User::Leave(KErrArgument);		
-	}
-	
-	view.SetColL(colSet->ColNo(cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal), acceptedPtr);
-	view.SetColL(colSet->ColNo(cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal), unacceptedPtr);	
-
-	CleanupStack::PopAndDestroy( colSet ); // Delete colSet.	
-
-	view.PutL();
-
-	EAP_TRACE_DATA_DEBUG_SYMBIAN(("EapTlsPeapUtils::SetEapDataL- Enabled extended EAP type data added to DB:",
-		acceptedPtr.Ptr(), 
-		acceptedPtr.Size() ) );
-
-	EAP_TRACE_DATA_DEBUG_SYMBIAN(("EapTlsPeapUtils::SetEapDataL- Disabled extended EAP type data added to DB:",
-		unacceptedPtr.Ptr(), 
-		unacceptedPtr.Size() ) );
-
-	CleanupStack::PopAndDestroy(unacceptedDbText); // Delete unacceptedDbText
-	CleanupStack::PopAndDestroy(acceptedDbText); // Delete acceptedDbText	
-	CleanupStack::PopAndDestroy(&view); // Close view
-	CleanupStack::PopAndDestroy(buf); // Delete buf
-}
-
-/**
-* Gets Eapdata from corresponding table in commdb
-* see format in SetEapDAtaL
-*/
-void EapTlsPeapUtils::GetEapDataL(
-	RDbNamedDatabase& aDatabase,
-	eap_am_tools_symbian_c * const /*aTools*/,
-	TEapArray &aEaps, 
-	const TIndexType aIndexType,
-	const TInt aIndex,
-	const eap_type_value_e aTunnelingType,
-	const eap_type_value_e aEapType)
-{
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
-	TUint aEapVendorType = aEapType.get_vendor_type();
-
-#else
-
-	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
-	TUint aEapVendorType = static_cast<TUint>(aEapType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::GetEapDataL aIndexType=%d, aIndex=%d, Tunneling vendor type=%d, Eap vendor type=%d \n"),
-		aIndexType,aIndex, aTunnelingVendorType, aEapVendorType));
-
-	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
-	TPtr sqlStatement = buf->Des();
-	
-	_LIT(KSQLQueryRow, "SELECT %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
-
-	if (aEapType == eap_type_peap)
-	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
-			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KPeapDatabaseTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
-	} 
-#if defined(USE_TTLS_EAP_TYPE)
-	else if (aEapType == eap_type_ttls)
-	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
-			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KTtlsDatabaseTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
-	} 
-#endif
-
-	else if (aEapType == eap_type_ttls_plain_pap)
-	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
-			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KTtlsDatabaseTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
-	} 
-	
-#if defined(USE_FAST_EAP_TYPE)
-	else if (aEapType == eap_type_fast)
-	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
-			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KFastGeneralSettingsDBTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
-	} 
-#endif
-	else
-	{
-		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("EapTlsPeapUtils::GetEapDataL - Unsupported EAP type=%d \n"),
-			 aEapVendorType));
-			 
-		// Unsupported EAP type
-		User::Leave(KErrNotSupported);
-	}	
-	
-	RDbView view;
-	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
-	CleanupClosePushL(view);
-	User::LeaveIfError(view.EvaluateAll());	
-	
-	User::LeaveIfError(view.FirstL());
-	
-	view.GetL();
-	
-	// Get column set so we get the correct column numbers
-	CDbColSet* colSet = view.ColSetL();
-	CleanupStack::PushL(colSet);			
-	
-	TPtrC8 acceptedEAPData = view.ColDes8(colSet->ColNo(cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal));
-	TPtrC8 unacceptedEAPData = view.ColDes8(colSet->ColNo(cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal));
-	
-	CleanupStack::PopAndDestroy( colSet ); // Delete colSet.	
-
-	EAP_TRACE_DATA_DEBUG_SYMBIAN(("EapTlsPeapUtils::GetEapDataL- Enabled extended EAP type data from DB:",
-		acceptedEAPData.Ptr(), 
-		acceptedEAPData.Size() ) );
-	
-	EAP_TRACE_DATA_DEBUG_SYMBIAN(("EapTlsPeapUtils::GetEapDataL- Disabled extended EAP type data from DB:",
-		unacceptedEAPData.Ptr(), 
-		unacceptedEAPData.Size() ) );
-	
-	aEaps.ResetAndDestroy();
-		
-	TUint acceptedLength = acceptedEAPData.Length();
-	TUint unacceptedLength = unacceptedEAPData.Length();
-	
-	TEap *eapTmp;
-
-	TUint index = 0;
-	
-	_LIT8(KUIDFormat,"%u");
-	
-	// For accepted or enabled tunneled EAP types. 	
-	while(index < acceptedLength)
-	{		
-		eapTmp = new (ELeave)TEap;
-
-		eapTmp->Enabled=ETrue; // All EAP types in here are enabled.
-		
-		eapTmp->UID.Zero();
-
-		// Get the UID from data from the DB.				
-		TPtrC8 tempEAPtype( acceptedEAPData.Mid(index, sizeof(TUint)) );
-		
-		EAP_TRACE_DATA_DEBUG_SYMBIAN(("EapTlsPeapUtils::GetEapDataL- extracted EAP type:",
-			tempEAPtype.Ptr(), 
-			tempEAPtype.Size() ) );
-						
-		TUint eapTypeUint = *(tempEAPtype.Ptr()); // All EAP types are saved as TUInt. 
-		
-		eapTmp->UID.Format(KUIDFormat,eapTypeUint);
-				
-		aEaps.Append(eapTmp);
-
-		index = index + sizeof(TUint);
-		
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetEapDataL - Appended enabled-EAP type=%s \n"),eapTmp->UID.Ptr()) );
-	}
-	
-	index = 0;
-	
-	// For unaccepted or disabled tunneled EAP types. 	
-	while(index < unacceptedLength)
-	{		
-		eapTmp = new (ELeave)TEap;
-
-		eapTmp->Enabled=EFalse; // All EAP types in here are disabled.
-		
-		eapTmp->UID.Zero();
-
-		// Get the UID from data from the DB.				
-		TPtrC8 tempEAPtype( unacceptedEAPData.Mid(index, sizeof(TUint)) );
-		
-		EAP_TRACE_DATA_DEBUG_SYMBIAN(("EapTlsPeapUtils::GetEapDataL- extracted EAP type:",
-			tempEAPtype.Ptr(), 
-			tempEAPtype.Size() ) );
-						
-		TUint eapTypeUint = *(tempEAPtype.Ptr()); // All EAP types are saved as TUint. 
-		
-		eapTmp->UID.Format(KUIDFormat,eapTypeUint);
-				
-		aEaps.Append(eapTmp);
-
-		index = index + sizeof(TUint);
-		
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetEapDataL - Appended disabled-EAP type=%s \n"),eapTmp->UID.Ptr()) );
-	}
-	
-	CleanupStack::PopAndDestroy(&view); // Close view
-	CleanupStack::PopAndDestroy(buf); // Delete buf	
-}
-
-#endif // #ifndef USE_EAP_EXPANDED_TYPES
-
 //--------------------------------------------------
-
-#ifdef USE_EAP_EXPANDED_TYPES
 
 // Stores the tunneled EAP type (expanded) to the database.
 void EapTlsPeapUtils::SetTunnelingExpandedEapDataL(
 	RDbNamedDatabase& aDatabase,
 	eap_am_tools_symbian_c * const /*aTools*/,
-	RExpandedEapTypePtrArray &aEnabledEAPArrary,
-	RExpandedEapTypePtrArray &aDisabledEAPArrary,
+	RPointerArray<TEapExpandedType> &aEnabledEAPArrary,
+	RPointerArray<TEapExpandedType> &aDisabledEAPArrary,
 	const TIndexType aIndexType,
 	const TInt aIndex,
 	const eap_type_value_e aTunnelingType,
 	const eap_type_value_e aEapType)
 {
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
-	TUint aEapVendorType = aEapType.get_vendor_type();
-
 	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::SetTunnelingExpandedEapDataL:aIndexType=%d, aIndex=%d, Tunneling vendor type=%d, Eap vendor type=%d\n"),
-		aIndexType,aIndex, aTunnelingVendorType, aEapVendorType));
+		(_L("EapTlsPeapUtils::SetTunnelingExpandedEapDataL(): - Start - aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x, aEapType=0xfe%06x%08x\n"),
+		aIndexType,
+		aIndex,
+		aTunnelingType.get_vendor_id(),
+		aTunnelingType.get_vendor_type(),
+		aEapType.get_vendor_id(),
+		aEapType.get_vendor_type()));
 
 	EAP_TRACE_DEBUG_SYMBIAN(
 		(_L("Number of Tunneled EAP types: Enabled=%d, Disabled=%d\n"),
-		aEnabledEAPArrary.Count(), aDisabledEAPArrary.Count()));
+		aEnabledEAPArrary.Count(),
+		aDisabledEAPArrary.Count()));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::SetTunnelingExpandedEapDataL()\n"));
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 	
-	_LIT(KSQLQueryRow, "SELECT %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQLQueryRow, "SELECT %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
 	
 	if (aEapType == eap_type_peap)
 	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal,
+		sqlStatement.Format(KSQLQueryRow,
+			&cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal,
 			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KPeapDatabaseTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
+			&KPeapDatabaseTableName,
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex, 
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());		
 	} 
 #if defined(USE_TTLS_EAP_TYPE)
 	else if (aEapType == eap_type_ttls)
 	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
+		sqlStatement.Format(KSQLQueryRow,
+			&cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
 			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KTtlsDatabaseTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
+			&KTtlsDatabaseTableName,
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex, 
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());		
 	} 
 #endif
 #if defined(USE_FAST_EAP_TYPE)
 	else if (aEapType == eap_type_fast)
 	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
+		sqlStatement.Format(KSQLQueryRow,
+			&cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
 			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KFastGeneralSettingsDBTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
+			&KFastGeneralSettingsDBTableName,
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex, 
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());		
 	} 
 #endif
 
 	else if ( aEapType == eap_type_ttls_plain_pap )
 	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
+		sqlStatement.Format(KSQLQueryRow,
+			&cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
 			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KTtlsDatabaseTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
+			&KTtlsDatabaseTableName,
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex, 
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());		
 	} 
 
 	else
 	{
-		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("EapTlsPeapUtils::SetTunnelingExpandedEapDataL - Unsupported EAP type =%d \n"),
-			 aEapVendorType));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetTunnelingExpandedEapDataL - Unsupported EAP-type=0xfe%06x%08x\n"),
+			aEapType.get_vendor_id(),
+			aEapType.get_vendor_type()));
 			 
 		// Unsupported EAP type
 		User::Leave(KErrNotSupported);
@@ -2563,8 +2402,8 @@ void EapTlsPeapUtils::SetTunnelingExpandedEapDataL(
 	TInt enabledEAPCount = aEnabledEAPArrary.Count();
 	TInt disabledEAPCount = aDisabledEAPArrary.Count();
 	
-	HBufC8 *acceptedDbText = HBufC8::NewLC( KExpandedEAPTypeSize * enabledEAPCount ); // 8 bytes (64 bits) for an EAP type.
-	HBufC8 *unacceptedDbText = HBufC8::NewLC( KExpandedEAPTypeSize * disabledEAPCount ); // 8 bytes (64 bits) for an EAP type.
+	HBufC8 *acceptedDbText = HBufC8::NewLC( KEapExpandedTypeLength * enabledEAPCount ); // 8 bytes (64 bits) for an EAP type.
+	HBufC8 *unacceptedDbText = HBufC8::NewLC( KEapExpandedTypeLength * disabledEAPCount ); // 8 bytes (64 bits) for an EAP type.
 	
 	TPtr8 acceptedPtr(acceptedDbText->Des());
 	TPtr8 unacceptedPtr(unacceptedDbText->Des());
@@ -2572,13 +2411,23 @@ void EapTlsPeapUtils::SetTunnelingExpandedEapDataL(
 	// Fill in accepted tunneled type.		
 	for(TInt i = 0 ; i< enabledEAPCount; i++)
 	{
-		acceptedPtr.Append(aEnabledEAPArrary[i]->iExpandedEAPType);					
+		EAP_TRACE_DEBUG_SYMBIAN(
+			(_L("EapTlsPeapUtils::SetTunnelingExpandedEapDataL():  enabled EAP-type=0xfe%06x%08x\n"),
+			aEnabledEAPArrary[i]->GetVendorId(),
+			aEnabledEAPArrary[i]->GetVendorType()));
+
+		acceptedPtr.Append(aEnabledEAPArrary[i]->GetValue());					
 	}
 	
 	// Fill in unaccepted tunneled type.		
 	for(TInt i = 0 ; i< disabledEAPCount; i++)
 	{
-		unacceptedPtr.Append(aDisabledEAPArrary[i]->iExpandedEAPType);					
+		EAP_TRACE_DEBUG_SYMBIAN(
+			(_L("EapTlsPeapUtils::SetTunnelingExpandedEapDataL(): disabled EAP-type=0xfe%06x%08x\n"),
+			aDisabledEAPArrary[i]->GetVendorId(),
+			aDisabledEAPArrary[i]->GetVendorType()));
+
+		unacceptedPtr.Append(aDisabledEAPArrary[i]->GetValue());					
 	}
 	
 	// Save the strings in the DB.
@@ -2591,7 +2440,7 @@ void EapTlsPeapUtils::SetTunnelingExpandedEapDataL(
 	if(acceptedPtr.Length() > KMaxTunneledTypeStringLengthInDB 
 		|| unacceptedPtr.Length() > KMaxTunneledTypeStringLengthInDB)
 	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetTunnelingExpandedEapDataL - Too long Tunneled EAP type string \n") ) );
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::SetTunnelingExpandedEapDataL - Too long Tunneled EAP type string \n") ) );
 
 		User::Leave(KErrArgument);		
 	}
@@ -2617,68 +2466,106 @@ void EapTlsPeapUtils::SetTunnelingExpandedEapDataL(
 	CleanupStack::PopAndDestroy(buf); // Delete buf	
 }
 
+// ---------------------------------------------------------
+
 // Retrieves the tunneled EAP type (expanded) from the database	.
 void EapTlsPeapUtils::GetTunnelingExpandedEapDataL(
 	RDbNamedDatabase& aDatabase,
 	eap_am_tools_symbian_c * const /*aTools*/,
-	RExpandedEapTypePtrArray &aEnabledEAPArrary,
-	RExpandedEapTypePtrArray &aDisabledEAPArrary,
+	RPointerArray<TEapExpandedType> &aEnabledEAPArrary,
+	RPointerArray<TEapExpandedType> &aDisabledEAPArrary,
 	const TIndexType aIndexType,
 	const TInt aIndex,
 	const eap_type_value_e aTunnelingType,
 	const eap_type_value_e aEapType)
 {
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
-	TUint aEapVendorType = aEapType.get_vendor_type();
-	
 	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::GetTunnelingExpandedEapDataL aIndexType=%d, aIndex=%d, Tunneling vendor type=%d, Eap vendor type=%d \n"),
-		aIndexType,aIndex, aTunnelingVendorType, aEapVendorType));
+		(_L("EapTlsPeapUtils::GetTunnelingExpandedEapDataL(): - Start - aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x, aEapType=0xfe%06x%08x\n"),
+		aIndexType,
+		aIndex,
+		aTunnelingType.get_vendor_id(),
+		aTunnelingType.get_vendor_type(),
+		aEapType.get_vendor_id(),
+		aEapType.get_vendor_type()));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::GetTunnelingExpandedEapDataL()\n"));
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 	
-	_LIT(KSQLQueryRow, "SELECT %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQLQueryRow, "SELECT %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
 
 	if (aEapType == eap_type_peap)
 	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
+		sqlStatement.Format(KSQLQueryRow,
+			&cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
 			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KPeapDatabaseTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
+			&KPeapDatabaseTableName,
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex, 
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());		
 	} 
 #if defined(USE_TTLS_EAP_TYPE)
 	else if (aEapType == eap_type_ttls)
 	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
+		sqlStatement.Format(KSQLQueryRow,
+			&cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
 			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KTtlsDatabaseTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
+			&KTtlsDatabaseTableName,
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex, 
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());		
 	} 
 #endif
 #if defined(USE_FAST_EAP_TYPE)
 	else if (aEapType == eap_type_fast)
 	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
+		sqlStatement.Format(KSQLQueryRow,
+			&cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
 			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KFastGeneralSettingsDBTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
+			&KFastGeneralSettingsDBTableName,
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex, 
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());		
 	} 
 #endif
 
 	else if (aEapType == eap_type_ttls_plain_pap )
 	{
-		sqlStatement.Format(KSQLQueryRow, &cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
+		sqlStatement.Format(KSQLQueryRow,
+			&cf_str_PEAP_accepted_tunneled_client_types_hex_data_literal, 
 			&cf_str_PEAP_unaccepted_tunneled_client_types_hex_data_literal,
-			&KTtlsDatabaseTableName, &KServiceType, aIndexType, &KServiceIndex, aIndex, 
-			&KTunnelingType, aTunnelingVendorType);		
+			&KTtlsDatabaseTableName,
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex, 
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());		
 	} 
 
 	else
 	{
-		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("EapTlsPeapUtils::GetTunnelingExpandedEapDataL - Unsupported EAP type=%d \n"),
-			 aEapVendorType));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::GetTunnelingExpandedEapDataL(): - Unsupported EAP-type=0xfe%06x%08x\n"),
+			aEapType.get_vendor_id(),
+			aEapType.get_vendor_type()));
 			 
 		// Unsupported EAP type
 		User::Leave(KErrNotSupported);
@@ -2716,13 +2603,13 @@ void EapTlsPeapUtils::GetTunnelingExpandedEapDataL(
 	TUint acceptedLength = acceptedEAPData.Length();
 	TUint unacceptedLength = unacceptedEAPData.Length();
 	
-	SExpandedEAPType *expandedEAPTmp = 0;
+	TEapExpandedType *expandedEAPTmp = 0;
 	TUint index = 0;
 	
 	// For accepted or enabled tunneled EAP types. 	
 	while(index < acceptedLength)
 	{		
-		expandedEAPTmp = new SExpandedEAPType;
+		expandedEAPTmp = new TEapExpandedType;
 
 		if (expandedEAPTmp == 0)
 		{
@@ -2731,15 +2618,16 @@ void EapTlsPeapUtils::GetTunnelingExpandedEapDataL(
 			User::LeaveIfError(KErrNoMemory);
 		}
 
-		expandedEAPTmp->iExpandedEAPType = acceptedEAPData.Mid(index, KExpandedEAPTypeSize);
+		*expandedEAPTmp = acceptedEAPData.Mid(index, KEapExpandedTypeLength);
 						
-		EAP_TRACE_DATA_DEBUG_SYMBIAN(("Extracted EAP type:",
-			expandedEAPTmp->iExpandedEAPType.Ptr(), 
-			expandedEAPTmp->iExpandedEAPType.Size() ) );
+		EAP_TRACE_DEBUG_SYMBIAN(
+			(_L("EapTlsPeapUtils::GetTunnelingExpandedEapDataL():  enabled EAP-type=0xfe%06x%08x\n"),
+			expandedEAPTmp->GetVendorId(),
+			expandedEAPTmp->GetVendorType()));
 
 		aEnabledEAPArrary.Append(expandedEAPTmp);
 
-		index = index + KExpandedEAPTypeSize;
+		index = index + KEapExpandedTypeLength;
 	}
 	
 	index = 0;
@@ -2747,7 +2635,7 @@ void EapTlsPeapUtils::GetTunnelingExpandedEapDataL(
 	// For unaccepted or disabled tunneled EAP types.
 	while(index < unacceptedLength)
 	{		
-		expandedEAPTmp = new SExpandedEAPType;
+		expandedEAPTmp = new TEapExpandedType;
 
 		if (expandedEAPTmp == 0)
 		{
@@ -2756,27 +2644,31 @@ void EapTlsPeapUtils::GetTunnelingExpandedEapDataL(
 			User::LeaveIfError(KErrNoMemory);
 		}
 
-		expandedEAPTmp->iExpandedEAPType = unacceptedEAPData.Mid(index, KExpandedEAPTypeSize);
+		*expandedEAPTmp = unacceptedEAPData.Mid(index, KEapExpandedTypeLength);
 						
-		EAP_TRACE_DATA_DEBUG_SYMBIAN(("Extracted EAP type:",
-			expandedEAPTmp->iExpandedEAPType.Ptr(), 
-			expandedEAPTmp->iExpandedEAPType.Size() ) );
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetTunnelingExpandedEapDataL(): disabled EAP-type=0xfe%06x%08x\n"),
+			expandedEAPTmp->GetVendorId(),
+			expandedEAPTmp->GetVendorType()));
 
 		aDisabledEAPArrary.Append(expandedEAPTmp);
 
-		index = index + KExpandedEAPTypeSize;
+		index = index + KEapExpandedTypeLength;
 	}
 
 	CleanupStack::PopAndDestroy(&view); // Close view
 	CleanupStack::PopAndDestroy(buf); // Delete buf
 }
 
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
 //--------------------------------------------------
 
 TBool EapTlsPeapUtils::CipherSuiteUseRSAKeys(tls_cipher_suites_e aCipherSuite)
 {
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("EapTlsPeapUtils::CipherSuiteUseRSAKeys(): aCipherSuite=%d\n"),
+		aCipherSuite));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::CipherSuiteUseRSAKeys()\n"));
+
 	if (aCipherSuite == tls_cipher_suites_TLS_RSA_WITH_3DES_EDE_CBC_SHA
 		|| aCipherSuite == tls_cipher_suites_TLS_RSA_WITH_AES_128_CBC_SHA
 		|| aCipherSuite == tls_cipher_suites_TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA
@@ -2795,6 +2687,12 @@ TBool EapTlsPeapUtils::CipherSuiteUseRSAKeys(tls_cipher_suites_e aCipherSuite)
 
 TBool EapTlsPeapUtils::CipherSuiteUseDSAKeys(tls_cipher_suites_e aCipherSuite)
 {
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("EapTlsPeapUtils::CipherSuiteUseDSAKeys(): aCipherSuite=%d\n"),
+		aCipherSuite));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::CipherSuiteUseDSAKeys()\n"));
+
 	if (aCipherSuite == tls_cipher_suites_TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA
 		|| aCipherSuite == tls_cipher_suites_TLS_DHE_DSS_WITH_AES_128_CBC_SHA)
 	{
@@ -2808,6 +2706,12 @@ TBool EapTlsPeapUtils::CipherSuiteUseDSAKeys(tls_cipher_suites_e aCipherSuite)
 
 TBool EapTlsPeapUtils::CipherSuiteIsEphemeralDHKeyExchange(tls_cipher_suites_e aCipherSuite)
 {
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("EapTlsPeapUtils::CipherSuiteIsEphemeralDHKeyExchange(): aCipherSuite=%d\n"),
+		aCipherSuite));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::CipherSuiteIsEphemeralDHKeyExchange()\n"));
+
 	if (aCipherSuite == tls_cipher_suites_TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA
 		|| aCipherSuite == tls_cipher_suites_TLS_DHE_DSS_WITH_AES_128_CBC_SHA
 		|| aCipherSuite == tls_cipher_suites_TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA
@@ -2832,149 +2736,64 @@ void EapTlsPeapUtils::SetConfigurationL(
 	const eap_type_value_e aTunnelingType,
 	const eap_type_value_e aEapType)
 {
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
-	TUint aEapVendorType = aEapType.get_vendor_type();
-
-#else
-
-	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
-	TUint aEapVendorType = static_cast<TUint>(aEapType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
-// The current values for TTLS-PAP:
-// TTLS: aEapVendorType = TTLS, aTunnelingVendorType = None
-// TTLS/plain-PAP: aEapVendorType = ttls_plain_pap, aTunnelingVendorType = TTLS
-	
 	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::SetConfigurationL -Start- aIndexType=%d, aIndex=%d, Tunneling vendor type=%d, Eap vendor type=%d \n"),
-		aIndexType,aIndex, aTunnelingVendorType, aEapVendorType));
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("*************************** SetConfigurationL - Set the below values: ***************************\n")) );
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - Set these values for EAPType=%d"),aSettings.iEAPType) );
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, Username=%S"),aSettings.iUsernamePresent, &(aSettings.iUsername)) );
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, Password=%S"),aSettings.iPasswordPresent, &(aSettings.iPassword)) );
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, Realm=%S"),aSettings.iRealmPresent, &(aSettings.iRealm)) );
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, UsePseudonyms=%d"),aSettings.iUsePseudonymsPresent, aSettings.iUsePseudonyms) );
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, VerifyServerRealm=%d"),
-						aSettings.iVerifyServerRealmPresent, aSettings.iVerifyServerRealm) );
+		(_L("EapTlsPeapUtils::SetConfigurationL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x, aEapType=0xfe%06x%08x\n"),
+		aIndexType,
+		aIndex,
+		aTunnelingType.get_vendor_id(),
+		aTunnelingType.get_vendor_type(),
+		aEapType.get_vendor_id(),
+		aEapType.get_vendor_type()));
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, RequireClientAuthentication=%d"),
-						aSettings.iRequireClientAuthenticationPresent, aSettings.iRequireClientAuthentication) );
-						
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, SessionValidityTime=%d minutes"),
-						aSettings.iSessionValidityTimePresent, aSettings.iSessionValidityTime) );
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::SetConfigurationL()\n"));
+	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("*************************** EapTlsPeapUtils::SetConfigurationL(): Set the below values: ***************************\n")) );
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, CipherSuites Count=%d"),
-						aSettings.iCipherSuitesPresent, aSettings.iCipherSuites.Count()) );
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, PEAPv0Allowed=%d, PEAPv1Allowed=%d, PEAPv2Allowed=%d"),
-						aSettings.iPEAPVersionsPresent, aSettings.iPEAPv0Allowed,aSettings.iPEAPv1Allowed, aSettings.iPEAPv2Allowed ) );
-	
+	EAP_TRACE_SETTINGS(&aSettings);
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("*************************** EapTlsPeapUtils::SetConfigurationL(): Set the above values: ***************************\n")) );
+
+
 	// Validate length of inputs.
-	if(aSettings.iUsername.Length() > KMaxManualUsernameLengthInDB
-		|| aSettings.iRealm.Length() > KMaxManualRealmLengthInDB )
+	if(aSettings.iUsername.Length() > KMaxUsernameLengthInDB
+		|| aSettings.iRealm.Length() > KMaxRealmLengthInDB )
 	{
 		// Some inputs are too long. Can not be stored in DB.
 		
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL: Too long arguments\n")));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::SetConfigurationL(): Too long arguments\n")));
 		
 		User::Leave(KErrArgument);
 	}
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, Certificates Count=%d"),
-						aSettings.iCertificatesPresent, aSettings.iCertificates.Count()) );
-						
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - Certificate details below: \n")) );
-	
-	for( TInt n=0; n < aSettings.iCertificates.Count(); n++ )
-	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - Certificate type:%d \n"), aSettings.iCertificates[n].iCertType) );
-		
-		EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - certificates - present=%d, SubjectName=%S"),
-						aSettings.iCertificates[n].iSubjectNamePresent, &(aSettings.iCertificates[n].iSubjectName) ) );
-						
-		EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - certificates - present=%d, IssuerName=%S"),
-						aSettings.iCertificates[n].iIssuerNamePresent, &(aSettings.iCertificates[n].iIssuerName) ) );
-						
-		EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - certificates - present=%d, SerialNumber=%S"),
-						aSettings.iCertificates[n].iSerialNumberPresent, &(aSettings.iCertificates[n].iSerialNumber) ) );
-						
-		EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - certificates - SubjectKeyID present=%d"),
-						aSettings.iCertificates[n].iSubjectKeyIDPresent ) );						
-						
-		EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "SubjectKeyID:", aSettings.iCertificates[n].iSubjectKeyID.Ptr(), 
-													aSettings.iCertificates[n].iSubjectKeyID.Size() ) );
 
-		EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - certificates - Thumbprint present=%d"),
-						aSettings.iCertificates[n].iThumbprintPresent ) );						
-						
-		EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "Thumbprint:", aSettings.iCertificates[n].iThumbprint.Ptr(), 
-													aSettings.iCertificates[n].iThumbprint.Size() ) );
-	}						
+#ifdef USE_FAST_EAP_TYPE
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, EncapsulatedEAPTypes Count=%d"),
-						aSettings.iEncapsulatedEAPTypesPresent, aSettings.iEncapsulatedEAPTypes.Count()) );
-	
-	for( TInt m=0; m < aSettings.iEncapsulatedEAPTypes.Count(); m++ )
-	{	
-		EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - EncapsulatedEAPTypes=%d"),
-						aSettings.iEncapsulatedEAPTypes[m]) );
-	}						
-
-#ifdef USE_FAST_EAP_TYPE		
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, AuthProvModeAllowed=%d"),
-						aSettings.iAuthProvModeAllowedPresent, aSettings.iAuthProvModeAllowed) );
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, UnauthProvModeAllowed=%d"),
-						aSettings.iUnauthProvModeAllowedPresent, aSettings.iUnauthProvModeAllowed) );
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, WarnADHPNoPAC=%d"),
-			aSettings.iWarnADHPNoPACPresent, aSettings.iWarnADHPNoPAC) );
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, WarnADHPNoMatchingPAC=%d"),
-			aSettings.iWarnADHPNoMatchingPACPresent, aSettings.iWarnADHPNoMatchingPAC) );
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, WarnNotDefaultServer=%d"),
-			aSettings.iWarnNotDefaultServerPresent, aSettings.iWarnNotDefaultServer) );
-	
 	// Validate length of PAC Group Ref.
 	if(aSettings.iPACGroupReference.Length() > KMaxPACGroupRefCollectionLengthInDB)
 	{
 		// Too long PAC Group Reference. Can not be stored in DB.
 		
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL: Too long PAC Group Ref!\n")));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::SetConfigurationL(): Too long PAC Group Ref!\n")));
 		
 		User::Leave(KErrArgument);
 	}
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, PAC Group Ref=%S"),
-						aSettings.iPACGroupReferencePresent, &(aSettings.iPACGroupReference)) );
-
 #endif //#ifdef USE_FAST_EAP_TYPE		
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("*************************** SetConfigurationL - Set the above values: ***************************\n")) );
-
-
 	// Check if the settings are for the correct type
-	if ((aSettings.iEAPType != EAPSettings::EEapTls
-		&& aSettings.iEAPType != EAPSettings::EEapPeap
-		&& aSettings.iEAPType != EAPSettings::EEapTtls
-#ifdef USE_FAST_EAP_TYPE		
-		&& aSettings.iEAPType != EAPSettings::EEapFast
-#endif	
-		&& aSettings.iEAPType != EAPSettings::ETtlsPlainPap
+	if (aSettings.iEAPExpandedType != (*EapExpandedTypeTls.GetType())
+		&& aSettings.iEAPExpandedType != (*EapExpandedTypePeap.GetType())
+		&& aSettings.iEAPExpandedType != (*EapExpandedTypeTtls.GetType())
+#ifdef USE_FAST_EAP_TYPE
+		&& aSettings.iEAPExpandedType != (*EapExpandedTypeFast.GetType())
+#endif //#ifdef USE_FAST_EAP_TYPE
+		&& aSettings.iEAPExpandedType != (*EapExpandedTypeTtlsPap.GetType())
 		)
-		|| static_cast<TUint>(aSettings.iEAPType) != aEapVendorType)
 	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - LEAVE - Unsupported EAP type\n")) );
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::SetConfigurationL(): LEAVE - Unsupported EAP type\n")) );
 		
 		User::Leave(KErrNotSupported);
 	}
-		
+
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();	
 
@@ -2989,86 +2808,81 @@ void EapTlsPeapUtils::SetConfigurationL(
 	TPtrC fastSpecialSettings;		
 #endif
 	
-	switch (aEapVendorType)
+	if (aEapType == eap_type_tls)
 	{
-	case eap_type_tls:
-		{
-			settings.Set(KTlsDatabaseTableName);
-			usercerts.Set(KTlsAllowedUserCertsDatabaseTableName);
-			cacerts.Set(KTlsAllowedCACertsDatabaseTableName);
-			ciphersuites.Set(KTlsAllowedCipherSuitesDatabaseTableName);
-			maxSessionTime.Set(cf_str_EAP_TLS_max_session_validity_time_literal);
-			lastFullAuthTime.Set(KTLSLastFullAuthTime);
-		}
-		break;
-
-	case eap_type_peap:
-		{
-			settings.Set(KPeapDatabaseTableName);
-			usercerts.Set(KPeapAllowedUserCertsDatabaseTableName);
-			cacerts.Set(KPeapAllowedCACertsDatabaseTableName);
-			ciphersuites.Set(KPeapAllowedCipherSuitesDatabaseTableName);
-			maxSessionTime.Set(cf_str_EAP_PEAP_max_session_validity_time_literal);
-			lastFullAuthTime.Set(KPEAPLastFullAuthTime);
-		}
-		break;
-
-	case eap_type_ttls:
-		{
-			settings.Set(KTtlsDatabaseTableName);
-			usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
-			cacerts.Set(KTtlsAllowedCACertsDatabaseTableName);
-			ciphersuites.Set(KTtlsAllowedCipherSuitesDatabaseTableName);
-			maxSessionTime.Set(cf_str_EAP_TTLS_max_session_validity_time_literal);
-			lastFullAuthTime.Set(KTTLSLastFullAuthTime);
-		}
-		break;
-
+		settings.Set(KTlsDatabaseTableName);
+		usercerts.Set(KTlsAllowedUserCertsDatabaseTableName);
+		cacerts.Set(KTlsAllowedCACertsDatabaseTableName);
+		ciphersuites.Set(KTlsAllowedCipherSuitesDatabaseTableName);
+		maxSessionTime.Set(cf_str_EAP_TLS_max_session_validity_time_literal);
+		lastFullAuthTime.Set(KTLSLastFullAuthTime);
+	}
+	else if (aEapType == eap_type_peap)
+	{
+		settings.Set(KPeapDatabaseTableName);
+		usercerts.Set(KPeapAllowedUserCertsDatabaseTableName);
+		cacerts.Set(KPeapAllowedCACertsDatabaseTableName);
+		ciphersuites.Set(KPeapAllowedCipherSuitesDatabaseTableName);
+		maxSessionTime.Set(cf_str_EAP_PEAP_max_session_validity_time_literal);
+		lastFullAuthTime.Set(KPEAPLastFullAuthTime);
+	}
+	else if (aEapType == eap_type_ttls)
+	{
+		settings.Set(KTtlsDatabaseTableName);
+		usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
+		cacerts.Set(KTtlsAllowedCACertsDatabaseTableName);
+		ciphersuites.Set(KTtlsAllowedCipherSuitesDatabaseTableName);
+		maxSessionTime.Set(cf_str_EAP_TTLS_max_session_validity_time_literal);
+		lastFullAuthTime.Set(KTTLSLastFullAuthTime);
+	}
 #ifdef USE_FAST_EAP_TYPE		
-	case eap_type_fast:
-		{
-			settings.Set(KFastGeneralSettingsDBTableName); // This is general settings for FAST.
-			fastSpecialSettings.Set(KFastSpecialSettingsDBTableName);
-			
-			usercerts.Set(KFastAllowedUserCertsDatabaseTableName);
-			cacerts.Set(KFastAllowedCACertsDatabaseTableName);
-			ciphersuites.Set(KFastAllowedCipherSuitesDatabaseTableName);
-			maxSessionTime.Set(cf_str_EAP_FAST_max_session_validity_time_literal);
-			lastFullAuthTime.Set(KFASTLastFullAuthTime);
-		}
-		break;
+	else if (aEapType == eap_type_fast)
+	{
+		settings.Set(KFastGeneralSettingsDBTableName); // This is general settings for FAST.
+		fastSpecialSettings.Set(KFastSpecialSettingsDBTableName);
+		
+		usercerts.Set(KFastAllowedUserCertsDatabaseTableName);
+		cacerts.Set(KFastAllowedCACertsDatabaseTableName);
+		ciphersuites.Set(KFastAllowedCipherSuitesDatabaseTableName);
+		maxSessionTime.Set(cf_str_EAP_FAST_max_session_validity_time_literal);
+		lastFullAuthTime.Set(KFASTLastFullAuthTime);
+	}
 #endif
+	else if (aEapType == eap_type_ttls_plain_pap)
+	{
+		settings.Set( KTtlsDatabaseTableName );
+		maxSessionTime.Set( cf_str_EAP_TLS_PEAP_ttls_pap_max_session_validity_time_literal );
+		lastFullAuthTime.Set( KTTLSPAPLastFullAuthTime );
+	}
+	else
+	{
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: SetConfigurationL(): LEAVE - Unsupported EAP-type=0xfe%06x%08x\n"),
+			aEapType.get_vendor_id(),
+			aEapType.get_vendor_type()) );
 
-	case eap_type_ttls_plain_pap:
-		{
-			settings.Set( KTtlsDatabaseTableName );
-			maxSessionTime.Set( cf_str_EAP_TLS_PEAP_ttls_pap_max_session_validity_time_literal );
-			lastFullAuthTime.Set( KTTLSPAPLastFullAuthTime );
-		}
-		break;
+		// Should never happen
+		User::Leave(KErrArgument);
+	}
 
-	default:
-		{
-			EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - LEAVE - Unsupported EAP type =%d\n"),
-				aEapVendorType) );
-
-			// Should never happen
-			User::Leave(KErrArgument);
-		}
-	}	
-	
 	RDbView view;
 
-	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
 	
 	//////////////////////////////////////////
 	// This is for settings for all EAP types.
 	// For EAP-FAST it is General settings.
 	//////////////////////////////////////////
 	
-	sqlStatement.Format( KSQL, &settings, 
-		&KServiceType, aIndexType, &KServiceIndex, aIndex,
-		&KTunnelingType, aTunnelingVendorType );		
+	sqlStatement.Format(KSQL,
+		&settings, 
+		&KServiceType,
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aTunnelingType.get_vendor_type());		
 		
 	// Evaluate view
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
@@ -3091,131 +2905,209 @@ void EapTlsPeapUtils::SetConfigurationL(
 	//////////////////////////////////////////
 	// This is only for plain PAP settings. //
 	//////////////////////////////////////////
-	if ( aEapVendorType == eap_type_ttls_plain_pap )
-		{
+	if ( aEapType == eap_type_ttls_plain_pap )
+	{
 		// Username
 		if ( aSettings.iUsernamePresent )
-		    {
+		{
 			// Validate length.
 			if( aSettings.iUsername.Length() > KMaxPapUserNameLengthInDb )
-			    {
+		    {
 				// Username too long. Can not be stored in DB.				
-				EAP_TRACE_DEBUG_SYMBIAN( ( _L( 
-					"EapTlsPeapUtils::SetConfigurationL: Too long Username. Length=%d \n" ),
-				aSettings.iUsername.Length() ) );
-				CleanupStack::PopAndDestroy( 3 ); // colset, view, buf
+				EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::SetConfigurationL: Too long Username. Length=%d, max length=%d \n" ),
+					aSettings.iUsername.Length(),
+					KMaxPapUserNameLengthInDb) );
+
+				CleanupStack::PopAndDestroy(colSet);
+				CleanupStack::PopAndDestroy(&view);
+				CleanupStack::PopAndDestroy(buf);
 				User::Leave( KErrArgument );
-			    }
+		    }
 			
 			// Length is ok. Set the value in DB.
 			view.SetColL( colSet->ColNo( cf_str_EAP_TLS_PEAP_ttls_pap_username_literal ),
 				aSettings.iUsername);		
-		    }
+		}
+
+		// Password existence.
+		if (aSettings.iPasswordExistPresent
+			&& !aSettings.iPasswordExist)
+		{
+			// Clear password from database.
+			view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_ttls_pap_password_literal), KNullPasswordData);
+			view.PutL();
+			view.SetColNullL(colSet->ColNo(cf_str_EAP_TLS_PEAP_ttls_pap_password_literal));
+		}
+
 		// Password
 		if ( aSettings.iPasswordPresent )
-		    {
+	    {
 			// Validate length.
 			if ( aSettings.iPassword.Length() > KMaxPapPasswordLengthInDb )
-			    {
+		    {
 				// Password too long. Can not be stored in DB.				
-				EAP_TRACE_DEBUG_SYMBIAN( ( _L(
-					"EapTlsPeapUtils::SetConfigurationL: Too long Password. Length=%d \n" ),
-				aSettings.iPassword.Length() ) );
-				CleanupStack::PopAndDestroy( 3 ); // colset, view, buf
+				EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::SetConfigurationL: Too long Password. Length=%d, max length=%d\n" ),
+					aSettings.iPassword.Length(),
+					KMaxPapPasswordLengthInDb) );
+
+				CleanupStack::PopAndDestroy(colSet);
+				CleanupStack::PopAndDestroy(&view);
+				CleanupStack::PopAndDestroy(buf);
 				User::Leave( KErrArgument );
-			    }
+		    }
 						
 			// Length is ok. Set the value in DB.	
 			view.SetColL( colSet->ColNo(
 				cf_str_EAP_TLS_PEAP_ttls_pap_password_literal ),
 				aSettings.iPassword );
-			
-			// If password was supplied set password prompting off
-			view.SetColL( colSet->ColNo(
-				cf_str_EAP_TLS_PEAP_ttls_pap_password_prompt_literal ),
-				EPapPasswordPromptOff );
-		    }
+	    }
+
+		// Password prompt
+		if ( aSettings.iShowPassWordPromptPresent )
+	    {
+			if ( aSettings.iShowPassWordPrompt )
+			{
+				view.SetColL( colSet->ColNo(
+					cf_str_EAP_TLS_PEAP_ttls_pap_password_prompt_literal ),
+					EPapPasswordPromptOn );
+			}
+			else
+			{
+				view.SetColL( colSet->ColNo(
+					cf_str_EAP_TLS_PEAP_ttls_pap_password_prompt_literal ),
+					EPapPasswordPromptOff );
+			}
+	    }
 				
 		// Session validity time
 		if ( aSettings.iSessionValidityTimePresent )
-		    {
+	    {
 			// User or device management wants to store the session validity time.
 			// Convert the time to micro seconds and save.			
-			TInt64 validityInMicro =
-			    ( aSettings.iSessionValidityTime )
-			    *
-			    KMicroSecsInAMinute;			
+			TInt64 validityInMicro = (aSettings.iSessionValidityTime) * KMicroSecsInAMinute;
 			view.SetColL( colSet->ColNo( maxSessionTime ), validityInMicro );
-			
+
 			// If max session validity time is supplied and non-zero, set password prompting ON.
 			// It doesn't matter even if the password is supplied. If max session validity is supplied,
 			// it means user needs to provide a password hence prompt should appear.			
 			if( validityInMicro != 0)
-			    {
+		    {
 				view.SetColL( colSet->ColNo(
 					cf_str_EAP_TLS_PEAP_ttls_pap_password_prompt_literal ),
 					EPapPasswordPromptOn );
-			    }		
-		    }
+		    }		
+	    }
 		
 		// Last full authentication time should be made zero when EAP configurations are modified.
 		// This makes sure that the next authentication with this EAP would be full authentication
 		// instead of reauthentication even if the session is still valid.		
 		view.SetColL( colSet->ColNo( lastFullAuthTime ), default_FullAuthTime );
-		EAP_TRACE_DEBUG_SYMBIAN( ( _L(
-			"Session Validity: EAP-Type=%d, Resetting Full Auth Time since settings are modified\n" ),
-			aSettings.iEAPType ));
+
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils: Session Validity: Resetting Full Auth Time since settings are modified\n")));
 	    
 		view.PutL();		
-		CleanupStack::PopAndDestroy( 3 ); // colset, view, buf
+
+		CleanupStack::PopAndDestroy(colSet);
+		CleanupStack::PopAndDestroy(&view);
+		CleanupStack::PopAndDestroy(buf);
 		
-	    EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL - Return \n") ) );		
+	    EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL(): Return PAP\n") ) );		
 	    return; 
-        } // if ( aEapVendorType == eap_type_ttls_plain_pap )
-	
-	// Manual username
+	} // if ( aEapVendorType == eap_type_ttls_plain_pap )
+
+
+	if (aSettings.iUseAutomaticCACertificatePresent)
 	{
-		// Set the value in DB. Value could be empty. It doesn't matter.
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_username_literal), aSettings.iUsername);
-		
 		// This is to set the automatic or manual status.
-		TUint useManualUsernameStatus;
+		TUint useAutomaticCACertificateStatus;
 		
-		if (aSettings.iUsernamePresent)
+		if (aSettings.iUseAutomaticCACertificate)
 		{
-			useManualUsernameStatus = ETLSPEAPUseManualUsernameYes;
+			useAutomaticCACertificateStatus = EEapDbTrue;
 		}
 		else
 		{
-			useManualUsernameStatus = ETLSPEAPUseManualUsernameNo;
+			useAutomaticCACertificateStatus = EEapDbFalse;
 		}
 		
 		// Set the value.
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_username_literal), 
-			useManualUsernameStatus);
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal), useAutomaticCACertificateStatus);
+	}
+
+
+	if (aSettings.iUseAutomaticUsernamePresent)
+	{
+		// This is to set the automatic or manual status.
+		TUint useManualUsernameStatus;
+		
+		if (aSettings.iUseAutomaticUsername)
+		{
+			useManualUsernameStatus = EEapDbFalse;
+		}
+		else
+		{
+			useManualUsernameStatus = EEapDbTrue;
+		}
+		
+		// Set the value.
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_username_literal), useManualUsernameStatus);
+	}
+
+
+	if (aSettings.iUseAutomaticRealmPresent)
+	{
+		// This is to set the automatic or manual status.
+		TUint useManualRealmStatus;
+		
+		if (aSettings.iUseAutomaticRealm)
+		{
+			useManualRealmStatus = EEapDbFalse;
+		}
+		else
+		{
+			useManualRealmStatus = EEapDbTrue;
+		}
+
+		// Set the value.
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_realm_literal), useManualRealmStatus);
+	}
+
+
+	// Manual username
+	if (aSettings.iUsernamePresent)
+	{
+		// Check if length of username is less than the max length.
+		if(aSettings.iUsername.Length() > KMaxUsernameLengthInDB)
+		{
+			// Username too long. Can not be stored in DB.
+			
+			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::SetConfigurationL(): Too long Username. Length=%d \n"),
+				aSettings.iUsername.Length()));
+			
+			User::Leave(KErrArgument);
+		}
+
+		// Set the value in DB. Value could be empty. It doesn't matter.
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_username_literal), aSettings.iUsername);
 		
 	}
 		
 	// Manual realm
+	if (aSettings.iRealmPresent)
 	{
+		// Check if length of realm is less than the max length.
+		if(aSettings.iRealm.Length() > KMaxRealmLengthInDB)
+		{
+			// Realm too long. Can not be stored in DB.
+
+			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::SetConfigurationL(): Too long Realm. Length=%d \n"),
+				aSettings.iRealm.Length()));
+			
+			User::Leave(KErrArgument);
+		}
+
 		// Set the value in DB. Value could be empty. It doesn't matter.
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_realm_literal), aSettings.iRealm);
-
-		// This is to set the automatic or manual status.
-		TUint useManualRealmStatus;
-		
-		if (aSettings.iRealmPresent)
-		{
-			useManualRealmStatus = ETLSPEAPUseManualRealmYes;
-		}
-		else
-		{
-			useManualRealmStatus = ETLSPEAPUseManualRealmNo;
-		}
-		
-		// Set the value.
-		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_realm_literal),
-			useManualRealmStatus);	
 	}
 	
 	// Verify server realm
@@ -3224,12 +3116,12 @@ void EapTlsPeapUtils::SetConfigurationL(
 		if (aSettings.iVerifyServerRealm)
 		{
 			view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal), 
-				ETLSPEAPVerifyCertRealmYes);
+				EEapDbTrue);
 		}
 		else
 		{			
 			view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal), 
-				ETLSPEAPVerifyCertRealmNo);
+				EEapDbFalse);
 		}
 	}
 	
@@ -3239,12 +3131,12 @@ void EapTlsPeapUtils::SetConfigurationL(
 		if (aSettings.iRequireClientAuthentication)
 		{
 			view.SetColL(colSet->ColNo(cf_str_TLS_server_authenticates_client_policy_in_client_literal),
-				ETLSPEAPServerAuthenticatesClientPolicyYes);
+				EEapDbTrue);
 		}
 		else
 		{			
 			view.SetColL(colSet->ColNo(cf_str_TLS_server_authenticates_client_policy_in_client_literal),
-				ETLSPEAPServerAuthenticatesClientPolicyNo);
+				EEapDbFalse);
 		}
 	}
 	
@@ -3265,8 +3157,7 @@ void EapTlsPeapUtils::SetConfigurationL(
 	
 	view.SetColL(colSet->ColNo(lastFullAuthTime), default_FullAuthTime);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("Session Validity: EAP-Type=%d, Resetting Full Auth Time since settings are modified\n"),
-								aSettings.iEAPType ));	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils: Session Validity: Resetting Full Auth Time since settings are modified\n")));	
 	
 	// PEAP versions
 		
@@ -3297,10 +3188,28 @@ void EapTlsPeapUtils::SetConfigurationL(
 		}
 		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_accepted_PEAP_versions_literal), acceptedPEAPVersions); 	
 	}
+
+	if (aSettings.iUseIdentityPrivacyPresent)
+	{
+		// This is to set the automatic or manual status.
+		TUint UseIdentityPrivacy = 0ul;
+		
+		if (aSettings.iUseIdentityPrivacy)
+		{
+			UseIdentityPrivacy = EEapDbTrue;
+		}
+		else
+		{
+			UseIdentityPrivacy = EEapDbFalse;
+		}
+
+		view.SetColL(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal), UseIdentityPrivacy); 	
+	}
 	
 	view.PutL();
 	
-	CleanupStack::PopAndDestroy(2); // view, colset	
+	CleanupStack::PopAndDestroy(colSet);
+	CleanupStack::PopAndDestroy(&view);
 	
 #ifdef USE_FAST_EAP_TYPE		
 
@@ -3310,8 +3219,16 @@ void EapTlsPeapUtils::SetConfigurationL(
 	
 	if(aEapType == eap_type_fast)
 	{
-		sqlStatement.Format(KSQL, &fastSpecialSettings, 
-			&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+		sqlStatement.Format(KSQL,
+			&fastSpecialSettings, 
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex,
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());
 		
 		User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
 		
@@ -3335,12 +3252,12 @@ void EapTlsPeapUtils::SetConfigurationL(
 			if (aSettings.iAuthProvModeAllowed)
 			{
 				view.SetColL(colSet->ColNo(cf_str_EAP_FAST_allow_server_authenticated_provisioning_mode_literal), 
-					EFASTAuthProvModeAllowedYes);
+					EEapDbTrue);
 			}
 			else
 			{			
 				view.SetColL(colSet->ColNo(cf_str_EAP_FAST_allow_server_authenticated_provisioning_mode_literal), 
-					EFASTAuthProvModeAllowedNo);
+					EEapDbFalse);
 			}
 		}
 		
@@ -3349,12 +3266,12 @@ void EapTlsPeapUtils::SetConfigurationL(
 			if (aSettings.iUnauthProvModeAllowed)
 			{
 				view.SetColL(colSet->ColNo(cf_str_EAP_FAST_allow_server_unauthenticated_provisioning_mode_ADHP_literal), 
-					EFASTUnauthProvModeAllowedYes);
+					EEapDbTrue);
 			}
 			else
 			{			
 				view.SetColL(colSet->ColNo(cf_str_EAP_FAST_allow_server_unauthenticated_provisioning_mode_ADHP_literal), 
-					EFASTUnauthProvModeAllowedNo);
+					EEapDbFalse);
 			}
 		}
 		
@@ -3364,12 +3281,12 @@ void EapTlsPeapUtils::SetConfigurationL(
 			if (aSettings.iWarnADHPNoPAC)
 			{
 				view.SetColL(colSet->ColNo(KFASTWarnADHPNoPAC), 
-						EFASTWarnADHPNoPACYes);
+						EEapDbTrue);
 			}
 			else
 			{			
 				view.SetColL(colSet->ColNo(KFASTWarnADHPNoPAC), 
-						EFASTWarnADHPNoPACNo);
+						EEapDbFalse);
 			}
 		}	
 		
@@ -3378,12 +3295,12 @@ void EapTlsPeapUtils::SetConfigurationL(
 			if (aSettings.iWarnADHPNoMatchingPAC)
 			{
 				view.SetColL(colSet->ColNo(KFASTWarnADHPNoMatchingPAC), 
-						EFASTWarnADHPNoMatchingPACYes);
+						EEapDbTrue);
 			}
 			else
 			{			
 				view.SetColL(colSet->ColNo(KFASTWarnADHPNoMatchingPAC), 
-						EFASTWarnADHPNoMatchingPACNo);
+						EEapDbFalse);
 			}
 		}	
 		
@@ -3392,12 +3309,12 @@ void EapTlsPeapUtils::SetConfigurationL(
 			if (aSettings.iWarnADHPNoMatchingPAC)
 			{
 				view.SetColL(colSet->ColNo(KFASTWarnNotDefaultServer), 
-						EFASTWarnNotDefaultServerYes);
+						EEapDbTrue);
 			}
 			else
 			{			
 				view.SetColL(colSet->ColNo(KFASTWarnNotDefaultServer), 
-						EFASTWarnNotDefaultServerNo);
+						EEapDbFalse);
 			}
 		}	
 		
@@ -3412,7 +3329,8 @@ void EapTlsPeapUtils::SetConfigurationL(
 		
 		view.PutL();
 		
-		CleanupStack::PopAndDestroy(2); // view, colset			
+		CleanupStack::PopAndDestroy(colSet);
+		CleanupStack::PopAndDestroy(&view);
 	
 	} // End: if(aEapType == eap_type_fast)
 	
@@ -3424,8 +3342,16 @@ void EapTlsPeapUtils::SetConfigurationL(
 	
 	if (aSettings.iCipherSuitesPresent)
 	{
-		sqlStatement.Format(KSQL, &ciphersuites, 
-			&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+		sqlStatement.Format(KSQL,
+			&ciphersuites, 
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex,
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());
 		
 		User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
 		
@@ -3435,12 +3361,12 @@ void EapTlsPeapUtils::SetConfigurationL(
 
 		// Delete old rows
 		if (view.FirstL())
-		{		
+		{
 			do {
 				view.DeleteL();
 			} while (view.NextL() != EFalse);
 		}	
-		
+
 		// Get column set so we get the correct column numbers
 		colSet = view.ColSetL();
 		CleanupStack::PushL(colSet);
@@ -3449,34 +3375,44 @@ void EapTlsPeapUtils::SetConfigurationL(
 		
 		for (TInt i = 0; i < aSettings.iCipherSuites.Count(); i++)
 		{
-			view.InsertL();			
+			view.InsertL();
 			view.SetColL(colSet->ColNo(KServiceType), static_cast<TUint>(aIndexType));
-			view.SetColL(colSet->ColNo(KServiceIndex), static_cast<TUint>(aIndex));			
-			view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingVendorType);
+			view.SetColL(colSet->ColNo(KServiceIndex), static_cast<TUint>(aIndex));
+			view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
+			view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
 			view.SetColL(colSet->ColNo(KCipherSuite), aSettings.iCipherSuites[i]);
-			view.PutL();	
+			view.PutL();
 		}
 		
-		CleanupStack::PopAndDestroy(2); // view, colset
+		CleanupStack::PopAndDestroy(colSet);
+		CleanupStack::PopAndDestroy(&view);
 	}
 	
 	/////////////////////////
 	// User + CA Certificates
 	/////////////////////////
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL - aSettings.iCertificatesPresent=%d \n"), aSettings.iCertificatesPresent ) );
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL(): aSettings.iCertificatesPresent=%d \n"), aSettings.iCertificatesPresent ) );
 	
 	if (aSettings.iCertificatesPresent)
 	{
 		// Needed for getting the Symbian's subject key id.
-		CEapTlsPeapCertFetcher* certFetcher = CEapTlsPeapCertFetcher::NewL();
-		CleanupStack::PushL(certFetcher);
+		//CEapTlsPeapCertFetcher* certFetcher = CEapTlsPeapCertFetcher::NewL();
+		//CleanupStack::PushL(certFetcher);
 				
 		TBuf8<KKeyIdentifierLength> symbianSubjectKeyID;		
 		
 		// For USER certificate.		
-		sqlStatement.Format(KSQL, &usercerts, 
-			&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+		sqlStatement.Format(KSQL,
+			&usercerts, 
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex,
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());
 			
 		User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
 	
@@ -3486,7 +3422,7 @@ void EapTlsPeapUtils::SetConfigurationL(
 
 		// Delete old rows
 		if (view.FirstL())
-		{		
+		{
 			do {
 				view.DeleteL();
 			} while (view.NextL() != EFalse);
@@ -3500,18 +3436,20 @@ void EapTlsPeapUtils::SetConfigurationL(
 		
 		TInt i(0);
 		
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL - aSettings.iCertificates.Count()=%d \n"), aSettings.iCertificates.Count() ) );
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL(): aSettings.iCertificates.Count()=%d \n"), aSettings.iCertificates.Count() ) );
 
 		for (i = 0; i < aSettings.iCertificates.Count(); i++)
 		{
-			if (aSettings.iCertificates[i].iCertType == CertificateEntry::EUser)
+			if (aSettings.iCertificates[i]->GetIsEnabledPresent()
+				&& aSettings.iCertificates[i]->GetIsEnabled()
+				&& aSettings.iCertificates[i]->GetCertType() == EapCertificateEntry::EUser)
 			{	
 				// Validate the length and save other certificate details to the DB.
-				if(aSettings.iCertificates[i].iSubjectName.Length() > KKeyIdentifierLength
-				   || aSettings.iCertificates[i].iIssuerName.Length() > KGeneralStringMaxLength
-				   || aSettings.iCertificates[i].iSerialNumber.Length() > KGeneralStringMaxLength
-				   || aSettings.iCertificates[i].iSubjectKeyID.Length() > KGeneralStringMaxLength
-				   || aSettings.iCertificates[i].iThumbprint.Length() > KThumbprintMaxLength)
+				if(aSettings.iCertificates[i]->GetSubjectName()->Length() > KKeyIdentifierLength
+				   || aSettings.iCertificates[i]->GetIssuerName()->Length() > KGeneralStringMaxLength
+				   || aSettings.iCertificates[i]->GetSerialNumber()->Length() > KGeneralStringMaxLength
+				   || aSettings.iCertificates[i]->GetSubjectKeyId().Length() > KGeneralStringMaxLength
+				   || aSettings.iCertificates[i]->GetThumbprint()->Length() > KThumbprintMaxLength)
 				{
 					// Too long data. Can not be stored in DB.
 
@@ -3521,36 +3459,48 @@ void EapTlsPeapUtils::SetConfigurationL(
 				}					
 						
 				EAP_TRACE_DATA_DEBUG_SYMBIAN(("THIS IS SubjectKeyID:",
-						aSettings.iCertificates[i].iSubjectKeyID.Ptr(), aSettings.iCertificates[i].iSubjectKeyID.Size()));
+						aSettings.iCertificates[i]->GetSubjectKeyId().Ptr(),
+						aSettings.iCertificates[i]->GetSubjectKeyId().Length()));
 
 				// The cert label column is left empty
 
 				view.InsertL();			
 				view.SetColL(colSet->ColNo(KServiceType), static_cast<TUint>(aIndexType));
 				view.SetColL(colSet->ColNo(KServiceIndex), static_cast<TUint>(aIndex));
-				view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingVendorType);				
+				view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
+				view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
 																
-				view.SetColL(colSet->ColNo(KSubjectName), aSettings.iCertificates[i].iSubjectName);
-				view.SetColL(colSet->ColNo(KIssuerName), aSettings.iCertificates[i].iIssuerName);
-				view.SetColL(colSet->ColNo(KSerialNumber), aSettings.iCertificates[i].iSerialNumber);
-				view.SetColL(colSet->ColNo(KActualSubjectKeyIdentifier), aSettings.iCertificates[i].iSubjectKeyID);					
+				view.SetColL(colSet->ColNo(KSubjectName), *(aSettings.iCertificates[i]->GetSubjectName()));
+				view.SetColL(colSet->ColNo(KIssuerName), *(aSettings.iCertificates[i]->GetIssuerName()));
+				view.SetColL(colSet->ColNo(KSerialNumber), *(aSettings.iCertificates[i]->GetSerialNumber()));
+				view.SetColL(colSet->ColNo(KActualSubjectKeyIdentifier), aSettings.iCertificates[i]->GetSubjectKeyId());
 				
 				// Special for thumb print (finger print). Need to convert it to 8 bits before storing in DB
 				TBuf8<KThumbprintMaxLength> thumbPrint8Bit;
-				thumbPrint8Bit.Copy(aSettings.iCertificates[i].iThumbprint);
+				thumbPrint8Bit.Copy(*(aSettings.iCertificates[i]->GetThumbprint()));
 				
 				view.SetColL(colSet->ColNo(KThumbprint), thumbPrint8Bit);
 				
-				view.SetColL(colSet->ColNo(KSubjectKeyIdentifier), aSettings.iCertificates[i].iSubjectKeyID);
+				view.SetColL(colSet->ColNo(KSubjectKeyIdentifier), aSettings.iCertificates[i]->GetSubjectKeyId());
 			
 				view.PutL();	
-				}
+			}
 		}
-		CleanupStack::PopAndDestroy(2); // view, colset			
+
+		CleanupStack::PopAndDestroy(colSet);
+		CleanupStack::PopAndDestroy(&view);
 
 		// Do the same for CA certificates.		
-		sqlStatement.Format(KSQL, &cacerts, 
-			&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+		sqlStatement.Format(KSQL,
+			&cacerts, 
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex,
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());
 		
 		User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
 		
@@ -3560,7 +3510,7 @@ void EapTlsPeapUtils::SetConfigurationL(
 		
 		// Delete old rows
 		if (view.FirstL())
-		{		
+		{
 			do {
 				view.DeleteL();
 			} while (view.NextL() != EFalse);
@@ -3572,14 +3522,16 @@ void EapTlsPeapUtils::SetConfigurationL(
 
 		for (i = 0; i < aSettings.iCertificates.Count(); i++)
 		{
-			if (aSettings.iCertificates[i].iCertType == CertificateEntry::ECA)
+			if (aSettings.iCertificates[i]->GetIsEnabledPresent()
+				&& aSettings.iCertificates[i]->GetIsEnabled()
+				&& aSettings.iCertificates[i]->GetCertType() == EapCertificateEntry::ECA)
 			{
 				// Validate the length and save other certificate details to the DB.
-				if(aSettings.iCertificates[i].iSubjectName.Length() > KKeyIdentifierLength
-				   || aSettings.iCertificates[i].iIssuerName.Length() > KGeneralStringMaxLength
-				   || aSettings.iCertificates[i].iSerialNumber.Length() > KGeneralStringMaxLength
-				   || aSettings.iCertificates[i].iSubjectKeyID.Length() > KGeneralStringMaxLength
-				   || aSettings.iCertificates[i].iThumbprint.Length() > KThumbprintMaxLength)
+				if(aSettings.iCertificates[i]->GetSubjectName()->Length() > KKeyIdentifierLength
+				   || aSettings.iCertificates[i]->GetIssuerName()->Length() > KGeneralStringMaxLength
+				   || aSettings.iCertificates[i]->GetSerialNumber()->Length() > KGeneralStringMaxLength
+				   || aSettings.iCertificates[i]->GetSubjectKeyId().Length() > KGeneralStringMaxLength
+				   || aSettings.iCertificates[i]->GetThumbprint()->Length() > KThumbprintMaxLength)
 				{
 					// Too long data. Can not be stored in DB.
 
@@ -3593,47 +3545,52 @@ void EapTlsPeapUtils::SetConfigurationL(
 				view.InsertL();			
 				view.SetColL(colSet->ColNo(KServiceType), static_cast<TUint>(aIndexType));
 				view.SetColL(colSet->ColNo(KServiceIndex), static_cast<TUint>(aIndex));				
-				view.SetColL(colSet->ColNo(KTunnelingType),aTunnelingVendorType);
+				view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
+				view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
 								
-				view.SetColL(colSet->ColNo(KSubjectName), aSettings.iCertificates[i].iSubjectName);
-				view.SetColL(colSet->ColNo(KIssuerName), aSettings.iCertificates[i].iIssuerName);
-				view.SetColL(colSet->ColNo(KSerialNumber), aSettings.iCertificates[i].iSerialNumber);
-				view.SetColL(colSet->ColNo(KActualSubjectKeyIdentifier), aSettings.iCertificates[i].iSubjectKeyID);					
+				view.SetColL(colSet->ColNo(KSubjectName), *(aSettings.iCertificates[i]->GetSubjectName()));
+				view.SetColL(colSet->ColNo(KIssuerName), *(aSettings.iCertificates[i]->GetIssuerName()));
+				view.SetColL(colSet->ColNo(KSerialNumber), *(aSettings.iCertificates[i]->GetSerialNumber()));
+				view.SetColL(colSet->ColNo(KActualSubjectKeyIdentifier), aSettings.iCertificates[i]->GetSubjectKeyId());
 				
 				// Special for thumb print (finger print). Need to convert it to 8 bits before storing in DB
 				TBuf8<KThumbprintMaxLength> thumbPrint8Bit;
-				thumbPrint8Bit.Copy(aSettings.iCertificates[i].iThumbprint);
+				thumbPrint8Bit.Copy(*(aSettings.iCertificates[i]->GetThumbprint()));
 				
 				view.SetColL(colSet->ColNo(KThumbprint), thumbPrint8Bit);
 				
 				// Get the "symbian's subject key id" using symbian API.
 				// We use this subject key id for authentication.
 
-				view.SetColL(colSet->ColNo(KSubjectKeyIdentifier), aSettings.iCertificates[i].iSubjectKeyID);
+				view.SetColL(colSet->ColNo(KSubjectKeyIdentifier), aSettings.iCertificates[i]->GetSubjectKeyId());
 
-				EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "EapTlsPeapUtils::SetConfigurationL - Adding CA cert to DB, Supplied (Actual) SubjectKeyID:",
-					aSettings.iCertificates[i].iSubjectKeyID.Ptr(), aSettings.iCertificates[i].iSubjectKeyID.Size() ) );				
+				EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "EapTlsPeapUtils::SetConfigurationL(): Adding CA cert to DB, Supplied (Actual) SubjectKeyID:",
+					aSettings.iCertificates[i]->GetSubjectKeyId().Ptr(),
+					aSettings.iCertificates[i]->GetSubjectKeyId().Length() ) );
 				
+				EAP_TRACE_SETTINGS(aSettings.iCertificates[i]);
+
 				view.PutL();
 				}
 		}
 		
-		CleanupStack::PopAndDestroy(2); // view, colset	
+		CleanupStack::PopAndDestroy(colSet);
+		CleanupStack::PopAndDestroy(&view);
 		
-		CleanupStack::PopAndDestroy(certFetcher);
+		//CleanupStack::PopAndDestroy(certFetcher);
 		
 	} // End of if (aSettings.iCertificatesPresent)
 	
-	CleanupStack::PopAndDestroy(); // buf
+	CleanupStack::PopAndDestroy(buf);
 		
 	/////////////////////
 	// Encapsulated types
 	/////////////////////
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL - aSettings.iEncapsulatedEAPTypesPresent=%d \n"), aSettings.iEncapsulatedEAPTypesPresent ) );
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL(): aSettings.iEnabledEncapsulatedEAPExpandedTypesPresent=%d \n"), aSettings.iEnabledEncapsulatedEAPExpandedTypesPresent ) );
 
 	// Encapsulated types are only for EAP-PEAP, EAP-TTLS and EAP-FAST. Not for EAP-TLS.
-	// This is just to be on safe side. In case if iEncapsulatedEAPTypesPresent is set true for EAP-TLS by the caller.
+	// This is just to be on safe side. In case if iEnabledEncapsulatedEAPExpandedTypesPresent is set true for EAP-TLS by the caller.
 	if ( aEapType != eap_type_peap 
 		 && aEapType != eap_type_ttls
 #ifdef USE_FAST_EAP_TYPE
@@ -3641,25 +3598,23 @@ void EapTlsPeapUtils::SetConfigurationL(
 #endif		  		 
 		  )
 	{
-		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("EapTlsPeapUtils::SetConfigurationL - End - Since no encapsulated type for the EAPType =%d \n"),
-			aEapVendorType  ) );
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL(): End - Since no encapsulated type for the EAP-type=0xfe%06x%08x\n"),
+			aEapType.get_vendor_id(),
+			aEapType.get_vendor_type()  ) );
 			
 		return; // No need to proceed. No encapsulated type for EAP-TLS..
 	}
 	
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	if (aSettings.iEncapsulatedEAPTypesPresent)
+	if (aSettings.iEnabledEncapsulatedEAPExpandedTypesPresent)
 	{
-		RExpandedEapTypePtrArray enabledEAPTypes;
+		RPointerArray<TEapExpandedType> enabledEAPTypes;
 		// This is just for dummy. All EAP types available here are enabled as default.
-		RExpandedEapTypePtrArray disabledEAPTypes;
-		SExpandedEAPType* expandedEAPTmp = 0;
+		RPointerArray<TEapExpandedType> disabledEAPTypes;
+		TEapExpandedType* expandedEAPTmp = 0;
 	
-		for (TInt i = 0; i < aSettings.iEncapsulatedEAPTypes.Count(); i++)
+		for (TInt i = 0; i < aSettings.iEnabledEncapsulatedEAPExpandedTypes.Count(); i++)
 		{
-			expandedEAPTmp = new SExpandedEAPType;
+			expandedEAPTmp = new TEapExpandedType;
 
 			if (expandedEAPTmp == 0)
 			{
@@ -3669,50 +3624,24 @@ void EapTlsPeapUtils::SetConfigurationL(
 				disabledEAPTypes.Close();
 				User::Leave(KErrNoMemory);				
 			}
-			
-			// This fills the needed values for vendor id etc.
-			eap_expanded_type_c tmpExpEAP(static_cast <eap_type_ietf_values_e> (aSettings.iEncapsulatedEAPTypes[i]));
-			
-			// This is only for plain-MSCHAPv2 as long as we are using the value 99 for it.
-			if(aSettings.iEncapsulatedEAPTypes[i] == EAPSettings::EPlainMschapv2)
-			{
-				tmpExpEAP.set_eap_type_values(
-					eap_type_vendor_id_hack,
-					eap_type_vendor_type_plain_MSCHAPv2_hack);
-			}
-			
-			// And this is for TTLS-PAP as long as we are using the value 98 for it.
-			if(aSettings.iEncapsulatedEAPTypes[i] == EAPSettings::ETtlsPlainPap)
-			{
-				tmpExpEAP.set_eap_type_values(
-					eap_type_vendor_id_hack,
-					eap_type_vendor_type_ttls_plain_pap_hack);
-			}
-			
-			// Some indirect way of forming the 8 byte string of an EAP type is needed here.
-			TUint8 tmpExpBuffer[KExpandedEAPTypeSize]; // This is for the eap_expanded_type_c::write_type
-			
-			// This copies the 8 byte string of EAP type to tmpExpBuffer. 
-			eap_status_e status = eap_expanded_type_c::write_type(0,
-											0, // index should be zero here.
-											tmpExpBuffer,
-											KExpandedEAPTypeSize,
-											true,
-											tmpExpEAP);
-											
-			// Now copy the 8 byte string to expandedEAPTmp.
-			expandedEAPTmp->iExpandedEAPType.Copy(tmpExpBuffer, KExpandedEAPTypeSize);
-			
-			EAP_TRACE_DATA_DEBUG_SYMBIAN(
-				("EapTlsPeapUtils::SetConfigurationL: Expanded EAp type string",
-				expandedEAPTmp->iExpandedEAPType.Ptr(), 
-				expandedEAPTmp->iExpandedEAPType.Size() ) );						
-														
 
-			enabledEAPTypes.Append(expandedEAPTmp);
+			// Now copy the 8 byte string to expandedEAPTmp.
+			*expandedEAPTmp = aSettings.iEnabledEncapsulatedEAPExpandedTypes[i].GetValue();
+
+			EAP_TRACE_DATA_DEBUG_SYMBIAN(
+				("EapTlsPeapUtils::SetConfigurationL: Expanded EAP type string",
+				expandedEAPTmp->GetValue().Ptr(), 
+				expandedEAPTmp->GetValue().Size() ) );						
+
+			TInt error = enabledEAPTypes.Append(expandedEAPTmp);
+			if (error != KErrNone)
+			{
+				delete expandedEAPTmp;
+				expandedEAPTmp = 0;
+			}
 		}	
-	
-	TRAPD(error, SetTunnelingExpandedEapDataL(
+
+		TRAPD(error, SetTunnelingExpandedEapDataL(
 			aDatabase, 
 			0, 
 			enabledEAPTypes,
@@ -3724,7 +3653,7 @@ void EapTlsPeapUtils::SetConfigurationL(
 			
 		if( error != KErrNone )
 		{
-			EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL - ########### Setting Expanded Tunneling types in the DB failed ############ \n") ) );
+			EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL(): ########### Setting Expanded Tunneling types in the DB failed ############ \n") ) );
 
 			enabledEAPTypes.ResetAndDestroy();
 			disabledEAPTypes.ResetAndDestroy();
@@ -3740,59 +3669,86 @@ void EapTlsPeapUtils::SetConfigurationL(
 		disabledEAPTypes.Close();
 
 	}
-
-#else // For normal unexpanded EAP type.
 	
-	if (aSettings.iEncapsulatedEAPTypesPresent)
-	{
-		TEapArray eapArray;
-		
-		TEap *eap;
-		for (TInt i = 0; i < aSettings.iEncapsulatedEAPTypes.Count(); i++)
-		{
-			eap = new TEap;
-			if (eap == 0)
-			{
-				eapArray.ResetAndDestroy();
-				eapArray.Close();
-				User::Leave(KErrNoMemory);				
-			}
-			
-			eap->UID.NumFixedWidth(aSettings.iEncapsulatedEAPTypes[i], EDecimal, 2);
-			eap->Enabled = ETrue;
-			eapArray.Append(eap);
-		}	
-	
-		TInt err(KErrNone);
-		TRAP(err, SetEapDataL(
-			aDatabase,
-			0,
-			eapArray,
-			aIndexType,
-			aIndex,
-			aTunnelingType,
-			aEapType));
-
-		if( err != KErrNone )
-		{
-			EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL - ########### Setting Tunneling types in the DB failed ############ \n") ) );
-
-			eapArray.ResetAndDestroy();
-			eapArray.Close();			
-
-			User::Leave(KErrArgument); // There could be some problem in the encapsulated EAP type argument.
-		}
-
-		eapArray.ResetAndDestroy();
-		eapArray.Close();			
-	}
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL - End \n") ) );		
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetConfigurationL(): End \n") ) );		
 
 } // EapTlsPeapUtils::SetConfigurationL()
 
+
+// ----------------------------------------------------------------------
+
+TInt EapTlsPeapUtils::FilterEapMethods(
+	RPointerArray<TEapExpandedType> * const aEAPTypes,
+	RPointerArray<TEapExpandedType> * const aPlugins)
+{
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::FilterEapMethods(): aEAPTypes->Count()=%d, aPlugins->Count()=%d\n"),
+		aEAPTypes->Count(),
+		aPlugins->Count()));
+
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::FilterEapMethods()\n"));
+
+	for (TInt act_ind = 0; act_ind < aEAPTypes->Count(); ++act_ind)
+	{
+		const TEapExpandedType * eap_type = (*aEAPTypes)[act_ind];
+		if (eap_type == 0)
+		{
+			return KErrNoMemory;
+		}
+
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::FilterEapMethods(): aEAPTypes[%d] EAP-type=0xfe%06x%08x\n"),
+			act_ind,
+			eap_type->GetVendorId(),
+			eap_type->GetVendorType()));
+
+		bool exists(false);
+
+		for (TInt plugin_ind = 0; plugin_ind < aPlugins->Count(); ++plugin_ind)
+		{
+			const TEapExpandedType * plugin_type = (*aPlugins)[plugin_ind];
+			if (plugin_type == 0)
+			{
+				return KErrNoMemory;
+			}
+
+			EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::FilterEapMethods(): aPlugins[%d] EAP-type=0xfe%06x%08x\n"),
+				plugin_ind,
+				plugin_type->GetVendorId(),
+				plugin_type->GetVendorType()));
+
+			if (*eap_type == *plugin_type)
+			{
+				// OK, this active EAP-method have implementation.
+				exists = true;
+
+				EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::FilterEapMethods(): Removes from aPlugins EAP-type=0xfe%06x%08x\n"),
+					eap_type->GetVendorId(),
+					eap_type->GetVendorType()));
+
+				// Remove this plugin EAP-method because it is in the list of EAP-methods.
+				delete (*aPlugins)[plugin_ind];
+				aPlugins->Remove(plugin_ind);
+
+				break;
+			}
+		} // for()
+
+		if (exists == false)
+		{
+			// Remove this EAP-method because there are no implementation.
+
+			EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::FilterEapMethods(): Removes from aEAPTypes EAP-type=0xfe%06x%08x\n"),
+				eap_type->GetVendorId(),
+				eap_type->GetVendorType()));
+
+			delete (*aEAPTypes)[act_ind];
+			aEAPTypes->Remove(act_ind);
+
+			--act_ind;
+		}
+	} // for()
+
+	return KErrNone;
+}
 
 // ---------------------------------------------------------
 // EapTlsPeapUtils::GetConfigurationL()
@@ -3806,21 +3762,16 @@ void EapTlsPeapUtils::GetConfigurationL(
 	const eap_type_value_e aTunnelingType,
 	const eap_type_value_e aEapType)
 {
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
-	TUint aEapVendorType = aEapType.get_vendor_type();
-
-#else
-
-	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
-	TUint aEapVendorType = static_cast<TUint>(aEapType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-		
 	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::GetConfigurationL aIndexType=%d, aIndex=%d, Tunneling vendor type=%d, Eap vendor type=%d \n"),
-		aIndexType,aIndex, aTunnelingVendorType, aEapVendorType));
+		(_L("EapTlsPeapUtils::GetConfigurationL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x, aEapType=0xfe%06x%08x\n"),
+		aIndexType,
+		aIndex,
+		aTunnelingType.get_vendor_id(),
+		aTunnelingType.get_vendor_type(),
+		aEapType.get_vendor_id(),
+		aEapType.get_vendor_type()));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::GetConfigurationL()\n"));
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();	
@@ -3835,61 +3786,49 @@ void EapTlsPeapUtils::GetConfigurationL(
 	TPtrC fastSpecialSettings;		
 #endif
 	
-	switch (aEapVendorType)
+	if (aEapType == eap_type_tls)
 	{
-	case eap_type_tls:
-		{
-			settings.Set(KTlsDatabaseTableName);
-			usercerts.Set(KTlsAllowedUserCertsDatabaseTableName);
-			cacerts.Set(KTlsAllowedCACertsDatabaseTableName);
-			ciphersuites.Set(KTlsAllowedCipherSuitesDatabaseTableName);
-			maxSessionTime.Set(cf_str_EAP_TLS_max_session_validity_time_literal);
-		}
-		break;
-
-	case eap_type_peap:
-		{
-			settings.Set(KPeapDatabaseTableName);
-			usercerts.Set(KPeapAllowedUserCertsDatabaseTableName);
-			cacerts.Set(KPeapAllowedCACertsDatabaseTableName);
-			ciphersuites.Set(KPeapAllowedCipherSuitesDatabaseTableName);
-			maxSessionTime.Set(cf_str_EAP_PEAP_max_session_validity_time_literal);
-		}
-		break;
-
-	case eap_type_ttls:
-		{
-			settings.Set(KTtlsDatabaseTableName);
-			usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
-			cacerts.Set(KTtlsAllowedCACertsDatabaseTableName);
-			ciphersuites.Set(KTtlsAllowedCipherSuitesDatabaseTableName);
-			maxSessionTime.Set(cf_str_EAP_TTLS_max_session_validity_time_literal);
-		}
-		break;
-
+		settings.Set(KTlsDatabaseTableName);
+		usercerts.Set(KTlsAllowedUserCertsDatabaseTableName);
+		cacerts.Set(KTlsAllowedCACertsDatabaseTableName);
+		ciphersuites.Set(KTlsAllowedCipherSuitesDatabaseTableName);
+		maxSessionTime.Set(cf_str_EAP_TLS_max_session_validity_time_literal);
+	}
+	else if (aEapType == eap_type_peap)
+	{
+		settings.Set(KPeapDatabaseTableName);
+		usercerts.Set(KPeapAllowedUserCertsDatabaseTableName);
+		cacerts.Set(KPeapAllowedCACertsDatabaseTableName);
+		ciphersuites.Set(KPeapAllowedCipherSuitesDatabaseTableName);
+		maxSessionTime.Set(cf_str_EAP_PEAP_max_session_validity_time_literal);
+	}
+	else if (aEapType == eap_type_ttls)
+	{
+		settings.Set(KTtlsDatabaseTableName);
+		usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
+		cacerts.Set(KTtlsAllowedCACertsDatabaseTableName);
+		ciphersuites.Set(KTtlsAllowedCipherSuitesDatabaseTableName);
+		maxSessionTime.Set(cf_str_EAP_TTLS_max_session_validity_time_literal);
+	}
 #ifdef USE_FAST_EAP_TYPE
-	case eap_type_fast:
-		{
-			settings.Set(KFastGeneralSettingsDBTableName); // This is general settings for FAST.
-			fastSpecialSettings.Set(KFastSpecialSettingsDBTableName);
-			
-			usercerts.Set(KFastAllowedUserCertsDatabaseTableName);
-			cacerts.Set(KFastAllowedCACertsDatabaseTableName);
-			ciphersuites.Set(KFastAllowedCipherSuitesDatabaseTableName);
-			maxSessionTime.Set(cf_str_EAP_FAST_max_session_validity_time_literal);
-		}
-		break;
+	else if (aEapType == eap_type_fast)
+	{
+		settings.Set(KFastGeneralSettingsDBTableName); // This is general settings for FAST.
+		fastSpecialSettings.Set(KFastSpecialSettingsDBTableName);
+		
+		usercerts.Set(KFastAllowedUserCertsDatabaseTableName);
+		cacerts.Set(KFastAllowedCACertsDatabaseTableName);
+		ciphersuites.Set(KFastAllowedCipherSuitesDatabaseTableName);
+		maxSessionTime.Set(cf_str_EAP_FAST_max_session_validity_time_literal);
+	}
 #endif
-
-
-	case eap_type_ttls_plain_pap:
-		{
+	else if (aEapType == eap_type_ttls_plain_pap)
+	{
 		settings.Set( KTtlsDatabaseTableName );
 		maxSessionTime.Set( cf_str_EAP_TLS_PEAP_ttls_pap_max_session_validity_time_literal );
-		}
-		break;
-		
-	default:
+	}
+	else
+	{
 		// Should never happen
 		User::Leave(KErrArgument);
 	}	
@@ -3897,15 +3836,23 @@ void EapTlsPeapUtils::GetConfigurationL(
 	RDbView view;
 
 	// Form the query
-	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
 	
 	//////////////////////////////////////////
 	// This is for settings for all EAP types.
 	// For EAP-FAST it is General settings.
 	//////////////////////////////////////////
 	
-	sqlStatement.Format(KSQL, &settings, 
-		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+	sqlStatement.Format(KSQL,
+		&settings, 
+		&KServiceType,
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aTunnelingType.get_vendor_type());
 
 	// Evaluate view
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
@@ -3922,26 +3869,51 @@ void EapTlsPeapUtils::GetConfigurationL(
 	CDbColSet* colSet = view.ColSetL();
 	CleanupStack::PushL(colSet);
 
-	aSettings.iEAPType = static_cast<EAPSettings::TEapType>(aEapVendorType);
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL - aSettings.iEAPType=%d \n"),aSettings.iEAPType) );
-	
+	aSettings.iEAPExpandedType.SetValue(
+		aEapType.get_vendor_id(),
+		aEapType.get_vendor_type());
+
+	EAP_TRACE_DATA_DEBUG_SYMBIAN(
+		(EAPL("EapTlsPeapUtils::GetConfigurationL(): aSettings.iEAPExpandedType"),
+		aSettings.iEAPExpandedType.GetValue().Ptr(),
+		aSettings.iEAPExpandedType.GetValue().Length()));
+
 	//////////////////////////////////////////
 	// This is only for plain PAP settings. //
 	//////////////////////////////////////////
 	if ( aEapType == eap_type_ttls_plain_pap )
-		{		
+	{		
 	    // Username
 	    TPtrC username = view.ColDes( colSet->ColNo(
 	   		cf_str_EAP_TLS_PEAP_ttls_pap_username_literal ) );
 	    aSettings.iUsername.Copy( username );
 	    aSettings.iUsernamePresent = ETrue;
-	
+
+		// Password existence.
+		aSettings.iPasswordExistPresent = ETrue;
+		aSettings.iPasswordExist = ! view.IsColNull(colSet->ColNo(cf_str_EAP_TLS_PEAP_ttls_pap_password_literal));
+
+		aSettings.iShowPassWordPromptPresent = ETrue;
+
+		TUint aShow = view.ColUint( colSet->ColNo( cf_str_EAP_TLS_PEAP_ttls_pap_password_prompt_literal ) );
+		if ( aShow == EPapPasswordPromptOn)
+		{
+			aSettings.iShowPassWordPrompt = ETrue;
+		}
+		else
+		{
+			aSettings.iShowPassWordPrompt = EFalse;
+		}
+
+#if defined(USE_EAP_PASSWORD_READ_FROM_DATABASE)
         // Password
 	    TPtrC password = view.ColDes( colSet->ColNo(
     		cf_str_EAP_TLS_PEAP_ttls_pap_password_literal ) );
 	    aSettings.iPassword.Copy( password );
 	    aSettings.iPasswordPresent = ETrue;
+#else
+		EAP_TRACE_DEBUG_SYMBIAN((_L("WARNING: EapTlsPeapUtils::GetConfigurationL(): Password read is disabled\n")));
+#endif //#if defined(USE_EAP_PASSWORD_READ_FROM_DATABASE)
 
 	    // Session validity time	
 	    TInt64 maxSessionTimeMicro = view.ColInt64( colSet->ColNo(
@@ -3956,75 +3928,117 @@ void EapTlsPeapUtils::GetConfigurationL(
 	    CleanupStack::PopAndDestroy(3); // view, colset, buf
 
 		return;
+	}
+
+
+	{
+		// For manual or automatic CA-certificate.
+		TUint useAutomaticCACertificate = view.ColUint(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate_literal));
+
+		aSettings.iUseAutomaticCACertificatePresent = ETrue;
+
+		if(useAutomaticCACertificate == EEapDbTrue)
+		{
+			aSettings.iUseAutomaticCACertificate = ETrue;
 		}
+		else
+		{
+			aSettings.iUseAutomaticCACertificate = EFalse;
+		}
+	}
 
+	{
+		// For manual or automatic username.
+		TUint useUsername = view.ColUint(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_username_literal));
+
+		aSettings.iUseAutomaticUsernamePresent = ETrue;
+
+		if(useUsername == EEapDbTrue)
+		{
+			aSettings.iUseAutomaticUsername = EFalse;		
+		}
+		else
+		{
+			aSettings.iUseAutomaticUsername = ETrue;		
+		}
+	}
+
+	{
+		// For manual or automatic realm.
+		TUint useRealm = view.ColUint(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_realm_literal));
+
+		aSettings.iUseAutomaticRealmPresent = ETrue;
+
+		if(useRealm == EEapDbTrue)
+		{
+			aSettings.iUseAutomaticRealm = EFalse;
+		}
+		else
+		{
+			aSettings.iUseAutomaticRealm = ETrue;
+		}
+	}
+
+	{
+		// Username
+		TPtrC username = view.ColDes(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_username_literal));
+
+		aSettings.iUsernamePresent = ETrue;
+
+		aSettings.iUsername.Copy(username);
+	}
 	
-	// Username
-	TPtrC username = view.ColDes(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_username_literal));
-	aSettings.iUsername.Copy(username);
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL(): Settings.iUsername=%S \n"), &(aSettings.iUsername) ) );
 
-	// For manual or automatic status.
-	TUint useUsername = view.ColUint(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_username_literal));
-	if(useUsername == ETLSPEAPUseManualUsernameNo)
 	{
-		aSettings.iUsernamePresent = EFalse;		
-	}
-	else
-	{
-		aSettings.iUsernamePresent = ETrue;		
-	}
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL - Settings.iUsername=%S \n"), &(aSettings.iUsername) ) );
-		
-	// Realm
-	TPtrC realm = view.ColDes(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_realm_literal));
-	aSettings.iRealm.Copy(realm);
+		// Realm
+		TPtrC realm = view.ColDes(colSet->ColNo(cf_str_EAP_TLS_PEAP_manual_realm_literal));
 
-	// For manual or automatic status.
-	TUint useRealm = view.ColUint(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_manual_realm_literal));
-	if(useRealm == ETLSPEAPUseManualRealmNo)
-	{
-		aSettings.iRealmPresent = EFalse;
-	}
-	else
-	{
 		aSettings.iRealmPresent = ETrue;
-	}
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL - aSettings.iRealm=%S \n"),&(aSettings.iRealm)) );
 
-	// Verify server realm	
-	TInt verifyrealm = view.ColUint(colSet->ColNo(cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal));
-	if (verifyrealm == 0)
-	{
-		aSettings.iVerifyServerRealm = EFalse;
+		aSettings.iRealm.Copy(realm);
 	}
-	else
-	{
-		aSettings.iVerifyServerRealm = ETrue;
-	}
-	aSettings.iVerifyServerRealmPresent = ETrue;
 	
-	// Require client authentication
-	TInt requireclientauth = view.ColUint(colSet->ColNo(cf_str_TLS_server_authenticates_client_policy_in_client_literal));
-	if (requireclientauth == 0)
-	{
-		aSettings.iRequireClientAuthentication = EFalse;
-	}
-	else
-	{
-		aSettings.iRequireClientAuthentication = ETrue;
-	}
-	aSettings.iRequireClientAuthenticationPresent = ETrue;
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL(): aSettings.iRealm=%S \n"),&(aSettings.iRealm)) );
 
-	// Session validity time	
-	TInt64 maxSessionTimeMicro = view.ColInt64(colSet->ColNo(maxSessionTime));
+	{
+		// Verify server realm	
+		TInt verifyrealm = view.ColUint(colSet->ColNo(cf_str_EAP_TLS_PEAP_verify_certificate_realm_literal));
+		if (verifyrealm == 0)
+		{
+			aSettings.iVerifyServerRealm = EFalse;
+		}
+		else
+		{
+			aSettings.iVerifyServerRealm = ETrue;
+		}
+		aSettings.iVerifyServerRealmPresent = ETrue;
+	}
 	
-	// Convert the time to minutes.	
-	TInt64 maxSessionTimeMin = maxSessionTimeMicro / KMicroSecsInAMinute;
-	
-	aSettings.iSessionValidityTime = static_cast<TUint>(maxSessionTimeMin);
-	aSettings.iSessionValidityTimePresent = ETrue;
+	{
+		// Require client authentication
+		TInt requireclientauth = view.ColUint(colSet->ColNo(cf_str_TLS_server_authenticates_client_policy_in_client_literal));
+		if (requireclientauth == 0)
+		{
+			aSettings.iRequireClientAuthentication = EFalse;
+		}
+		else
+		{
+			aSettings.iRequireClientAuthentication = ETrue;
+		}
+		aSettings.iRequireClientAuthenticationPresent = ETrue;
+	}
+
+	{
+		// Session validity time	
+		TInt64 maxSessionTimeMicro = view.ColInt64(colSet->ColNo(maxSessionTime));
+		
+		// Convert the time to minutes.	
+		TInt64 maxSessionTimeMin = maxSessionTimeMicro / KMicroSecsInAMinute;
+		
+		aSettings.iSessionValidityTime = static_cast<TUint>(maxSessionTimeMin);
+		aSettings.iSessionValidityTimePresent = ETrue;
+	}
 
 	// PEAP versions
 	if (aEapType == eap_type_peap
@@ -4058,7 +4072,22 @@ void EapTlsPeapUtils::GetConfigurationL(
 		aSettings.iPEAPVersionsPresent = ETrue;
 	}
 	
-	CleanupStack::PopAndDestroy(2); // view, colset
+	{
+		// Require client authentication
+		TInt UseIdentityPrivacy = view.ColUint(colSet->ColNo(cf_str_EAP_TLS_PEAP_use_identity_privacy_literal));
+		if (UseIdentityPrivacy == 0)
+		{
+			aSettings.iUseIdentityPrivacy = EFalse;
+		}
+		else
+		{
+			aSettings.iUseIdentityPrivacy = ETrue;
+		}
+		aSettings.iUseIdentityPrivacyPresent = ETrue;
+	}
+
+	CleanupStack::PopAndDestroy(colSet);
+	CleanupStack::PopAndDestroy(&view);
 	
 #ifdef USE_FAST_EAP_TYPE		
 
@@ -4068,8 +4097,16 @@ void EapTlsPeapUtils::GetConfigurationL(
 	
 	if(aEapType == eap_type_fast)
 	{
-		sqlStatement.Format(KSQL, &fastSpecialSettings, 
-			&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+		sqlStatement.Format(KSQL,
+			&fastSpecialSettings, 
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex,
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());
 	
 		// Evaluate view
 		User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
@@ -4088,7 +4125,7 @@ void EapTlsPeapUtils::GetConfigurationL(
 	
 		// For provisioning modes.
 		TUint authProvMode = view.ColUint(colSet->ColNo(cf_str_EAP_FAST_allow_server_authenticated_provisioning_mode_literal));
-		if(authProvMode == EFASTAuthProvModeAllowedNo)
+		if(authProvMode == EEapDbFalse)
 		{
 			aSettings.iAuthProvModeAllowed = EFalse;
 		}
@@ -4100,7 +4137,7 @@ void EapTlsPeapUtils::GetConfigurationL(
 		aSettings.iAuthProvModeAllowedPresent = ETrue;
 
 		TUint unauthProvMode = view.ColUint(colSet->ColNo(cf_str_EAP_FAST_allow_server_unauthenticated_provisioning_mode_ADHP_literal));
-		if(unauthProvMode == EFASTUnauthProvModeAllowedNo)
+		if(unauthProvMode == EEapDbFalse)
 		{
 			aSettings.iUnauthProvModeAllowed = EFalse;
 		}
@@ -4113,7 +4150,7 @@ void EapTlsPeapUtils::GetConfigurationL(
 		
 		// For no PAC warning	
 		TUint warn = view.ColUint(colSet->ColNo(KFASTWarnADHPNoPAC));
-		if(warn == EFASTWarnADHPNoPACNo)
+		if(warn == EEapDbFalse)
 		{
 			aSettings.iWarnADHPNoPAC = EFalse;
 		}
@@ -4126,7 +4163,7 @@ void EapTlsPeapUtils::GetConfigurationL(
 		
 		// For no matching PAC warning		
 		warn = view.ColUint(colSet->ColNo(KFASTWarnADHPNoMatchingPAC));
-		if(warn == EFASTWarnADHPNoMatchingPACNo)
+		if(warn == EEapDbFalse)
 		{
 			aSettings.iWarnADHPNoMatchingPAC = EFalse;
 		}
@@ -4139,7 +4176,7 @@ void EapTlsPeapUtils::GetConfigurationL(
 		
 		// For no default server warning
 		warn = view.ColUint(colSet->ColNo(KFASTWarnNotDefaultServer));
-		if(warn == EFASTWarnNotDefaultServerNo)
+		if(warn == EEapDbFalse)
 		{
 			aSettings.iWarnNotDefaultServer = EFalse;
 		}
@@ -4159,7 +4196,8 @@ void EapTlsPeapUtils::GetConfigurationL(
 			aSettings.iPACGroupReferencePresent = ETrue;
 		}
 		
-		CleanupStack::PopAndDestroy(2); // view, colset		
+		CleanupStack::PopAndDestroy(colSet);
+		CleanupStack::PopAndDestroy(&view);
 				
 	} // End: if(aEapType == eap_type_fast) 
 
@@ -4170,8 +4208,16 @@ void EapTlsPeapUtils::GetConfigurationL(
 	// Cipher suites
 	//////////////////
 	
-	sqlStatement.Format(KSQL, &ciphersuites, 
-		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+	sqlStatement.Format(KSQL,
+		&ciphersuites, 
+		&KServiceType,
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aTunnelingType.get_vendor_type());
 	
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
 	
@@ -4193,18 +4239,27 @@ void EapTlsPeapUtils::GetConfigurationL(
 		} while (view.NextL() != EFalse);
 	}
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL - Total cipher suites appended=%d \n"),aSettings.iCipherSuites.Count()) );
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL(): Total cipher suites appended=%d \n"), aSettings.iCipherSuites.Count()) );
 	
 	aSettings.iCipherSuitesPresent = ETrue;
 	
-	CleanupStack::PopAndDestroy(2); // view, colset
+	CleanupStack::PopAndDestroy(colSet);
+	CleanupStack::PopAndDestroy(&view);
 	
 	/////////////////
 	// User Certificates
 	/////////////////
 
-	sqlStatement.Format(KSQL, &usercerts, 
-		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+	sqlStatement.Format(KSQL,
+		&usercerts, 
+		&KServiceType,
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aTunnelingType.get_vendor_type());
 	
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
 	
@@ -4222,59 +4277,73 @@ void EapTlsPeapUtils::GetConfigurationL(
 			view.GetL();
 			{
 				// This is big object.
-				CertificateEntry * certEntry = new (ELeave) CertificateEntry;
+				EapCertificateEntry * certEntry = new (ELeave) EapCertificateEntry;
 				CleanupStack::PushL(certEntry);
 
-				certEntry->iCertType = CertificateEntry::EUser;
+				certEntry->SetCertType(EapCertificateEntry::EUser);
 				
-				certEntry->iSubjectName.Copy(view.ColDes(colSet->ColNo(KSubjectName)));
-				if(certEntry->iSubjectName.Length())
+				certEntry->GetSubjectNameWritable()->Copy(view.ColDes(colSet->ColNo(KSubjectName)));
+				if(certEntry->GetSubjectName()->Length())
 				{
-					certEntry->iSubjectNamePresent = ETrue;
+					certEntry->SetSubjectNamePresent();
 				}
 				
-				certEntry->iIssuerName.Copy(view.ColDes(colSet->ColNo(KIssuerName)));
-				if(certEntry->iIssuerName.Length())
+				certEntry->GetIssuerNameWritable()->Copy(view.ColDes(colSet->ColNo(KIssuerName)));
+				if(certEntry->GetIssuerName()->Length())
 				{
-					certEntry->iIssuerNamePresent = ETrue;
+					certEntry->SetIssuerNamePresent();
 				}
 
-				certEntry->iSerialNumber.Copy(view.ColDes(colSet->ColNo(KSerialNumber)));
-				if(certEntry->iSerialNumber.Length())
+				certEntry->GetSerialNumberWritable()->Copy(view.ColDes(colSet->ColNo(KSerialNumber)));
+				if(certEntry->GetSerialNumber()->Length())
 				{
-					certEntry->iSerialNumberPresent = ETrue;
+					certEntry->SetSerialNumberPresent();
 				}
 
-				certEntry->iSubjectKeyID.Copy(view.ColDes8(colSet->ColNo(KActualSubjectKeyIdentifier))); // This is the subjectkey id we got in SetConfigurationL
-				if(certEntry->iSubjectKeyID.Length())
+				certEntry->GetSubjectKeyIdWritable()->Copy(view.ColDes8(colSet->ColNo(KActualSubjectKeyIdentifier))); // This is the subjectkey id we got in SetConfigurationL
+				if(certEntry->GetSubjectKeyId().Length())
 				{
-					certEntry->iSubjectKeyIDPresent = ETrue;
+					certEntry->SetSubjectKeyIdPresent();
 				}
 
-				certEntry->iThumbprint.Copy(view.ColDes8(colSet->ColNo(KThumbprint)));				
-				if(certEntry->iThumbprint.Length())
+				certEntry->GetThumbprintWritable()->Copy(view.ColDes8(colSet->ColNo(KThumbprint)));				
+				if(certEntry->GetThumbprint()->Length())
 				{
-					certEntry->iThumbprintPresent = ETrue;
+					certEntry->SetThumbprintPresent();
 				}
 
-				aSettings.iCertificates.AppendL(*certEntry);
+				certEntry->SetIsEnabledPresent();
+				certEntry->SetIsEnabled(ETrue);
 
-				EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "EapTlsPeapUtils::GetConfigurationL - Filling User cert entry, SubjectKeyID:",
-					certEntry->iSubjectKeyID.Ptr(), certEntry->iSubjectKeyID.Size() ) );
+				aSettings.iCertificates.AppendL(certEntry);
+				aSettings.iCertificatesPresent = ETrue;
 
-				CleanupStack::PopAndDestroy(certEntry);
+				EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "EapTlsPeapUtils::GetConfigurationL(): Filling User cert entry, SubjectKeyID:",
+					certEntry->GetSubjectKeyId().Ptr(),
+					certEntry->GetSubjectKeyId().Length() ) );
+
+				CleanupStack::Pop(certEntry);
 			}
 		} while (view.NextL() != EFalse);
 	}
 	
-	CleanupStack::PopAndDestroy(2); // view, colset
+	CleanupStack::PopAndDestroy(colSet);
+	CleanupStack::PopAndDestroy(&view);
 	
 	/////////////////
 	// CA Certificates
 	/////////////////
 
-	sqlStatement.Format(KSQL, &cacerts, 
-		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+	sqlStatement.Format(KSQL,
+		&cacerts, 
+		&KServiceType,
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aTunnelingType.get_vendor_type());
 	
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
 	
@@ -4292,131 +4361,62 @@ void EapTlsPeapUtils::GetConfigurationL(
 			view.GetL();
 			{	
 				// This is big object.
-				CertificateEntry * certEntry = new (ELeave) CertificateEntry;
+				EapCertificateEntry * certEntry = new (ELeave) EapCertificateEntry;
 				CleanupStack::PushL(certEntry);
 
-				certEntry->iCertType = CertificateEntry::ECA;
+				certEntry->SetCertType(EapCertificateEntry::ECA);
 				
-				certEntry->iSubjectName.Copy(view.ColDes(colSet->ColNo(KSubjectName)));
-				if(certEntry->iSubjectName.Length())
+				certEntry->GetSubjectNameWritable()->Copy(view.ColDes(colSet->ColNo(KSubjectName)));
+				if(certEntry->GetSubjectName()->Length())
 				{
-					certEntry->iSubjectNamePresent = ETrue;
-				}
-				
-				certEntry->iIssuerName.Copy(view.ColDes(colSet->ColNo(KIssuerName)));
-				if(certEntry->iIssuerName.Length())
-				{
-					certEntry->iIssuerNamePresent = ETrue;
-				}
-
-				certEntry->iSerialNumber.Copy(view.ColDes(colSet->ColNo(KSerialNumber)));
-				if(certEntry->iSerialNumber.Length())
-				{
-					certEntry->iSerialNumberPresent = ETrue;
-				}
-
-				certEntry->iSubjectKeyID.Copy(view.ColDes8(colSet->ColNo(KActualSubjectKeyIdentifier))); // This is the subjectkey id we got in SetConfigurationL
-				if(certEntry->iSubjectKeyID.Length())
-				{
-					certEntry->iSubjectKeyIDPresent = ETrue;
-				}
-
-				certEntry->iThumbprint.Copy(view.ColDes8(colSet->ColNo(KThumbprint)));				
-				if(certEntry->iThumbprint.Length())
-				{
-					certEntry->iThumbprintPresent = ETrue;
+					certEntry->SetSubjectNamePresent();
 				}
 				
-				aSettings.iCertificates.AppendL(*certEntry);
+				certEntry->GetIssuerNameWritable()->Copy(view.ColDes(colSet->ColNo(KIssuerName)));
+				if(certEntry->GetIssuerName()->Length())
+				{
+					certEntry->SetIssuerNamePresent();
+				}
 
-				EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "EapTlsPeapUtils::GetConfigurationL - Filling CA cert entry, SubjectKeyID:",
-					certEntry->iSubjectKeyID.Ptr(), certEntry->iSubjectKeyID.Size() ) );
+				certEntry->GetSerialNumberWritable()->Copy(view.ColDes(colSet->ColNo(KSerialNumber)));
+				if(certEntry->GetSerialNumber()->Length())
+				{
+					certEntry->SetSerialNumberPresent();
+				}
 
-				CleanupStack::PopAndDestroy(certEntry);
+				certEntry->GetSubjectKeyIdWritable()->Copy(view.ColDes8(colSet->ColNo(KActualSubjectKeyIdentifier))); // This is the subjectkey id we got in SetConfigurationL
+				if(certEntry->GetSubjectKeyId().Length())
+				{
+					certEntry->SetSubjectKeyIdPresent();
+				}
+
+				certEntry->GetThumbprintWritable()->Copy(view.ColDes8(colSet->ColNo(KThumbprint)));				
+				if(certEntry->GetThumbprint()->Length())
+				{
+					certEntry->SetThumbprintPresent();
+				}
+				
+				certEntry->SetIsEnabledPresent();
+				certEntry->SetIsEnabled(ETrue);
+
+				aSettings.iCertificates.AppendL(certEntry);
+				aSettings.iCertificatesPresent = ETrue;
+
+				EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "EapTlsPeapUtils::GetConfigurationL(): Filling CA cert entry, SubjectKeyID:",
+					certEntry->GetSubjectKeyId().Ptr(),
+					certEntry->GetSubjectKeyId().Length() ) );
+
+				EAP_TRACE_SETTINGS(certEntry);
+
+				CleanupStack::Pop(certEntry);
 			}
 		} while (view.NextL() != EFalse);
 	}
 	
-	CleanupStack::PopAndDestroy(3); // view, colset, buf
-	
-	aSettings.iCertificatesPresent = ETrue;
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("**************** GetConfigurationL - Returning the below values: ***************\n")) );
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - Return these values for EAPType=%d"),aSettings.iEAPType) );
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, Username=%S"),aSettings.iUsernamePresent, &(aSettings.iUsername)) );
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, Password=%S"),aSettings.iPasswordPresent, &(aSettings.iPassword)) );
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, Realm=%S"),aSettings.iRealmPresent, &(aSettings.iRealm)) );
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, UsePseudonyms=%d"),aSettings.iUsePseudonymsPresent, aSettings.iUsePseudonyms) );
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, VerifyServerRealm=%d"),
-						aSettings.iVerifyServerRealmPresent, aSettings.iVerifyServerRealm) );
+	CleanupStack::PopAndDestroy(colSet);
+	CleanupStack::PopAndDestroy(&view);
+	CleanupStack::PopAndDestroy(buf);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, RequireClientAuthentication=%d"),
-						aSettings.iRequireClientAuthenticationPresent, aSettings.iRequireClientAuthentication) );
-						
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, SessionValidityTime=%d minutes"),
-						aSettings.iSessionValidityTimePresent, aSettings.iSessionValidityTime) );
-						
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, CipherSuites Count=%d"),
-						aSettings.iCipherSuitesPresent, aSettings.iCipherSuites.Count()) );
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, PEAPv0Allowed=%d, PEAPv1Allowed=%d, PEAPv2Allowed=%d"),
-						aSettings.iPEAPVersionsPresent, aSettings.iPEAPv0Allowed,aSettings.iPEAPv1Allowed, aSettings.iPEAPv2Allowed ) );
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, Certificates Count=%d"),
-						aSettings.iCertificatesPresent, aSettings.iCertificates.Count()) );
-						
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - Certificate details below: \n")) );
-	for( TInt n=0; n < aSettings.iCertificates.Count(); n++ )
-	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - Certificate type:%d \n"), aSettings.iCertificates[n].iCertType) );
-		
-		EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - certificates - present=%d, SubjectName=%S"),
-						aSettings.iCertificates[n].iSubjectNamePresent, &(aSettings.iCertificates[n].iSubjectName)) );
-						
-		EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - certificates - present=%d, IssuerName=%S"),
-						aSettings.iCertificates[n].iIssuerNamePresent, &(aSettings.iCertificates[n].iIssuerName)) );
-						
-		EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - certificates - present=%d, SerialNumber=%S"),
-						aSettings.iCertificates[n].iSerialNumberPresent, &(aSettings.iCertificates[n].iSerialNumber)) );
-						
-		EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - certificates - SubjectKeyID present=%d"),
-						aSettings.iCertificates[n].iSubjectKeyIDPresent ) );
-						
-		EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "SubjectKeyID:", aSettings.iCertificates[n].iSubjectKeyID.Ptr(), 
-													aSettings.iCertificates[n].iSubjectKeyID.Size() ) );						
-
-		EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - certificates - Thumbprint present=%d"),
-						aSettings.iCertificates[n].iThumbprintPresent ) );
-						
-		EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "Thumbprint:", aSettings.iCertificates[n].iThumbprint.Ptr(), 
-													aSettings.iCertificates[n].iThumbprint.Size() ) );						
-	}
-	
-#ifdef USE_FAST_EAP_TYPE		
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, AuthProvModeAllowed=%d"),
-						aSettings.iAuthProvModeAllowedPresent, aSettings.iAuthProvModeAllowed) );
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, UnauthProvModeAllowed=%d"),
-						aSettings.iUnauthProvModeAllowedPresent, aSettings.iUnauthProvModeAllowed) );
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, WarnADHPNoPAC=%d"),
-			aSettings.iWarnADHPNoPACPresent, aSettings.iWarnADHPNoPAC) );
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, WarnADHPNoMatchingPAC=%d"),
-			aSettings.iWarnADHPNoMatchingPACPresent, aSettings.iWarnADHPNoMatchingPAC) );
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, WarnNotDefaultServer=%d"),
-			aSettings.iWarnNotDefaultServerPresent, aSettings.iWarnNotDefaultServer) );
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("GetConfigurationL - present=%d, PAC Group Ref=%S"),
-						aSettings.iPACGroupReferencePresent, &(aSettings.iPACGroupReference)) );
-
-#endif //#ifdef USE_FAST_EAP_TYPE		
-					
-	EAP_TRACE_DEBUG_SYMBIAN((_L("**************** GetConfigurationL - Returning the above values: ***************\n")) );
-
-	
 	//////////////////////	
 	// Encapsulated types
 	//////////////////////
@@ -4429,19 +4429,17 @@ void EapTlsPeapUtils::GetConfigurationL(
 #endif		 
 		 )
 	{
-		aSettings.iEncapsulatedEAPTypesPresent = EFalse;
+		aSettings.iEnabledEncapsulatedEAPExpandedTypesPresent = EFalse;
 		
-		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("EapTlsPeapUtils::GetConfigurationL - End - Since no encapsulated type for the EAPType =%d \n"),
-			aEapVendorType));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL(): End - Since no encapsulated type for the EAP-type=0xfe%06x%08x\n"),
+			aEapType.get_vendor_id(),
+			aEapType.get_vendor_type()));
 		
 		return; // No need to proceed. Nothing more to provide.
 	}
-		
-#ifdef USE_EAP_EXPANDED_TYPES
 
-	RExpandedEapTypePtrArray enabledEAPTypes;
-	RExpandedEapTypePtrArray disabledEAPTypes;
+	RPointerArray<TEapExpandedType> enabledEAPTypes;
+	RPointerArray<TEapExpandedType> disabledEAPTypes;
 	
 	TRAPD(error, GetTunnelingExpandedEapDataL(
 			aDatabase, 
@@ -4453,278 +4451,222 @@ void EapTlsPeapUtils::GetConfigurationL(
 			aTunnelingType,
 			aEapType));
 			
-		if( error != KErrNone )
-		{
-			EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL - ########### Getting Expanded Tunneling types from the DB failed ############ \n") ) );
-
-			enabledEAPTypes.ResetAndDestroy();
-			disabledEAPTypes.ResetAndDestroy();
-			enabledEAPTypes.Close();
-			disabledEAPTypes.Close();
-
-			User::Leave(KErrGeneral);
-		}
-
-	// There should be some enabled EAP types (atleast one).
-	if (enabledEAPTypes.Count() == 0)
+	if( error != KErrNone )
 	{
-		// Nothing enabled. Some problem. 
-		// We should get all the available EAP plugins on the device and make them enabled as default.
-		
-		RImplInfoPtrArray eapImplArray;
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::GetConfigurationL(): ########### Getting Expanded Tunneling types from the DB failed ############ \n") ) );
 
-		TRAP(error, REComSession::ListImplementationsL(KEapTypeInterfaceUid, eapImplArray));
-		if (error != KErrNone)
+		enabledEAPTypes.ResetAndDestroy();
+		disabledEAPTypes.ResetAndDestroy();
+		enabledEAPTypes.Close();
+		disabledEAPTypes.Close();
+
+		User::Leave(KErrGeneral);
+	}
+
+
+	{
+		RPointerArray<TEapExpandedType> aPlugins;
+
+		// This works if we do not leave from the block.
+		PointerArrayResetAndDestroy<TEapExpandedType> aAutomaticPlugins(&aPlugins, EFalse);
+
+		EapPluginTools aPluginTool;
+
+		TEapExpandedType aSymbTunnelingType;
+    
+		error = CEapConversion::ConvertInternalTypeToExpandedEAPType(
+			&aEapType,
+			&aSymbTunnelingType);
+
+		if (error == KErrNone)
 		{
-			EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL - ########### Getting Expanded Tunneling types - Listing ECOM plugins failed ############ \n") ) );
-
-			enabledEAPTypes.ResetAndDestroy();
-			disabledEAPTypes.ResetAndDestroy();
-			enabledEAPTypes.Close();
-			disabledEAPTypes.Close();
-
-			User::Leave(KErrNotFound);
+			TRAP(error, (aPluginTool.ListAllEapPluginsL(aIndexType, aSymbTunnelingType, aPlugins)));
+			if (error != KErrNone)
+			{
+				EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::GetConfigurationL(): aPluginTool.ListAllEapPluginsL() failed, EAP-type=0xfe%06x%08x, index_type=%d, index=%d, error=%d.\n"),
+					aEapType.get_vendor_id(),
+					aEapType.get_vendor_type(),
+					aIndexType,
+					aIndex,
+					error));
+			}
 		}
-		
+
 		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("GetConfigurationL - ListImplementationsL - No: of available EAP plugin implementations=%d \n"),
-		 	eapImplArray.Count() ) );
-		
-		SExpandedEAPType* expandedEAPTmp;
-		
-		// Add the EAP types to enabledEAPTypes array now.
-		
-		for (TInt i = 0; i < eapImplArray.Count(); i++)
-		{		
-			if (aEapType == eap_type_peap)
+			(_L("EapTlsPeapUtils::GetConfigurationL(): ListImplementationsL(): No: of available EAP plugin implementations=%d, enabledEAPTypes.Count()=%d, disabledEAPTypes.Count()=%d\n"),
+		 	aPlugins.Count(),
+			enabledEAPTypes.Count(),
+			disabledEAPTypes.Count()));
+
+		if (error == KErrNone)
+		{
+			// Filter out unimplemented enabled EAP-methods.
+			error = FilterEapMethods(
+				&enabledEAPTypes,
+				&aPlugins);
+		}
+
+		if (error == KErrNone)
+		{
+			// Filter out unimplemented disabled EAP-methods.
+			error = FilterEapMethods(
+				&disabledEAPTypes,
+				&aPlugins);
+		}
+
+		if (error == KErrNone)
+		{
+			// Add rest of the implemented EAP-methods to array of disabled EAP-methods.
+			EAP_TRACE_DEBUG_SYMBIAN(
+				(_L("EapTlsPeapUtils::GetConfigurationL(): ListImplementationsL(): Before adding disabled, No: of available EAP plugin implementations=%d, enabledEAPTypes.Count()=%d, disabledEAPTypes.Count()=%d\n"),
+		 		aPlugins.Count(),
+				enabledEAPTypes.Count(),
+				disabledEAPTypes.Count()));
+
+			for (TInt plugin_ind = 0; plugin_ind < aPlugins.Count(); ++plugin_ind)
 			{
-				// Some EAP types are not allowed inside EAP-PEAP.
-				if (CEapType::IsDisallowedInsidePEAP(*eapImplArray[i]))
-				{			
-					continue;	
-				}
-				
-				expandedEAPTmp = new SExpandedEAPType;
-				if (expandedEAPTmp == 0)
+				const TEapExpandedType * const plugin_type = aPlugins[plugin_ind];
+				if (plugin_type == 0)
 				{
-					enabledEAPTypes.ResetAndDestroy();
-					disabledEAPTypes.ResetAndDestroy();
-					enabledEAPTypes.Close();
-					disabledEAPTypes.Close();
-
-					eapImplArray.ResetAndDestroy();
-					eapImplArray.Close();				
-
-					User::Leave(KErrNoMemory);				
+					error = KErrNoMemory;
+					break;
 				}
-				
-				CleanupStack::PushL(expandedEAPTmp);
-				
-				expandedEAPTmp->iExpandedEAPType.Copy(eapImplArray[i]->DataType());
 
-				enabledEAPTypes.Append(expandedEAPTmp);				
-				
-				CleanupStack::Pop(expandedEAPTmp);
-			}
-
-			if (aEapType == eap_type_ttls)
-			{
-				// Some EAP types are not allowed inside EAP-TTLS.
-				if (CEapType::IsDisallowedInsideTTLS(*eapImplArray[i]))
-				{			
-					continue;	
-				}
-				
-				expandedEAPTmp = new SExpandedEAPType;
-				if (expandedEAPTmp == 0)
+				TEapExpandedType * const disabled_eap_type = new TEapExpandedType;
+				if (disabled_eap_type != 0)
 				{
-					enabledEAPTypes.ResetAndDestroy();
-					disabledEAPTypes.ResetAndDestroy();
-					enabledEAPTypes.Close();
-					disabledEAPTypes.Close();
+					*disabled_eap_type = *plugin_type;
 
-					eapImplArray.ResetAndDestroy();
-					eapImplArray.Close();				
+					EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL(): Adds disabled EAP-type=0xfe%06x%08x\n"),
+						disabled_eap_type->GetVendorId(),
+						disabled_eap_type->GetVendorType()));
 
-					User::Leave(KErrNoMemory);				
+					error = disabledEAPTypes.Append( disabled_eap_type );
+					if (error != KErrNone)
+					{
+						break;
+					}
 				}
-				
-				CleanupStack::PushL(expandedEAPTmp);
-				
-				expandedEAPTmp->iExpandedEAPType.Copy(eapImplArray[i]->DataType());
+			} // for()
 
-				enabledEAPTypes.Append(expandedEAPTmp);				
-				
-				CleanupStack::Pop(expandedEAPTmp);
-			}
+		}
 
-#ifdef USE_FAST_EAP_TYPE
+		EAP_TRACE_DEBUG_SYMBIAN(
+			(_L("EapTlsPeapUtils::GetConfigurationL(): ListImplementationsL(): After adding disabled, No: of available EAP plugin implementations=%d, enabledEAPTypes.Count()=%d, disabledEAPTypes.Count()=%d\n"),
+		 	aPlugins.Count(),
+			enabledEAPTypes.Count(),
+			disabledEAPTypes.Count()));
 
-			if (aEapType == eap_type_fast)
-			{
-				// Some EAP types are not allowed inside EAP-FAST.
-				if (CEapType::IsDisallowedInsidePEAP(*eapImplArray[i]))
-				{			
-					continue;	
-				}
-				
-				expandedEAPTmp = new SExpandedEAPType;
-				if (expandedEAPTmp == 0)
-				{
-					enabledEAPTypes.ResetAndDestroy();
-					disabledEAPTypes.ResetAndDestroy();
-					enabledEAPTypes.Close();
-					disabledEAPTypes.Close();
+	}
 
-					eapImplArray.ResetAndDestroy();
-					eapImplArray.Close();				
+	// This leave must be outside the previous block.
+	User::LeaveIfError(error);
 
-					User::Leave(KErrNoMemory);				
-				}
-				
-				CleanupStack::PushL(expandedEAPTmp);
-				
-				expandedEAPTmp->iExpandedEAPType.Copy(eapImplArray[i]->DataType());
 
-				enabledEAPTypes.Append(expandedEAPTmp);				
-				
-				CleanupStack::Pop(expandedEAPTmp);
-			}
-#endif // #ifdef USE_FAST_EAP_TYPE
-
-		} // End: for (TInt i = 0; i < eapImplArray.Count(); i++)
-		
-		eapImplArray.ResetAndDestroy();
-		eapImplArray.Close();
-							
-	} // End: if (enabledEAPTypes.Count() == 0)
-
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::GetConfigurationL - No: of available tunneled types for this EAP=%d \n"),
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL(): No: of available tunneled types for this EAP=%d \n"),
 		enabledEAPTypes.Count()));
 
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL(): No: of disabled tunneled types for this EAP=%d \n"),
+		disabledEAPTypes.Count()));
+
 	// enabledEAPTypes contains the EAP types now (expanded).
-	// Fill aSettings.iEncapsulatedEAPTypes here.
-	
-	for (TInt i = 0; i < enabledEAPTypes.Count(); i++)
+	// Fill aSettings.iEnabledEncapsulatedEAPExpandedTypes here.
+
 	{
-		eap_expanded_type_c expEAPTmp;
-		
-		// This will read the expanded EAP from enabledEAPTypes[i]->iExpandedEAPType to expEAPTmp.
-		// This makes easy to get the vendor type.
-		eap_expanded_type_c::read_type( 0,
-										0,
-										enabledEAPTypes[i]->iExpandedEAPType.Ptr(),
-										KExpandedEAPTypeSize,
-										&expEAPTmp);
-	
-		// We need to fill only the vendor type to aSettings.iEncapsulatedEAPTypes
-		aSettings.iEncapsulatedEAPTypes.Append(expEAPTmp.get_vendor_type());
-		
+		TEapExpandedType EapType;
+
+		for (TInt i = 0; i < enabledEAPTypes.Count(); i++)
+		{
+			error = EapType.SetValue(
+				enabledEAPTypes[i]->GetValue().Ptr(),
+				enabledEAPTypes[i]->GetValue().Length());
+			if (error != KErrNone)
+			{
+				enabledEAPTypes.ResetAndDestroy();
+				disabledEAPTypes.ResetAndDestroy();
+				enabledEAPTypes.Close();
+				disabledEAPTypes.Close();
+
+				User::Leave(KErrNoMemory);				
+			}
+
+			error = aSettings.iEnabledEncapsulatedEAPExpandedTypes.Append(EapType);
+			if (error != KErrNone)
+			{
+				enabledEAPTypes.ResetAndDestroy();
+				disabledEAPTypes.ResetAndDestroy();
+				enabledEAPTypes.Close();
+				disabledEAPTypes.Close();
+
+				User::Leave(KErrNoMemory);				
+			}
+
+			EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL(): enabled EAP-type=0xfe%06x%08x\n"),
+				EapType.GetVendorId(),
+				EapType.GetVendorType()));
+		}
+
 		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("EapTlsPeapUtils::GetConfigurationL - Available encapsulated type for this EAP(%d)=%d\n"),
-			aEapVendorType, expEAPTmp.get_vendor_type()));
+			(_L("EapTlsPeapUtils::GetConfigurationL(): aSettings.iEnabledEncapsulatedEAPExpandedTypes.Count()=%d \n"),
+			aSettings.iEnabledEncapsulatedEAPExpandedTypes.Count()));
+
+		aSettings.iEnabledEncapsulatedEAPExpandedTypesPresent = ETrue;
+		
 	}
-	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::GetConfigurationL - aSettings.iEncapsulatedEAPTypes.Count()=%d \n"),
-		aSettings.iEncapsulatedEAPTypes.Count()));
+
+	{
+		TEapExpandedType EapType;
+
+		for (TInt i = 0; i < disabledEAPTypes.Count(); i++)
+		{
+			error = EapType.SetValue(
+				disabledEAPTypes[i]->GetValue().Ptr(),
+				disabledEAPTypes[i]->GetValue().Length());
+			if (error != KErrNone)
+			{
+				enabledEAPTypes.ResetAndDestroy();
+				disabledEAPTypes.ResetAndDestroy();
+				enabledEAPTypes.Close();
+				disabledEAPTypes.Close();
+
+				User::Leave(KErrNoMemory);				
+			}
+
+			error = aSettings.iDisabledEncapsulatedEAPExpandedTypes.Append(EapType);
+			if (error != KErrNone)
+			{
+				enabledEAPTypes.ResetAndDestroy();
+				disabledEAPTypes.ResetAndDestroy();
+				enabledEAPTypes.Close();
+				disabledEAPTypes.Close();
+
+				User::Leave(KErrNoMemory);				
+			}
+
+			EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL(): disabled EAP-type=0xfe%06x%08x\n"),
+				EapType.GetVendorId(),
+				EapType.GetVendorType()));
+		}
+
+		EAP_TRACE_DEBUG_SYMBIAN(
+			(_L("EapTlsPeapUtils::GetConfigurationL(): aSettings.iDisabledEncapsulatedEAPExpandedTypes.Count()=%d \n"),
+			aSettings.iDisabledEncapsulatedEAPExpandedTypes.Count()));
+
+		aSettings.iDisabledEncapsulatedEAPExpandedTypesPresent = ETrue;
+		
+	}
+
+	EAP_TRACE_SETTINGS(&aSettings);
 
 	enabledEAPTypes.ResetAndDestroy();
 	disabledEAPTypes.ResetAndDestroy();
 	enabledEAPTypes.Close();
 	disabledEAPTypes.Close();
 
-	aSettings.iEncapsulatedEAPTypesPresent = ETrue;
-
-#else // for Normal EAP types.
-			
-	TEapArray eapArray;
-		
-	TRAPD(err, GetEapDataL(
-		aDatabase,
-		0,
-		eapArray, 
-		aIndexType,
-		aIndex,
-		aTunnelingType,	
-		aEapType));
-	if (err != KErrNone)
-	{
-		eapArray.ResetAndDestroy();
-		eapArray.Close();
-		User::Leave(KErrGeneral);
-	}
-	
-	RImplInfoPtrArray eapImplArray;
-	
-	if (eapArray.Count() == 0)
-	{
-		// The array was empty. By default all types are enabled.
-		TRAP(err, REComSession::ListImplementationsL(KEapTypeInterfaceUid, eapImplArray));
-		if (err != KErrNone)
-		{
-			eapArray.ResetAndDestroy();
-			eapArray.Close();
-			User::Leave(KErrGeneral);
-		}
-		
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL - ListImplementationsL - No: of available implementations=%d \n"), eapImplArray.Count() ) );
-		
-		TEap *eap;
-		for (TInt i = 0; i < eapImplArray.Count(); i++)
-		{
-			if (CEapType::IsDisallowedInsidePEAP(*eapImplArray[i]))
-			{			
-				continue;	
-			}
-			
-			eap = new TEap;
-			if (eap == 0)
-			{
-				eapArray.ResetAndDestroy();
-				eapArray.Close();
-				eapImplArray.ResetAndDestroy();
-				eapImplArray.Close();				
-				User::Leave(KErrGeneral);				
-			}
-			eap->UID.Copy(eapImplArray[i]->DataType());
-			eap->Enabled = ETrue;
-			eapArray.Append(eap);
-		}	
-	}
-
-	TInt i(0);
-
-	for (i = 0; i < eapArray.Count(); i++)
-	{
-		if (eapArray[i]->Enabled)
-		{
-			TLex8 tmp(eapArray[i]->UID);
-			TUint val(0);
-			tmp.Val(val);
-			aSettings.iEncapsulatedEAPTypes.Append(val);
-
-			EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL - Available encapsulated type for this EAP =%d \n"), val ) );
-		}	
-	}
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL - eapArray.Count()=%d \n"),eapArray.Count() ) );
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL - aSettings.iEncapsulatedEAPTypes.Count()=%d \n"),aSettings.iEncapsulatedEAPTypes.Count() ) );	
-
-	eapArray.ResetAndDestroy();
-	eapArray.Close();
-	eapImplArray.ResetAndDestroy();
-	eapImplArray.Close();				
-		
-	aSettings.iEncapsulatedEAPTypesPresent = ETrue;
-	
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetConfigurationL - End \n") ) );	
 
 } // EapTlsPeapUtils::GetConfigurationL()
 
+// ---------------------------------------------------------
 
 void EapTlsPeapUtils::CopySettingsL(
 	RDbNamedDatabase& aDatabase,
@@ -4736,29 +4678,37 @@ void EapTlsPeapUtils::CopySettingsL(
 	const TInt aDestIndex,
 	const eap_type_value_e aDestTunnelingType)
 {
-#ifdef USE_EAP_EXPANDED_TYPES
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("EapTlsPeapUtils::CopySettingsL(): -Start- aSrcIndexType=%d, aSrcIndex=%d, aSrcTunnelingType=0xfe%06x%08x\n"),
+		aSrcIndexType,
+		aSrcIndex,
+		aSrcTunnelingType.get_vendor_id(),
+		aSrcTunnelingType.get_vendor_type()));
+	
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("EapTlsPeapUtils::CopySettingsL(): -Start- aDestIndexType=%d, aDestTunnelingType=0xfe%06x%08x\n"),
+		aDestIndexType,
+		aDestIndex,
+		aDestTunnelingType.get_vendor_id(),
+		aDestTunnelingType.get_vendor_type()));
 
-	TUint aSrcTunnelingVendorType = aSrcTunnelingType.get_vendor_type();
-	TUint aDestTunnelingVendorType = aDestTunnelingType.get_vendor_type();
-
-#else
-
-	TUint aSrcTunnelingVendorType = static_cast<TUint>(aSrcTunnelingType);
-	TUint aDestTunnelingVendorType = static_cast<TUint>(aDestTunnelingType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
-    EAP_TRACE_DEBUG_SYMBIAN(
-        (_L("EapTlsPeapUtils::CopySettingsL table=%s, aSrcIndexType=%d, aDestIndexType=%d, aSrcIndex=%d, aDestIndex=%d, SrcTunneling vendor type=%d, DestTunneling vendor type=%d \n"),
-                aTableName.Ptr(), aSrcIndexType, aDestIndexType, aSrcIndex, aDestIndex, aSrcTunnelingVendorType, aDestTunnelingVendorType));
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::CopySettingsL()\n"));
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
 
-	sqlStatement.Format(KSQL, &aTableName, 
-		&KServiceType, aDestIndexType, &KServiceIndex, aDestIndex, &KTunnelingType, aDestTunnelingVendorType);
+	sqlStatement.Format(KSQL,
+		&aTableName, 
+		&KServiceType,
+		aDestIndexType,
+		&KServiceIndex,
+		aDestIndex,
+		&KTunnelingTypeVendorId,
+		aSrcTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aSrcTunnelingType.get_vendor_type());
 	
 	RDbView view;
 	
@@ -4773,26 +4723,36 @@ void EapTlsPeapUtils::CopySettingsL(
 	CDbColSet* colSet = view.ColSetL();
 	CleanupStack::PushL(colSet);
 
-  if (view.FirstL())
-  	{       
-  	do 
+	if (view.FirstL())
+	{
+		do
   		{
-  		view.GetL();
+	  		view.GetL();
+
 			if (view.ColUint(colSet->ColNo(KServiceType)) == static_cast<TUint>(aDestIndexType)
 				&& view.ColUint(colSet->ColNo(KServiceIndex)) == static_cast<TUint>(aDestIndex)
-				&& view.ColUint(colSet->ColNo(KTunnelingType)) == aDestTunnelingVendorType)
+				&& view.ColUint(colSet->ColNo(KTunnelingTypeVendorId)) == aDestTunnelingType.get_vendor_id()
+				&& view.ColUint(colSet->ColNo(KTunnelingType)) == aDestTunnelingType.get_vendor_type())
 				{  		
-      			EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::CopySettingsL - Delete old records\n") ) );
-      			view.DeleteL();
+      				EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::CopySettingsL - Delete old records\n") ) );
+      				view.DeleteL();
     			}
-      		} while (view.NextL() != EFalse);
-  		}
+		} while (view.NextL() != EFalse);
+	}
 	
 	view.Close();
 	CleanupStack::PopAndDestroy(2); // view, colset
 	
-  	sqlStatement.Format(KSQL, &aTableName, 
-        &KServiceType, aSrcIndexType, &KServiceIndex, aSrcIndex, &KTunnelingType, aSrcTunnelingVendorType);
+  	sqlStatement.Format(KSQL,
+		&aTableName, 
+        &KServiceType,
+		aSrcIndexType,
+		&KServiceIndex,
+		aSrcIndex,
+		&KTunnelingTypeVendorId,
+		aSrcTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aSrcTunnelingType.get_vendor_type());
 
   	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited , RDbView::EUpdatable));
 
@@ -4816,17 +4776,17 @@ void EapTlsPeapUtils::CopySettingsL(
 			// Check if it was already copied			
 			if (view.ColUint(colSet->ColNo(KServiceType)) != static_cast<TUint>(aDestIndexType)
 				|| view.ColUint(colSet->ColNo(KServiceIndex)) != static_cast<TUint>(aDestIndex)
-				|| view.ColUint(colSet->ColNo(KTunnelingType)) != aDestTunnelingVendorType)
+				|| view.ColUint(colSet->ColNo(KTunnelingTypeVendorId)) != aDestTunnelingType.get_vendor_id()
+				|| view.ColUint(colSet->ColNo(KTunnelingType)) != aDestTunnelingType.get_vendor_type())
 			{
 				bookmark = view.Bookmark();
 				
 				view.InsertCopyL();
 				
 				view.SetColL(colSet->ColNo(KServiceType), static_cast<TUint>(aDestIndexType));
-    
 	    		view.SetColL(colSet->ColNo(KServiceIndex), static_cast<TUint>(aDestIndex));
-
-	    		view.SetColL(colSet->ColNo(KTunnelingType), aDestTunnelingVendorType);
+				view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aDestTunnelingType.get_vendor_id());
+				view.SetColL(colSet->ColNo(KTunnelingType), aDestTunnelingType.get_vendor_type());
 				
 				view.PutL();
 			
@@ -4843,7 +4803,9 @@ void EapTlsPeapUtils::CopySettingsL(
 	
 	view.Close();
 	
-	CleanupStack::PopAndDestroy(3); // view, colset, buf
+	CleanupStack::PopAndDestroy(colSet);
+	CleanupStack::PopAndDestroy(&view);
+	CleanupStack::PopAndDestroy(buf);
 
 } // EapTlsPeapUtils::CopySettingsL()
 
@@ -4858,20 +4820,16 @@ void EapTlsPeapUtils::DeleteConfigurationL(
 	const eap_type_value_e aTunnelingType,
 	const eap_type_value_e aEapType)
 {
-#ifdef USE_EAP_EXPANDED_TYPES
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("EapTlsPeapUtils::DeleteConfigurationL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x, aEapType=0xfe%06x%08x\n"),
+		aIndexType,
+		aIndex,
+		aTunnelingType.get_vendor_id(),
+		aTunnelingType.get_vendor_type(),
+		aEapType.get_vendor_id(),
+		aEapType.get_vendor_type()));
 
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
-	TUint aEapVendorType = aEapType.get_vendor_type();
-
-#else
-
-	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
-	TUint aEapVendorType = static_cast<TUint>(aEapType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL:Start:aIndexType=%d,aIndex=%d,aTunnelingVendorType=%d,aEapVendorType=%d"),
-			aIndexType, aIndex, aTunnelingVendorType, aEapVendorType));
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::DeleteConfigurationL()\n"));
 	
 	TPtrC dbname;
 	TPtrC settings;
@@ -4883,123 +4841,93 @@ void EapTlsPeapUtils::DeleteConfigurationL(
 	TPtrC fastSpecialSettings;
 #endif
 	
-	switch (aEapVendorType)
+	if (aEapType == eap_type_tls)
 	{
-	case eap_type_tls:
-		{
-			dbname.Set(KTlsDatabaseName);
-			settings.Set(KTlsDatabaseTableName);
-			usercerts.Set(KTlsAllowedUserCertsDatabaseTableName);
-			cacerts.Set(KTlsAllowedCACertsDatabaseTableName);
-			ciphersuites.Set(KTlsAllowedCipherSuitesDatabaseTableName);
-		}
-		break;
-
-	case eap_type_peap:
-		{
-			dbname.Set(KPeapDatabaseName);
-			settings.Set(KPeapDatabaseTableName);
-			usercerts.Set(KPeapAllowedUserCertsDatabaseTableName);
-			cacerts.Set(KPeapAllowedCACertsDatabaseTableName);
-			ciphersuites.Set(KPeapAllowedCipherSuitesDatabaseTableName);
-		}
-		break;
-
-	case eap_type_ttls:
-		{
-			dbname.Set(KTtlsDatabaseName);
-			settings.Set(KTtlsDatabaseTableName);
-			usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
-			cacerts.Set(KTtlsAllowedCACertsDatabaseTableName);
-			ciphersuites.Set(KTtlsAllowedCipherSuitesDatabaseTableName);
-		}
-		break;
-
+		dbname.Set(KTlsDatabaseName);
+		settings.Set(KTlsDatabaseTableName);
+		usercerts.Set(KTlsAllowedUserCertsDatabaseTableName);
+		cacerts.Set(KTlsAllowedCACertsDatabaseTableName);
+		ciphersuites.Set(KTlsAllowedCipherSuitesDatabaseTableName);
+	}
+	else if (aEapType == eap_type_peap)
+	{
+		dbname.Set(KPeapDatabaseName);
+		settings.Set(KPeapDatabaseTableName);
+		usercerts.Set(KPeapAllowedUserCertsDatabaseTableName);
+		cacerts.Set(KPeapAllowedCACertsDatabaseTableName);
+		ciphersuites.Set(KPeapAllowedCipherSuitesDatabaseTableName);
+	}
+	else if (aEapType == eap_type_ttls)
+	{
+		dbname.Set(KTtlsDatabaseName);
+		settings.Set(KTtlsDatabaseTableName);
+		usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
+		cacerts.Set(KTtlsAllowedCACertsDatabaseTableName);
+		ciphersuites.Set(KTtlsAllowedCipherSuitesDatabaseTableName);
+	}
 #ifdef USE_FAST_EAP_TYPE
-
-	case eap_type_fast:
-		{
-			dbname.Set(KFastDatabaseName);
-			settings.Set(KFastGeneralSettingsDBTableName); // This is general settings for FAST.
-			fastSpecialSettings.Set(KFastSpecialSettingsDBTableName);
-			
-			usercerts.Set(KFastAllowedUserCertsDatabaseTableName);
-			cacerts.Set(KFastAllowedCACertsDatabaseTableName);
-			ciphersuites.Set(KFastAllowedCipherSuitesDatabaseTableName);
-		}
-		break;
+	else if (aEapType == eap_type_fast)
+	{
+		dbname.Set(KFastDatabaseName);
+		settings.Set(KFastGeneralSettingsDBTableName); // This is general settings for FAST.
+		fastSpecialSettings.Set(KFastSpecialSettingsDBTableName);
+		
+		usercerts.Set(KFastAllowedUserCertsDatabaseTableName);
+		cacerts.Set(KFastAllowedCACertsDatabaseTableName);
+		ciphersuites.Set(KFastAllowedCipherSuitesDatabaseTableName);
+	}
 #endif
-
-	case eap_type_ttls_plain_pap:
-		{
-			dbname.Set( KTtlsDatabaseName );
-			settings.Set( KTtlsDatabaseTableName );
-		}
-	break;
-	
-	default:
+	else if (aEapType == eap_type_ttls_plain_pap)
+	{
+		dbname.Set( KTtlsDatabaseName );
+		settings.Set( KTtlsDatabaseTableName );
+	}
+	else
+	{
 		// Should never happen
 		User::Leave(KErrArgument);
 	}	
 
-	RDbs session;
-	RDbNamedDatabase database;
-	
-	// Connect to the DBMS server.
-	User::LeaveIfError(session.Connect());
-	CleanupClosePushL(session);	
-		
-#ifdef SYMBIAN_SECURE_DBMS
-	
-	// Create the secure shared database with the specified secure policy.
-	// Database will be created in the data caging path for DBMS (C:\private\100012a5).
-	
-	TInt err = database.Create(session, dbname, KSecureUIDFormat);
-	
-	if(err == KErrNone)
-	{
-		// Database was created so it was empty. No need for further actions.
-		database.Destroy();
-		CleanupStack::PopAndDestroy();
-		return;
-		
-	} 
-	else if (err != KErrAlreadyExists) 
-	{
-		User::LeaveIfError(err);
-	}
-	
-	// Database existed, open it.
-	User::LeaveIfError(database.Open(session, dbname, KSecureUIDFormat));
-	CleanupClosePushL(database);
-		
-#else
-	// For non-secured database. The database will be created in the old location (c:\system\data).
-	
-	RFs fsSession;		
-	User::LeaveIfError(fsSession.Connect());
-	CleanupClosePushL(fsSession);	
-	TInt err = database.Create(fsSession, dbname);
+	RDbNamedDatabase aDatabase;
+	RFs aFileServerSession;
 
-	if(err == KErrNone)
+	TInt error(KErrNone);
+	TFileName aPrivateDatabasePathName;
+	
+	error = aFileServerSession.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL(): - aFileServerSession.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	EapPluginTools::CreateDatabaseLC(
+		aDatabase,
+		aFileServerSession,
+		error,
+		dbname,
+		aPrivateDatabasePathName);
+
+	if(error == KErrNone)
 	{
 		// Database was created so it was empty. No need for further actions.
-		database.Destroy();
-		CleanupStack::PopAndDestroy(2); // fsSession, database session
+		aDatabase.Destroy();
+		CleanupStack::PopAndDestroy(&aDatabase);
+		CleanupStack::PopAndDestroy(&aFileServerSession);
 		return;
-		
-	} 
-	else if (err != KErrAlreadyExists) 
+	}
+	else if (error != KErrAlreadyExists) 
 	{
-		User::LeaveIfError(err);
+		User::LeaveIfError(error);
 	}
 	
-	CleanupStack::PopAndDestroy(); // close fsSession
-	
-	User::LeaveIfError(database.Open(session, dbname));
-	CleanupClosePushL(database);		
-	    
-#endif // #ifdef SYMBIAN_SECURE_DBMS
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapLeapDbUtils::DeleteConfigurationL(): - calls aDatabase.Open()\n")));
+
+	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapLeapDbUtils::DeleteConfigurationL(): - Opened private DB for %S. error=%d\n"),
+		&dbname,
+		error));
+
+	User::LeaveIfError(error);
+
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
@@ -5007,160 +4935,202 @@ void EapTlsPeapUtils::DeleteConfigurationL(
 	EAP_TRACE_DEBUG_SYMBIAN(
 		(_L("EapTlsPeapUtils::DeleteConfigurationL - Deleting the tables\n")));
 
-	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
 	
 	//--------------------- Deletion 1 ----------------------------//
 	
 	// For all EAPs delete the settings table. 
 	// For EAP-FAST, this is delting the general settings table.
 	
-	sqlStatement.Format(KSQL, &settings, 
-		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+	sqlStatement.Format(KSQL,
+		&settings, 
+		&KServiceType,
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aTunnelingType.get_vendor_type());
 	
 	// Evaluate view
 	RDbView view;
-	User::LeaveIfError(view.Prepare(database,TDbQuery(sqlStatement), TDbWindow::EUnlimited));
+	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 	CleanupClosePushL(view);
 	User::LeaveIfError(view.EvaluateAll());
 
 	// Delete rows
 	if (view.FirstL())
-	{		
+	{
 		do {
 			view.DeleteL();
 		} while (view.NextL() != EFalse);
 	}
 	
-	CleanupStack::PopAndDestroy(); // view
-	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL: Deleted %s (general) settings table"), settings.Ptr()));	
+	CleanupStack::PopAndDestroy(&view);
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL(): Deleted %s (general) settings table"), settings.Ptr()));	
 
 	//////////////////////////////////////////
 	// This is only for plain PAP settings. //
 	//////////////////////////////////////////
-	if ( aEapVendorType == eap_type_ttls_plain_pap )
-		{
-        CleanupStack::PopAndDestroy(3); // buf, database, session
-        EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL: Return")));	
+	if ( aEapType == eap_type_ttls_plain_pap )
+	{
+		CleanupStack::PopAndDestroy(buf);
+		CleanupStack::PopAndDestroy(&aDatabase);
+		CleanupStack::PopAndDestroy(&aFileServerSession);
+        EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL(): Return PAP")));	
         // we return here in case of pap because there is nothing to do else.
         return;
-		}
+	}
 	
 	//--------------------- Deletion 2 ----------------------------//
 	
-	// For all EAPs delte the User cert table
-
-//	KSQL2 is "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d"
+	// For all EAPs delete the User cert table
+	//	KSQL2 is "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d"
 	
-	sqlStatement.Format(KSQL, &usercerts, 
-		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+	sqlStatement.Format(KSQL,
+		&usercerts, 
+		&KServiceType,
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aTunnelingType.get_vendor_type());
 
 	// Evaluate view
 	
-	User::LeaveIfError(view.Prepare(database,TDbQuery(sqlStatement), TDbWindow::EUnlimited));
+	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 	CleanupClosePushL(view);
 	User::LeaveIfError(view.EvaluateAll());
 	
 	if (view.FirstL())
-	{		
+	{
 		do {
 			view.DeleteL();
 		} while (view.NextL() != EFalse);
 	}
 
-	CleanupStack::PopAndDestroy(); // view
+	CleanupStack::PopAndDestroy(&view);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL: Deleted USER certs table")));	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL(): Deleted USER certs table")));	
 
 	//--------------------- Deletion 3 ----------------------------//
 	
 	// For all EAPs delete the CA cert table
 
-//	KSQL3 is "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d"
+	//	KSQL3 is "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d"
 	
-	sqlStatement.Format(KSQL, &cacerts, 
-		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+	sqlStatement.Format(KSQL,
+		&cacerts, 
+		&KServiceType,
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aTunnelingType.get_vendor_type());
 	
 	// Evaluate view
 	
-	User::LeaveIfError(view.Prepare(database,TDbQuery(sqlStatement), TDbWindow::EUnlimited));
+	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 	CleanupClosePushL(view);
 	User::LeaveIfError(view.EvaluateAll());
 	
 	if (view.FirstL())
-	{		
+	{
 		do {
 			view.DeleteL();
 		} while (view.NextL() != EFalse);
 	}
 
-	CleanupStack::PopAndDestroy(); // view
+	CleanupStack::PopAndDestroy(&view);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL: Deleted CA certs table")));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL(): Deleted CA certs table")));
 
 	//--------------------- Deletion 4 ----------------------------//
 	
 	// For all EAPs delete the Cipher suite table
 
-//	KSQL4 is "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d"
+	//	KSQL4 is "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d"
 	
-	sqlStatement.Format(KSQL, &ciphersuites, 
-		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+	sqlStatement.Format(KSQL,
+		&ciphersuites, 
+		&KServiceType,
+		aIndexType,
+		&KServiceIndex,
+		aIndex,
+		&KTunnelingTypeVendorId,
+		aTunnelingType.get_vendor_id(),
+		&KTunnelingType, 
+		aTunnelingType.get_vendor_type());
 
 	// Evaluate view
 	
-	User::LeaveIfError(view.Prepare(database,TDbQuery(sqlStatement), TDbWindow::EUnlimited));
+	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 	CleanupClosePushL(view);
 	User::LeaveIfError(view.EvaluateAll());
 	
 	if (view.FirstL())
-	{		
+	{
 		do {
 			view.DeleteL();
 		} while (view.NextL() != EFalse);
 	}
 	
-	CleanupStack::PopAndDestroy(&view); // Close view
+	CleanupStack::PopAndDestroy(&view);
 		
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL: Deleted cipher suits table")));	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL(): Deleted cipher suits table")));	
 
 	
 #ifdef USE_FAST_EAP_TYPE	
 
-	if(aEapVendorType == eap_type_fast)
+	if(aEapType == eap_type_fast)
 	{
 		//--------------------- Deletion 5 ----------------------------//
 		
 		// For EAP-FAST, delete the special settings table
 		
-		sqlStatement.Format(KSQL, &fastSpecialSettings, 
-			&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
+		sqlStatement.Format(KSQL,
+			&fastSpecialSettings, 
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex,
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());
 	
 		// Evaluate view
 		
-		User::LeaveIfError(view.Prepare(database,TDbQuery(sqlStatement), TDbWindow::EUnlimited));
+		User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 		CleanupClosePushL(view);
 		User::LeaveIfError(view.EvaluateAll());
 		
 		if (view.FirstL())
-		{		
+		{
 			do {
 				view.DeleteL();
 			} while (view.NextL() != EFalse);
 		}
 		
-		CleanupStack::PopAndDestroy(&view); // Close view
+		CleanupStack::PopAndDestroy(&view);
 			
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL: Deleted EAP-FAST Special settings table")));	
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL(): Deleted EAP-FAST Special settings table")));	
 				
 	} // End: if(aEapVendorType == eap_type_fast)
 
 #endif // End: #ifdef USE_FAST_EAP_TYPE	
-	
-	// Close database
-	CleanupStack::PopAndDestroy(3); // buf, database, session
-	
-EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL: End")));	
+
+	CleanupStack::PopAndDestroy(buf);
+	CleanupStack::PopAndDestroy(&aDatabase);
+	CleanupStack::PopAndDestroy(&aFileServerSession);
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL: End")));	
 
 } // EapTlsPeapUtils::DeleteConfigurationL()
 
@@ -5173,14 +5143,21 @@ void EapTlsPeapUtils::AddExtraCertColumnsL(
 	RDbNamedDatabase& aDatabase, 
 	TDesC& aTableName)
 {
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("EapTlsPeapUtils::AddExtraCertColumnsL(): -Start- aTableName=\"%S\"\n"),
+		&aTableName));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::AddExtraCertColumnsL()\n"));
+	
 	// Check if the EXTRA cert columns are already in the table.
 	
 	CDbColSet* colSetCertTable = aDatabase.ColSetL(aTableName);
 	User::LeaveIfNull(colSetCertTable);
 	CleanupStack::PushL(colSetCertTable);	
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::AddExtraCertColumnsL - Number of columns in %S table before addition=%d\n"),
-	&aTableName, colSetCertTable->Count()));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::AddExtraCertColumnsL(): - Number of columns in %S table before addition=%d\n"),
+		&aTableName,
+		colSetCertTable->Count()));
 		
 	// Check if there is a column for Serial Number, for example.
 	if(colSetCertTable->ColNo(KSerialNumber) == KDbNullColNo)
@@ -5196,53 +5173,65 @@ void EapTlsPeapUtils::AddExtraCertColumnsL(
 		//| Thumbprint			| BINARY(64)	| KThumbprint        |//	
 		//////////////////////////////////////////////////////////////////////////////
 			
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::AddExtraCertColumnsL - EXTRA cert columns missing from the table %S. Adding now.\n"),
-		&aTableName));			
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::AddExtraCertColumnsL(): - EXTRA cert columns missing from the table %S. Adding now.\n"),
+			&aTableName));			
 
 		HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 		TPtr sqlStatement = buf->Des();
 		
 		_LIT(KSQLAlterTableForBin, "ALTER TABLE %S ADD %S BINARY(%d)");											 
 	
-		sqlStatement.Format(KSQLAlterTableForBin, &aTableName, 
-			&KActualSubjectKeyIdentifier, KKeyIdentifierLength);
+		sqlStatement.Format(KSQLAlterTableForBin,
+			&aTableName, 
+			&KActualSubjectKeyIdentifier,
+			KKeyIdentifierLength);
 			
 		User::LeaveIfError( aDatabase.Execute(sqlStatement));
 
 		_LIT(KSQLAlterTableForVarChar, "ALTER TABLE %S ADD %S VARCHAR(%d)");											 
 	
-		sqlStatement.Format(KSQLAlterTableForVarChar, &aTableName, 
-			&KSubjectName, KGeneralStringMaxLength);
+		sqlStatement.Format(KSQLAlterTableForVarChar,
+			&aTableName, 
+			&KSubjectName,
+			KGeneralStringMaxLength);
 			
 		User::LeaveIfError( aDatabase.Execute(sqlStatement));
 
-		sqlStatement.Format(KSQLAlterTableForVarChar, &aTableName, 
-			&KIssuerName, KGeneralStringMaxLength);
+		sqlStatement.Format(KSQLAlterTableForVarChar,
+			&aTableName, 
+			&KIssuerName,
+			KGeneralStringMaxLength);
 			
 		User::LeaveIfError( aDatabase.Execute(sqlStatement));
 	
-		sqlStatement.Format(KSQLAlterTableForVarChar, &aTableName, 
-			&KSerialNumber, KGeneralStringMaxLength);
+		sqlStatement.Format(KSQLAlterTableForVarChar,
+			&aTableName, 
+			&KSerialNumber,
+			KGeneralStringMaxLength);
 			
 		User::LeaveIfError( aDatabase.Execute(sqlStatement));
 	
-		sqlStatement.Format(KSQLAlterTableForBin, &aTableName, 
-			&KThumbprint, KThumbprintMaxLength);
+		sqlStatement.Format(KSQLAlterTableForBin,
+			&aTableName, 
+			&KThumbprint,
+			KThumbprintMaxLength);
 			
 		User::LeaveIfError( aDatabase.Execute(sqlStatement));
 	
-		CleanupStack::PopAndDestroy( buf ); // Delete buf or sqlStatement
+		CleanupStack::PopAndDestroy(buf);
 	}
 
-	CleanupStack::PopAndDestroy( colSetCertTable ); // Delete colSetCertTable.
+	CleanupStack::PopAndDestroy(colSetCertTable);
 
 	CDbColSet* colSetCertTableAfterAdd = aDatabase.ColSetL(aTableName);
 	User::LeaveIfNull(colSetCertTableAfterAdd);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::AddExtraCertColumnsL - Number of columns in %S table after addition=%d\n"),
-	&aTableName, colSetCertTableAfterAdd->Count()));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::AddExtraCertColumnsL(): - Number of columns in %S table after addition=%d\n"),
+		&aTableName,
+		colSetCertTableAfterAdd->Count()));
 	
 	delete colSetCertTableAfterAdd;
+
 } // EapTlsPeapUtils::AddExtraCertColumnsL()
 
 	
@@ -5259,26 +5248,19 @@ void EapTlsPeapUtils::GetEapSettingsDataL(
 	const TDesC& aDbColumnName,
 	eap_variable_data_c * const aDbColumnValue)
 {
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
-	TUint aEapVendorType = aEapType.get_vendor_type();
-
-#else
-
-	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
-	TUint aEapVendorType = static_cast<TUint>(aEapType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-
-	
 	EAP_TRACE_DEBUG_SYMBIAN(
-	(_L("EapTlsPeapUtils::GetEapSettingsDataL-Start- aIndexType=%d, aIndex=%d, Tunneling vendor type=%d, Eap vendor type=%d \n"),
-	aIndexType,aIndex, aTunnelingVendorType, aEapVendorType));
+		(_L("EapTlsPeapUtils::GetEapSettingsDataL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x, aEapType=0xfe%06x%08x\n"),
+		aIndexType,
+		aIndex,
+		aTunnelingType.get_vendor_id(),
+		aTunnelingType.get_vendor_type(),
+		aEapType.get_vendor_id(),
+		aEapType.get_vendor_type()));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::GetEapSettingsDataL()\n"));
 	
-	EAP_TRACE_DEBUG_SYMBIAN(
-	(_L("EapTlsPeapUtils::GetEapSettingsDataL Get Column Name:%S \n"),
-	&aDbColumnName));	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetEapSettingsDataL Get Column Name:%S \n"),
+		&aDbColumnName));	
 
 	TBufC<KMaxEapDbTableNameLength> generalSettingsTableName;
 	
@@ -5287,45 +5269,41 @@ void EapTlsPeapUtils::GetEapSettingsDataL(
 #endif
 
 	// Set the database table name based on the type
-	switch (aEapVendorType)
+	if (aEapType == eap_type_tls)
 	{
-		case eap_type_tls:
-			generalSettingsTableName = KTlsDatabaseTableName;
-			break;
-		
-		case eap_type_peap:
-			generalSettingsTableName = KPeapDatabaseTableName;	
-			break;
-				
-		case eap_type_ttls:
-		case eap_type_ttls_plain_pap:
-			generalSettingsTableName = KTtlsDatabaseTableName;
-			break;
-			
+		generalSettingsTableName = KTlsDatabaseTableName;
+	}
+	else if (aEapType == eap_type_peap)
+	{
+		generalSettingsTableName = KPeapDatabaseTableName;	
+	}
+	else if (aEapType == eap_type_ttls
+		|| aEapType == eap_type_ttls_plain_pap)
+	{
+		generalSettingsTableName = KTtlsDatabaseTableName;
+	}
 #if defined (USE_FAST_EAP_TYPE)
-		case eap_type_fast:
-			generalSettingsTableName = KFastGeneralSettingsDBTableName; // General settings
-			specialSettingsTableName = KFastSpecialSettingsDBTableName; // Special settings  for only FAST
-			break;
+	else if (aEapType == eap_type_fast)
+	{
+		generalSettingsTableName = KFastGeneralSettingsDBTableName; // General settings
+		specialSettingsTableName = KFastSpecialSettingsDBTableName; // Special settings  for only FAST
+	}
 #endif // #if defined (USE_FAST_EAP_TYPE)
+	else
+	{
+		// Unsupported EAP type		
+		// Should never happen
+		
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::GetEapSettingsDataL(): Unsupported EAP type=0xfe%06x%08x"),
+			aEapType.get_vendor_id(),
+			aEapType.get_vendor_type()));
 
-		default:
-			{
-				// Unsupported EAP type		
-				// Should never happen
-				
-				EAP_TRACE_DEBUG_SYMBIAN(
-					(_L("EapTlsPeapUtils::GetEapSettingsDataL: ERROR: Unsupported EAP type=%d"),
-					aEapVendorType));
-
-				User::Leave(KErrArgument);
-			}
+		User::Leave(KErrArgument);
 	}
 	
 	if(aDbColumnName.Size() <= 0)	
 	{
-		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("EapTlsPeapUtils::GetEapSettingsDataL: ERROR: No Column Name!\n")));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::GetEapSettingsDataL(): No Column Name!\n")));
 		
 		User::Leave(KErrArgument);
 	}
@@ -5334,7 +5312,7 @@ void EapTlsPeapUtils::GetEapSettingsDataL(
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 	
-	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");	
+	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");	
 	
 #if defined(USE_FAST_EAP_TYPE)
 	
@@ -5353,26 +5331,52 @@ void EapTlsPeapUtils::GetEapSettingsDataL(
 		EAP_TRACE_DEBUG_SYMBIAN(
 			(_L("EapTlsPeapUtils::GetEapSettingsDataL: This field will be read from EAP-FAST's special table")));
 
-		sqlStatement.Format(KSQLQueryRow, &aDbColumnName, &specialSettingsTableName, 
-			&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);		
+		sqlStatement.Format(KSQLQueryRow,
+			&aDbColumnName,
+			&specialSettingsTableName, 
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex,
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());		
 	}
 	else
 	{
-		sqlStatement.Format(KSQLQueryRow, &aDbColumnName, &generalSettingsTableName, 
-			&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);		
+		sqlStatement.Format(KSQLQueryRow,
+			&aDbColumnName,
+			&generalSettingsTableName, 
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex,
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());		
 	}
 
 #else
 
 	{
-		sqlStatement.Format(KSQLQueryRow, &aDbColumnName, &generalSettingsTableName, 
-			&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);		
+		sqlStatement.Format(KSQLQueryRow,
+			&aDbColumnName,
+			&generalSettingsTableName, 
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex,
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());		
 	}
 
 #endif // End: #if defined(USE_FAST_EAP_TYPE)	
 
-	EAP_TRACE_DEBUG_SYMBIAN(
-	(_L("EapTlsPeapUtils::GetEapSettingsDataL - SQL query formated OK")));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetEapSettingsDataL - SQL query formated OK")));
 
 	RDbView view;
 	
@@ -5483,20 +5487,18 @@ void EapTlsPeapUtils::GetEapSettingsDataL(
 		}
 	}
 
-	CleanupStack::PopAndDestroy( &view ); // Close view.
+	CleanupStack::PopAndDestroy( &view );
 	
 	if (status != eap_status_ok)
 	{
-		EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("EapTlsPeapUtils::GetEapSettingsDataL: Status=%d\n"), status));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetEapSettingsDataL: Status=%d\n"), status));
 	}
 	
 	EAP_TRACE_DATA_DEBUG_SYMBIAN(("GetEapSettingsDataL:DbColumnValue:",
 		aDbColumnValue->get_data(aDbColumnValue->get_data_length()),
 		aDbColumnValue->get_data_length()));
 
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapTlsPeapUtils::GetEapSettingsDataL: End \n")));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::GetEapSettingsDataL: End \n")));
 
 } // EapTlsPeapUtils::GetEapSettingsDataL()
 
@@ -5514,25 +5516,20 @@ void EapTlsPeapUtils::SetEapSettingsDataL(
 	const TDesC& aDbColumnName,
 	const eap_variable_data_c * const aDbColumnValue)
 {
-#ifdef USE_EAP_EXPANDED_TYPES
-
-	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
-	TUint aEapVendorType = aEapType.get_vendor_type();
-
-#else
-
-	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
-	TUint aEapVendorType = static_cast<TUint>(aEapType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-	
 	EAP_TRACE_DEBUG_SYMBIAN(
-	(_L("EapTlsPeapUtils::SetEapSettingsDataL-Start- aIndexType=%d, aIndex=%d, Tunneling vendor type=%d, Eap vendor type=%d \n"),
-	aIndexType,aIndex, aTunnelingVendorType, aEapVendorType));
+		(_L("EapTlsPeapUtils::SetEapSettingsDataL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x, aEapType=0xfe%06x%08x\n"),
+		aIndexType,
+		aIndex,
+		aTunnelingType.get_vendor_id(),
+		aTunnelingType.get_vendor_type(),
+		aEapType.get_vendor_id(),
+		aEapType.get_vendor_type()));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::SetEapSettingsDataL()\n"));
 	
-	EAP_TRACE_DEBUG_SYMBIAN(
-	(_L("EapTlsPeapUtils::SetEapSettingsDataL Set Column Name:%S \n"),
-	&aDbColumnName));	
+	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetEapSettingsDataL Set Column Name:%S \n"),
+		&aDbColumnName));	
 
 	EAP_TRACE_DATA_DEBUG_SYMBIAN(("SetEapSettingsDataL:DbColumnValue:",
 		aDbColumnValue->get_data(aDbColumnValue->get_data_length()),
@@ -5545,45 +5542,41 @@ void EapTlsPeapUtils::SetEapSettingsDataL(
 #endif
 
 	// Set the database table name based on the type
-	switch (aEapVendorType)
+	if (aEapType == eap_type_tls)
 	{
-		case eap_type_tls:
-			generalSettingsTableName = KTlsDatabaseTableName;	
-			break;
-		
-		case eap_type_peap:
-			generalSettingsTableName = KPeapDatabaseTableName;
-			break;
-				
-		case eap_type_ttls:
-		case eap_type_ttls_plain_pap:
-			generalSettingsTableName = KTtlsDatabaseTableName;
-			break;
-			
-#if defined (USE_FAST_EAP_TYPE)
-		case eap_type_fast:
-			generalSettingsTableName = KFastGeneralSettingsDBTableName; // General settings
-			specialSettingsTableName = KFastSpecialSettingsDBTableName; // Special settings  for only FAST
-			break;
-#endif // #if defined (USE_FAST_EAP_TYPE)
-			
-		default:
-			{
-				// Unsupported EAP type		
-				// Should never happen
-				
-				EAP_TRACE_DEBUG_SYMBIAN(
-					(_L("EapTlsPeapUtils::SetEapSettingsDataL: ERROR: Unsupported EAP type=%d"),
-					aEapVendorType));
-
-				User::Leave(KErrArgument);
-			}
+		generalSettingsTableName = KTlsDatabaseTableName;
 	}
-	
+	else if (aEapType == eap_type_peap)
+	{
+		generalSettingsTableName = KPeapDatabaseTableName;
+	}
+	else if (aEapType == eap_type_ttls
+		|| aEapType == eap_type_ttls_plain_pap)
+	{
+		generalSettingsTableName = KTtlsDatabaseTableName;
+	}
+#if defined (USE_FAST_EAP_TYPE)
+	else if (aEapType == eap_type_fast)
+	{
+		generalSettingsTableName = KFastGeneralSettingsDBTableName; // General settings
+		specialSettingsTableName = KFastSpecialSettingsDBTableName; // Special settings  for only FAST
+	}
+#endif // #if defined (USE_FAST_EAP_TYPE)
+	else
+	{
+		// Unsupported EAP type		
+		// Should never happen
+		
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::SetEapSettingsDataL(): Unsupported EAP-type=0xfe%06x%08x"),
+			aEapType.get_vendor_id(),
+			aEapType.get_vendor_type()));
+
+		User::Leave(KErrArgument);
+	}
+
 	if(aDbColumnName.Size() <= 0)	
 	{
-		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("EapTlsPeapUtils::SetEapSettingsDataL: ERROR: No Column Name!\n")));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::SetEapSettingsDataL(): No Column Name!\n")));
 		
 		User::Leave(KErrArgument);
 	}
@@ -5592,7 +5585,7 @@ void EapTlsPeapUtils::SetEapSettingsDataL(
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 	
-	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");	
+	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");	
 	
 #if defined(USE_FAST_EAP_TYPE)
 	
@@ -5611,26 +5604,52 @@ void EapTlsPeapUtils::SetEapSettingsDataL(
 		EAP_TRACE_DEBUG_SYMBIAN(
 			(_L("EapTlsPeapUtils::SetEapSettingsDataL: This field will be read from EAP-FAST's special table")));
 
-		sqlStatement.Format(KSQLQueryRow, &aDbColumnName, &specialSettingsTableName, 
-			&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);		
+		sqlStatement.Format(KSQLQueryRow,
+			&aDbColumnName,
+			&specialSettingsTableName, 
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex,
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());		
 	}
 	else
 	{
-		sqlStatement.Format(KSQLQueryRow, &aDbColumnName, &generalSettingsTableName, 
-			&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);		
+		sqlStatement.Format(KSQLQueryRow,
+			&aDbColumnName,
+			&generalSettingsTableName, 
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex,
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());		
 	}
 
 #else
 
 	{
-		sqlStatement.Format(KSQLQueryRow, &aDbColumnName, &generalSettingsTableName, 
-			&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);		
+		sqlStatement.Format(KSQLQueryRow,
+			&aDbColumnName,
+			&generalSettingsTableName, 
+			&KServiceType,
+			aIndexType,
+			&KServiceIndex,
+			aIndex,
+			&KTunnelingTypeVendorId,
+			aTunnelingType.get_vendor_id(),
+			&KTunnelingType, 
+			aTunnelingType.get_vendor_type());		
 	}
 
 #endif // End: #if defined(USE_FAST_EAP_TYPE)	
 
-	EAP_TRACE_DEBUG_SYMBIAN(
-	(_L("EapTlsPeapUtils::SetEapSettingsDataL - SQL query formated OK")));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::SetEapSettingsDataL - SQL query formated OK")));
 
 	RDbView view;
 	
@@ -5683,10 +5702,9 @@ void EapTlsPeapUtils::SetEapSettingsDataL(
 
 #if defined (USE_FAST_EAP_TYPE)
 					
-					EAP_TRACE_DEBUG_SYMBIAN(
-							(_L("eap_am_type_tls_peap_symbian_c::authentication_finishedL WARNING, HACK to set Unauth Prov mode set to default (NO)!")));					
+					EAP_TRACE_DEBUG_SYMBIAN((_L("WARNING: eap_am_type_tls_peap_symbian_c::authentication_finishedL(): HACK to set Unauth Prov mode set to default (NO)!")));					
 	
-					view.SetColL(KDefaultColumnInView_One, EFASTUnauthProvModeAllowedNo);
+					view.SetColL(KDefaultColumnInView_One, EEapDbFalse);
 				
 #endif // End: #if defined (USE_FAST_EAP_TYPE)
 				}
@@ -5696,8 +5714,7 @@ void EapTlsPeapUtils::SetEapSettingsDataL(
 				{
 					// Do some lexical analysis to get TInt64 value here and set it in DB.
 					
-					EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("EapTlsPeapUtils::SetEapSettingsDataL: ERROR: EDbColInt64 not supported here yet!\n")));	
+					EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::SetEapSettingsDataL(): EDbColInt64 not supported here yet!\n")));	
 					
 					User::Leave(KErrNotSupported);					
 				}
@@ -5706,16 +5723,14 @@ void EapTlsPeapUtils::SetEapSettingsDataL(
 			case EDbColLongBinary:
 				{
 					// This needs special handling. (readstream). Not needed in this DB yet.	
-					EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("EapTlsPeapUtils::SetEapSettingsDataL: ERROR: EDbColLongBinary not supported in this DB!\n")));	
+					EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::SetEapSettingsDataL(): EDbColLongBinary not supported in this DB!\n")));	
 					
 					User::Leave(KErrNotSupported);
 				}
 				break;			
 				
 			default:
-				EAP_TRACE_DEBUG_SYMBIAN(
-					(_L("EapTlsPeapUtils::SetEapSettingsDataL: ERROR: Unsupported DB field! \n")));	
+				EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::SetEapSettingsDataL: Unsupported DB field! \n")));	
 				
 				User::Leave(KErrNotSupported);
 				break;
@@ -5726,8 +5741,7 @@ void EapTlsPeapUtils::SetEapSettingsDataL(
 		} // End: if(view.ColCount() == KDefaultColumnInView_One)
 		else
 		{
-			EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("EapTlsPeapUtils::SetEapSettingsDataL: ERROR: Too many columns in DB view, count=%d \n"),
+			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapTlsPeapUtils::SetEapSettingsDataL(): Too many columns in DB view, count=%d \n"),
 				view.ColCount()));	
 			
 			User::Leave(KErrNotFound);
@@ -5737,94 +5751,105 @@ void EapTlsPeapUtils::SetEapSettingsDataL(
 	// Now it should go to the DB.
 	view.PutL();	
 	
-	CleanupStack::PopAndDestroy( &view ); // Close view.		
+	CleanupStack::PopAndDestroy( &view );	
 
 	EAP_TRACE_DEBUG_SYMBIAN(
 		(_L("EapTlsPeapUtils::SetEapSettingsDataL: End \n")));	
 }
+
+// ---------------------------------------------------------
 
 /*
  * Alter table for added column, if doesn't exist
  * 
  */
 void EapTlsPeapUtils::AlterTableL(
-		RDbNamedDatabase& aDb,
-		TAlterTableCmd aCmd,
-		const TDesC& aTableName,
-		const TDesC& aColumnName,
-		const TDesC& aColumnDef )
-		{
+	RDbNamedDatabase& aDb,
+	TAlterTableCmd aCmd,
+	const TDesC& aTableName,
+	const TDesC& aColumnName,
+	const TDesC& aColumnDef )
+{
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("EapTlsPeapUtils::AlterTableL(): -Start- aTableName=\"%S\", aColumnName=\"%S\", aColumnDef=\"%S\"\n"),
+		&aTableName,
+		&aColumnName,
+		&aColumnDef));
+
+    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapTlsPeapUtils::AlterTableL()\n"));
+
+	CDbColSet* colSet = aDb.ColSetL( aTableName );
+	User::LeaveIfNull( colSet );
+	CleanupStack::PushL( colSet );	
+		
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::AlterTableL() Number of columns in \"%S\" table is %d.\n" ),
+		&aTableName,
+		colSet->Count()));
 	
-		CDbColSet* colSet = aDb.ColSetL( aTableName );
-		User::LeaveIfNull( colSet );
-		CleanupStack::PushL( colSet );	
-			
-		EAP_TRACE_DEBUG_SYMBIAN( ( _L(
-	        "EapTlsPeapUtils::AlterTableL() \
-	        Number of columns in %S table is %d.\n" ),
-			&aTableName, colSet->Count() ) );
-		
-	    if ( aCmd == EAddColumn )
+	if ( aCmd == EAddColumn )
+	    {
+	    // Check if there is a target column
+	    if( colSet->ColNo( aColumnName ) != KDbNullColNo )
 	    	{
-	    	// Check if there is a target column
-	    	if( colSet->ColNo( aColumnName ) != KDbNullColNo )
-	    		{
-	    		EAP_TRACE_DEBUG_SYMBIAN( ( _L(
-	   		        "EapTlsPeapUtils::AlterTableL() \
-	   		        Column %S exists already in table %S.\n" ),
-	    			&aColumnName, &aTableName ) );
-	    		CleanupStack::PopAndDestroy( colSet );
-	    		return;
-	    		}
+	    	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::AlterTableL() Column \"%S\" exists already in table \"%S\".\n" ),
+	    		&aColumnName,
+				&aTableName));
+	    	CleanupStack::PopAndDestroy( colSet );
+	    	return;
 	    	}
-	    else
+	    }
+	else
+	    {
+	    // Check if there is a target column
+	    if( colSet->ColNo( aColumnName ) == KDbNullColNo )
 	    	{
-	    	// Check if there is a target column
-	    	if( colSet->ColNo( aColumnName ) == KDbNullColNo )
-	    		{
-	    		EAP_TRACE_DEBUG_SYMBIAN( ( _L(
-	   		        "EapTlsPeapUtils::AlterTableL() \
-	   		        Column %S does not exists already in table %S.\n" ),
-	    			&aColumnName, &aTableName ) );
-	    		CleanupStack::PopAndDestroy( colSet );
-	    		return;
-	    		}
+	    	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::AlterTableL() Column \"%S\" does not exists already in table \"%S\".\n" ),
+	    		&aColumnName,
+				&aTableName));
+	    	CleanupStack::PopAndDestroy( colSet );
+	    	return;
 	    	}
+	    }
 
-		HBufC* buf = HBufC::NewLC( KMaxSqlQueryLength );
-		TPtr sqlStatement = buf->Des();
-			
-		_LIT( KSqlAddCol, "ALTER TABLE %S ADD %S %S" );
-		_LIT( KSqlRemoveCol, "ALTER TABLE %S DROP %S" );
+	HBufC* buf = HBufC::NewLC( KMaxSqlQueryLength );
+	TPtr sqlStatement = buf->Des();
 		
-		if ( aCmd == EAddColumn )
-			{
-			sqlStatement.Format( KSqlAddCol, &aTableName, 
-			    &aColumnName, &aColumnDef );
-			}
-		else
-			{
-			sqlStatement.Format( KSqlRemoveCol, &aTableName, 
-		        &aColumnName );
-			}
-			
-		EAP_TRACE_DEBUG_SYMBIAN( ( _L(
-			"EapTlsPeapUtils::AlterTableL(): sqlStatement=%S\n"),
-			&sqlStatement ) );
+	_LIT( KSqlAddCol, "ALTER TABLE %S ADD %S %S" );
+	_LIT( KSqlRemoveCol, "ALTER TABLE %S DROP %S" );
+	
+	if ( aCmd == EAddColumn )
+		{
+		sqlStatement.Format(KSqlAddCol,
+			&aTableName, 
+			&aColumnName,
+			&aColumnDef);
+		}
+	else
+		{
+		sqlStatement.Format(KSqlRemoveCol,
+			&aTableName, 
+		    &aColumnName);
+		}
 		
-		User::LeaveIfError( aDb.Execute( sqlStatement ) );		
-		CleanupStack::PopAndDestroy( buf );
-		CleanupStack::PopAndDestroy( colSet );
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::AlterTableL(): sqlStatement=%S\n"),
+		&sqlStatement));
+	
+	User::LeaveIfError( aDb.Execute( sqlStatement ) );		
+	CleanupStack::PopAndDestroy( buf );
+	CleanupStack::PopAndDestroy( colSet );
 
-		CDbColSet* alteredColSet = aDb.ColSetL( aTableName );
-		User::LeaveIfNull( alteredColSet );
-		EAP_TRACE_DEBUG_SYMBIAN( ( _L(
-	        "EapTlsPeapUtils::AlterTableL() \
-	        Number of columns in %S table after adding is %d.\n" ),
-			&aTableName, alteredColSet->Count() ) );
-		delete alteredColSet;
-			
-		} // EapTlsPeapUtils::AlterTableL()
+	CDbColSet* alteredColSet = aDb.ColSetL( aTableName );
+	User::LeaveIfNull( alteredColSet );
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::AlterTableL() Number of columns in %S table after adding is %d.\n" ),
+		&aTableName,
+		alteredColSet->Count()));
+
+	delete alteredColSet;
+		
+} // EapTlsPeapUtils::AlterTableL()
+
+// ---------------------------------------------------------
 
 // End of file
 

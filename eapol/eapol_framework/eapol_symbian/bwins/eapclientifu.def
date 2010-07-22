@@ -1,0 +1,10 @@
+EXPORTS
+	?Close@REapSession@@QAEXXZ @ 1 NONAME ; void REapSession::Close(void)
+	?get_is_valid@REapSession@@QAE_NXZ @ 2 NONAME ; bool REapSession::get_is_valid(void)
+	??1REapSession@@UAE@XZ @ 3 NONAME ; REapSession::~REapSession(void)
+	?ConnectL@REapSession@@QAEXPAVabs_eap_am_tools_c@@PAVMSendPacketHandler@@V?$TBuf@$0BI@@@2PBXHW4TEapRequests@@@Z @ 4 NONAME ; void REapSession::ConnectL(class abs_eap_am_tools_c *, class MSendPacketHandler *, class TBuf<24>, class TBuf<24>, void const *, int, enum TEapRequests)
+	??1EapClientIf@@UAE@XZ @ 5 NONAME ; EapClientIf::~EapClientIf(void)
+	?process_data@REapSession@@QAE?AW4eap_status_e@@W4TEapRequests@@PBXK@Z @ 6 NONAME ; enum eap_status_e REapSession::process_data(enum TEapRequests, void const *, unsigned long)
+	??0EapClientIf@@QAE@XZ @ 7 NONAME ; EapClientIf::EapClientIf(void)
+	?GetServerNameAndExe@EapClientIf@@KAHPAV?$TBuf@$0BI@@@0@Z @ 8 NONAME ; int EapClientIf::GetServerNameAndExe(class TBuf<24> *, class TBuf<24> *)
+

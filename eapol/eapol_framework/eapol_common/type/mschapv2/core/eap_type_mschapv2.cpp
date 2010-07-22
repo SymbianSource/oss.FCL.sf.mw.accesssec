@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 40.1.2 %
+* %version: 46 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -730,7 +730,6 @@ EAP_FUNC_EXPORT eap_status_e eap_type_mschapv2_c::configure()
 
 	//----------------------------------------------------------
 
-#if defined(USE_EAP_EXPANDED_TYPES)
 	{
 		eap_variable_data_c use_eap_expanded_type(m_am_tools);
 
@@ -764,7 +763,6 @@ EAP_FUNC_EXPORT eap_status_e eap_type_mschapv2_c::configure()
 			}
 		}
 	}
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 
 	//----------------------------------------------------------
 
@@ -1012,7 +1010,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_mschapv2_c::reset()
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_type_mschapv2_c::reset()");
 
-	m_session.set_state(eap_type_mschapv2_state_none);
+	m_session.reset();
 
 	m_username_utf8.reset();
 	eap_variable_data_c username_uc(m_am_tools);
@@ -1045,6 +1043,9 @@ EAP_FUNC_EXPORT eap_status_e eap_type_mschapv2_c::reset()
 
 	m_is_notification_sent = false;
 	m_is_reauthentication = false;
+
+	m_is_pending = false;
+	m_identity_asked = false;
 
 	status = m_am_type_mschapv2->reset();
 	if (status != eap_status_ok)
@@ -1505,7 +1506,7 @@ eap_status_e eap_type_mschapv2_c::des_crypt(
 
 				if (key[key_byte] & (1 << key_bit_shifting)) // If bit is 1...
 				{
-					newkey[newkey_byte] |= (1 << newkey_bit_shifting); // ...set bit to 1
+					newkey[newkey_byte] = static_cast<u8_t>(newkey[newkey_byte] | (1 << newkey_bit_shifting)); // ...set bit to 1
 					bit_counter++;
 				}
 			}
@@ -1519,7 +1520,7 @@ eap_status_e eap_type_mschapv2_c::des_crypt(
 	}
 
 	// Copy key three times into triple size key because we are internally using 3des instead of des
-	// des: Ek == 3des: Ek3(Dk2(Ek1)) when k == k1 == k2 == k3
+	// des: Ek == 3des: Ek3(Dk2(Ek1)) when k == key1 == key2 == key3
 	m_am_tools->memmove(newkey + EAP_MSCHAPV2_DES_KEY_SIZE, newkey, EAP_MSCHAPV2_DES_KEY_SIZE);
 	m_am_tools->memmove(newkey + 2 * EAP_MSCHAPV2_DES_KEY_SIZE, newkey, EAP_MSCHAPV2_DES_KEY_SIZE);
 
@@ -1726,7 +1727,7 @@ eap_status_e eap_type_mschapv2_c::generate_authenticator_response(
 
 	m_am_tools->memmove(authenticator_response, "S=", 2);
 	u32_t length = EAP_MSCHAPV2_SHA1_DIGEST_SIZE * 2;
-	m_am_tools->convert_bytes_to_hex_ascii(
+	(void)m_am_tools->convert_bytes_to_hex_ascii(
 		digest, 
 		EAP_MSCHAPV2_SHA1_DIGEST_SIZE,
 		authenticator_response + 2,

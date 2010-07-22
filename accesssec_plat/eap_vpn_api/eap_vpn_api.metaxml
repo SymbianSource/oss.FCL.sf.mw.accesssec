@@ -3,7 +3,7 @@
   <name>EAP VPN API</name>
   <description>Interface for VPN implementations to request EAP authentication services</description>
   <type>c++</type>
-  <subsystem>wlaneapol</subsystem>
+  <subsystem>eapol</subsystem>
   <libs>
   </libs>
   <release category="domain"/>
@@ -11,7 +11,7 @@
      <!-- This indicates wether the api provedes separate html documentation -->
      <!-- or is the additional documentation generated from headers. -->
      <!-- If you are unsuere then the value is "no" -->
-     <htmldocprovided>yes</htmldocprovided>
+     <htmldocprovided>no</htmldocprovided>
      <adaptation>no</adaptation>
   </attributes>
 </api>

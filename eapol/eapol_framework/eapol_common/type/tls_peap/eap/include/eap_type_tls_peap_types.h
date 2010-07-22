@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 62 %
+* %version: %
 */
 
 #if !defined(_EAP_TYPE_TLS_PEAP_TYPES_H_)
@@ -130,6 +130,12 @@ const u32_t EAP_TLS_PEAP_MAX_MESSAGE_LENGTH = 65536ul;
  *  The following configuration options are read through abs_eap_base_type_c::read_configure() function.
  *  @{
  */
+
+EAP_CONFIGURATION_FIELD(
+	cf_str_EAP_TLS_PEAP_use_automatic_ca_certificate,
+	"EAP_TLS_PEAP_use_automatic_ca_certificate",
+	eap_configure_type_boolean,
+	false);
 
 EAP_CONFIGURATION_FIELD(
 	cf_str_EAP_TLS_PEAP_use_manual_username,
@@ -803,26 +809,6 @@ EAP_CONFIGURATION_FIELD(
 	cf_str_EAP_FAST_delay_successfull_finish_timeout,
 	"EAP_FAST_delay_successfull_finish_timeout",
 	eap_configure_type_u32_t,
-	false);
-
-/**
- *  This boolean data configuration option activate prompt to warn for ADHP auto-provisioning when 
- *  there is no PAC that matches the A-ID sent by server. EAP-FAST specific.
- */
-EAP_CONFIGURATION_FIELD(
-	cf_str_EAP_FAST_warn_ADHP_no_matching_PAC,
-	"EAP_FAST_warn_ADHP_no_matching_PAC",
-	eap_configure_type_boolean,
-	false);
-
-/**
- *  This boolean data configuration option activate prompt to warn for ADHP (Authenticated Diffie-Hellman Protocol) 
- *  auto-provisioning when there is no PAC at all. EAP-FAST specific.
- */
-EAP_CONFIGURATION_FIELD(
-	cf_str_EAP_FAST_warn_ADHP_no_PAC,
-	"EAP_FAST_warn_ADHP_no_PAC",
-	eap_configure_type_boolean,
 	false);
 
 /**
