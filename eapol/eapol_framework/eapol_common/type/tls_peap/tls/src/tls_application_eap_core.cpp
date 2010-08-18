@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 99 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -677,7 +677,7 @@ EAP_FUNC_EXPORT eap_status_e tls_application_eap_core_c::configure()
 
 	status = m_eap_core->configure();
 
-	if (m_peap_tunneled_eap_type == eap_type_ttls_plain_pap)
+	if (m_peap_tunneled_eap_type == eap_expanded_type_ttls_plain_pap.get_type())
 	{
 		if (m_free_eap_core == true)
 		{

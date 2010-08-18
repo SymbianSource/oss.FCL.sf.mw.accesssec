@@ -15,19 +15,34 @@
 */
 
 /*
- * %version: 3 %
+ * %version: 4 %
  */
 
 #ifndef __EAPUSERNAMEPWDDIALOG_H__
 #define __EAPUSERNAMEPWDDIALOG_H__
 
+// System includes
 #include <HbInputDialog>
 #include <hbdevicedialoginterface.h>
 
+// User includes
+
+// Forward declarations
 class EapQtValidator;
 class HbTranslator;
 class HbLineEdit;
 class HbAction;
+
+// External data types
+
+// Constants
+
+/*!
+   @addtogroup group_eap_username_pwd_dialog
+   @{
+ */
+
+// Class declaration
 
 class EapUsernamePwdDialog: public HbInputDialog, public HbDeviceDialogInterface
     {
@@ -43,17 +58,18 @@ class EapUsernamePwdDialog: public HbInputDialog, public HbDeviceDialogInterface
         void createDialog( const QVariantMap &parameters );
         
         /* Device dialog parameters to be set while dialog is displayed.
-         * Not supported.
+         * Not supported. (from HbDeviceDialogInterface)
          */
         bool setDeviceDialogParameters(const QVariantMap &parameters);
         
-        /* Not supported */
+        /* Not supported. (from HbDeviceDialogInterface) */
         int deviceDialogError() const;
         
-        /* Closes the device dialog */
+        /* Closes the device dialog. (from HbDeviceDialogInterface) */
         void closeDeviceDialog(bool byClient);
         
-        /* Returns a pointer to this dialog widget */
+        /* Returns a pointer to this dialog widget.
+           (from HbDeviceDialogInterface) */
         HbPopup *deviceDialogWidget() const;
         
     signals:
@@ -79,29 +95,32 @@ class EapUsernamePwdDialog: public HbInputDialog, public HbDeviceDialogInterface
         
         Q_DISABLE_COPY(EapUsernamePwdDialog)
    
-    private:
-        /* Pointer to the line edit 1 object */
+    private: // data
+        // NOT OWNED
+        //! Pointer to the line edit 1 object 
         HbLineEdit *mEdit1;
         
-        /* Pointer to the line edit 2 object */
+        //! Pointer to the line edit 2 object
         HbLineEdit *mEdit2;
         
-        /* Pointer to the user name validator object */
+        // OWNED        
+        //! Pointer to the user name validator object
         QScopedPointer<EapQtValidator> mUnameValidator;
                 
-        /* Pointer to the password validator object */
+        //! Pointer to the password validator object
         QScopedPointer<EapQtValidator> mPwdValidator;
                 
-        /* Pointer to the HbTranslator */
+        //! Pointer to the HbTranslator
         QScopedPointer<HbTranslator> mTranslator;
         
-        /* Tells whether close has already been called for the dialog */
+        //! Tells whether close has already been called for the dialog
         bool mClose;
         
-        /* Tells whether Ok Action has already been pressed */
+        //! Tells whether Ok Action has already been pressed
         bool mOkActionPressed;
     };
 
+/*! @} */
 
 #endif // __EAPUSERNAMEPWDDIALOG_H__
 

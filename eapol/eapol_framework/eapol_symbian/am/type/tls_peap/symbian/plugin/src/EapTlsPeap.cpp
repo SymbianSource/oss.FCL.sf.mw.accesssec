@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 64 %
+* %version: 67 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -90,9 +90,6 @@ CEapTlsPeap::CEapTlsPeap(const TIndexType aIndexType,
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return;
 	}
-
-	ASSERT(iEapType.get_vendor_id() == eap_type_vendor_id_ietf);
-	ASSERT(iTunnelingType.get_vendor_id() == eap_type_vendor_id_ietf);
 
 #if defined(USE_FAST_EAP_TYPE)
 	if(iEapType == eap_type_fast)
@@ -202,7 +199,7 @@ CEapTlsPeap* CEapTlsPeap::NewTtlsPapL( SIapInfo* aIapInfo )
 	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::NewTtlsPapL()\n"));
 
 	return new (ELeave) CEapTlsPeap(
-		aIapInfo->indexType, aIapInfo->index, eap_type_ttls_plain_pap );    
+		aIapInfo->indexType, aIapInfo->index, eap_expanded_type_ttls_plain_pap.get_type() );    
     }
 
 
@@ -672,7 +669,7 @@ void CEapTlsPeap::DeleteConfigurationL()
 		|| iEapType == eap_type_fast
 #endif		
 
-		|| iEapType == eap_type_ttls_plain_pap
+		|| iEapType == eap_expanded_type_ttls_plain_pap.get_type()
 
 
 	) 
@@ -689,7 +686,7 @@ void CEapTlsPeap::DeleteConfigurationL()
 				|| (iEapType == eap_type_fast && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i]))
 #endif						
 
-				|| (iEapType == eap_type_ttls_plain_pap && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i]))
+				|| (iEapType == eap_expanded_type_ttls_plain_pap.get_type() && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i]))
 					
 
 			)
@@ -889,7 +886,7 @@ void CEapTlsPeap::SetIndexL(
 		ciphersuites.Set(KFastAllowedCipherSuitesDatabaseTableName);			
 	}
 #endif		
-	else if (iEapType == eap_type_ttls_plain_pap)
+	else if (iEapType == eap_expanded_type_ttls_plain_pap.get_type())
 	{
 		settings.Set(KTtlsDatabaseTableName);
 		usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
@@ -997,7 +994,7 @@ void CEapTlsPeap::SetIndexL(
 		|| iEapType == eap_type_fast
 #endif				
 
-		|| iEapType == eap_type_ttls_plain_pap
+		|| iEapType == eap_expanded_type_ttls_plain_pap.get_type()
 			
 
 	)
@@ -1014,7 +1011,7 @@ void CEapTlsPeap::SetIndexL(
 				|| (iEapType == eap_type_fast && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i]))
 #endif										
 
-				|| (iEapType == eap_type_ttls_plain_pap && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i]))
+				|| (iEapType == eap_expanded_type_ttls_plain_pap.get_type() && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i]))
 										
 
 			)
@@ -1210,7 +1207,7 @@ void CEapTlsPeap::CopySettingsL(
 		ciphersuites.Set(KTtlsAllowedCipherSuitesDatabaseTableName);
 	}
 #endif
-	else if (iEapType == eap_type_ttls_plain_pap)
+	else if (iEapType == eap_expanded_type_ttls_plain_pap.get_type())
 	{
 		settings.Set(KTtlsDatabaseTableName);
 		usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
@@ -1330,7 +1327,7 @@ void CEapTlsPeap::CopySettingsL(
 		|| iEapType == eap_type_fast
 #endif						
 
-		|| iEapType == eap_type_ttls_plain_pap
+		|| iEapType == eap_expanded_type_ttls_plain_pap.get_type()
 						
 
 	)
@@ -1350,7 +1347,7 @@ void CEapTlsPeap::CopySettingsL(
 				|| (iEapType == eap_type_fast && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i]))
 #endif										
 
-				|| (iEapType == eap_type_ttls_plain_pap && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i]))
+				|| (iEapType == eap_expanded_type_ttls_plain_pap.get_type() && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i]))
 									
 			)
 			{

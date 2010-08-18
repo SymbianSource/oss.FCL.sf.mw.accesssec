@@ -11,28 +11,46 @@
 *
 * Contributors:
 *
-* Description: EAP query Dialog implementation
+* Description: EAP Challenge query Dialog implementation
 *
 */
 
 /*
-* %version: 2 %
+* %version: 3 %
 */
 
+// System includes
 #include <HbLabel>
 #include <HbAction>
 #include <HbTranslator>
 #include <HbParameterLengthLimiter>
+
+// User includes
 #include "eapquerydialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #endif
 
-// The index numbers of the button of the dialog
-const int okButtonIndex = 1;
+/*!
+ * \class EapQueryDialog
+ * \brief Implements EAP Challenge query Dialog. 
+ */
 
-/**
- * The constructor
+// External function prototypes
+
+// Local constants
+
+//! The index numbers of the button of the dialog
+static const int okButtonIndex = 1;
+ 
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+/*!
+ * Constructor.
+ * 
+ * @param [in]  parameters Parameters for the Constructor.
  */
 EapQueryDialog::EapQueryDialog(const QVariantMap &parameters)
 :mTranslator(new HbTranslator("eapprompts")),
@@ -47,9 +65,10 @@ mOkActionPressed(false)
     qDebug("EapQueryDialog::EapQueryDialog EXIT");
 }
 
-    
-/**
+/*!
  * The construction of the dialog
+ *
+ * @param [in] parameters Parameters for the Construction of the dialog.
  */ 
 void EapQueryDialog::createDialog(const QVariantMap &parameters )
 {
@@ -122,8 +141,8 @@ void EapQueryDialog::createDialog(const QVariantMap &parameters )
     qDebug("EapQueryDialog::createDialog EXIT");
 }
 
-/**
- * Destructor
+/*!
+ * Destructor.
  */
 EapQueryDialog::~EapQueryDialog()
 {
@@ -134,7 +153,7 @@ EapQueryDialog::~EapQueryDialog()
     OstTraceFunctionExit0( EAPQUERYDIALOG_DEAPQUERYDIALOG_EXIT );
 }
 
-/**
+/*!
  * Function is called when the Ok Action button is pressed
  */
 void EapQueryDialog::okPressed()
@@ -147,8 +166,8 @@ void EapQueryDialog::okPressed()
             mOkActionPressed = true;
             
             QVariantMap data;
-            QVariant variant(okButtonIndex);
-            data.insert("okbutton", variant);
+            data["okbutton"] = okButtonIndex;
+            
             // emit the data of the selected button and close the dialog
             qDebug("EapQueryDialog::okPressed: emit deviceDialogData");
             emit deviceDialogData(data);
@@ -159,9 +178,8 @@ void EapQueryDialog::okPressed()
     qDebug("EapQueryDialog::okPressed EXIT");
 }
 
-/**
+/*!
  * Function is called when the dialog is about to close
- * 
  */
 void EapQueryDialog::closingDialog()
 {
@@ -172,9 +190,13 @@ void EapQueryDialog::closingDialog()
     OstTraceFunctionExit0( EAPQUERYDIALOG_CLOSINGDIALOG_EXIT );
 }
 
-/**
- * Updating the dialog during its showing is not allowed.
- */ 
+/*!
+ * Device dialog parameters to be set while dialog is displayed.
+ * Not supported. 
+ *
+ * @param [in] parameters NOT USED
+ * @return true always.
+ */  
 bool EapQueryDialog::setDeviceDialogParameters
                 (const QVariantMap &parameters)
 {
@@ -187,8 +209,10 @@ bool EapQueryDialog::setDeviceDialogParameters
     return true;
 }
 
-/**
- * Not supported, 0 always returned
+/*!
+ * Not supported
+ *
+ * @return 0 always returned.
  */
 int EapQueryDialog::deviceDialogError() const
 {
@@ -197,8 +221,10 @@ int EapQueryDialog::deviceDialogError() const
     return 0;
 }
 
-/**
+/*!
  * Dialog is closed and the signal about closing is emitted
+ *
+ * @param [in] byClient indicates when the user closes the dialog
  */
 void EapQueryDialog::closeDeviceDialog(bool byClient)
 {   
@@ -214,8 +240,10 @@ void EapQueryDialog::closeDeviceDialog(bool byClient)
     OstTraceFunctionExit0( EAPQUERYDIALOG_CLOSEDEVICEDIALOG_EXIT );
 }
 
-/**
+/*!
  * This dialog widget is returned to the caller
+ *
+ * @return this dialog widget
  */
 HbPopup *EapQueryDialog::deviceDialogWidget() const
 {

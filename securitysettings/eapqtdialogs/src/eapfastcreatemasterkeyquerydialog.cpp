@@ -11,14 +11,15 @@
 *
 * Contributors:
 *
-* Description: Fast Create Master Key Query Dialog implementation
+* Description: EAP-FAST Create Master Key Query Dialog implementation
 *
 */
 
 /*
-* %version: 4 %
+* %version: 5 %
 */
 
+// System includes
 #include <HbLineEdit>
 #include <HbAction>
 #include <HbMessageBox>
@@ -27,14 +28,30 @@
 #include <eapqtexpandedeaptype.h>
 #include <eapqtconfiginterface.h>
 #include <eapqtconfig.h>
+
+// User includes
 #include "eapfastcreatemasterkeyquerydialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #endif
 
+/*!
+ * \class EapFastCreateMasterKeyQueryDialog
+ * \brief Implements EAP-FAST Create Master Key Query Dialog. 
+ */
 
-/**
- * The constructor
+// External function prototypes
+
+// Local constants
+ 
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+/*!
+ * Constructor.
+ * 
+ * @param [in]  parameters Parameters for the Constructor.
  */
 EapFastCreateMasterKeyQueryDialog::EapFastCreateMasterKeyQueryDialog(const QVariantMap &parameters) 
  :mEdit1(NULL), 
@@ -54,8 +71,10 @@ EapFastCreateMasterKeyQueryDialog::EapFastCreateMasterKeyQueryDialog(const QVari
     qDebug("EapFastCreateMasterKeyQueryDialog::EapFastCreateMasterKeyQueryDialog EXIT");
 }
     
-/**
+/*!
  * The construction of the dialog
+ *
+ * @param [in] parameters Parameters for the Construction of the dialog.
  */ 
 void EapFastCreateMasterKeyQueryDialog::createDialog(const QVariantMap &parameters )
 {
@@ -128,8 +147,8 @@ void EapFastCreateMasterKeyQueryDialog::createDialog(const QVariantMap &paramete
     qDebug("EapFastCreateMasterKeyQueryDialog::createDialog EXIT");
 }
 
-/**
- * Destructor
+/*!
+ * Destructor.
  */
 EapFastCreateMasterKeyQueryDialog::~EapFastCreateMasterKeyQueryDialog()
 {
@@ -142,16 +161,16 @@ EapFastCreateMasterKeyQueryDialog::~EapFastCreateMasterKeyQueryDialog()
     OstTraceFunctionExit0( EAPFASTCREATEMASTERKEYQUERYDIALOG_DEAPFASTCREATEMASTERKEYQUERYDIALOG_EXIT );
 }
 
-/**
+/*!
  * Line edit validator
+ *
+ * @return true if content is valid.
  */
 bool EapFastCreateMasterKeyQueryDialog::validate() const
 {
     qDebug("EapFastCreateMasterKeyQueryDialog::validate");
     
     bool valid = false;
-    
-    EapQtValidator::Status test_status = mPwdValidator->validate(mEdit1->text());
     
     if ( mPwdValidator->validate(mEdit1->text())== EapQtValidator::StatusOk &&
         mEdit1->text() == mEdit2->text()) {
@@ -161,7 +180,7 @@ bool EapFastCreateMasterKeyQueryDialog::validate() const
     return valid;
 }
 
-/**
+/*!
  * Function is called when the Ok Action button is pressed
  */
 void EapFastCreateMasterKeyQueryDialog::okPressed()
@@ -191,7 +210,7 @@ void EapFastCreateMasterKeyQueryDialog::okPressed()
     qDebug("EapFastCreateMasterKeyQueryDialog::okPressed EXIT");
 }
 
-/**
+/*!
  * Function is called when the Cancel Action button is pressed
  */
 void EapFastCreateMasterKeyQueryDialog::cancelPressed()
@@ -207,9 +226,8 @@ void EapFastCreateMasterKeyQueryDialog::cancelPressed()
     OstTraceFunctionExit0( EAPFASTCREATEMASTERKEYQUERYDIALOG_CANCELPRESSED_EXIT );
 }
 
-/**
+/*!
  * Function is called when the dialog is about to close
- * 
  */
 void EapFastCreateMasterKeyQueryDialog::closingDialog()
 {
@@ -220,9 +238,13 @@ void EapFastCreateMasterKeyQueryDialog::closingDialog()
     OstTraceFunctionExit0( EAPFASTCREATEMASTERKEYQUERYDIALOG_CLOSINGDIALOG_EXIT );
 }
 
-/**
- * Updating the dialog during its showing is not allowed.
- */ 
+/*!
+ * Device dialog parameters to be set while dialog is displayed.
+ * Not supported. 
+ *
+ * @param [in] parameters NOT USED
+ * @return true always.
+ */  
 bool EapFastCreateMasterKeyQueryDialog::setDeviceDialogParameters
                 (const QVariantMap &parameters)
 {
@@ -235,8 +257,10 @@ bool EapFastCreateMasterKeyQueryDialog::setDeviceDialogParameters
     return true;
 }
 
-/**
- * Not supported, 0 always returned
+/*!
+ * Not supported
+ *
+ * @return 0 always returned.
  */
 int EapFastCreateMasterKeyQueryDialog::deviceDialogError() const
 {
@@ -245,8 +269,10 @@ int EapFastCreateMasterKeyQueryDialog::deviceDialogError() const
     return 0;
 }
 
-/**
+/*!
  * Dialog is closed and the signal about closing is emitted
+ *
+ * @param [in] byClient indicates when the user closes the dialog
  */
 void EapFastCreateMasterKeyQueryDialog::closeDeviceDialog(bool byClient)
 {   
@@ -264,8 +290,10 @@ void EapFastCreateMasterKeyQueryDialog::closeDeviceDialog(bool byClient)
     OstTraceFunctionExit0( EAPFASTCREATEMASTERKEYQUERYDIALOG_CLOSEDEVICEDIALOG_EXIT );
 }
 
-/**
+/*!
  * This dialog widget is returned to the caller
+ *
+ * @return this dialog widget
  */
 HbPopup *EapFastCreateMasterKeyQueryDialog::deviceDialogWidget() const
 {

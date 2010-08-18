@@ -11,30 +11,48 @@
 *
 * Contributors:
 *
-* Description: Fast Install Pac Query Dialog implementation
+* Description: EAP-FAST Install PAC Query Dialog implementation
 *
 */
 
 /*
-* %version: 3 %
+* %version: 4 %
 */
 
+// System includes
 #include <HbTranslator>
 #include <HbAction>
 #include <HbParameterLengthLimiter>
+
+// User includes
 #include "eapfastinstallpacquerydialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #endif
 
-// The index numbers of the button of the dialog
-const int yesButtonIndex = 1;
+/*!
+ * \class EapFastInstallPacQueryDialog
+ * \brief Implements EAP-FAST Install PAC Query Dialog. 
+ */
 
-/**
- * The constructor
+// External function prototypes
+
+// Local constants
+
+//! The index numbers of the button of the dialog
+static const int yesButtonIndex = 1;
+ 
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+/*!
+ * Constructor.
+ * 
+ * @param [in]  parameters Parameters for the Constructor.
  */
 EapFastInstallPacQueryDialog::EapFastInstallPacQueryDialog(const QVariantMap &parameters)
-:HbMessageBox("default text...",HbMessageBox::MessageTypeQuestion),
+:HbMessageBox(HbMessageBox::MessageTypeQuestion),
 mTranslator(new HbTranslator("eapprompts")),
 mClose(false),
 mYesActionPressed(false)
@@ -48,8 +66,10 @@ mYesActionPressed(false)
     qDebug("EapFastInstallPacQueryDialog::EapFastInstallPacQueryDialog EXIT");
 }
     
-/**
+/*!
  * The construction of the dialog
+ *
+ * @param [in] parameters Parameters for the Construction of the dialog.
  */ 
 void EapFastInstallPacQueryDialog::createDialog(const QVariantMap &parameters )
 {
@@ -116,8 +136,8 @@ void EapFastInstallPacQueryDialog::createDialog(const QVariantMap &parameters )
     qDebug("EapFastInstallPacQueryDialog::createDialog EXIT");
 }
 
-/**
- * Destructor
+/*!
+ * Destructor.
  */
 EapFastInstallPacQueryDialog::~EapFastInstallPacQueryDialog()
 {
@@ -128,7 +148,7 @@ EapFastInstallPacQueryDialog::~EapFastInstallPacQueryDialog()
     OstTraceFunctionExit0( EAPGTCQUERYDIALOG_DEAPGTCQUERYDIALOG_EXIT );
 }
 
-/**
+/*!
  * Function is called when the Yes Action button is pressed
  */
 void EapFastInstallPacQueryDialog::yesPressed()
@@ -141,8 +161,8 @@ void EapFastInstallPacQueryDialog::yesPressed()
          mYesActionPressed = true;
             
          QVariantMap data;
-         QVariant variant(yesButtonIndex);
-         data.insert("yesbutton", variant);
+         data["yesbutton"] = yesButtonIndex;
+         
          // emit the data of the selected button and close the dialog
          qDebug("EapFastInstallPacQueryDialog::yesPressed: emit deviceDialogData");
          emit deviceDialogData(data);   
@@ -152,7 +172,7 @@ void EapFastInstallPacQueryDialog::yesPressed()
     qDebug("EapFastInstallPacQueryDialog::yesPressed EXIT");
 }
 
-/**
+/*!
  * Function is called when the No Action button is pressed
  */
 void EapFastInstallPacQueryDialog::noPressed()
@@ -168,9 +188,8 @@ void EapFastInstallPacQueryDialog::noPressed()
     OstTraceFunctionExit0( EAPFASTINSTALLPACQUERYDIALOG_NOPRESSED_EXIT );
 }
 
-/**
+/*!
  * Function is called when the dialog is about to close
- * 
  */
 void EapFastInstallPacQueryDialog::closingDialog()
 {
@@ -181,9 +200,13 @@ void EapFastInstallPacQueryDialog::closingDialog()
     OstTraceFunctionExit0( EAPFASTINSTALLPACQUERYDIALOG_CLOSINGDIALOG_EXIT );
 }
 
-/**
- * Updating the dialog during its showing is not allowed.
- */ 
+/*!
+ * Device dialog parameters to be set while dialog is displayed.
+ * Not supported. 
+ *
+ * @param [in] parameters NOT USED
+ * @return true always.
+ */  
 bool EapFastInstallPacQueryDialog::setDeviceDialogParameters
                 (const QVariantMap &parameters)
 {
@@ -196,8 +219,10 @@ bool EapFastInstallPacQueryDialog::setDeviceDialogParameters
     return true;
 }
 
-/**
- * Not supported, 0 always returned
+/*!
+ * Not supported
+ *
+ * @return 0 always returned.
  */
 int EapFastInstallPacQueryDialog::deviceDialogError() const
 {
@@ -206,8 +231,10 @@ int EapFastInstallPacQueryDialog::deviceDialogError() const
     return 0;
 }
 
-/**
+/*!
  * Dialog is closed and the signal about closing is emitted
+ *
+ * @param [in] byClient indicates when the user closes the dialog
  */
 void EapFastInstallPacQueryDialog::closeDeviceDialog(bool byClient)
 {   
@@ -225,8 +252,10 @@ void EapFastInstallPacQueryDialog::closeDeviceDialog(bool byClient)
     OstTraceFunctionExit0( EAPFASTINSTALLPACQUERYDIALOG_CLOSEDEVICEDIALOG_EXIT );
 }
 
-/**
+/*!
  * This dialog widget is returned to the caller
+ *
+ * @return this dialog widget
  */
 HbPopup *EapFastInstallPacQueryDialog::deviceDialogWidget() const
 {

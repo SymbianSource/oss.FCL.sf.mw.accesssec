@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 60 %
+* %version: 62 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -1104,9 +1104,16 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::send_message(e
 {
 	// Sends message data composed of Attribute-Value Pairs.
 
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		(EAPL("TIMER: eapol_message_wlan_authentication_c::send_message()\n")));
+
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eapol_message_wlan_authentication_c::send_message()");
+
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
-		EAP_TRACE_FLAGS_MESSAGE_DATA,
+		EAP_TRACE_FLAGS_NEVER,
 		(EAPL("eapol_message_wlan_authentication_c::send_message()"),
 		message->get_message_data(),
 		message->get_message_data_length()));
@@ -1198,6 +1205,13 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::send_message(e
 EAP_FUNC_EXPORT wlan_eap_if_send_status_e eapol_message_wlan_authentication_c::process_data(const void * const data, const u32_t length)
 {
 	// Parses message data composed of Attribute-Value Pairs.
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		(EAPL("TIMER: eapol_message_wlan_authentication_c::process_data()\n")));
+
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eapol_message_wlan_authentication_c::process_data()");
 
 	eap_status_e status(eap_status_ok);
 
@@ -1303,9 +1317,16 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::process_messag
 {
 	// Parses message data composed of Attribute-Value Pairs.
 
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		(EAPL("TIMER: eapol_message_wlan_authentication_c::process_message()\n")));
+
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eapol_message_wlan_authentication_c::process_message()");
+
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
-		EAP_TRACE_FLAGS_MESSAGE_DATA,
+		EAP_TRACE_FLAGS_NEVER,
 		(EAPL("eapol_message_wlan_authentication_c::process_message()"),
 		message->get_message_data(),
 		message->get_message_data_length()));

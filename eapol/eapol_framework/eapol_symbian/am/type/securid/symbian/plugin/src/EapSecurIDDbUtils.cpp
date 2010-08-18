@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 28 %
+* %version: 29 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -82,7 +82,7 @@ void EapSecurIDDbUtils::OpenDatabaseL(
 
 	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSecurIDDbUtils::OpenDatabaseL(): - Opened private DB for EAP-AKA. error=%d\n"), error));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSecurIDDbUtils::OpenDatabaseL(): - Opened private DB for EAP-SecurID. error=%d\n"), error));
 
 	User::LeaveIfError(error);
 

@@ -16,17 +16,32 @@
 */
 
 /*
-* %version: 2 %
+* %version: 3 %
 */
 
 #ifndef __EAPMSCHAPV2PWDEXPNOTEDIALOG_H__
 #define __EAPMSCHAPV2PWDEXPNOTEDIALOG_H__
 
-
+// System includes
 #include <HbMessageBox>
 #include <hbdevicedialoginterface.h>
 
+// User includes
+
+// Forward declarations
+
 class HbTranslator;
+
+// External data types
+
+// Constants
+
+/*!
+   @addtogroup group_eap_mschapv2_pwd_exp_note_dialog
+   @{
+ */
+
+// Class declaration
 
 class EapMschapv2PwdExpNoteDialog: public HbMessageBox, public HbDeviceDialogInterface
     {
@@ -39,20 +54,21 @@ class EapMschapv2PwdExpNoteDialog: public HbMessageBox, public HbDeviceDialogInt
         ~EapMschapv2PwdExpNoteDialog();
         
         /* Function creates the actual dialog widget */
-        void createDialog(const QVariantMap &parameters );
+        void createDialog();
         
         /* Device dialog parameters to be set while dialog is displayed.
-         * Not supported.
+         * Not supported. (from HbDeviceDialogInterface)
          */
         bool setDeviceDialogParameters(const QVariantMap &parameters);
         
-        /* Not supported */
+        /* Not supported. (from HbDeviceDialogInterface) */
         int deviceDialogError() const;
         
-        /* Closes the device dialog */
+        /* Closes the device dialog. (from HbDeviceDialogInterface) */
         void closeDeviceDialog(bool byClient);
         
-        /* Returns a pointer to this dialog widget */
+        /* Returns a pointer to this dialog widget.
+           (from HbDeviceDialogInterface) */
         HbPopup *deviceDialogWidget() const;
                 
     signals:
@@ -73,13 +89,17 @@ class EapMschapv2PwdExpNoteDialog: public HbMessageBox, public HbDeviceDialogInt
                 
         Q_DISABLE_COPY(EapMschapv2PwdExpNoteDialog)
    
-    private:
+    private: // data
+        // NOT OWNED
         
-        /* Pointer to the HbTranslator */
+        // OWNED        
+        //! Pointer to the HbTranslator
         QScopedPointer<HbTranslator> mTranslator;
         
-        /* Tells whether Ok Action has already been pressed */
+        //! Tells whether Ok Action has already been pressed
         bool mOkActionPressed;
     };
+    
+/*! @} */
 
 #endif // __EAPMSCHAPV2PWDEXPNOTEDIALOG_H__

@@ -16,17 +16,31 @@
 */
 
 /*
-* %version: 3 %
+* %version: 4 %
 */
 
 #ifndef __EAPFASTINSTALLQUERYDIALOG_H__
 #define __EAPFASTINSTALLQUERYDIALOG_H__
 
-
+// System includes
 #include <HbMessageBox>
 #include <hbdevicedialoginterface.h>
 
+// User includes
+
+// Forward declarations
 class HbTranslator;
+
+// External data types
+
+// Constants
+
+/*!
+   @addtogroup group_eap_fast_install_pac_query_dialog
+   @{
+ */
+
+// Class declaration
 
 class EapFastInstallPacQueryDialog: public HbMessageBox, public HbDeviceDialogInterface
     {
@@ -42,17 +56,18 @@ class EapFastInstallPacQueryDialog: public HbMessageBox, public HbDeviceDialogIn
         void createDialog(const QVariantMap &parameters );
         
         /* Device dialog parameters to be set while dialog is displayed.
-         * Not supported.
+         * Not supported. (from HbDeviceDialogInterface)
          */
         bool setDeviceDialogParameters(const QVariantMap &parameters);
         
-        /* Not supported */
+        /* Not supported. (from HbDeviceDialogInterface) */
         int deviceDialogError() const;
         
-        /* Closes the device dialog */
+        /* Closes the device dialog. (from HbDeviceDialogInterface) */
         void closeDeviceDialog(bool byClient);
         
-        /* Returns a pointer to this dialog widget */
+        /* Returns a pointer to this dialog widget.
+           (from HbDeviceDialogInterface) */
         HbPopup *deviceDialogWidget() const;
                 
     signals:
@@ -76,16 +91,20 @@ class EapFastInstallPacQueryDialog: public HbMessageBox, public HbDeviceDialogIn
                 
         Q_DISABLE_COPY(EapFastInstallPacQueryDialog)
    
-    private:
+    private: // data
+        // NOT OWNED
         
-        /* Pointer to the HbTranslator */
+        // OWNED        
+        //! Pointer to the password validator object
         QScopedPointer<HbTranslator> mTranslator;
         
-        /* Tells whether close has already been called for the dialog */
+        //! Tells whether close has already been called for the dialog
         bool mClose;
         
-        /* Tells whether Yes Action has already been pressed */
+        //! Tells whether Yes Action has already been pressed
         bool mYesActionPressed;
     };
+
+/*! @} */
 
 #endif // __EAPFASTINSTALLQUERYDIALOG_H__

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 53 %
+* %version: 56 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -83,7 +83,7 @@ void EapMsChapV2DbUtils::OpenDatabaseL(
 
 	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): - Opened private DB for EAP-AKA. error=%d\n"), error));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): - Opened private DB for EAP-MsChapV2. error=%d\n"), error));
 
 	User::LeaveIfError(error);
 
@@ -406,7 +406,6 @@ void EapMsChapV2DbUtils::SetConfigurationL(
 	{
 		// Clear password from database.
 		view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_literal), KNullPasswordData);
-		view.PutL();
 		view.SetColNullL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_literal));
 	}
 
@@ -704,7 +703,7 @@ void EapMsChapV2DbUtils::DeleteConfigurationL(
 
 	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::DeleteConfigurationL(): - Opened private DB for EAP-LEAP. error=%d\n"), error));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::DeleteConfigurationL(): - Opened private DB for EAP-MsChapV2. error=%d\n"), error));
 
 	User::LeaveIfError(error);
 

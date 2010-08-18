@@ -11,23 +11,27 @@
 *
 * Contributors:
 *
-* Description: EAP Auth Notitier implementation
+* Description: 
+*   EAP Authentication Notitier implementation
 *
 */
 
 /*
-* %version: 3 %
+* %version: 21 %
 */
 
-// INCLUDE FILES
+// System include files
 #include <hb/hbcore/hbsymbianvariant.h>
 #include <e32debug.h> 
-#include <EapExpandedType.h>  
+#include <EapExpandedType.h> 
+// User include files 
 #include "eap_auth_notifier.h"
 #include "eap_auth_observer.h"
 #include "eap_auth_ui_strings.h"
 
-// CONSTANTS
+// External function prototypes
+
+// Local constants
 const TInt KVariableLength = 30; 
 const TInt KDlgTypeStrLength = 100; 
 const TInt KMaxAuthMethodLength = 50;
@@ -53,9 +57,13 @@ _LIT(KTypeoldpwddlg,"com.nokia.eap.mschapv2oldpassworddialog/1.0");
 _LIT(KTypenewpwddlg,"com.nokia.eap.mschapv2newpassworddialog/1.0"); 
 _LIT(KTypeshowprovnotsuccdlg,"com.nokia.eap.fastshowprovnotsuccessnotedialog/1.0"); 
 
-// ---------------------------------------------------------
-// CEapAuthNotifier::CEapAuthNotifier()
-// ---------------------------------------------------------
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+// ---------------------------------------------------------------------------
+// Constructor
+// ---------------------------------------------------------------------------
 //
 CEapAuthNotifier::CEapAuthNotifier( MNotificationCallback& aClient )
     :iClient(aClient),
@@ -68,9 +76,9 @@ CEapAuthNotifier::CEapAuthNotifier( MNotificationCallback& aClient )
     
     }
 
-// ---------------------------------------------------------
-// CEapAuthNotifier::~CEapAuthNotifier()
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Destructor
+// ---------------------------------------------------------------------------
 //
 CEapAuthNotifier::~CEapAuthNotifier()
     {
@@ -94,9 +102,9 @@ CEapAuthNotifier::~CEapAuthNotifier()
         }
     }
 
-// ---------------------------------------------------------
-// CEapAuthNotifier* CEapAuthNotifier::NewL
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Two-phased constructor
+// ---------------------------------------------------------------------------
 //
 EXPORT_C CEapAuthNotifier* CEapAuthNotifier::NewL( 
     MNotificationCallback& aClient )
@@ -111,9 +119,9 @@ EXPORT_C CEapAuthNotifier* CEapAuthNotifier::NewL(
     return self;
     }
 
-// ---------------------------------------------------------
-// CEapAuthNotifier::ConstructL
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// ConstructL for the Notifier
+// ---------------------------------------------------------------------------
 //
 void CEapAuthNotifier::ConstructL()
     {
@@ -123,9 +131,9 @@ void CEapAuthNotifier::ConstructL()
     iDialog = CHbDeviceDialogSymbian::NewL();    
     }
 
-// ---------------------------------------------------------
-// void CEapAuthNotifier::StartL
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Start the Notifier
+// ---------------------------------------------------------------------------
 //
 EXPORT_C void CEapAuthNotifier::StartL( 
     EEapNotifierType aType,
@@ -218,17 +226,17 @@ EXPORT_C void CEapAuthNotifier::StartL(
         }
     else if ( aType == EEapNotifierTypeFastPacFilePwQueryDialog ) 
         {
-        setFastPacFileQueryPwDialogDataL( aEapInfo, map );
+        SetFastPacFileQueryPwDialogDataL( aEapInfo, map );
         EapNtfType.Copy(KTypepacfilepwquerydlg);
         }
     else if ( aType == EEapNotifierTypeFastStartAuthProvWaitNote )
         {
-        setFastProvWaitNoteDialogDataL( map, ETrue );
+        SetFastProvWaitNoteDialogDataL( map, ETrue );
         EapNtfType.Copy(KTypeprovwaitnotedlg);
         }
     else if ( aType == EEapNotifierTypeFastStartUnauthProvWaitNote )
         {
-        setFastProvWaitNoteDialogDataL( map, EFalse );
+        SetFastProvWaitNoteDialogDataL( map, EFalse );
         EapNtfType.Copy(KTypeprovwaitnotedlg);
         }   
     else if ( aType == EEapNotifierTypeMsChapV2PasswordExpiredNote )
@@ -259,11 +267,11 @@ EXPORT_C void CEapAuthNotifier::StartL(
     RDebug::Print(_L("CEapAuthNotifier::StartL: LEAVING") );
     }
 
-// ---------------------------------------------------------
-// void CEapAuthNotifier::setFastProvWaitNoteDialogDataL
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Set data for the EAP-FAST provisioning wait note Dialog(s)
+// ---------------------------------------------------------------------------
 //
-void CEapAuthNotifier::setFastProvWaitNoteDialogDataL(    
+void CEapAuthNotifier::SetFastProvWaitNoteDialogDataL(    
     CHbSymbianVariantMap* aMap,
     TBool aAuthProvWaitNote )
     {
@@ -272,23 +280,25 @@ void CEapAuthNotifier::setFastProvWaitNoteDialogDataL(
             
     CHbSymbianVariant *variant = NULL;
     
-    RDebug::Print(_L("CEapAuthNotifier::setFastProvWaitNoteDialogData: ENTERING"));    
+    RDebug::Print(_L("CEapAuthNotifier::SetFastProvWaitNoteDialogDataL: ENTERING"));    
 
     //Create the variant data information for the plugin
-    variant =  CHbSymbianVariant::NewL ( &aAuthProvWaitNote, CHbSymbianVariant::EBool );
+    variant =  
+        CHbSymbianVariant::NewL (
+        &aAuthProvWaitNote, CHbSymbianVariant::EBool );
     CleanupStack::PushL( variant );
     error = aMap->Add( key, variant);
     User::LeaveIfError( error );
     CleanupStack::Pop( variant ); // map's cleanup sequence handles variant.
     
-    RDebug::Print(_L("CEapAuthNotifier::setFastProvWaitNoteDialogData: LEAVING") );
+    RDebug::Print(_L("CEapAuthNotifier::SetFastProvWaitNoteDialogDataL: LEAVING") );
     }
 
-// ---------------------------------------------------------
-// void CEapAuthNotifier::setFastPacFileQueryPwDialogDataL
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Set data for the EAP-FAST PAC file query Dialog(s)
+// ---------------------------------------------------------------------------
 //
-void CEapAuthNotifier::setFastPacFileQueryPwDialogDataL( 
+void CEapAuthNotifier::SetFastPacFileQueryPwDialogDataL( 
     TEapDialogInfo* aEapInfo,
     CHbSymbianVariantMap* aMap )
     {
@@ -297,26 +307,28 @@ void CEapAuthNotifier::setFastPacFileQueryPwDialogDataL(
                 
     CHbSymbianVariant *variant = NULL;
         
-    RDebug::Print(_L("CEapAuthNotifier::setFastPacFileQueryPwDialogData: ENTERING"));
+    RDebug::Print(_L("CEapAuthNotifier::SetFastPacFileQueryPwDialogDataL: ENTERING"));
         
     if( 0 < aEapInfo->iUidata.Length() )
        {
-       RDebug::Print(_L("CEapAuthNotifier::setFastPacFileQueryPwDialogData: Set PAC filename"));
-       RDebug::Print(_L("CEapAuthNotifier::setFastPacFileQueryPwDialogData: aEapInfo->iUidata = %S\n"), &aEapInfo->iUidata );
+       RDebug::Print(_L("CEapAuthNotifier::SetFastPacFileQueryPwDialogDataL: Set PAC filename"));
+       RDebug::Print(_L("CEapAuthNotifier::SetFastPacFileQueryPwDialogDataL: aEapInfo->iUidata = %S\n"), &aEapInfo->iUidata );
         
        // Create the variant data information for the plugin
-       variant =  CHbSymbianVariant::NewL ( &aEapInfo->iUidata, CHbSymbianVariant::EDes );
+       variant =  
+           CHbSymbianVariant::NewL ( 
+           &aEapInfo->iUidata, CHbSymbianVariant::EDes );
        CleanupStack::PushL( variant );
        error = aMap->Add( key, variant);
        User::LeaveIfError( error );
        CleanupStack::Pop( variant ); // map's cleanup sequence handles variant.
        }     
-    RDebug::Print(_L("CEapAuthNotifier::setFastPacFileQueryPwDialogData: LEAVING") );
+    RDebug::Print(_L("CEapAuthNotifier::SetFastPacFileQueryPwDialogDataL: LEAVING") );
     }
 
-// --------------------------------------------------------------
-// void CEapAuthNotifier::SetFastInstallPacQueryDialogDataL
-// --------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Set data for the EAP-FAST Install PAC query Dialog(s)
+// ---------------------------------------------------------------------------
 //
 void CEapAuthNotifier::SetFastInstallPacQueryDialogDataL( 
     TEapDialogInfo* aEapInfo,
@@ -335,7 +347,9 @@ void CEapAuthNotifier::SetFastInstallPacQueryDialogDataL(
         RDebug::Print(_L("CEapAuthNotifier::SetFastInstallPacQueryDialogData: aEapInfo->iUidata = %S\n"), &aEapInfo->iUidata );
     
         // Create the variant data information for the plugin
-        variant =  CHbSymbianVariant::NewL ( &aEapInfo->iUidata, CHbSymbianVariant::EDes );
+        variant =  
+            CHbSymbianVariant::NewL ( 
+            &aEapInfo->iUidata, CHbSymbianVariant::EDes );
         CleanupStack::PushL( variant );
         error = aMap->Add( key, variant);
         User::LeaveIfError( error );
@@ -344,9 +358,9 @@ void CEapAuthNotifier::SetFastInstallPacQueryDialogDataL(
     RDebug::Print(_L("CEapAuthNotifier::SetFastInstallPacQueryDialogData: LEAVING") );
     }
 
-// ---------------------------------------------------------
-// void CEapAuthNotifier::SetQueryDialogDataL
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Set data for the Challenge Query Dialog(s)
+// ---------------------------------------------------------------------------
 //
 void CEapAuthNotifier::SetQueryDialogDataL( 
     TEapDialogInfo* aEapInfo,
@@ -365,7 +379,8 @@ void CEapAuthNotifier::SetQueryDialogDataL(
     RDebug::Print(_L("CEapAuthNotifier::SetQueryDialogData: aAuthMethod = %S\n"), &aAuthMethod );
     
     // Create the variant data information for the plugin
-    variant =  CHbSymbianVariant::NewL ( &aAuthMethod, CHbSymbianVariant::EDes );
+    variant =  
+        CHbSymbianVariant::NewL ( &aAuthMethod, CHbSymbianVariant::EDes );
     CleanupStack::PushL( variant );
     error = aMap->Add( key1, variant);
     User::LeaveIfError( error );
@@ -377,7 +392,9 @@ void CEapAuthNotifier::SetQueryDialogDataL(
         RDebug::Print(_L("CEapAuthObserver::SetQueryDialogData: aEapInfo->iUidata = %S\n"), &aEapInfo->iUidata );
     
         // Create the variant data information for the plugin
-        variant =  CHbSymbianVariant::NewL ( &aEapInfo->iUidata, CHbSymbianVariant::EDes );
+        variant =  
+            CHbSymbianVariant::NewL (
+            &aEapInfo->iUidata, CHbSymbianVariant::EDes );
         CleanupStack::PushL( variant );
         error = aMap->Add( key2, variant);
         User::LeaveIfError( error );
@@ -386,9 +403,9 @@ void CEapAuthNotifier::SetQueryDialogDataL(
     RDebug::Print(_L("CEapAuthNotifier::SetQueryDialogData: LEAVING") );
     }
 
-// ---------------------------------------------------------
-// void CEapAuthNotifier::SetPasswordQueryDataL
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Set data for the Password Query Dialog(s)
+// ---------------------------------------------------------------------------
 //
 void CEapAuthNotifier::SetPasswordQueryDataL( 
     TEapExpandedType& aEapType,
@@ -405,14 +422,17 @@ void CEapAuthNotifier::SetPasswordQueryDataL(
     
     //Create the variant data information for the plugin
     //Set authentication method 
-    variant =  CHbSymbianVariant::NewL ( &aAuthMethod, CHbSymbianVariant::EDes );
+    variant =  
+        CHbSymbianVariant::NewL ( &aAuthMethod, CHbSymbianVariant::EDes );
     CleanupStack::PushL( variant );
     error = aMap->Add( key2, variant);
     User::LeaveIfError( error );
     CleanupStack::Pop( variant ); // map's cleanup sequence handles variant.
     
     //Set EAP type
-    variant =  CHbSymbianVariant::NewL( &aEapType.GetValue(), CHbSymbianVariant::EBinary );
+    variant =  
+        CHbSymbianVariant::NewL(
+        &aEapType.GetValue(), CHbSymbianVariant::EBinary );
     CleanupStack::PushL( variant );
     error = aMap->Add( key3, variant);
     User::LeaveIfError( error );
@@ -420,9 +440,9 @@ void CEapAuthNotifier::SetPasswordQueryDataL(
     RDebug::Print(_L("CEapAuthNotifier::SetPasswordQueryData: LEAVING") );
     }
 
-// ---------------------------------------------------------
-// void CEapAuthNotifier::SetUsernamePasswordDataL
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Set data for the UsernamePassword Dialog(s)
+// ---------------------------------------------------------------------------
 //
 void CEapAuthNotifier::SetUsernamePasswordDataL( 
     TEapDialogInfo* aEapInfo,
@@ -441,7 +461,8 @@ void CEapAuthNotifier::SetUsernamePasswordDataL(
     
     //Create the variant data information for the plugin
     //Set authentication method 
-    variant =  CHbSymbianVariant::NewL ( &aAuthMethod, CHbSymbianVariant::EDes );
+    variant =  
+        CHbSymbianVariant::NewL ( &aAuthMethod, CHbSymbianVariant::EDes );
     CleanupStack::PushL( variant );
     error = aMap->Add( key2, variant);
     User::LeaveIfError( error );
@@ -454,7 +475,9 @@ void CEapAuthNotifier::SetUsernamePasswordDataL(
         RDebug::Print(_L("CEapAuthNotifier::SetUsernamePasswordData: iEapInfo->iUsername = %S\n"), &iEapInfo->iUsername );
     
         // Create the variant data information for the plugin
-        variant =  CHbSymbianVariant::NewL ( &aEapInfo->iUsername, CHbSymbianVariant::EDes );
+        variant =  
+            CHbSymbianVariant::NewL ( 
+            &aEapInfo->iUsername, CHbSymbianVariant::EDes );
         CleanupStack::PushL( variant );
         error = aMap->Add( key1, variant);
         User::LeaveIfError( error );
@@ -462,7 +485,9 @@ void CEapAuthNotifier::SetUsernamePasswordDataL(
         }
 
     //Set EAP type
-    variant =  CHbSymbianVariant::NewL( &aEapType.GetValue(), CHbSymbianVariant::EBinary );
+    variant =  
+        CHbSymbianVariant::NewL( 
+        &aEapType.GetValue(), CHbSymbianVariant::EBinary );
     CleanupStack::PushL( variant );
     error = aMap->Add( key3, variant);
     User::LeaveIfError( error );
@@ -470,9 +495,9 @@ void CEapAuthNotifier::SetUsernamePasswordDataL(
     RDebug::Print(_L("CEapAuthNotifier::SetUsernamePasswordData: LEAVING") );
     }
 
-// --------------------------------------------------------------------------
-// void CEapAuthNotifier::SetSelectedUnameAndPwd( TEapDialogInfo& aEapInfo )
-// --------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Sets the selected user name and password of the presented dialog
+// ---------------------------------------------------------------------------
 //
 void CEapAuthNotifier::SetSelectedUnameAndPwd ( TEapDialogInfo& aEapInfo )
     {
@@ -493,9 +518,9 @@ void CEapAuthNotifier::SetSelectedUnameAndPwd ( TEapDialogInfo& aEapInfo )
         }    
     }
 
-// ------------------------------------------------------------------------------
-// void CEapAuthNotifier::SetSelectedPassword( TEapDialogInfo& aPasswordInfo )
-// ------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Sets the selected password of the presented dialog
+// ---------------------------------------------------------------------------
 //
 void CEapAuthNotifier::SetSelectedPassword ( TEapDialogInfo& aPasswordInfo )
     {
@@ -505,9 +530,9 @@ void CEapAuthNotifier::SetSelectedPassword ( TEapDialogInfo& aPasswordInfo )
     RDebug::Print(_L("CEapAuthNotifier::SetSelectedPassword: iEapInfo->iPassword = %S\n"), &iEapInfo->iPassword );    
     }
 
-// ---------------------------------------------------------------------------------
-// void CEapAuthNotifier::SetSelectedOldPassword( TEapDialogInfo& aPasswordInfo )
-// ---------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Sets the selected Old password of the presented dialog
+// ---------------------------------------------------------------------------
 //
 void CEapAuthNotifier::SetSelectedOldPassword ( TEapDialogInfo& aPasswordInfo )
     {
@@ -517,9 +542,9 @@ void CEapAuthNotifier::SetSelectedOldPassword ( TEapDialogInfo& aPasswordInfo )
     RDebug::Print(_L("CEapAuthNotifier::SetSelectedOldPassword: iEapInfo->iOldPassword = %S\n"), &iEapInfo->iOldPassword );    
     }
 
-// ---------------------------------------------------------
-// void CEapAuthNotifier::Complete( TInt aStatus )
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// The notifier is complete
+// ---------------------------------------------------------------------------
 //
 void CEapAuthNotifier::CompleteL( TInt aStatus )
     {
@@ -532,9 +557,9 @@ void CEapAuthNotifier::CompleteL( TInt aStatus )
         }
     }
 
-// ------------------------------------------------------------
-// void CEapAuthNotifier::Cancel()
-// ------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Cancel() the notifier
+// ---------------------------------------------------------------------------
 //
 EXPORT_C void CEapAuthNotifier::Cancel()
     {

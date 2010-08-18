@@ -11,14 +11,16 @@
 *
 * Contributors:
 *
-* Description: EAP-MSCHAPv2 New Password Input Dialog implementation
+* Description: 
+*   EAP-MSCHAPv2 New Password Input Dialog implementation
 *
 */
 
 /*
-* %version: 4 %
+* %version: 5 %
 */
 
+// System includes
 #include <HbAction>
 #include <HbLineEdit>
 #include <HbTranslator>
@@ -27,14 +29,30 @@
 #include <eapqtexpandedeaptype.h>
 #include <eapqtconfiginterface.h>
 #include <eapqtconfig.h>
+
+// User includes
 #include "eapmschapv2newpwddialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #endif
 
+/*!
+ * \class EapMschapv2NewPwdDialog
+ * \brief Implements EAP-MSCHAPv2 New Password Input Dialog. 
+ */
 
-/**
- * The constructor
+// External function prototypes
+
+// Local constants
+ 
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+/*!
+ * Constructor.
+ * 
+ * @param [in]  parameters Parameters for the Constructor.
  */
 EapMschapv2NewPwdDialog::EapMschapv2NewPwdDialog(const QVariantMap &parameters) 
  :mEdit1(NULL), 
@@ -53,8 +71,10 @@ EapMschapv2NewPwdDialog::EapMschapv2NewPwdDialog(const QVariantMap &parameters)
     qDebug("EapMschapv2NewPwdDialog::EapMschapv2NewPwdDialog EXIT");
 }
     
-/**
+/*!
  * The construction of the dialog
+ *
+ * @param [in] parameters Parameters for the Construction of the dialog.
  */ 
 void EapMschapv2NewPwdDialog::createDialog(const QVariantMap &parameters )
 {
@@ -73,17 +93,19 @@ void EapMschapv2NewPwdDialog::createDialog(const QVariantMap &parameters )
     this->setDismissPolicy(HbPopup::NoDismiss);    
     this->setAdditionalRowVisible(true);
     
+    //Set the first Line Edit to be on the screen
     this->setPromptText(labelText1, 0);   
     mEdit1 = this->lineEdit(0);
     mEdit1->setEchoMode(HbLineEdit::Password);
     
+    //Set the second Line Edit to be on the screen also
     this->setPromptText(labelText2, 1);   
     mEdit2 = this->lineEdit(1);        
     mEdit2->setEchoMode(HbLineEdit::Password);
     
-    EapQtConfigInterface eap_config_if;
+    EapQtConfigInterface eapConfigIf;
     
-    mPwdValidator.reset( eap_config_if.validatorEap(EapQtExpandedEapType::TypeEapMschapv2,
+    mPwdValidator.reset( eapConfigIf.validatorEap(EapQtExpandedEapType::TypeEapMschapv2,
                 EapQtConfig::Password ) );  
     Q_ASSERT( mPwdValidator.isNull() == false );                
                    
@@ -126,8 +148,8 @@ void EapMschapv2NewPwdDialog::createDialog(const QVariantMap &parameters )
     qDebug("EapMschapv2NewPwdDialog::createDialog EXIT");
 }
 
-/**
- * Destructor
+/*!
+ * Destructor.
  */
 EapMschapv2NewPwdDialog::~EapMschapv2NewPwdDialog()
 {
@@ -140,17 +162,17 @@ EapMschapv2NewPwdDialog::~EapMschapv2NewPwdDialog()
     OstTraceFunctionExit0( EAPMSCHAPV2NEWPWDDIALOG_DEAPMSCHAPV2NEWPWDDIALOG_EXIT );
 }
 
-/**
+/*!
  * Line edit validator
+ *
+ * @return true if content is valid.
  */
 bool EapMschapv2NewPwdDialog::validate() const
 {
     qDebug("EapMschapv2NewPwdDialog::validate ENTER");
     
     bool valid = false;
-    
-    EapQtValidator::Status test_status = mPwdValidator->validate(mEdit1->text());
-    
+     
     if ( mPwdValidator->validate(mEdit1->text())== EapQtValidator::StatusOk &&
         mEdit1->text() == mEdit2->text()) {
         qDebug("EapMschapv2NewPwdDialog::validate: ret val: TRUE");
@@ -160,7 +182,7 @@ bool EapMschapv2NewPwdDialog::validate() const
     return valid;
 }
 
-/**
+/*!
  * Function is called when the Ok Action button is pressed
  */
 void EapMschapv2NewPwdDialog::okPressed()
@@ -190,7 +212,7 @@ void EapMschapv2NewPwdDialog::okPressed()
     qDebug("EapMschapv2NewPwdDialog::okPressed EXIT");
 }
 
-/**
+/*!
  * Function is called when the Cancel Action button is pressed
  */
 void EapMschapv2NewPwdDialog::cancelPressed()
@@ -206,9 +228,8 @@ void EapMschapv2NewPwdDialog::cancelPressed()
     OstTraceFunctionExit0( EAPMSCHAPV2NEWPWDDIALOG_CANCELPRESSED_EXIT );
 }
 
-/**
+/*!
  * Function is called when the dialog is about to close
- * 
  */
 void EapMschapv2NewPwdDialog::closingDialog()
 {
@@ -219,9 +240,13 @@ void EapMschapv2NewPwdDialog::closingDialog()
     OstTraceFunctionExit0( EAPMSCHAPV2NEWPWDDIALOG_CLOSINGDIALOG_EXIT );
 }
 
-/**
- * Updating the dialog during its showing is not allowed.
- */ 
+/*!
+ * Device dialog parameters to be set while dialog is displayed.
+ * Not supported. 
+ *
+ * @param [in] parameters NOT USED
+ * @return true always.
+ */  
 bool EapMschapv2NewPwdDialog::setDeviceDialogParameters
                 (const QVariantMap &parameters)
 {
@@ -234,8 +259,10 @@ bool EapMschapv2NewPwdDialog::setDeviceDialogParameters
     return true;
 }
 
-/**
- * Not supported, 0 always returned
+/*!
+ * Not supported
+ *
+ * @return 0 always returned.
  */
 int EapMschapv2NewPwdDialog::deviceDialogError() const
 {
@@ -244,8 +271,10 @@ int EapMschapv2NewPwdDialog::deviceDialogError() const
     return 0;
 }
 
-/**
+/*!
  * Dialog is closed and the signal about closing is emitted
+ *
+ * @param [in] byClient indicates when the user closes the dialog
  */
 void EapMschapv2NewPwdDialog::closeDeviceDialog(bool byClient)
 {   
@@ -262,8 +291,10 @@ void EapMschapv2NewPwdDialog::closeDeviceDialog(bool byClient)
     OstTraceFunctionExit0( EAPMSCHAPV2NEWPWDDIALOG_CLOSEDEVICEDIALOG_EXIT );
 }
 
-/**
+/*!
  * This dialog widget is returned to the caller
+ *
+ * @return this dialog widget
  */
 HbPopup *EapMschapv2NewPwdDialog::deviceDialogWidget() const
 {

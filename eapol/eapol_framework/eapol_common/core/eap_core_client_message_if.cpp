@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 32 %
+* %version: 34 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -116,11 +116,18 @@ EAP_FUNC_EXPORT eap_status_e eap_core_client_message_if_c::process_message(eap_p
 {
 	// Sends message data composed of Attribute-Value Pairs.
 
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		(EAPL("eap_core_client_message_if_c::process_message(): this = 0x%08x => 0x%08x.\n"),
+		this,
+		dynamic_cast<abs_eap_base_timer_c *>(this)));
+
 	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_core_client_message_if_c::send_message()");
 
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
-		EAP_TRACE_FLAGS_MESSAGE_DATA,
+		EAP_TRACE_FLAGS_NEVER,
 		(EAPL("eap_core_client_message_if_c::send_message()"),
 		message->get_message_data(),
 		message->get_message_data_length()));
@@ -1389,7 +1396,7 @@ EAP_FUNC_EXPORT eap_status_e eap_core_client_message_if_c::send_data(const void 
 
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
-		EAP_TRACE_FLAGS_MESSAGE_DATA,
+		EAP_TRACE_FLAGS_NEVER,
 		(EAPL("eap_core_client_message_if_c::send_data()"),
 		message.get_message_data(),
 		message.get_message_data_length()));

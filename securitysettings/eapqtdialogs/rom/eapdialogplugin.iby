@@ -11,12 +11,12 @@
  *
  * Contributors:
  *
- * Description:
+ * Description: Image description file for the EAP Dialogs
  * 
  */
  
  /*
-  * %version: 1 %
+  * %version: 3 %
   */
  
 #ifndef __EAPDIALOGPLUGIN_IBY__

@@ -15,15 +15,29 @@
 *
 */
 
+/*
+* %version: 15 %
+*/
+
+// System include files
 #include <hb/hbcore/hbsymbianvariant.h>
 #include <e32debug.h>
+
+// User include files
 #include "eap_auth_notifier.h"
 #include "eap_auth_observer.h"
 
+// External function prototypes
 
-// ---------------------------------------------------------
-// CEapAuthObserver* CEapAuthObserver::NewL
-// ---------------------------------------------------------
+// Local constants
+
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+// ---------------------------------------------------------------------------
+// Two-phased constructor.
+// ---------------------------------------------------------------------------
 //
 CEapAuthObserver* CEapAuthObserver::NewL( 
     CEapAuthNotifier* aNotifier )
@@ -34,9 +48,9 @@ CEapAuthObserver* CEapAuthObserver::NewL(
     return self;
     }
 
-// ---------------------------------------------------------
-// CEapAuthObserver::CEapAuthObserver
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Constructor
+// ---------------------------------------------------------------------------
 //
 CEapAuthObserver::CEapAuthObserver( 
     CEapAuthNotifier* aNotifier  ): 
@@ -45,18 +59,18 @@ CEapAuthObserver::CEapAuthObserver(
     RDebug::Print(_L("CEapAuthObserver::CEapAuthObserver") );
     }
 
-// ---------------------------------------------------------
-// CEapAuthObserver::~CEapAuthObserver()
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Destructor
+// ---------------------------------------------------------------------------
 //
 CEapAuthObserver::~CEapAuthObserver()
     {
     RDebug::Print(_L("CEapAuthObserver::~CEapAuthObserver") );
     }
 
-// ---------------------------------------------------------
-// CEapAuthObserver::SetNotifierType
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Handles the setting of the notifier (dialog) type
+// ---------------------------------------------------------------------------
 //
 void CEapAuthObserver::SetNotifierType( CEapAuthNotifier::EEapNotifierType aType )
     {
@@ -65,9 +79,11 @@ void CEapAuthObserver::SetNotifierType( CEapAuthNotifier::EEapNotifierType aType
     iType = aType;
     }
 
-// ---------------------------------------------------------
-// void CEapAuthObserver::DataReceived
-// ---------------------------------------------------------
+// Derived function:
+// ---------------------------------------------------------------------------
+// From class MHbDeviceDialogObserver.
+// Handles the user input received from the dialog
+// ---------------------------------------------------------------------------
 //
 void CEapAuthObserver::DataReceived( CHbSymbianVariantMap& aData )
 {
@@ -139,11 +155,12 @@ void CEapAuthObserver::DataReceived( CHbSymbianVariantMap& aData )
     TRAP_IGNORE( iNotifier->CompleteL( status ));
 }
 
-// ---------------------------------------------------------
-// void CEapAuthObserver::UsernamePasswordDlgDataReceived
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Handles the user name password input received from the dialog
+// ---------------------------------------------------------------------------
 //
-void CEapAuthObserver::UsernamePasswordDlgDataReceived( CHbSymbianVariantMap& aData )
+void CEapAuthObserver::UsernamePasswordDlgDataReceived(
+     CHbSymbianVariantMap& aData )
 {
     RDebug::Print(_L("CEapAuthObserver::UsernamePasswordDlgDataReceived") ); 
     
@@ -180,9 +197,9 @@ void CEapAuthObserver::UsernamePasswordDlgDataReceived( CHbSymbianVariantMap& aD
     iNotifier->SetSelectedUnameAndPwd( PasswordInfo );   
 }
 
-// ---------------------------------------------------------
-// void CEapAuthObserver::OldPwdQueryDataReceived
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Handles the old password query user input received from the dialog
+// ---------------------------------------------------------------------------
 //
 void CEapAuthObserver::OldPwdQueryDataReceived( CHbSymbianVariantMap& aData )
 {
@@ -207,9 +224,9 @@ void CEapAuthObserver::OldPwdQueryDataReceived( CHbSymbianVariantMap& aData )
     iNotifier->SetSelectedOldPassword( PasswordInfo );   
 }
 
-// ---------------------------------------------------------
-// void CEapAuthObserver::PwdQueryDataReceived
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Handles the password query user input received from the dialog
+// ---------------------------------------------------------------------------
 //
 void CEapAuthObserver::PwdQueryDataReceived( CHbSymbianVariantMap& aData )
 {
@@ -234,9 +251,11 @@ void CEapAuthObserver::PwdQueryDataReceived( CHbSymbianVariantMap& aData )
     iNotifier->SetSelectedPassword( PasswordInfo );   
 }
 
-// ---------------------------------------------------------
-// void CEapAuthObserver::DeviceDialogClosed
-// ---------------------------------------------------------
+// Derived function:
+// ---------------------------------------------------------------------------
+// From class MHbDeviceDialogObserver.
+// Handles the closing of the dialog
+// ---------------------------------------------------------------------------
 //
 void CEapAuthObserver::DeviceDialogClosed( TInt /*aCompletionCode*/ )
 {

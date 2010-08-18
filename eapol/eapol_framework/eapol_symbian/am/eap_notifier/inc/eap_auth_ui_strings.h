@@ -12,12 +12,12 @@
  * Contributors:
  *
  * Description: 
- *   EAP String definitions for the Notifier
+ *   EAP String definitions
  *
  */
  
 /*
- * %version: 2 %
+ * %version: 3 %
  */
 
 

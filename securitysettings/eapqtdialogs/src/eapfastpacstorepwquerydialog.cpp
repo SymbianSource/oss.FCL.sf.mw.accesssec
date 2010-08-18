@@ -11,14 +11,15 @@
 *
 * Contributors:
 *
-* Description: Fast Pac Store Password Query Dialog implementation
+* Description: EAP-FAST PAC Store Password Query Dialog implementation
 *
 */
 
 /*
-* %version: 5 %
+* %version: 6 %
 */
 
+// System includes
 #include <HbTranslator>
 #include <HbAction>
 #include <HbTranslator>
@@ -28,14 +29,32 @@
 #include <eapqtexpandedeaptype.h>
 #include <eapqtconfiginterface.h>
 #include <eapqtconfig.h>
+
+// User includes
 #include "eapfastpacstorepwquerydialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #endif
 
 
-/**
- * The constructor
+/*!
+ * \class EapFastPacStorePwQueryDialog
+ * \brief Implements EAP-FAST PAC Store Password Query Dialog. 
+ */
+
+// External function prototypes
+
+// Local constants
+static const uint PacStorePwQueryTimeout = 60000;
+ 
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+/*!
+ * Constructor.
+ * 
+ * @param [in]  parameters Parameters for the Constructor.
  */
 EapFastPacStorePwQueryDialog::EapFastPacStorePwQueryDialog(const QVariantMap &parameters) 
  :mEdit(NULL), 
@@ -46,29 +65,29 @@ EapFastPacStorePwQueryDialog::EapFastPacStorePwQueryDialog(const QVariantMap &pa
 {
     OstTraceFunctionEntry0( EAPFASTPACSTOREPWQUERYDIALOG_EAPFASTPACSTOREPWQUERYDIALOG_ENTRY );
     qDebug("EapFastPacStorePwQueryDialog::EapFastPacStorePwQueryDialog ENTER");
+    
+    Q_UNUSED(parameters)
           
-    createDialog(parameters);
+    createDialog();
      
     OstTraceFunctionExit0( EAPFASTPACSTOREPWQUERYDIALOG_EAPFASTPACSTOREPWQUERYDIALOG_EXIT );
     qDebug("EapFastPacStorePwQueryDialog::EapFastPacStorePwQueryDialog EXIT");
 }
     
-/**
+/*!
  * The construction of the dialog
  */ 
-void EapFastPacStorePwQueryDialog::createDialog(const QVariantMap &parameters )
+void EapFastPacStorePwQueryDialog::createDialog()
 {
     OstTraceFunctionEntry0( EAPFASTPACSTOREPWQUERYDIALOG_CREATEDIALOG_ENTRY );
     qDebug("EapFastPacStorePwQueryDialog::createDialog ENTER");
 
     QString labelText(hbTrId("txt_occ_dialog_pac_store_password"));
     
-    Q_UNUSED(parameters)
-
     // Set the dialog to be on the screen for 60 seconds, unless
     // the user reacts earlier
     this->setModal(true);
-    this->setTimeout(60000);
+    this->setTimeout(PacStorePwQueryTimeout);
     this->setDismissPolicy(HbPopup::NoDismiss);
     this->setPromptText(labelText, 0);  
     
@@ -121,8 +140,8 @@ void EapFastPacStorePwQueryDialog::createDialog(const QVariantMap &parameters )
     qDebug("EapFastPacStorePwQueryDialog::createDialog EXIT");
 }
 
-/**
- * Destructor
+/*!
+ * Destructor.
  */
 EapFastPacStorePwQueryDialog::~EapFastPacStorePwQueryDialog()
 {
@@ -134,8 +153,10 @@ EapFastPacStorePwQueryDialog::~EapFastPacStorePwQueryDialog()
     OstTraceFunctionExit0( EAPFASTPACSTOREPWQUERYDIALOG_DEAPFASTPACSTOREPWQUERYDIALOG_EXIT );
 }
 
-/**
+/*!
  * Line edit validator
+ *
+ * @return true if content is valid.
  */
 bool EapFastPacStorePwQueryDialog::validate() const
 {
@@ -152,7 +173,7 @@ bool EapFastPacStorePwQueryDialog::validate() const
     return valid;
 }
 
-/**
+/*!
  * Function is called when the Ok Action button is pressed
  */
 void EapFastPacStorePwQueryDialog::okPressed()
@@ -184,7 +205,7 @@ void EapFastPacStorePwQueryDialog::okPressed()
     qDebug("EapFastPacStorePwQueryDialog::okPressed EXIT");
 }
 
-/**
+/*!
  * Function is called when the Cancel Action button is pressed
  */
 void EapFastPacStorePwQueryDialog::cancelPressed()
@@ -200,9 +221,8 @@ void EapFastPacStorePwQueryDialog::cancelPressed()
     OstTraceFunctionExit0( EAPFASTPACSTOREPWQUERYDIALOG_CANCELPRESSED_EXIT );
 }
 
-/**
+/*!
  * Function is called when the dialog is about to close
- * 
  */
 void EapFastPacStorePwQueryDialog::closingDialog()
 {
@@ -213,9 +233,13 @@ void EapFastPacStorePwQueryDialog::closingDialog()
     OstTraceFunctionExit0( EAPFASTPACSTOREPWQUERYDIALOG_CLOSINGDIALOG_EXIT );
 }
 
-/**
- * Updating the dialog during its showing is not allowed.
- */ 
+/*!
+ * Device dialog parameters to be set while dialog is displayed.
+ * Not supported. 
+ *
+ * @param [in] parameters NOT USED
+ * @return true always.
+ */  
 bool EapFastPacStorePwQueryDialog::setDeviceDialogParameters
                 (const QVariantMap &parameters)
 {
@@ -228,8 +252,10 @@ bool EapFastPacStorePwQueryDialog::setDeviceDialogParameters
     return true;
 }
 
-/**
- * Not supported, 0 always returned
+/*!
+ * Not supported
+ *
+ * @return 0 always returned.
  */
 int EapFastPacStorePwQueryDialog::deviceDialogError() const
 {
@@ -238,8 +264,10 @@ int EapFastPacStorePwQueryDialog::deviceDialogError() const
     return 0;
 }
 
-/**
+/*!
  * Dialog is closed and the signal about closing is emitted
+ *
+ * @param [in] byClient indicates when the user closes the dialog
  */
 void EapFastPacStorePwQueryDialog::closeDeviceDialog(bool byClient)
 {   
@@ -257,8 +285,10 @@ void EapFastPacStorePwQueryDialog::closeDeviceDialog(bool byClient)
     OstTraceFunctionExit0( EAPFASTPACSTOREPWQUERYDIALOG_CLOSEDEVICEDIALOG_EXIT );
 }
 
-/**
+/*!
  * This dialog widget is returned to the caller
+ *
+ * @return this dialog widget
  */
 HbPopup *EapFastPacStorePwQueryDialog::deviceDialogWidget() const
 {

@@ -11,23 +11,36 @@
 *
 * Contributors:
 *
-* Description: Fast Pac File Password Query Dialog
+* Description: EAP-FAST PAC File Password Query Dialog
 *
 */
 
 /*
-* %version: 3 %
+* %version: 4 %
 */
 
 #ifndef __EAPFASTPACFILEPWQUERYDIALOG_H__
 #define __EAPFASTPACFILEPWQUERYDIALOG_H__
 
-
+// System includes
 #include <HbInputDialog>
 #include <hbdevicedialoginterface.h>
 
+// User includes
 
+// Forward declarations
 class HbTranslator;
+
+// External data types
+
+// Constants
+
+/*!
+   @addtogroup group_eap_fast_pac_file_pwd_query_dialog
+   @{
+ */
+
+// Class declaration
 
 class EapFastPacFilePwQueryDialog: public HbInputDialog, public HbDeviceDialogInterface
     {
@@ -43,17 +56,18 @@ class EapFastPacFilePwQueryDialog: public HbInputDialog, public HbDeviceDialogIn
         void createDialog( const QVariantMap &parameters );
         
         /* Device dialog parameters to be set while dialog is displayed.
-         * Not supported.
+         * Not supported. (from HbDeviceDialogInterface)
          */
         bool setDeviceDialogParameters(const QVariantMap &parameters);
         
-        /* Not supported */
+        /* Not supported. (from HbDeviceDialogInterface */
         int deviceDialogError() const;
         
-        /* Closes the device dialog */
+        /* Closes the device dialog. (from HbDeviceDialogInterface */
         void closeDeviceDialog(bool byClient);
         
-        /* Returns a pointer to this dialog widget */
+        /* Returns a pointer to this dialog widget.
+           (from HbDeviceDialogInterface) */
         HbPopup *deviceDialogWidget() const;
                 
     signals:
@@ -77,20 +91,23 @@ class EapFastPacFilePwQueryDialog: public HbInputDialog, public HbDeviceDialogIn
                 
         Q_DISABLE_COPY(EapFastPacFilePwQueryDialog)
    
-    private:
-        /* Pointer to the line edit object */
+    private: // data
+        // NOT OWNED
+        //! Pointer to the line edit object
         HbLineEdit *mEdit;
                                 
-        /* Pointer to the HbTranslator */
+        // OWNED        
+        //! Pointer to the password validator object
         QScopedPointer<HbTranslator> mTranslator;
                 
-        /* Tells whether close has already been called for the dialog */
+        //! Tells whether close has already been called for the dialog
         bool mClose;
         
-        /* Tells whether Ok Action has already been pressed */
+        //! Tells whether Ok Action has already been pressed
         bool mOkActionPressed;
     };
 
+/*! @} */
 
 #endif // __EAPFASTPACFILEPWQUERYDIALOG_H__
 

@@ -16,21 +16,39 @@
 */
 
 /*
-* %version: 2 %
+* %version: 3 %
 */
 
+// System includes
 #include <HbAction>
 #include <HbTranslator>
+
+// User includes
 #include "eapmschapv2pwdexpirednotedialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #endif
 
-// The index numbers of the button of the dialog
-const int okButtonIndex = 1;
+/*!
+ * \class EapMschapv2NewPwdDialog
+ * \brief Implements EAP-MSCHAPv2 New Password Input Dialog. 
+ */
 
-/**
- * The constructor
+// External function prototypes
+
+// Local constants
+
+//! The index numbers of the button of the dialog
+static const int okButtonIndex = 1;
+ 
+// ======== LOCAL FUNCTIONS ========
+
+// ======== MEMBER FUNCTIONS ========
+
+/*!
+ * Constructor.
+ * 
+ * @param [in]  parameters Parameters for the Constructor.
  */
 EapMschapv2PwdExpNoteDialog::EapMschapv2PwdExpNoteDialog(const QVariantMap &parameters)
 :HbMessageBox("default text...",HbMessageBox::MessageTypeInformation),    
@@ -39,24 +57,24 @@ mOkActionPressed(false)
 {
     OstTraceFunctionEntry0( EAPMSCHAPV2PWDEXPNOTEDIALOG_EAPMSCHAPV2PWDEXPNOTEDIALOG_ENTRY );
     qDebug("EapMschapv2PwdExpNoteDialog::EapMschapv2PwdExpNoteDialog ENTER");
+    
+    Q_UNUSED(parameters)
 
-    createDialog( parameters );
+    createDialog();
     
     OstTraceFunctionExit0( EAPMSCHAPV2PWDEXPNOTEDIALOG_EAPMSCHAPV2PWDEXPNOTEDIALOG_EXIT );
     qDebug("EapMschapv2PwdExpNoteDialog::EapMschapv2PwdExpNoteDialog EXIT");
 }
     
-/**
+/*!
  * The construction of the dialog
  */ 
-void EapMschapv2PwdExpNoteDialog::createDialog(const QVariantMap &parameters )
+void EapMschapv2PwdExpNoteDialog::createDialog()
 {
     OstTraceFunctionEntry0( EAPMSCHAPV2PWDEXPNOTEDIALOG_CREATEDIALOG_ENTRY );
     qDebug("EapMschapv2PwdExpNoteDialog::createDialog ENTER");
      
     QString text(hbTrId("txt_occ_info_eapmschapv2_password_has_expired_yo"));
-    
-    Q_UNUSED(parameters)
         
     //Set the dialog to be on the screen until user reacts
     //by pressing the Action button
@@ -94,7 +112,7 @@ void EapMschapv2PwdExpNoteDialog::createDialog(const QVariantMap &parameters )
     qDebug("EapMschapv2PwdExpNoteDialog::createDialog EXIT");
 }
 
-/**
+/*!
  * Destructor
  */
 EapMschapv2PwdExpNoteDialog::~EapMschapv2PwdExpNoteDialog()
@@ -106,7 +124,7 @@ EapMschapv2PwdExpNoteDialog::~EapMschapv2PwdExpNoteDialog()
     OstTraceFunctionExit0( EAPMSCHAPV2PWDEXPNOTEDIALOG_DEAPMSCHAPV2PWDEXPNOTEDIALOG_EXIT );
 }
 
-/**
+/*!
  * Function is called when the Ok Action button is pressed
  */
 void EapMschapv2PwdExpNoteDialog::okPressed()
@@ -119,8 +137,8 @@ void EapMschapv2PwdExpNoteDialog::okPressed()
             mOkActionPressed = true;
             
             QVariantMap data;
-            QVariant variant(okButtonIndex);
-            data.insert("okbutton", variant);
+            data["okbutton"] = okButtonIndex;    
+            
             // emit the data of the selected button and close the dialog
             qDebug("EapMschapv2PwdExpNoteDialog::okPressed: emit deviceDialogData");
             emit deviceDialogData(data);
@@ -131,7 +149,7 @@ void EapMschapv2PwdExpNoteDialog::okPressed()
     qDebug("EapMschapv2PwdExpNoteDialog::okPressed EXIT");
 }
 
-/**
+/*!
  * Function is called when the dialog is about to close
  * 
  */
@@ -144,9 +162,13 @@ void EapMschapv2PwdExpNoteDialog::closingDialog()
     OstTraceFunctionExit0( EAPMSCHAPV2PWDEXPNOTEDIALOG_CLOSINGDIALOG_EXIT );
 }
 
-/**
- * Updating the dialog during its showing is not allowed.
- */ 
+/*!
+ * Device dialog parameters to be set while dialog is displayed.
+ * Not supported. 
+ *
+ * @param [in] parameters NOT USED
+ * @return true always.
+ */  
 bool EapMschapv2PwdExpNoteDialog::setDeviceDialogParameters
                 (const QVariantMap &parameters)
 {
@@ -159,8 +181,10 @@ bool EapMschapv2PwdExpNoteDialog::setDeviceDialogParameters
     return true;
 }
 
-/**
- * Not supported, 0 always returned
+/*!
+ * Not supported
+ *
+ * @return 0 always returned.
  */
 int EapMschapv2PwdExpNoteDialog::deviceDialogError() const
 {
@@ -169,8 +193,10 @@ int EapMschapv2PwdExpNoteDialog::deviceDialogError() const
     return 0;
 }
 
-/**
+/*!
  * Dialog is closed and the signal about closing is emitted
+ *
+ * @param [in] byClient indicates when the user closes the dialog
  */
 void EapMschapv2PwdExpNoteDialog::closeDeviceDialog(bool byClient)
 {   
@@ -186,8 +212,10 @@ void EapMschapv2PwdExpNoteDialog::closeDeviceDialog(bool byClient)
     OstTraceFunctionExit0( EAPMSCHAPV2PWDEXPNOTEDIALOG_CLOSEDEVICEDIALOG_EXIT );
 }
 
-/**
+/*!
  * This dialog widget is returned to the caller
+ *
+ * @return this dialog widget
  */
 HbPopup *EapMschapv2PwdExpNoteDialog::deviceDialogWidget() const
 {
