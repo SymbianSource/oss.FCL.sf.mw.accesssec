@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: tr1cfwln#20 %
+* %version: tr1cfwln#21 %
 */
 
 //  RESOURCE IDENTIFIER
@@ -271,7 +271,12 @@ RESOURCE TBUF r_wpa_tkip_cipher
     { 
     buf = qtn_wlan_sett_allow_tkip;
     }
-        
+ 
+RESOURCE TBUF r_wpa_unencrypted_conn
+    {
+    buf = qtn_wlan_sett_unencrypted_conn;
+    }
+
 RESOURCE TBUF r_wpa_mode_eap
     { 
     buf = qtn_wlan_sett_wpa_mode_eap;
@@ -290,6 +295,16 @@ RESOURCE TBUF r_wpa_cipher_allowed
 RESOURCE TBUF r_wpa_cipher_not_allowed
     { 
     buf = qtn_wlan_sett_tkip_not_allowed;
+    }
+
+RESOURCE TBUF r_wpa_unencrypted_conn_not_allow
+    {
+    buf = qtn_wlan_sett_unencrypted_conn_not_allow;
+    }
+
+RESOURCE TBUF r_wpa_unencrypted_conn_allow
+    {
+    buf = qtn_wlan_sett_unencrypted_conn_allow;
     }
 
 RESOURCE TBUF r_wpa_preshared_key_must_be_defined

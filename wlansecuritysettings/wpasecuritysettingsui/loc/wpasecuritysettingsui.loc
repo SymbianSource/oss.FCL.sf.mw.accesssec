@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: tr1cfwln#7 %
 */
 
 // LOCALISATION STRINGS
@@ -63,6 +63,14 @@
 #define qtn_wlan_sett_allow_tkip                "WPA2-only mode"
 
 
+//d:Fourth element of the Selection List
+//l:list_setting_pane_t1
+//w:
+//r:5.0
+//
+#define qtn_wlan_sett_unencrypted_conn         "Unencrypted connection"
+
+
 //d:Setting item for the first element of the Selection List
 //d:(qtn_wlan_sett_wpa_mode)
 //l:list_set_graphic_pane_t1
@@ -97,6 +105,24 @@
 //r:3.0
 //
 #define qtn_wlan_sett_tkip_not_allowed          "Yes"
+
+
+//d:Setting item for the fourth element of the Selection List
+//d:(qtn_wlan_sett_unencrypted_conn)
+//l:list_set_graphic_pane_t1
+//w:
+//r:5.0
+//
+#define qtn_wlan_sett_unencrypted_conn_not_allow  "Not allowed"
+
+
+//d:Setting item for the fourth element of the Selection List
+//d:(qtn_wlan_sett_unencrypted_conn)
+//l:list_set_graphic_pane_t1
+//w:
+//r:5.0
+//
+#define qtn_wlan_sett_unencrypted_conn_allow    "Allowed"
 
 
 //d:Information note for the user when the entered key is too short

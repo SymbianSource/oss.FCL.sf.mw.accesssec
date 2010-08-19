@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: tr1cfwln#15 %
+* %version: tr1cfwln#16 %
 */
 
 #ifndef WPASECURITYSETTINGSIMPL_INL
@@ -50,6 +50,16 @@ inline TBool CWPASecuritySettingsImpl::WPAMode() const
 inline TBool CWPASecuritySettingsImpl::Wpa2Only() const
     { 
     return iWpa2Only; 
+    }
+
+
+// ---------------------------------------------------------
+// CWPASecuritySettingsImpl::WPAUnencryptedConn
+// ---------------------------------------------------------
+//
+inline TBool CWPASecuritySettingsImpl::WPAUnencryptedConn() const
+    { 
+    return iWPAUnencryptedConn; 
     }
 
 
@@ -112,6 +122,15 @@ inline void CWPASecuritySettingsImpl::SetWpa2Only( const TBool aWpa2Only )
     iWpa2Only = aWpa2Only; 
     }
 
+
+// ---------------------------------------------------------
+// CWPASecuritySettingsImpl::SetWPAUnencryptedConn
+// ---------------------------------------------------------
+//
+inline void CWPASecuritySettingsImpl::SetWPAUnencryptedConn( const TBool aUnencryptedConn )
+    { 
+    iWPAUnencryptedConn = aUnencryptedConn; 
+    }
 
 
 // ---------------------------------------------------------

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: tr1cfwln#27 %
+* %version: tr1cfwln#29 %
 */
 
 // INCLUDE FILES
@@ -69,7 +69,8 @@ CWPASecuritySettingsImpl::CWPASecuritySettingsImpl(
                                                 TSecurityMode aSecurityMode )
 : iSecurityMode( aSecurityMode ),
   iWPAMode( EFalse ),
-  iWpa2Only( EFalse )
+  iWpa2Only( EFalse ),
+  iWPAUnencryptedConn( EFalse )
     {
     iWPAEAPPlugin.Zero();
     iWPAPreSharedKey.Zero();
@@ -123,18 +124,26 @@ void CWPASecuritySettingsImpl::LoadL( TUint32 aIapId,
     TInt errorCode = wLanServiceTable->GotoFirstRecord();
     if ( errorCode == KErrNone )
         {
-        // Get WPA Mode
-        TRAPD( err, wLanServiceTable->ReadUintL( TPtrC( WLAN_ENABLE_WPA_PSK ),
-                                                ( TUint32& ) iWPAMode ) );
-        if ( err != KErrNone )
-            { // do not leave if value is not present in table...
-            if ( err != KErrUnknown )
-                User::Leave( err );
+        if ( iSecurityMode == ESecurityMode8021x )
+            {
+            // in 802.1x PSK mode is not supported
+            iWPAMode = EFalse;
             }
-
+        else
+            {
+            // Get WPA Mode
+            TRAPD( err, wLanServiceTable->ReadUintL( TPtrC( WLAN_ENABLE_WPA_PSK ),
+                                                    ( TUint32& ) iWPAMode ) );
+            if ( err != KErrNone )
+                { // do not leave if value is not present in table...
+                if ( err != KErrUnknown )
+                    User::Leave( err );
+                }
+            }
+        
         TUint32 secMode = 0;
         // Get WPA2 Only Mode
-        TRAP( err, wLanServiceTable->ReadUintL( TPtrC( WLAN_SECURITY_MODE ),
+        TRAPD( err, wLanServiceTable->ReadUintL( TPtrC( WLAN_SECURITY_MODE ),
                                                  secMode ) );
         if ( err != KErrNone )
             { // do not leave if value is not present in table...
@@ -143,6 +152,19 @@ void CWPASecuritySettingsImpl::LoadL( TUint32 aIapId,
             }
 
         iWpa2Only = secMode == EWpa2;
+
+        // Get Unencrypted Connection mode for 802.1x
+        if ( iSecurityMode == ESecurityMode8021x )
+            {
+            // WLAN_WPA_KEY_LENGTH is used also for Unencrypted Connection mode
+            TRAPD( err2, wLanServiceTable->ReadUintL( TPtrC( WLAN_WPA_KEY_LENGTH ),
+                                                ( TUint32& ) iWPAUnencryptedConn ) );
+            if ( err2 != KErrNone )
+                { // do not leave if value is not present in table...
+                if ( err2 != KErrUnknown )
+                    User::Leave( err2 );
+                }
+            }
 
         // Get EAP list
     	iWPAEAPPlugin.Copy( *wLanServiceTable->ReadLongTextLC( 
@@ -248,8 +270,11 @@ void CWPASecuritySettingsImpl::LoadL( TUint32 aIapId,
 	        }
 	        
         // Get PreShared Key
-        wLanServiceTable->ReadTextL( TPtrC( WLAN_WPA_PRE_SHARED_KEY ), 
+	    if ( iSecurityMode != ESecurityMode8021x )
+	        {
+            wLanServiceTable->ReadTextL( TPtrC( WLAN_WPA_PRE_SHARED_KEY ), 
                                     iWPAPreSharedKey );
+	        }
 
         if ( !IsValidPsk( iWPAPreSharedKey ) )
             {       
@@ -293,8 +318,11 @@ void CWPASecuritySettingsImpl::SaveL( TUint32 aIapId,
         }
 
     // Save WPA Mode
-    wLanServiceTable->WriteUintL( TPtrC( WLAN_ENABLE_WPA_PSK ), 
+    if ( iSecurityMode != ESecurityMode8021x )
+        {
+        wLanServiceTable->WriteUintL( TPtrC( WLAN_ENABLE_WPA_PSK ), 
                                   ( TUint32& ) iWPAMode );
+        }
 
     TUint32 secMode;
 
@@ -331,13 +359,26 @@ void CWPASecuritySettingsImpl::SaveL( TUint32 aIapId,
                                   iWPADisabledEAPPlugin? 
                                         (const TDesC8&)*iWPADisabledEAPPlugin: 
                                         (const TDesC8&)KNullDesC8 );
-    // Save PreShared Key
-    wLanServiceTable->WriteTextL( TPtrC( WLAN_WPA_PRE_SHARED_KEY ), 
-                                  iWPAPreSharedKey );
+ 
 
-    // Save PreShared Key Length
-    wLanServiceTable->WriteUintL( TPtrC( WLAN_WPA_KEY_LENGTH ), 
-                                  iWPAPreSharedKey.Length() );
+
+    if ( iSecurityMode == ESecurityMode8021x )
+        {
+        // In 802.1x WpaKeyLength is not used 
+        // and the field is reused to save UnencryptedConn mode
+        wLanServiceTable->WriteUintL( TPtrC( WLAN_WPA_KEY_LENGTH ), 
+                                      ( TUint32& ) iWPAUnencryptedConn );
+        }
+    else
+        {
+        // Save PreShared Key
+        wLanServiceTable->WriteTextL( TPtrC( WLAN_WPA_PRE_SHARED_KEY ), 
+                                  iWPAPreSharedKey );
+    
+        // Save PreShared Key Length
+        wLanServiceTable->WriteUintL( TPtrC( WLAN_WPA_KEY_LENGTH ), 
+                                        iWPAPreSharedKey.Length() );
+        }
 
     wLanServiceTable->PutRecordChanges();
 
@@ -542,16 +583,32 @@ void CWPASecuritySettingsImpl::LoadL( TUint32 aIapId,
 
     if( generic->FindL( aSession) )
         {
-        // Get WPA mode
-        CMDBField<TUint>* enableWpaPskField = static_cast<CMDBField<TUint>*>
+        if ( iSecurityMode == ESecurityMode8021x )
+            {
+            // in 802.1x PSK mode is not supported
+            iWPAMode = EFalse;
+            }
+        else
+            {
+            // Get WPA mode
+            CMDBField<TUint>* enableWpaPskField = static_cast<CMDBField<TUint>*>
                           ( generic->GetFieldByIdL( KCDTIdWlanEnableWpaPsk ) );
-        iWPAMode = *enableWpaPskField;
+            iWPAMode = *enableWpaPskField;
+            }
         
         // Get WPA2 Only Mode
         CMDBField<TUint>* secModeField = static_cast<CMDBField<TUint>*>
                                ( generic->GetFieldByIdL( KCDTIdWlanSecMode ) );
         TUint32 secMode = *secModeField;
         iWpa2Only = secMode == EWpa2;
+ 
+        // Get 802.1x Unencrypted Connection saved in reused WpaKeyLengthField
+        if ( iSecurityMode == ESecurityMode8021x )
+            {
+            CMDBField<TUint>* WpaKeyLengthField = static_cast<CMDBField<TUint>*>
+                          ( generic->GetFieldByIdL( KCDTIdWlanWpaKeyLength ) );
+            iWPAUnencryptedConn = *WpaKeyLengthField;
+            }
         
         // Get EAP plugins
         CMDBField<TDesC>* wlanEapsField = static_cast<CMDBField<TDesC>*>
@@ -652,10 +709,13 @@ void CWPASecuritySettingsImpl::LoadL( TUint32 aIapId,
 	        }
 
         // GetWPA preshared key
-        CMDBField<TDesC8>* wpaPskField = static_cast<CMDBField<TDesC8>*>
+	    if ( iSecurityMode != ESecurityMode8021x )
+	        {
+            CMDBField<TDesC8>* wpaPskField = static_cast<CMDBField<TDesC8>*>
                        ( generic->GetFieldByIdL( KCDTIdWlanWpaPreSharedKey ) );
-        iWPAPreSharedKey = *wpaPskField;
-        
+            iWPAPreSharedKey = *wpaPskField;
+	        }
+	    
         if ( !IsValidPsk( iWPAPreSharedKey ) )
             {       
             // invalid key format
@@ -698,11 +758,14 @@ void CWPASecuritySettingsImpl::SaveL( TUint32 aIapId,
    
     // If loading failed, WLAN service record will be 
     // created and StoreL()-d, otherwise, ModifyL()
-    
-    // Set WPA mode
-    CMDBField<TUint>* enableWpaPskField = static_cast<CMDBField<TUint>*>
-                          ( generic->GetFieldByIdL( KCDTIdWlanEnableWpaPsk ) );
-    enableWpaPskField->SetL( iWPAMode );
+
+    if ( iSecurityMode != ESecurityMode8021x )
+        {
+        // Set WPA mode
+        CMDBField<TUint>* enableWpaPskField = static_cast<CMDBField<TUint>*>
+                ( generic->GetFieldByIdL( KCDTIdWlanEnableWpaPsk ) );
+        enableWpaPskField->SetL( iWPAMode );
+        }
     
     // Set security mode
     TUint32 secMode;
@@ -745,15 +808,23 @@ void CWPASecuritySettingsImpl::SaveL( TUint32 aIapId,
                                     (const TDesC8&)*iWPADisabledEAPPlugin: 
                                     (const TDesC8&)KNullDesC8 );
 
-    // Save PreShared Key
-    CMDBField<TDesC8>* wpaPskField = static_cast<CMDBField<TDesC8>*>
-                       ( generic->GetFieldByIdL( KCDTIdWlanWpaPreSharedKey ) );
-    wpaPskField->SetL( iWPAPreSharedKey );
-
     // Save PreShared Key length
     CMDBField<TUint>* keyLengthField = static_cast<CMDBField<TUint>*>
                         ( generic->GetFieldByIdL( KCDTIdWlanWpaKeyLength ) );
-    keyLengthField->SetL( iWPAPreSharedKey.Length() );
+    if ( iSecurityMode == ESecurityMode8021x )
+        {
+        // In 802.1x keyLengthField is reused to contain Unencrypted Connection info
+        keyLengthField->SetL( iWPAUnencryptedConn );
+        }
+    else
+        {
+        keyLengthField->SetL( iWPAPreSharedKey.Length() );
+        
+        // Save PreShared Key
+        CMDBField<TDesC8>* wpaPskField = static_cast<CMDBField<TDesC8>*>
+                           ( generic->GetFieldByIdL( KCDTIdWlanWpaPreSharedKey ) );
+        wpaPskField->SetL( iWPAPreSharedKey );
+        }
     
     TInt error( KErrNone );
     
