@@ -14,7 +14,7 @@
 # Description: EAP Dialog build file
 #
 #
-# %version: 12 %
+# %version: 13 %
 #
 
 TEMPLATE = lib
@@ -25,6 +25,12 @@ CONFIG += hb plugin
 INCLUDEPATH += .
 DEPENDPATH += .
 DESTDIR = $${HB_BUILD_DIR}/plugins/devicedialogs
+
+# Temporary solution to fix tracecompiler
+# When tracecompiler is fixed, this can be removed
+symbian: {
+    MMP_RULES += "USERINCLUDE traces"
+}
 
 # directories for generated files
 MOC_DIR     = _build

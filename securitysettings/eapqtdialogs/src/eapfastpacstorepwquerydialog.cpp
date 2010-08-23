@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 6 %
+* %version: 7 %
 */
 
 // System includes
@@ -34,6 +34,7 @@
 #include "eapfastpacstorepwquerydialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
+#include "eapfastpacstorepwquerydialogTraces.h"
 #endif
 
 

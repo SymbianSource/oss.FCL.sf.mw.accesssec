@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 5 %
+* %version: 6 %
 */
 
 // System includes
@@ -34,6 +34,7 @@
 #include "eappasswordquerydialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
+#include "eappasswordquerydialogTraces.h"
 #endif
 
 /*!
