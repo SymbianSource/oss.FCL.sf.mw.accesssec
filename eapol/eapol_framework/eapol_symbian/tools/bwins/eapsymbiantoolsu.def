@@ -1,0 +1,26 @@
+EXPORTS
+	?SetValue@TEapExpandedType@@QAEHII@Z @ 1 NONAME ; int TEapExpandedType::SetValue(unsigned int, unsigned int)
+	??4TEapExpandedType@@QAEAAV0@ABV0@@Z @ 2 NONAME ; class TEapExpandedType & TEapExpandedType::operator=(class TEapExpandedType const &)
+	?SetValue@TEapExpandedType@@QAEHPBXI@Z @ 3 NONAME ; int TEapExpandedType::SetValue(void const *, unsigned int)
+	?GetVendorId@TEapExpandedType@@QBEIXZ @ 4 NONAME ; unsigned int TEapExpandedType::GetVendorId(void) const
+	??0TEapExpandedType@@QAE@ABV?$TBufC8@$07@@@Z @ 5 NONAME ; TEapExpandedType::TEapExpandedType(class TBufC8<8> const &)
+	??0TEapExpandedType@@QAE@ABV0@@Z @ 6 NONAME ; TEapExpandedType::TEapExpandedType(class TEapExpandedType const &)
+	??1EapPluginTools@@UAE@XZ @ 7 NONAME ; EapPluginTools::~EapPluginTools(void)
+	?CreateDatabaseLC@EapPluginTools@@SAXAAVRDbNamedDatabase@@AAVRFs@@AAHABVTDesC16@@AAV?$TBuf@$0BAA@@@@Z @ 8 NONAME ; void EapPluginTools::CreateDatabaseLC(class RDbNamedDatabase &, class RFs &, int &, class TDesC16 const &, class TBuf<256> &)
+	??0TEapExpandedType@@QAE@XZ @ 9 NONAME ; TEapExpandedType::TEapExpandedType(void)
+	?GetPrivatePathL@EapPluginTools@@SAXAAV?$TBuf@$0BAA@@@@Z @ 10 NONAME ; void EapPluginTools::GetPrivatePathL(class TBuf<256> &)
+	??0TEapExpandedType@@QAE@ABVTDesC8@@@Z @ 11 NONAME ; TEapExpandedType::TEapExpandedType(class TDesC8 const &)
+	??9TEapExpandedType@@QBE_NABV0@@Z @ 12 NONAME ; bool TEapExpandedType::operator!=(class TEapExpandedType const &) const
+	??8TEapExpandedType@@QBE_NABV0@@Z @ 13 NONAME ; bool TEapExpandedType::operator==(class TEapExpandedType const &) const
+	?ListAllEapPluginsL@EapPluginTools@@QAEXW4TIndexType@@ABVTEapExpandedType@@AAV?$RPointerArray@VTEapExpandedType@@@@@Z @ 14 NONAME ; void EapPluginTools::ListAllEapPluginsL(enum TIndexType, class TEapExpandedType const &, class RPointerArray<class TEapExpandedType> &)
+	??4TEapExpandedType@@QAEAAV0@ABVTDesC8@@@Z @ 15 NONAME ; class TEapExpandedType & TEapExpandedType::operator=(class TDesC8 const &)
+	??0TEapExpandedType@@QAE@PBV0@@Z @ 16 NONAME ; TEapExpandedType::TEapExpandedType(class TEapExpandedType const *)
+	??4TEapExpandedType@@QAEAAV0@ABV?$TBufC8@$07@@@Z @ 17 NONAME ; class TEapExpandedType & TEapExpandedType::operator=(class TBufC8<8> const &)
+	?Compare@TEapExpandedType@@QBEHABV1@@Z @ 18 NONAME ; int TEapExpandedType::Compare(class TEapExpandedType const &) const
+	?CleanupImplArray@EapPluginTools@@SAXPAX@Z @ 19 NONAME ; void EapPluginTools::CleanupImplArray(void *)
+	??0EapPluginTools@@QAE@XZ @ 20 NONAME ; EapPluginTools::EapPluginTools(void)
+	??1TEapExpandedType@@UAE@XZ @ 21 NONAME ; TEapExpandedType::~TEapExpandedType(void)
+	?GetVendorType@TEapExpandedType@@QBEIXZ @ 22 NONAME ; unsigned int TEapExpandedType::GetVendorType(void) const
+	?GetPrivatePathL@EapPluginTools@@SAXAAVRFs@@AAV?$TBuf@$0BAA@@@@Z @ 23 NONAME ; void EapPluginTools::GetPrivatePathL(class RFs &, class TBuf<256> &)
+	?GetValue@TEapExpandedType@@QBEABV?$TBuf8@$07@@XZ @ 24 NONAME ; class TBuf8<8> const & TEapExpandedType::GetValue(void) const
+

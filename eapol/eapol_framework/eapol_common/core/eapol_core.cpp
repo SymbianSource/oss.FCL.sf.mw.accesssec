@@ -16,13 +16,13 @@
 */
 
 /*
-* %version: 67.1.2.1.2 %
+* %version: 100 %
 */
 
 // This is enumeration of EAPOL source code.
 #if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 	#undef EAP_FILE_NUMBER_ENUM
-	#define EAP_FILE_NUMBER_ENUM 48 
+	#define EAP_FILE_NUMBER_ENUM 747 
 	#undef EAP_FILE_NUMBER_DATE 
 	#define EAP_FILE_NUMBER_DATE 1127594498 
 #endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
@@ -61,6 +61,7 @@ EAP_FUNC_EXPORT eapol_core_c::~eapol_core_c()
 	EAP_ASSERT(m_shutdown_was_called == true);
 
 	delete m_eap_core;
+	m_eap_core = 0;
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
@@ -77,14 +78,8 @@ EAP_FUNC_EXPORT eapol_core_c::eapol_core_c(
 	abs_eapol_core_c * const partner,
 	const bool is_client_when_true)
 	: m_partner(partner)
-#if !defined(NO_EAP_SESSION_CORE)
-	  , m_eap_core(new eap_session_core_c(tools, this, is_client_when_true))
-#else
-	  , m_eap_core(new eap_core_c(tools, this, is_client_when_true, 0, false))
-#endif
-#if defined(USE_EAPOL_KEY_STATE)
+	, m_eap_core(0)
 	  , m_eapol_key_state_map(tools, this)
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 	  , m_am_tools(tools)
 	  , m_master_session_key(m_am_tools)
 	  , m_authentication_type(eapol_key_authentication_type_none)
@@ -98,9 +93,7 @@ EAP_FUNC_EXPORT eapol_core_c::eapol_core_c(
 	  , m_is_valid(false)
 	  , m_shutdown_was_called(false)
 	  , m_block_state_notifications(false)
-#if defined(USE_EAPOL_KEY_STATE)
 	  , m_skip_start_4_way_handshake(false)
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -114,13 +107,136 @@ EAP_FUNC_EXPORT eapol_core_c::eapol_core_c(
 		__DATE__,
 		__TIME__));
 
-	if (m_eap_core != 0
-		&& m_eap_core->get_is_valid() == true)
+#if defined(EAP_USE_WPXM)
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eapol_core_c::eapol_core_c(): WPX enabled.")));
+#else
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eapol_core_c::eapol_core_c(): WPX disabled.")));
+#endif //#if defined(EAP_USE_WPXM)
+
+	if (m_partner != 0)
 	{
 		set_is_valid();
 	}
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+}
+
+//--------------------------------------------------
+
+//
+EAP_FUNC_EXPORT eap_status_e eapol_core_c::configure()
+{
+	EAP_ASSERT(m_am_tools->get_global_mutex()->get_is_reserved() == true);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("%s: eapol_core_c::configure()\n"),
+		(m_is_client == true) ? "client": "server"));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_core_c::configure()");
+
+	eap_status_e status(eap_status_process_general_error);
+
+	m_eapol_header_offset = m_partner->get_header_offset(
+		&m_MTU, &m_trailer_length);
+
+#if defined(NO_EAP_CORE_CLIENT_MESSAGE_IF)
+	m_eap_core = eap_session_core_base_c::new_eap_session_core_c(
+		m_am_tools,
+		this,
+		m_is_client,
+		m_MTU-eapol_header_wr_c::get_header_length());
+#else
+	m_eap_core = new_eap_core_client_message_if_c(
+		m_am_tools,
+		this,
+		m_is_client,
+		m_MTU-eapol_header_wr_c::get_header_length());
+#endif
+
+	if (m_eap_core == 0
+		|| m_eap_core->get_is_valid() == false)
+	{
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	{
+		eap_variable_data_c max_eapol_starts(m_am_tools);
+
+		status = read_configure(
+			cf_str_EAPOL_CORE_starts_max_count.get_field(),
+			&max_eapol_starts);
+		if (status != eap_status_ok 
+			|| max_eapol_starts.get_is_valid_data() == false
+			|| max_eapol_starts.get_data_length() < sizeof(u32_t))
+		{
+			// Probably not found from db. Use the default value.
+			m_max_eapol_starts = EAPOL_CORE_MAX_EAPOL_START_SENDINGS;						
+		} 
+		else 
+		{
+			m_max_eapol_starts = *reinterpret_cast<u32_t *>(
+				max_eapol_starts.get_data(sizeof(u32_t)));
+		}
+	}
+
+	{
+		eap_variable_data_c eapol_start_interval(m_am_tools);
+
+		status = read_configure(
+			cf_str_EAPOL_CORE_send_start_interval.get_field(),
+			&eapol_start_interval);
+		if (status != eap_status_ok 
+			|| eapol_start_interval.get_is_valid_data() == false
+			|| eapol_start_interval.get_data_length() < sizeof(u32_t))
+		{
+			// Probably not found from db. Use the default value.
+			m_eapol_start_interval = EAPOL_CORE_TIMER_SEND_START_AGAIN_TIMEOUT;						
+		} 
+		else 
+		{
+			m_eapol_start_interval = *reinterpret_cast<u32_t *>(
+				eapol_start_interval.get_data(sizeof(u32_t)));
+		}
+	}
+
+#if defined(USE_EAP_CORE_SERVER)
+	if (m_is_client == false)
+	{
+		eap_variable_data_c data(m_am_tools);
+
+		eap_status_e status = read_configure(
+			cf_str_EAPOL_CORE_skip_start_4_way_handshake.get_field(),
+			&data);
+		if (status == eap_status_ok
+			&& data.get_data_length() == sizeof(u32_t)
+			&& data.get_data(data.get_data_length()) != 0)
+		{
+			u32_t *flag = reinterpret_cast<u32_t *>(data.get_data(data.get_data_length()));
+
+			if (flag != 0)
+			{
+				if ((*flag) != 0ul)
+				{
+					m_skip_start_4_way_handshake = true;
+				}
+				else
+				{
+					m_skip_start_4_way_handshake = false;
+				}
+			}
+		}
+	}
+#endif //#if defined(USE_EAP_CORE_SERVER)
+
+	return EAP_STATUS_RETURN(m_am_tools, m_eap_core->configure());
 }
 
 //--------------------------------------------------
@@ -265,7 +381,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::packet_process(
 #if defined(EAP_USE_WPXM)
 			&& m_authentication_type != eapol_key_authentication_type_WPXM
 #endif //#if defined(EAP_USE_WPXM)
-			&& m_authentication_type != eapol_key_authentication_type_WFA_SC
+			&& m_authentication_type != eapol_key_authentication_type_WPS
 			&& m_authentication_type != eapol_key_authentication_type_EAP_authentication_no_encryption
 			)
 		{
@@ -279,34 +395,26 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::packet_process(
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_wrong_eapol_type);
 		}
 
-
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
 		// Test first we are connected.
 		if (eapol_key_state->get_is_associated() == true)
 		{
-			status = m_eap_core->synchronous_create_eap_session(receive_network_id);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
+			eap_header_wr_c eap(
+				m_am_tools,
+				eapol.get_eap_header(),
+				eapol.get_data_length());
+
+			status = m_eap_core->packet_process(
+				receive_network_id,
+				&eap,
+				eapol.get_data_length());
+
+			EAP_GENERAL_HEADER_COPY_ERROR_PARAMETERS(packet_data, &eap);
 		}
-
-#endif //#if !defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
-
-		eap_header_wr_c eap(
-			m_am_tools,
-			eapol.get_eap_header(),
-			eapol.get_data_length());
-
-		status = m_eap_core->packet_process(
-			receive_network_id,
-			&eap,
-			eapol.get_data_length());
-
-		EAP_GENERAL_HEADER_COPY_ERROR_PARAMETERS(packet_data, &eap);
+		else
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, eap_status_drop_packet_quietly);
+		}
 	}
 	else if (m_is_client == false
 		&& eapol.get_packet_type() == eapol_packet_type_logoff)
@@ -319,7 +427,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::packet_process(
 		if (m_authentication_type != eapol_key_authentication_type_RSNA_EAP
 			&& m_authentication_type != eapol_key_authentication_type_WPA_EAP
 			&& m_authentication_type != eapol_key_authentication_type_dynamic_WEP
-			&& m_authentication_type != eapol_key_authentication_type_WFA_SC
+			&& m_authentication_type != eapol_key_authentication_type_WPS
 #if defined(EAP_USE_WPXM)
 			&& m_authentication_type != eapol_key_authentication_type_WPXM
 #endif //#if defined(EAP_USE_WPXM)
@@ -342,7 +450,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::packet_process(
 			m_is_client,
 			false);
 	}
-#if defined(USE_EAPOL_KEY_STATE)
 	else if (eapol.get_packet_type() == eapol_packet_type_key)
 	{
 		if (m_authentication_type != eapol_key_authentication_type_RSNA_EAP
@@ -389,40 +496,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::packet_process(
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_handler_does_not_exists_error);
 		}
 	}
-#endif //#if defined(USE_EAPOL_KEY_STATE)
-#if ! defined(USE_EAPOL_KEY_STATE)
-	else if (
-		m_is_client == true
-		&& eapol.get_packet_type() == eapol_packet_type_key)
-	{
-		// Handle EAPOL-Key frame.
-		// Here is assumed the EAPOL-Key frame includes RC4 Key Descriptor.
-		/**
-		 * @{ Here we need to check the Descriptor Type field.
-		 * It may be RC4 Key Descriptor, RSNA Key Descriptor or other descriptor. }
-		 */
-		
-		eapol_RC4_key_header_c eapol_key_msg(
-			m_am_tools,
-			eapol.get_header_buffer(eapol.get_header_buffer_length()),
-			eapol.get_header_buffer_length());
-		if (eapol_key_msg.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_header_corrupted);
-		}
-		else if (eapol_key_msg.check_header() != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		status = handle_RC4_key_descriptor(
-			receive_network_id,
-			&eapol_key_msg,
-			packet_length);
-	}
-#endif //#if ! defined(USE_EAPOL_KEY_STATE)
 	else
 	{
 		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: %s, packet_type=0x%02x=%s not handled, data length 0x%04x.\n"),
@@ -457,7 +530,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::packet_send(
 	EAP_ASSERT(data_length <= sent_packet->get_data_length());
 	EAP_ASSERT(sent_packet->get_data_length() <= buffer_length);
 
-	if (header_offset < eap_header_wr_c::get_header_length())
+	if (header_offset < m_eapol_header_offset+eapol_header_wr_c::get_header_length())
 	{
 		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("packet_send: packet buffer corrupted.\n")));
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -467,7 +540,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::packet_send(
 	eapol_header_wr_c eapol(
 		m_am_tools,
 		sent_packet->get_data_offset(
-			header_offset-eap_header_wr_c::get_header_length(), data_length),
+			header_offset-eapol_header_wr_c::get_header_length(), data_length),
 		data_length);
 
 	if (eapol.get_is_valid() == false)
@@ -539,8 +612,11 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::packet_send(
 	}
 
 	eap_status_e status = m_partner->packet_send(
-		send_network_id, sent_packet, header_offset-eapol_header_wr_c::get_header_length(),
-		data_length+eapol_header_wr_c::get_header_length(), buffer_length);
+		send_network_id,
+		sent_packet,
+		header_offset-eapol_header_wr_c::get_header_length(),
+		data_length+eapol_header_wr_c::get_header_length(),
+		buffer_length);
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
@@ -672,13 +748,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::restart_authentication(
 			this,
 			EAPOL_CORE_TIMER_SEND_START_AGAIN_ID);
 
-#if !defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-#if !defined(NO_EAP_SESSION_CORE)
-		// First we remove possible EAP session.
-		(void) m_eap_core->synchronous_remove_eap_session(receive_network_id);
-#endif
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
 		// Here we swap the addresses.
 		eap_am_network_id_c send_network_id(m_am_tools,
 			receive_network_id->get_destination_id(),
@@ -757,7 +826,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::restart_authentication(
 
 		if (m_authentication_type == eapol_key_authentication_type_EAP_authentication_no_encryption)
 		{
-			// This is a hack for this security mode. Some APs need broadcast EAPOL-Start-message.
+			// Some APs need broadcast EAPOL-Start-message.
 
 			const u8_t BROADCAST_ADDRESS[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
@@ -864,14 +933,12 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::restart_authentication(
 		{
 			// It is bad idea to terminate on-going authentication
 			// when EAPOL-Start is received.
-			// Because of that synchronous_remove_eap_session() is called
+			// Because of that remove_eap_session() is called
 			// only when force_clean_restart is true.
-#if !defined(NO_EAP_SESSION_CORE)
 			bool previous_block = m_block_state_notifications;
 			m_block_state_notifications = true;
-			(void) m_eap_core->synchronous_remove_eap_session(receive_network_id);
+			(void) m_eap_core->remove_eap_session(false, receive_network_id);
 			m_block_state_notifications = previous_block;
-#endif
 		}
 
 		if (m_authentication_type == eapol_key_authentication_type_RSNA_EAP
@@ -880,7 +947,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::restart_authentication(
 #if defined(EAP_USE_WPXM)
 			|| m_authentication_type == eapol_key_authentication_type_WPXM
 #endif //#if defined(EAP_USE_WPXM)
-			|| m_authentication_type == eapol_key_authentication_type_WFA_SC
+			|| m_authentication_type == eapol_key_authentication_type_WPS
 			|| m_authentication_type == eapol_key_authentication_type_EAP_authentication_no_encryption
 			)
 		{
@@ -995,6 +1062,13 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::check_pmksa_cache(
 		}
 	} // for()
 
+#if 1
+
+	status = m_partner->complete_check_pmksa_cache(bssid_sta_receive_network_ids);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+
+#else
+
 	if (bssid_sta_receive_network_ids->get_object_count() > 0ul)
 	{
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
@@ -1005,6 +1079,9 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::check_pmksa_cache(
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_not_found);
 	}
+
+#endif
+
 }
 
 //--------------------------------------------------
@@ -1046,13 +1123,14 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::remove_pmksa_from_cache(
 	}
 
 	status = remove_eapol_key_state(
-		&send_network_id);
+		&send_network_id,
+		true);
 	if (status != eap_status_ok)
 	{
 		EAP_TRACE_DEBUG(
 			m_am_tools, 
 			TRACE_FLAGS_DEFAULT, 
-			(EAPL("WARNING: eapol_core_c::disassociation(): ")
+			(EAPL("WARNING: eapol_core_c::remove_pmksa_from_cache(): ")
 			 EAPL("remove_eapol_key_state(), eap_status_e %d\n"),
 			status));
 		return EAP_STATUS_RETURN(m_am_tools, status);
@@ -1077,8 +1155,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::start_preauthentication(
 		 (m_is_client == true) ? "client": "server"));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_core_c::start_preauthentication()");
-
-#if defined(USE_EAPOL_KEY_STATE)
 
 	if (receive_network_id->get_type() != eapol_ethernet_type_preauthentication)
 	{
@@ -1222,7 +1298,8 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::start_preauthentication(
 	if (status != eap_status_ok)
 	{
 		status = remove_eapol_key_state(
-			&send_network_id);
+			&send_network_id,
+			true);
 		if (status != eap_status_ok)
 		{
 			EAP_TRACE_DEBUG(
@@ -1243,8 +1320,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::start_preauthentication(
 		m_is_client,
 		true,
 		false);
-
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
@@ -1283,8 +1358,6 @@ eap_status_e eapol_core_c::copy_eapol_key_state(
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
 	}
-
-#if defined(USE_EAPOL_KEY_STATE)
 
 	// Here we swap the addresses.
 	eap_am_network_id_c old_send_network_id(
@@ -1382,8 +1455,6 @@ eap_status_e eapol_core_c::copy_eapol_key_state(
 		}
 	}
 
-#endif //#if defined(USE_EAPOL_KEY_STATE)
-
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
@@ -1428,8 +1499,6 @@ eap_status_e eapol_core_c::generate_new_pmksa(
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
 	}
-
-#if defined(USE_EAPOL_KEY_STATE)
 
 	// Here we swap the addresses.
 	eap_am_network_id_c old_send_network_id(
@@ -1530,8 +1599,6 @@ eap_status_e eapol_core_c::generate_new_pmksa(
 		status = eap_status_not_found;
 	}
 
-#endif //#if defined(USE_EAPOL_KEY_STATE)
-
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
@@ -1539,7 +1606,7 @@ eap_status_e eapol_core_c::generate_new_pmksa(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_core_c::read_reassociation_parameters(
+EAP_FUNC_EXPORT eap_status_e eapol_core_c::read_reassociation_parameters(
 	const eap_am_network_id_c * const old_receive_network_id, ///< source includes remote address, destination includes local address.
 	const eap_am_network_id_c * const new_receive_network_id, ///< source includes remote address, destination includes local address.
 	const eapol_key_authentication_type_e authentication_type,
@@ -1558,8 +1625,6 @@ eap_status_e eapol_core_c::read_reassociation_parameters(
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_core_c::read_reassociation_parameters()");
 
 	eap_status_e status(eap_status_process_general_error);
-
-#if defined(USE_EAPOL_KEY_STATE)
 
 	// No need to check authentication type anymore. It can be changed in reassociation.
 
@@ -1666,8 +1731,6 @@ eap_status_e eapol_core_c::read_reassociation_parameters(
 		status = eap_status_not_found;
 	}
 
-#endif //#if defined(USE_EAPOL_KEY_STATE)
-
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
@@ -1734,7 +1797,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::start_reassociation(
 			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 
-#if defined(USE_EAPOL_KEY_STATE)
 		if (m_skip_start_4_way_handshake == true
 			&& (authentication_type == eapol_key_authentication_type_RSNA_EAP
 				|| authentication_type == eapol_key_authentication_type_RSNA_PSK
@@ -1751,7 +1813,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::start_reassociation(
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
 		}
 		else
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 		{
 #if !defined(NO_EAPOL_KEY_STATE_SERVER)
 			status = eapol_key_state->start_4_way_handshake(
@@ -1789,7 +1850,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::start_reassociation(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_core_c::complete_reassociation(
+EAP_FUNC_EXPORT eap_status_e eapol_core_c::complete_reassociation(
 	const eapol_wlan_authentication_state_e reassociation_result,
 	const eap_am_network_id_c * const receive_network_id,
 	const eapol_key_authentication_type_e authentication_type,
@@ -1808,8 +1869,6 @@ eap_status_e eapol_core_c::complete_reassociation(
 		(m_is_client == true) ? "client": "server"));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_core_c::complete_reassociation()");
-
-#if defined(USE_EAPOL_KEY_STATE)
 
 	// Here we swap the addresses.
 	eap_am_network_id_c send_network_id(
@@ -1863,7 +1922,6 @@ eap_status_e eapol_core_c::complete_reassociation(
 		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 	else
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 	{
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_authentication_failure);
@@ -1999,8 +2057,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::packet_data_crypto_keys(
 			 master_session_key->get_data_length()));
 	}
 
-#if defined(USE_EAPOL_KEY_STATE)
-
 	eap_network_id_selector_c state_selector(
 		m_am_tools,
 		send_network_id);
@@ -2035,20 +2091,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::packet_data_crypto_keys(
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_handler_does_not_exists_error);
 	}
-
-#else
-
-	// Store the session key so it can be used when EAPOL-Key is received.
-	m_master_session_key.reset();
-
-	status = m_master_session_key.set_copy_of_buffer(master_session_key);
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
@@ -2104,369 +2146,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::packet_data_session_key(
 
 //--------------------------------------------------
 
-#if !defined(USE_EAPOL_KEY_STATE)
-
-//
-eap_status_e eapol_core_c::handle_RC4_key_descriptor(
-	const eap_am_network_id_c * const receive_network_id,
-	eapol_RC4_key_header_c* const packet,
-	const u32_t packet_length)
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("%s: eapol_core_c::handle_RC4_key_descriptor()\n"),
-		(m_is_client == true) ? "client": "server"));
-
-	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_core_c::handle_RC4_key_descriptor()");
-
-	eap_status_e status = eap_status_process_general_error;
-
-	// Check the packet length
-	if (static_cast<u32_t>(packet->get_header_length()) != packet_length
-		&& static_cast<u32_t>(packet->get_header_length() + packet->get_key_length()) != packet_length)
-	{
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("ERROR: Illegal EAPOL-Key frame length, packet->get_header_length() %d, packet_length %d\n"),
-			packet->get_header_length(),
-			packet_length));
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_process_illegal_packet_error);
-	}
-
-	// Get MS-MPPE-Recv-Key and MS-MPPE-Send-Key
-	// Recv-Key is the first 32 bytes of master session key and Send-Key is the next 32 bytes.
-	eap_variable_data_c mppe_recv_key(m_am_tools);
-	eap_variable_data_c mppe_send_key(m_am_tools);
-	if (m_master_session_key.get_data_length() == 16ul)
-	{
-		status = mppe_recv_key.set_buffer(
-			m_master_session_key.get_data(m_master_session_key.get_data_length()),
-			m_master_session_key.get_data_length(),
-			false,
-			false);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		status = mppe_send_key.set_buffer(
-			m_master_session_key.get_data(m_master_session_key.get_data_length()),
-			m_master_session_key.get_data_length(),
-			false,
-			false);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-	}
-	else
-	{
-		status = mppe_recv_key.set_buffer(
-			m_master_session_key.get_data(MPPE_KEY_LENGTH),
-			MPPE_KEY_LENGTH,
-			false,
-			false);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		status = mppe_send_key.set_buffer(
-			m_master_session_key.get_data_offset(MPPE_KEY_LENGTH, MPPE_KEY_LENGTH),
-			MPPE_KEY_LENGTH,
-			false,
-			false);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-	}
-
-	if (mppe_recv_key.get_is_valid() == false
-		|| mppe_send_key.get_is_valid() == false)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-	}
-
-	// Verify the the MD5 signature in Eapol-Key
-	crypto_md5_c md5(m_am_tools);
-	crypto_hmac_c hmac_md5(m_am_tools, &md5, false);
-	if (hmac_md5.get_is_valid() == false)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-	}
-
-	// MPPE-Send-Key is used as the signature key.
-	if (hmac_md5.hmac_set_key(&mppe_send_key) != eap_status_ok)
-	{
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: hmac_md5_init failed\n")));
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-	}
-
-	// Save the signature from the packet
-	eap_variable_data_c signature(m_am_tools);
-	status = signature.set_copy_of_buffer(packet->get_key_signature(), EAPOL_RC4_KEY_SIGNATURE_LENGTH);
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-
-	// Replace the signature with zeros.
-	packet->zero_key_signature(m_am_tools);
-
-	// Send the data to HMAC-MD5 module
-	if (hmac_md5.hmac_update(packet->get_header_buffer(packet_length), packet_length) != eap_status_ok)
-	{
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: hmac_md5_update failed\n")));
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);		
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_process_general_error);
-	}
-
-	// Get the calculated signature
-	u8_t tmp_signature[EAPOL_RC4_KEY_SIGNATURE_LENGTH];
-	u32_t length = EAPOL_RC4_KEY_SIGNATURE_LENGTH;
-	if (hmac_md5.hmac_final(tmp_signature, &length) != eap_status_ok)
-	{
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: hmac_md5_final failed\n")));
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_process_general_error);
-	}
-	
-	// Compare the calculated and original signature
-	if (m_am_tools->memcmp(
-		tmp_signature,
-		signature.get_data(
-			EAPOL_RC4_KEY_SIGNATURE_LENGTH),
-			EAPOL_RC4_KEY_SIGNATURE_LENGTH) != 0)
-	{
-		// Signatures did not match. Something's wrong.
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: EAPOL-Key HMAC-MD5 check failed.\n")));
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_header_corrupted);
-	}
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("EAPOL-Key HMAC-MD5 check passed.\n")));
-
-	eap_variable_data_c key_out(m_am_tools);
-	// Decrypt the RC4 encrypted key
-	if (packet->get_key() == 0)
-	{
-		// EAPOL-Key does not contain the key. This means that we should use
-		// the first bytes from MS-MPPE-Recv-Key as the key. There is a slight 
-		// confusion in draft-congdon-radius-8021x-23.txt regarding this but this is how
-		// it works.
-		if (packet->get_key_length() > 0)
-		{
-			status = key_out.set_copy_of_buffer(mppe_recv_key.get_data(packet->get_key_length()), packet->get_key_length());	
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
-		} 
-		else
-		{
-			// Key message with no key length?
-			// Just ignore the message.
-			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Got empty WEP unicast key message.\n")));
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
-		}
-	} 
-	else
-	{
-		// Set-up RC4 key. Key is the IV and the MS-MPPE-Recv-Key truncated together.
-		eap_variable_data_c rc4_key(m_am_tools);
-		status = rc4_key.set_copy_of_buffer(packet->get_key_IV(), EAPOL_RC4_KEY_IV_LENGTH);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		rc4_key.add_data(&mppe_recv_key);
-
-		// Set-up RC4 module
-		crypto_rc4_c rc4(m_am_tools);
-		// Set the key for RC4
-		if (rc4.set_key(&rc4_key) != eap_status_ok)
-		{
-			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: rc4_set_key failed\n")));
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_process_general_error);
-		}
-
-		// Decrypt the key to key_out
-		key_out.set_buffer_length(packet->get_key_length());
-		if (rc4.decrypt_data(packet->get_key(), key_out.get_data(packet->get_key_length()), packet->get_key_length()) != eap_status_ok)
-		{
-			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: rc4 failed\n")));
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_process_general_error);
-		}		
-		key_out.set_data_length(packet->get_key_length());
-	}
-
-	// Find out the key type. At the moment only WEP keys are supported.
-	eapol_key_type_e key_type;
-	switch (packet->get_key_flag())
-	{
-	case eapol_RC4_key_flag_broadcast:
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Got WEP broadcast key\n")));
-		key_type = eapol_key_type_broadcast;
-		break;
-	case eapol_RC4_key_flag_unicast:
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Got WEP unicast key\n")));
-		key_type = eapol_key_type_unicast;
-		break;
-	default:
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_header_corrupted);
-	}
-
-	EAP_TRACE_DATA_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("Key"),
-		 key_out.get_data(key_out.get_data_length()),
-		 key_out.get_data_length()));
-
-	// Here we swap the addresses.
-	eap_am_network_id_c send_network_id(m_am_tools,
-		receive_network_id->get_destination_id(),
-		receive_network_id->get_source_id(),
-		receive_network_id->get_type());
-	if (send_network_id.get_is_valid_data() == false)
-	{
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-	}
-
-	eapol_session_key_c wep_key(
-		m_am_tools,
-		&key_out,
-		key_type,
-		packet->get_key_index(),
-		true);
-
-	// Forward the keys to lower layers
-	status = m_partner->packet_data_session_key(
-		&send_network_id,
-		&wep_key);
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, status);
-}
-
-#endif //#if !defined(USE_EAPOL_KEY_STATE)
-
-//--------------------------------------------------
-
-//
-EAP_FUNC_EXPORT eap_status_e eapol_core_c::configure()
-{
-	EAP_ASSERT(m_am_tools->get_global_mutex()->get_is_reserved() == true);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("%s: eapol_core_c::configure()\n"),
-		(m_is_client == true) ? "client": "server"));
-
-	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_core_c::configure()");
-
-	m_eapol_header_offset = m_partner->get_header_offset(
-		&m_MTU, &m_trailer_length);
-	
-	eap_status_e status = eap_status_process_general_error;
-
-	{
-		eap_variable_data_c max_eapol_starts(m_am_tools);
-
-		status = read_configure(
-			cf_str_EAPOL_CORE_starts_max_count.get_field(),
-			&max_eapol_starts);
-		if (status != eap_status_ok 
-			|| max_eapol_starts.get_is_valid_data() == false
-			|| max_eapol_starts.get_data_length() < sizeof(u32_t))
-		{
-			// Probably not found from db. Use the default value.
-			m_max_eapol_starts = EAPOL_CORE_MAX_EAPOL_START_SENDINGS;						
-		} 
-		else 
-		{
-			m_max_eapol_starts = *reinterpret_cast<u32_t *>(
-				max_eapol_starts.get_data(sizeof(u32_t)));
-		}
-	}
-
-	{
-		eap_variable_data_c eapol_start_interval(m_am_tools);
-
-		status = read_configure(
-			cf_str_EAPOL_CORE_send_start_interval.get_field(),
-			&eapol_start_interval);
-		if (status != eap_status_ok 
-			|| eapol_start_interval.get_is_valid_data() == false
-			|| eapol_start_interval.get_data_length() < sizeof(u32_t))
-		{
-			// Probably not found from db. Use the default value.
-			m_eapol_start_interval = EAPOL_CORE_TIMER_SEND_START_AGAIN_TIMEOUT;						
-		} 
-		else 
-		{
-			m_eapol_start_interval = *reinterpret_cast<u32_t *>(
-				eapol_start_interval.get_data(sizeof(u32_t)));
-		}
-	}
-
-#if defined(USE_EAP_CORE_SERVER)
-	if (m_is_client == false)
-	{
-		eap_variable_data_c data(m_am_tools);
-
-		eap_status_e status = read_configure(
-			cf_str_EAPOL_CORE_skip_start_4_way_handshake.get_field(),
-			&data);
-		if (status == eap_status_ok
-			&& data.get_data_length() == sizeof(u32_t)
-			&& data.get_data(data.get_data_length()) != 0)
-		{
-			u32_t *flag = reinterpret_cast<u32_t *>(data.get_data(data.get_data_length()));
-
-			if (flag != 0)
-			{
-				if ((*flag) != 0ul)
-				{
-					m_skip_start_4_way_handshake = true;
-				}
-				else
-				{
-					m_skip_start_4_way_handshake = false;
-				}
-			}
-		}
-	}
-#endif //#if defined(USE_EAP_CORE_SERVER)
-
-	return EAP_STATUS_RETURN(m_am_tools, m_eap_core->configure());
-}
-
-//--------------------------------------------------
-
-#if defined(USE_EAPOL_KEY_STATE)
-
 //
 EAP_FUNC_EXPORT eap_status_e eapol_core_c::shutdown_operation(
 	eapol_key_state_c * const handler,
@@ -2481,8 +2160,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::shutdown_operation(
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
-
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 //--------------------------------------------------
 
@@ -2507,10 +2184,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::shutdown()
 	}
 	m_shutdown_was_called = true;
 
-	eap_status_e status;
-#if defined(USE_EAPOL_KEY_STATE)
-	status = m_eapol_key_state_map.for_each(shutdown_operation, true);
-#endif //#if defined(USE_EAPOL_KEY_STATE)
+	eap_status_e status = m_eapol_key_state_map.for_each(shutdown_operation, true);
 
 	if (m_eap_core != 0)
 	{
@@ -2519,9 +2193,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::shutdown()
 
 	// This will cancel all timers of this object.
 	m_partner->cancel_timer(this, EAPOL_CORE_TIMER_SEND_START_AGAIN_ID);
-#if defined(USE_EAPOL_KEY_STATE)
 	m_partner->cancel_timer(this, EAPOL_REMOVE_EAPOL_KEY_HANDSHAKE_ID);
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 	
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
@@ -2647,7 +2319,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::timer_expired(
 			state_notification(&notification);
 		}
 	}
-#if defined(USE_EAPOL_KEY_STATE)
 	else if (id == EAPOL_REMOVE_EAPOL_KEY_HANDSHAKE_ID)
 	{
 		EAP_TRACE_DEBUG(
@@ -2663,9 +2334,8 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::timer_expired(
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 		}
 
-		(void) remove_eapol_key_state(send_network_id);
+		(void) remove_eapol_key_state(send_network_id, false);
 	}
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
 }
@@ -2693,7 +2363,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::timer_delete_data(
 			= reinterpret_cast<const eap_am_network_id_c *>(data);
 		delete send_network_id;
 	}
-#if defined(USE_EAPOL_KEY_STATE)
 	else if (id == EAPOL_REMOVE_EAPOL_KEY_HANDSHAKE_ID)
 
 	{
@@ -2701,14 +2370,11 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::timer_delete_data(
 			= reinterpret_cast<const eap_am_network_id_c *>(data);
 		delete send_network_id;
 	}
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
 }
 
 //--------------------------------------------------
-
-#if defined(USE_EAPOL_KEY_STATE)
 
 //
 EAP_FUNC_EXPORT eap_status_e eapol_core_c::init_eapol_key_pmksa_caching_timeout(
@@ -2768,11 +2434,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::init_eapol_key_pmksa_caching_timeout(
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
-#endif //#if defined(USE_EAPOL_KEY_STATE)
-
 //--------------------------------------------------
-
-#if defined(USE_EAPOL_KEY_STATE)
 
 //
 EAP_FUNC_EXPORT eap_status_e eapol_core_c::indicate_eapol_key_state_started_eap_authentication(
@@ -2824,15 +2486,12 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::indicate_eapol_key_state_started_eap_
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
-#endif //#if defined(USE_EAPOL_KEY_STATE)
-
 //--------------------------------------------------
-
-#if defined(USE_EAPOL_KEY_STATE)
 
 //
 EAP_FUNC_EXPORT eap_status_e eapol_core_c::remove_eapol_key_state(
-	const eap_am_network_id_c * const send_network_id)
+	const eap_am_network_id_c * const send_network_id,
+	const bool force_remove)
 {
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
@@ -2864,7 +2523,8 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::remove_eapol_key_state(
 
 	if (eapol_key_state != 0)
 	{
-		if (eapol_key_state->get_marked_removed() == false)
+		if (force_remove == false
+			&& eapol_key_state->get_marked_removed() == false)
 		{
 			// Do not remove object in use.
 			EAP_TRACE_DEBUG(
@@ -2900,14 +2560,10 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::remove_eapol_key_state(
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
-#endif //#if defined(USE_EAPOL_KEY_STATE)
-
 //--------------------------------------------------
 
-#if defined(USE_EAPOL_KEY_STATE)
-
 //
-eap_status_e eapol_core_c::asynchronous_init_remove_eapol_key_state(
+EAP_FUNC_EXPORT eap_status_e eapol_core_c::asynchronous_init_remove_eapol_key_state(
 	const eap_am_network_id_c * const send_network_id)
 {
 	EAP_TRACE_DEBUG(
@@ -2991,8 +2647,6 @@ eap_status_e eapol_core_c::asynchronous_init_remove_eapol_key_state(
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
-#endif //#if defined(USE_EAPOL_KEY_STATE)
-
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT void eapol_core_c::state_notification(
@@ -3043,7 +2697,6 @@ EAP_FUNC_EXPORT void eapol_core_c::state_notification(
 			if (state->get_current_state() == eap_state_identity_request_received
 				|| state->get_current_state() == eap_state_eap_response_sent)
 			{
-#if defined(USE_EAPOL_KEY_STATE)
 				// Indicate EAPOL Key state the started EAP-authentication.
 				status = indicate_eapol_key_state_started_eap_authentication(
 					state->get_send_network_id());
@@ -3056,7 +2709,6 @@ EAP_FUNC_EXPORT void eapol_core_c::state_notification(
 						 EAPL("indicate_eapol_key_state_started_eap_authentication(), eap_status_e %d\n"),
 						status));
 				}
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 			}
 
 		}
@@ -3068,10 +2720,10 @@ EAP_FUNC_EXPORT void eapol_core_c::state_notification(
 				(EAPL("ERROR: eapol_core_c::state_notification(): %s: EAP-authentication FAILED\n"),
 				 (state->get_is_client() == true ? "client": "server")));
 
-#if defined(USE_EAPOL_KEY_STATE)
 			// Remove possible EAPOL Key state.
 			status = remove_eapol_key_state(
-				state->get_send_network_id());
+				state->get_send_network_id(),
+				true);
 			if (status != eap_status_ok)
 			{
 				EAP_TRACE_DEBUG(
@@ -3081,7 +2733,6 @@ EAP_FUNC_EXPORT void eapol_core_c::state_notification(
 					 EAPL("remove_eapol_key_state(), eap_status_e %d\n"),
 					status));
 			}
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 		}
 		else if (state->get_current_state() == eap_state_authentication_finished_successfully)
@@ -3092,7 +2743,6 @@ EAP_FUNC_EXPORT void eapol_core_c::state_notification(
 				(EAPL("eapol_core_c::state_notification(): %s: EAP authentication SUCCESS\n"),
 				(state->get_is_client() == true ? "client": "server")));
 
-#if defined(USE_EAPOL_KEY_STATE)
 			eap_network_id_selector_c state_selector(
 				m_am_tools,
 				state->get_send_network_id());
@@ -3220,7 +2870,6 @@ EAP_FUNC_EXPORT void eapol_core_c::state_notification(
 						 EAPL("allow_4_way_handshake() failed, no eapol_key_state_c object\n")));
 				}
 			}
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 		}
 		else
 		{
@@ -3239,7 +2888,6 @@ EAP_FUNC_EXPORT void eapol_core_c::state_notification(
 				state->get_is_client()));
 		}
 	}
-#if defined(USE_EAPOL_KEY_STATE)
 	else if (state->get_protocol_layer() == eap_protocol_layer_eapol_key)
 	{
 		// This nofifation is from eapol_key_state_c object.
@@ -3393,8 +3041,6 @@ EAP_FUNC_EXPORT void eapol_core_c::state_notification(
 				state->get_is_client()));
 		}
 	}
-#endif //#if defined(USE_EAPOL_KEY_STATE)
-
 
 	m_partner->state_notification(state);
 }
@@ -3463,21 +3109,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::cancel_timer(
 
 //--------------------------------------------------
 
-//
-EAP_FUNC_EXPORT eap_status_e eapol_core_c::cancel_all_timers()
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	EAP_ASSERT(m_am_tools->get_global_mutex()->get_is_reserved() == true);
-
-	const eap_status_e status = m_partner->cancel_all_timers();
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, status);
-}
-
-//--------------------------------------------------
-
 EAP_FUNC_EXPORT eap_status_e eapol_core_c::check_is_valid_eap_type(
 	const eap_type_value_e eap_type)
 {
@@ -3497,8 +3128,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::get_eap_type_list(
 }
 
 //--------------------------------------------------
-
-#if defined(USE_EAPOL_KEY_STATE)
 
 //
 EAP_FUNC_EXPORT eap_status_e eapol_core_c::cancel_authentication_session(
@@ -3522,8 +3151,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::cancel_authentication_session(
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
-#endif //#if defined(USE_EAPOL_KEY_STATE)
-
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e eapol_core_c::cancel_all_authentication_sessions()
@@ -3545,34 +3172,25 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::cancel_all_authentication_sessions()
 	bool previous_block = m_block_state_notifications;
 	m_block_state_notifications = true;
 
-#if !defined(NO_EAP_SESSION_CORE)
 	if (m_eap_core != 0)
 	{
-		status = m_eap_core->synchronous_cancel_all_eap_sessions();
+		status = m_eap_core->cancel_all_eap_sessions();
 	}
-#endif //#if !defined(NO_EAP_SESSION_CORE)
 
-
-#if defined(USE_EAPOL_KEY_STATE)
 	status = m_eapol_key_state_map.for_each(cancel_authentication_session, true);
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 	m_block_state_notifications = previous_block;
 
 
 	// This will cancel all timers of this object.
 	m_partner->cancel_timer(this, EAPOL_CORE_TIMER_SEND_START_AGAIN_ID);
-#if defined(USE_EAPOL_KEY_STATE)
 	m_partner->cancel_timer(this, EAPOL_REMOVE_EAPOL_KEY_HANDSHAKE_ID);
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
 //--------------------------------------------------
-
-#if defined(USE_EAPOL_KEY_STATE)
 
 EAP_FUNC_EXPORT eap_status_e eapol_core_c::get_and_increment_global_key_counter(
 	eap_variable_data_c * const key_counter)
@@ -3581,11 +3199,8 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::get_and_increment_global_key_counter(
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_not_supported);
 }
 
-#endif //#if defined(USE_EAPOL_KEY_STATE)
-
 //--------------------------------------------------
 
-#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 /**
  * Function creates a state for later use. This is for optimazing 4-Way Handshake.
  * @param receive_network_id carries the MAC addresses.
@@ -3753,7 +3368,8 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::create_state(
 	if (status != eap_status_ok)
 	{
 		status = remove_eapol_key_state(
-			&send_network_id);
+			&send_network_id,
+			true);
 		if (status != eap_status_ok)
 		{
 			EAP_TRACE_DEBUG(
@@ -3771,11 +3387,8 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::create_state(
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
-#endif //#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
 //--------------------------------------------------
 
-#if defined(USE_EAPOL_KEY_STATE)
 /**
  * @param receive_network_id carries the MAC addresses.
  * MAC address of Authenticator should be in source address. MAC address of 
@@ -3852,112 +3465,10 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::association(
 
 	eapol_key_state_c *eapol_key_state = m_eapol_key_state_map.get_handler(&state_selector);
 
-#if !defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-	if (eapol_key_state != 0)
-	{
-		// Reuse the session.
-		eapol_key_state->unset_marked_removed();
-
-		if (m_is_client == false)
-		{
-			// In test version do not reset server.
-		}
-		else
-		{
-			status = eapol_key_state->reset();
-			if (status != eap_status_ok)
-			{
-				// We cannot reuse the session.
-				EAP_TRACE_ERROR(
-					m_am_tools,
-					TRACE_FLAGS_ERROR,
-					(EAPL("eapol_core_c::association(): eapol_key_state NOT reused.\n")));
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
-		}
-	}
-#endif //#if !defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
-
 	if (eapol_key_state == 0)
 	{
-
-#if !defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
-		eapol_key_state = new eapol_key_state_c(
-			m_am_tools,
-			this,
-			m_partner,
-			m_is_client,
-			receive_network_id,
-			authentication_type,
-			authenticator_RSNA_IE,
-			supplicant_RSNA_IE,
-			eapol_pairwise_cipher,
-			eapol_group_cipher,
-			pre_shared_key_PSK);
-		if (eapol_key_state == 0
-			|| eapol_key_state->get_is_valid() == false)
-		{
-			if (eapol_key_state != 0)
-			{
-				eapol_key_state->shutdown();
-			}
-			else
-			{
-				EAP_TRACE_DEBUG(
-					m_am_tools, 
-					TRACE_FLAGS_DEFAULT, 
-					(EAPL("WARNING: eapol_core_c::association(): Cannot run eapol_key_state->shutdown() 0x%08x\n"),
-					eapol_key_state));
-			}
-			delete eapol_key_state;
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = eapol_key_state->initialize(
-			receive_network_id,
-			authentication_type,
-			authenticator_RSNA_IE,
-			supplicant_RSNA_IE,
-			eapol_pairwise_cipher,
-			eapol_group_cipher,
-			pre_shared_key_PSK);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		status = m_eapol_key_state_map.add_handler(&state_selector, eapol_key_state);
-		if (status != eap_status_ok)
-		{
-			if (eapol_key_state != 0)
-			{
-				eapol_key_state->shutdown();
-			}
-			else
-			{
-				EAP_TRACE_DEBUG(
-					m_am_tools, 
-					TRACE_FLAGS_DEFAULT, 
-					(EAPL("WARNING: eapol_core_c::association(): Cannot run eapol_key_state->shutdown() 0x%08x\n"),
-					eapol_key_state));
-			}
-			delete eapol_key_state;
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-#else
-
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_handler_does_not_exists_error);
-
-#endif //#if !defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
 	}
 	else
 	{
@@ -3976,29 +3487,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::association(
 		}
 	}
 
-
-#if !defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-	status = eapol_key_state->configure();
-	if (status != eap_status_ok)
-	{
-		status = remove_eapol_key_state(
-			&send_network_id);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_DEBUG(
-				m_am_tools, 
-				TRACE_FLAGS_DEFAULT, 
-				(EAPL("WARNING: eapol_core_c::association(): ")
-				 EAPL("remove_eapol_key_state(), eap_status_e %d\n"),
-				status));
-		}
-
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-#endif //#if !defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
-
 	if (authentication_type == eapol_key_authentication_type_RSNA_PSK
 		|| authentication_type == eapol_key_authentication_type_WPA_PSK)
 	{
@@ -4006,7 +3494,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::association(
 #if !defined(NO_EAPOL_KEY_STATE_SERVER)
 		if (m_is_client == false)
 		{
-#if defined(USE_EAPOL_KEY_STATE)
 			if (m_skip_start_4_way_handshake == true)
 			{
 				// This is test to skip 4-Way Handshake start.
@@ -4019,7 +3506,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::association(
 				return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
 			}
 			else
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 			{
 				status = eapol_key_state->start_4_way_handshake(
 					receive_network_id);
@@ -4037,40 +3523,35 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::association(
 			eapol_key_state->allow_4_way_handshake();
 		}
 	}
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 	else if (authentication_type == eapol_key_authentication_type_RSNA_EAP
 		|| authentication_type == eapol_key_authentication_type_WPA_EAP
 		|| authentication_type == eapol_key_authentication_type_dynamic_WEP
 		|| authentication_type == eapol_key_authentication_type_WPXM
-		|| authentication_type == eapol_key_authentication_type_WFA_SC
+		|| authentication_type == eapol_key_authentication_type_WPS
 		|| authentication_type == eapol_key_authentication_type_EAP_authentication_no_encryption
 		)
 	{
 		// Creates a EAP-session.
-		status = m_eap_core->synchronous_create_eap_session(receive_network_id);
+		status = m_eap_core->create_eap_session(receive_network_id);
 		if (status != eap_status_ok)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 	}
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
 
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
-#endif //#if defined(USE_EAPOL_KEY_STATE)
-
 //--------------------------------------------------
 
-#if defined(USE_EAPOL_KEY_STATE)
 /**
  * @param receive_network_id carries the MAC addresses.
  * MAC address of Authenticator should be in source address.
  * MAC address of Supplicant should be in destination address.
  */
 EAP_FUNC_EXPORT eap_status_e eapol_core_c::disassociation(
+	const bool complete_to_lower_layer,
 	const eap_am_network_id_c * const receive_network_id
 	)
 {
@@ -4103,10 +3584,10 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::disassociation(
 
 	(void) m_partner->cancel_timer(this, EAPOL_CORE_TIMER_SEND_START_AGAIN_ID);
 
-#if !defined(NO_EAP_SESSION_CORE)
 	// First we remove possible EAP session.
-	(void) m_eap_core->synchronous_remove_eap_session(receive_network_id);
-#endif
+	(void) m_eap_core->remove_eap_session(
+		complete_to_lower_layer,
+		receive_network_id);
 
 	status = init_eapol_key_pmksa_caching_timeout(
 		&send_network_id);
@@ -4123,8 +3604,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::disassociation(
 
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
-
-#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 //--------------------------------------------------
 
@@ -4162,8 +3641,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::tkip_mic_failure(
 		 (m_is_client == true) ? "client": "server"));
 
 	eap_status_e status = eap_status_process_general_error;
-
-#if defined(USE_EAPOL_KEY_STATE)
 
 	// Here we swap the addresses.
 	eap_am_network_id_c send_network_id(
@@ -4207,12 +3684,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::tkip_mic_failure(
 		status = eap_status_handler_does_not_exists_error;
 	}
 
-#else
-
-	status = eap_status_not_supported;
-
-#endif //#if defined(USE_EAPOL_KEY_STATE)
-
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
@@ -4233,6 +3704,154 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::set_session_timeout(
 
 //--------------------------------------------------
 
+#if defined(USE_EAP_SIMPLE_CONFIG)
 
+EAP_FUNC_EXPORT eap_status_e eapol_core_c::save_simple_config_session(
+	const simple_config_state_e state,
+	EAP_TEMPLATE_CONST eap_array_c<simple_config_credential_c> * const credential_array,
+	const eap_variable_data_c * const new_password,
+	const simple_config_Device_Password_ID_e Device_Password_ID,
+	const simple_config_payloads_c * const other_configuration)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("%s: eapol_core_c::save_simple_config_session().\n"),
+		 (m_is_client == true) ? "client": "server"));
+
+	const eap_status_e status = m_partner->save_simple_config_session(
+		state,
+		credential_array,
+		new_password,
+		Device_Password_ID,
+		other_configuration);
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+#endif // #if defined(USE_EAP_SIMPLE_CONFIG)
+
+//--------------------------------------------------
+
+//
+EAP_FUNC_EXPORT eap_status_e eapol_core_c::set_eap_database_reference_values(
+	const eap_variable_data_c * const reference)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eapol_core_c::set_eap_database_reference_values()\n")));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_core_c::set_eap_database_reference_values()");
+
+	eap_status_e status(eap_status_ok);
+
+	if (m_eap_core != 0)
+	{
+		status = m_eap_core->set_eap_database_reference_values(reference);
+	}
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
+//
+EAP_FUNC_EXPORT eap_status_e eapol_core_c::get_802_11_authentication_mode(
+	const eap_am_network_id_c * const receive_network_id,
+	const eapol_key_authentication_type_e authentication_type,
+	const eap_variable_data_c * const SSID,
+	const eap_variable_data_c * const preshared_key)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eapol_core_c::get_802_11_authentication_mode()\n")));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_core_c::get_802_11_authentication_mode()");
+
+	eap_status_e status(eap_status_ok);
+
+	if (m_eap_core != 0)
+	{
+		status = m_eap_core->get_802_11_authentication_mode(
+			receive_network_id,
+			authentication_type,
+			SSID,
+			preshared_key);
+	}
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
+//
+EAP_FUNC_EXPORT eap_status_e eapol_core_c::complete_get_802_11_authentication_mode(
+		const eap_status_e completion_status,
+		const eap_am_network_id_c * const receive_network_id,
+		const eapol_key_802_11_authentication_mode_e mode)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eapol_core_c::complete_get_802_11_authentication_mode()\n")));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_core_c::complete_get_802_11_authentication_mode()");
+
+	eap_status_e status(eap_status_ok);
+
+	if (m_partner != 0)
+	{
+		status = m_partner->complete_get_802_11_authentication_mode(
+			completion_status,
+			receive_network_id,
+			mode);
+	}
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
+//
+EAP_FUNC_EXPORT eap_status_e eapol_core_c::complete_remove_eap_session(
+	const bool complete_to_lower_layer,
+	const eap_am_network_id_c * const receive_network_id)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eapol_core_c::complete_remove_eap_session()\n")));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_core_c::complete_remove_eap_session()");
+
+	eap_status_e status(eap_status_ok);
+
+	if (m_partner != 0)
+	{
+		status = m_partner->complete_disassociation(
+			complete_to_lower_layer,
+			receive_network_id);
+	}
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
 // End.

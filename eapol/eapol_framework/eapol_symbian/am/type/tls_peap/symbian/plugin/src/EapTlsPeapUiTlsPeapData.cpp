@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 14 %
+* %version: %
 */
 
 // This is enumeration of EAPOL source code.
@@ -34,7 +34,8 @@ CEapTlsPeapUiTlsPeapData::CEapTlsPeapUiTlsPeapData()
 : iAllowVersion0(EFalse),
 iAllowVersion1(EFalse),
 iAllowVersion2(EFalse),
-iPapPasswordPrompt( ETrue )
+iPapPasswordPrompt( ETrue ),
+iPasswordPrompt(ETrue)
 {
 }
 
@@ -98,6 +99,11 @@ TBool * CEapTlsPeapUiTlsPeapData::GetUnauthProvModeAllowed()
 TDes& CEapTlsPeapUiTlsPeapData::GetPacStorePassword()
 {
 	return iPacStorePassword;
+}
+
+TBool* CEapTlsPeapUiTlsPeapData::GetUsePacStorePasswordPrompt()
+{
+	return &iPasswordPrompt;
 }
 
 

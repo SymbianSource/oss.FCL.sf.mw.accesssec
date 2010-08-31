@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10.1.3 %
+* %version: %
 */
 
 // This is enumeration of EAPOL source code.
@@ -38,6 +38,20 @@ eap_type_mschapv2_state_c::eap_type_mschapv2_state_c(abs_eap_am_tools_c * const 
 , m_next_state(eap_type_mschapv2_state_none)
 , m_failure_message_received(false)
 {
+	reset();
+}
+
+EAP_FUNC_EXPORT eap_type_mschapv2_state_c::~eap_type_mschapv2_state_c()
+{
+}
+
+eap_type_mschapv2_state_variable_e eap_type_mschapv2_state_c::get_state() const
+{
+	return m_state;
+}
+
+void eap_type_mschapv2_state_c::reset()
+{
 	if (m_is_client)
 	{
 		m_state = eap_type_mschapv2_state_none;
@@ -50,15 +64,6 @@ eap_type_mschapv2_state_c::eap_type_mschapv2_state_c(abs_eap_am_tools_c * const 
 		m_prev_state = eap_type_mschapv2_state_none;
 		m_next_state = eap_type_mschapv2_state_identity_response;
 	}
-}
-
-EAP_FUNC_EXPORT eap_type_mschapv2_state_c::~eap_type_mschapv2_state_c()
-{
-}
-
-eap_type_mschapv2_state_variable_e eap_type_mschapv2_state_c::get_state() const
-{
-	return m_state;
 }
 
 void eap_type_mschapv2_state_c::set_state(const eap_type_mschapv2_state_variable_e new_state)
@@ -74,11 +79,14 @@ void eap_type_mschapv2_state_c::set_state(
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eap_type_mschapv2_state_c::set_state(): this = 0x%08x, previous state %d, new state %d, new next state %d\n"),
-		this,
-		m_prev_state,
-		new_state,
-		new_next_state));
+		(EAPL("eap_type_mschapv2_state_c::set_state(): this = 0x%08x, previous state %d=%s, new state %d=%s, new next state %d=%s\n"),
+		 this,
+		 m_prev_state,
+		 get_state_string(m_prev_state),
+		 new_state,
+		 get_state_string(new_state),
+		 new_next_state,
+		 get_state_string(m_next_state)));
 
 	m_prev_state = m_state;
 	m_state = new_state;
@@ -90,12 +98,16 @@ bool eap_type_mschapv2_state_c::is_valid_state(const eap_type_mschapv2_state_var
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eap_type_mschapv2_state_c::is_valid_state(): this = 0x%08x, previous state %d, state %d, new state %d, new next state %d\n"),
-		this,
-		m_prev_state,
-		m_state,
-		new_state,
-		m_next_state));
+		(EAPL("eap_type_mschapv2_state_c::is_valid_state(): this = 0x%08x, previous state %d=%s, state %d=%s, new state %d=%s, new next state %d\n"),
+		 this,
+		 m_prev_state,
+		 get_state_string(m_prev_state),
+		 m_state,
+		 get_state_string(m_state),
+		 new_state,
+		 get_state_string(new_state),
+		 m_next_state,
+		 get_state_string(m_next_state)));
 
 	if (m_is_client) // Client
 	{
@@ -162,12 +174,16 @@ bool eap_type_mschapv2_state_c::is_valid_state(const eap_type_mschapv2_state_var
 			EAP_TRACE_DEBUG(
 				m_am_tools, 
 				TRACE_FLAGS_DEFAULT, 
-				(EAPL("WARNING: eap_type_mschapv2_state_c::is_valid_state(): returns false: this = 0x%08x, previous state %d, state %d, new state %d, new next state %d\n"),
-				this,
-				m_prev_state,
-				m_state,
-				new_state,
-				m_next_state));
+				(EAPL("WARNING: eap_type_mschapv2_state_c::is_valid_state(): returns false: this = 0x%08x, previous state %d=%s, state %d=%s, new state %d=%s, new next state %d=%s\n"),
+				 this,
+				 m_prev_state,
+				 get_state_string(m_prev_state),
+				 m_state,
+				 get_state_string(m_state),
+				 new_state,
+				 get_state_string(new_state),
+				 m_next_state,
+				 get_state_string(m_next_state)));
 
 			return false;
 
@@ -215,12 +231,16 @@ bool eap_type_mschapv2_state_c::is_valid_state(const eap_type_mschapv2_state_var
 			EAP_TRACE_DEBUG(
 				m_am_tools, 
 				TRACE_FLAGS_DEFAULT, 
-				(EAPL("WARNING: eap_type_mschapv2_state_c::is_valid_state(): returns false: this = 0x%08x, previous state %d, state %d, new state %d, new next state %d\n"),
-				this,
-				m_prev_state,
-				m_state,
-				new_state,
-				m_next_state));
+				(EAPL("WARNING: eap_type_mschapv2_state_c::is_valid_state(): returns false: this = 0x%08x, previous state %d=%s, state %d=%s, new state %d=%s, new next state %d=%s\n"),
+				 this,
+				 m_prev_state,
+				 get_state_string(m_prev_state),
+				 m_state,
+				 get_state_string(m_state),
+				 new_state,
+				 get_state_string(new_state),
+				 m_next_state,
+				 get_state_string(m_next_state)));
 
 			return false;
 
@@ -236,11 +256,14 @@ void eap_type_mschapv2_state_c::set_failure_message_received()
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eap_type_mschapv2_state_c::set_failure_message_received(): this = 0x%08x, previous state %d, state %d, new next state %d\n"),
-		this,
-		m_prev_state,
-		m_state,
-		m_next_state));
+		(EAPL("eap_type_mschapv2_state_c::set_failure_message_received(): this = 0x%08x, previous state %d=%s, state %d=%s, new next state %d=%s\n"),
+		 this,
+		 m_prev_state,
+		 get_state_string(m_prev_state),
+		 m_state,
+		 get_state_string(m_state),
+		 m_next_state,
+		 get_state_string(m_next_state)));
 
 	m_failure_message_received = true;
 }
@@ -250,11 +273,14 @@ void eap_type_mschapv2_state_c::unset_failure_message_received()
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eap_type_mschapv2_state_c::unset_failure_message_received(): this = 0x%08x, previous state %d, state %d, new next state %d\n"),
-		this,
-		m_prev_state,
-		m_state,
-		m_next_state));
+		(EAPL("eap_type_mschapv2_state_c::unset_failure_message_received(): this = 0x%08x, previous state %d=%s, state %d=%s, new next state %d=%s\n"),
+		 this,
+		 m_prev_state,
+		 get_state_string(m_prev_state),
+		 m_state,
+		 get_state_string(m_state),
+		 m_next_state,
+		 get_state_string(m_next_state)));
 
 	m_failure_message_received = false;
 }
@@ -262,3 +288,30 @@ void eap_type_mschapv2_state_c::unset_failure_message_received()
 void eap_type_mschapv2_state_c::cancel_eap_failure_timer()
 {
 }
+
+eap_const_string eap_type_mschapv2_state_c::get_state_string(const eap_type_mschapv2_state_variable_e state)
+{
+#if defined(USE_EAP_TRACE_STRINGS)
+	EAP_IF_RETURN_STRING(state, eap_type_mschapv2_state_none)
+	else EAP_IF_RETURN_STRING(state, eap_type_mschapv2_state_success)
+	else EAP_IF_RETURN_STRING(state, eap_type_mschapv2_state_failure)
+	else EAP_IF_RETURN_STRING(state, eap_type_mschapv2_state_identity_request)
+	else EAP_IF_RETURN_STRING(state, eap_type_mschapv2_state_challenge_request)
+	else EAP_IF_RETURN_STRING(state, eap_type_mschapv2_state_success_request)
+	else EAP_IF_RETURN_STRING(state, eap_type_mschapv2_state_failure_request)
+	else EAP_IF_RETURN_STRING(state, eap_type_mschapv2_state_change_password_request)
+	else EAP_IF_RETURN_STRING(state, eap_type_mschapv2_state_identity_response)
+	else EAP_IF_RETURN_STRING(state, eap_type_mschapv2_state_challenge_response)
+	else EAP_IF_RETURN_STRING(state, eap_type_mschapv2_state_success_response)
+	else EAP_IF_RETURN_STRING(state, eap_type_mschapv2_state_failure_response)
+	else EAP_IF_RETURN_STRING(state, eap_type_mschapv2_state_change_password_response)
+	else
+#endif // #if defined(USE_EAP_TRACE_STRINGS)
+	{
+		EAP_UNREFERENCED_PARAMETER(state);
+		return EAPL("Unknown EAP-MsChapv2-state");
+	}
+}
+
+
+// End

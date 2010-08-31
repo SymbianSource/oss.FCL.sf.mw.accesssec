@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11 %
+* %version: %
 */
 
 #ifndef EAPGTCDBPARAMETERNAMES_H

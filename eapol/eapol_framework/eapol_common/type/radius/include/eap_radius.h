@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11 %
+* %version: %
 */
 
 #if !defined(_RADIUS_CORE_H_)

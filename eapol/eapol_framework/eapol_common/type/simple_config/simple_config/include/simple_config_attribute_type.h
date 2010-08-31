@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 7 %
+* %version: %
 */
 
 #if !defined(_SIMPLE_CONFIG_ATTRIBUTE_TYPE_H_)

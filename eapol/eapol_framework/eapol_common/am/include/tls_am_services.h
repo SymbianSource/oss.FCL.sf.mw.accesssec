@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 25 %
+* %version: %
 */
 
 #if !defined(_TLS_AM_SERVICES_H_)

@@ -1,0 +1,37 @@
+/*
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* 	Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+* 	IBY file for common UI implementation for WPA/WPA2, WPA2 only and 802.1x
+*
+*/
+
+/*
+ * %version: tr1cfwln#5 %
+ */
+
+#ifndef __CPWPACMNUI_IBY__
+#define __CPWPACMNUI_IBY__
+
+#include <data_caging_paths_for_iby.hrh>
+#include <bldvariant.hrh>
+
+#ifdef __PROTOCOL_WLAN
+
+//file content
+file=ABI_DIR\BUILD_DIR\cpwpacmnui.dll		SHARED_LIB_DIR\cpwpacmnui.dll
+
+#endif // __PROTOCOL_WLAN
+
+#endif
+

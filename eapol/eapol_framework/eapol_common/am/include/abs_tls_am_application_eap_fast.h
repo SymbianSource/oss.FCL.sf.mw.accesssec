@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 28 %
+* %version: %
 */
 
 #if !defined(_ABS_TLS_AM_APPLICATION_EAP_FAST_H_)

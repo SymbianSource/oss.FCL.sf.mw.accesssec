@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 23 %
+* %version: 20.1.4 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -2583,7 +2583,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_aka_c::handle_imsi_from_username(
 
 
 	if (m_authentication_type == AKA_AUTHENTICATION_TYPE_FULL_AUTH
-		&& (m_identity_type == AKA_IDENTITY_TYPE_IMSI_ID
+		&& ((m_identity_type == AKA_IDENTITY_TYPE_IMSI_ID
 			&& (get_saved_previous_state() == eap_type_aka_state_waiting_for_identity_response
 				|| get_saved_previous_state() == eap_type_aka_state_waiting_for_aka_identity_response_with_at_permanent_identity
 				|| get_saved_previous_state() == eap_type_aka_state_waiting_for_aka_identity_response_with_at_full_auth_identity
@@ -2593,7 +2593,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_aka_c::handle_imsi_from_username(
 			&& (get_saved_previous_state() == eap_type_aka_state_waiting_for_identity_response
 				|| get_saved_previous_state() == eap_type_aka_state_waiting_for_aka_identity_response_with_at_permanent_identity
 				|| get_saved_previous_state() == eap_type_aka_state_waiting_for_aka_identity_response_with_at_any_identity
-				|| get_saved_previous_state() == eap_type_aka_state_waiting_for_aka_identity_response))
+				|| get_saved_previous_state() == eap_type_aka_state_waiting_for_aka_identity_response)))
 		)
 	{
 		eap_type_aka_identity_type local_identity_type = m_identity_type;
@@ -4734,7 +4734,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_aka_c::handle_reauthentication_response_me
 						return EAP_STATUS_RETURN(m_am_tools, status);
 					}
 
-					if (l_aka_payloads->get_COUNTER_TOO_SMALL()->get_payload_included() == true)
+					if (l_aka_payloads->get_counter_too_small()->get_payload_included() == true)
 					{
 						// When the client detects that the
 						// counter value is not fresh, it includes the AT_COUNTER_TOO_SMALL

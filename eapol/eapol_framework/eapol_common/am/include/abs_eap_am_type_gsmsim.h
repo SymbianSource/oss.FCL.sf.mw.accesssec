@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 4 %
+* %version: %
 */
 
 #if !defined(_ABS_EAP_AM_TYPE_GSMSIM_H_)

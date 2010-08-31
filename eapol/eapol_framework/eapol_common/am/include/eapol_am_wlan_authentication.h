@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 2.1.2 %
+* %version: %
 */
 
 #if !defined(_EAPOL_AM_WLAN_AUTHENTICATION_H_)
@@ -34,8 +34,8 @@ class abs_eap_base_type_c;
 class eap_base_type_c;
 class eap_am_network_id_c;
 class eap_type_selection_c;
-class abs_eapol_wlan_database_reference_if_c;
 class abs_eap_state_notification_c;
+#include "eap_database_reference_if.h"
 
 #if defined(USE_EAP_SIMPLE_CONFIG)
 class abs_eap_configuration_if_c;
@@ -44,6 +44,7 @@ class abs_eap_configuration_if_c;
 
 /// This is interface to adaptation module of class eapol_wlan_authentication_c.
 class EAP_EXPORT eapol_am_wlan_authentication_c
+: public eap_database_reference_if_c
 {
 private:
 	//--------------------------------------------------
@@ -57,15 +58,14 @@ public:
 	//--------------------------------------------------
 
 	// 
-	virtual ~eapol_am_wlan_authentication_c();
+	EAP_FUNC_IMPORT virtual ~eapol_am_wlan_authentication_c();
 
 	/// @param tools: Constructor takes parameter tools that is pointer to adaptation of the platform.
 	/// @param is_client_when_true: Second parameter is true when object is client and false when object is server.
 	/// @param wlan_database_reference: third parameter is pointer to interface to read the current database reference.
 	EAP_FUNC_IMPORT static eapol_am_wlan_authentication_c * new_eapol_am_wlan_authentication(
 		abs_eap_am_tools_c * const tools,
-		const bool is_client_when_true,
-		const abs_eapol_wlan_database_reference_if_c * const wlan_database_reference
+		const bool is_client_when_true
 		);
 
 	/// This is documented in abs_eap_stack_interface_c::get_is_valid().
@@ -85,8 +85,8 @@ public:
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
 		) = 0;
 
-	/// Function resets current EAP-configuration.
-	virtual eap_status_e reset_eap_configuration() = 0;
+	/// Function resets current WPA-configuration.
+	virtual eap_status_e reset_wpa_configuration() = 0;
 
 	/// Function sets the new WLAN parameters.
 	virtual eap_status_e set_wlan_parameters(
@@ -105,13 +105,6 @@ public:
 		const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
 		) = 0;
 
-	/**
-	 * This function queries the selected and active EAP-types that can be used
-	 * in current connection.
-	 */
-	virtual eap_status_e get_selected_eap_types(
-		eap_array_c<eap_type_selection_c> * const selected_eap_types) = 0;
-
 	/// Function gets the current WLAN configuration, now only the HASH of the WPA(2)-PSK.
 	virtual eap_status_e get_wlan_configuration(
 		eap_variable_data_c * const wpa_preshared_key_hash) = 0;
@@ -126,36 +119,6 @@ public:
 		const bool when_true_successfull,
 		const eap_type_value_e eap_type,
 		const eapol_key_authentication_type_e authentication_type) = 0;
-
-	/**
-	 * The load_module() function function indicates the lower level to
-	 * load new module of EAP-type.
-	 * @param type is the requested EAP-type.
-	 * @param tunneling_type is the EAP-type that tunnels the type. When plain EAP-type is used this parameter is eap_type_none.
-	 * @param partner is pointer to the caller object.
-	 * The partner of the new created EAP-type object is the caller object.
-	 * @param eap_type is a pointer to a pointer of EAP-type object.
-	 * Adaptation module sets eap_type pointer to created EAP-type object.
-	 * @param is_client_when_true parameter indicates whether the network entity should
-	 * act as a client (true) or server (false), in terms of EAP-protocol whether
-	 * this network entity is EAP-supplicant (true) or EAP-authenticator (false).
-	 * @param receive_network_id includes the addresses (network identity) and packet type.
-	 */
-	virtual eap_status_e load_module(
-		const eap_type_value_e type,
-		const eap_type_value_e tunneling_type,
-		abs_eap_base_type_c * const partner,
-		eap_base_type_c ** const eap_type,
-		const bool is_client_when_true,
-		const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
-		) = 0;
-
-	/**
-	 * The unload_module() function unloads the module of a EAP-type. 
-	 * @param eap_type is the requested EAP-type.
-	 */
-	virtual eap_status_e unload_module(
-		const eap_type_value_e type) = 0;
 
 	/**
 	 * The read_configure() function reads the configuration data identified
@@ -215,21 +178,6 @@ public:
 	 * Adaptation module internally implements the timer.
 	 */
 	virtual eap_status_e cancel_all_timers() = 0;
-
-	/**
-	 * This function queries the validity of EAP-type.
-	 * Lower layer should return eap_status_ok if this EAP-type is supported.
-	 */
-	virtual eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type) = 0;
-
-	/**
-	 * This function queries the list of supported EAP-types.
-	 * Lower layer should return eap_status_ok if this call succeeds.
-	 * @param eap_type_list will include the list of supported EAP-types. Each value in list
-	 * is type of u32_t and represent one supported EAP-type. List consists of subsequent u32_t type values.
-	 */
-	virtual eap_status_e get_eap_type_list(
-		eap_array_c<eap_type_value_e> * const eap_type_list) = 0;
 
 	/**
 	 * This is notification of internal state transition.

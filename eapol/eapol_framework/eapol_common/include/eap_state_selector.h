@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11 %
+* %version: %
 */
 
 #if !defined(_EAP_STATE_SELECTOR_H_)

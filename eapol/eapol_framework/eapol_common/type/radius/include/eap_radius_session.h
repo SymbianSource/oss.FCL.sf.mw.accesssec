@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11.1.2 %
+* %version: %
 */
 
 #if !defined(_EAP_RADIUS_SESSION_H_)
@@ -342,7 +342,8 @@ public:
 	 * This function removes EAP session object synchronously.
 	 * @param receive_network_id identifies the removed EAP session.
 	 */
-	EAP_FUNC_IMPORT eap_status_e synchronous_remove_eap_session(
+	EAP_FUNC_IMPORT eap_status_e remove_eap_session(
+		const bool complete_to_lower_layer,
 		const eap_am_network_id_c * const receive_network_id);
 
 	/**

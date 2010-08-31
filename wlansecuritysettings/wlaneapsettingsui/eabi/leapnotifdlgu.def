@@ -1,7 +1,0 @@
-EXPORTS
-	_Z13NotifierArrayv @ 1 NONAME
-	_ZTI11CLeapDialog @ 2 NONAME ; #<TI>#
-	_ZTI17CLeapDialogPlugin @ 3 NONAME ; #<TI>#
-	_ZTV11CLeapDialog @ 4 NONAME ; #<VT>#
-	_ZTV17CLeapDialogPlugin @ 5 NONAME ; #<VT>#
-

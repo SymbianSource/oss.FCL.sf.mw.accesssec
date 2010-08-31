@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 41 %
+* %version: %
 */
 
 #if !defined(_SIMPLE_CONFIG_RECORD_H_)

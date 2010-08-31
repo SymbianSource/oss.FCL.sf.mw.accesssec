@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 7.1.2 %
+* %version: %
 */
 
 #if !defined( _ABS_EAP_AM_TOOLS_H_ )
@@ -367,6 +367,11 @@ public:
 	 * This function sets the current trace mask.
 	 */
 	virtual void set_trace_mask(const u32_t mask) = 0;
+
+	/**
+	 * This function sets the trace prefix string.
+	 */
+	virtual eap_status_e set_trace_prefix(const eap_variable_data_c * const prefix8bit) = 0;
 
 	/**
 	 * This function sets the trace output file name.

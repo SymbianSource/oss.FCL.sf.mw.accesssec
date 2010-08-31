@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10 %
+* %version: 8.1.6 %
 */
 
 #ifndef EAPGTCDBUTILS_H
@@ -29,21 +29,10 @@
 
 // LOCAL CONSTANTS
 
-#ifdef SYMBIAN_SECURE_DBMS
-// For EAP GTC secure database.
-// Full path is not needed. The database eapgtc.dat will be saved in the 
-// data cage path for DBMS. So it will be in "\private\100012a5\eapgtc.dat" in C: drive.
-// The maximum length of database name is 0x40 (KDbMaxName) , which is defined in d32dbms.h.
+// For EAP-GTC private database. Database will be in the private folder of EAP-server (20026FCB).
+// The maximum length of database name is 0x40 (KDbMaxName), which is defined in d32dbms.h.
 
-_LIT(KGtcDatabaseName, "c:eapgtc.dat");
-
-_LIT(KGtcSecureUIDFormat, "SECURE[102072e9]"); // For the security policy.
-
-#else
-
-_LIT(KGtcDatabaseName, "c:\\system\\data\\eapgtc.dat");
-
-#endif // #ifdef SYMBIAN_SECURE_DBMS
+_LIT(KEapGtcDatabaseName, "eapgtc.dat");
 
 _LIT(KGtcTableName, "eapgtc");
 
@@ -60,8 +49,8 @@ public:
 	* @param aIndex Index
 	*/
 	static void OpenDatabaseL(
-		RDbNamedDatabase& aDatabase, 
-		RDbs& aSession, 
+		RDbNamedDatabase& aDatabase,
+		RFs& aFileServerSession,
 		const TIndexType aIndexType,
 		const TInt aIndex,
 		const eap_type_value_e aTunnelingType);
@@ -105,7 +94,6 @@ public:
 		const TIndexType aIndexType,
 		const TInt aIndex,
 		const eap_type_value_e aTunnelingType);
-
 };
 
 #endif // EAPGTCBUTILS_H

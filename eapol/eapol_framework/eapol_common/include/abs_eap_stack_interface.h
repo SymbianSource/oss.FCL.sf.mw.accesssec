@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 2.1.2 %
+* %version: %
 */
 
 #if !defined(_ABS_EAP_STACK_INTERFACE_H_)
@@ -56,15 +56,15 @@ public:
 	 * The destructor of the abs_eap_stack_interface_c class does nothing special.
 	 */
 	virtual ~abs_eap_stack_interface_c()
-		{
-		}
+	{
+	}
 
 	/**
 	 * The constructor of the abs_eap_stack_interface_c does nothing special.
 	 */
 	abs_eap_stack_interface_c()
-		{
-		}
+	{
+	}
 
 	/**
 	 * The configure() function is called after the constructor of the 

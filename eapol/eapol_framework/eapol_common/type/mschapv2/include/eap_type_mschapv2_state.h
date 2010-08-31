@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10.1.2 %
+* %version: %
 */
 
 #ifndef _MSCHAPV2_STATE_H_
@@ -71,6 +71,8 @@ public:
 
 	EAP_FUNC_IMPORT virtual ~eap_type_mschapv2_state_c();
 
+	void reset();
+
 	eap_type_mschapv2_state_variable_e get_state() const;
 
 	void set_state(const eap_type_mschapv2_state_variable_e new_state);
@@ -84,6 +86,8 @@ public:
 	void unset_failure_message_received();
 
 	void cancel_eap_failure_timer();
+
+	static eap_const_string get_state_string(const eap_type_mschapv2_state_variable_e state);
 };
 
 

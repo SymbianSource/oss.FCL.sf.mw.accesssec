@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 20 %
+* %version: 18.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -4261,7 +4261,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_gsmsim_c::handle_reauthentication_response
 						return EAP_STATUS_RETURN(m_am_tools, status);
 					}
 
-					if (l_gsmsim_payloads->get_COUNTER_TOO_SMALL()->get_payload_included() == true)
+					if (l_gsmsim_payloads->get_counter_too_small()->get_payload_included() == true)
 					{
 						// When the client detects that the
 						// counter value is not fresh, it includes the AT_COUNTER_TOO_SMALL

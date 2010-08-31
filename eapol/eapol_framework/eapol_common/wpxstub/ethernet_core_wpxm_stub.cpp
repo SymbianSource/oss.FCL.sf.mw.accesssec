@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 6.1.3 %
+* %version: %
 */
 
 // This is enumeration of EAPOL source code.
@@ -42,15 +42,10 @@
 
 //
 EAP_FUNC_EXPORT eap_status_e ethernet_core_c::start_WPXM_reassociation(
-	const eap_am_network_id_c * const receive_network_id,
-	const eapol_key_authentication_type_e authentication_type,
-	eap_variable_data_c * const send_reassociation_request_ie)
+	const eap_am_network_id_c * const /* receive_network_id */,
+	const eapol_key_authentication_type_e /* authentication_type */,
+	eap_variable_data_c * const /* send_reassociation_request_ie */)
 {
-	eap_status_e status = m_eapol_core->start_WPXM_reassociation(
-		receive_network_id,
-		authentication_type,
-		send_reassociation_request_ie);
-
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_not_supported);
 }
 
@@ -58,17 +53,11 @@ EAP_FUNC_EXPORT eap_status_e ethernet_core_c::start_WPXM_reassociation(
 
 //
 EAP_FUNC_EXPORT eap_status_e ethernet_core_c::complete_WPXM_reassociation(
-	const eapol_wlan_authentication_state_e reassociation_result,
-	const eap_am_network_id_c * const receive_network_id,
-	const eapol_key_authentication_type_e authentication_type,
-	const eap_variable_data_c * const received_reassociation_ie)
+	const eapol_wlan_authentication_state_e /* reassociation_result */,
+	const eap_am_network_id_c * const /* receive_network_id */,
+	const eapol_key_authentication_type_e /* authentication_type */,
+	const eap_variable_data_c * const /* received_reassociation_ie */)
 {
-	eap_status_e status = m_eapol_core->complete_WPXM_reassociation(
-		reassociation_result,
-		receive_network_id,
-		authentication_type,
-		received_reassociation_ie);
-
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_not_supported);
 }
 

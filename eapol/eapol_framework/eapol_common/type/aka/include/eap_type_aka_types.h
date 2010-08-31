@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 24 %
+* %version: %
 */
 
 #if !defined(_AKA_TYPES_H_)

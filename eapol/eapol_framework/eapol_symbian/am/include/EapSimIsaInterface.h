@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8 %
+* %version: %
 */
 
 #ifndef _EAPSIMISAINTERFACE_H_

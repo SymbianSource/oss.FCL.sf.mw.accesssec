@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 9 %
+* %version: %
 */
 
 #if !defined(_ABS_EAPOL_AM_CORE_SYMBIAN_H_)

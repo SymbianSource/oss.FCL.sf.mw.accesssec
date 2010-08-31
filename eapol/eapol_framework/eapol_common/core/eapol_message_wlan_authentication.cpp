@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 46.1.2 %
+* %version: 62 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -82,7 +82,7 @@ EAP_FUNC_EXPORT eapol_message_wlan_authentication_c::eapol_message_wlan_authenti
 	, m_MTU(0ul)
 	, m_trailer_length(0ul)
 	, m_error_code(wlan_eap_if_send_status_ok)
-	, m_error_function(eapol_tlv_message_type_function_none)
+	, m_error_function(eap_tlv_message_type_function_none)
 	, m_use_asyncronous_test(false)
 	, m_is_valid(true)
 {
@@ -109,8 +109,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::configure(
 	m_wauth = eapol_wlan_authentication_c::new_eapol_wlan_authentication(
 		m_am_tools,
 		this,
-		true,
-		this);
+		true);
 	if (m_wauth != 0
 		&& m_wauth->get_is_valid() == true)
 	{
@@ -183,7 +182,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::timer_expired(
 	
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		TRACE_FLAGS_DEFAULT, 
+		EAP_TRACE_FLAGS_MESSAGE_DATA, 
 		(EAPL("TIMER: [0x%08x]->eapol_message_wlan_authentication_c::timer_expired")
 		 EAPL("(id 0x%02x, data 0x%08x).\n"),
 		 this, id, data));
@@ -194,7 +193,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::timer_expired(
 	{
 		EAP_TRACE_DEBUG(
 			m_am_tools, 
-			TRACE_FLAGS_DEFAULT, 
+			EAP_TRACE_FLAGS_MESSAGE_DATA, 
 			(EAPL("TIMER: [0x%08x]->eapol_message_wlan_authentication_c::timer_expired: EAPOL_MESSAGE_TIMER_PROCESS_DATA_ID")
 			 EAPL("(id 0x%02x, data 0x%08x).\n"),
 			 this, id, data));
@@ -211,7 +210,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::timer_expired(
 	{
 		EAP_TRACE_DEBUG(
 			m_am_tools, 
-			TRACE_FLAGS_DEFAULT, 
+			EAP_TRACE_FLAGS_MESSAGE_DATA, 
 			(EAPL("TIMER: [0x%08x]->eapol_message_wlan_authentication_c::timer_expired: EAPOL_MESSAGE_TIMER_SEND_DATA_ID")
 			 EAPL("(id 0x%02x, data 0x%08x).\n"),
 			 this, id, data));
@@ -335,6 +334,9 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::packet_send(
 	}
 	else
 	{
+
+#if !defined(EAPOL_SKIP_ETHERNET_HEADER)
+
 		// Always we need at least the Ethernet header.
 		if (sent_packet->get_data_length()
 			< eapol_ethernet_header_wr_c::get_header_length())
@@ -349,6 +351,9 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::packet_send(
 				 eapol_ethernet_header_wr_c::get_header_length()));
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_process_general_error);
 		}
+
+#endif //#if !defined(EAPOL_SKIP_ETHERNET_HEADER)
+
 	}
 	
 	eapol_ethernet_header_wr_c eth(
@@ -372,7 +377,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::packet_send(
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 		}
 
-		status = message.add_parameter_data(eapol_tlv_message_type_function_packet_send);
+		status = message.add_parameter_data(eap_tlv_message_type_function_packet_send);
 		if (status != eap_status_ok)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -439,7 +444,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::associate(
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 		}
 
-		status = message.add_parameter_data(eapol_tlv_message_type_function_associate);
+		status = message.add_parameter_data(eap_tlv_message_type_function_associate);
 		if (status != eap_status_ok)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -447,7 +452,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::associate(
 		}
 
 		status = message.add_parameter_data(
-			eapol_tlv_message_type_eapol_key_802_11_authentication_mode,
+			eap_tlv_message_type_eapol_key_802_11_authentication_mode,
 			static_cast<u32_t>(authentication_mode));
 		if (status != eap_status_ok)
 		{
@@ -485,7 +490,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::disassociate(
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 		}
 
-		status = message.add_parameter_data(eapol_tlv_message_type_function_disassociate);
+		status = message.add_parameter_data(eap_tlv_message_type_function_disassociate);
 		if (status != eap_status_ok)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -540,14 +545,14 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::packet_data_se
 	
 	EAP_TRACE_DEBUG(
 		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
+		EAP_TRACE_FLAGS_MESSAGE_DATA,
 		(EAPL("test_eapol_c::packet_data_session_key(): key_type 0x%02x, key_index %d\n"),
 		 key->get_key_type(),
 		 key->get_key_index()));
 	
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
+		EAP_TRACE_FLAGS_MESSAGE_DATA,
 		(EAPL("test_eapol_c::packet_data_session_key"), 
 		 key->get_key()->get_data(key->get_key()->get_data_length()),
 		 key->get_key()->get_data_length()));
@@ -562,7 +567,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::packet_data_se
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 		}
 
-		status = message.add_parameter_data(eapol_tlv_message_type_function_packet_data_session_key);
+		status = message.add_parameter_data(eap_tlv_message_type_function_packet_data_session_key);
 		if (status != eap_status_ok)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -615,7 +620,7 @@ EAP_FUNC_EXPORT void eapol_message_wlan_authentication_c::state_notification(
 			return;
 		}
 
-		status = message.add_parameter_data(eapol_tlv_message_type_function_state_notification);
+		status = message.add_parameter_data(eap_tlv_message_type_function_state_notification);
 		if (status != eap_status_ok)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -673,7 +678,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::reassociate(
 	
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
+		EAP_TRACE_FLAGS_MESSAGE_DATA,
 		(EAPL("eapol_message_wlan_authentication_c::reassociate"), 
 		 PMKID->get_data(PMKID->get_data_length()),
 		 PMKID->get_data_length()));
@@ -688,7 +693,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::reassociate(
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 		}
 
-		status = message.add_parameter_data(eapol_tlv_message_type_function_reassociate);
+		status = message.add_parameter_data(eap_tlv_message_type_function_reassociate);
 		if (status != eap_status_ok)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -703,7 +708,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::reassociate(
 		}
 
 		status = message.add_parameter_data(
-			eapol_tlv_message_type_eapol_key_authentication_type,
+			eap_tlv_message_type_eapol_key_authentication_type,
 			static_cast<u32_t>(authentication_type));
 		if (status != eap_status_ok)
 		{
@@ -732,33 +737,9 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::reassociate(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::get_wlan_database_reference_values(
-	eap_variable_data_c * const reference) const
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	if (m_wlan_database_reference.get_is_valid_data() == true
-		&& m_wlan_database_reference.get_data_length() > 0ul)
-	{
-
-		return reference->set_copy_of_buffer(&m_wlan_database_reference);
-	}
-	else
-	{
-		EAP_TRACE_ERROR(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("ERROR: get_header_offset(): no completed parameters.\n")));
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT)
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-	}
-}
-
-//--------------------------------------------------
-
 EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::send_error_message(
 	const eap_status_e function_status,
-	const eapol_tlv_message_type_function_e function)
+	const eap_tlv_message_type_function_e function)
 {
 	wlan_eap_if_send_status_e error_code = wlan_eap_if_send_status_conversion_c::convert(function_status);
 
@@ -775,7 +756,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::send_error_mes
 		}
 
 		status = message.add_parameter_data(
-			eapol_tlv_message_type_error,
+			eap_tlv_message_type_error,
 			static_cast<u32_t>(error_code));
 		if (status != eap_status_ok)
 		{
@@ -927,7 +908,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::save_simple_co
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 		}
 
-		status = message.add_parameter_data(eapol_tlv_message_type_function_new_protected_setup_credentials);
+		status = message.add_parameter_data(eap_tlv_message_type_function_new_protected_setup_credentials);
 		if (status != eap_status_ok)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -957,62 +938,116 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::save_simple_co
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::process_message_type_error(
-	EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters)
+EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::complete_check_pmksa_cache(
+	EAP_TEMPLATE_CONST eap_array_c<eap_am_network_id_c> * const bssid_sta_receive_network_ids)
 {
-	eap_status_e status(eap_status_ok);
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eapol_message_wlan_authentication_c::complete_check_pmksa_cache()\n")));
+
+	eap_status_e status(eap_status_process_general_error);
+
+	// Creates message data composed of Attribute-Value Pairs.
+	eapol_handle_tlv_message_data_c message(m_am_tools);
+
+	if (message.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	status = message.add_parameter_data(eap_tlv_message_type_function_complete_check_pmksa_cache);
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
 
 	{
-		// Error payload is the first in this case.
-		const eap_tlv_header_c * const error_header = parameters->get_object(eapol_message_payload_index_function);
+		u32_t bssid_sta_receive_network_ids_size(0ul);
+		u32_t ind(0ul);
 
-		if (error_header == 0
-			|| error_header->get_type() != eapol_tlv_message_type_error)
+		for (ind = 0ul; ind < bssid_sta_receive_network_ids->get_object_count(); ++ind)
 		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
+			const eap_am_network_id_c * const network_id = bssid_sta_receive_network_ids->get_object(ind);
+			if (network_id == 0)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+			}
 
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
+			const u32_t size_of_network_id = 
+				eap_tlv_header_c::get_header_length()
+				+ message.get_payload_size(network_id);
 
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
+			bssid_sta_receive_network_ids_size += size_of_network_id;
+		} // for()
 
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(error_header, &value);
+		eap_status_e status = message.add_structured_parameter_header(
+			eap_tlv_message_type_array,
+			bssid_sta_receive_network_ids_size);
 		if (status != eap_status_ok)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 
-		m_error_code = static_cast<wlan_eap_if_send_status_e>(value);
+		for (ind = 0ul; ind < bssid_sta_receive_network_ids->get_object_count(); ++ind)
+		{
+			status = message.add_parameter_data(
+				bssid_sta_receive_network_ids->get_object(ind));
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+		} // for()
 	}
 
+	status = send_message(&message);
+	if (status != eap_status_ok)
 	{
-		// Fuction payload is the second in this case.
-		const eap_tlv_header_c * const function_header = parameters->get_object(eapol_message_payload_index_first_parameter);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
 
-		if (function_header == 0
-			|| function_header->get_type() != eapol_tlv_message_type_function)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
 
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
+//--------------------------------------------------
 
-		if (message_data.get_is_valid() == false)
+EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::complete_disassociation(
+	const eap_am_network_id_c * const receive_network_id) ///< source includes remote address, destination includes local address.
+{
+	eap_status_e status(eap_status_ok);
+
+	{
+		// Creates message data composed of Attribute-Value Pairs.
+		eapol_handle_tlv_message_data_c message(m_am_tools);
+
+		if (message.get_is_valid() == false)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 		}
 
-		status = message_data.get_parameter_data(function_header, &m_error_function);
+		status = message.add_parameter_data(eap_tlv_message_type_function_complete_disassociation);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+
+		status = message.add_parameter_data(receive_network_id);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+
+		status = send_message(&message);
 		if (status != eap_status_ok)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1026,13 +1061,59 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::process_messag
 
 //--------------------------------------------------
 
+EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::process_message_type_error(
+	EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters)
+{
+	eap_status_e status(eap_status_ok);
+
+	eapol_handle_tlv_message_data_c message_data(m_am_tools);
+
+	if (message_data.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	eap_status_e code(eap_status_process_general_error);
+
+	// Error payload is the first in this case.
+	status = message_data.read_parameter_data(parameters, eap_message_payload_index_function, eap_tlv_message_type_error, &code);
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	m_error_code = wlan_eap_if_send_status_conversion_c::convert(code);
+
+	// Fuction payload is the second in this case.
+	status = message_data.read_parameter_data(parameters, eap_message_payload_index_first_parameter, &m_error_function);
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
+}
+
+//--------------------------------------------------
+
 EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::send_message(eapol_handle_tlv_message_data_c * const message)
 {
 	// Sends message data composed of Attribute-Value Pairs.
 
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		(EAPL("TIMER: eapol_message_wlan_authentication_c::send_message()\n")));
+
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eapol_message_wlan_authentication_c::send_message()");
+
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
-		EAP_TRACE_FLAGS_MESSAGE_DATA,
+		EAP_TRACE_FLAGS_NEVER,
 		(EAPL("eapol_message_wlan_authentication_c::send_message()"),
 		message->get_message_data(),
 		message->get_message_data_length()));
@@ -1056,7 +1137,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::send_message(e
 
 			(void) send_error_message(
 				status,
-				eapol_tlv_message_type_function_none);
+				eap_tlv_message_type_function_none);
 
 			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
@@ -1070,7 +1151,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::send_message(e
 
 			(void) send_error_message(
 				status,
-				eapol_tlv_message_type_function_none);
+				eap_tlv_message_type_function_none);
 
 			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
@@ -1125,6 +1206,13 @@ EAP_FUNC_EXPORT wlan_eap_if_send_status_e eapol_message_wlan_authentication_c::p
 {
 	// Parses message data composed of Attribute-Value Pairs.
 
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		(EAPL("TIMER: eapol_message_wlan_authentication_c::process_data()\n")));
+
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eapol_message_wlan_authentication_c::process_data()");
+
 	eap_status_e status(eap_status_ok);
 
 #if defined(USE_EAPOL_WLAN_AUTHENTICATION_MESSAGE_ASYNCRONOUS_TEST)
@@ -1144,7 +1232,7 @@ EAP_FUNC_EXPORT wlan_eap_if_send_status_e eapol_message_wlan_authentication_c::p
 
 			(void) send_error_message(
 				status,
-				eapol_tlv_message_type_function_none);
+				eap_tlv_message_type_function_none);
 
 			return wlan_eap_if_send_status_conversion_c::convert(
 				EAP_STATUS_RETURN(m_am_tools, status));
@@ -1157,7 +1245,7 @@ EAP_FUNC_EXPORT wlan_eap_if_send_status_e eapol_message_wlan_authentication_c::p
 
 			(void) send_error_message(
 				status,
-				eapol_tlv_message_type_function_none);
+				eap_tlv_message_type_function_none);
 
 			return wlan_eap_if_send_status_conversion_c::convert(
 				EAP_STATUS_RETURN(m_am_tools, status));
@@ -1167,7 +1255,7 @@ EAP_FUNC_EXPORT wlan_eap_if_send_status_e eapol_message_wlan_authentication_c::p
 
 		EAP_TRACE_DEBUG(
 			m_am_tools, 
-			TRACE_FLAGS_DEFAULT, 
+			EAP_TRACE_FLAGS_MESSAGE_DATA, 
 			(EAPL("TIMER: eapol_message_wlan_authentication_c::process_data(): sets EAPOL_MESSAGE_TIMER_PROCESS_DATA_ID\n")));
 	
 		status = m_am_tools->am_set_timer(
@@ -1197,7 +1285,7 @@ EAP_FUNC_EXPORT wlan_eap_if_send_status_e eapol_message_wlan_authentication_c::p
 
 			(void) send_error_message(
 				status,
-				eapol_tlv_message_type_function_none);
+				eap_tlv_message_type_function_none);
 
 			return wlan_eap_if_send_status_conversion_c::convert(
 				EAP_STATUS_RETURN(m_am_tools, status));
@@ -1210,7 +1298,7 @@ EAP_FUNC_EXPORT wlan_eap_if_send_status_e eapol_message_wlan_authentication_c::p
 
 			(void) send_error_message(
 				status,
-				eapol_tlv_message_type_function_none);
+				eap_tlv_message_type_function_none);
 
 			return wlan_eap_if_send_status_conversion_c::convert(
 				EAP_STATUS_RETURN(m_am_tools, status));
@@ -1229,9 +1317,16 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::process_messag
 {
 	// Parses message data composed of Attribute-Value Pairs.
 
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		(EAPL("TIMER: eapol_message_wlan_authentication_c::process_message()\n")));
+
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eapol_message_wlan_authentication_c::process_message()");
+
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
-		EAP_TRACE_FLAGS_MESSAGE_DATA,
+		EAP_TRACE_FLAGS_NEVER,
 		(EAPL("eapol_message_wlan_authentication_c::process_message()"),
 		message->get_message_data(),
 		message->get_message_data_length()));
@@ -1245,7 +1340,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::process_messag
 
 		(void) send_error_message(
 			status,
-			eapol_tlv_message_type_function_none);
+			eap_tlv_message_type_function_none);
 
 		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
@@ -1258,15 +1353,15 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::process_messag
 
 		(void) send_error_message(
 			status,
-			eapol_tlv_message_type_function_none);
+			eap_tlv_message_type_function_none);
 
 		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
-	const eap_tlv_header_c * const function_header = parameters.get_object(eapol_message_payload_index_function);
+	const eap_tlv_header_c * const function_header = parameters.get_object(eap_message_payload_index_function);
 	if (function_header == 0
-		|| (function_header->get_type() != eapol_tlv_message_type_error
-			&& function_header->get_type() != eapol_tlv_message_type_function))
+		|| (function_header->get_type() != eap_tlv_message_type_error
+			&& function_header->get_type() != eap_tlv_message_type_function))
 	{
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -1274,18 +1369,18 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::process_messag
 
 		(void) send_error_message(
 			status,
-			eapol_tlv_message_type_function_none);
+			eap_tlv_message_type_function_none);
 
 		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
-	if (function_header->get_type() == eapol_tlv_message_type_error)
+	if (function_header->get_type() == eap_tlv_message_type_error)
 	{
 		status = process_message_type_error(&parameters);
 	}
-	else // function_header->get_type() == eapol_tlv_message_type_function
+	else // function_header->get_type() == eap_tlv_message_type_function
 	{
-		eapol_tlv_message_type_function_e function(eapol_tlv_message_type_function_none);
+		eap_tlv_message_type_function_e function(eap_tlv_message_type_function_none);
 
 		status = message->get_parameter_data(function_header, &function);
 		if (status != eap_status_ok)
@@ -1294,53 +1389,53 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::process_messag
 
 			(void) send_error_message(
 				status,
-				eapol_tlv_message_type_function_none);
+				eap_tlv_message_type_function_none);
 
 			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 
 		switch(function)
 		{
-		case eapol_tlv_message_type_function_check_pmksa_cache:
+		case eap_tlv_message_type_function_check_pmksa_cache:
 			status = check_pmksa_cache(&parameters);
 			break;
-		case eapol_tlv_message_type_function_start_authentication:
+		case eap_tlv_message_type_function_start_authentication:
 			status = start_authentication(&parameters);
 			break;
-		case eapol_tlv_message_type_function_complete_association:
+		case eap_tlv_message_type_function_complete_association:
 			status = complete_association(&parameters);
 			break;
-		case eapol_tlv_message_type_function_disassociation:
+		case eap_tlv_message_type_function_disassociation:
 			status = disassociation(&parameters);
 			break;
-		case eapol_tlv_message_type_function_start_preauthentication:
+		case eap_tlv_message_type_function_start_preauthentication:
 			status = start_preauthentication(&parameters);
 			break;
-		case eapol_tlv_message_type_function_start_reassociation:
+		case eap_tlv_message_type_function_start_reassociation:
 			status = start_reassociation(&parameters);
 			break;
-		case eapol_tlv_message_type_function_complete_reassociation:
+		case eap_tlv_message_type_function_complete_reassociation:
 			status = complete_reassociation(&parameters);
 			break;
-		case eapol_tlv_message_type_function_start_WPXM_reassociation:
+		case eap_tlv_message_type_function_start_WPXM_reassociation:
 			status = start_WPXM_reassociation(&parameters);
 			break;
-		case eapol_tlv_message_type_function_complete_WPXM_reassociation:
+		case eap_tlv_message_type_function_complete_WPXM_reassociation:
 			status = complete_WPXM_reassociation(&parameters);
 			break;
-		case eapol_tlv_message_type_function_packet_process:
+		case eap_tlv_message_type_function_packet_process:
 			status = packet_process(&parameters);
 			break;
-		case eapol_tlv_message_type_function_tkip_mic_failure:
+		case eap_tlv_message_type_function_tkip_mic_failure:
 			status = tkip_mic_failure(&parameters);
 			break;
-		case eapol_tlv_message_type_function_eap_acknowledge:
+		case eap_tlv_message_type_function_eap_acknowledge:
 			status = eap_acknowledge(&parameters);
 			break;
-		case eapol_tlv_message_type_function_update_header_offset:
+		case eap_tlv_message_type_function_update_header_offset:
 			status = update_header_offset(&parameters);
 			break;
-		case eapol_tlv_message_type_function_update_wlan_database_reference_values:
+		case eap_tlv_message_type_function_update_wlan_database_reference_values:
 			status = update_wlan_database_reference_values(&parameters);
 			break;
 		default:
@@ -1380,195 +1475,64 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::check_pmksa_ca
 
 	eap_status_e status(eap_status_ok);
 
-	u32_t parameter_index(eapol_message_payload_index_first_parameter);
+	u32_t parameter_index(eap_message_payload_index_first_parameter);
+
+	eapol_handle_tlv_message_data_c message_data(m_am_tools);
+
+	if (message_data.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	eap_array_c<eap_am_network_id_c> bssid_sta_receive_network_ids(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &bssid_sta_receive_network_ids);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const array_of_network_ids
-			= parameters->get_object(parameter_index);
-
-		if (array_of_network_ids == 0
-			|| array_of_network_ids->get_type() != eapol_tlv_message_type_array)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c array_data(m_am_tools);
-
-		if (array_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = array_data.set_message_data(
-			array_of_network_ids->get_value_length(),
-			array_of_network_ids->get_value(array_of_network_ids->get_value_length()));
-
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		eap_array_c<eap_tlv_header_c> network_ids(m_am_tools);
-
-		status = array_data.parse_message_data(
-			&network_ids);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		for (u32_t ind = 0ul; ind < network_ids.get_object_count(); ++ind)
-		{
-			const eap_tlv_header_c * const header = network_ids.get_object(ind);
-
-			if (header == 0)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-			}
-
-			eap_am_network_id_c * const new_network_id = new eap_am_network_id_c(m_am_tools);
-			if (new_network_id == 0)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-			}
-
-			eap_automatic_variable_c<eap_am_network_id_c> automatic_new_network_id(m_am_tools, new_network_id);
-
-			status = array_data.get_parameter_data(header, new_network_id);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
-
-			automatic_new_network_id.do_not_free_variable();
-
-			status = bssid_sta_receive_network_ids.add_object(
-				new_network_id,
-				true);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
-
-		} // for()
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eapol_key_authentication_type_e selected_eapol_key_authentication_type(eapol_key_authentication_type_none);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &selected_eapol_key_authentication_type);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const authentication_type
-			= parameters->get_object(parameter_index);
-
-		if (authentication_type == 0
-			|| authentication_type->get_type() != eapol_tlv_message_type_eapol_key_authentication_type)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(authentication_type, &value);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		selected_eapol_key_authentication_type = static_cast<eapol_key_authentication_type_e>(value);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eapol_RSNA_key_header_c::eapol_RSNA_cipher_e pairwise_key_cipher_suite(eapol_RSNA_key_header_c::eapol_RSNA_cipher_none);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &pairwise_key_cipher_suite);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const authentication_type
-			= parameters->get_object(parameter_index);
-
-		if (authentication_type == 0
-			|| authentication_type->get_type() != eapol_tlv_message_type_RSNA_cipher)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(authentication_type, &value);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		pairwise_key_cipher_suite = static_cast<eapol_RSNA_key_header_c::eapol_RSNA_cipher_e>(value);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eapol_RSNA_key_header_c::eapol_RSNA_cipher_e group_key_cipher_suite(eapol_RSNA_key_header_c::eapol_RSNA_cipher_none);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &group_key_cipher_suite);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const authentication_type
-			= parameters->get_object(parameter_index);
-
-		if (authentication_type == 0
-			|| authentication_type->get_type() != eapol_tlv_message_type_RSNA_cipher)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(authentication_type, &value);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		group_key_cipher_suite = static_cast<eapol_RSNA_key_header_c::eapol_RSNA_cipher_e>(value);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1580,6 +1544,8 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::check_pmksa_ca
 		group_key_cipher_suite);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if 0
 
 	if (status == eap_status_ok
 		|| status == eap_status_not_found)
@@ -1594,7 +1560,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::check_pmksa_ca
 		}
 
 		status = message.add_parameter_data(
-			eapol_tlv_message_type_function_complete_check_pmksa_cache);
+			eap_tlv_message_type_function_complete_check_pmksa_cache);
 		if (status != eap_status_ok)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1620,7 +1586,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::check_pmksa_ca
 		}
 
 		status = message.add_structured_parameter_header(
-			eapol_tlv_message_type_array,
+			eap_tlv_message_type_array,
 			network_id_parameters_size);
 		if (status != eap_status_ok)
 		{
@@ -1655,6 +1621,8 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::check_pmksa_ca
 		}
 	}
 
+#endif //#if 0
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1672,7 +1640,17 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::start_authenti
 
 	eap_status_e status(eap_status_ok);
 
-	u32_t parameter_index(eapol_message_payload_index_first_parameter);
+	u32_t parameter_index(eap_message_payload_index_first_parameter);
+
+	eapol_handle_tlv_message_data_c message_data(m_am_tools);
+
+	if (message_data.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	eap_variable_data_c SSID(m_am_tools);
 
@@ -1682,172 +1660,64 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::start_authenti
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 	}
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &SSID);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const ssid_parameter
-			= parameters->get_object(parameter_index);
-
-		if (ssid_parameter == 0
-			|| ssid_parameter->get_type() != eapol_tlv_message_type_variable_data)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(ssid_parameter, &SSID);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eapol_key_authentication_type_e selected_eapol_key_authentication_type(eapol_key_authentication_type_none);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &selected_eapol_key_authentication_type);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const authentication_type_parameter
-			= parameters->get_object(parameter_index);
-
-		if (authentication_type_parameter == 0
-			|| authentication_type_parameter->get_type() != eapol_tlv_message_type_eapol_key_authentication_type)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(authentication_type_parameter, &value);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		selected_eapol_key_authentication_type = static_cast<eapol_key_authentication_type_e>(value);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eap_variable_data_c wpa_preshared_key(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &wpa_preshared_key);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const wpa_preshared_key_parameter
-			= parameters->get_object(parameter_index);
-
-		if (wpa_preshared_key_parameter == 0
-			|| wpa_preshared_key_parameter->get_type() != eapol_tlv_message_type_variable_data)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(wpa_preshared_key_parameter, &wpa_preshared_key);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	bool WPA_override_enabled(false);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &WPA_override_enabled);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const WPA_override_enabled_parameter
-			= parameters->get_object(parameter_index);
-
-		if (WPA_override_enabled_parameter == 0
-			|| WPA_override_enabled_parameter->get_type() != eapol_tlv_message_type_boolean)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(WPA_override_enabled_parameter, &value);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		WPA_override_enabled = (value == 0) ? false: true;
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
-
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eap_am_network_id_c receive_network_id(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &receive_network_id);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const receive_network_id_parameter
-			= parameters->get_object(parameter_index);
-
-		if (receive_network_id_parameter == 0
-			|| receive_network_id_parameter->get_type() != eapol_tlv_message_type_network_id)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(receive_network_id_parameter, &receive_network_id);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
-
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -1855,10 +1725,8 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::start_authenti
 		&SSID,
 		selected_eapol_key_authentication_type,
 		&wpa_preshared_key,
-		WPA_override_enabled
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-		, &receive_network_id
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
+		WPA_override_enabled,
+		&receive_network_id
 		);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1878,206 +1746,91 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::complete_assoc
 
 	eap_status_e status(eap_status_ok);
 
-	u32_t parameter_index(eapol_message_payload_index_first_parameter);
+	u32_t parameter_index(eap_message_payload_index_first_parameter);
+
+	eapol_handle_tlv_message_data_c message_data(m_am_tools);
+
+	if (message_data.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	eapol_wlan_authentication_state_e association_result(eapol_wlan_authentication_state_none);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &association_result);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const association_result_parameter
-			= parameters->get_object(parameter_index);
-
-		if (association_result_parameter == 0
-			|| association_result_parameter->get_type() != eapol_tlv_message_type_eapol_wlan_authentication_state)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(association_result_parameter, &value);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		association_result = static_cast<eapol_wlan_authentication_state_e>(value);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eap_am_network_id_c receive_network_id(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &receive_network_id);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const receive_network_id_parameter
-			= parameters->get_object(parameter_index);
-
-		if (receive_network_id_parameter == 0
-			|| receive_network_id_parameter->get_type() != eapol_tlv_message_type_network_id)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(receive_network_id_parameter, &receive_network_id);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eap_variable_data_c received_WPA_IE(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &received_WPA_IE);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const received_WPA_IE_parameter
-			= parameters->get_object(parameter_index);
-
-		if (received_WPA_IE_parameter == 0
-			|| received_WPA_IE_parameter->get_type() != eapol_tlv_message_type_variable_data)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(received_WPA_IE_parameter, &received_WPA_IE);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eap_variable_data_c sent_WPA_IE(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &sent_WPA_IE);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const sent_WPA_IE_parameter
-			= parameters->get_object(parameter_index);
-
-		if (sent_WPA_IE_parameter == 0
-			|| sent_WPA_IE_parameter->get_type() != eapol_tlv_message_type_variable_data)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(sent_WPA_IE_parameter, &sent_WPA_IE);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eapol_RSNA_key_header_c::eapol_RSNA_cipher_e pairwise_key_cipher_suite(eapol_RSNA_key_header_c::eapol_RSNA_cipher_none);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &pairwise_key_cipher_suite);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const pairwise_key_cipher_suite_parameter
-			= parameters->get_object(parameter_index);
-
-		if (pairwise_key_cipher_suite_parameter == 0
-			|| pairwise_key_cipher_suite_parameter->get_type() != eapol_tlv_message_type_RSNA_cipher)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(pairwise_key_cipher_suite_parameter, &value);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		pairwise_key_cipher_suite = static_cast<eapol_RSNA_key_header_c::eapol_RSNA_cipher_e>(value);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eapol_RSNA_key_header_c::eapol_RSNA_cipher_e group_key_cipher_suite(eapol_RSNA_key_header_c::eapol_RSNA_cipher_none);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &group_key_cipher_suite);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const group_key_cipher_suite_parameter
-			= parameters->get_object(parameter_index);
-
-		if (group_key_cipher_suite_parameter == 0
-			|| group_key_cipher_suite_parameter->get_type() != eapol_tlv_message_type_RSNA_cipher)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(group_key_cipher_suite_parameter, &value);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		group_key_cipher_suite = static_cast<eapol_RSNA_key_header_c::eapol_RSNA_cipher_e>(value);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2108,35 +1861,25 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::disassociation
 
 	eap_status_e status(eap_status_ok);
 
-	u32_t parameter_index(eapol_message_payload_index_first_parameter);
+	u32_t parameter_index(eap_message_payload_index_first_parameter);
+
+	eapol_handle_tlv_message_data_c message_data(m_am_tools);
+
+	if (message_data.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	eap_am_network_id_c receive_network_id(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &receive_network_id);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const receive_network_id_parameter
-			= parameters->get_object(parameter_index);
-
-		if (receive_network_id_parameter == 0
-			|| receive_network_id_parameter->get_type() != eapol_tlv_message_type_network_id)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(receive_network_id_parameter, &receive_network_id);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2162,35 +1905,25 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::start_preauthe
 
 	eap_status_e status(eap_status_ok);
 
-	u32_t parameter_index(eapol_message_payload_index_first_parameter);
+	u32_t parameter_index(eap_message_payload_index_first_parameter);
+
+	eapol_handle_tlv_message_data_c message_data(m_am_tools);
+
+	if (message_data.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	eap_am_network_id_c receive_network_id(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &receive_network_id);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const receive_network_id_parameter
-			= parameters->get_object(parameter_index);
-
-		if (receive_network_id_parameter == 0
-			|| receive_network_id_parameter->get_type() != eapol_tlv_message_type_network_id)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(receive_network_id_parameter, &receive_network_id);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2216,104 +1949,52 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::start_reassoci
 
 	eap_status_e status(eap_status_ok);
 
-	u32_t parameter_index(eapol_message_payload_index_first_parameter);
+	u32_t parameter_index(eap_message_payload_index_first_parameter);
+
+	eapol_handle_tlv_message_data_c message_data(m_am_tools);
+
+	if (message_data.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	eap_am_network_id_c old_receive_network_id(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &old_receive_network_id);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const old_receive_network_id_parameter
-			= parameters->get_object(parameter_index);
-
-		if (old_receive_network_id_parameter == 0
-			|| old_receive_network_id_parameter->get_type() != eapol_tlv_message_type_network_id)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(old_receive_network_id_parameter, &old_receive_network_id);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eap_am_network_id_c new_receive_network_id(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &new_receive_network_id);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const new_receive_network_id_parameter
-			= parameters->get_object(parameter_index);
-
-		if (new_receive_network_id_parameter == 0
-			|| new_receive_network_id_parameter->get_type() != eapol_tlv_message_type_network_id)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(new_receive_network_id_parameter, &new_receive_network_id);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eapol_key_authentication_type_e selected_eapol_key_authentication_type(eapol_key_authentication_type_none);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &selected_eapol_key_authentication_type);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const authentication_type
-			= parameters->get_object(parameter_index);
-
-		if (authentication_type == 0
-			|| authentication_type->get_type() != eapol_tlv_message_type_eapol_key_authentication_type)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(authentication_type, &value);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		selected_eapol_key_authentication_type = static_cast<eapol_key_authentication_type_e>(value);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
-
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -2339,206 +2020,91 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::complete_reass
 
 	eap_status_e status(eap_status_ok);
 
-	u32_t parameter_index(eapol_message_payload_index_first_parameter);
+	u32_t parameter_index(eap_message_payload_index_first_parameter);
+
+	eapol_handle_tlv_message_data_c message_data(m_am_tools);
+
+	if (message_data.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	eapol_wlan_authentication_state_e association_result(eapol_wlan_authentication_state_none);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &association_result);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const association_result_parameter
-			= parameters->get_object(parameter_index);
-
-		if (association_result_parameter == 0
-			|| association_result_parameter->get_type() != eapol_tlv_message_type_eapol_wlan_authentication_state)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(association_result_parameter, &value);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		association_result = static_cast<eapol_wlan_authentication_state_e>(value);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eap_am_network_id_c receive_network_id(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &receive_network_id);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const receive_network_id_parameter
-			= parameters->get_object(parameter_index);
-
-		if (receive_network_id_parameter == 0
-			|| receive_network_id_parameter->get_type() != eapol_tlv_message_type_network_id)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(receive_network_id_parameter, &receive_network_id);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eap_variable_data_c received_WPA_IE(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &received_WPA_IE);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const received_WPA_IE_parameter
-			= parameters->get_object(parameter_index);
-
-		if (received_WPA_IE_parameter == 0
-			|| received_WPA_IE_parameter->get_type() != eapol_tlv_message_type_variable_data)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(received_WPA_IE_parameter, &received_WPA_IE);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eap_variable_data_c sent_WPA_IE(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &sent_WPA_IE);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const sent_WPA_IE_parameter
-			= parameters->get_object(parameter_index);
-
-		if (sent_WPA_IE_parameter == 0
-			|| sent_WPA_IE_parameter->get_type() != eapol_tlv_message_type_variable_data)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(sent_WPA_IE_parameter, &sent_WPA_IE);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eapol_RSNA_key_header_c::eapol_RSNA_cipher_e pairwise_key_cipher_suite(eapol_RSNA_key_header_c::eapol_RSNA_cipher_none);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &pairwise_key_cipher_suite);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const pairwise_key_cipher_suite_parameter
-			= parameters->get_object(parameter_index);
-
-		if (pairwise_key_cipher_suite_parameter == 0
-			|| pairwise_key_cipher_suite_parameter->get_type() != eapol_tlv_message_type_RSNA_cipher)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(pairwise_key_cipher_suite_parameter, &value);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		pairwise_key_cipher_suite = static_cast<eapol_RSNA_key_header_c::eapol_RSNA_cipher_e>(value);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eapol_RSNA_key_header_c::eapol_RSNA_cipher_e group_key_cipher_suite(eapol_RSNA_key_header_c::eapol_RSNA_cipher_none);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &group_key_cipher_suite);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const group_key_cipher_suite_parameter
-			= parameters->get_object(parameter_index);
-
-		if (group_key_cipher_suite_parameter == 0
-			|| group_key_cipher_suite_parameter->get_type() != eapol_tlv_message_type_RSNA_cipher)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(group_key_cipher_suite_parameter, &value);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		group_key_cipher_suite = static_cast<eapol_RSNA_key_header_c::eapol_RSNA_cipher_e>(value);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2569,35 +2135,25 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::start_WPXM_rea
 
 	eap_status_e status(eap_status_ok);
 
-	u32_t parameter_index(eapol_message_payload_index_first_parameter);
+	u32_t parameter_index(eap_message_payload_index_first_parameter);
+
+	eapol_handle_tlv_message_data_c message_data(m_am_tools);
+
+	if (message_data.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	eap_am_network_id_c old_receive_network_id(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &old_receive_network_id);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const receive_network_id_parameter
-			= parameters->get_object(parameter_index);
-
-		if (receive_network_id_parameter == 0
-			|| receive_network_id_parameter->get_type() != eapol_tlv_message_type_network_id)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(receive_network_id_parameter, &old_receive_network_id);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2606,65 +2162,24 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::start_WPXM_rea
 
 	eap_am_network_id_c new_receive_network_id(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &new_receive_network_id);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const receive_network_id_parameter
-			= parameters->get_object(parameter_index);
-
-		if (receive_network_id_parameter == 0
-			|| receive_network_id_parameter->get_type() != eapol_tlv_message_type_network_id)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(receive_network_id_parameter, &new_receive_network_id);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 
 	++parameter_index;
 
 	eap_variable_data_c send_reassociation_request_ie(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &send_reassociation_request_ie);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const send_reassociation_request_ie_parameter
-			= parameters->get_object(parameter_index);
-
-		if (send_reassociation_request_ie_parameter == 0
-			|| send_reassociation_request_ie_parameter->get_type() != eapol_tlv_message_type_variable_data)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(send_reassociation_request_ie_parameter, &send_reassociation_request_ie);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2675,26 +2190,11 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::start_WPXM_rea
 
 	if (parameters->get_object_count() > parameter_index)
 	{
-		const eap_tlv_header_c * const send_reassociation_request_ie_parameter
-			= parameters->get_object(parameter_index);
-
-		if (send_reassociation_request_ie_parameter != 0
-			&& send_reassociation_request_ie_parameter->get_type() == eapol_tlv_message_type_variable_data)
+		status = message_data.read_parameter_data(parameters, parameter_index, &received_WPA_ie);
+		if (status != eap_status_ok)
 		{
-			eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-			if (message_data.get_is_valid() == false)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-			}
-
-			status = message_data.get_parameter_data(send_reassociation_request_ie_parameter, &received_WPA_ie);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
+			// This is optional parameter.
+			(void) EAP_STATUS_RETURN(m_am_tools, status);
 		}
 	}
 
@@ -2706,26 +2206,11 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::start_WPXM_rea
 
 	if (parameters->get_object_count() > parameter_index)
 	{
-		const eap_tlv_header_c * const send_reassociation_request_ie_parameter
-			= parameters->get_object(parameter_index);
-
-		if (send_reassociation_request_ie_parameter != 0
-			&& send_reassociation_request_ie_parameter->get_type() == eapol_tlv_message_type_variable_data)
+		status = message_data.read_parameter_data(parameters, parameter_index, &sent_WPA_ie);
+		if (status != eap_status_ok)
 		{
-			eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-			if (message_data.get_is_valid() == false)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-			}
-
-			status = message_data.get_parameter_data(send_reassociation_request_ie_parameter, &sent_WPA_ie);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
+			// This is optional parameter.
+			(void) EAP_STATUS_RETURN(m_am_tools, status);
 		}
 	}
 
@@ -2752,7 +2237,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::start_WPXM_rea
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 		}
 
-		status = message.add_parameter_data(eapol_tlv_message_type_function_complete_start_WPXM_reassociation);
+		status = message.add_parameter_data(eap_tlv_message_type_function_complete_start_WPXM_reassociation);
 		if (status != eap_status_ok)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -2798,105 +2283,53 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::complete_WPXM_
 
 	eap_status_e status(eap_status_ok);
 
-	u32_t parameter_index(eapol_message_payload_index_first_parameter);
+	u32_t parameter_index(eap_message_payload_index_first_parameter);
+
+	eapol_handle_tlv_message_data_c message_data(m_am_tools);
+
+	if (message_data.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	eapol_wlan_authentication_state_e reassociation_result(eapol_wlan_authentication_state_none);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &reassociation_result);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const reassociation_result_parameter
-			= parameters->get_object(parameter_index);
-
-		if (reassociation_result_parameter == 0
-			|| reassociation_result_parameter->get_type() != eapol_tlv_message_type_eapol_wlan_authentication_state)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(reassociation_result_parameter, &value);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		reassociation_result = static_cast<eapol_wlan_authentication_state_e>(value);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eap_am_network_id_c receive_network_id(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &receive_network_id);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const receive_network_id_parameter
-			= parameters->get_object(parameter_index);
-
-		if (receive_network_id_parameter == 0
-			|| receive_network_id_parameter->get_type() != eapol_tlv_message_type_network_id)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(receive_network_id_parameter, &receive_network_id);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eap_variable_data_c received_reassociation_ie(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &received_reassociation_ie);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const received_reassociation_ie_parameter
-			= parameters->get_object(parameter_index);
-
-		if (received_reassociation_ie_parameter == 0
-			|| received_reassociation_ie_parameter->get_type() != eapol_tlv_message_type_variable_data)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(received_reassociation_ie_parameter, &received_reassociation_ie);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
-
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -2922,69 +2355,40 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::packet_process
 
 	eap_status_e status(eap_status_ok);
 
-	u32_t parameter_index(eapol_message_payload_index_first_parameter);
+	u32_t parameter_index(eap_message_payload_index_first_parameter);
+
+	eapol_handle_tlv_message_data_c message_data(m_am_tools);
+
+	if (message_data.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	eap_am_network_id_c receive_network_id(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &receive_network_id);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const receive_network_id_parameter
-			= parameters->get_object(parameter_index);
-
-		if (receive_network_id_parameter == 0
-			|| receive_network_id_parameter->get_type() != eapol_tlv_message_type_network_id)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(receive_network_id_parameter, &receive_network_id);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eap_variable_data_c packet_data_payload(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &packet_data_payload);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const packet_data_parameter
-			= parameters->get_object(parameter_index);
-
-		if (packet_data_parameter == 0
-			|| packet_data_parameter->get_type() != eapol_tlv_message_type_variable_data)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(packet_data_parameter, &packet_data_payload);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
-
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -3021,106 +2425,51 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::tkip_mic_failu
 
 	eap_status_e status(eap_status_ok);
 
-	u32_t parameter_index(eapol_message_payload_index_first_parameter);
+	u32_t parameter_index(eap_message_payload_index_first_parameter);
+
+	eapol_handle_tlv_message_data_c message_data(m_am_tools);
+
+	if (message_data.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	eap_am_network_id_c receive_network_id(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &receive_network_id);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const receive_network_id_parameter
-			= parameters->get_object(parameter_index);
-
-		if (receive_network_id_parameter == 0
-			|| receive_network_id_parameter->get_type() != eapol_tlv_message_type_network_id)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(receive_network_id_parameter, &receive_network_id);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	bool fatal_failure_when_true(false);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &fatal_failure_when_true);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const fatal_failure_when_true_parameter
-			= parameters->get_object(parameter_index);
-
-		if (fatal_failure_when_true_parameter == 0
-			|| fatal_failure_when_true_parameter->get_type() != eapol_tlv_message_type_boolean)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(fatal_failure_when_true_parameter, &value);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		fatal_failure_when_true = (value == 0) ? false: true;
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
 	eapol_RSNA_key_header_c::eapol_tkip_mic_failure_type_e tkip_mic_failure_type(eapol_RSNA_key_header_c::eapol_tkip_mic_failure_type_group_key);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &tkip_mic_failure_type);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const tkip_mic_failure_type_parameter
-			= parameters->get_object(parameter_index);
-
-		if (tkip_mic_failure_type_parameter == 0
-			|| tkip_mic_failure_type_parameter->get_type() != eapol_tlv_message_type_eapol_tkip_mic_failure_type)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		u32_t value(0ul);
-
-		status = message_data.get_parameter_data(tkip_mic_failure_type_parameter, &value);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		tkip_mic_failure_type = static_cast<eapol_RSNA_key_header_c::eapol_tkip_mic_failure_type_e>(value);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3148,35 +2497,25 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::eap_acknowledg
 
 	eap_status_e status(eap_status_ok);
 
-	u32_t parameter_index(eapol_message_payload_index_first_parameter);
+	u32_t parameter_index(eap_message_payload_index_first_parameter);
+
+	eapol_handle_tlv_message_data_c message_data(m_am_tools);
+
+	if (message_data.get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	eap_am_network_id_c receive_network_id(m_am_tools);
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &receive_network_id);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const receive_network_id_parameter
-			= parameters->get_object(parameter_index);
-
-		if (receive_network_id_parameter == 0
-			|| receive_network_id_parameter->get_type() != eapol_tlv_message_type_network_id)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(receive_network_id_parameter, &receive_network_id);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3202,93 +2541,43 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::update_header_
 
 	eap_status_e status(eap_status_ok);
 
-	u32_t parameter_index(eapol_message_payload_index_first_parameter);
+	u32_t parameter_index(eap_message_payload_index_first_parameter);
 
+	eapol_handle_tlv_message_data_c message_data(m_am_tools);
+
+	if (message_data.get_is_valid() == false)
 	{
-		const eap_tlv_header_c * const header_offset_value_parameter
-			= parameters->get_object(parameter_index);
-
-		if (header_offset_value_parameter == 0
-			|| header_offset_value_parameter->get_type() != eapol_tlv_message_type_u32_t)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(header_offset_value_parameter, &m_header_offset);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 	}
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &m_header_offset);
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &m_MTU);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const MTU_value_parameter
-			= parameters->get_object(parameter_index);
-
-		if (MTU_value_parameter == 0
-			|| MTU_value_parameter->get_type() != eapol_tlv_message_type_u32_t)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(MTU_value_parameter, &m_MTU);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	++parameter_index;
 
+	status = message_data.read_parameter_data(parameters, parameter_index, &m_trailer_length);
+	if (status != eap_status_ok)
 	{
-		const eap_tlv_header_c * const trailer_length_parameter
-			= parameters->get_object(parameter_index);
-
-		if (trailer_length_parameter == 0
-			|| trailer_length_parameter->get_type() != eapol_tlv_message_type_u32_t)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
-
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
-
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(trailer_length_parameter, &m_trailer_length);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3308,33 +2597,30 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::update_wlan_da
 
 	eap_status_e status(eap_status_ok);
 
-	u32_t parameter_index(eapol_message_payload_index_first_parameter);
+	u32_t parameter_index(eap_message_payload_index_first_parameter);
 
+	eapol_handle_tlv_message_data_c message_data(m_am_tools);
+
+	if (message_data.get_is_valid() == false)
 	{
-		const eap_tlv_header_c * const reference_parameter
-			= parameters->get_object(parameter_index);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
 
-		if (reference_parameter == 0
-			|| reference_parameter->get_type() != eapol_tlv_message_type_variable_data)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
-		}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		eapol_handle_tlv_message_data_c message_data(m_am_tools);
+	status = message_data.read_parameter_data(parameters, parameter_index, &m_wlan_database_reference);
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
 
-		if (message_data.get_is_valid() == false)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-		status = message_data.get_parameter_data(reference_parameter, &m_wlan_database_reference);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+	status = m_wauth->set_eap_database_reference_values(&m_wlan_database_reference);
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

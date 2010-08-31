@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 17.1.3 %
+* %version: 31 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -37,8 +37,8 @@
 #include <EapTypeInfo.h>
 #include "EapMsChapV2DbUtils.h"
 
-#include <EapMsChapV2UiConnection.h>
-#include "EapMschapv2Ui.h"
+#include "EapConversion.h"
+#include "EapTraceSymbian.h"
 
 // LOCAL CONSTANTS
 
@@ -49,34 +49,41 @@ const TUint KInterfaceVersion = 1;
 // ================= MEMBER FUNCTIONS =======================
 
 
-CEapMsChapV2::CEapMsChapV2(const TIndexType aIndexType,	
-				 const TInt aIndex, const eap_type_value_e aEapType /* =eap_type_mschapv2 */)
+CEapMsChapV2::CEapMsChapV2(
+	const TIndexType aIndexType,	
+	const TInt aIndex,
+	const eap_type_value_e aEapType)
 : iIndexType(aIndexType)
 , iIndex(aIndex)
 , iTunnelingType(eap_type_none)
 , iEapType(aEapType)
 {
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::CEapMsChapV2()\n")));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapMsChapV2::CEapMsChapV2()\n"));
+
 }
 
 // ----------------------------------------------------------
 
 CEapMsChapV2* CEapMsChapV2::NewL(SIapInfo *aIapInfo)
 {
-	return new (ELeave) CEapMsChapV2(aIapInfo->indexType, aIapInfo->index);
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::NewL()\n")));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapMsChapV2::NewL()\n"));
+
+	return new (ELeave) CEapMsChapV2(aIapInfo->indexType, aIapInfo->index, eap_type_mschapv2);
 }
 
 // ----------------------------------------------------------
 
 CEapMsChapV2* CEapMsChapV2::NewPlainMSCHAPv2L(SIapInfo *aIapInfo)
 {
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::NewPlainMSCHAPv2L()\n")));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapMsChapV2::NewPlainMSCHAPv2L()\n"));
+
 	return new (ELeave) CEapMsChapV2(
 		aIapInfo->indexType,
 		aIapInfo->index,
-#if defined(USE_EAP_EXPANDED_TYPES)
 		eap_expanded_type_ttls_plain_mschapv2.get_type()
-#else
-		eap_type_plain_mschapv2
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 		);
 }
 
@@ -85,6 +92,9 @@ CEapMsChapV2* CEapMsChapV2::NewPlainMSCHAPv2L(SIapInfo *aIapInfo)
 
 CEapMsChapV2::~CEapMsChapV2()
 {
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::~CEapMsChapV2()\n")));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapMsChapV2::~CEapMsChapV2()\n"));
+
 }
 
 // ----------------------------------------------------------
@@ -106,6 +116,9 @@ eap_base_type_c* CEapMsChapV2::GetStackInterfaceL(abs_eap_am_tools_c* const aToo
 	
 #endif // #ifdef USE_EAP_SIMPLE_CONFIG
 {
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::GetStackInterfaceL()\n")));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapMsChapV2::GetStackInterfaceL()\n"));
+
 	// Create AM
 	eap_am_type_mschapv2_symbian_c* amEapType = eap_am_type_mschapv2_symbian_c::NewL(
 		aTools,
@@ -153,43 +166,24 @@ eap_base_type_c* CEapMsChapV2::GetStackInterfaceL(abs_eap_am_tools_c* const aToo
 
 TUint CEapMsChapV2::GetInterfaceVersion() 
 { 
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::GetInterfaceVersion()\n")));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapMsChapV2::GetInterfaceVersion()\n"));
+
 	return KInterfaceVersion; 
 }
 
-
 // ----------------------------------------------------------
-TInt CEapMsChapV2::InvokeUiL()
+
+CEapTypeInfo* CEapMsChapV2::GetInfoL()
 {
-	TInt buttonId(0);
-   	
-#ifdef USE_EAP_EXPANDED_TYPES
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::GetInfoL()\n")));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapMsChapV2::GetInfoL()\n"));
 
-	CEapMsChapV2UiConnection uiConn(iIndexType, iIndex, 
-									iTunnelingType.get_vendor_type(), iEapType.get_vendor_type());
-	
-#else
-
-   	CEapMsChapV2UiConnection uiConn(iIndexType, iIndex, iTunnelingType, (TInt)iEapType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-	
-	CEapMsChapV2Ui* ui = CEapMsChapV2Ui::NewL(&uiConn);
-	CleanupStack::PushL(ui);
-	buttonId = ui->InvokeUiL();
-	CleanupStack::PopAndDestroy(ui);
-	return buttonId;
-}
-
-
-// ----------------------------------------------------------
-CEapTypeInfo* CEapMsChapV2::GetInfoLC()
-{
 	CEapTypeInfo* info = new(ELeave) CEapTypeInfo(
 		(TDesC&)KReleaseDate, 
 		(TDesC&)KEapTypeVersion,
 		(TDesC&)KManufacturer);
 
-	CleanupStack::PushL(info);
 	return info;
 }
 
@@ -197,30 +191,42 @@ CEapTypeInfo* CEapMsChapV2::GetInfoLC()
 
 void CEapMsChapV2::DeleteConfigurationL()
 {		
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::DeleteConfigurationL()\n")));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapMsChapV2::DeleteConfigurationL()\n"));
+
 	EapMsChapV2DbUtils::DeleteConfigurationL(iIndexType, iIndex, iTunnelingType);
 }
 
 // ----------------------------------------------------------
 
-void CEapMsChapV2::SetTunnelingType(const TInt aTunnelingType)
-{
-#ifdef USE_EAP_EXPANDED_TYPES
+void CEapMsChapV2::SetTunnelingType(const TEapExpandedType aTunnelingType)
+    {
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::SetTunnelingType()\n")));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapMsChapV2::SetTunnelingType()\n"));
 
-	// Vendor id is eap_type_vendor_id_ietf always in this plugin.
-	iTunnelingType.set_eap_type_values(eap_type_vendor_id_ietf, aTunnelingType);
-
-#else
-
-	iTunnelingType = static_cast<eap_type_value_e>(aTunnelingType);
-
-#endif //#ifdef USE_EAP_EXPANDED_TYPES
-}
+    EAP_TRACE_DATA_DEBUG_SYMBIAN(
+        (EAPL("CEapMsChapV2::SetTunnelingType - tunneling type"),
+        aTunnelingType.GetValue().Ptr(), aTunnelingType.GetValue().Length()));
+    
+    eap_type_value_e aInternalType;
+    
+    TInt err = CEapConversion::ConvertExpandedEAPTypeToInternalType(
+            &aTunnelingType,
+            &aInternalType);
+    
+    iTunnelingType = aInternalType;
+    
+    }
 
 // ----------------------------------------------------------
+
 void CEapMsChapV2::SetIndexL(
 		const TIndexType aIndexType, 
 		const TInt aIndex)
 {		
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::SetIndexL()\n")));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapMsChapV2::SetIndexL()\n"));
+
 	// First delete the target configuration
 	TIndexType tmpIndexType = iIndexType;
 	TInt tmpIndex = iIndex;
@@ -238,13 +244,16 @@ void CEapMsChapV2::SetIndexL(
 
 	RDbNamedDatabase db;
 
-	RDbs session;
-	
-	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+	RFs session;
 	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-		
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::SetIndexL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+
 	EapMsChapV2DbUtils::SetIndexL(
 		db, 
 		iIndexType, 
@@ -257,20 +266,30 @@ void CEapMsChapV2::SetIndexL(
 	iIndexType = aIndexType;
 	iIndex = aIndex;
 
-	CleanupStack::PopAndDestroy(2); // db
+	db.Close();
+	session.Close();
+
+	CleanupStack::PopAndDestroy(&db);
+	CleanupStack::PopAndDestroy(&session);
 }
 
 void CEapMsChapV2::SetConfigurationL(const EAPSettings& aSettings)
 {
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::SetConfigurationL()\n")));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapMsChapV2::SetConfigurationL()\n"));
+
 	RDbNamedDatabase db;
 
-	RDbs session;	
-	
-	// This also creates the IAP entry if it doesn't exist
-	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+	RFs session;
 	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::SetConfigurationL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	// This also creates the IAP entry if it doesn't exist
+	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 
 	EapMsChapV2DbUtils::SetConfigurationL(
 		db,
@@ -279,20 +298,30 @@ void CEapMsChapV2::SetConfigurationL(const EAPSettings& aSettings)
 		iIndex,
 		iTunnelingType);		
 		
-	CleanupStack::PopAndDestroy(2); // db, session
+	db.Close();
+	session.Close();
+
+	CleanupStack::PopAndDestroy(&db);
+	CleanupStack::PopAndDestroy(&session);
 }
 
 void CEapMsChapV2::GetConfigurationL(EAPSettings& aSettings)
 {
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::GetConfigurationL()\n")));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapMsChapV2::GetConfigurationL()\n"));
+
 	RDbNamedDatabase db;
 
-	RDbs session;
-	
-	// This also creates the IAP entry if it doesn't exist
-	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+	RFs session;
 	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::GetConfigurationL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	// This also creates the IAP entry if it doesn't exist
+	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 
 	EapMsChapV2DbUtils::GetConfigurationL(
 		db,
@@ -300,14 +329,31 @@ void CEapMsChapV2::GetConfigurationL(EAPSettings& aSettings)
 		iIndexType,
 		iIndex,
 		iTunnelingType);
+
+	// Plain-MsChapv2 and EAP-MsChapv2 uses the same database.
+	// Here we set the correct authentication method to read settings.
+	error = CEapConversion::ConvertInternalTypeToExpandedEAPType(
+		&iEapType,
+		&aSettings.iEAPExpandedType);
+	if (error != KErrNone)
+	{
+		User::Leave(error);
+	}
 		
-	CleanupStack::PopAndDestroy(2); // db, session
+	db.Close();
+	session.Close();
+
+	CleanupStack::PopAndDestroy(&db);
+	CleanupStack::PopAndDestroy(&session);
 }
 
 void CEapMsChapV2::CopySettingsL(
 	const TIndexType aDestinationIndexType,
 	const TInt aDestinationIndex)
 {
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::CopySettingsL()\n")));
+	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapMsChapV2::CopySettingsL()\n"));
+
 	// First delete the target configuration
 	TIndexType tmpIndexType = iIndexType;
 	TInt tmpIndex = iIndex;
@@ -325,13 +371,16 @@ void CEapMsChapV2::CopySettingsL(
 
 	RDbNamedDatabase db;
 
-	RDbs session;
-	
-	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+	RFs session;
 	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-		
+	TInt error = session.Connect();
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::CopySettingsL(): - session.Connect(), error=%d\n"), error));
+	User::LeaveIfError(error);
+
+	EapMsChapV2DbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+
 	EapMsChapV2DbUtils::CopySettingsL(
 		db,
 		iIndexType,
@@ -341,7 +390,11 @@ void CEapMsChapV2::CopySettingsL(
 		aDestinationIndex, 
 		iTunnelingType);
 		
-	CleanupStack::PopAndDestroy(2); // db
+	db.Close();
+	session.Close();
+
+	CleanupStack::PopAndDestroy(&db);
+	CleanupStack::PopAndDestroy(&session);
 	
 }
 

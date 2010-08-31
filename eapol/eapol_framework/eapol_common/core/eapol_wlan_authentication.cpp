@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 86.1.2.1.1 %
+* %version: 115 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -50,6 +50,7 @@
 #include "eap_array_algorithms.h"
 #include "eap_state_notification.h"
 #include "eap_automatic_variable.h"
+#include "eapol_key_state_string.h"
 
 // LOCAL CONSTANTS
 
@@ -84,8 +85,7 @@ enum eapol_am_core_timer_id_e
 EAP_FUNC_EXPORT eapol_wlan_authentication_c * eapol_wlan_authentication_c::new_eapol_wlan_authentication(
 	abs_eap_am_tools_c * const tools,
 	abs_eapol_wlan_authentication_c * const partner,
-	const bool is_client_when_true,
-	const abs_eapol_wlan_database_reference_if_c * const wlan_database_reference
+	const bool is_client_when_true
 	)
 {
 	EAP_TRACE_DEBUG(
@@ -97,8 +97,7 @@ EAP_FUNC_EXPORT eapol_wlan_authentication_c * eapol_wlan_authentication_c::new_e
 
 	eapol_am_wlan_authentication_c * m_am_wauth = eapol_am_wlan_authentication_c::new_eapol_am_wlan_authentication(
 		tools,
-		is_client_when_true,
-		wlan_database_reference);
+		is_client_when_true);
 	if (m_am_wauth == 0
 		|| m_am_wauth->get_is_valid() == false)
 	{
@@ -158,7 +157,7 @@ EAP_FUNC_EXPORT eapol_wlan_authentication_c::eapol_wlan_authentication_c(
 , m_am_wauth(am_wauth)
 , m_ethernet_core(0)
 , m_am_tools(tools)
-, m_selected_eap_types(tools)
+//, m_selected_eap_types(tools)
 , m_wpa_preshared_key_hash(tools)
 , m_authentication_type(eapol_key_authentication_type_none)
 , m_802_11_authentication_mode(eapol_key_802_11_authentication_mode_none)
@@ -399,12 +398,9 @@ eap_status_e eapol_wlan_authentication_c::cancel_all_authentication_sessions()
 EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::start_authentication(
 	const eap_variable_data_c * const SSID,
 	const eapol_key_authentication_type_e selected_eapol_key_authentication_type,
-	const eap_variable_data_c * const wpa_preshared_key,
-	const bool WPA_override_enabled
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-	,
+	const eap_variable_data_c * const preshared_key, // This does include WPA pre-shared key or WPS PIN.
+	const bool WPA_override_enabled,
 	const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 	)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);	
@@ -418,8 +414,9 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::start_authentication(
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("Starting authentication, selected_eapol_key_authentication_type = %d.\n"),
-		selected_eapol_key_authentication_type));
+		(EAPL("Starting authentication, selected_eapol_key_authentication_type=%d=%s.\n"),
+		selected_eapol_key_authentication_type,
+		eapol_key_state_string_c::get_eapol_key_authentication_type_string(selected_eapol_key_authentication_type)));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns to partner: eapol_wlan_authentication_c::start_authentication()");
 
@@ -442,11 +439,11 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::start_authentication(
 	status = m_am_wauth->set_wlan_parameters(
 		SSID,
 		WPA_override_enabled,
-		wpa_preshared_key,
+		preshared_key,
 		selected_eapol_key_authentication_type);
 	if (status != eap_status_ok)
 	{
-		(void) disassociation(0); // Note we have no addresses yet.
+		(void) internal_disassociation(false, 0); // Note we have no addresses yet.
 
 		(void) eapol_indication(
 			0, // Note we have no addresses yet.
@@ -458,13 +455,13 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::start_authentication(
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
-		(EAPL("calls: eapol_wlan_authentication_c::start_authentication(): m_am_wauth->reset_eap_configuration(): %s.\n"),
+		(EAPL("calls: eapol_wlan_authentication_c::start_authentication(): m_am_wauth->reset_wpa_configuration(): %s.\n"),
 		(m_is_client == true) ? "client": "server"));
 
-	status = m_am_wauth->reset_eap_configuration();
+	status = m_am_wauth->reset_wpa_configuration();
 	if (status != eap_status_ok)
 	{
-		(void) disassociation(0); // Note we have no addresses yet.
+		(void) internal_disassociation(false, 0); // Note we have no addresses yet.
 
 		(void) eapol_indication(
 			0, // Note we have no addresses yet.
@@ -478,12 +475,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::start_authentication(
 		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
 		(EAPL("calls: eapol_wlan_authentication_c::start_authentication(): m_am_wauth->get_selected_eap_types(): %s.\n"),
 		(m_is_client == true) ? "client": "server"));
-
-	status = m_am_wauth->get_selected_eap_types(&m_selected_eap_types);
-	if (status != eap_status_ok)
-	{
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
 
 	EAP_TRACE_DEBUG(
 		m_am_tools,
@@ -500,6 +491,28 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::start_authentication(
 
 	// Start new authentication from scratch.
 	
+	WAUTH_ENTER_MUTEX(m_am_tools);
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+		(EAPL("calls eapol: eapol_wlan_authentication_c::start_authentication(): m_ethernet_core->create_state(): %s.\n"),
+		(m_is_client == true) ? "client": "server"));
+	status = m_ethernet_core->create_state(
+		receive_network_id,
+		m_authentication_type
+		);
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+		(EAPL("returns from eapol: eapol_wlan_authentication_c::start_authentication(): m_ethernet_core->create_state(): %s, status = %s.\n"),
+		(m_is_client == true) ? "client": "server",
+		eap_status_string_c::get_status_string(status)));
+	WAUTH_LEAVE_MUTEX(m_am_tools);
+	if (status != eap_status_ok)
+	{
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
 	if (m_authentication_type == eapol_key_authentication_type_RSNA_PSK
 		|| m_authentication_type == eapol_key_authentication_type_WPA_PSK)
 	{
@@ -520,127 +533,39 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::start_authentication(
 				TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
 				(EAPL("start_authentication(): Trying auth mode OPEN and WPA-PSK.\n")));
 		}
+
+		status = complete_get_802_11_authentication_mode(
+			eap_status_ok,
+			receive_network_id,
+			m_802_11_authentication_mode);
 	}
-	else //if (wpa_preshared_key == 0
-		//|| wpa_preshared_key->get_is_valid_data() == false
+	else //if (preshared_key == 0
+		//|| preshared_key->get_is_valid_data() == false
 		//|| WPA_override_enabled == false)
 	{
-		// Check the first enabled type
-		eap_type_selection_c * eap_type = 0;
-		u32_t ind_type = 0ul;
-
-		for (ind_type = 0; ind_type < m_selected_eap_types.get_object_count(); ind_type++)
+		WAUTH_ENTER_MUTEX(m_am_tools);
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+			(EAPL("calls eapol: eapol_wlan_authentication_c::start_authentication(): m_ethernet_core->get_802_11_authentication_mode(): %s.\n"),
+			(m_is_client == true) ? "client": "server"));
+		status = m_ethernet_core->get_802_11_authentication_mode(
+			receive_network_id,
+			m_authentication_type,
+			SSID,
+			preshared_key);
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+			(EAPL("returns from eapol: eapol_wlan_authentication_c::start_authentication(): m_ethernet_core->get_802_11_authentication_mode(): %s, status = %s.\n"),
+			(m_is_client == true) ? "client": "server",
+			eap_status_string_c::get_status_string(status)));
+		WAUTH_LEAVE_MUTEX(m_am_tools);
+		if (status != eap_status_ok)
 		{
-			// Check if type is enabled
-			eap_type = m_selected_eap_types.get_object(ind_type);
-
-			if (eap_type->get_is_enabled() == true)
-			{	
-				break;
-			}
-		}
-
-		if (ind_type >= m_selected_eap_types.get_object_count())
-		{
-			// No enabled EAP types.
-			EAP_TRACE_ALWAYS(
-				m_am_tools,
-				TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT,
-				(EAPL("No enabled EAP types.\n")));
-			EAP_TRACE_ALWAYS(
-				m_am_tools,
-				TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT,
-				(EAPL("Indication sent to WLM: eap_status_failed_completely.\n")));
-
-			(void) disassociation(0); // Note we have no addresses yet.
-
-			status = eapol_indication(
-				0, // Note we have no addresses yet.
-				eapol_wlan_authentication_state_failed_completely);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
-
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
-		}	
-
-		// reset index (start from the first enabled EAP type)
-		m_current_eap_index = ind_type;
-		
-		if (eap_type->get_type() == eap_type_leap)
-		{
-			if (m_authentication_type == eapol_key_authentication_type_dynamic_WEP)
-			{
-				// LEAP uses it's own 802.11 authentication mode when 802.1X (dynamic WEP) is used.
-				m_802_11_authentication_mode = eapol_key_802_11_authentication_mode_leap;
-
-				EAP_TRACE_ALWAYS(
-					m_am_tools,
-					TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
-					(EAPL("start_authentication(): Trying auth mode LEAP (802.1x mode).\n")));
-			}
-			else
-			{
-				// If security mode is WPA or RSNA then even LEAP uses open authentication!
-				m_802_11_authentication_mode = eapol_key_802_11_authentication_mode_open;
-
-				EAP_TRACE_ALWAYS(
-					m_am_tools,
-					TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
-					(EAPL("start_authentication(): Trying auth mode OPEN (LEAP in WPA mode).\n")));
-			}
-
-		}
-		else
-		{
-			m_802_11_authentication_mode = eapol_key_802_11_authentication_mode_open;
-
-			EAP_TRACE_ALWAYS(
-				m_am_tools,
-				TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
-				(EAPL("start_authentication(): Trying auth mode OPEN.\n")));
+			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 	}
-
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-	WAUTH_ENTER_MUTEX(m_am_tools);
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
-		(EAPL("calls eapol: eapol_wlan_authentication_c::start_authentication(): m_ethernet_core->create_state(): %s.\n"),
-		(m_is_client == true) ? "client": "server"));
-	status = m_ethernet_core->create_state(
-		receive_network_id,
-		selected_eapol_key_authentication_type
-		);
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
-		(EAPL("returns from eapol: eapol_wlan_authentication_c::start_authentication(): m_ethernet_core->create_state(): %s, status = %s.\n"),
-		(m_is_client == true) ? "client": "server",
-		eap_status_string_c::get_status_string(status)));
-	WAUTH_LEAVE_MUTEX(m_am_tools);
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-	
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
-		(EAPL("calls partner: eapol_wlan_authentication_c::start_authentication(): m_partner->associate(%d).\n"),
-		m_802_11_authentication_mode));
-
-	status = m_partner->associate(m_802_11_authentication_mode);
-	(void)EAP_STATUS_RETURN(m_am_tools, status);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
-		(EAPL("returns from partner: eapol_wlan_authentication_c::start_authentication(): %s: m_partner->associate(): status = %s\n"),
-		 (m_is_client == true) ? "client": "server",
-		 eap_status_string_c::get_status_string(status)));
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
 	return EAP_STATUS_RETURN(m_am_tools, status);
@@ -717,7 +642,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::complete_association(
 			TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT,
 			(EAPL("Indication sent to WLM: eap_status_this_ap_failed.\n")));
 
-		(void) disassociation(receive_network_id);
+		(void) internal_disassociation(false, receive_network_id);
 
 		status = eapol_indication(
 			receive_network_id,
@@ -831,7 +756,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::complete_association(
 			(EAPL("calls: eapol_wlan_authentication_c::complete_association(): this->disassociation(): %s.\n"),
 			(m_is_client == true) ? "client": "server"));
 
-		(void) disassociation(receive_network_id);
+		(void) internal_disassociation(false, receive_network_id);
 
 		status = eapol_indication(
 			receive_network_id,
@@ -849,7 +774,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::complete_association(
 	if (m_authentication_type == eapol_key_authentication_type_RSNA_EAP
 		|| m_authentication_type == eapol_key_authentication_type_WPA_EAP
 		|| m_authentication_type == eapol_key_authentication_type_dynamic_WEP
-		|| m_authentication_type == eapol_key_authentication_type_WFA_SC
+		|| m_authentication_type == eapol_key_authentication_type_WPS
 #if defined(EAP_USE_WPXM)
 		|| m_authentication_type == eapol_key_authentication_type_WPXM
 #endif //#if defined(EAP_USE_WPXM)
@@ -1024,10 +949,10 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::start_reassociation(
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
-		(EAPL("calls: eapol_wlan_authentication_c::start_reassociation(): m_am_wauth->reset_eap_configuration(): %s.\n"),
+		(EAPL("calls: eapol_wlan_authentication_c::start_reassociation(): m_am_wauth->reset_wpa_configuration(): %s.\n"),
 		(m_is_client == true) ? "client": "server"));
 
-	status = m_am_wauth->reset_eap_configuration();
+	status = m_am_wauth->reset_wpa_configuration();
 	if (status != eap_status_ok)
 	{
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
@@ -1080,9 +1005,10 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::start_reassociation(
 		EAP_TRACE_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
-			(EAPL("calls partner: eapol_wlan_authentication_c::start_reassociation(): %s: m_partner->reassociate(): m_authentication_type=%d.\n"),
+			(EAPL("calls partner: eapol_wlan_authentication_c::start_reassociation(): %s: m_partner->reassociate(): m_authentication_type=%d=%s.\n"),
 			 (m_is_client == true) ? "client": "server",
-			 m_authentication_type));
+			 m_authentication_type,
+			 eapol_key_state_string_c::get_eapol_key_authentication_type_string(m_authentication_type)));
 
 		status = m_partner->reassociate(
 			&send_network_id,
@@ -1210,11 +1136,15 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::packet_process(
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns to partner: eapol_wlan_authentication_c::packet_process()");
 
+#if !defined(EAPOL_SKIP_ETHERNET_HEADER)
+
 	if (packet_length < eapol_ethernet_header_wr_c::get_header_length())
 	{
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_too_short_message);
 	}
+
+#endif //#if !defined(EAPOL_SKIP_ETHERNET_HEADER)
 
 	eapol_ethernet_header_wr_c eth_header(
 		m_am_tools,
@@ -1223,8 +1153,11 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::packet_process(
 
 	eap_status_e status(eap_status_process_general_error);
 
+#if !defined(EAPOL_SKIP_ETHERNET_HEADER)
 	if (eth_header.get_type() == eapol_ethernet_type_pae
 		|| eth_header.get_type() == eapol_ethernet_type_preauthentication)
+#endif //#if !defined(EAPOL_SKIP_ETHERNET_HEADER)
+
 	{
 		// Forward the packet to the Ethernet layer of the EAPOL stack.
 		// Ignore return value. Failure is signalled using state_notification.
@@ -1248,6 +1181,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::packet_process(
 
 		EAP_GENERAL_HEADER_COPY_ERROR_PARAMETERS(packet_data, &eth_header);
 	} 
+#if !defined(EAPOL_SKIP_ETHERNET_HEADER)
 	else
 	{
 		EAP_TRACE_DEBUG(
@@ -1256,6 +1190,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::packet_process(
 			(EAPL("Not supported ethernet type 0x%04x\n"), eth_header.get_type()));
 		status = eap_status_ethernet_type_not_supported;
 	}
+#endif //#if !defined(EAPOL_SKIP_ETHERNET_HEADER)
 	
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
@@ -1867,14 +1802,15 @@ EAP_FUNC_EXPORT void eapol_wlan_authentication_c::state_notification(
 		EAP_TRACE_DEBUG(
 			m_am_tools, 
 			TRACE_FLAGS_DEFAULT, 
-			(EAPL("eapol_wlan_authentication_c::state_notification() %s: protocol layer %d=%s, protocol %d=%s, EAP-type 0x%08x=%s\n"),
+			(EAPL("eapol_wlan_authentication_c::state_notification() %s: protocol layer %d=%s, protocol %d=%s, EAP-type 0xfe%06x%08x=%s\n"),
 			(state->get_is_client() == true ? "client": "server"),
 			state->get_protocol_layer(),
 			state->get_protocol_layer_string(),
 			state->get_protocol(),
 			state->get_protocol_string(),
-			convert_eap_type_to_u32_t(state->get_eap_type()),
-			eap_string.get_eap_type_string(state->get_eap_type())));
+			state->get_eap_type().get_vendor_id(),
+			state->get_eap_type().get_vendor_type(),
+			eap_header_string_c::get_eap_type_string(state->get_eap_type())));
 
 		EAP_TRACE_DEBUG(
 			m_am_tools, 
@@ -1887,26 +1823,6 @@ EAP_FUNC_EXPORT void eapol_wlan_authentication_c::state_notification(
 			status_string.get_status_string(state->get_authentication_error())));
 	}
 
-
-#if !defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
-		(EAPL("calls partner: eapol_wlan_authentication_c::state_notification(): %s: m_partner->state_notification()\n"),
-		 (m_is_client == true) ? "client": "server"));
-
-	// Calls lower layer.
-	// Note the optimization prevents most of the state notifications to lower layer.
-	m_partner->state_notification(state);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
-		(EAPL("returns from partner: eapol_wlan_authentication_c::state_notification(): %s: m_partner->state_notification()\n"),
-		 (m_is_client == true) ? "client": "server"));
-
-#endif //#if !defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 	if(state->get_protocol_layer() == eap_protocol_layer_general)
 	{
@@ -1959,14 +1875,15 @@ EAP_FUNC_EXPORT void eapol_wlan_authentication_c::state_notification(
 			EAP_TRACE_ERROR(
 				m_am_tools, 
 				TRACE_FLAGS_DEFAULT, 
-				(EAPL("ERROR: eapol_wlan_authentication_c::state_notification() %s: protocol layer %d=%s, protocol %d=%s, EAP-type 0x%08x=%s\n"),
+				(EAPL("ERROR: eapol_wlan_authentication_c::state_notification() %s: protocol layer %d=%s, protocol %d=%s, EAP-type 0xfe%06x%08x=%s\n"),
 				(state->get_is_client() == true ? "client": "server"),
 				state->get_protocol_layer(),
 				state->get_protocol_layer_string(),
 				state->get_protocol(),
 				state->get_protocol_string(),
-				convert_eap_type_to_u32_t(state->get_eap_type()),
-				eap_string.get_eap_type_string(state->get_eap_type())));
+				state->get_eap_type().get_vendor_id(),
+				state->get_eap_type().get_vendor_type(),
+				eap_header_string_c::get_eap_type_string(state->get_eap_type())));
 
 			EAP_TRACE_ERROR(
 				m_am_tools, 
@@ -1978,7 +1895,6 @@ EAP_FUNC_EXPORT void eapol_wlan_authentication_c::state_notification(
 				state->get_authentication_error(),
 				status_string.get_status_string(state->get_authentication_error())));
 
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 			EAP_TRACE_DEBUG(
 				m_am_tools,
 				TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
@@ -1994,8 +1910,6 @@ EAP_FUNC_EXPORT void eapol_wlan_authentication_c::state_notification(
 				TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
 				(EAPL("returns from partner: eapol_wlan_authentication_c::state_notification(): %s: m_partner->state_notification()\n"),
 				 (m_is_client == true) ? "client": "server"));
-
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 			(void) cancel_timer_this_ap_failed();
 
@@ -2021,14 +1935,15 @@ EAP_FUNC_EXPORT void eapol_wlan_authentication_c::state_notification(
 			EAP_TRACE_DEBUG(
 				m_am_tools, 
 				TRACE_FLAGS_DEFAULT, 
-				(EAPL("eapol_wlan_authentication_c::state_notification() %s: protocol layer %d=%s, protocol %d=%s, EAP-type 0x%08x=%s\n"),
+				(EAPL("eapol_wlan_authentication_c::state_notification() %s: protocol layer %d=%s, protocol %d=%s, EAP-type 0xfe%06x%08x=%s\n"),
 				(state->get_is_client() == true ? "client": "server"),
 				state->get_protocol_layer(),
 				state->get_protocol_layer_string(),
 				state->get_protocol(),
 				state->get_protocol_string(),
-				convert_eap_type_to_u32_t(state->get_eap_type()),
-				eap_string.get_eap_type_string(state->get_eap_type())));
+				state->get_eap_type().get_vendor_id(),
+				state->get_eap_type().get_vendor_type(),
+				eap_header_string_c::get_eap_type_string(state->get_eap_type())));
 
 			EAP_TRACE_DEBUG(
 				m_am_tools, 
@@ -2079,8 +1994,6 @@ EAP_FUNC_EXPORT void eapol_wlan_authentication_c::state_notification(
 					(EAPL("calls: eapol_wlan_authentication_c::state_notification(): m_am_wauth->authentication_finished(): %s.\n"),
 					(m_is_client == true) ? "client": "server"));
 
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
 				EAP_TRACE_DEBUG(
 					m_am_tools,
 					TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
@@ -2097,14 +2010,11 @@ EAP_FUNC_EXPORT void eapol_wlan_authentication_c::state_notification(
 					(EAPL("returns from partner: eapol_wlan_authentication_c::state_notification(): %s: m_partner->state_notification()\n"),
 					 (m_is_client == true) ? "client": "server"));
 
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
 				m_am_wauth->authentication_finished(
 					true,
 					state->get_eap_type(),
 					m_authentication_type);
 
-#if defined(USE_EAP_EXPANDED_TYPES)
 				if (state->get_eap_type() == eap_expanded_type_simple_config.get_type())
 				{
 					increment_authentication_counter();
@@ -2125,16 +2035,12 @@ EAP_FUNC_EXPORT void eapol_wlan_authentication_c::state_notification(
 						return;
 					}
 				}
-#endif //#if defined(USE_EAP_EXPANDED_TYPES)
-
 			}
 			break;
 		case eap_state_authentication_terminated_unsuccessfully:
 			{
 				increment_authentication_counter();
 				m_failed_authentications++;
-
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 				EAP_TRACE_DEBUG(
 					m_am_tools,
@@ -2151,8 +2057,6 @@ EAP_FUNC_EXPORT void eapol_wlan_authentication_c::state_notification(
 					TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
 					(EAPL("returns from partner: eapol_wlan_authentication_c::state_notification(): %s: m_partner->state_notification()\n"),
 					 (m_is_client == true) ? "client": "server"));
-
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 				EAP_TRACE_DEBUG(
 					m_am_tools,
@@ -2370,7 +2274,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::timer_expired(
 				(EAPL("EAPOL_WLAN_AUTHENTICATION_TIMER_FAILED_COMPLETELY_ID elapsed: ")
 				 EAPL("Indication sent to WLM: eap_status_failed_completely.\n")));
 
-			(void) disassociation_mutex_must_be_reserved(&receive_network_id);
+			(void) disassociation_mutex_must_be_reserved(false, &receive_network_id);
 
 			eap_status_e status = eapol_indication(
 				&receive_network_id,
@@ -2391,7 +2295,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::timer_expired(
 				(EAPL("EAPOL_WLAN_AUTHENTICATION_TIMER_THIS_AP_FAILED_ID elapsed: ")
 				 EAPL("Indication sent to WLM: eap_status_this_ap_failed.\n")));
 
-			(void) disassociation_mutex_must_be_reserved(&receive_network_id);
+			(void) disassociation_mutex_must_be_reserved(false, &receive_network_id);
 
 			eap_status_e status = eapol_indication(
 				&receive_network_id,
@@ -2412,7 +2316,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::timer_expired(
 				(EAPL("EAPOL_WLAN_AUTHENTICATION_TIMER_NO_RESPONSE_ID elapsed: ")
 				 EAPL("Indication sent to WLM: eap_status_no_response.\n")));
 
-			(void) disassociation_mutex_must_be_reserved(&receive_network_id);
+			(void) disassociation_mutex_must_be_reserved(false, &receive_network_id);
 
 			eap_status_e status = eapol_indication(
 				&receive_network_id,
@@ -2433,7 +2337,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::timer_expired(
 				(EAPL("EAPOL_WLAN_AUTHENTICATION_TIMER_AUTHENTICATION_CANCELLED_ID elapsed: ")
 				 EAPL("Indication sent to WLM: eapol_wlan_authentication_state_authentication_cancelled.\n")));
 
-			(void) disassociation_mutex_must_be_reserved(&receive_network_id);
+			(void) disassociation_mutex_must_be_reserved(false, &receive_network_id);
 		}
 		break;
 
@@ -2532,6 +2436,7 @@ EAP_FUNC_EXPORT u32_t eapol_wlan_authentication_c::get_header_offset(
 EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::unload_module(
 	const eap_type_value_e type)
 {
+	EAP_UNREFERENCED_PARAMETER(type);
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
@@ -2552,7 +2457,16 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::unload_module(
 		(EAPL("calls: eapol_wlan_authentication_c::unload_module(): m_am_wauth->unload_module(): %s.\n"),
 		(m_is_client == true) ? "client": "server"));
 
+#if 0
+
 	status = m_am_wauth->unload_module(type);
+
+#else
+
+	status = eap_status_not_supported;
+
+#endif
+
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
@@ -2598,6 +2512,68 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::eap_acknowledge(
 //--------------------------------------------------
 
 //
+EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::set_eap_database_reference_values(
+	const eap_variable_data_c * const reference)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("partner calls: eapol_wlan_authentication_c::set_eap_database_reference_values()\n")));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns to partner: eapol_wlan_authentication_c::set_eap_database_reference_values()");
+
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eapol_wlan_authentication_c::set_eap_database_reference_values(): reference"),
+		 reference->get_data(),
+		 reference->get_data_length()));
+
+	WAUTH_ENTER_MUTEX(m_am_tools);
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+		(EAPL("calls eapol: eapol_wlan_authentication_c::set_eap_database_reference_values(): m_ethernet_core->set_eap_database_reference_values(): %s.\n"),
+		(m_is_client == true) ? "client": "server"));
+	eap_status_e status = m_ethernet_core->set_eap_database_reference_values(reference);
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+		(EAPL("returns from eapol: eapol_wlan_authentication_c::set_eap_database_reference_values(): m_ethernet_core->set_eap_database_reference_values(): %s, status = %s.\n"),
+		 (m_is_client == true) ? "client": "server",
+		 eap_status_string_c::get_status_string(status)));
+	WAUTH_LEAVE_MUTEX(m_am_tools);
+
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	WAUTH_ENTER_MUTEX(m_am_tools);
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+		(EAPL("calls eapol: eapol_wlan_authentication_c::set_eap_database_reference_values(): m_am_wauth->set_eap_database_reference_values(): %s.\n"),
+		(m_is_client == true) ? "client": "server"));
+	status = m_am_wauth->set_eap_database_reference_values(reference);
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+		(EAPL("returns from eapol: eapol_wlan_authentication_c::set_eap_database_reference_values(): m_am_wauth->set_eap_database_reference_values(): %s, status = %s.\n"),
+		 (m_is_client == true) ? "client": "server",
+		 eap_status_string_c::get_status_string(status)));
+	WAUTH_LEAVE_MUTEX(m_am_tools);
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
+//
 EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::load_module(
 		const eap_type_value_e type,
 		const eap_type_value_e tunneling_type,
@@ -2606,6 +2582,12 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::load_module(
 		const bool is_client_when_true,
 		const eap_am_network_id_c * const receive_network_id)
 {	
+	EAP_UNREFERENCED_PARAMETER(type);
+	EAP_UNREFERENCED_PARAMETER(tunneling_type);
+	EAP_UNREFERENCED_PARAMETER(eap_type_if);
+	EAP_UNREFERENCED_PARAMETER(receive_network_id);
+	EAP_UNREFERENCED_PARAMETER(partner);
+	EAP_UNREFERENCED_PARAMETER(is_client_when_true);
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
@@ -2628,6 +2610,8 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::load_module(
 		(EAPL("calls: eapol_wlan_authentication_c::load_module(): m_am_wauth->load_module(): %s.\n"),
 		(m_is_client == true) ? "client": "server"));
 
+#if 0
+
 	eap_status_e status = m_am_wauth->load_module(
 		type,
 		tunneling_type,
@@ -2635,6 +2619,12 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::load_module(
 		eap_type_if,
 		is_client_when_true,
 		receive_network_id);
+
+#else
+
+	eap_status_e status = eap_status_not_supported;
+
+#endif
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
@@ -2644,6 +2634,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::load_module(
 
 //
 eap_status_e eapol_wlan_authentication_c::disassociation_mutex_must_be_reserved(
+	const bool complete_to_lower_layer,
 	const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
 	)
 {
@@ -2652,8 +2643,9 @@ eap_status_e eapol_wlan_authentication_c::disassociation_mutex_must_be_reserved(
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("eapol calls: eapol_wlan_authentication_c::disassociation_mutex_must_be_reserved(): %s\n"),
-		(m_is_client == true) ? "client": "server"));
+		(EAPL("eapol calls: eapol_wlan_authentication_c::disassociation_mutex_must_be_reserved(): %s, complete_to_lower_layer=%s\n"),
+		 (m_is_client == true) ? "client": "server",
+		 (complete_to_lower_layer == true) ? "true": "false"));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns to eapol: eapol_wlan_authentication_c::disassociation_mutex_must_be_reserved()");
 
@@ -2670,7 +2662,9 @@ eap_status_e eapol_wlan_authentication_c::disassociation_mutex_must_be_reserved(
 			(EAPL("calls eapol: eapol_wlan_authentication_c::disassociation_mutex_must_be_reserved(): m_ethernet_core->disassociation(): %s.\n"),
 			(m_is_client == true) ? "client": "server"));
 
-		status = m_ethernet_core->disassociation(receive_network_id);
+		status = m_ethernet_core->disassociation(
+			complete_to_lower_layer,
+			receive_network_id);
 
 		EAP_TRACE_DEBUG(
 			m_am_tools,
@@ -2720,6 +2714,37 @@ eap_status_e eapol_wlan_authentication_c::disassociation_mutex_must_be_reserved(
 //--------------------------------------------------
 
 //
+eap_status_e eapol_wlan_authentication_c::internal_disassociation(
+	const bool complete_to_lower_layer,
+	const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
+	)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eapol calls: eapol_wlan_authentication_c::internal_disassociation(): %s, complete_to_lower_layer=%s\n"),
+		 (m_is_client == true) ? "client": "server",
+		 (complete_to_lower_layer == true) ? "true": "false"));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns to eapol: : eapol_wlan_authentication_c::internal_disassociation()");
+
+	eap_status_e status(eap_status_ok);
+
+	WAUTH_ENTER_MUTEX(m_am_tools);
+	status = disassociation_mutex_must_be_reserved(
+		complete_to_lower_layer,
+		receive_network_id);
+	WAUTH_LEAVE_MUTEX(m_am_tools);
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
+//
 EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::disassociation(
 	const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
 	)
@@ -2730,15 +2755,15 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::disassociation(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
 		(EAPL("partner calls: eapol_wlan_authentication_c::disassociation(): %s\n"),
-		(m_is_client == true) ? "client": "server"));
+		 (m_is_client == true) ? "client": "server"));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns to partner: eapol_wlan_authentication_c::disassociation()");
 
 	eap_status_e status(eap_status_ok);
 
-	WAUTH_ENTER_MUTEX(m_am_tools);
-	status = disassociation_mutex_must_be_reserved(receive_network_id);
-	WAUTH_LEAVE_MUTEX(m_am_tools);
+	status = internal_disassociation(
+		true,
+		receive_network_id);
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
@@ -3298,7 +3323,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::cancel_all_timers()
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::check_is_valid_eap_type(
-	const eap_type_value_e eap_type)
+	const eap_type_value_e /* eap_type */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -3317,8 +3342,17 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::check_is_valid_eap_typ
 		(EAPL("calls: eapol_wlan_authentication_c::check_is_valid_eap_type(): m_am_wauth->check_is_valid_eap_type(): %s.\n"),
 		(m_is_client == true) ? "client": "server"));
 
+#if 0
+
 	eap_status_e status = m_am_wauth->check_is_valid_eap_type(eap_type);
 	
+#else
+
+	eap_status_e status = eap_status_not_supported;
+
+#endif
+
+
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
@@ -3326,7 +3360,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::check_is_valid_eap_typ
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::get_eap_type_list(
-	eap_array_c<eap_type_value_e> * const eap_type_list)
+	eap_array_c<eap_type_value_e> * const /* eap_type_list */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -3343,7 +3377,15 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::get_eap_type_list(
 		(EAPL("calls: eapol_wlan_authentication_c::get_eap_type_list(): m_am_wauth->get_eap_type_list(): %s.\n"),
 		(m_is_client == true) ? "client": "server"));
 
+#if 0
+
 	eap_status_e status = m_am_wauth->get_eap_type_list(eap_type_list);
+
+#else
+
+	eap_status_e status = eap_status_not_supported;
+
+#endif
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
@@ -3351,7 +3393,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::get_eap_type_list(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::eapol_indication(
+eap_status_e eapol_wlan_authentication_c::eapol_indication(
 	const eap_am_network_id_c * const receive_network_id, ///< source includes remote address, destination includes local address.
 	const eapol_wlan_authentication_state_e wlan_authentication_state)
 {
@@ -3375,6 +3417,27 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::eapol_indication(
 			receive_network_id->get_destination_id(),
 			receive_network_id->get_source_id(),
 			receive_network_id->get_type());
+
+		status = send_network_id.set_copy_of_network_id(&tmp_network_id);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+	}
+	else
+	{
+		const u8_t no_address[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00,};
+
+		eap_am_network_id_c tmp_network_id(
+			m_am_tools,
+			no_address,
+			sizeof(no_address),
+			no_address,
+			sizeof(no_address),
+			eapol_ethernet_type_pae,
+			false,
+			false);
 
 		status = send_network_id.set_copy_of_network_id(&tmp_network_id);
 		if (status != eap_status_ok)
@@ -3437,7 +3500,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::eapol_indication(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::create_upper_stack()
+eap_status_e eapol_wlan_authentication_c::create_upper_stack()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	
@@ -3894,12 +3957,15 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::save_simple_config_ses
 		}
 	}
 
-	EAP_TRACE_DATA_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT, 
-		(EAPL("SIMPLE_CONFIG: new_password"),
-		new_password->get_data(),
-		new_password->get_data_length()));
+	if (new_password != 0)
+	{
+		EAP_TRACE_DATA_DEBUG(
+			m_am_tools, 
+			TRACE_FLAGS_DEFAULT, 
+			(EAPL("SIMPLE_CONFIG: new_password"),
+			new_password->get_data(),
+			new_password->get_data_length()));
+	}
 
 	EAP_TRACE_DEBUG(
 		m_am_tools,
@@ -3933,6 +3999,146 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::save_simple_config_ses
 
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
 
-//--------------------------------------------------				
+//--------------------------------------------------
 
+eap_status_e eapol_wlan_authentication_c::complete_check_pmksa_cache(
+	EAP_TEMPLATE_CONST eap_array_c<eap_am_network_id_c> * const bssid_sta_receive_network_ids)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+		(EAPL("calls partner: eapol_wlan_authentication_c::complete_check_pmksa_cache(): %s: m_partner->complete_check_pmksa_cache().\n"),
+		(m_is_client == true) ? "client": "server"));
+
+	const eap_status_e status = m_partner->complete_check_pmksa_cache(
+		bssid_sta_receive_network_ids);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+		(EAPL("returns from partner: eapol_wlan_authentication_c::complete_check_pmksa_cache(): %s: m_partner->complete_check_pmksa_cache(): status = %s\n"),
+		 (m_is_client == true) ? "client": "server",
+		 eap_status_string_c::get_status_string(status)));
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
+//
+EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::complete_get_802_11_authentication_mode(
+		const eap_status_e completion_status,
+		const eap_am_network_id_c * const /* receive_network_id */,
+		const eapol_key_802_11_authentication_mode_e mode)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eapol calls: eapol_wlan_authentication_c::complete_get_802_11_authentication_mode(): completion_status=%d=%s, mode=%d\n"),
+		completion_status,
+		eap_status_string_c::get_status_string(completion_status),
+		mode));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns to eapol: eapol_wlan_authentication_c::complete_get_802_11_authentication_mode()");
+
+	eap_status_e status(eap_status_ok);
+
+	if (completion_status != eap_status_ok
+		|| mode == eapol_key_802_11_authentication_mode_none)
+	{
+		EAP_TRACE_ALWAYS(
+			m_am_tools,
+			TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT,
+			(EAPL("No enabled EAP types.\n")));
+		EAP_TRACE_ALWAYS(
+			m_am_tools,
+			TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT,
+			(EAPL("Indication sent to WLM: eap_status_failed_completely.\n")));
+
+		(void) internal_disassociation(false, 0); // Note we have no addresses yet.
+
+		status = eapol_indication(
+			0, // Note we have no addresses yet.
+			eapol_wlan_authentication_state_failed_completely);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
+	}
+
+	m_802_11_authentication_mode = mode;
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+		(EAPL("calls partner: eapol_wlan_authentication_c::complete_get_802_11_authentication_mode(): m_partner->associate(%d).\n"),
+		m_802_11_authentication_mode));
+
+	status = m_partner->associate(m_802_11_authentication_mode);
+	(void)EAP_STATUS_RETURN(m_am_tools, status);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+		(EAPL("returns from partner: eapol_wlan_authentication_c::complete_get_802_11_authentication_mode(): %s: m_partner->associate(): status = %s\n"),
+		 (m_is_client == true) ? "client": "server",
+		 eap_status_string_c::get_status_string(status)));
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
+EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::complete_disassociation(
+	const bool complete_to_lower_layer,
+	const eap_am_network_id_c * const receive_network_id)
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+		(EAPL("eapol calls: eapol_wlan_authentication_c::complete_disassociation(): %s: m_partner->complete_disassociation(), complete_to_lower_layer=%s.\n"),
+		 (m_is_client == true) ? "client": "server",
+		 (complete_to_lower_layer == true) ? "true": "false"));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns to eapol: eapol_wlan_authentication_c::complete_disassociation()");
+
+	eap_status_e status(eap_status_ok);
+
+	if (complete_to_lower_layer == true)
+	{
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+			(EAPL("calls partner: eapol_wlan_authentication_c::complete_disassociation(): %s: m_partner->complete_disassociation(), complete_to_lower_layer=%s.\n"),
+			 (m_is_client == true) ? "client": "server",
+			 (complete_to_lower_layer == true) ? "true": "false"));
+
+		status = m_partner->complete_disassociation(
+			receive_network_id);
+
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
+			(EAPL("returns from partner: eapol_wlan_authentication_c::complete_disassociation(): %s: m_partner->complete_disassociation(): status = %s\n"),
+			 (m_is_client == true) ? "client": "server",
+			 eap_status_string_c::get_status_string(status)));
+	}
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
 // End of file

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 13 %
+* %version: 9.1.2 %
 */
 
 #ifndef _EAPSIMINTERFACE_H_
@@ -87,8 +87,6 @@ private:
 	
 	// Creates the MMETel connection and loads the phone module.
 	TInt CreateMMETelConnectionL();
-
-	void DisconnectMMETel();
 
 private:
 

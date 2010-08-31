@@ -16,14 +16,14 @@
 */
 
 /*
-* %version: 9 %
+* %version: 7.1.2 %
 */
 
 #ifndef _EAPSIMPLUGIN_H_
 #define _EAPSIMPLUGIN_H_
 
 #include "EapPluginInterface.h"
-#include <ecom/ImplementationProxy.h>
+#include <ecom/implementationproxy.h>
 
 const TUint KVersion = 1;
 

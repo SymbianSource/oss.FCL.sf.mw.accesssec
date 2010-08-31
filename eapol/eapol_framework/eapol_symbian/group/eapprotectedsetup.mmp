@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12.2.3 %
+* %version: 16 %
 */
 
 #include <platform_paths.hrh>
@@ -28,6 +28,8 @@ TARGETTYPE    PLUGIN
 
 TARGET        eapprotectedsetup.dll
 UID	      0x10009d8d 0x2000b003
+
+deffile eapprotectedsetup.def
 
 SOURCEPATH    ../am/type/protected_setup/symbian/plugin/src
 
@@ -43,15 +45,9 @@ SOURCE        EapProtectedSetupProxy.cpp
 SOURCEPATH	../am/type/symbian/plugin/common
 SOURCE		EapTypeInfo.cpp
 
-//SOURCEPATH    ../am/type/symbian/plugin/common
-//SOURCE	      EapProtectedSetupInfo.cpp
-
 SOURCEPATH    ../am/type/protected_setup
 SOURCE        eap_am_type_protected_setup_symbian.cpp
 SOURCE        EapProtectedSetupInterface.cpp
-
-SOURCEPATH    ../am/common/symbian
-SOURCE		  eap_am_trace_symbian.cpp
 
 // For Common Side
 SOURCEPATH		../../eapol_common/type/simple_config/eap/src
@@ -79,77 +75,16 @@ USERINCLUDE   ../../eapol_common/type/simple_config/simple_config/include
 USERINCLUDE   ../am/include
 USERINCLUDE   ../am/type/protected_setup/symbian/plugin/inc
 
-/*
-
-//USERINCLUDE   ../am/type/tls_peap/symbian/plugin/inc
-
-USERINCLUDE   ../../eapol_common/am/include
-USERINCLUDE   ../../eapol_common/type
-USERINCLUDE   ../../eapol_common/type/diameter/include
-
-#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
-USERINCLUDE   ../../eapol_common/type/mschapv2/include
-#endif //#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
-
-#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
-SOURCEPATH    ../../eapol_common/type/mschapv2/core
-SOURCE		  eap_type_mschapv2_header.cpp
-#endif //#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
-
-*/
-
-//SOURCEPATH		../am/type/tls_peap/symbian/plugin/inc
-//DOCUMENT		101f8e4c.loc
-
-/*
-// UI 
-SOURCEPATH    ../am/type/tls_peap/symbian/plugin/src
-SOURCE		  EapTlsPeapUiConnection.cpp
-SOURCE        EapTlsPeapUiDataConnection.cpp
-SOURCE        EapTlsPeapUiTlsPeapData.cpp
-SOURCE		  EapTlsPeapCertFetcher.cpp
-SOURCE        EapTlsPeapUiEapTypes.cpp
-SOURCE        EapTlsPeapUiCertificates.cpp
-SOURCE        EapTlsPeapUiCipherSuites.cpp
-*/
-/*
-LIBRARY       avkon.lib
-LIBRARY       AknSkins.lib
-LIBRARY       AknIcon.lib
-STATICLIBRARY eaptlsui.lib
-STATICLIBRARY eappeapui.lib
-STATICLIBRARY eapttlsui.lib
-LIBRARY		  x509certnameparser.lib		// For parsing of certificate label. 
-
-//SYSTEMINCLUDE /epoc32/include/ecom
-//SYSTEMINCLUDE /epoc32/include/libc
-//SYSTEMINCLUDE /epoc32/include/cshelp
-*/
-
 LANG		  SC
 
 MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
 
-LIBRARY		euser.lib ecom.lib eapol.lib //edbms.lib efsrv.lib 
+LIBRARY		euser.lib ecom.lib eaptools.lib eaptrace.lib eapsymbiantools.lib 
 LIBRARY		cone.lib eikcoctl.lib
 LIBRARY		etelmm.lib etel.lib	// For ETel connection
 
-LIBRARY 	wlandbif.lib
 
-//LIBRARY	    x509.lib crypto.lib certstore.lib ctframework.lib pkixcert.lib
-//LIBRARY		asn1.lib x500.lib bafl.lib eikctl.lib egul.lib fbscli.lib
-/*
-LIBRARY		gdi.lib
-LIBRARY		cryptography.lib
-LIBRARY     eikdlg.lib
-LIBRARY     eikcore.lib
-LIBRARY		CommonEngine.lib
 
-LIBRARY     hlplch.lib
-LIBRARY		featmgr.lib
-*/
-
-//-------------------------------------------------------------------
 
 //-------------------------------------------------------------------
 // End of File

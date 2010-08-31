@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12 %
+* %version: %
 */
 
 #ifndef EAP_TYPE_SECURID_H

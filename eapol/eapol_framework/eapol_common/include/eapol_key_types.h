@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 19.1.2 %
+* %version: %
 */
 
 #if !defined(_EAPOL_KEY_TYPES_H_)
@@ -104,7 +104,7 @@ enum eapol_key_authentication_type_e
 	eapol_key_authentication_type_WPA_PSK = 4,    ///< Authentication is WPA PSK (pre shared key), 4-Way and Group Key Handshakes.
 	eapol_key_authentication_type_dynamic_WEP = 5, ///< Authentication is dynamic WEP (802.1X). EAP-authentication with simple EAPOL RC4 key message.
 	eapol_key_authentication_type_WPXM = 6,    ///< Authentication is WPXM.
-	eapol_key_authentication_type_WFA_SC = 7,  ///< Authentication is Wi-Fi Alliance Simple Configure.
+	eapol_key_authentication_type_WPS = 7,  ///< Authentication is Wi-Fi Alliance Protected Setup (Simple Configure).
 #if defined(USE_WAPI_CORE)
 	eapol_key_authentication_type_WAI_PSK = 8,  ///< Authentication is WAI PSK.
 	eapol_key_authentication_type_WAI_certificate = 9,  ///< Authentication is WAI certificate.
@@ -332,8 +332,8 @@ EAP_CONFIGURATION_FIELD(
 #endif //#if defined(EAP_USE_WPXM)
 
 EAP_CONFIGURATION_FIELD(
-	cf_str_EAPOL_key_authentication_type_config_value_WFA_SC,
-	"WFA_SC",
+	cf_str_EAPOL_key_authentication_type_config_value_WPS,
+	"WPS",
 	eap_configure_type_string,
 	false);
 

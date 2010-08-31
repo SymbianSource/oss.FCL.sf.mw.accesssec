@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 120.1.6.1.2 %
+* %version: 135 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -277,7 +277,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::initialize(
 		}
 	}
 
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 	{
 		m_is_associated = true;
 
@@ -288,14 +287,11 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::initialize(
 			 (m_is_client == true) ? "client": "server",
 			 (m_is_associated == true) ? "true": "false"));
 	}
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
 }
 
 //--------------------------------------------------
-
-#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 // 
 EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::initialize(
@@ -328,7 +324,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::initialize(
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 	// Creates SNonce. This is done here in early phase of authentication.
 	// This will reduce the CPU load when time critical first message
 	// of 4-Way handshake is processed.
@@ -338,15 +333,12 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::initialize(
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
 }
-
-#endif //#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 //--------------------------------------------------
 
@@ -521,9 +513,7 @@ EAP_FUNC_EXPORT eapol_key_state_c::eapol_key_state_c(
 	, m_indicate_pmkid_to_lower_layer(false)
 	, m_handshake_timeout_set(false)
 	, m_server_TEST_group_key_update(false)
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 	, m_is_associated(false)
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -616,9 +606,7 @@ EAP_FUNC_EXPORT eapol_key_state_c::eapol_key_state_c(
 	, m_indicate_pmkid_to_lower_layer(false)
 	, m_handshake_timeout_set(false)
 	, m_server_TEST_group_key_update(false)
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 	, m_is_associated(false)
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -953,6 +941,8 @@ eap_status_e eapol_key_state_c::set_reassociation_parameters(
 	const eapol_key_authentication_type_e authentication_type
 	)
 {
+	EAP_UNREFERENCED_PARAMETER(eapol_key_handshake_type);
+	EAP_UNREFERENCED_PARAMETER(authentication_type);
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
@@ -1148,8 +1138,6 @@ EAP_FUNC_EXPORT eapol_key_state_c *eapol_key_state_c::copy(const eap_am_network_
 	}
 
 
-#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
 	status = new_state->initialize(
 		receive_network_id,
 		m_authentication_type);
@@ -1160,9 +1148,6 @@ EAP_FUNC_EXPORT eapol_key_state_c *eapol_key_state_c::copy(const eap_am_network_
 		(void) EAP_STATUS_RETURN(m_am_tools, status);
 		return 0;
 	}
-
-#endif //#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
 
 	eapol_key_handshake_type_e eapol_key_handshake_type(m_eapol_key_handshake_type);
 
@@ -1421,11 +1406,17 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::check_pmksa_cache(
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
-		(EAPL("EAPOL_KEY: %s: eapol_key_state_c::check_pmksa_cache(): this = 0x%08x, state %d=%s, selected_eapol_key_authentication_type %d=%s, m_authentication_type %d=%s.\n"),
+		(EAPL("EAPOL_KEY: %s: eapol_key_state_c::check_pmksa_cache(): this = 0x%08x, state %d=%s,\n"),
 		 (m_is_client == true) ? "client": "server",
 		 this,
 		 get_eapol_key_state(),
-		 eapol_key_state_string_c::get_eapol_key_state_string(get_eapol_key_state()),
+		 eapol_key_state_string_c::get_eapol_key_state_string(get_eapol_key_state())));
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("EAPOL_KEY: %s: eapol_key_state_c::check_pmksa_cache(): selected_eapol_key_authentication_type %d=%s, m_authentication_type %d=%s.\n"),
+		 (m_is_client == true) ? "client": "server",
 		 selected_eapol_key_authentication_type,
 		 eapol_key_state_string_c::get_eapol_key_authentication_type_string(selected_eapol_key_authentication_type),
 		 m_authentication_type,
@@ -1569,7 +1560,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::read_reassociation_parameters(
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 	// Creates SNonce. This is done here in early phase of authentication.
 	// This will reduce the CPU load when time critical first message
 	// of 4-Way handshake is processed.
@@ -1579,7 +1569,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::read_reassociation_parameters(
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 	status = init_handshake_timeout(m_handshake_timeout);
 	if (status != eap_status_ok)
@@ -1682,7 +1671,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::read_reassociation_parameters(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::complete_reassociation(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::complete_reassociation(
 	const eapol_wlan_authentication_state_e reassociation_result,
 	const eap_am_network_id_c * const /* receive_network_id */,
 	const eapol_key_authentication_type_e authentication_type,
@@ -1745,7 +1734,6 @@ eap_status_e eapol_key_state_c::complete_reassociation(
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_authentication_failure);
 		}
 
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 		{
 			m_is_associated = true;
 
@@ -1756,8 +1744,6 @@ eap_status_e eapol_key_state_c::complete_reassociation(
 				 (m_is_client == true) ? "client": "server",
 				 (m_is_associated == true) ? "true": "false"));
 		}
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
 	}
 	else
 	{
@@ -2693,7 +2679,7 @@ EAP_FUNC_EXPORT eap_variable_data_c * eapol_key_state_c::get_encryption_KEK()
 //--------------------------------------------------
 
 // 
-eap_status_e eapol_key_state_c::check_is_aes_key_wrap_padding(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::check_is_aes_key_wrap_padding(
 	const eapol_RSNA_key_descriptor_type_e /* current_key_data_type */,
 	eapol_rsna_key_data_header_c * const key_data_payload,
 	const u32_t key_data_max_length
@@ -2725,7 +2711,7 @@ eap_status_e eapol_key_state_c::check_is_aes_key_wrap_padding(
 //--------------------------------------------------
 
 // 
-eap_status_e eapol_key_state_c::parse_generic_key_data_payload(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::parse_generic_key_data_payload(
 	const eapol_key_descriptor_type_e eapol_key_descriptor_type,
 	const eapol_RSNA_key_descriptor_type_e current_key_descriptor_type,
 	eapol_rsna_key_data_header_c * const key_data_payload,
@@ -3487,7 +3473,7 @@ eap_status_e eapol_key_state_c::parse_generic_key_data_payload(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::parse_key_data(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::parse_key_data(
 	const eapol_key_descriptor_type_e eapol_key_descriptor_type,
 	const eapol_rsna_key_data_header_c * const p_payload,
 	u32_t * const buffer_length,
@@ -3659,7 +3645,7 @@ eap_status_e eapol_key_state_c::parse_key_data(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::rsna_prf(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::rsna_prf(
 	const eap_variable_data_c * const key_K,
 	const eap_variable_data_c * const label_A,
 	const eap_variable_data_c * const input_B,
@@ -3799,7 +3785,7 @@ eap_status_e eapol_key_state_c::rsna_prf(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::select_minimum(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::select_minimum(
 	const eap_variable_data_c * const input_a,
 	const eap_variable_data_c * const input_b,
 	const eap_variable_data_c ** const minimum,
@@ -3848,7 +3834,7 @@ eap_status_e eapol_key_state_c::select_minimum(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::derive_PTK()
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::derive_PTK()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -4130,7 +4116,7 @@ eap_status_e eapol_key_state_c::derive_PTK()
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::create_nonce(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::create_nonce(
 	eap_variable_data_c * const nonce,	const u32_t nonce_length)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -4182,7 +4168,7 @@ eap_status_e eapol_key_state_c::create_nonce(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::create_PMKID()
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::create_PMKID()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	eap_status_e status = eap_status_process_general_error;
@@ -4319,7 +4305,7 @@ eap_status_e eapol_key_state_c::create_PMKID()
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::encrypt_key_data(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::encrypt_key_data(
 	eapol_RSNA_key_header_c * const eapol_key_message)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -4552,7 +4538,7 @@ eap_status_e eapol_key_state_c::encrypt_key_data(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::decrypt_key_data(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::decrypt_key_data(
 	eapol_RSNA_key_header_c * const eapol_key_message)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -4701,7 +4687,7 @@ eap_status_e eapol_key_state_c::decrypt_key_data(
 
 
 //
-eap_status_e eapol_key_state_c::create_key_mic(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::create_key_mic(
 	eapol_RSNA_key_header_c * const eapol_key_message,
 	const eap_variable_data_c * const confirmation_key)
 {
@@ -4873,7 +4859,7 @@ eap_status_e eapol_key_state_c::create_key_mic(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::verify_key_mic(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::verify_key_mic(
 	eapol_RSNA_key_header_c * const eapol_key_message,
 	const eap_variable_data_c * const confirmation_key)
 {
@@ -5303,8 +5289,6 @@ EAP_FUNC_EXPORT bool eapol_key_state_c::get_is_encryption_on()
 
 //--------------------------------------------------
 
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
 EAP_FUNC_EXPORT bool eapol_key_state_c::get_is_associated()
 {
 	EAP_TRACE_DEBUG(
@@ -5316,8 +5300,6 @@ EAP_FUNC_EXPORT bool eapol_key_state_c::get_is_associated()
 
 	return m_is_associated;
 }
-
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 //--------------------------------------------------
 
@@ -5712,7 +5694,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::init_pmksa_caching_timeout()
 
 	eap_status_e status(eap_status_process_general_error);
 
-#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 	{
 		m_is_associated = false;
 
@@ -5723,7 +5704,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::init_pmksa_caching_timeout()
 			 (m_is_client == true) ? "client": "server",
 			 (m_is_associated == true) ? "true": "false"));
 	}
-#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 	if ((m_authentication_type == eapol_key_authentication_type_RSNA_EAP
 #if defined(EAP_USE_WPXM)
@@ -6158,7 +6138,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::reset()
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::create_tkip_mic_failure_message(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::create_tkip_mic_failure_message(
 	eap_buf_chain_wr_c * const sent_packet,
 	const u32_t eapol_header_offset,
 	u32_t * const data_length,
@@ -6494,7 +6474,7 @@ eap_status_e eapol_key_state_c::packet_data_session_key(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::allow_4_way_handshake()
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::allow_4_way_handshake()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	eap_status_e status = eap_status_process_general_error;
@@ -6609,18 +6589,6 @@ eap_status_e eapol_key_state_c::allow_4_way_handshake()
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
 	}
 	
-#if !defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-	// Creates SNonce. This is done here in early phase of authentication.
-	// This will reduce the CPU load when time critical first message
-	// of 4-Way handshake is processed.
-	status = create_nonce(&m_SNonce, EAPOL_RSNA_NONCE_LENGTH_BYTES);
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-#endif //#if !defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
-
 	status = init_handshake_timeout(m_handshake_timeout);
 	if (status != eap_status_ok)
 	{
@@ -6642,7 +6610,7 @@ eap_status_e eapol_key_state_c::allow_4_way_handshake()
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::start_group_key_handshake(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::start_group_key_handshake(
 	const eap_am_network_id_c * const receive_network_id,
 	const eapol_protocol_version_e received_eapol_version,
 	const eapol_key_descriptor_type_e received_key_descriptor_type)
@@ -6773,7 +6741,7 @@ eap_status_e eapol_key_state_c::start_group_key_handshake(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::get_key_length(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::get_key_length(
 	const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e cipher,
 	u16_t * const key_length)
 {
@@ -6811,7 +6779,7 @@ eap_status_e eapol_key_state_c::get_key_length(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::process_4_way_handshake_message(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message(
 	const eap_am_network_id_c * const receive_network_id,
 	eapol_RSNA_key_header_c * const eapol_key_message,
 	const u32_t packet_length)
@@ -6916,7 +6884,7 @@ eap_status_e eapol_key_state_c::process_4_way_handshake_message(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::process_group_key_handshake_message(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_group_key_handshake_message(
 	const eap_am_network_id_c * const receive_network_id,
 	eapol_RSNA_key_header_c * const eapol_key_message,
 	const u32_t packet_length)
@@ -6985,7 +6953,7 @@ eap_status_e eapol_key_state_c::process_group_key_handshake_message(
 //--------------------------------------------------
 
 //
-eap_status_e eapol_key_state_c::process_RSNA_key_descriptor(
+EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_RSNA_key_descriptor(
 	const eap_am_network_id_c * const receive_network_id,
 	eap_general_header_base_c * const packet_data,
 	const u32_t packet_length)

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12 %
+* %version: %
 */
 
 #ifndef _EAP_AM_TYPE_MSCHAPV2_H_

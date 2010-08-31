@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10 %
+* %version: 8.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -50,7 +50,7 @@ LOCAL_C TInt mainL(TAny *lpParam)
 _LIT(K_eap_test_timer,"eap_test_timer");
 
 
-eap_status_e eap_am_tools_symbian_c::start_timer_thread()
+EAP_FUNC_EXPORT eap_status_e eap_am_tools_symbian_c::start_timer_thread()
 { 
 	EAP_TRACE_DEBUG(this, TRACE_FLAGS_DEFAULT, (EAPL("Create timer thread.\n")));
 
@@ -81,7 +81,7 @@ eap_status_e eap_am_tools_symbian_c::start_timer_thread()
 }
 
 
-eap_status_e eap_am_tools_symbian_c::stop_timer_thread()
+EAP_FUNC_EXPORT eap_status_e eap_am_tools_symbian_c::stop_timer_thread()
 {
 	EAP_TRACE_DEBUG(this, TRACE_FLAGS_DEFAULT, (EAPL("Trigger timer thread stops.\n")));
 

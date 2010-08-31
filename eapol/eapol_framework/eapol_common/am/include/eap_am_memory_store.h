@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 13 %
+* %version: %
 */
 
 #if !defined( _EAP_AM_MEMORY_STORE_H_ )

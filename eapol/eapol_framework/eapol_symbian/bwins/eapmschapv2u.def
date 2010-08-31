@@ -1,3 +1,80 @@
 EXPORTS
 	?ImplementationGroupProxy@@YAPBUTImplementationProxy@@AAH@Z @ 1 NONAME ; struct TImplementationProxy const * ImplementationGroupProxy(int &)
+	?set_value_size@mschapv2_challenge_c@@QAEXXZ @ 2 NONAME ; void mschapv2_challenge_c::set_value_size(void)
+	?get_opcode@mschapv2_header_c@@QBE?AW4mschapv2_opcode_e@@XZ @ 3 NONAME ; enum mschapv2_opcode_e mschapv2_header_c::get_opcode(void) const
+	?get_name_length@mschapv2_response_c@@QBEKXZ @ 4 NONAME ; unsigned long mschapv2_response_c::get_name_length(void) const
+	?get_name@mschapv2_challenge_c@@QBEPBEXZ @ 5 NONAME ; unsigned char const * mschapv2_challenge_c::get_name(void) const
+	?update_username_password@eap_am_type_mschapv2_symbian_c@@UAE?AW4eap_status_e@@XZ @ 6 NONAME ; enum eap_status_e eap_am_type_mschapv2_symbian_c::update_username_password(void)
+	?get_memory_store_key@eap_am_type_mschapv2_symbian_c@@UAE?AW4eap_status_e@@PAVeap_variable_data_c@@@Z @ 7 NONAME ; enum eap_status_e eap_am_type_mschapv2_symbian_c::get_memory_store_key(class eap_variable_data_c *)
+	??0mschapv2_change_password_c@@QAE@PAVabs_eap_am_tools_c@@PAXK@Z @ 8 NONAME ; mschapv2_change_password_c::mschapv2_change_password_c(class abs_eap_am_tools_c *, void *, unsigned long)
+	?set_nt_response@mschapv2_response_c@@QAEXPBE@Z @ 9 NONAME ; void mschapv2_response_c::set_nt_response(unsigned char const *)
+	?configure@eap_am_type_mschapv2_symbian_c@@UAE?AW4eap_status_e@@XZ @ 10 NONAME ; enum eap_status_e eap_am_type_mschapv2_symbian_c::configure(void)
+	?get_header_minimum_size@mschapv2_response_c@@SAKXZ @ 11 NONAME ; unsigned long mschapv2_response_c::get_header_minimum_size(void)
+	?get_nt_response@mschapv2_response_c@@QBEPBEXZ @ 12 NONAME ; unsigned char const * mschapv2_response_c::get_nt_response(void) const
+	?get_is_valid@eap_am_type_mschapv2_symbian_c@@QAE_NXZ @ 13 NONAME ; bool eap_am_type_mschapv2_symbian_c::get_is_valid(void)
+	?get_nt_response@mschapv2_change_password_c@@QBEPBEXZ @ 14 NONAME ; unsigned char const * mschapv2_change_password_c::get_nt_response(void) const
+	??1mschapv2_response_c@@UAE@XZ @ 15 NONAME ; mschapv2_response_c::~mschapv2_response_c(void)
+	??1eap_type_mschapv2_state_c@@UAE@XZ @ 16 NONAME ; eap_type_mschapv2_state_c::~eap_type_mschapv2_state_c(void)
+	?reset@eap_am_type_mschapv2_symbian_c@@UAE?AW4eap_status_e@@XZ @ 17 NONAME ; enum eap_status_e eap_am_type_mschapv2_symbian_c::reset(void)
+	?set_peer_challenge@mschapv2_change_password_c@@QAEXPBE@Z @ 18 NONAME ; void mschapv2_change_password_c::set_peer_challenge(unsigned char const *)
+	?set_is_valid@eap_am_type_mschapv2_symbian_c@@QAEXXZ @ 19 NONAME ; void eap_am_type_mschapv2_symbian_c::set_is_valid(void)
+	?packet_process@eap_type_mschapv2_c@@UAE?AW4eap_status_e@@PBVeap_am_network_id_c@@PAVeap_header_wr_c@@K@Z @ 20 NONAME ; enum eap_status_e eap_type_mschapv2_c::packet_process(class eap_am_network_id_c const *, class eap_header_wr_c *, unsigned long)
+	?set_challenge@mschapv2_challenge_c@@QAEXPBE@Z @ 21 NONAME ; void mschapv2_challenge_c::set_challenge(unsigned char const *)
+	?set_name@mschapv2_challenge_c@@QAEXPBE@Z @ 22 NONAME ; void mschapv2_challenge_c::set_name(unsigned char const *)
+	?get_challenge@mschapv2_challenge_c@@QBEPBEXZ @ 23 NONAME ; unsigned char const * mschapv2_challenge_c::get_challenge(void) const
+	?set_peer_challenge@mschapv2_response_c@@QAEXPBE@Z @ 24 NONAME ; void mschapv2_response_c::set_peer_challenge(unsigned char const *)
+	?get_peer_challenge@mschapv2_response_c@@QBEPBEXZ @ 25 NONAME ; unsigned char const * mschapv2_response_c::get_peer_challenge(void) const
+	?read_auth_failure_string@eap_am_type_mschapv2_symbian_c@@UAE?AW4eap_status_e@@W4eap_mschapv2_error_e@@AAVeap_variable_data_c@@@Z @ 26 NONAME ; enum eap_status_e eap_am_type_mschapv2_symbian_c::read_auth_failure_string(enum eap_mschapv2_error_e, class eap_variable_data_c &)
+	?get_ms_length@mschapv2_header_c@@QBEGXZ @ 27 NONAME ; unsigned short mschapv2_header_c::get_ms_length(void) const
+	??0mschapv2_header_c@@QAE@PAVabs_eap_am_tools_c@@PAXK@Z @ 28 NONAME ; mschapv2_header_c::mschapv2_header_c(class abs_eap_am_tools_c *, void *, unsigned long)
+	?set_is_valid@eap_type_mschapv2_c@@UAEXXZ @ 29 NONAME ; void eap_type_mschapv2_c::set_is_valid(void)
+	?get_is_valid@eap_type_mschapv2_c@@UAE_NXZ @ 30 NONAME ; bool eap_type_mschapv2_c::get_is_valid(void)
+	?finish_successful_authentication@eap_type_mschapv2_c@@AAE?AW4eap_status_e@@XZ @ 31 NONAME ; enum eap_status_e eap_type_mschapv2_c::finish_successful_authentication(void)
+	?get_encrypted_pw_block@mschapv2_change_password_c@@QBEPBEXZ @ 32 NONAME ; unsigned char const * mschapv2_change_password_c::get_encrypted_pw_block(void) const
+	?type_configure_write@eap_am_type_mschapv2_symbian_c@@UAE?AW4eap_status_e@@PBVeap_configuration_field_c@@PAVeap_variable_data_c@@@Z @ 33 NONAME ; enum eap_status_e eap_am_type_mschapv2_symbian_c::type_configure_write(class eap_configuration_field_c const *, class eap_variable_data_c *)
+	??1eap_type_mschapv2_c@@UAE@XZ @ 34 NONAME ; eap_type_mschapv2_c::~eap_type_mschapv2_c(void)
+	?get_data@mschapv2_header_c@@QBEPAEXZ @ 35 NONAME ; unsigned char * mschapv2_header_c::get_data(void) const
+	?complete_eap_identity_query@eap_type_mschapv2_c@@EAE?AW4eap_status_e@@XZ @ 36 NONAME ; enum eap_status_e eap_type_mschapv2_c::complete_eap_identity_query(void)
+	?set_name@mschapv2_response_c@@QAEXPBE@Z @ 37 NONAME ; void mschapv2_response_c::set_name(unsigned char const *)
+	?get_header_minimum_size@mschapv2_change_password_c@@SAKXZ @ 38 NONAME ; unsigned long mschapv2_change_password_c::get_header_minimum_size(void)
+	??1mschapv2_header_c@@UAE@XZ @ 39 NONAME ; mschapv2_header_c::~mschapv2_header_c(void)
+	??0eap_type_mschapv2_c@@QAE@PAVabs_eap_am_tools_c@@PAVabs_eap_base_type_c@@PAVeap_am_type_mschapv2_c@@_N3PBVeap_am_network_id_c@@@Z @ 40 NONAME ; eap_type_mschapv2_c::eap_type_mschapv2_c(class abs_eap_am_tools_c *, class abs_eap_base_type_c *, class eap_am_type_mschapv2_c *, bool, bool, class eap_am_network_id_c const *)
+	?get_name@mschapv2_response_c@@QBEPBEXZ @ 41 NONAME ; unsigned char const * mschapv2_response_c::get_name(void) const
+	?get_mschapv2_id@mschapv2_header_c@@QBEEXZ @ 42 NONAME ; unsigned char mschapv2_header_c::get_mschapv2_id(void) const
+	?complete_change_password_query@eap_type_mschapv2_c@@EAE?AW4eap_status_e@@XZ @ 43 NONAME ; enum eap_status_e eap_type_mschapv2_c::complete_change_password_query(void)
+	?set_initial_eap_identifier@eap_type_mschapv2_c@@UAE?AW4eap_status_e@@PBVeap_am_network_id_c@@E@Z @ 44 NONAME ; enum eap_status_e eap_type_mschapv2_c::set_initial_eap_identifier(class eap_am_network_id_c const *, unsigned char)
+	?get_data_length@mschapv2_header_c@@QBEKXZ @ 45 NONAME ; unsigned long mschapv2_header_c::get_data_length(void) const
+	?set_opcode@mschapv2_header_c@@QAEXW4mschapv2_opcode_e@@@Z @ 46 NONAME ; void mschapv2_header_c::set_opcode(enum mschapv2_opcode_e)
+	?handle_identity_response_message@eap_type_mschapv2_c@@AAE?AW4eap_status_e@@XZ @ 47 NONAME ; enum eap_status_e eap_type_mschapv2_c::handle_identity_response_message(void)
+	??1mschapv2_change_password_c@@UAE@XZ @ 48 NONAME ; mschapv2_change_password_c::~mschapv2_change_password_c(void)
+	?check_header@mschapv2_change_password_c@@UBE?AW4eap_status_e@@XZ @ 49 NONAME ; enum eap_status_e mschapv2_change_password_c::check_header(void) const
+	?get_is_client@eap_type_mschapv2_c@@EAE_NXZ @ 50 NONAME ; bool eap_type_mschapv2_c::get_is_client(void)
+	?get_header_minimum_size@mschapv2_challenge_c@@SAKXZ @ 51 NONAME ; unsigned long mschapv2_challenge_c::get_header_minimum_size(void)
+	?query_eap_identity@eap_type_mschapv2_c@@UAE?AW4eap_status_e@@_NPAVeap_variable_data_c@@PBVeap_am_network_id_c@@E@Z @ 52 NONAME ; enum eap_status_e eap_type_mschapv2_c::query_eap_identity(bool, class eap_variable_data_c *, class eap_am_network_id_c const *, unsigned char)
+	??1eap_am_type_mschapv2_symbian_c@@UAE@XZ @ 53 NONAME ; eap_am_type_mschapv2_symbian_c::~eap_am_type_mschapv2_symbian_c(void)
+	?reset@eap_type_mschapv2_c@@UAE?AW4eap_status_e@@XZ @ 54 NONAME ; enum eap_status_e eap_type_mschapv2_c::reset(void)
+	?configure@eap_type_mschapv2_c@@UAE?AW4eap_status_e@@XZ @ 55 NONAME ; enum eap_status_e eap_type_mschapv2_c::configure(void)
+	?set_mschapv2_id@mschapv2_header_c@@QAEXE@Z @ 56 NONAME ; void mschapv2_header_c::set_mschapv2_id(unsigned char)
+	?check_header@mschapv2_header_c@@UBE?AW4eap_status_e@@XZ @ 57 NONAME ; enum eap_status_e mschapv2_header_c::check_header(void) const
+	?set_constants@mschapv2_response_c@@QAE?AW4eap_status_e@@XZ @ 58 NONAME ; enum eap_status_e mschapv2_response_c::set_constants(void)
+	?set_ms_length@mschapv2_header_c@@QAEXG@Z @ 59 NONAME ; void mschapv2_header_c::set_ms_length(unsigned short)
+	?shutdown@eap_am_type_mschapv2_symbian_c@@UAE?AW4eap_status_e@@XZ @ 60 NONAME ; enum eap_status_e eap_am_type_mschapv2_symbian_c::shutdown(void)
+	??1mschapv2_challenge_c@@UAE@XZ @ 61 NONAME ; mschapv2_challenge_c::~mschapv2_challenge_c(void)
+	?check_header@mschapv2_response_c@@UBE?AW4eap_status_e@@XZ @ 62 NONAME ; enum eap_status_e mschapv2_response_c::check_header(void) const
+	??0mschapv2_response_c@@QAE@PAVabs_eap_am_tools_c@@PAXK@Z @ 63 NONAME ; mschapv2_response_c::mschapv2_response_c(class abs_eap_am_tools_c *, void *, unsigned long)
+	?shutdown@eap_type_mschapv2_c@@UAE?AW4eap_status_e@@XZ @ 64 NONAME ; enum eap_status_e eap_type_mschapv2_c::shutdown(void)
+	?DlgComplete@eap_am_type_mschapv2_symbian_c@@UAEXH@Z @ 65 NONAME ; void eap_am_type_mschapv2_symbian_c::DlgComplete(int)
+	?eap_acknowledge@eap_type_mschapv2_c@@UAE?AW4eap_status_e@@PBVeap_am_network_id_c@@@Z @ 66 NONAME ; enum eap_status_e eap_type_mschapv2_c::eap_acknowledge(class eap_am_network_id_c const *)
+	?set_encrypted_pw_block@mschapv2_change_password_c@@QAEXPBE@Z @ 67 NONAME ; void mschapv2_change_password_c::set_encrypted_pw_block(unsigned char const *)
+	?set_nt_response@mschapv2_change_password_c@@QAEXPBE@Z @ 68 NONAME ; void mschapv2_change_password_c::set_nt_response(unsigned char const *)
+	??0mschapv2_challenge_c@@QAE@PAVabs_eap_am_tools_c@@PAXK@Z @ 69 NONAME ; mschapv2_challenge_c::mschapv2_challenge_c(class abs_eap_am_tools_c *, void *, unsigned long)
+	?set_encrypted_hash@mschapv2_change_password_c@@QAEXPBE@Z @ 70 NONAME ; void mschapv2_change_password_c::set_encrypted_hash(unsigned char const *)
+	?type_configure_read@eap_am_type_mschapv2_symbian_c@@UAE?AW4eap_status_e@@PBVeap_configuration_field_c@@PAVeap_variable_data_c@@@Z @ 71 NONAME ; enum eap_status_e eap_am_type_mschapv2_symbian_c::type_configure_read(class eap_configuration_field_c const *, class eap_variable_data_c *)
+	?get_encrypted_hash@mschapv2_change_password_c@@QBEPBEXZ @ 72 NONAME ; unsigned char const * mschapv2_change_password_c::get_encrypted_hash(void) const
+	?finish_unsuccessful_authentication@eap_type_mschapv2_c@@EAE?AW4eap_status_e@@_N@Z @ 73 NONAME ; enum eap_status_e eap_type_mschapv2_c::finish_unsuccessful_authentication(bool)
+	?set_constants@mschapv2_change_password_c@@QAE?AW4eap_status_e@@XZ @ 74 NONAME ; enum eap_status_e mschapv2_change_password_c::set_constants(void)
+	?complete_failure_retry_response@eap_type_mschapv2_c@@EAE?AW4eap_status_e@@XZ @ 75 NONAME ; enum eap_status_e eap_type_mschapv2_c::complete_failure_retry_response(void)
+	?check_header@mschapv2_challenge_c@@UBE?AW4eap_status_e@@XZ @ 76 NONAME ; enum eap_status_e mschapv2_challenge_c::check_header(void) const
+	?get_peer_challenge@mschapv2_change_password_c@@QBEPBEXZ @ 77 NONAME ; unsigned char const * mschapv2_change_password_c::get_peer_challenge(void) const
+	?get_name_length@mschapv2_challenge_c@@QBEKXZ @ 78 NONAME ; unsigned long mschapv2_challenge_c::get_name_length(void) const
 

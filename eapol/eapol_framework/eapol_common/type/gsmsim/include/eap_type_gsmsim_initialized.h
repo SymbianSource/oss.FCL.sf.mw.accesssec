@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 5 %
+* %version: %
 */
 
 #if !defined(_GSMSIM_INITIALIZED_H_)
