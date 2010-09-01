@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 30 %
 */
 
 #if !defined(_ASN1_TYPE_H_)

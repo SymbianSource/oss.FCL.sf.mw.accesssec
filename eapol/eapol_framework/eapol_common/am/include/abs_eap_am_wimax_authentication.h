@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 4 %
 */
 
 #if !defined(_ABS_EAP_AM_WIMAX_AUTHENTICATION_H_)

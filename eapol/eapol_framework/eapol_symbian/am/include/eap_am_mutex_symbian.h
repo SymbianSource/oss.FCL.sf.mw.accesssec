@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 4 %
 */
 
 #if !defined( _EAP_AM_MUTEX_SYMBIAN_H_ )

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 7.1.2 %
+* %version: 9 %
 */
 
 #if !defined(_PEAP_TLV_PAYLOADS_H_)
@@ -129,19 +129,19 @@ public:
 		const peap_tlv_payload_status_e intermediate_result_tlv
 		);
 
-	EAP_FUNC_IMPORT peap_tlv_variable_data_c * get_result_tlv();
+	peap_tlv_variable_data_c * get_result_tlv();
 
-	EAP_FUNC_IMPORT peap_tlv_variable_data_c * get_nak_tlv();
+	peap_tlv_variable_data_c * get_nak_tlv();
 
-	EAP_FUNC_IMPORT peap_tlv_variable_data_c * get_crypto_binding_tlv();
+	peap_tlv_variable_data_c * get_crypto_binding_tlv();
 
-	EAP_FUNC_IMPORT peap_tlv_variable_data_c * get_eap_payload_tlv();
+	peap_tlv_variable_data_c * get_eap_payload_tlv();
 
-	EAP_FUNC_IMPORT peap_tlv_variable_data_c * get_intermediate_result_tlv();
+	peap_tlv_variable_data_c * get_intermediate_result_tlv();
 
-	EAP_FUNC_IMPORT void reset();
+	void reset();
 
-	EAP_FUNC_IMPORT bool get_is_valid() const;
+	bool get_is_valid() const;
 
 	//--------------------------------------------------
 }; // class peap_tlv_payloads_c

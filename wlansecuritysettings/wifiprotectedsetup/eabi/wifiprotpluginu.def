@@ -1,0 +1,11 @@
+EXPORTS
+	_Z13NotifierArrayv @ 1 NONAME
+	_ZN20CWifiProtUiInProcess12StartFromUiLERK5TBuf8ILi32EEiR6RArrayImE @ 2 NONAME
+	_ZN20CWifiProtUiInProcess4NewLEP13RCmManagerExt @ 3 NONAME
+	_ZTI19CWiFiProtDlgsPlugin @ 4 NONAME ; #<TI>#
+	_ZTI20CWifiProtUiInProcess @ 5 NONAME ; #<TI>#
+	_ZTI21CWiFiProtActiveRunner @ 6 NONAME ; #<TI>#
+	_ZTV19CWiFiProtDlgsPlugin @ 7 NONAME ; #<VT>#
+	_ZTV20CWifiProtUiInProcess @ 8 NONAME ; #<VT>#
+	_ZTV21CWiFiProtActiveRunner @ 9 NONAME ; #<VT>#
+

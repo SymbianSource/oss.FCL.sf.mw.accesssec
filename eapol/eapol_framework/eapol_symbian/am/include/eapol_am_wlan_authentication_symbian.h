@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 46 %
+* %version: 30.1.2 %
 */
 
 #if !defined(_EAPOL_AM_WLAN_AUTHENTICATION_SYMBIAN_H_)
@@ -38,9 +38,28 @@
 #include <e32std.h>
 #include <d32dbms.h>
 
-//#include <wdbifwlansettings.h>
+#include <wdbifwlansettings.h>
 
 #include <EapType.h> // For TIndexType
+
+
+#ifdef SYMBIAN_SECURE_DBMS
+// For EAP TLS, PEAP, TTLS, FAST secure databases.
+// Full path is not needed. The database eaptls.dat will be saved in the 
+// data cage path for DBMS. So it will be in "\private\100012a5\eaptls.dat" in C: drive.
+// The maximum length of database name is 0x40 (KDbMaxName) , which is defined in d32dbms.h.
+
+_LIT(KFastDatabaseName, "c:eapfast.dat");
+
+
+#else
+
+#ifdef USE_EAP_FAST_TYPE
+_LIT(KFastDatabaseName, "c:\\system\\data\\eapfast.dat");
+#endif
+
+#endif // #ifdef SYMBIAN_SECURE_DBMS
+
 
 class CEapType;
 class abs_eapol_am_wlan_authentication_c;
@@ -56,7 +75,8 @@ const TUint K_Max_SSID_Length = 32;
 /// This class declares the simulator adaptation module of eapol_am_wlan_authentication_c.
 /// See comments of the functions from eapol_am_wlan_authentication_c.
 class EAP_EXPORT eapol_am_wlan_authentication_symbian_c
-: public eapol_am_wlan_authentication_c
+: public CActive
+, public eapol_am_wlan_authentication_c
 #if defined(USE_EAP_SIMPLE_CONFIG)
 , public abs_eap_configuration_if_c
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
@@ -84,17 +104,46 @@ private:
 	/// HAHS of WPA(2)-PSK 
 	eap_variable_data_c m_wpa_preshared_key_hash;
 
-	/// Database reference to EAPOL settings.
-	eap_variable_data_c m_database_reference;
+	/// This pointer is abstract interface to reference of WLAN database of the current connection.
+	const abs_eapol_wlan_database_reference_if_c * m_wlan_database_reference;
 
 	/// Handle of database session.
-	RFs m_session;
+	RDbs m_session;
 
 	/// Handle of database file.
-	//RFs m_fs;
+	RFs m_fs;
+
+	/// Array for storing the loaded EAP types.
+	RPointerArray<CEapType> m_plugin_if_array;
+
+#ifdef USE_EAP_EXPANDED_TYPES
+
+	/// Enabled expanded EAP configuration data from CommsDat
+	// This is for the outer most EAP (not tunneled)
+	RExpandedEapTypeArray m_enabled_expanded_eap_array;
+
+	/// Disabled expanded EAP configuration data from CommsDat
+	// This is for the outer most EAP (not tunneled)
+	RExpandedEapTypeArray m_disabled_expanded_eap_array;
+	
+	/// Array which corresponds with m_plugin_if_array and indicates the types of the loaded EAP types.	
+	eap_array_c<eap_type_value_e> m_eap_type_array;
+		
+#else
+
+	/// EAP configuration data from CommDb
+	TEapArray m_iap_eap_array;
+	
+	/// Array which corresponds with m_plugin_if_array and indicates the types of the loaded EAP types.
+	RArray<eap_type_value_e> m_eap_type_array;	
+	
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	/// Network identity of current connection.
 	eap_am_network_id_c m_receive_network_id;
+
+	/// WLAN security mode as defined in Symbian platform.
+	EWlanSecurityMode m_security_mode;
 
 	/// WLAN authentication type.
 	eapol_key_authentication_type_e m_selected_eapol_key_authentication_type;
@@ -147,13 +196,28 @@ private:
 	/// This function saves WPA(2)-PSK to database.
 	void SavePSKL(TPSKEntry& entry);
 
-	/// This function reads WPA-settings from database.
-	void ReadWPASettingsL();
+	/// This function reads EAP-settings from database.
+	void ReadEAPSettingsL();
+
+#ifdef USE_EAP_EXPANDED_TYPES
+
+	/// This function set the EAP-type to highest in priority.
+	void SetToTopPriorityL(const eap_type_value_e aEapType);
+
+#else // For normal EAP types.
+
+	/// This function set the EAP-type to highest in priority.
+	void SetToTopPriorityL(const TEap* const aEapType);
+
+#endif // #ifdef USE_EAP_EXPANDED_TYPES
 
 	/// THis function reads the references to active Internet Access Point (IAP).
 	eap_status_e read_database_reference_values(
 		TIndexType * const type,
 		TUint * const index);
+
+	/// This function resets all EAP-plugings.
+	eap_status_e reset_eap_plugins();
 
 	/// This function sends error notification to partner object.
 	void send_error_notification(const eap_status_e error);
@@ -168,7 +232,8 @@ public:
 	// 
 	EAP_FUNC_IMPORT eapol_am_wlan_authentication_symbian_c(
 		abs_eap_am_tools_c * const tools,
-		const bool is_client_when_true);
+		const bool is_client_when_true,
+		const abs_eapol_wlan_database_reference_if_c * const wlan_database_reference);
 
 
 	/// See comments of the functions from eapol_am_wlan_authentication_c.
@@ -186,7 +251,7 @@ public:
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
 		);
 
-	EAP_FUNC_IMPORT eap_status_e reset_wpa_configuration();
+	EAP_FUNC_IMPORT eap_status_e reset_eap_configuration();
 
 	EAP_FUNC_IMPORT eap_status_e set_wlan_parameters(
 		const eap_variable_data_c * const SSID,
@@ -201,6 +266,9 @@ public:
 		const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
 		);
 
+	EAP_FUNC_IMPORT eap_status_e get_selected_eap_types(
+		eap_array_c<eap_type_selection_c> * const selected_eap_types);
+
 	EAP_FUNC_IMPORT eap_status_e get_wlan_configuration(
 		eap_variable_data_c * const wpa_preshared_key_hash);
 
@@ -208,6 +276,18 @@ public:
 		const bool when_true_successfull,
 		const eap_type_value_e eap_type,
 		const eapol_key_authentication_type_e authentication_type);
+
+	EAP_FUNC_IMPORT eap_status_e load_module(
+		const eap_type_value_e type,
+		const eap_type_value_e tunneling_type,
+		abs_eap_base_type_c * const partner,
+		eap_base_type_c ** const eap_type_if,
+		const bool is_client_when_true,
+		const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
+		);
+
+	EAP_FUNC_IMPORT eap_status_e unload_module(
+		const eap_type_value_e type);
 
 	EAP_FUNC_IMPORT eap_status_e read_configure(
 		const eap_configuration_field_c * const field,
@@ -229,12 +309,17 @@ public:
 
 	EAP_FUNC_IMPORT eap_status_e cancel_all_timers();
 
+	EAP_FUNC_IMPORT eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);
+
+	EAP_FUNC_IMPORT eap_status_e get_eap_type_list(
+		eap_array_c<eap_type_value_e> * const eap_type_list);
+
 	EAP_FUNC_IMPORT void state_notification(
 		const abs_eap_state_notification_c * const state);
 
 #if defined(USE_EAP_SIMPLE_CONFIG)
 
-	EAP_FUNC_IMPORT eap_status_e save_simple_config_session(
+	EAP_FUNC_EXPORT eap_status_e save_simple_config_session(
 		const simple_config_state_e state,
 		EAP_TEMPLATE_CONST eap_array_c<simple_config_credential_c> * const credential_array,
 		const eap_variable_data_c * const new_password,
@@ -242,9 +327,6 @@ public:
 		const simple_config_payloads_c * const other_configuration);	
 
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
-
-	EAP_FUNC_IMPORT eap_status_e set_eap_database_reference_values(
-		const eap_variable_data_c * const reference);
 
 	//--------------------------------------------------
 }; // class eapol_am_wlan_authentication_symbian_c

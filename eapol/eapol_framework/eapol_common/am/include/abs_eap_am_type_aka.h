@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 9 %
 */
 
 #if !defined(_ABS_EAP_AM_TYPE_AKA_H_)

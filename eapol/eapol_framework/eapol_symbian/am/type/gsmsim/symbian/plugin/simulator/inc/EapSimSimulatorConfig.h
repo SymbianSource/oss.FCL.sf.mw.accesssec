@@ -16,6 +16,6 @@
 */
 
 /*
-* %version: %
+* %version: 7 %
 */
 

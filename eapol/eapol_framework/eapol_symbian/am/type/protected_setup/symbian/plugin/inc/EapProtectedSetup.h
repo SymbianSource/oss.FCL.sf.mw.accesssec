@@ -16,21 +16,21 @@
 */
 
 /*
-* %version: 11 %
+* %version: 4.1.2 %
 */
 
 #ifndef _EAPPROTECTEDSETUP_H_
 #define _EAPPROTECTEDSETUP_H_
 
 // INCLUDES
-#include <EapTypePlugin.h>
+#include <EapType.h>
 #include "eap_header.h"
 
 // CLASS DECLARATION
 /**
 * Class that implements the generic EAP type interface for EAP protected setup (EAP-WSC).
 */
-class CEapProtectedSetup : public CEapTypePlugin
+class CEapProtectedSetup : public CEapType
 {
 public:		
 
@@ -63,13 +63,16 @@ public:
 											   const eap_am_network_id_c * const receive_network_id,
 											   abs_eap_configuration_if_c * const configuration_if);
 	
-
+	/**
+	* Invokes the configuration UI. This doesn't do anything.
+	**/
+	TInt InvokeUiL();
 	
 	/**
 	* Gets information about EAP type. 
 	* @return Pointer to a class that contains the EAP type information. Also pushed to cleanup stack.
 	*/
-	CEapTypeInfo* GetInfoL();
+	CEapTypeInfo* GetInfoLC();
 	
 	/**
 	* Deletes EAP type configuration
@@ -91,7 +94,7 @@ public:
 	* EAP type. 
 	* @param aTunnelingType Type number for the tunneling type
 	*/	
-	void SetTunnelingType(const TEapExpandedType aTunnelingType);
+	void SetTunnelingType(const TInt aTunnelingType);
 
 	/**
 	* Changes the index of the saved parameters.

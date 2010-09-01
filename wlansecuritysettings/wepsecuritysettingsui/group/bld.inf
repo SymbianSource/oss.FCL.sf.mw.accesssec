@@ -1,0 +1,46 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: This file provides the information required for building the whole of a WEPSecuritySettingsUI. 
+*
+*/
+
+/*
+* %version: tr1cfwln#22 %
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+// export iby files
+../Rom/WEPSecuritySettingsUI.iby		CORE_MW_LAYER_IBY_EXPORT_PATH(WEPSecuritySettingsUI.iby)
+../Rom/WEPSecuritySettingsUIResources.iby	LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(WEPSecuritySettingsUIResources.iby)
+
+// export localised loc file
+../loc/wepsecuritysettingsui.loc	MW_LAYER_LOC_EXPORT_PATH(wepsecuritysettingsui.loc)
+
+
+PRJ_MMPFILES
+// real implementation for WLAN products
+./WEPSecuritySettingsUI.mmp
+// stub implementation for non-WLAN products
+./wepsecuritysettingsuistub.mmp
+
+PRJ_TESTMMPFILES
+
+
+// End of File

@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<api id="b201dac8921c275ba68ea6b0cfc18be9" dataversion="1.0">
+  <name>WLAN EAP Settings UI API</name>
+  <description>API for accessing EAP settings UI</description>
+  <type>c++</type>
+  <subsystem>networkingutilities</subsystem>
+  <libs>
+    <lib name="eapakaui.lib" />
+    <lib name="eapgtcui.lib" />
+    <lib name="eapmschapv2ui.lib" />
+    <lib name="eappeapui.lib" />
+    <lib name="eapsimui.lib" />
+    <lib name="eaptlsui.lib" />
+    <lib name="eapttlsui.lib" />
+    <lib name="papui.lib" />
+  </libs>
+  <release category="domain"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

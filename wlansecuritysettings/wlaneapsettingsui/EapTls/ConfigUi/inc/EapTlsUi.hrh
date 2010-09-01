@@ -1,0 +1,99 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: EAP TLS UI hrh file
+*
+*/
+
+/*
+* %version: %
+*/
+
+#ifndef _EAPTLSUI_HRH_
+#define _EAPTLSUI_HRH_
+
+enum TEapTlsUiMenuCommands
+    {
+    ETlsUiCmdUndefined = 6000,
+    ETlsUiCmdChange,
+    ETlsUiCmdEnable,
+    ETlsUiCmdDisable,
+	ETlsUiCmdMoveUp,
+    ETlsUiCmdMoveDown,
+	ETlsUiCmdViewDetails
+    };
+
+enum TEapTlsUiNotes
+    {
+    TEapTlsUiGeneralError = 6100
+    };
+
+enum TEapTlsUiLines
+	{
+	ETlsSettingsListBox = 6200
+	};
+
+enum TEapTlsUiSettingIds
+	{
+	ETlsSettingUsernameInUseId=6300,
+	ETlsSettingUsernameId,
+	ETlsSettingRealmInUseId,
+	ETlsSettingRealmId,
+	ETlsSettingTlsPrivacyId
+	};
+
+enum TEapTlsUiSettingPageIds
+	{
+	ETlsSettingPageSettings=6400,
+	ETlsSettingPageCipherSuites
+	};
+
+enum TEapTlsUiListBoxes
+	{
+	ETlsSettingsUserCertListbox=6500,
+	ETlsSettingsCaCertListbox,
+	ETlsSettingsCipherSuiteListbox,
+	ETlsSettingsEapTypeListbox,
+	ETlsSettingsListbox
+	};
+
+enum TEapTlsSettingItems
+	{
+	ETlsSettingsUserCert=6600,
+	ETlsSettingsCaCert,
+	ETlsTabSheetSettingsUsernameInUse,
+	ETlsTabSheetSettingsUsername,
+	ETlsTabSheetSettingsRealmInUse,
+	ETlsTabSheetSettingsRealm
+	};
+
+
+enum TEapTlsTests
+	{
+	ETlsTabSheetTest2=6600,
+	ETlsTabSheetTest3,
+	ETlsTabSheetTest4,
+	ETlsTabSheetTest5,
+	ETlsTabSheetTest6,
+	ETlsTabSheetTest7
+	};
+	
+// Constants that are used as page ids
+// TEapTlsUiSettingPageIds does not work for this purpose
+#define KEAPTLSSETTINGSPAGE 1
+#define KEAPTLSCIPHERPAGE   2
+
+#endif  //_EAPTLSUI_HRH_
+
+
+// End of File

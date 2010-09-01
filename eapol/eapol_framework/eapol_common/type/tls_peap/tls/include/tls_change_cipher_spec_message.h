@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 8 %
 */
 
 #if !defined(_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H_)

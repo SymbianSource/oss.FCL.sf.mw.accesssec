@@ -1,0 +1,162 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: UI resources for the EAPPluginConfig module.
+*
+*/
+
+/*
+* %version: 17 %
+*/
+
+CHARACTER_SET   UTF8
+
+//  INCLUDES
+#include <eikon.rh>
+#include <eikon.rsg>
+#include <avkon.rh>
+#include <avkon.rsg>
+
+#include "EAPPluginConfig.hrh"
+#include <wlaneapsettingsui.loc>
+#include <avkon.loc>
+
+
+//  RESOURCE IDENTIFIER
+NAME EPCG
+
+
+//  RESOURCE DEFINITIONS 
+
+RESOURCE RSS_SIGNATURE { }
+
+
+RESOURCE TBUF { buf = "EAPPluginConfiguration"; }
+
+
+RESOURCE MENU_BAR r_wpa_eap_plugin_menubar
+    {
+    titles =
+        {
+        MENU_TITLE 
+            { 
+            menu_pane = r_wpa_eap_plugin_menu;
+            }
+        };
+    }
+
+
+RESOURCE MENU_PANE r_wpa_eap_plugin_menu
+    {
+    items =
+        {
+        MENU_ITEM 
+            { 
+            command = EWPAEAPPluginCmdConfigure; 
+            txt = qtn_wlan_options_eap_plugin_configure;
+            flags = EEikMenuItemAction;
+            },
+
+        MENU_ITEM 
+            { 
+            command = EWPAEAPPluginCmdEnable; 
+            txt = qtn_wlan_options_eap_plugin_enable; 
+            flags = EEikMenuItemAction;
+            },
+
+        MENU_ITEM 
+            { 
+            command = EWPAEAPPluginCmdDisable; 
+            txt = qtn_wlan_options_eap_plugin_disable; 
+            flags = EEikMenuItemSpecific;
+            },
+
+        MENU_ITEM 
+            { 
+            command = EWPAEAPPluginCmdPriorityUp; 
+            txt = qtn_wlan_options_eap_plugin_priority_up; 
+            flags = EEikMenuItemSpecific;
+            },
+
+        MENU_ITEM 
+            { 
+            command = EWPAEAPPluginCmdPriorityDown; 
+            txt = qtn_wlan_options_eap_plugin_priority_down; 
+            flags = EEikMenuItemSpecific;
+            },
+
+        MENU_ITEM 
+            { 
+            command = EAknCmdHelp; 
+            txt = qtn_options_help; 
+            },
+
+        MENU_ITEM
+            {
+            command = EAknCmdExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+
+RESOURCE CBA r_wpa_eap_config_softkeys_options_back_configure
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_back; },
+        CBA_BUTTON { id = EWPAEAPPluginCmdConfigure; txt = \
+                                            qtn_msk_wlan_eap_configure; }
+        };
+    }
+    
+
+RESOURCE CBA r_wpa_eap_config_softkeys_options_back_enable
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_back; },
+        CBA_BUTTON { id = EWPAEAPPluginCmdEnable; txt = \
+                                            qtn_msk_wlan_eap_cs_enable; }
+        };
+    }
+
+
+RESOURCE DIALOG r_wpa_eap_config_dialog
+    {
+    flags = EAknDialogSelectionList;
+    buttons = r_wpa_eap_config_softkeys_options_back_configure;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtSingleNumberListBox;
+            id = ESelectionListControl;
+            control = LISTBOX
+                {
+                flags = EAknListBoxSelectionList;
+                };
+            }
+        };
+    }
+
+
+RESOURCE TBUF r_info_cannot_disable
+    {
+    buf = qtn_wlan_info_cannot_disable_all_eap_plugins;
+    }
+
+
+// End of File

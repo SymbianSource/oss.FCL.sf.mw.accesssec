@@ -16,13 +16,13 @@
 */
 
 /*
-* %version: 12 %
+* %version: 9.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
 #if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 	#undef EAP_FILE_NUMBER_ENUM
-	#define EAP_FILE_NUMBER_ENUM 719 
+	#define EAP_FILE_NUMBER_ENUM 50 
 	#undef EAP_FILE_NUMBER_DATE 
 	#define EAP_FILE_NUMBER_DATE 1127594498 
 #endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
@@ -103,7 +103,6 @@ EAP_FUNC_EXPORT eap_const_string eapol_key_state_string_c::get_eapol_key_handsha
 #if defined(USE_WAPI_CORE)
 	else EAP_IF_RETURN_STRING(handshake_type, eapol_key_handshake_type_wai_handshake)
 #endif //#if defined(USE_WAPI_CORE)
-	else EAP_IF_RETURN_STRING(handshake_type, eapol_key_handshake_type_authenticated)
 	else
 #endif // #if defined(USE_EAP_TRACE_STRINGS)
 	{
@@ -129,7 +128,7 @@ EAP_FUNC_EXPORT eap_const_string eapol_key_state_string_c::get_eapol_key_authent
 #if defined(EAP_USE_WPXM)
 	else EAP_IF_RETURN_STRING(authentication_type, eapol_key_authentication_type_WPXM)
 #endif //#if defined(EAP_USE_WPXM)
-	else EAP_IF_RETURN_STRING(authentication_type, eapol_key_authentication_type_WPS)
+	else EAP_IF_RETURN_STRING(authentication_type, eapol_key_authentication_type_WFA_SC)
 #if defined(USE_WAPI_CORE)
 	else EAP_IF_RETURN_STRING(authentication_type, eapol_key_authentication_type_WAI_PSK)
 	else EAP_IF_RETURN_STRING(authentication_type, eapol_key_authentication_type_WAI_certificate)
@@ -147,7 +146,7 @@ EAP_FUNC_EXPORT eap_const_string eapol_key_state_string_c::get_eapol_key_authent
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_const_string eapol_key_state_string_c::get_eapol_key_descriptor_type_string(
+eap_const_string eapol_key_state_string_c::get_eapol_key_descriptor_type_string(
 	const eapol_key_descriptor_type_e key_descriptor_type)
 {
 

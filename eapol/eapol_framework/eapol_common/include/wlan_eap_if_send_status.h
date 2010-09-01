@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 9 %
 */
 
 #if !defined(_WLAN_EAP_IF_SEND_STATUS_H_)

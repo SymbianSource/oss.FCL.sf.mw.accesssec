@@ -1,0 +1,84 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: UI strings for WLAN EAP-PEAP authentication settings
+*
+*/
+
+/*
+* %version: %
+*/
+
+// LOCALISATION STRINGS
+
+
+//d:UI title for main view
+//l:title_pane_t2/opt9
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_peap_title             "EAP-PEAP settings"
+
+
+//d:Setting list item, static part. User is able to define the settings for 
+//d:the usage of different PEAP versions in WLAN authentication.
+//l:list_setting_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_allow_peapv0      "Allow PEAPv0"
+
+
+//d:Setting list item, static part. User is able to define the settings for 
+//d:the usage of different PEAP versions in WLAN authentication.
+//l:list_setting_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_allow_peapv1      "Allow PEAPv1"
+
+
+//d:Setting list item, static part. User is able to define the settings for 
+//d:the usage of different PEAP versions in WLAN authentication.
+//l:list_setting_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_allow_peapv2      "Allow PEAPv2"
+
+
+//d:Setting list item, dynamic part. Displayed below one of the texts 
+//d:"Allow PEAPv0" (qtn_wlan_eap_sett_allow_peapv0), "Allow PEAPv1" 
+//d:(qtn_wlan_eap_sett_allow_peapv1) or "Allow PEAPv2" 
+//d:(qtn_wlan_eap_sett_allow_peapv2). 
+//d:Allows the usage of a different version of PEAP.
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_allow_peap_yes    "Yes"
+
+
+//d:Setting list item, dynamic part. Displayed below one of the texts 
+//d:"Allow PEAPv0" (qtn_wlan_eap_sett_allow_peapv0), "Allow PEAPv1" 
+//d:(qtn_wlan_eap_sett_allow_peapv1) or "Allow PEAPv2" 
+//d:(qtn_wlan_eap_sett_allow_peapv2). 
+//d: Denies the usage of a different version of PEAP.
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_sett_allow_peap_no     "No"
+
+
+// End of File

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 10 %
 */
 
 #if !defined(_ABS_RADIUS_STATE_H_)

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 9 %
 */
 
 #if !defined(_EAP_DIAMETER_AVP_HEADER_H_)

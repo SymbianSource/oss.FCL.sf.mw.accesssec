@@ -16,14 +16,14 @@
 */
 
 /*
-* %version: 16 %
+* %version: 9.1.2 %
 */
 
 #ifndef _EAPAKA_H_
 #define _EAPAKA_H_
 
 // INCLUDES
-#include <EapTypePlugin.h>
+#include <EapType.h>
 #include "eap_header.h"
 
 // FORWARD DECLARATIONS
@@ -33,7 +33,7 @@ class eap_am_network_id_c;
 /**
 * Class that implements the generic EAP type interface. Implements EAP AKA protocol.
 */
-class CEapAka : public CEapTypePlugin
+class CEapAka : public CEapType
 {
 public:		
 
@@ -87,13 +87,16 @@ public:
 	
 #endif // #ifdef USE_EAP_SIMPLE_CONFIG
 	
-
+	/**
+	* Invokes the configuration UI.
+	**/
+	TInt InvokeUiL();
 	
 	/**
 	* Gets information about EAP type. 
 	* @return Pointer to a class that contains the EAP type information. Also pushed to cleanup stack.
 	*/
-	CEapTypeInfo* GetInfoL();
+	CEapTypeInfo* GetInfoLC();
 
 	/**
 	* Deletes EAP type configuration
@@ -115,7 +118,7 @@ public:
 	* EAP type. 
 	* @param aTunnelingType Type number for the tunneling type
 	*/	
-	void SetTunnelingType(const TEapExpandedType aTunnelingType);
+	void SetTunnelingType(const TInt aTunnelingType);
 
 	/**
 	* Changes the index of the saved parameters.

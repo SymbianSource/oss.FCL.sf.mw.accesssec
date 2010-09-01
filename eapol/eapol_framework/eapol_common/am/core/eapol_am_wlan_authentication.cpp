@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 7.1.3 %
+* %version: 9 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -31,7 +31,7 @@
 #include "eapol_am_wlan_authentication.h"
 
 // 
-EAP_FUNC_EXPORT eapol_am_wlan_authentication_c::~eapol_am_wlan_authentication_c()
+eapol_am_wlan_authentication_c::~eapol_am_wlan_authentication_c()
 {
 }
  

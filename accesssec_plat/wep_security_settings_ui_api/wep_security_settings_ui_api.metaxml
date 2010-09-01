@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<api id="c8f684fc1b499af65679c5dc7fb8d4b8" dataversion="1.0">
+<name>WEP Security Settings UI API</name>
+<description>API for accessing WEP security settings UI</description>
+<type>c++</type>
+<subsystem>networkingutilities</subsystem>
+<libs><lib name="wepsecuritysettingsui.lib"/>
+</libs>
+<release category="domain" sinceversion="3.2"/>
+<attributes>
+<htmldocprovided>yes</htmldocprovided>
+<adaptation>no</adaptation>
+</attributes>
+</api>

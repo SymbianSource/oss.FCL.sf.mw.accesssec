@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 2.1.2 %
+* %version: 4 %
 */
 
 #ifndef _EAP_AM_ASYNC_WAIT_SYMBIAN_H_
@@ -39,7 +39,7 @@ class eap_am_async_wait_symbian_c : public CActive
         /**
         * Destructor.
         */    
-        virtual ~eap_am_async_wait_symbian_c() ;
+        ~eap_am_async_wait_symbian_c() ;
 
     public: 
 

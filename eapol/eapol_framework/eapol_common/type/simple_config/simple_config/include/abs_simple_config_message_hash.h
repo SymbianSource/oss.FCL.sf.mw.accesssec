@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 9 %
 */
 
 #if !defined(_ABS_SIMPLE_CONFIG_MESSAGE_HASH_H_)

@@ -1,0 +1,138 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: EAP GTC UI resource file
+*
+*/
+
+/*
+* %version: 14 %
+*/
+
+CHARACTER_SET   UTF8
+
+//  RESOURCE IDENTIFIER
+NAME EPGT
+
+//  INCLUDES
+#include <eikon.rh>
+#include "EapGtcUi.hrh"   // Enums for these resources
+#include <eapgtcui.loc>   // Localisation file
+#include <wlaneapsettingsui.loc>
+#include <eikon.rsg>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.mbg>
+#include <avkon.loc>
+
+
+//  CONSTANTS  
+#define KUsernameMaxNameLength 255
+
+
+//  RESOURCE DEFINITIONS 
+
+RESOURCE RSS_SIGNATURE { }
+
+
+RESOURCE TBUF16 { buf=""; }
+
+RESOURCE CBA r_gtc_ui_softkeys_options_back_change
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_back; },
+        CBA_BUTTON { id = EGtcUiCmdChange; txt = qtn_msk_change; }
+        };
+    }
+
+
+RESOURCE DIALOG r_gtc_setting_dialog
+    {
+    flags = EAknDialogSelectionList|EEikDialogFlagWait;
+    buttons = r_gtc_ui_softkeys_options_back_change;
+    items= 
+        { 
+        DLG_LINE
+            {
+            id = EGtcSettingsListBox;
+            type = EAknCtSettingListBox;
+            control = LISTBOX 
+                {
+                flags = EAknListBoxMenuList;
+                };
+            }
+        }; 
+    }
+
+
+RESOURCE AVKON_SETTING_PAGE r_gtc_username_page
+    {
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    label = qtn_wlan_eap_sett_username;
+    type = EEikCtEdwin;
+    editor_resource_id = r_gtc_setting_edwin;
+    }
+
+
+RESOURCE EDWIN r_gtc_setting_edwin 
+    {
+    width = 9;
+    lines = 5;
+    maxlength = 255;
+    allowed_input_modes = EAknEditorTextInputMode | EAknEditorNumericInputMode;
+    default_input_mode = EAknEditorTextInputMode;
+    flags = EEikEdwinAutoSelection | EEikEdwinNoLineOrParaBreaks;
+    }
+
+
+RESOURCE MENU_BAR r_gtc_menubar
+    {
+    titles =
+        {
+        MENU_TITLE { menu_pane = r_gtc_menu_pane; txt=""; }
+        };
+    }
+
+
+RESOURCE MENU_PANE r_gtc_menu_pane
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = EGtcUiCmdChange;
+            txt = qtn_options_change;
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+
+// Resource strings
+RESOURCE TBUF r_gtc_settings_title      { buf = qtn_wlan_eap_gtc_title; }
+RESOURCE TBUF r_gtc_username_string     { buf = qtn_wlan_eap_sett_username; }
+
+
+// End of File

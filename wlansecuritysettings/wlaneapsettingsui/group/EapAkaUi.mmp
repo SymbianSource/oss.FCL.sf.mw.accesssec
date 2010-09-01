@@ -1,0 +1,53 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: EAP AKA UI Project mmp file
+*
+*/
+
+/*
+* %version: 21 %
+*/
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+
+TARGET          eapakaui.lib
+TARGETTYPE      lib
+UID             0x1000008d 0x102072A5
+
+
+SOURCEPATH  ../EapAka/ConfigUi/src
+
+SOURCE  EapAkaUi.cpp
+SOURCE  EapAkaUiView.cpp
+SOURCE  EapAkaUiSettingArray.cpp
+
+
+USERINCLUDE     ../EapAka/ConfigUi/inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+APP_LAYER_SYSTEMINCLUDE
+
+// Resource files
+START RESOURCE ../data/EapAkaUi.rss
+
+HEADER
+TARGETPATH RESOURCE_FILES_DIR
+LANGUAGE_IDS
+
+END
+
+// End of File

@@ -1,0 +1,150 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: This is a localisation file for Wi-Fi Protected Setup A .loc file is the one and only place where the logical strings to be localised are defined. 
+*
+*/
+
+/*
+* %version: %
+*/
+
+// LOCALISATION STRINGS
+
+//d:Wi-Fi protected Setup initial query dialog. Asks the user if he wants to use easy setup.
+//l:popup_note_window
+//w:
+//r:3.2
+#define qtn_ntw_conset_quest_wps_configure_auto "Selected network supports easy setup for receiving settings. Configure automatically?"
+
+//d:Left softkey text
+//l:control_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_text_sotkey_continue "Continue" 
+
+//d:Wi-Fi protected Setup 'Initiate easy setup' query dialog heading text
+//l:heading_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_prmpt_wps_initiate "Initiate easy setup" 
+
+//d:Wi-Fi protected Setup 'Initiate easy setup' query dialog text
+//l:popup_info_list_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_wps_msg_pbc "Push a button on the wireless station to initiate the easy setup process, and select 'Continue'." 
+
+
+//d:Link inside 'Initiate easy setup' to activate 'use PIN code' option
+//l:popup_info_list_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_wps_msg_link_use_pin "Use PIN code instead"
+
+//d:Wi-Fi protected Setup dialog to display PIN code that should be entered to wireless station.
+//l:popup_note_window
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_wps_info_enter_pin_code "Enter '%N' on the wireless station and select 'Continue'"
+
+//d:Wi-Fi protected Setup wait note shown during configuring connection
+//l:popup_note_window
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_wait_wps_configuring "Configuring connection..."
+
+//d:Wi-Fi protected Setup ok note shown after successful configuration of a single connection
+//l:popup_note_window
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_conf_wps_one_network_configured "Settings configured for '%U' network"
+
+//d:Wi-Fi protected Setup ok note shown after successful configuration of multiple connections
+//l:popup_note_window
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_conf_wps_multiple_networks_config "Settings for multiple networks configured"
+
+//d:Wi-Fi protected Setup ok note shown after unsuccessful configuration of network(s)
+//l:popup_note_window
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_conf_wps_no_networks_configured "No settings received"
+
+//d:Wi-Fi protected Setup error note show when configuration fails
+//l:popup_note_window
+//w:
+//r:3.2
+//
+#define qtn_err_wlan_sc_config_failed_try_again "Configuration failed. Please try again."
+
+//d:Wi-Fi protected Setup error note show when configuration fails and user is requested to try again
+//l:popup_note_window
+//w:
+//r:3.2
+//
+#define qtn_err_wlan_sc_config_failed "Configuration failed."
+
+//d:Wi-Fi protected Setup error note show when configuration fails because signal is too weak
+//l:popup_note_window
+//w:
+//r:3.2
+//
+#define qtn_err_wlan_signal_too_weak "WLAN signal too weak. Move closer to wireless station."
+
+//d:Wi-Fi protected Setup error note show when configuration fails because WLAN network can't be found
+//l:popup_note_window
+//w:
+//r:3.2
+//
+#define qtn_err_wlan_network_not_found "Connection failed. Could not find WLAN network."
+
+//d:Wi-Fi protected Setup error note show when configuration fails because multiple push-button sessions
+//d:were detected
+//l:popup_note_window
+//w:
+//r:3.2
+//
+#define qtn_err_wlan_sc_config_failed_multiple_pb_sessions "Multiple push-button sessions detected. Wait a moment and try again, or use PIN code mechanism instead."
+
+//d:Wi-Fi protected Setup error note show when configuration fails and user is requested to try again with PIN code
+//l:popup_note_window
+//w:
+//r:3.2
+//
+#define qtn_err_wlan_sc_config_failed_rogue_activity "Connection failed. Please try again with PIN code mechanism."
+
+//d:Wi-Fi protected Setup error note show when configuration fails because PIN code mechanism is not supported
+//l:popup_note_window
+//w:
+//r:3.2
+//
+#define qtn_err_wlan_sc_config_failed_pin_not_supported "Configuration failed. Device you tried to connect to does not support PIN code mechanism."
+
+//d:Wi-Fi protected Setup error note show when configuration fails because push-button mechanism is not supported
+//l:popup_note_window
+//w:
+//r:3.2
+//
+#define qtn_err_wlan_sc_config_failed_pb_not_supported "Configuration failed. Device you tried to connect to does not support push-button mechanism."
+// End of File

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 5.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -158,7 +158,8 @@ EAP_FUNC_EXPORT eap_wimax_authentication_c::eap_wimax_authentication_c
 EAP_FUNC_EXPORT eap_wimax_authentication_c* eap_wimax_authentication_c::new_eap_wimax_authentication_c
 (abs_eap_am_tools_c* const tools,
  abs_eap_wimax_authentication_c* const partner,
- const bool is_client_when_true)
+ const bool is_client_when_true,
+ const abs_eapol_wlan_database_reference_if_c* const wimax_database_reference)
 {
   EAP_TRACE_DEBUG
     (tools, 
@@ -316,15 +317,15 @@ EAP_FUNC_EXPORT eap_status_e eap_wimax_authentication_c::cancel_all_authenticati
       EAP_TRACE_DEBUG
 		(m_am_tools,
 		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
-		(EAPL("calls eap: eap_wimax_authentication_c:cancel_all_authentication_sessions(): m_eap_core->cancel_all_eap_sessions(): %s.\n"),
+		(EAPL("calls eap: eap_wimax_authentication_c:cancel_all_authentication_sessions(): m_eap_core->synchronous_cancel_all_eap_sessions(): %s.\n"),
 		(m_is_client == true) ? "client": "server"));
 
-      status = m_eap_core->cancel_all_eap_sessions();
+      status = m_eap_core->synchronous_cancel_all_eap_sessions();
 
       EAP_TRACE_DEBUG
 		(m_am_tools,
 		TRACE_FLAGS_ALWAYS|TRACE_FLAGS_DEFAULT, 
-		(EAPL("returns from eap: eap_wimax_authentication_c:cancel_all_authentication_sessions(): m_eap_core->cancel_all_eap_sessions(): %s, status = %s.\n"),
+		(EAPL("returns from eap: eap_wimax_authentication_c:cancel_all_authentication_sessions(): m_eap_core->synchronous_cancel_all_eap_sessions(): %s, status = %s.\n"),
 		(m_is_client == true) ? "client": "server",
 		eap_status_string_c::get_status_string(status)));
 

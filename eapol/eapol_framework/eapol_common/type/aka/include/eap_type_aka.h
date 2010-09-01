@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 23 %
+* %version: 20.1.2 %
 */
 
 #if !defined(_AKA_CORE_H_)
@@ -1294,6 +1294,9 @@ private:
 		const u32_t identity_length,
 		const u8_t * const at_character);
 
+
+#if defined(USE_EAP_TRACE)
+
 	/**
 	 * This function traces the EAP packet.
 	 */
@@ -1302,8 +1305,6 @@ private:
 		const eap_am_network_id_c * const receive_network_id,
 		eap_header_wr_c * const received_eap,
 		const u32_t eap_packet_length);
-
-#if defined(USE_EAP_TRACE)
 
 	#define EAP_AKA_PACKET_TRACE(prefix, receive_network_id, received_eap, eap_packet_length) \
 			packet_trace((prefix), (receive_network_id), (received_eap), (eap_packet_length))
@@ -1936,6 +1937,9 @@ public:
 	EAP_FUNC_IMPORT eap_status_e cancel_timer(
 		abs_eap_base_timer_c * const p_initializer, 
 		const u32_t p_id);
+
+	//
+	EAP_FUNC_IMPORT eap_status_e cancel_all_timers();
 
 	EAP_FUNC_IMPORT static eap_const_string get_identity_string(const eap_type_aka_identity_type identity_type);
 

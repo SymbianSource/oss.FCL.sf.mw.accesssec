@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 23.1.2 %
+* %version: 25 %
 */
 
 #if !defined(_TLS_BASE_APPLICATION_H_)
@@ -59,7 +59,7 @@ public:
 	/**
 	 * Destructor does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~tls_base_application_c();
+	virtual ~tls_base_application_c();
 
 	/**
 	 * Application partner is object below the tls_base_application_c object.

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8.1.2 %
+* %version: 10 %
 */
 
 #if !defined( _EAP_AM_TOOLS_H_ )
@@ -120,7 +120,6 @@ public:
 		eap_trace_mask_hash_map           = (1u << 13u), ///< This value traces only data of hash table. It does map data and selector.
 		eap_trace_mask_timer_queue        = (1u << 14u), ///< This value traces the timer queue.
 		eap_trace_mask_ok_returns         = (1u << 15u), ///< This value traces the OK return values, alot of them.
-		eap_trace_mask_trace_never        = (1u << 16u), ///< This value never traces. This can disable trace always.
 	};
 
 	EAP_FUNC_IMPORT u8_t octet_to_ascii(i32_t octet);
@@ -321,8 +320,6 @@ const u32_t TRACE_FLAGS_TIMER = eap_am_tools_c::eap_trace_mask_timer;
 const u32_t TRACE_FLAGS_TIMER_QUEUE = eap_am_tools_c::eap_trace_mask_timer_queue;
 
 const u32_t TRACE_FLAGS_OK_RETURNS = eap_am_tools_c::eap_trace_mask_ok_returns;
-
-const u32_t EAP_TRACE_FLAGS_NEVER = eap_am_tools_c::eap_trace_mask_trace_never;
 
 //-----------------------------------------------------------------------------------------------
 

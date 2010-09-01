@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18.1.4.1.12 %
+* %version: 18.1.8 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -34,6 +34,7 @@
 #include "eap_am_tools.h"
 #include "eap_state_notification.h"
 #include "eap_config.h"
+#include <wdbifwlansettings.h>
 
 #include "eap_type_simple_config_types.h"
 #include "eap_tlv_message_data.h"
@@ -41,7 +42,7 @@
 #include "simple_config_credential.h"
 #include "abs_eap_configuration_if.h"
 
-#include "EapTraceSymbian.h"
+#include "eap_am_trace_symbian.h"
 #include <mmtsy_names.h>
 
 static const char EAP_AM_TYPE_SIMPLE_CONFIG_MEMORY_STORE_KEY[] = "eap_am_type_simple_config_simulator_c credential_store";
@@ -50,12 +51,12 @@ static const char EAP_AM_TYPE_SIMPLE_CONFIG_MEMORY_STORE_KEY[] = "eap_am_type_si
 
 
 // 
-EAP_FUNC_EXPORT CEapAmProtectedSetupSymbian::CEapAmProtectedSetupSymbian(
+EAP_FUNC_EXPORT eap_am_type_protected_setup_symbian_c::eap_am_type_protected_setup_symbian_c(
 	abs_eap_am_tools_c * const tools,
 	abs_eap_base_type_c * const partner,
-	const TIndexType /* aIndexType */,
+	const TIndexType aIndexType,
 	const TInt aIndex,
-	const eap_type_value_e /* aTunnelingType */,
+	const eap_type_value_e aTunnelingType,	
 	const eap_type_value_e eap_type,
 	const bool is_client_when_true,
 	const eap_am_network_id_c * const receive_network_id,
@@ -91,7 +92,7 @@ EAP_FUNC_EXPORT CEapAmProtectedSetupSymbian::CEapAmProtectedSetupSymbian(
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("SIMPLE_CONFIG: %s: function: CEapAmProtectedSetupSymbian(): this = 0x%08x\n"),
+		(EAPL("SIMPLE_CONFIG: %s: function: eap_am_type_protected_setup_symbian_c(): this = 0x%08x\n"),
 		(m_is_client == true ? "client": "server"),
 		this));
 
@@ -118,7 +119,7 @@ EAP_FUNC_EXPORT CEapAmProtectedSetupSymbian::CEapAmProtectedSetupSymbian(
 
 //--------------------------------------------------
 
-void CEapAmProtectedSetupSymbian::ConstructL()
+void eap_am_type_protected_setup_symbian_c::ConstructL()
 {
 	if (m_is_client == true)
 	{
@@ -138,7 +139,7 @@ void CEapAmProtectedSetupSymbian::ConstructL()
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT CEapAmProtectedSetupSymbian* CEapAmProtectedSetupSymbian::NewL(
+eap_am_type_protected_setup_symbian_c* eap_am_type_protected_setup_symbian_c::NewL(
 	abs_eap_am_tools_c * const tools,
 	abs_eap_base_type_c * const partner,
 	const TIndexType aIndexType,
@@ -149,7 +150,7 @@ EAP_FUNC_EXPORT CEapAmProtectedSetupSymbian* CEapAmProtectedSetupSymbian::NewL(
 	const eap_am_network_id_c * const receive_network_id,
 	abs_eap_configuration_if_c * const configuration_if)
 {
-	CEapAmProtectedSetupSymbian* self = new (ELeave) CEapAmProtectedSetupSymbian(
+	eap_am_type_protected_setup_symbian_c* self = new (ELeave) eap_am_type_protected_setup_symbian_c(
 		tools,
 		partner,
 		aIndexType, 
@@ -176,7 +177,7 @@ EAP_FUNC_EXPORT CEapAmProtectedSetupSymbian* CEapAmProtectedSetupSymbian::NewL(
 //--------------------------------------------------
 
 // 
-EAP_FUNC_EXPORT CEapAmProtectedSetupSymbian::~CEapAmProtectedSetupSymbian()
+EAP_FUNC_EXPORT eap_am_type_protected_setup_symbian_c::~eap_am_type_protected_setup_symbian_c()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -184,7 +185,7 @@ EAP_FUNC_EXPORT CEapAmProtectedSetupSymbian::~CEapAmProtectedSetupSymbian()
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("SIMPLE_CONFIG: %s: function: ~CEapAmProtectedSetupSymbian(): this = 0x%08x\n"),
+		(EAPL("SIMPLE_CONFIG: %s: function: ~eap_am_type_protected_setup_symbian_c(): this = 0x%08x\n"),
 		(m_is_client == true ? "client": "server"),
 		this));
 
@@ -200,7 +201,7 @@ EAP_FUNC_EXPORT CEapAmProtectedSetupSymbian::~CEapAmProtectedSetupSymbian()
 
 //--------------------------------------------------
 
-abs_simple_config_am_services_c * CEapAmProtectedSetupSymbian::get_simple_config_am_partner()
+abs_simple_config_am_services_c * eap_am_type_protected_setup_symbian_c::get_simple_config_am_partner()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	EAP_ASSERT_ALWAYS(m_simple_config_am_partner != 0);
@@ -210,7 +211,7 @@ abs_simple_config_am_services_c * CEapAmProtectedSetupSymbian::get_simple_config
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT void CEapAmProtectedSetupSymbian::set_simple_config_am_partner(abs_simple_config_am_services_c * const simple_config_am_partner)
+EAP_FUNC_EXPORT void eap_am_type_protected_setup_symbian_c::set_simple_config_am_partner(abs_simple_config_am_services_c * const simple_config_am_partner)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	m_simple_config_am_partner = simple_config_am_partner;
@@ -219,7 +220,7 @@ EAP_FUNC_EXPORT void CEapAmProtectedSetupSymbian::set_simple_config_am_partner(a
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT void CEapAmProtectedSetupSymbian::set_am_partner(abs_eap_am_type_simple_config_c * const partner)
+EAP_FUNC_EXPORT void eap_am_type_protected_setup_symbian_c::set_am_partner(abs_eap_am_type_simple_config_c * const partner)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -228,13 +229,13 @@ EAP_FUNC_EXPORT void CEapAmProtectedSetupSymbian::set_am_partner(abs_eap_am_type
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::configure()
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::configure()
 {
 
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("SIMPLE_CONFIG: %s: function: CEapAmProtectedSetupSymbian::configure()\n"),
+		(EAPL("SIMPLE_CONFIG: %s: function: eap_am_type_protected_setup_symbian_c::configure()\n"),
 		 (m_is_client == true ? "client": "server")));
 
 	if (m_configured == true)
@@ -242,7 +243,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::configure()
 		EAP_TRACE_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("SIMPLE_CONFIG: %s: function: CEapAmProtectedSetupSymbian::configure(): Already configured.\n"),
+			(EAPL("SIMPLE_CONFIG: %s: function: eap_am_type_protected_setup_symbian_c::configure(): Already configured.\n"),
 			 (m_is_client == true ? "client": "server")));
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
@@ -253,7 +254,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::configure()
 	{
 		eap_variable_data_c use_manual_username(m_am_tools);
 
-		eap_status_e status = type_configure_read(
+		eap_status_e status = m_partner->read_configure(
 			cf_str_EAP_SIMPLE_CONFIG_use_manual_username.get_field(),
 			&use_manual_username);
 		if (status == eap_status_ok
@@ -273,7 +274,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::configure()
 
 	if (m_use_manual_username == true)
 	{
-		eap_status_e status = type_configure_read(
+		eap_status_e status = m_partner->read_configure(
 			cf_str_EAP_SIMPLE_CONFIG_manual_username.get_field(),
 			&m_manual_username);
 		if (status == eap_status_ok
@@ -325,7 +326,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::configure()
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::reset()
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::reset()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	m_device_parameters_valid = false;
@@ -335,14 +336,14 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::reset()
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::shutdown()
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::shutdown()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("SIMPLE_CONFIG: %s: function: CEapAmProtectedSetupSymbian::shutdown(): ")
+		(EAPL("SIMPLE_CONFIG: %s: function: eap_am_type_protected_setup_symbian_c::shutdown(): ")
 		 EAPL("this = 0x%08x\n"),
 		(m_is_client == true ? "client": "server"),
 		this));
@@ -386,7 +387,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::shutdown()
 		EAP_TRACE_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("EAP_type_SIMPLE_CONFIG: CEapAmProtectedSetupSymbian::shutdown():")
+			(EAPL("EAP_type_SIMPLE_CONFIG: eap_am_type_protected_setup_symbian_c::shutdown():")
 			 EAPL("credentials removed from eapol\n")));
 		
 		eap_tlv_message_data_c tlv_data(m_am_tools);
@@ -416,7 +417,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::shutdown()
 
 //--------------------------------------------------
 
-void CEapAmProtectedSetupSymbian::send_error_notification(const eap_status_e error)
+void eap_am_type_protected_setup_symbian_c::send_error_notification(const eap_status_e error)
 {
 	{
 		eap_general_state_variable_e general_state_variable(eap_general_state_authentication_error);
@@ -447,7 +448,7 @@ void CEapAmProtectedSetupSymbian::send_error_notification(const eap_status_e err
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::authentication_finished(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::authentication_finished(
 	const bool true_when_successfull,
 	const bool true_when_session_resumed)
 {
@@ -469,13 +470,13 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::authentication_finishe
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::query_eap_identity(
-	const eap_am_network_id_c * const /* receive_network_id */,
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::query_eap_identity(
+	const eap_am_network_id_c * const receive_network_id,
 	const u8_t eap_identifier,
-	bool * const /* use_manual_username */,
+	bool * const use_manual_username,
 	eap_variable_data_c * const manual_username,
-	bool *const /* use_manual_realm */,
-	eap_variable_data_c * const /* manual_realm */
+	bool *const use_manual_realm,
+	eap_variable_data_c * const manual_realm
 	)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -495,12 +496,6 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::query_eap_identity(
 	if (m_use_manual_username == true
 		&& m_manual_username.get_is_valid_data() == true)
 	{
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("SIMPLE_CONFIG: %s: function: query_eap_identity(): manual username\n"),
-			 (m_is_client == true ? "client": "server")));
-
 		status = manual_username->set_copy_of_buffer(&m_manual_username);
 	}
 
@@ -539,7 +534,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::query_eap_identity(
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::cancel_identity_query()
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::cancel_identity_query()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -565,7 +560,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::cancel_identity_query(
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT void CEapAmProtectedSetupSymbian::set_is_valid()
+EAP_FUNC_EXPORT void eap_am_type_protected_setup_symbian_c::set_is_valid()
 {
 	m_is_valid = true;
 }
@@ -573,7 +568,7 @@ EAP_FUNC_EXPORT void CEapAmProtectedSetupSymbian::set_is_valid()
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT bool CEapAmProtectedSetupSymbian::get_is_valid()
+EAP_FUNC_EXPORT bool eap_am_type_protected_setup_symbian_c::get_is_valid()
 {
 	return m_is_valid;
 }
@@ -581,7 +576,7 @@ EAP_FUNC_EXPORT bool CEapAmProtectedSetupSymbian::get_is_valid()
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::type_configure_read(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::type_configure_read(
 	const eap_configuration_field_c * const field,
 	eap_variable_data_c * const data)
 {
@@ -644,6 +639,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::type_configure_read(
 		} // if (!wanted_field.compare(&type_field))
 
 
+	// NOTE: This is for simulation.
 	// Read is routed to partner object.
 	status = m_partner->read_configure(
 			field,
@@ -660,20 +656,18 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::type_configure_read(
 //--------------------------------------------------
 
 //
-void CEapAmProtectedSetupSymbian::read_device_passwordL(
+void eap_am_type_protected_setup_symbian_c::read_device_passwordL(
 	eap_config_string /*field*/,
 	const u32_t /*field_length*/,
-	eap_variable_data_c * const /* data */)
+	eap_variable_data_c * const data)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	// Get the things from commsdat here.
-
-#if 0
-
+	
 	// We need PSK (PIN code for protected setup) from the CommsDat.
 	// CommDbIf is used to get the PSK.
-
+	
 	CWLanSettings* wlan_settings = new(ELeave) CWLanSettings;
 	CleanupStack::PushL(wlan_settings);
 	SWLANSettings wlanSettings;
@@ -688,7 +682,7 @@ void CEapAmProtectedSetupSymbian::read_device_passwordL(
 		EAP_TRACE_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT, (
-			EAPL("ERROR: CEapAmProtectedSetupSymbian::read_device_passwordL() Connecting to CommsDat failed!\n")));
+			EAPL("ERROR: eap_am_type_protected_setup_symbian_c::read_device_passwordL() Connecting to CommsDat failed!\n")));
 				
 		User::Leave(KErrCouldNotConnect);
 	}
@@ -696,7 +690,7 @@ void CEapAmProtectedSetupSymbian::read_device_passwordL(
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT, (
-		EAPL("CEapAmProtectedSetupSymbian::read_device_passwordL() Connected to CommDbIf.\n")));
+		EAPL("eap_am_type_protected_setup_symbian_c::read_device_passwordL() Connected to CommDbIf.\n")));
 
 	error = wlan_settings->GetWlanSettingsForService(m_index, wlanSettings);
 	if ( error != KErrNone)
@@ -704,7 +698,7 @@ void CEapAmProtectedSetupSymbian::read_device_passwordL(
 		EAP_TRACE_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT, (
-			EAPL("ERROR: CEapAmProtectedSetupSymbian::read_device_passwordL() GetWlanSettingsForService failed, error=%d\n"),
+			EAPL("ERROR: eap_am_type_protected_setup_symbian_c::read_device_passwordL() GetWlanSettingsForService failed, error=%d\n"),
 			error));
 	
 		wlan_settings->Disconnect();
@@ -771,15 +765,13 @@ void CEapAmProtectedSetupSymbian::read_device_passwordL(
 	wlan_settings->Disconnect();
 	CleanupStack::PopAndDestroy(wlan_settings);
 
-#endif
-
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
 
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::type_configure_write(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::type_configure_write(
 	const eap_configuration_field_c * const field,
 	eap_variable_data_c * const data)
 {
@@ -795,7 +787,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::type_configure_write(
 
 //--------------------------------------------------
 
-abs_eap_am_type_simple_config_c * CEapAmProtectedSetupSymbian::get_am_partner()
+abs_eap_am_type_simple_config_c * eap_am_type_protected_setup_symbian_c::get_am_partner()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -804,7 +796,7 @@ abs_eap_am_type_simple_config_c * CEapAmProtectedSetupSymbian::get_am_partner()
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::query_network_and_device_parameters(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::query_network_and_device_parameters(
 	const simple_config_state_e state)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -816,7 +808,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::query_network_and_devi
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("SIMPLE_CONFIG: %s: CEapAmProtectedSetupSymbian::query_network_and_device_parameters()\n"),
+		(EAPL("SIMPLE_CONFIG: %s: eap_am_type_protected_setup_symbian_c::query_network_and_device_parameters()\n"),
 		(m_is_client == true ? "client": "server")));
 
 	eap_status_e status = eap_status_process_general_error;
@@ -828,7 +820,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::query_network_and_devi
 	{
 		
 		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("CEapAmProtectedSetupSymbian::query_network_and_device_parameters: Parameters exist, completing query immediately.")));
+			(_L("eap_am_type_protected_setup_symbian_c::query_network_and_device_parameters: Parameters exist, completing query immediately.")));
 
 		// pass the parameters
 		status = get_simple_config_am_partner()->complete_query_network_and_device_parameters(
@@ -936,7 +928,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::query_network_and_devi
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapAmProtectedSetupSymbian::query_network_and_device_parameters() m_Device_Password_ID=%d\n"),
+		(EAPL("eap_am_type_protected_setup_symbian_c::query_network_and_device_parameters() m_Device_Password_ID=%d\n"),
 		m_Device_Password_ID));
 
 	{
@@ -1105,7 +1097,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::query_network_and_devi
 //--------------------------------------------------
 
 // This is always synchronous call.
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::save_simple_config_session(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::save_simple_config_session(
 	const simple_config_state_e state,
 	EAP_TEMPLATE_CONST eap_array_c<simple_config_credential_c> * const credential_array,
 	const eap_variable_data_c * const new_password,
@@ -1208,7 +1200,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::save_simple_config_ses
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::received_registrar_information(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::received_registrar_information(
 	EAP_TEMPLATE_CONST eap_array_c<simple_config_payloads_c> * const M2D_payloads)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1289,7 +1281,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::received_registrar_inf
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::cancel_query_network_and_device_parameters()
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::cancel_query_network_and_device_parameters()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -1314,7 +1306,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::cancel_query_network_a
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::load_module(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::load_module(
 		const eap_type_value_e eap_type,
 		const eap_type_value_e tunneling_type,
 		abs_eap_base_type_c * const partner,
@@ -1326,7 +1318,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::load_module(
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapAmProtectedSetupSymbian::load_module(0x%08x)\n"),
+		(EAPL("eap_am_type_protected_setup_symbian_c::load_module(0x%08x)\n"),
 		 convert_eap_type_to_u32_t(eap_type)));
 
 	eap_status_e status = m_partner->load_module(
@@ -1343,13 +1335,13 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::load_module(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::check_is_valid_eap_type(const eap_type_value_e eap_type)
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::check_is_valid_eap_type(const eap_type_value_e eap_type)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapAmProtectedSetupSymbian::check_is_valid_eap_type(0x%08x)\n"),
+		(EAPL("eap_am_type_protected_setup_symbian_c::check_is_valid_eap_type(0x%08x)\n"),
 		 convert_eap_type_to_u32_t(eap_type)));
 
 	eap_status_e status = m_partner->check_is_valid_eap_type(
@@ -1361,7 +1353,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::check_is_valid_eap_typ
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::get_eap_type_list(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::get_eap_type_list(
 	eap_array_c<eap_type_value_e> * const eap_type_list)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1374,13 +1366,13 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::get_eap_type_list(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::unload_module(const eap_type_value_e eap_type)
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::unload_module(const eap_type_value_e eap_type)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapAmProtectedSetupSymbian::unload_module(0x%08x)\n"),
+		(EAPL("eap_am_type_protected_setup_symbian_c::unload_module(0x%08x)\n"),
 		convert_eap_type_to_u32_t(eap_type)));
 
 	eap_status_e status = m_partner->unload_module(
@@ -1392,7 +1384,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::unload_module(const ea
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::complete_protected_setup_device_paramsL(
+EAP_FUNC_EXPORT eap_status_e eap_am_type_protected_setup_symbian_c::complete_protected_setup_device_paramsL(
 	const RMobilePhone::TMobilePhoneIdentityV1 &phone_identity,
 	const eap_status_e completion_status )
 {
@@ -1499,7 +1491,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::complete_protected_set
 		// since there is nothing better for the purpose.
 		
 		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("CEapAmProtectedSetupSymbian::complete_protected_setup_device_paramsL: Uses model as device name.")));
+			(_L("eap_am_type_protected_setup_symbian_c::complete_protected_setup_device_paramsL: Uses model as device name.")));
 
 		status = m_network_and_device_parameters.copy_attribute_data(
 				simple_config_Attribute_Type_Device_Name,
@@ -1611,23 +1603,23 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::complete_protected_set
 
 //--------------------------------------------------
 
-void CEapAmProtectedSetupSymbian::ConvertUnicodeToAsciiL(const TDesC16& aFromUnicode, TDes8& aToAscii)
+void eap_am_type_protected_setup_symbian_c::ConvertUnicodeToAsciiL(const TDesC16& aFromUnicode, TDes8& aToAscii)
 {
 		EAP_TRACE_DATA_DEBUG_SYMBIAN(
-			("CEapAmProtectedSetupSymbian::ConvertUnicodeToAsciiL:From TEXT",
+			("eap_am_type_protected_setup_symbian_c::ConvertUnicodeToAsciiL:From TEXT",
 			aFromUnicode.Ptr(), 
 			aFromUnicode.Size()));	
 		
 		if(aFromUnicode.Length() <= 0)
 		{
 			EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("CEapAmProtectedSetupSymbian::ConvertUnicodeToAsciiL: Return: NOTHING TO CONVERT")));
+			(_L("eap_am_type_protected_setup_symbian_c::ConvertUnicodeToAsciiL: Return: NOTHING TO CONVERT")));
 			
 			return;
 		}	
 		
 		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("CEapAmProtectedSetupSymbian::ConvertUnicodeToAsciiL, aFromUnicode.Length=%d, aFromUnicode.Size=%d"),
+			(_L("eap_am_type_protected_setup_symbian_c::ConvertUnicodeToAsciiL, aFromUnicode.Length=%d, aFromUnicode.Size=%d"),
 			aFromUnicode.Length(), aFromUnicode.Size()));	
 		
 		// Convert from Unicode to ascii.
@@ -1635,7 +1627,7 @@ void CEapAmProtectedSetupSymbian::ConvertUnicodeToAsciiL(const TDesC16& aFromUni
 		TPtr8 aFromUnicodePtr8 = aFromUnicodeBuf8->Des();
 		
 		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("CEapAmProtectedSetupSymbian::ConvertUnicodeToAsciiL, aFromUnicodePtr8.Length=%d, aFromUnicodePtr8.Size=%d, aFromUnicodePtr8.MaxLength=%d, aFromUnicodePtr8.MaxSize=%d"),
+			(_L("eap_am_type_protected_setup_symbian_c::ConvertUnicodeToAsciiL, aFromUnicodePtr8.Length=%d, aFromUnicodePtr8.Size=%d, aFromUnicodePtr8.MaxLength=%d, aFromUnicodePtr8.MaxSize=%d"),
 			aFromUnicodePtr8.Length(), aFromUnicodePtr8.Size(), aFromUnicodePtr8.MaxLength(), aFromUnicodePtr8.MaxSize()));				
 		
 		aFromUnicodePtr8.Copy(aFromUnicode); // Unicode -> ascii.
@@ -1645,7 +1637,7 @@ void CEapAmProtectedSetupSymbian::ConvertUnicodeToAsciiL(const TDesC16& aFromUni
 		CleanupStack::PopAndDestroy(aFromUnicodeBuf8); // Delete aFromUnicodeBuf8.	
 
 		EAP_TRACE_DATA_DEBUG_SYMBIAN(
-			("CEapAmProtectedSetupSymbian::ConvertUnicodeToAsciiL:To ASCII",
+			("eap_am_type_protected_setup_symbian_c::ConvertUnicodeToAsciiL:To ASCII",
 			aToAscii.Ptr(), 
 			aToAscii.Size()));	
 }

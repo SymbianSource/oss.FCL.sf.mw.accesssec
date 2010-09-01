@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 13.1.5 %
+* %version: 16 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -32,7 +32,6 @@
 #include "EapMsChapV2.h"
 #include <e32base.h>
 #include <ecom/implementationproxy.h>
-#include "EapTraceSymbian.h"
 
 #include "EapolUID.h"
 
@@ -46,9 +45,6 @@ const TImplementationProxy ImplementationTable[] =
 
 EXPORT_C const TImplementationProxy* ImplementationGroupProxy(TInt& aTableCount)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("ImplementationGroupProxy(): CEapMsChapV2\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: ImplementationGroupProxy(): CEapMsChapV2\n"));
-
 	aTableCount = sizeof(ImplementationTable) / sizeof(TImplementationProxy);
 
 	return ImplementationTable;

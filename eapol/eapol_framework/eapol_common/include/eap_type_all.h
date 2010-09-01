@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 8.1.2 %
 */
 
 #if !defined(_EAP_TYPE_ALL_H_)
@@ -49,11 +49,8 @@ EAP_C_FUNC_IMPORT eap_base_type_c * const new_eap_type(
 	abs_eap_base_type_c * const partner,
 	const eap_type_value_e eap_type,
 	const bool is_client_when_true,
-	const eap_am_network_id_c * const receive_network_id
-#if defined(USE_EAP_SIMPLE_CONFIG)
-	, abs_eap_configuration_if_c * const configuration_if
-#endif // #if defined(USE_EAP_SIMPLE_CONFIG)
-	);
+	const eap_am_network_id_c * const receive_network_id,
+	abs_eap_configuration_if_c * const configuration_if);
 
 //--------------------------------------------------
 

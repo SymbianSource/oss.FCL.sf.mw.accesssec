@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 5 %
 */
 
 #if !defined(_EAPOL_TEST_STACK_IF_H_)

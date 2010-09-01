@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 24 %
+* %version: 9.1.2 %
 */
 
 #if !defined(_EAP_SESSION_CORE_H_)
@@ -24,13 +24,11 @@
 
 #include "eap_tools.h"
 #include "eap_am_export.h"
-#include "abs_eap_session_core.h"
+#include "abs_eap_core.h"
 #include "eap_core_map.h"
 #include "abs_eap_stack_interface.h"
-#include "eap_session_core_base.h"
-#include "eap_base_type.h"
-#include "eap_core.h"
 
+class eap_core_c;
 class eap_network_id_selector_c;
 
 
@@ -55,14 +53,13 @@ class EAP_EXPORT eap_session_core_c
 , public abs_eap_core_map_c
 , public abs_eap_base_timer_c
 , public abs_eap_stack_interface_c
-, public eap_session_core_base_c
 {
 private:
 	//--------------------------------------------------
 
 	/// This is back pointer to object which created this object.
 	/// Packets are sent to the partner.
-	abs_eap_session_core_c * const m_partner;
+	abs_eap_core_c * const m_partner;
 
 	/// This is pointer to the tools class.
 	abs_eap_am_tools_c * const m_am_tools;
@@ -123,7 +120,7 @@ public:
 	 */
 	EAP_FUNC_IMPORT eap_session_core_c(
 		abs_eap_am_tools_c * const tools,
-		abs_eap_session_core_c * const partner,
+		abs_eap_core_c * const partner,
 		const bool is_client_when_true);
 
 	/**
@@ -141,7 +138,7 @@ public:
 	 * If this fails this function must return corresponding error status.
 	 * @return This function returns the status of operation.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_all_eap_sessions();
+	EAP_FUNC_IMPORT eap_status_e synchronous_cancel_all_eap_sessions();
 
 	// This is documented in abs_eap_stack_interface_c::packet_process().
 	EAP_FUNC_IMPORT eap_status_e packet_process(
@@ -168,7 +165,7 @@ public:
 	/**
 	 * The get_partner() function returns pointer to partner class.
 	 */
-	EAP_FUNC_IMPORT abs_eap_session_core_c * get_partner();
+	EAP_FUNC_IMPORT abs_eap_core_c * get_partner();
 
 	/**
 	 * The get_header_offset() function obtains the header offset of EAP-packet.
@@ -319,19 +316,20 @@ public:
 		const bool force_clean_restart,
 		const bool from_timer = false);
 
+#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 	/**
 	 * This function creates EAP session object synchronously.
 	 * @param receive_network_id identifies the removed EAP session.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_eap_session(
+	EAP_FUNC_IMPORT eap_status_e synchronous_create_eap_session(
 		const eap_am_network_id_c * const receive_network_id);
+#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 	/**
 	 * This function removes EAP session object synchronously.
 	 * @param receive_network_id identifies the removed EAP session.
 	 */
-	EAP_FUNC_IMPORT eap_status_e remove_eap_session(
-		const bool complete_to_lower_layer,
+	EAP_FUNC_IMPORT eap_status_e synchronous_remove_eap_session(
 		const eap_am_network_id_c * const receive_network_id);
 
 	/**
@@ -360,6 +358,9 @@ public:
 		const u32_t p_id);
 
 	//
+	EAP_FUNC_IMPORT eap_status_e cancel_all_timers();
+
+	//
 	EAP_FUNC_IMPORT eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);
 
 	/// @see abs_eap_core_c::get_eap_type_list().
@@ -372,20 +373,6 @@ public:
 	// This is documented in abs_eap_core_c::set_session_timeout().
 	EAP_FUNC_IMPORT eap_status_e set_session_timeout(
 		const u32_t session_timeout_ms);
-
-	EAP_FUNC_IMPORT eap_status_e set_eap_database_reference_values(
-		const eap_variable_data_c * const reference);
-
-	EAP_FUNC_IMPORT eap_status_e get_802_11_authentication_mode(
-		const eap_am_network_id_c * const receive_network_id,
-		const eapol_key_authentication_type_e authentication_type,
-		const eap_variable_data_c * const SSID,
-		const eap_variable_data_c * const preshared_key);
-
-	EAP_FUNC_IMPORT eap_status_e complete_get_802_11_authentication_mode(
-		const eap_status_e completion_status,
-		const eap_am_network_id_c * const receive_network_id,
-		const eapol_key_802_11_authentication_mode_e mode);
 
 	//--------------------------------------------------
 }; // class eap_session_core_c

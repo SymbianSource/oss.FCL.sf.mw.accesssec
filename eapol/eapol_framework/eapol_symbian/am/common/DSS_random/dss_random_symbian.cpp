@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10.1.4 %
+* %version: 12 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -77,7 +77,7 @@ LOCAL_C void dss_pseudo_randomL(abs_eap_am_tools_c * const m_am_tools, u8_t *out
  *      X= 47c27eb6 16dba413 91e5165b e9c5e397 7e39a15d
  *  @endcode
 */
-eap_status_e dss_random_G(abs_eap_am_tools_c * const m_am_tools, u8_t *out, u32_t out_length, const u8_t *c, u32_t c_length)
+void dss_random_G(abs_eap_am_tools_c * const m_am_tools, u8_t *out, u32_t out_length, const u8_t *c, u32_t c_length)
 {
 	u32_t *out_array = reinterpret_cast<u32_t *>(out);
 
@@ -92,15 +92,13 @@ eap_status_e dss_random_G(abs_eap_am_tools_c * const m_am_tools, u8_t *out, u32_
 		);
 	if (status != eap_status_ok)
 	{
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_EAP_AM_CRYPTO, (EAPL("ERROR: eap_sha1_dss_G_function(): status = %d"),
+		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_EAP_AM_CRYPTO, (EAPL("eap_sha1_dss_G_function(): status = %d"),
 			status));
-		return status;
 	}
 
 	EAP_TRACE_DATA_DEBUG(m_am_tools, TRACE_FLAGS_EAP_AM_CRYPTO, (EAPL("dss_random_G(): out_array"),
 		out_array, sizeof(out_array)*5));
 
-	return status;
 }
 
 /**
@@ -116,7 +114,7 @@ eap_status_e dss_random_G(abs_eap_am_tools_c * const m_am_tools, u8_t *out, u32_
  *              d. XKEY = (1 + XKEY + xj) mod 2^b.
  *  @endcode
 */
-EAP_FUNC_EXPORT eap_status_e dss_pseudo_random(abs_eap_am_tools_c * const m_am_tools, u8_t *out, u32_t out_length, u8_t *xkey, u32_t xkey_length)
+eap_status_e dss_pseudo_random(abs_eap_am_tools_c * const m_am_tools, u8_t *out, u32_t out_length, u8_t *xkey, u32_t xkey_length)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	eap_status_e status = eap_status_ok;
@@ -183,13 +181,7 @@ LOCAL_C void dss_pseudo_randomL(abs_eap_am_tools_c * const m_am_tools, u8_t *out
 
 	for (u32_t ind = 0; ind < block_count; ind++)
 	{
-		eap_status_e status = dss_random_G(m_am_tools, &(out[ind*BLOCK_SIZE]), BLOCK_SIZE, tmp_xkey.Ptr(), BLOCK_SIZE);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_EAP_AM_CRYPTO, (EAPL("ERROR: dss_random_G(): status = %d"),
-																	status));
-			User::Leave(KErrGeneral);
-		}
+		dss_random_G(m_am_tools, &(out[ind*BLOCK_SIZE]), BLOCK_SIZE, tmp_xkey.Ptr(), BLOCK_SIZE);
 
 		EAP_TRACE_DATA_DEBUG(
 			m_am_tools,

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10.1.2 %
+* %version: 12 %
 */
 
 #if !defined(_AKA_RESULT_H_)
@@ -337,7 +337,7 @@ public:
 		return static_cast<aka_variable_data_c *>(&m_COUNTER);
 	}
 
-	aka_variable_data_c * const get_counter_too_small()
+	aka_variable_data_c * const get_COUNTER_TOO_SMALL()
 	{
 		return static_cast<aka_variable_data_c *>(&m_COUNTER_TOO_SMALL);
 	}
@@ -353,7 +353,7 @@ public:
 	bool get_includes_other_version_than_1();
 
 
-	EAP_FUNC_IMPORT bool get_is_valid() const;
+	bool get_is_valid() const;
 
 	//--------------------------------------------------
 }; // class aka_payloads_c

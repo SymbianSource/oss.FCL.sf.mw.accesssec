@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 12.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -67,38 +67,6 @@ EAP_FUNC_EXPORT eap_expanded_type_c::eap_expanded_type_c(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT bool eap_expanded_type_c::get_is_valid() const
-{
-	return true;
-}
-
-//--------------------------------------------------
-
-EAP_FUNC_EXPORT bool eap_expanded_type_c::get_is_valid_data() const
-{
-	return get_is_valid();
-}
-
-//--------------------------------------------------
-
-EAP_FUNC_EXPORT eap_expanded_type_c * eap_expanded_type_c::copy() const
-{
-	eap_expanded_type_c * const new_entry = new eap_expanded_type_c;
-
-	if (new_entry == 0
-		|| new_entry->get_is_valid() == false)
-	{
-		delete new_entry;
-		return 0;
-	}
-
-	new_entry->set_eap_type_values(m_vendor_id, m_vendor_type);
-
-	return new_entry;
-}
-
-//--------------------------------------------------
-
 EAP_FUNC_EXPORT bool eap_expanded_type_c::is_expanded_type(const eap_type_ietf_values_e eap_type)
 {
 	return (eap_type == eap_type_expanded_type);
@@ -106,17 +74,26 @@ EAP_FUNC_EXPORT bool eap_expanded_type_c::is_expanded_type(const eap_type_ietf_v
 
 //--------------------------------------------------
 
+#if defined(USE_EAP_EXPANDED_TYPES)
 EAP_FUNC_EXPORT bool eap_expanded_type_c::is_ietf_type(const eap_expanded_type_c eap_type)
 {
 	return (eap_type.get_vendor_id() == eap_type_vendor_id_ietf
 			&& eap_type.get_vendor_type() < eap_type_expanded_type);
 }
 
+#else
+EAP_FUNC_EXPORT bool eap_expanded_type_c::is_ietf_type(const eap_type_ietf_values_e eap_type)
+{
+	return (eap_type < eap_type_expanded_type);
+}
+
+#endif //#if defined(USE_EAP_EXPANDED_TYPES)
+
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e eap_expanded_type_c::get_type_data(
 	abs_eap_am_tools_c * const am_tools,
-	eap_type_ietf_values_e * const type) const
+	eap_type_ietf_values_e * const type)
 {
 	if (type == 0)
 	{
@@ -143,7 +120,7 @@ EAP_FUNC_EXPORT eap_status_e eap_expanded_type_c::get_type_data(
 
 EAP_FUNC_EXPORT eap_status_e eap_expanded_type_c::get_type_data(
 	abs_eap_am_tools_c * const am_tools,
-	eap_expanded_type_c * const type) const
+	eap_expanded_type_c * const type)
 {
 	if (type == 0)
 	{
@@ -160,10 +137,9 @@ EAP_FUNC_EXPORT eap_status_e eap_expanded_type_c::get_type_data(
 
 EAP_FUNC_EXPORT eap_status_e eap_expanded_type_c::get_expanded_type_data(
 	abs_eap_am_tools_c * const am_tools,
-	eap_variable_data_c * const data) const
+	eap_variable_data_c * const data)
 {
-	if (data == 0
-		|| data->get_is_valid() == false)
+	if (data == 0)
 	{
 		EAP_UNREFERENCED_PARAMETER(am_tools);
 		return EAP_STATUS_RETURN(am_tools, eap_status_illegal_parameter);
@@ -245,8 +221,7 @@ EAP_FUNC_EXPORT eap_status_e eap_expanded_type_c::set_expanded_type_data(
 	abs_eap_am_tools_c * const am_tools,
 	const eap_variable_data_c * const data)
 {
-	if (data == 0
-		|| data->get_data_length() != get_eap_expanded_type_size()
+	if (data->get_data_length() != get_eap_expanded_type_size()
 		|| data->get_data(data->get_data_length()) == 0)
 	{
 		EAP_UNREFERENCED_PARAMETER(am_tools);
@@ -282,61 +257,6 @@ EAP_FUNC_EXPORT eap_status_e eap_expanded_type_c::set_expanded_type_data(
 
 	{
 		u8_t * const vendor_type = data->get_data_offset(offset, m_vendor_type_size);
-		if (vendor_type == 0)
-		{
-			return EAP_STATUS_RETURN(am_tools, eap_status_illegal_parameter);
-		}
-		offset += m_vendor_type_size;
-
-		m_vendor_type = eap_read_u32_t_network_order(vendor_type, m_vendor_type_size);
-	}
-
-	return EAP_STATUS_RETURN(am_tools, eap_status_ok);
-}
-
-//--------------------------------------------------
-
-EAP_FUNC_EXPORT eap_status_e eap_expanded_type_c::set_expanded_type_data(
-	abs_eap_am_tools_c * const am_tools,
-	const void * const data,
-	const u32_t data_length)
-{
-	if (data_length != get_eap_expanded_type_size()
-		|| data == 0)
-	{
-		EAP_UNREFERENCED_PARAMETER(am_tools);
-		return EAP_STATUS_RETURN(am_tools, eap_status_illegal_parameter);
-	}
-
-	u32_t offset = 0ul;
-
-	{
-		const u8_t * const ietf_type = &(reinterpret_cast<const u8_t *>(data)[offset]);
-		if (ietf_type == 0)
-		{
-			return EAP_STATUS_RETURN(am_tools, eap_status_illegal_parameter);
-		}
-		offset += m_ietf_type_size;
-
-		if (static_cast<eap_type_ietf_values_e>(*ietf_type) != eap_type_expanded_type)
-		{
-			return EAP_STATUS_RETURN(am_tools, eap_status_illegal_parameter);
-		}
-	}
-
-	{
-		const u8_t * const vendor_id = &(reinterpret_cast<const u8_t *>(data)[offset]);
-		if (vendor_id == 0)
-		{
-			return EAP_STATUS_RETURN(am_tools, eap_status_illegal_parameter);
-		}
-		offset += m_vendor_id_size;
-
-		m_vendor_id = static_cast<eap_type_vendor_id_e>(eap_read_u24_t_network_order(vendor_id, m_vendor_id_size));
-	}
-
-	{
-		const u8_t * const vendor_type = &(reinterpret_cast<const u8_t *>(data)[offset]);
 		if (vendor_type == 0)
 		{
 			return EAP_STATUS_RETURN(am_tools, eap_status_illegal_parameter);
@@ -471,7 +391,11 @@ EAP_FUNC_EXPORT eap_status_e eap_expanded_type_c::read_type(
 	const u32_t index,
 	const void * const p_buffer,
 	const u32_t buffer_length,
+#if defined(USE_EAP_EXPANDED_TYPES)
 	eap_expanded_type_c * const type
+#else
+	eap_type_ietf_values_e * const type
+#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 	)
 {
 	if (p_buffer == 0)
@@ -575,11 +499,22 @@ EAP_FUNC_EXPORT eap_status_e eap_expanded_type_c::read_type(
 						sizeof(u32_t));
 				}
 
+#if defined(USE_EAP_EXPANDED_TYPES)
 				type->set_eap_type_values(
 					vendor_id_value,
 					vendor_type_value);
 
 				EAP_ASSERT_TOOLS(am_tools, (ietf_eap_type == eap_type_expanded_type));
+#else
+				if (vendor_id_value == eap_type_vendor_id_ietf)
+				{
+					*type = static_cast<eap_type_value_e>(vendor_type_value); // Type field follows eap_header_c.
+				}
+				else
+				{
+					*type = ietf_eap_type; // Type field follows eap_header_c.
+				}
+#endif
 
 				return EAP_STATUS_RETURN(am_tools, eap_status_ok);
 			}
@@ -608,7 +543,11 @@ EAP_FUNC_EXPORT eap_status_e eap_expanded_type_c::write_type(
 	void * const p_buffer,
 	const u32_t buffer_length,
 	const bool write_extented_type_when_true,
+#if defined(USE_EAP_EXPANDED_TYPES)
 	const eap_expanded_type_c p_type ///< The EAP type to be written.
+#else
+	const eap_type_ietf_values_e p_type ///< The EAP type to be written.
+#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 	)
 {
 	if (p_buffer == 0)
@@ -618,6 +557,8 @@ EAP_FUNC_EXPORT eap_status_e eap_expanded_type_c::write_type(
 	}
 
 	u8_t * const buffer = static_cast<u8_t *>(p_buffer);
+
+#if defined(USE_EAP_EXPANDED_TYPES)
 
 	if (write_extented_type_when_true == false
 		&& is_ietf_type(p_type) == true
@@ -691,10 +632,33 @@ EAP_FUNC_EXPORT eap_status_e eap_expanded_type_c::write_type(
 		return EAP_STATUS_RETURN(am_tools, eap_status_allocation_error);
 	}
 
+#else
+
+	EAP_UNREFERENCED_PARAMETER(write_extented_type_when_true); // Only Expanded Type version uses this.
+
+	if (buffer_length >= eap_expanded_type_c::m_ietf_type_size*(index+1ul))
+	{
+		u8_t * const type_data =
+			&(buffer[eap_expanded_type_c::m_ietf_type_size*index]);
+		if (type_data == 0)
+		{
+			return EAP_STATUS_RETURN(am_tools, eap_status_allocation_error);
+		}
+		*type_data = static_cast<u8_t>(p_type);
+	}
+	else
+	{
+		return EAP_STATUS_RETURN(am_tools, eap_status_allocation_error);
+	}
+
+#endif //#if defined(USE_EAP_EXPANDED_TYPES)
+
 	return EAP_STATUS_RETURN(am_tools, eap_status_ok);
 }
 
 //--------------------------------------------------
+
+#if defined(USE_EAP_EXPANDED_TYPES)
 
 EAP_FUNC_EXPORT i32_t eap_expanded_type_c::compare(const eap_expanded_type_c * const data) const
 {
@@ -719,6 +683,8 @@ EAP_FUNC_EXPORT i32_t eap_expanded_type_c::compare(const eap_expanded_type_c * c
 	}
 }
 
+#endif //#if defined(USE_EAP_EXPANDED_TYPES)
+
 //--------------------------------------------------
 //--------------------------------------------------
 //--------------------------------------------------
@@ -732,6 +698,8 @@ EAP_FUNC_EXPORT const eap_expanded_type_c &eap_static_expanded_type_c::get_type(
 //--------------------------------------------------
 //--------------------------------------------------
 
+#if defined(USE_EAP_EXPANDED_TYPES)
+
 EAP_C_FUNC_EXPORT u32_t convert_eap_type_to_u32_t(eap_type_value_e type)
 {
 	// NOTE, this returns only 8 least significant bits of vendor type.
@@ -744,6 +712,20 @@ EAP_C_FUNC_EXPORT u64_t convert_eap_type_to_u64_t(eap_type_value_e type)
 	return static_cast<u64_t>(type.get_vendor_id()) << sizeof(u32_t)*8ul
 		| static_cast<u64_t>(type.get_vendor_type());
 }
+
+#else
+
+EAP_C_FUNC_EXPORT u32_t convert_eap_type_to_u32_t(eap_type_value_e type)
+{
+	return static_cast<u32_t>(type);
+}
+
+EAP_C_FUNC_EXPORT u64_t convert_eap_type_to_u64_t(eap_type_value_e type)
+{
+	return static_cast<u64_t>(type);
+}
+
+#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 
 //--------------------------------------------------
 //--------------------------------------------------

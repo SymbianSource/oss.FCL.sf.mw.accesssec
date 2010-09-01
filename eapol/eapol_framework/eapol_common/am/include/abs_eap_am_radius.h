@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 8 %
 */
 
 #if !defined(_ABS_EAP_AM_TYPE_RADIUS_H_)

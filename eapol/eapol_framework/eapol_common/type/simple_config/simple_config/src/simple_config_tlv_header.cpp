@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -11,12 +11,12 @@
 *
 * Contributors:
 *
-* Description:  defines header of Attribute-Value Pairs used in protected setup.
+* Description:  EAP and WLAN authentication protocols.
 *
 */
 
 /*
-* %version: 11.1.2 %
+* %version: 13 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -125,7 +125,7 @@ u8_t * simple_config_tlv_header_c::get_data_offset(const u32_t offset, const u32
 {
 	EAP_UNREFERENCED_PARAMETER(m_am_tools);
 
-	u32_t data_length = get_data_length();
+	u32_t data_length = get_data_length(); // Here is removed optional SIMPLE_CONFIG message length.
 
 	if (data_length >= offset+contignuous_bytes)
 	{
@@ -153,7 +153,7 @@ u8_t * simple_config_tlv_header_c::get_data_offset(const u32_t offset, const u32
  */
 u8_t * simple_config_tlv_header_c::get_data(const u32_t contignuous_bytes) const
 {
-	return get_data_offset(0ul, contignuous_bytes);
+	return get_data_offset(0u, contignuous_bytes);
 }
 
 

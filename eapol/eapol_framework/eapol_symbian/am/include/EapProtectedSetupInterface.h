@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 4.1.2 %
+* %version: 6 %
 */
 
 #ifndef _EAPPROTECTEDSETUPINTERFACE_H_
@@ -29,7 +29,7 @@
 #include <etelmm.h>
 
 // FORWARD DECLARATIONS
-class CEapAmProtectedSetupSymbian;
+class eap_am_type_protected_setup_symbian_c;
 
 // CLASS DECLARATION
 /**
@@ -54,7 +54,7 @@ public:
 	*/
 	static CEapProtectedSetupInterface* NewL(
 		abs_eap_am_tools_c* const aTools, 
-		CEapAmProtectedSetupSymbian* const aParent);	
+		eap_am_type_protected_setup_symbian_c* const aParent);	
 
 	/**
 	* Destructor
@@ -69,7 +69,7 @@ public:
 
 protected:
 
-	CEapProtectedSetupInterface(abs_eap_am_tools_c* const aTools, CEapAmProtectedSetupSymbian* const aParent);
+	CEapProtectedSetupInterface(abs_eap_am_tools_c* const aTools, eap_am_type_protected_setup_symbian_c* const aParent);
 
 	void ConstructL();
 	
@@ -85,7 +85,7 @@ private:
 
 private:
 
-	CEapAmProtectedSetupSymbian * const iParent;
+	eap_am_type_protected_setup_symbian_c * const iParent;
 	
 	abs_eap_am_tools_c * const m_am_tools;
 		

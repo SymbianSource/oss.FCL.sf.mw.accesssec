@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 5.1.2 %
 */
 
 #if !defined(_EAP_WIMAX_AUTHENTICATION_H_)
@@ -31,6 +31,7 @@
 #include <abs_eap_am_tools.h>
 
 // FORWARD DECLARATIONS
+class abs_eapol_wlan_database_reference_if_c;
 class eap_session_core_c;
 class eap_am_tools_symbian_c;
 class eap_file_config_c;
@@ -62,7 +63,8 @@ public:
 	EAP_FUNC_IMPORT static eap_wimax_authentication_c* new_eap_wimax_authentication_c(
 		abs_eap_am_tools_c* const tools,
 		abs_eap_wimax_authentication_c* const partner,
-		const bool is_client_when_true);
+		const bool is_client_when_true,
+		const abs_eapol_wlan_database_reference_if_c* const wimax_database_reference);
 
 	EAP_FUNC_IMPORT eap_status_e shutdown();
 

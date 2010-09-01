@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11.1.3 %
+* %version: 14 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -518,7 +518,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_file_input_symbian_c::file_read_line(
 /**
  * This function reads word from file.
  */
-EAP_FUNC_EXPORT eap_status_e eap_am_file_input_symbian_c::file_read_word(eap_variable_data_c * const word)
+eap_status_e eap_am_file_input_symbian_c::file_read_word(eap_variable_data_c * const word)
 {
 	if (word == 0
 		|| word->get_is_valid() == false)
@@ -626,14 +626,14 @@ void eap_am_file_input_symbian_c::set_is_valid()
  * If object initialization fails this function must return false.
  * @return This function returns the validity of this object.
  */
-EAP_FUNC_EXPORT bool eap_am_file_input_symbian_c::get_is_valid()
+bool eap_am_file_input_symbian_c::get_is_valid()
 {
 	return m_is_valid;
 }
 
 //----------------------------------------------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_am_file_input_symbian_c::directory_open(
+eap_status_e eap_am_file_input_symbian_c::directory_open(
 	const eap_variable_data_c * const /* directory_name */)
 {
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_not_supported);
@@ -641,7 +641,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_file_input_symbian_c::directory_open(
 
 //----------------------------------------------------------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_am_file_input_symbian_c::directory_read(
+eap_status_e eap_am_file_input_symbian_c::directory_read(
 	eap_array_c<abs_eap_file_stat_c> * const /* directory_list */)
 {
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_not_supported);
@@ -652,7 +652,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_file_input_symbian_c::directory_read(
 /**
  * This function closes the directory.
  */
-EAP_FUNC_EXPORT eap_status_e eap_am_file_input_symbian_c::directory_close()
+eap_status_e eap_am_file_input_symbian_c::directory_close()
 {
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_not_supported);
 }

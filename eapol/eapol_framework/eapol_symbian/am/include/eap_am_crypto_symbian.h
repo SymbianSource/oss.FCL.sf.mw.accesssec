@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 6 %
 */
 
 #if !defined( _EAP_AM_CRYPTO_SYMBIAN_H_ )

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 3.1.2 %
+* %version: 5 %
 */
 
 #if !defined(_GSMSIM_RESULT_H_)
@@ -263,7 +263,7 @@ public:
 
 	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_COUNTER();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_counter_too_small();
+	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_COUNTER_TOO_SMALL();
 
 
 	EAP_FUNC_IMPORT void set_includes_unknown_attribute(const gsmsim_payload_AT_type_e unknown_payload);

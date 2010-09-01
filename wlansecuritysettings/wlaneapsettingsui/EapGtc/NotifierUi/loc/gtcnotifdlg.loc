@@ -1,0 +1,49 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: UI strings for WLAN EAP-GTC Notifier
+*
+*/
+
+/*
+* %version: %
+*/
+
+//  LOCALISATION STRINGS
+
+
+//d:Message in query used to send GTC output.
+//l:popup_query_code_window
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_gtc_notif_response     "EAP-GTC response:"
+
+
+//d:Title of the message query.
+//l:heading_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_gtc_notif_message      "EAP-GTC message:"
+
+
+//d:Username query string
+//l:popup_query_code_window
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_gtc_notif_username     "EAP-GTC user name:"
+
+
+// End of File

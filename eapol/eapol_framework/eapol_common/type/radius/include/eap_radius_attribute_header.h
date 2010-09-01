@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 10 %
 */
 
 #if !defined(_EAP_RADIUS_PAYLOAD_HEADER_H_)

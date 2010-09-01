@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 4 %
 */
 
 #if !defined(_ABS_EAP_TYPE_MAP_H_)

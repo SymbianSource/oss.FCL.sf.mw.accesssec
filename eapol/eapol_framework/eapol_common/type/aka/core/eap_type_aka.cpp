@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 41 %
+* %version: 31.1.4 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -383,7 +383,7 @@ EAP_FUNC_EXPORT eap_type_aka_c::eap_type_aka_c(
 //-----------------------------------------------
 
 //
-EAP_FUNC_EXPORT void eap_type_aka_c::initialize_state(
+void eap_type_aka_c::initialize_state(
 				const eap_type_aka_state_variable_e state,
 				const bool must_be_initiator,
 				const bool must_be_responder,
@@ -950,7 +950,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_aka_c::add_RES_payload(
 	// Add padding zero octets
 	if ((data_length % 4u) != 0)
 	{
-		padding_zero_count = static_cast<u16_t>(4u - (data_length % 4u));
+		padding_zero_count = 4u - (data_length % 4u);
 	}
 
 	if (RES->get_data_length()+padding_zero_count
@@ -977,7 +977,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_aka_c::add_RES_payload(
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 	}
 
-	gp_data.reset_header(static_cast<u16_t>(data_length + padding_zero_count));
+	gp_data.reset_header(data_length+padding_zero_count);
 
 	{
 		u8_t *payload_buffer = gp_data.get_data(data_length+padding_zero_count);
@@ -1006,7 +1006,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_aka_c::add_RES_payload(
 	// It is always multiple of 8 bits.
 	gp_data.set_reserved(static_cast<u16_t>(data_length*8ul));
 
-	gp_data.set_data_length(static_cast<u16_t>(data_length + padding_zero_count));
+	gp_data.set_data_length(data_length+padding_zero_count);
 
 	status = eap_status_ok;
 
@@ -2036,7 +2036,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_aka_c::parse_generic_payload(
 			payload->get_payload_length(),
 			payload->get_reserved()));
 
-		status = p_aka_payloads->get_counter_too_small()->set_buffer(
+		status = p_aka_payloads->get_COUNTER_TOO_SMALL()->set_buffer(
 			payload, 0, 0u, false, false);
 
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -2901,6 +2901,8 @@ EAP_FUNC_EXPORT eap_status_e eap_type_aka_c::handle_aka_packet(
 
 //--------------------------------------------------
 
+#if defined(USE_EAP_TRACE)
+
 // 
 EAP_FUNC_EXPORT void eap_type_aka_c::packet_trace(
 	eap_const_string prefix,
@@ -3008,7 +3010,7 @@ EAP_FUNC_EXPORT void eap_type_aka_c::packet_trace(
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
 
-
+#endif //#if defined(USE_EAP_TRACE)
 
 //--------------------------------------------------
 
@@ -5646,6 +5648,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_aka_c::configure()
 
 	//----------------------------------------------------------
 
+#if defined(USE_EAP_EXPANDED_TYPES)
 	{
 		eap_variable_data_c use_eap_expanded_type(m_am_tools);
 
@@ -5679,6 +5682,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_aka_c::configure()
 			}
 		}
 	}
+#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 
 	//----------------------------------------------------------
 
@@ -5952,6 +5956,22 @@ EAP_FUNC_EXPORT eap_status_e eap_type_aka_c::cancel_timer(
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
+//--------------------------------------------------
+
+//
+EAP_FUNC_EXPORT eap_status_e eap_type_aka_c::cancel_all_timers()
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_ASSERT(m_am_tools->get_global_mutex()->get_is_reserved() == true);
+
+	const eap_status_e status = get_type_partner()->cancel_all_timers();
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT const eap_type_aka_state_variable_parameters_c * eap_type_aka_c::get_state_variable()

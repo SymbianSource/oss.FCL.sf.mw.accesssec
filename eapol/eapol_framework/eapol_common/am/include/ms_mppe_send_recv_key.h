@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 7 %
 */
 
 #if !defined(_MS_MPPE_SEND_RECV_KEY_H_)

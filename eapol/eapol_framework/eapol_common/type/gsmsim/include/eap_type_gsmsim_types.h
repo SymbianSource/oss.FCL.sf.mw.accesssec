@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 5 %
 */
 
 #if !defined(_GSMSIM_TYPES_H_)

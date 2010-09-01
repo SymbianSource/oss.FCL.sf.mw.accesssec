@@ -11,12 +11,12 @@
 *
 * Contributors:
 *
-* Description:  This file defines the constants of the protected setup protocol.
+* Description:  EAP and WLAN authentication protocols.
 *
 */
 
 /*
-* %version: 35 %
+* %version: 32.1.2 %
 */
 
 #if !defined(_SIMPLE_CONFIG_TYPES_H_)
@@ -30,7 +30,7 @@
 #include "simple_config_attribute_type.h"
 
 /** @file simple_config_types.h 
- *  @brief This file defines the constants of the protected setup protocol.
+ *  @brief This file defines the constants of the SIMPLE_CONFIG.
  */
 
 //--------------------------------------------------
@@ -325,13 +325,11 @@ public:
 	EAP_FUNC_IMPORT network_key_and_index_c(
 		abs_eap_am_tools_c * const m_am_tools);
 
-	EAP_FUNC_IMPORT u8_t get_network_key_index() const;
+	EAP_FUNC_IMPORT u8_t get_network_key_index();
 
 	EAP_FUNC_IMPORT void set_network_key_index(u8_t index);
 
 	EAP_FUNC_IMPORT eap_variable_data_c * get_network_key();
-
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_network_key_const() const;
 
 	EAP_FUNC_IMPORT network_key_and_index_c * copy();
 
@@ -436,4 +434,7 @@ public:
 #endif //#if !defined(_SIMPLE_CONFIG_TYPES_H_)
 
 //--------------------------------------------------
+
+
+
 // End.

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 6 %
 */
 
 #if !defined(_EAPOL_HEADER_H_)

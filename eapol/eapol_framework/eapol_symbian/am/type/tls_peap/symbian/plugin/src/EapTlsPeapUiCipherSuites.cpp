@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 13.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -30,33 +30,26 @@
 
 // INCLUDE FILES
 #include <e32base.h>
-//#include "EapTlsPeapUtils.h"
+#include "EapTlsPeapUtils.h"
 #include "EapTlsPeapDbParameterNames.h"
 #include "EapTlsPeapDbDefaults.h"
 #include <EapTlsPeapUiConnection.h>
 #include <EapTlsPeapUiCipherSuites.h>
 #include <EapTlsPeapUiCipherSuite.h>
-#include <EapTraceSymbian.h>
-#include <EapType.h>
 
-//const TUint KMaxSqlQueryLength = 256;
+const TUint KMaxSqlQueryLength = 256;
 
 CEapTlsPeapUiCipherSuites::CEapTlsPeapUiCipherSuites(CEapTlsPeapUiConnection * const aUiConn)
 : iIsOpened(EFalse)
 , iUiConn(aUiConn)
 , iDataPtr(NULL)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCipherSuites::CEapTlsPeapUiCipherSuites()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiCipherSuites::CEapTlsPeapUiCipherSuites()\n"));
 }
 
 
 CEapTlsPeapUiCipherSuites::~CEapTlsPeapUiCipherSuites()
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCipherSuites::~CEapTlsPeapUiCipherSuites()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiCipherSuites::~CEapTlsPeapUiCipherSuites()\n"));
-
-	if (iUiConn)
+    if (iUiConn)
     {
         Close();
         iUiConn = NULL;
@@ -66,24 +59,16 @@ CEapTlsPeapUiCipherSuites::~CEapTlsPeapUiCipherSuites()
 
 TInt CEapTlsPeapUiCipherSuites::Open()
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCipherSuites::Open()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiCipherSuites::Open()\n"));
-
     if (iIsOpened)
     {
         return KErrAlreadyExists;
     }
 
-	TEapExpandedType aEapType(iUiConn->GetEapType());
-
-    TRAPD(err, iEapTypeConnection = CEapType::NewL(iUiConn->GetIndexType(), iUiConn->GetIndex(), aEapType));
+    TInt err = iUiConn->GetDatabase(iDatabase);
     if (err != KErrNone)
-        {
-        EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiCipherSuites::Open() CEapType::NewL err=%d\n"),err));
+    {
         return err;
-        }
-    
-    iEapTypeConnection->SetTunnelingType(iUiConn->GetTunnelingType());
+    }
 
     iIsOpened = ETrue;
 
@@ -91,11 +76,8 @@ TInt CEapTlsPeapUiCipherSuites::Open()
 }
 
 
-TInt CEapTlsPeapUiCipherSuites::GetCipherSuites(RPointerArray<TEapTlsPeapUiCipherSuite> ** aDataPtr)
+TInt CEapTlsPeapUiCipherSuites::GetCipherSuites(CArrayFixFlat<TEapTlsPeapUiCipherSuite> ** aDataPtr)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCipherSuites::GetCipherSuites()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiCipherSuites::GetCipherSuites()\n"));
-
     if (aDataPtr == NULL)
     {
         return KErrArgument;
@@ -109,25 +91,19 @@ TInt CEapTlsPeapUiCipherSuites::GetCipherSuites(RPointerArray<TEapTlsPeapUiCiphe
     {
     	*aDataPtr = iDataPtr;
     	return KErrNone;
-	}
-
-    iDataPtr = new RPointerArray<TEapTlsPeapUiCipherSuite>(8);
+    }
+    iDataPtr = new CArrayFixFlat<TEapTlsPeapUiCipherSuite>(8);
     if (!iDataPtr)
     {
         return KErrNoMemory;
     }
     
-    TInt i_ind(0);
-	while (available_cipher_suites[i_ind] != 0)
+    TInt i(0);
+	while (available_cipher_suites[i] != 0)
 	{		
-		TEapTlsPeapUiCipherSuite * const tmp = new TEapTlsPeapUiCipherSuite;
-		if (tmp == 0)
-		{
-	        return KErrNoMemory;
-		}
-
-		tmp->SetCipherSuite(available_cipher_suites[i_ind]);
-		tmp->SetIsEnabled(EFalse);
+		TEapTlsPeapUiCipherSuite tmp;
+		tmp.iCipherSuite = available_cipher_suites[i];
+		tmp.iIsEnabled = EFalse;
 
 		TRAPD(err, iDataPtr->AppendL(tmp));
 		if (err != KErrNone)
@@ -135,38 +111,19 @@ TInt CEapTlsPeapUiCipherSuites::GetCipherSuites(RPointerArray<TEapTlsPeapUiCiphe
 			return err;
 		}
 
-		i_ind++;
+		i++;
 	}
 		
-    EAPSettings aSettings;
     
-	TRAPD(error,iEapTypeConnection->GetConfigurationL(aSettings));
-	if (error)
-	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiCipherSuites::GetCipherSuites() GetConfigurationL(): failed %d\n"), error));
-		return error;
-	}
 
-	if (aSettings.iCipherSuitesPresent)
-	{
-		TInt i_ind(0);
-
-		for (i_ind = 0; i_ind < aSettings.iCipherSuites.Count(); ++i_ind)
-		{
-			TUint aCipherSuite = aSettings.iCipherSuites[i_ind];
-			TInt j_ind(0);
-
-			for (j_ind = 0; j_ind < iDataPtr->Count(); j_ind++)
-			{
-				if ((*iDataPtr)[j_ind]->GetCipherSuite() == aCipherSuite)
-				{
-					(*iDataPtr)[j_ind]->SetIsEnabled(ETrue);
-					break;
-				}
-			}
-		}
-	}
+    TRAPD(err, FetchDataL());
     
+    if (err != KErrNone)
+    {
+        delete iDataPtr;
+        return err;
+    }
+
    	*aDataPtr = iDataPtr;
 
     return KErrNone;
@@ -175,41 +132,105 @@ TInt CEapTlsPeapUiCipherSuites::GetCipherSuites(RPointerArray<TEapTlsPeapUiCiphe
 
 TInt CEapTlsPeapUiCipherSuites::Update()
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCipherSuites::Update()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiCipherSuites::Update()\n"));
-
-	EAPSettings aSettings;
-
-	aSettings.iCipherSuitesPresent = ETrue;
-
-	TInt i_ind(0);
-	
-	for (i_ind = 0; i_ind < iDataPtr->Count(); i_ind++)
-	{
-		if ((*iDataPtr)[i_ind]->GetIsEnabled())
-		{
-			TInt error = aSettings.iCipherSuites.Append((*iDataPtr)[i_ind]->GetCipherSuite());
-			if (error != KErrNone)
-			{
-				return error;
-			}
-		}
-	}
-
-	TRAPD(error,iEapTypeConnection->SetConfigurationL(aSettings));
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiDataConnection::Update(): error = %d\n"),error));
-
-	return error;
+	TRAPD(err, UpdateL());
+	return err;
 }
 
+void CEapTlsPeapUiCipherSuites::UpdateL()
+{
+	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
+	TPtr sqlStatement = buf->Des();
 
+	// Form the query. Query everything.
+	_LIT(KSQLQuery, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+
+	if (iUiConn->GetEapType() == eap_type_tls)
+	{
+		sqlStatement.Format(KSQLQuery,
+							&KTlsAllowedCipherSuitesDatabaseTableName,
+							&KServiceType,
+							iUiConn->GetIndexType(),
+							&KServiceIndex,
+							iUiConn->GetIndex(),
+							&KTunnelingType, 
+							iUiConn->GetTunnelingType());
+	}
+	else if (iUiConn->GetEapType() == eap_type_peap)
+	{
+		sqlStatement.Format(KSQLQuery,
+							&KPeapAllowedCipherSuitesDatabaseTableName,
+							&KServiceType,
+							iUiConn->GetIndexType(),
+							&KServiceIndex,
+							iUiConn->GetIndex(),
+							&KTunnelingType, 
+							iUiConn->GetTunnelingType());
+	}
+	else if (iUiConn->GetEapType() == eap_type_ttls || iUiConn->GetEapType() == eap_type_ttls_plain_pap)
+	{
+		sqlStatement.Format(KSQLQuery,
+							&KTtlsAllowedCipherSuitesDatabaseTableName,
+							&KServiceType,
+							iUiConn->GetIndexType(),
+							&KServiceIndex,
+							iUiConn->GetIndex(),
+							&KTunnelingType, 
+							iUiConn->GetTunnelingType());
+	}
+
+#ifdef USE_FAST_EAP_TYPE
+	else if (iUiConn->GetEapType() == eap_type_fast)
+	{
+		sqlStatement.Format(KSQLQuery,
+							&KFastAllowedCipherSuitesDatabaseTableName,
+							&KServiceType,
+							iUiConn->GetIndexType(),
+							&KServiceIndex,
+							iUiConn->GetIndex(),
+							&KTunnelingType, 
+							iUiConn->GetTunnelingType());
+	}
+#endif //#ifdef USE_FAST_EAP_TYPE
+	
+	// Evaluate view
+	RDbView view;
+	User::LeaveIfError(view.Prepare(iDatabase, TDbQuery(sqlStatement)));
+	CleanupClosePushL(view);
+	User::LeaveIfError(view.EvaluateAll());	
+
+	// Delete old rows
+	if (view.FirstL())
+	{		
+		do {
+			view.DeleteL();
+		} while (view.NextL() != EFalse);
+	}	
+
+	// Get column set so we get the correct column numbers
+	CDbColSet* colSet = view.ColSetL();
+	CleanupStack::PushL(colSet);
+	
+	TInt i(0);
+	
+	for (i = 0; i < iDataPtr->Count(); i++)
+	{
+		if (iDataPtr->At(i).iIsEnabled)
+		{
+			view.InsertL();			
+			view.SetColL(colSet->ColNo(KServiceType), static_cast<TUint>(iUiConn->GetIndexType()));
+			view.SetColL(colSet->ColNo(KServiceIndex), static_cast<TUint>(iUiConn->GetIndex()));
+			view.SetColL(colSet->ColNo(KTunnelingType), static_cast<TUint>(iUiConn->GetTunnelingType()));
+			view.SetColL(colSet->ColNo(KCipherSuite), static_cast<TUint>(iDataPtr->At(i).iCipherSuite));
+			view.PutL();
+		}
+	}
+	CleanupStack::PopAndDestroy(colSet);
+	CleanupStack::PopAndDestroy(); // view
+	CleanupStack::PopAndDestroy(buf);    
+}
 
 TInt CEapTlsPeapUiCipherSuites::Close()
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCipherSuites::Close()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiCipherSuites::Close()\n"));
-
     if (iIsOpened == EFalse)
     {
         return KErrNone;
@@ -220,6 +241,111 @@ TInt CEapTlsPeapUiCipherSuites::Close()
     
     iUiConn = NULL;
     return KErrNone;
+}
+
+
+void CEapTlsPeapUiCipherSuites::FetchDataL()
+{
+	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
+	TPtr sqlStatement = buf->Des();
+
+	// Form the query. Query everything.
+	_LIT(KSQLQuery, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+
+	if (iUiConn->GetEapType() == eap_type_tls)
+	{
+		sqlStatement.Format(KSQLQuery,
+							&KCipherSuite,
+							&KTlsAllowedCipherSuitesDatabaseTableName,
+							&KServiceType,
+							iUiConn->GetIndexType(),
+							&KServiceIndex,
+							iUiConn->GetIndex(),
+							&KTunnelingType, 
+							iUiConn->GetTunnelingType());
+	}
+	else if (iUiConn->GetEapType() == eap_type_peap)
+	{
+		sqlStatement.Format(KSQLQuery,
+							&KCipherSuite,
+							&KPeapAllowedCipherSuitesDatabaseTableName,
+							&KServiceType,
+							iUiConn->GetIndexType(),
+							&KServiceIndex,
+							iUiConn->GetIndex(),
+							&KTunnelingType, 
+							iUiConn->GetTunnelingType());
+	}
+	else if (iUiConn->GetEapType() == eap_type_ttls || iUiConn->GetEapType() == eap_type_ttls_plain_pap)
+	{
+		sqlStatement.Format(KSQLQuery,
+							&KCipherSuite,
+							&KTtlsAllowedCipherSuitesDatabaseTableName,
+							&KServiceType,
+							iUiConn->GetIndexType(),
+							&KServiceIndex,
+							iUiConn->GetIndex(),
+							&KTunnelingType, 
+							iUiConn->GetTunnelingType());
+	}
+
+#ifdef USE_FAST_EAP_TYPE
+	else if (iUiConn->GetEapType() == eap_type_fast)
+	{
+		sqlStatement.Format(KSQLQuery,
+							&KCipherSuite,
+							&KFastAllowedCipherSuitesDatabaseTableName,
+							&KServiceType,
+							iUiConn->GetIndexType(),
+							&KServiceIndex,
+							iUiConn->GetIndex(),
+							&KTunnelingType, 
+							iUiConn->GetTunnelingType());
+	}
+#endif //#ifdef USE_FAST_EAP_TYPE
+	
+	// Evaluate view
+	RDbView view;
+	User::LeaveIfError(view.Prepare(iDatabase, TDbQuery(sqlStatement)));
+	CleanupClosePushL(view);
+	User::LeaveIfError(view.EvaluateAll());	
+	
+	// Get column set so we get the correct column numbers
+	CDbColSet* colSet = view.ColSetL();
+	CleanupStack::PushL(colSet);
+
+	if (view.FirstL())
+	{		
+		do {
+			view.GetL();
+
+			switch (view.ColType(colSet->ColNo(KCipherSuite)))
+			{
+			case EDbColUint32:
+				{
+					// Find the corresponding cipher suite in the list
+					TInt j(0);
+					TUint id = view.ColUint(colSet->ColNo(KCipherSuite));
+					for (j = 0; j < iDataPtr->Count(); j++)
+					{
+						if (iDataPtr->At(j).iCipherSuite == id)
+						{
+							iDataPtr->At(j).iIsEnabled = ETrue;
+							break;
+						}
+					}
+				}
+				break;
+			default:
+				User::Leave(KErrArgument);
+			}
+		} while (view.NextL() != EFalse);
+	}
+	
+	CleanupStack::PopAndDestroy(colSet);					
+	
+	CleanupStack::PopAndDestroy(); // view
+    CleanupStack::PopAndDestroy(buf);
 }
 
 // End of file

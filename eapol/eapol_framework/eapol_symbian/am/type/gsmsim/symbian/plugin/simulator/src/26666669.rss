@@ -16,10 +16,10 @@
 */
 
 /*
-* %version: 3.1.2 %
+* %version: 5 %
 */
 
-#include <ecom/registryinfo.rh>
+#include <ecom/RegistryInfo.rh>
 RESOURCE REGISTRY_INFO theInfo
 {
 dll_uid = 0x26666669;

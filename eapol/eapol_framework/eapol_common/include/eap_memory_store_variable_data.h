@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 10 %
 */
 
 #ifndef EAP_MEMORY_STORE_VARIABLE_DATA_H

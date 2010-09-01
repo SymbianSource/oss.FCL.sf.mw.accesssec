@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 11 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -83,7 +83,9 @@ EAP_FUNC_EXPORT eap_const_string eap_header_string_c::get_eap_type_string(const 
 	else EAP_IF_RETURN_STRING(type, eap_type_fast)
 #endif //#if defined(USE_FAST_EAP_TYPE)
 	else EAP_IF_RETURN_STRING(type, eap_type_saesim)
+#if defined(USE_EAP_EXPANDED_TYPES)
 	else EAP_IF_RETURN_STRING(type, eap_expanded_type_simple_config.get_type())
+#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 	else
 #endif // #if defined(USE_EAP_TRACE_STRINGS)
 	{

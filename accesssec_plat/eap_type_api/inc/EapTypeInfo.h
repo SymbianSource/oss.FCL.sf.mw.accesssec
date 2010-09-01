@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 7 %
 */
 
 #ifndef _EAPTYPEINFO_H_

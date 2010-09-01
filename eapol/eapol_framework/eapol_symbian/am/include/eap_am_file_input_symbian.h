@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 3.1.12 %
 */
 
 #if !defined(_EAP_AM_FILE_INPUT_SYMBIAN_H_)

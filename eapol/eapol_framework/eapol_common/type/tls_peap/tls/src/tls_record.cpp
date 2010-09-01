@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 197 %
+* %version: 177.1.9 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -60,7 +60,7 @@
 	EAP_STATUS_RETURN(tools, eap_status_return_and_create_tls_protocol_alert((status)))
 
 
-EAP_FUNC_EXPORT eap_status_e tls_record_c::eap_status_return_and_create_tls_protocol_alert(
+eap_status_e tls_record_c::eap_status_return_and_create_tls_protocol_alert(
 	const eap_status_e status)
 {
 	if (status != eap_status_ok
@@ -272,18 +272,6 @@ EAP_FUNC_EXPORT tls_record_c::tls_record_c(
 		 (m_is_client == true ? "client": "server")));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: tls_record_c::tls_record_c()");
-
-#if defined(USE_FAST_EAP_TYPE)
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("TLS: tls_record_c::tls_record_c(): EAP-FAST enabled.")));
-#else
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("TLS: tls_record_c::tls_record_c(): EAP-FAST disabled.")));
-#endif //#if defined(USE_FAST_EAP_TYPE)
 
 	if (receive_network_id == 0
 		|| receive_network_id->get_is_valid_data() == false)
@@ -1202,7 +1190,7 @@ EAP_FUNC_EXPORT eap_status_e tls_record_c::set_nai_realm(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT void tls_record_c::send_error_notification(const eap_status_e error)
+void tls_record_c::send_error_notification(const eap_status_e error)
 {
 	// Notifies the lower level of an authentication error.
 
@@ -1944,8 +1932,8 @@ EAP_FUNC_EXPORT eap_status_e tls_record_c::completion_action_check()
 		}
 		case tls_completion_action_complete_create_handshake_type_client_key_exchange:
 		{
-			if ((cipher_suite_is_TLS_RSA() == true
-				 && m_own_encrypted_premaster_secret.get_is_valid_data() == true)
+			if (cipher_suite_is_TLS_RSA() == true
+					&& m_own_encrypted_premaster_secret.get_is_valid_data() == true
 				|| ((cipher_suite_is_TLS_DHE_DSS() == true
 						|| cipher_suite_is_TLS_DHE_RSA() == true
 #if defined(USE_FAST_EAP_TYPE)
@@ -3430,12 +3418,10 @@ EAP_FUNC_EXPORT void tls_record_c::state_notification(
 	EAP_TRACE_ALWAYS(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("this = 0x%08x, %s: starts: tls_record_c::state_notification(): EAP-type 0xfe%06x%08x=%s: m_tls_session_type=%d=%s, tls_state=%d=%s, notification state=%s\n"),
+		(EAPL("this = 0x%08x, %s: starts: tls_record_c::state_notification(): EAP-type 0x%08x: m_tls_session_type=%d=%s, tls_state=%d=%s, notification state=%s\n"),
 		 this,
 		 (m_is_client == true ? "client": "server"),
-		 m_eap_type.get_vendor_id(),
-		 m_eap_type.get_vendor_type(),
-		 eap_header_string_c::get_eap_type_string(m_eap_type),
+		 convert_eap_type_to_u32_t(m_eap_type),
 		 m_tls_session_type,
 		 eap_tls_trace_string_c::get_tls_session_type_string(m_tls_session_type),
 		 m_tls_peap_state,
@@ -3580,11 +3566,9 @@ EAP_FUNC_EXPORT void tls_record_c::state_notification(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("%s: tls_record_c::state_notification(): ")
-				 EAPL("waits TTLS/plain MsChapv2 empty Ack: EAP-type 0xfe%06x%08x=%s\n"),
+				 EAPL("waits TTLS/plain MsChapv2 empty Ack: EAP-type 0x%08x\n"),
 				 (m_is_client == true ? "client": "server"),
-				 m_eap_type.get_vendor_id(),
-				 m_eap_type.get_vendor_type(),
-				 eap_header_string_c::get_eap_type_string(m_eap_type)));
+				 convert_eap_type_to_u32_t(m_eap_type)));
 		}
 #endif //#if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
 
@@ -3638,6 +3622,23 @@ EAP_FUNC_EXPORT eap_status_e tls_record_c::cancel_timer(
 	return get_type_partner()->cancel_timer(
 		initializer,
 		id);
+}
+
+//--------------------------------------------------
+
+// This is commented in abs_tls_base_application_c.
+EAP_FUNC_EXPORT eap_status_e tls_record_c::cancel_all_timers()
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	if (get_type_partner() == 0)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return get_type_partner()->cancel_all_timers();
 }
 
 //--------------------------------------------------
@@ -8863,22 +8864,6 @@ EAP_FUNC_EXPORT eap_status_e tls_record_c::analyse_handshake_type_certificate_re
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_payload);
 		}
-
-		{
-			for (u32_t ind = 0ul; ind < m_peer_certificate_types.get_object_count(); ++ind)
-			{
-				const u8_t * const certificate_type = m_peer_certificate_types.get_object(ind);
-				if (certificate_type != 0)
-				{
-					EAP_TRACE_DEBUG(
-						m_am_tools,
-						TRACE_FLAGS_DEFAULT,
-						(EAPL("peer certificate type %d=0x%02x\n"),
-						*certificate_type,
-						*certificate_type));
-				}
-			}
-		}
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8903,22 +8888,6 @@ EAP_FUNC_EXPORT eap_status_e tls_record_c::analyse_handshake_type_certificate_re
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_payload);
-		}
-
-		{
-			for (u32_t ind = 0ul; ind < m_peer_certificate_authorities.get_object_count(); ++ind)
-			{
-				const eap_variable_data_c * const ca_authority = m_peer_certificate_authorities.get_object(ind);
-				if (ca_authority != 0)
-				{
-					EAP_TRACE_DATA_DEBUG(
-						m_am_tools,
-						EAP_TRACE_FLAGS_MESSAGE_DATA,
-						(EAPL("peer CA-authority"),
-						 ca_authority->get_data(),
-						 ca_authority->get_data_length()));
-				}
-			}
 		}
 	}
 
@@ -12349,9 +12318,6 @@ EAP_FUNC_EXPORT eap_status_e tls_record_c::cipher_suite_initialization_cbc(
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 	}
 
-	// After this point *member_cbc_crypto_block_algorithm will delete crypto_block_algorithm.
-	block_algorithm_remove.do_not_free_variable();
-
 	*member_cbc_crypto_block_algorithm = new crypto_cbc_c(
 		m_am_tools,
 		crypto_block_algorithm,
@@ -12359,6 +12325,15 @@ EAP_FUNC_EXPORT eap_status_e tls_record_c::cipher_suite_initialization_cbc(
 
 	if (*member_cbc_crypto_block_algorithm == 0
 		|| (*member_cbc_crypto_block_algorithm)->get_is_valid() == false)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	// After this point *member_cbc_crypto_block_algorithm will delete crypto_block_algorithm.
+	block_algorithm_remove.do_not_free_variable();
+
+	if ((*member_cbc_crypto_block_algorithm)->get_is_valid() == false)
 	{
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
@@ -16672,12 +16647,6 @@ EAP_FUNC_EXPORT eap_status_e tls_record_c::finish_handshake()
 		&& m_eap_type == eap_type_fast
 		&& m_tls_session_type == tls_session_type_eap_fast_pac_session_resumption)
 	{
-		if (m_application == 0)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_process_general_error);
-		}
-
 		// This is server.
 		// EAP-FAST is using Tunnel PAC.
 		// Here we cannot start tunneled authentication immediately
@@ -16769,10 +16738,7 @@ EAP_FUNC_EXPORT eap_status_e tls_record_c::finish_handshake()
 		}
 	}
 	else if (tmp_identity_privacy_handshake_state == tls_identity_privacy_handshake_state_none
-#if defined(USE_EAP_TLS_IDENTITY_PRIVACY)
-		|| tmp_identity_privacy_handshake_state == tls_identity_privacy_handshake_state_runs
-#endif
-		)
+		|| tmp_identity_privacy_handshake_state == tls_identity_privacy_handshake_state_runs)
 	{
 		if ((m_eap_type == eap_type_peap
 				&& m_peap_version >= peap_version_0_xp
@@ -19074,12 +19040,7 @@ EAP_FUNC_EXPORT eap_status_e tls_record_c::complete_query_certificate_chain(
 		{
 			if (completion_status != eap_status_ok)
 			{
-				EAP_TRACE_DEBUG(
-					m_am_tools,
-					TRACE_FLAGS_DEFAULT,
-					(EAPL("WARNING: TLS: this = 0x%08x, %s: message_function: starts: tls_record_c::complete_query_certificate_chain(): No certificate chain configured.\n"),
-					 this,
-					 (m_is_client == true ? "client": "server")));
+				(void)EAP_STATUS_RETURN(m_am_tools, completion_status);
 			}
 
 			if (m_is_client == false)

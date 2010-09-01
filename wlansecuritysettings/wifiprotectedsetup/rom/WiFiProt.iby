@@ -1,0 +1,38 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Image description file for WifiProtectedSetup
+*
+*/
+
+/*
+* %version: tr1cfwln#9 %
+*/
+
+#ifndef __WIFIPROT_IBY__
+#define __WIFIPROT_IBY__
+
+#ifdef __PROTOCOL_WLAN
+
+REM Wi-Fi Protected Setup
+
+file=ABI_DIR\BUILD_DIR\WIFIPROTCLIENT.DLL		SHARED_LIB_DIR\WIFIPROTCLIENT.DLL
+file=ABI_DIR\BUILD_DIR\WIFIPROTPLUGIN.DLL		SHARED_LIB_DIR\WIFIPROTPLUGIN.DLL
+#else
+//stub for non-WLAN products
+file=ABI_DIR\BUILD_DIR\wifiprotclientstub.dll		SHARED_LIB_DIR\WIFIPROTCLIENT.DLL
+file=ABI_DIR\BUILD_DIR\wifiprotpluginstub.dll		SHARED_LIB_DIR\WIFIPROTPLUGIN.DLL
+
+#endif // __PROTOCOL_WLAN
+
+#endif

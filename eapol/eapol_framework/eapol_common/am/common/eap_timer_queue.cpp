@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 14.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -424,16 +424,6 @@ eap_timer_queue_c::~eap_timer_queue_c()
 
 	deactivate_timer_queue();
 
-	trace_timer();
-
-	EAP_TRACE_TIMER(
-		m_am_tools,
-		TRACE_FLAGS_TIMER_QUEUE,
-		(EAPL("TIMER: eap_timer_queue_c::~eap_timer_queue_c(): m_timer_queue=0x%08x, m_new_event_begin=0x%08x, m_new_event_end=0x%08x\n"),
-		m_timer_queue,
-		m_new_event_begin,
-		m_new_event_end));
-
 	// cancel_all_timers() must be called before destructor.
 	EAP_ASSERT_TOOLS(m_am_tools, m_timer_queue == 0);
 	EAP_ASSERT_TOOLS(m_am_tools, m_new_event_begin == 0);
@@ -699,10 +689,10 @@ u32_t eap_timer_queue_c::pulse_timer(
 
 				if (current != 0)
 				{
-					EAP_TRACE_DEBUG(
+					EAP_TRACE_TIMER(
 						m_am_tools,
 						TRACE_FLAGS_DEFAULT,
-						(EAPL("TIMER: eap_timer_queue_c::timer_expired(): [0x%08x]->initializer(0x%08x)->timer_expired(")
+						(EAPL("TIMER: timer_expired(): [0x%08x]->initializer(0x%08x)->timer_expired(")
 						 EAPL("id 0x%02x, data 0x%08x, original time %8d)\n"),
 						 current,
 						 current->get_initializer(),
@@ -1280,10 +1270,10 @@ eap_status_e eap_timer_queue_c::add_new_pending_timer(
 		 event->get_time_ms()));
 
 	// Adds the new event to the end of the list to keep the order of events correct.
-	EAP_ASSERT((m_new_event_begin == 0
-				&& m_new_event_end == 0)
-			   || (m_new_event_begin != 0
-				   && m_new_event_end != 0));
+	EAP_ASSERT(m_new_event_begin == 0
+		&& m_new_event_end == 0
+		|| m_new_event_begin != 0
+		&& m_new_event_end != 0);
 
 	if (m_new_event_begin == 0
 		&& m_new_event_end == 0)
@@ -1353,16 +1343,6 @@ eap_status_e eap_timer_queue_c::set_timer(
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 	}
 
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("TIMER: eap_timer_queue_c::set_timer(): [0x%08x]->initializer(0x%08x)->set_timer(")
-		 EAPL("id 0x%02x, data 0x%08x, original time %8d)\n"),
-		 event,
-		 event->get_initializer(),
-		 event->get_id(),
-		 event->get_data(),
-		 event->get_original_time()));
 
 	if (m_use_eap_millisecond_timer == true)
 	{
@@ -1458,17 +1438,6 @@ eap_status_e eap_timer_queue_c::cancel_pending_timer(
 				m_new_event_end = previous;
 			}
 
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("TIMER: eap_timer_queue_c::cancel_pending_timer(): [0x%08x]->initializer(0x%08x)->cancel_pending_timer(")
-				 EAPL("id 0x%02x, data 0x%08x, original time %8d)\n"),
-				 remove,
-				 remove->get_initializer(),
-				 remove->get_id(),
-				 remove->get_data(),
-				 remove->get_original_time()));
-
 			remove->set_next(0);
 			delete remove;
 
@@ -1536,15 +1505,14 @@ eap_status_e eap_timer_queue_c::cancel_timer(
 
 		while(cursor != 0)
 		{
-			EAP_TRACE_DEBUG(
+			EAP_TRACE_TIMER(
 				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("TIMER: eap_timer_queue_c::cancel_timer(): [0x%08x]->initializer(0x%08x)->cancel_timer(")
-				 EAPL("id 0x%02x, data 0x%08x, original time %8d)\n"),
+				TRACE_FLAGS_TIMER,
+				(EAPL("TIMER: [0x%08x] cancel_timer(initializer 0x%08x, ")
+				 EAPL("id 0x%02x, original time %8d)\n"),
 				 cursor,
-				 cursor->get_initializer(),
-				 cursor->get_id(),
-				 cursor->get_data(),
+				 initializer,
+				 id,
 				 cursor->get_original_time()));
 
 			if (cursor == m_timer_queue)
@@ -1709,16 +1677,11 @@ eap_status_e eap_timer_queue_c::cancel_all_timers()
 
 			while (cursor != 0)
 			{
-				EAP_TRACE_DEBUG(
+				EAP_TRACE_TIMER(
 					m_am_tools,
-					TRACE_FLAGS_DEFAULT,
-					(EAPL("TIMER: eap_timer_queue_c::cancel_all_timers(): [0x%08x]->initializer(0x%08x)->cancel_all_timers(")
-					 EAPL("id 0x%02x, data 0x%08x, original time %8d)\n"),
-					 cursor,
-					 cursor->get_initializer(),
-					 cursor->get_id(),
-					 cursor->get_data(),
-					 cursor->get_original_time()));
+					TRACE_FLAGS_TIMER,
+					(EAPL("TIMER: [0x%08x] cancel_all_timers()\n"),
+					cursor));
 
 				eap_timer_queue_event_c *next = cursor->get_next_same_time();
 

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 8 %
 */
 
 #if !defined(_TLS_APPLICATION_DATA_MESSAGE_H_)

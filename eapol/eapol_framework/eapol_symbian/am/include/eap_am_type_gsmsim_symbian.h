@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 19.1.4 %
+* %version: 21 %
 */
 
 #if !defined(_EAP_AM_TYPE_GSMSIM_SYMBIAN_H_)
@@ -262,7 +262,6 @@ protected:
 	//--------------------------------------------------
 
 private:
-
 	void type_configure_readL(
 		eap_config_string field,
 		const u32_t field_length,
@@ -338,12 +337,10 @@ private:
 	
 
 private:
-
 	//--------------------------------------------------
-
-	RFs m_session;
+	RDbs m_session;
 	
-	RDbNamedDatabase m_database;
+	RDbNamedDatabase m_database;	
 
 	eap_am_tools_symbian_c * const m_am_tools;
 
@@ -402,6 +399,14 @@ private:
 	
 	// This holds the max session time read from the configuration file.
 	TInt64 m_max_session_time;
+
+	// This is the vendor-type for tunneling EAP type.
+	// Valid for both expanded and non-expanded EAP types.
+	// This is used since m_tunneling_type can not be used in the same way 
+	// in expanded and non-expanded cases. 
+	// Unlike EAP type, Tunneling type is still non-expanded
+	// for both cases especially for using in the EAP databases.
+	u32_t m_tunneling_vendor_type;	
 
 	//--------------------------------------------------
 }; // class eap_am_type_gsmsim_symbian_c

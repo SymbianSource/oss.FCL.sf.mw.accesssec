@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10.1.2 %
+* %version: 12 %
 */
 
 // Interface's (abstract base class's) static factory method implementation.

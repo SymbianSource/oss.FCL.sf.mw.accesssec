@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 4 %
 */
 
 #if !defined(_EAPOL_ETHERNET_ADDRESS_H_)

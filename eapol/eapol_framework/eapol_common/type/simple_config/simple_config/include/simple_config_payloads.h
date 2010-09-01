@@ -11,12 +11,12 @@
 *
 * Contributors:
 *
-* Description:  Defines payloads of protected setup message.
+* Description:  EAP and WLAN authentication protocols.
 *
 */
 
 /*
-* %version: 24.1.3 %
+* %version: 26 %
 */
 
 #if !defined(_SIMPLE_CONFIG_PAYLOADS_H_)
@@ -79,7 +79,7 @@ public:
 
 	EAP_FUNC_IMPORT u8_t * get_data(const u32_t data_length) const;
 
-	EAP_FUNC_IMPORT simple_config_tlv_header_c * get_header();
+	simple_config_tlv_header_c * get_header();
 
 	EAP_FUNC_IMPORT eap_variable_data_c * get_full_attribute_buffer();
 

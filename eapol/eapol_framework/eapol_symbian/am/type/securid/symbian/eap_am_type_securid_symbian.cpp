@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 29.1.36 %
+* %version: 32 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -39,17 +39,14 @@
 #include "eap_am_type_securid_symbian.h"
 #include "EapSecurIDDbParameterNames.h"
 #include "EapSecurIDDbUtils.h"
-#include "EapPluginDbDefaults.h"
-#include "eap_auth_notifier.h"
-
-
+#include "EapSecurIDNotifierStructs.h"
 #include "EapGtcDbParameterNames.h"
 #include "EapGtcDbUtils.h"
 #include "EapSecurIDNotifierUids.h"
 #include "eap_configuration_field.h"
 #include "eap_state_notification.h"
 
-#include "EapTraceSymbian.h"
+#include "eap_am_trace_symbian.h"
 
 const TUint KMaxSqlQueryLength = 256;
 const TUint KMaxDBFieldNameLength = 255;
@@ -78,9 +75,6 @@ EAP_FUNC_EXPORT eap_am_type_securid_symbian_c::~eap_am_type_securid_symbian_c()
 	delete m_dialog_data_pckg_ptr;
 	delete m_message_buf;
 
-	delete iEapAuthNotifier;
-	iEapAuthNotifier = 0;
-
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
 
@@ -96,11 +90,52 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_securid_symbian_c::shutdown()
 		(EAPL("eap_am_type_securid_symbian_c::shutdown(): this = 0x%08x\n"),
 		this));
 
+	if( IsActive() )
+	{
+		Cancel(); // Cancel only if active.
+	}  
+	else
+	{
+		if( m_is_notifier_connected )
+		{
+	EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::shutdown - calling m_notifier.CancelNotifier(..)\n")));
+	
+			TInt error = m_notifier.CancelNotifier(KEapSecurIDIdentityQueryUid);
+			
+	EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::shutdown - CancelNotifier(KEapSecurIDIdentityQueryUid) error=%d\n"), error));
 
+
+			error = m_notifier.CancelNotifier(KEapSecurIDPasscodeQueryUid);
+			
+	EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::shutdown - CancelNotifier(KEapSecurIDPasscodeQueryUid) error=%d\n"), error));
+
+
+			error = m_notifier.CancelNotifier(KEapSecurIDPincodeQueryUid);
+			
+	EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::shutdown - CancelNotifier(KEapSecurIDPincodeQueryUid) error=%d\n"), error));
+
+
+			error = m_notifier.CancelNotifier(KEapGtcIdentityQueryUid);
+			
+	EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::shutdown - CancelNotifier(KEapGtcIdentityQueryUid) error=%d\n"), error));
+
+
+			error = m_notifier.CancelNotifier(KEapGtcUserInputQueryUid);
+			
+	EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::shutdown - CancelNotifier(KEapGtcUserInputQueryUid) error=%d\n"), error));
+
+
+	
+	EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::shutdown - calling m_notifier.Close(), prev error=%d\n"), error));
+
+			m_notifier.Close(); // Call close only if it is connected.	
+			
+			m_is_notifier_connected = false;
+		}
+	}
+	
 	m_shutdown_was_called = true;
 
-	m_partner->cancel_timer(this, EHandlingTimerCall);
-	
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
@@ -136,11 +171,21 @@ eap_am_type_securid_symbian_c::eap_am_type_securid_symbian_c(
 		, m_shutdown_was_called(false)
 		, m_eap_type(aEapType)
 		, m_is_notifier_connected(false)
-		, m_max_session_time(0)
-		, iEapAuthNotifier(0)	
-
+		, m_max_session_time(0)	
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+#ifdef USE_EAP_EXPANDED_TYPES
+
+	m_tunneling_vendor_type = m_tunneling_type.get_vendor_type();
+	m_eap_vendor_type = m_eap_type.get_vendor_type();
+
+#else
+
+	m_tunneling_vendor_type = static_cast<TUint>(m_tunneling_type);
+	m_eap_vendor_type = static_cast<TUint>(m_eap_type);	
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	if (receive_network_id != 0
 		&& receive_network_id->get_is_valid_data() == true)
@@ -200,10 +245,6 @@ eap_am_type_securid_symbian_c* eap_am_type_securid_symbian_c::NewL(
 
 void eap_am_type_securid_symbian_c::ConstructL()
 {
-	TInt error = m_session.Connect();
-	EAP_TRACE_DEBUG_SYMBIAN((_L("eap_am_type_securid_symbian_c::ConstructL(): - m_session.Connect(), error=%d\n"), error));
-	User::LeaveIfError(error);
-
 	// Open/create database
 	if (m_eap_type == eap_type_generic_token_card)
 	{
@@ -214,8 +255,8 @@ void eap_am_type_securid_symbian_c::ConstructL()
 		EapSecurIDDbUtils::OpenDatabaseL(m_database, m_session, m_index_type, m_index, m_tunneling_type);
 	}
 
-	m_dialog_data_ptr = new(ELeave) CEapAuthNotifier::TEapDialogInfo;
-	m_dialog_data_pckg_ptr = new(ELeave) TPckg<CEapAuthNotifier::TEapDialogInfo> (*m_dialog_data_ptr);
+	m_dialog_data_ptr = new(ELeave) TEapSecurIDStruct;
+	m_dialog_data_pckg_ptr = new(ELeave) TPckg<TEapSecurIDStruct> (*m_dialog_data_ptr);
 
 	CActiveScheduler::Add(this);
 }
@@ -281,6 +322,199 @@ void eap_am_type_securid_symbian_c::RunL()
 		 EAPL("m_state, iStatus.Int()=%d\n"),
 		 m_state, iStatus.Int()));
 
+	if (iStatus.Int() == KErrCancel)
+	{
+		delete m_message_buf;
+		m_message_buf = NULL;
+		get_am_partner()->finish_unsuccessful_authentication(true);
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+		return;
+	}
+	
+	if (iStatus.Int() != KErrNone)
+	{
+		delete m_message_buf;
+		m_message_buf = NULL;
+		// Something is very wrong...
+
+		EAP_TRACE_ERROR(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("ERROR: EAP - SecurID notifier or dialog\n")));
+
+		send_error_notification(eap_status_authentication_failure);
+
+		get_am_partner()->finish_unsuccessful_authentication(false);
+
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+		return;
+	}
+
+	switch (m_state)
+	{
+	case EHandlingIdentityQuery:
+		{
+			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("eap_am_type_securid_symbian_c::RunL(): EHandlingIdentityQuery\n")));
+
+			eap_variable_data_c identity(m_am_tools);
+
+			eap_status_e status = identity.set_copy_of_buffer(
+				m_dialog_data_ptr->iIdentity.Ptr(),
+				m_dialog_data_ptr->iIdentity.Size());
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+				(void)EAP_STATUS_RETURN(m_am_tools, status);
+				return;
+			}
+
+			eap_variable_data_c identity_utf8(m_am_tools);
+			status = m_am_tools->convert_unicode_to_utf8(identity_utf8, identity);
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+				(void)EAP_STATUS_RETURN(m_am_tools, status);
+				return;
+			}
+
+			status = get_am_partner()->complete_eap_identity_query(&identity_utf8);
+		}
+		break;
+
+	case EHandlingPasscodeQuery:
+		{
+			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("eap_am_type_securid_symbian_c::RunL(): EHandlingPasscodeQuery\n")));
+
+			eap_variable_data_c passcode(m_am_tools);
+
+			eap_status_e status = passcode.set_copy_of_buffer(
+				m_dialog_data_ptr->iPasscode.Ptr(),
+				m_dialog_data_ptr->iPasscode.Size());
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+				(void)EAP_STATUS_RETURN(m_am_tools, status);
+				return;
+			}
+
+			eap_variable_data_c passcode_utf8(m_am_tools);
+			status = m_am_tools->convert_unicode_to_utf8(passcode_utf8, passcode);
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+				(void)EAP_STATUS_RETURN(m_am_tools, status);
+				return;
+			}
+
+			status = get_am_partner()->client_securid_complete_passcode_query(&passcode_utf8);
+		}
+		break;
+
+	case EHandlingPincodeQuery:
+		{
+			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("eap_am_type_securid_symbian_c::RunL(): EHandlingPincodeQuery\n")));
+
+			eap_variable_data_c pincode(m_am_tools);
+
+			eap_status_e status = pincode.set_copy_of_buffer(
+				m_dialog_data_ptr->iPincode.Ptr(),
+				m_dialog_data_ptr->iPincode.Size());
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+				(void)EAP_STATUS_RETURN(m_am_tools, status);
+				return;
+			}
+
+			eap_variable_data_c passcode(m_am_tools);
+
+			status = passcode.set_copy_of_buffer(
+				m_dialog_data_ptr->iPasscode.Ptr(),
+				m_dialog_data_ptr->iPasscode.Size());
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+				(void)EAP_STATUS_RETURN(m_am_tools, status);
+				return;
+			}
+
+
+			eap_variable_data_c pincode_utf8(m_am_tools);
+			status = m_am_tools->convert_unicode_to_utf8(pincode_utf8, pincode);
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+				(void)EAP_STATUS_RETURN(m_am_tools, status);
+				return;
+			}
+
+			eap_variable_data_c passcode_utf8(m_am_tools);
+			status = m_am_tools->convert_unicode_to_utf8(passcode_utf8, passcode);
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+				(void)EAP_STATUS_RETURN(m_am_tools, status);
+				return;
+			}
+
+			status = get_am_partner()->client_securid_complete_pincode_query(&passcode_utf8, &passcode_utf8);
+		}
+		break;
+
+	case EHandlingGTCQuery:
+		{
+			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("eap_am_type_securid_symbian_c::RunL(): EHandlingGTCQuery\n")));
+
+			delete m_message_buf;
+			m_message_buf = NULL;
+
+			eap_variable_data_c passcode(m_am_tools);
+
+			eap_status_e status = passcode.set_copy_of_buffer(
+				m_dialog_data_ptr->iPasscode.Ptr(),
+				m_dialog_data_ptr->iPasscode.Size());
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+				(void)EAP_STATUS_RETURN(m_am_tools, status);
+				return;
+			}
+
+			eap_variable_data_c passcode_utf8(m_am_tools);
+			status = m_am_tools->convert_unicode_to_utf8(passcode_utf8, passcode);
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+				(void)EAP_STATUS_RETURN(m_am_tools, status);
+				return;
+			}
+			
+			// User must have entered some password and pressed OK.
+			// Treat this as a full authentication and update the Last Auth Time.
+			status = store_authentication_time();
+			if (status != eap_status_ok)
+			{
+				// Storing failed. Don't care.
+				EAP_TRACE_ERROR(m_am_tools, 
+					TRACE_FLAGS_DEFAULT, (
+					EAPL("eap_am_type_securid_symbian_c:Storing Last Full Authentication time failed, status=%d, but continuing\n"), 
+					status));
+
+				status = eap_status_ok;
+			}			
+
+			status = get_am_partner()->client_gtc_complete_user_input_query(&passcode_utf8);
+		}
+		break;
+
+	default:
+		EAP_TRACE_ERROR(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("ERROR: EAP - SecurID illegal state in RunL.\n")));
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+		return;		
+	}
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
 }
@@ -289,8 +523,34 @@ void eap_am_type_securid_symbian_c::RunL()
 
 void eap_am_type_securid_symbian_c::DoCancel()
 {
-	iEapAuthNotifier->Cancel();
+	if( m_is_notifier_connected )
+	{
+	EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::DoCancel - calling m_notifier.CancelNotifier(..)\n")));
+		
+		TInt error = m_notifier.CancelNotifier(KEapSecurIDIdentityQueryUid);
+		
+	EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::DoCancel - CancelNotifier(KEapSecurIDIdentityQueryUid) error=%d\n"), error));
 
+		error = m_notifier.CancelNotifier(KEapSecurIDPasscodeQueryUid);
+		
+	EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::DoCancel - CancelNotifier(KEapSecurIDPasscodeQueryUid) error=%d\n"), error));
+
+		error = m_notifier.CancelNotifier(KEapSecurIDPincodeQueryUid);
+		
+	EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::DoCancel - CancelNotifier(KEapSecurIDPincodeQueryUid) error=%d\n"), error));
+
+		error = m_notifier.CancelNotifier(KEapGtcIdentityQueryUid);
+		
+	EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::DoCancel - CancelNotifier(KEapGtcIdentityQueryUid) error=%d\n"), error));
+
+		error = m_notifier.CancelNotifier(KEapGtcUserInputQueryUid);
+		
+	EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::DoCancel - CancelNotifier(KEapGtcUserInputQueryUid) error=%d\n"), error));
+
+		m_notifier.Close(); // Call close only if it is connected.	
+		
+		m_is_notifier_connected = false;
+	}
 }
 
 //--------------------------------------------------
@@ -302,11 +562,9 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_securid_symbian_c::type_configure_read(
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	EAP_ASSERT(data != 0);
-
 	// Trap must be set here because the OS independent portion of EAP SecurID
 	// that calls this function does not know anything about Symbian.	
 	eap_status_e status(eap_status_ok);
-
 	TRAPD(err, type_configure_readL(
 		field->get_field(),
 		field->get_field_length(),
@@ -336,15 +594,6 @@ void eap_am_type_securid_symbian_c::type_configure_readL(
 	eap_variable_data_c * const data)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_type_securid_symbian_c::type_configure_readL(): m_index_type=%d, m_index=%d, m_tunneling_type=0xfe%06x%08x\n"),
-		m_index_type,
-		m_index,
-		m_tunneling_type.get_vendor_id(),
-		m_tunneling_type.get_vendor_type()));
-
 	EAP_UNREFERENCED_PARAMETER(field_length);
 
 	// Create a buffer for the ascii strings - initialised with the argument
@@ -360,38 +609,17 @@ void eap_am_type_securid_symbian_c::type_configure_readL(
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
 	if (m_eap_type == eap_type_securid)
 	{
-		sqlStatement.Format(
-			KSQLQueryRow,
-			&unicodeString,
-			&KSecurIDTableName, 
-			&KServiceType,
-			m_index_type,
-			&KServiceIndex,
-			m_index,
-			&KTunnelingTypeVendorId,
-			m_tunneling_type.get_vendor_id(),
-			&KTunnelingType, 
-			m_tunneling_type.get_vendor_type());
+		sqlStatement.Format(KSQLQueryRow, &unicodeString, &KSecurIDTableName, 
+			&KServiceType, m_index_type, &KServiceIndex, m_index, &KTunnelingType, m_tunneling_vendor_type);
 	}
 	else
 	{
-		sqlStatement.Format(
-			KSQLQueryRow,
-			&unicodeString,
-			&KGtcTableName, 
-			&KServiceType,
-			m_index_type,
-			&KServiceIndex,
-			m_index,
-			&KTunnelingTypeVendorId,
-			m_tunneling_type.get_vendor_id(),
-			&KTunnelingType, 
-			m_tunneling_type.get_vendor_type());
-	}
-
+		sqlStatement.Format(KSQLQueryRow, &unicodeString, &KGtcTableName, 
+			&KServiceType, m_index_type, &KServiceIndex, m_index, &KTunnelingType, m_tunneling_vendor_type);
+	}	
 	RDbView view;
 	User::LeaveIfError(view.Prepare(m_database, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 	CleanupClosePushL(view);
@@ -501,7 +729,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_securid_symbian_c::configure()
 		// Read Maximum Session Validity Time from the config file
 		eap_variable_data_c sessionTimeFromFile(m_am_tools);
 		
-		eap_status_e status = type_configure_read(
+		eap_status_e status = m_partner->read_configure(
 			cf_str_EAP_GTC_max_session_validity_time.get_field(),
 			&sessionTimeFromFile);
 		
@@ -563,70 +791,51 @@ eap_status_e eap_am_type_securid_symbian_c::show_passcode_query_dialog(
 	eap_variable_data_c * const /*passcode*/,
 	bool is_first_query)
 {
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_type_securid_symbian_c::show_passcode_query_dialog(): is_first_query=%d\n"),
-		is_first_query));
-
-	eap_status_e status = eap_status_pending_request;
-	
-	m_state = EHandlingPasscodeQuery;
-
-	TInt err1 = KErrNone;
-	
-	TRAPD(err, err1 = IsDlgReadyToCompleteL());
-	
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_type_securid_symbian_c::show_passcode_query_dialog(): err=%d result=%d\n"),
-		err, err1));
-
-	if ((err1 == KErrCancel) || err)
-		{
-		TEapExpandedType aEapType(*EapExpandedTypeGtc.GetType());
+	if (!IsActive())
+	{
+		m_state = EHandlingPasscodeQuery;
 		
-		if (iEapAuthNotifier == 0)
-		    {
-		    TRAPD(err, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
-		  	if (err)
-		  		{
-		  			return EAP_STATUS_RETURN(m_am_tools, eap_status_authentication_failure);
-		  		}
-		    }
-
-		if (is_first_query != true)
-			{
-			TRAPD(err1, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeGtcChallengeDialog, m_dialog_data_ptr, aEapType));
-			if (err1)
-				{
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_authentication_failure);
-				}
-			}
-		else
-			{
-			TRAPD(err2, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeGTCQueryDialog, m_dialog_data_ptr, aEapType));
-			if (err2)
-				{
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_authentication_failure);
-				}
-			}
-
-		}
-	else
+		if (is_first_query == true)
 		{
-		EAP_TRACE_DEBUG(
-			m_am_tools, 
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eap_am_type_securid_symbian_c::show_passcode_query_dialog(): EHandlingTimerCall\n")));
-
-		if(m_partner->set_timer(this,EHandlingTimerCall,0 /*data*/,2 /*time ms*/) != eap_status_ok)
-			status = eap_status_process_general_error;	
+			m_dialog_data_ptr->iIsFirstQuery = ETrue;
+		}
+		else
+		{
+			m_dialog_data_ptr->iIsFirstQuery = EFalse;
 		}
 
+		if( !m_is_notifier_connected )
+		{
+			TInt error = m_notifier.Connect();
+			
+			EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::show_passcode_query_dialog - m_notifier.Connect() returned error=%d\n"), error));
+			
+			if( error != KErrNone)
+			{
+				// Can not connect to notifier.
+				return EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(error));		
+			}
+			
+			m_is_notifier_connected = true; // Got connectted to notifier.
+		}
 
-	return EAP_STATUS_RETURN(m_am_tools, status);
+		EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::show_passcode_query_dialog - StartNotifierAndGetResponse - KEapSecurIDPasscodeQueryUid \n")));
+
+		m_notifier.StartNotifierAndGetResponse(
+			iStatus, 
+			KEapSecurIDPasscodeQueryUid, 
+			*m_dialog_data_pckg_ptr, 
+			*m_dialog_data_pckg_ptr);
+
+		SetActive();
+	} 
+	else
+	{
+		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("eap_am_type_securid_symbian_c: Already active when tried to show passcode query dialog.\n")));
+		return eap_status_process_general_error;
+	}
+
+	return eap_status_pending_request;
 }
 
 //--------------------------------------------------
@@ -644,83 +853,80 @@ eap_status_e eap_am_type_securid_symbian_c::show_gtc_query_dialog(
 		message,
 		message_length));
 
-	eap_status_e status = eap_status_pending_request;
-	
-	m_state = EHandlingGTCQuery;
-	
-	TInt err1 = KErrNone;
-	
-	TRAPD(err, err1 = IsDlgReadyToCompleteL());
-	
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_type_securid_symbian_c::show_gtc_query_dialog(): err=%d, result=%d, is_first_query=%d\n"),
-		err,
-		err1,
-		is_first_query));
+	if (!IsActive())
+	{
+		m_state = EHandlingGTCQuery;
 
-	if ((err1 == KErrCancel) || err)
-		{
 		eap_variable_data_c message_utf8(m_am_tools);
 		eap_status_e status = message_utf8.set_buffer(message, message_length, false, false);
 		if (status != eap_status_ok)
-			{
+		{
 			return EAP_STATUS_RETURN(m_am_tools, status);
-			}
+		}
 
 		eap_variable_data_c message_unicode(m_am_tools);
 		status = m_am_tools->convert_utf8_to_unicode(message_unicode, message_utf8);
 		if (status != eap_status_ok)
-			{
-			return EAP_STATUS_RETURN(m_am_tools, status);
-			}
-
-		m_dialog_data_ptr->iUidata.Copy((TText *)message_unicode.get_data(), message_unicode.get_data_length());
-
-		m_dialog_data_ptr->iPassword.Zero();
-
-		TEapExpandedType aEapType(*EapExpandedTypeGtc.GetType());
-		
-		if (iEapAuthNotifier == 0)
-		    {
-		    TRAPD(err, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
-		  	if (err)
-		  		{
-		  			return EAP_STATUS_RETURN(m_am_tools, eap_status_authentication_failure);
-		  		}
-		    }
-
-		if (is_first_query != true)
-			{
-			TRAPD(err1, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeGtcChallengeDialog, m_dialog_data_ptr, aEapType));
-			if (err1)
-				{
-					return EAP_STATUS_RETURN(m_am_tools, eap_status_authentication_failure);
-				}
-			}
-		else
-			{
-			TRAPD(err2, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeGTCUsernamePasswordDialog, m_dialog_data_ptr, aEapType));
-			if (err2)
-				{
-					return EAP_STATUS_RETURN(m_am_tools, eap_status_authentication_failure);
-				}
-			}
-		
-		}
-	else
 		{
-		EAP_TRACE_DEBUG(
-			m_am_tools, 
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eap_am_type_securid_symbian_c::show_gtc_query_dialog(): EHandlingTimerCall\n")));
-
-		if(m_partner->set_timer(this,EHandlingTimerCall, 0 /*data*/, 2 /*time ms*/) != eap_status_ok)
-			status = eap_status_process_general_error;	
+			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 
-	return EAP_STATUS_RETURN(m_am_tools, status);
+		TRAPD(err, m_message_buf = HBufC8::NewL(message_unicode.get_data_length()));
+		if (err != KErrNone)
+		{
+			return eap_status_allocation_error;
+		}
+		TPtr8 messageBufPtr = m_message_buf->Des();
+		messageBufPtr.Copy(message_unicode.get_data(), message_unicode.get_data_length());
+
+		if (is_first_query == true)
+		{
+			m_dialog_data_ptr->iIsFirstQuery = ETrue;
+		}
+		else
+		{
+			m_dialog_data_ptr->iIsFirstQuery = EFalse;
+		}
+		
+		EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::show_gtc_query_dialog - before m_notifier.Connect(), m_is_notifier_connected=%d\n"), m_is_notifier_connected));
+
+		if( !m_is_notifier_connected )
+		{
+			TInt error = m_notifier.Connect();
+			
+			EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::show_gtc_query_dialog - m_notifier.Connect() returned error=%d\n"), error));
+			
+			if( error != KErrNone)
+			{
+				// Can not connect to notifier.
+				return EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(error));		
+			}
+			
+			m_is_notifier_connected = true; // Got connectted to notifier.
+		}
+
+		EAP_TRACE_DATA_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_securid_symbian_c::show_gtc_query_dialog: m_message_buf"),
+			m_message_buf->Ptr(),
+			m_message_buf->Size()));
+
+		m_notifier.StartNotifierAndGetResponse(
+			iStatus, 
+			KEapGtcUserInputQueryUid, 
+			*m_message_buf, 
+			*m_dialog_data_pckg_ptr);
+
+		SetActive();
+	} 
+	else
+	{
+		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("eap_am_type_securid_symbian_c: Already active when tried to show GTC query dialog.\n")));
+		return eap_status_process_general_error;
+	}
+
+	return eap_status_pending_request;
 }
 
 //--------------------------------------------------
@@ -732,426 +938,51 @@ eap_status_e eap_am_type_securid_symbian_c::show_pincode_query_dialog(
 {
 	EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::_pincode_query_dialog - start - is_first_query=%d\n"), is_first_query));
 	
-	eap_status_e status = eap_status_pending_request;
-	
-	TEapExpandedType aEapType(*EapExpandedTypeGtc.GetType());
-	
-	m_state = EHandlingPincodeQuery;
+	if (!IsActive())
+	{
+		m_state = EHandlingPincodeQuery;
 
-	TInt err1 = KErrNone;
-	
-	TRAPD(err, err1 = IsDlgReadyToCompleteL());
-	
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_type_securid_symbian_c::show_pincode_query_dialog(): err=%d, result= %d is_first_query=%d\n"),
-		err,
-		err1,
-		is_first_query));
-
-	if ((err1 == KErrCancel) || err)
+		if (is_first_query == true)
 		{
-
-	    if (iEapAuthNotifier == 0)
-	    	{
-		    TRAPD(err, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
-		  	if (err)
-		  		{
-	  			return EAP_STATUS_RETURN(m_am_tools, eap_status_authentication_failure);
-	  			}
-	    	}
-
-		if (is_first_query != true)
-			{
-			TRAPD(err1, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeGtcChallengeDialog, m_dialog_data_ptr, aEapType));
-			if (err1)
-		  		{
-		  		return EAP_STATUS_RETURN(m_am_tools, eap_status_authentication_failure);
-		  		}
-			}
+			m_dialog_data_ptr->iIsFirstQuery = ETrue;
+		}
 		else
-			{
-			TRAPD(err2, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeGTCQueryDialog, m_dialog_data_ptr, aEapType));
-			if (err2)
-		  		{
-		  		return EAP_STATUS_RETURN(m_am_tools, eap_status_authentication_failure);
-		  		}
-			}
-
-		}
-	else
 		{
-		if(m_partner->set_timer(this,EHandlingTimerCall, 0 /*data*/, 2 /*time ms*/) != eap_status_ok)
-			status = eap_status_process_general_error;	
+			m_dialog_data_ptr->iIsFirstQuery = EFalse;
 		}
 
-
-
-	return EAP_STATUS_RETURN(m_am_tools, status);
-}
-
-//--------------------------------------------------
-
-TInt eap_am_type_securid_symbian_c::IsDlgReadyToCompleteL()
-	{
-
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_type_securid_symbian_c::IsDlgReadyToCompleteL(): m_index_type=%d, m_index=%d, m_tunneling_type=0xfe%06x%08x\n"),
-		m_index_type,
-		m_index,
-		m_tunneling_type.get_vendor_id(),
-		m_tunneling_type.get_vendor_type()));
-
-	TInt status = KErrNone;
-	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
-	TPtr sqlStatement = buf->Des();
-	
-	// Query all the relevant parameters
-	_LIT(KSQLQuery, "SELECT %S, %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-	
-	sqlStatement.Format(
-		KSQLQuery,
-		&cf_str_EAP_GTC_passcode_prompt_literal,
-		&cf_str_EAP_GTC_identity_literal,
-		&cf_str_EAP_GTC_passcode_literal,
-		&KGtcTableName,
-		&KServiceType,
-		m_index_type, 
-		&KServiceIndex,
-		m_index,
-		&KTunnelingTypeVendorId,
-		m_tunneling_type.get_vendor_id(),
-		&KTunnelingType, 
-		m_tunneling_type.get_vendor_type());
-	
-
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_type_securid_symbian_c::IsDlgReadyToCompleteL(): Reads database\n")));
-
-	RDbView view;
-	// Evaluate view
-	User::LeaveIfError(view.Prepare(m_database, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
-	CleanupClosePushL(view);
-	
-	User::LeaveIfError(view.EvaluateAll());
-	
-	// Get the first (and only) row
-	view.FirstL();
-	view.GetL();
-	
-	// Get column set so we get the correct column numbers
-	CDbColSet* colSet = view.ColSetL();
-	CleanupStack::PushL(colSet);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_type_securid_symbian_c::IsDlgReadyToCompleteL(): Reads database\n")));
-
-	TPtrC username = view.ColDes(colSet->ColNo( cf_str_EAP_GTC_identity_literal ) );
-
-	EAP_TRACE_DATA_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_type_securid_symbian_c::IsDlgReadyToCompleteL(): username"),
-		username.Ptr(),
-		username.Size()));
-
-	TPtrC password = view.ColDes(colSet->ColNo( cf_str_EAP_GTC_passcode_literal ) );
-
-	EAP_TRACE_DATA_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_type_securid_symbian_c::IsDlgReadyToCompleteL(): password"),
-		password.Ptr(),
-		password.Size()));
-
-	TUint prompt = view.ColUint(colSet->ColNo(cf_str_EAP_GTC_passcode_prompt_literal));
-
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_type_securid_symbian_c::IsDlgReadyToCompleteL(): prompt=%d\n"),
-		prompt));
-
-
-	if ((EEapDbFalse != prompt)
-		 || (username.Size() == 0) 
-		 || (password.Size() == 0))
+		if( !m_is_notifier_connected )
 		{
-
-		if (username.Size() == 0)
-			{
-			m_dialog_data_ptr->iUsername.Zero();
-			}
-		else
-			{
-			m_dialog_data_ptr->iUsername.Copy(username);
-			}
-
-		status = KErrCancel;
-		}
-	else
-		{
-		status = KErrNone;	
-		m_dialog_data_ptr->iUsername.Copy(username);
-		m_dialog_data_ptr->iPassword.Copy(password);
-		}
-		
-	CleanupStack::PopAndDestroy(colSet); // Delete colSet.
-	CleanupStack::PopAndDestroy(&view); // Close view.
-	CleanupStack::PopAndDestroy(buf); // Delete buf.
-		
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_type_securid_symbian_c::IsDlgReadyToCompleteL(): status=%d\n"),
-		status));
-
-	return status;
-	}
-	
-EAP_FUNC_EXPORT eap_status_e eap_am_type_securid_symbian_c::timer_expired(
-		const u32_t id , void * data)
-	{
-	EAP_UNREFERENCED_PARAMETER(id); // in release
-	EAP_UNREFERENCED_PARAMETER(data); // in release
-	
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("TIMER: [0x%08x]->eap_am_type_securid_symbian_c::timer_expired(id 0x%02x, data 0x%08x).\n"),
-		this, id, data));
-	
-	DlgComplete(KErrNone);
-	return eap_status_ok;	
-	}
-
-EAP_FUNC_EXPORT eap_status_e eap_am_type_securid_symbian_c::timer_delete_data(
-		const u32_t id, void *data)
-	{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-	EAP_UNREFERENCED_PARAMETER(id); // in release
-	EAP_UNREFERENCED_PARAMETER(data); // in release
-
-	eap_status_e status = eap_status_ok;
-
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("TIMER: [0x%08x]->eap_am_type_securid_symbian_c::timer_delete_data(id 0x%02x, data 0x%08x).\n"),
-		this, id, data));
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, status);
+			TInt error = m_notifier.Connect();
 			
-	}
-
-//--------------------------------------------------
-
-EAP_FUNC_EXPORT void eap_am_type_securid_symbian_c::DlgComplete( TInt aStatus )  
-{
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_type_securid_symbian_c::DlgComplete(): m_index_type=%d, m_index=%d, m_tunneling_type=0xfe%06x%08x\n"),
-		m_index_type,
-		m_index,
-		m_tunneling_type.get_vendor_id(),
-		m_tunneling_type.get_vendor_type()));
-
-	if (aStatus == KErrCancel)
-	{
-		delete m_message_buf;
-		m_message_buf = NULL;
-		get_am_partner()->finish_unsuccessful_authentication(true);
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-		return;
-	}
-	
-	if (aStatus != KErrNone)
-	{
-		delete m_message_buf;
-		m_message_buf = NULL;
-		// Something is very wrong...
-
-		EAP_TRACE_ERROR(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("ERROR: EAP - SecurID notifier or dialog\n")));
-
-		send_error_notification(eap_status_authentication_failure);
-
-		get_am_partner()->finish_unsuccessful_authentication(false);
-
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-		return;
-	}
-
-	switch (m_state)
-	{
-	case EHandlingIdentityQuery:
-		{
-			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("eap_am_type_securid_symbian_c::DlgComplete(): EHandlingIdentityQuery\n")));
-
-			eap_variable_data_c identity(m_am_tools);
-
-			eap_status_e status = identity.set_copy_of_buffer(
-				m_dialog_data_ptr->iUsername.Ptr(),
-				m_dialog_data_ptr->iUsername.Size());
-			if (status != eap_status_ok)
+			EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::show_pincode_query_dialog - m_notifier.Connect() returned error=%d\n"), error));
+			
+			if( error != KErrNone)
 			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-				(void)EAP_STATUS_RETURN(m_am_tools, status);
-				return;
-			}
-
-			eap_variable_data_c identity_utf8(m_am_tools);
-			status = m_am_tools->convert_unicode_to_utf8(identity_utf8, identity);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-				(void)EAP_STATUS_RETURN(m_am_tools, status);
-				return;
-			}
-
-			status = get_am_partner()->complete_eap_identity_query(&identity_utf8);
-		}
-		break;
-
-	case EHandlingPasscodeQuery:
-		{
-			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("eap_am_type_securid_symbian_c::DlgComplete(): EHandlingPasscodeQuery\n")));
-
-			eap_variable_data_c passcode(m_am_tools);
-
-			eap_status_e status = passcode.set_copy_of_buffer(
-				m_dialog_data_ptr->iPassword.Ptr(),
-				m_dialog_data_ptr->iPassword.Size());
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-				(void)EAP_STATUS_RETURN(m_am_tools, status);
-				return;
-			}
-
-			eap_variable_data_c passcode_utf8(m_am_tools);
-			status = m_am_tools->convert_unicode_to_utf8(passcode_utf8, passcode);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-				(void)EAP_STATUS_RETURN(m_am_tools, status);
-				return;
-			}
-
-			status = get_am_partner()->client_securid_complete_passcode_query(&passcode_utf8);
-		}
-		break;
-
-	case EHandlingPincodeQuery:
-		{
-			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("eap_am_type_securid_symbian_c::DlgComplete(): EHandlingPincodeQuery\n")));
-
-			eap_variable_data_c pincode(m_am_tools);
-
-			eap_status_e status = pincode.set_copy_of_buffer(
-				m_dialog_data_ptr->iUsername.Ptr(),
-				m_dialog_data_ptr->iUsername.Size());
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-				(void)EAP_STATUS_RETURN(m_am_tools, status);
-				return;
-			}
-
-			eap_variable_data_c passcode(m_am_tools);
-
-			status = passcode.set_copy_of_buffer(
-				m_dialog_data_ptr->iPassword.Ptr(),
-				m_dialog_data_ptr->iPassword.Size());
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-				(void)EAP_STATUS_RETURN(m_am_tools, status);
-				return;
-			}
-
-
-			eap_variable_data_c pincode_utf8(m_am_tools);
-			status = m_am_tools->convert_unicode_to_utf8(pincode_utf8, pincode);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-				(void)EAP_STATUS_RETURN(m_am_tools, status);
-				return;
-			}
-
-			eap_variable_data_c passcode_utf8(m_am_tools);
-			status = m_am_tools->convert_unicode_to_utf8(passcode_utf8, passcode);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-				(void)EAP_STATUS_RETURN(m_am_tools, status);
-				return;
-			}
-
-			status = get_am_partner()->client_securid_complete_pincode_query(&passcode_utf8, &passcode_utf8);
-		}
-		break;
-
-	case EHandlingGTCQuery:
-		{
-			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("eap_am_type_securid_symbian_c::DlgComplete(): EHandlingGTCQuery\n")));
-
-			delete m_message_buf;
-			m_message_buf = NULL;
-
-			eap_variable_data_c passcode(m_am_tools);
-
-			eap_status_e status = passcode.set_copy_of_buffer(
-				m_dialog_data_ptr->iPassword.Ptr(),
-				m_dialog_data_ptr->iPassword.Size());
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-				(void)EAP_STATUS_RETURN(m_am_tools, status);
-				return;
-			}
-
-			eap_variable_data_c passcode_utf8(m_am_tools);
-			status = m_am_tools->convert_unicode_to_utf8(passcode_utf8, passcode);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-				(void)EAP_STATUS_RETURN(m_am_tools, status);
-				return;
+				// Can not connect to notifier.
+				return EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(error));		
 			}
 			
-			// User must have entered some password and pressed OK.
-			// Treat this as a full authentication and update the Last Auth Time.
-			status = store_authentication_time();
-			if (status != eap_status_ok)
-			{
-				// Storing failed. Don't care.
-				EAP_TRACE_ERROR(m_am_tools, 
-					TRACE_FLAGS_DEFAULT, (
-					EAPL("eap_am_type_securid_symbian_c:Storing Last Full Authentication time failed, status=%d, but continuing\n"), 
-					status));
-
-				status = eap_status_ok;
-			}			
-
-			status = get_am_partner()->client_gtc_complete_user_input_query(&passcode_utf8);
+			m_is_notifier_connected = true; // Got connectted to notifier.
 		}
-		break;
 
-	default:
-		EAP_TRACE_ERROR(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("ERROR: EAP - SecurID illegal state in DlgComplete().\n")));
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
-		return;		
+		EAP_TRACE_DEBUG_SYMBIAN((_L(" eap_am_type_securid_symbian_c::show_pincode_query_dialog - StartNotifierAndGetResponse - KEapSecurIDPincodeQueryUid \n")));
+
+		m_notifier.StartNotifierAndGetResponse(
+			iStatus, 
+			KEapSecurIDPincodeQueryUid, 
+			*m_dialog_data_pckg_ptr, 
+			*m_dialog_data_pckg_ptr);
+
+		SetActive();
+	} 
+	else
+	{
+		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("eap_am_type_securid_symbian_c: Already active when tried to show identity query dialog.\n")));
+		return eap_status_process_general_error;
 	}
+
+	return eap_status_pending_request;
 }
 
 //--------------------------------------------------
@@ -1224,29 +1055,13 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_securid_symbian_c::get_memory_store_key
 		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	status = memory_store_key->add_data(
+		&m_tunneling_vendor_type,
+		sizeof(m_tunneling_vendor_type));
+	if (status != eap_status_ok)
 	{
-		u32_t vendor_id = m_tunneling_type.get_vendor_id();
-
-		status = memory_store_key->add_data(
-			&vendor_id,
-			sizeof(vendor_id));
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-	}
-
-	{
-		u32_t vendor_type = m_tunneling_type.get_vendor_type();
-		status = memory_store_key->add_data(
-			&vendor_type,
-			sizeof(vendor_type));
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1265,8 +1080,8 @@ bool eap_am_type_securid_symbian_c::is_session_valid()
 	if (err != KErrNone) 
 	{
 		EAP_TRACE_ERROR(m_am_tools, 
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eap_am_type_securid_symbian_c::is_session_valid(): LEAVE - error=%d, Assuming session is invalid \n"),
+			TRACE_FLAGS_DEFAULT, (
+			EAPL("eap_am_type_securid_symbian_c::is_session_valid - LEAVE - error=%d, Assuming session is invalid \n"),
 			err));
 			
 		sessionValidity = false;
@@ -1283,34 +1098,23 @@ bool eap_am_type_securid_symbian_c::is_session_validL()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_type_securid_symbian_c::is_session_valid(): EAP-tunneling type=0xfe%06x%08x\n"),
-		m_tunneling_type.get_vendor_id(),
-		m_tunneling_type.get_vendor_type()));
+	EAP_TRACE_DEBUG(m_am_tools, 
+		TRACE_FLAGS_DEFAULT, (
+		EAPL("eap_am_type_securid_symbian_c::is_session_valid: EAP vendor type=%d\n"),
+		m_eap_vendor_type));
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 	
 	// Query all the relevant parameters
-	_LIT(KSQLQuery, "SELECT %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQLQuery, "SELECT %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
 	
 	if (m_eap_type == eap_type_generic_token_card)
 	{
-		sqlStatement.Format(
-			KSQLQuery,
-			&cf_str_EAP_GTC_max_session_validity_time_literal,
-			&KGTCLastFullAuthTime,
-			&KGtcTableName,
-			&KServiceType,
-			m_index_type, 
-			&KServiceIndex,
-			m_index,
-			&KTunnelingTypeVendorId,
-			m_tunneling_type.get_vendor_id(),
-			&KTunnelingType, 
-			m_tunneling_type.get_vendor_type());
+		sqlStatement.Format(KSQLQuery, &cf_str_EAP_GTC_max_session_validity_time_literal,
+							&KGTCLastFullAuthTime, &KGtcTableName,
+							&KServiceType, m_index_type, 
+							&KServiceIndex, m_index, &KTunnelingType, m_tunneling_vendor_type);
 	}
 	else
 	{
@@ -1324,7 +1128,7 @@ bool eap_am_type_securid_symbian_c::is_session_validL()
 
 	RDbView view;
 	// Evaluate view
-	User::LeaveIfError(view.Prepare(m_database, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
+	User::LeaveIfError(view.Prepare(m_database, TDbQuery(sqlStatement)));
 	CleanupClosePushL(view);
 	
 	User::LeaveIfError(view.EvaluateAll());
@@ -1454,30 +1258,20 @@ void eap_am_type_securid_symbian_c::store_authentication_timeL()
 	
 	EAP_TRACE_DEBUG(m_am_tools, 
 		TRACE_FLAGS_DEFAULT, (
-		EAPL("eap_am_type_securid_symbian_c::store_authentication_timeL: EAP-tunneling type=0xfe%06x%08x\n"),
-		m_tunneling_type.get_vendor_id(),
-		m_tunneling_type.get_vendor_type()));	
+		EAPL("eap_am_type_securid_symbian_c::store_authentication_timeL: EAP Vendor Type=%d\n"),
+		m_eap_vendor_type));	
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 	
 	// Query all the relevant parameters
-	_LIT(KSQLQuery, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQLQuery, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
 	
 	if (m_eap_type == eap_type_generic_token_card)
 	{
-		sqlStatement.Format(
-			KSQLQuery,
-			&KGTCLastFullAuthTime,
-			&KGtcTableName,
-			&KServiceType,
-			m_index_type, 
-			&KServiceIndex,
-			m_index,
-			&KTunnelingTypeVendorId,
-			m_tunneling_type.get_vendor_id(),
-			&KTunnelingType, 
-			m_tunneling_type.get_vendor_type());
+		sqlStatement.Format(KSQLQuery, &KGTCLastFullAuthTime, &KGtcTableName,
+							&KServiceType, m_index_type, 
+							&KServiceIndex, m_index, &KTunnelingType, m_tunneling_vendor_type);
 	}
 	else
 	{
@@ -1487,7 +1281,7 @@ void eap_am_type_securid_symbian_c::store_authentication_timeL()
 		CleanupStack::PopAndDestroy(buf); // Delete buf.
 		User::Leave(KErrNotSupported);		
 	}
-
+		
 	RDbView view;
 	// Evaluate view
 	User::LeaveIfError(view.Prepare(m_database, TDbQuery(sqlStatement), TDbWindow::EUnlimited));

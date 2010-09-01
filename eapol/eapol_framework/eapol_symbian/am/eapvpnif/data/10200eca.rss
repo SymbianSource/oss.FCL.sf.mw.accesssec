@@ -17,10 +17,10 @@
 */
 
 /*
-* %version: 9.1.2 %
+* %version: 11 %
 */
 
-#include <ecom/registryinfo.rh>
+#include <ecom/RegistryInfo.rh>
 
 RESOURCE REGISTRY_INFO theInfo
 	{

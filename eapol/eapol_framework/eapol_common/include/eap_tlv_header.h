@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 5 %
 */
 
 #if !defined(_EAP_TLV_HEADER_H_)

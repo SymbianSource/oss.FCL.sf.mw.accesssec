@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 12 %
 */
 
 #if !defined(_SIMPLE_CONFIG_COMPLETION_H_)

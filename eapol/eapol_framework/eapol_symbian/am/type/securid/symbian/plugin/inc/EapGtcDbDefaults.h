@@ -16,15 +16,20 @@
 */
 
 /*
-* %version: %
+* %version: 8.1.2 %
 */
 
 #ifndef EAPGTCDBDEFAULTS_H
 #define EAPGTCDBDEFAULTS_H
 
-#include "EapPluginDbDefaults.h"
 // LOCAL CONSTANTS
 
+_LIT(default_EAP_GTC_identity, "");
+
+const TInt64 default_MaxSessionTime = 0; // 0 means read from configuration file.
+const TInt64 default_FullAuthTime = 0;
+
+const TUint KMaxIdentityLengthInDB = 255;
 
 #endif // EAPGTCDBDEFAULTS_H
 

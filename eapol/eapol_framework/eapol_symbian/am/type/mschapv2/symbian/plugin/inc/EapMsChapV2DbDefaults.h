@@ -16,12 +16,29 @@
 */
 
 /*
-* %version: %
+* %version: 12 %
 */
 
 #ifndef _EAPMSCHAPV2DBDEFAULTS_H_
 #define _EAPMSCHAPV2DBDEFAULTS_H_
 
-#include "EapPluginDbDefaults.h"
+enum TMSCHAPV2PasswordPrompt
+{
+	EMSCHAPV2PasswordPromptOff,		// False. Don't show password prompt.
+	EMSCHAPV2PasswordPromptOn,		// True. Show password prompt.
+};
+
+// LOCAL CONSTANTS
+
+const TUint default_EAP_MSCHAPV2_password_prompt = EMSCHAPV2PasswordPromptOff;
+
+_LIT(default_EAP_MSCHAPV2_username, "");
+_LIT(default_EAP_MSCHAPV2_password, "");
+
+const TInt64 default_MaxSessionTime = 0; // 0 means read from configuration file.
+const TInt64 default_FullAuthTime = 0;
+
+const TUint KMaxUsernameLengthInDB = 255;
+const TUint KMaxPasswordLengthInDB = 255;
 
 #endif // _EAPMSCHAPV2DBDEFAULTS_H_

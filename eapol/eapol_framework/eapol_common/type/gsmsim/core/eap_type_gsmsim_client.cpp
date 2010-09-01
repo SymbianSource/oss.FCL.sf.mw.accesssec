@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 31.1.2 %
+* %version: 33 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -5072,7 +5072,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_gsmsim_c::handle_reauthentication_request_
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eap_type_gsmsim_c::handle_eap_identity_query(
+eap_status_e eap_type_gsmsim_c::handle_eap_identity_query(
 	const eap_am_network_id_c * const send_network_id,
 	eap_variable_data_c * const p_identity,
 	const u8_t eap_identifier,
@@ -5458,7 +5458,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_gsmsim_c::handle_eap_identity_query(
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eap_type_gsmsim_c::query_eap_identity(
+eap_status_e eap_type_gsmsim_c::query_eap_identity(
 	const bool must_be_synchronous,
 	eap_variable_data_c * const identity,
 	const eap_am_network_id_c * const receive_network_id,

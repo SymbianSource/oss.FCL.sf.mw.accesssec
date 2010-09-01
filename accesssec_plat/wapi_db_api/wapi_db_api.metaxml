@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<api id="c0331af85644a1aab6d4a94443387df2" dataversion="1.0">
+<name>WAPI DB API</name>
+<description>Interface for the WAPI UI to access the settings in the WAPI DBMS database.</description>
+<type>c++</type>
+<subsystem>eapol</subsystem>
+<libs></libs>
+<release category="domain" sinceversion="5.0"/>
+<attributes>
+<htmldocprovided>no</htmldocprovided>
+<adaptation>no</adaptation>
+</attributes>
+</api>

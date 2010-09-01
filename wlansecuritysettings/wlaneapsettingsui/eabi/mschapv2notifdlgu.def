@@ -1,0 +1,7 @@
+EXPORTS
+	_Z13NotifierArrayv @ 1 NONAME
+	_ZTI15CMsChapv2Dialog @ 2 NONAME ; #<TI>#
+	_ZTI21CMsChapv2DialogPlugin @ 3 NONAME ; #<TI>#
+	_ZTV15CMsChapv2Dialog @ 4 NONAME ; #<VT>#
+	_ZTV21CMsChapv2DialogPlugin @ 5 NONAME ; #<VT>#
+

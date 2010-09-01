@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 4 %
 */
 
 #ifndef _EAPPROTECTEDSETUPGLOBAL_H_

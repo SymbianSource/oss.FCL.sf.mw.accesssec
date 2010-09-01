@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 36 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -582,7 +582,7 @@ EAP_FUNC_EXPORT void crypto_cbc_c::cbc_xor_block(
 
 		for (u32_t ind = 0u; ind < block_size/sizeof(u64_t); ind++)
 		{
-			pdata[ind] = static_cast<u64_t>(pdata[ind] ^ pIV[ind]);
+			pdata[ind] ^= pIV[ind];
 		}
 	}
 	else
@@ -595,7 +595,7 @@ EAP_FUNC_EXPORT void crypto_cbc_c::cbc_xor_block(
 
 		for (u32_t ind = 0u; ind < block_size/sizeof(u32_t); ind++)
 		{
-			pdata[ind] = static_cast<u32_t>(pdata[ind] ^ pIV[ind]);
+			pdata[ind] ^= pIV[ind];
 		}
 	}
 	else if ((reinterpret_cast<u32_t>(cipher_IV) % sizeof(u16_t)) == 0
@@ -606,7 +606,7 @@ EAP_FUNC_EXPORT void crypto_cbc_c::cbc_xor_block(
 
 		for (u32_t ind = 0u; ind < block_size/sizeof(u16_t); ind++)
 		{
-			pdata[ind] = static_cast<u16_t>(pdata[ind] ^ pIV[ind]);
+			pdata[ind] ^= pIV[ind];
 		}
 	}
 	else
@@ -616,7 +616,7 @@ EAP_FUNC_EXPORT void crypto_cbc_c::cbc_xor_block(
 
 		for (u32_t ind = 0u; ind < block_size/sizeof(u8_t); ind++)
 		{
-			pdata[ind] = static_cast<u8_t>(pdata[ind] ^ pIV[ind]);
+			pdata[ind] ^= pIV[ind];
 		}
 	}
 }
@@ -5293,7 +5293,7 @@ eap_status_e crypto_wpa_psk_password_hash_c::password_hash_F(
 
 		for (j_ind = 0; j_ind < digest_length; j_ind++)
 		{
-			p_output[j_ind] = static_cast<u8_t>(p_output[j_ind] ^ p_digest[j_ind]);
+			p_output[j_ind] ^= p_digest[j_ind];
 		}
 	} // for()
 

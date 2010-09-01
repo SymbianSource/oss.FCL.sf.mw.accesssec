@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10.1.2 %
+* %version: 12 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -304,7 +304,7 @@ EAP_FUNC_EXPORT u16_t gsmsim_header_c::get_data_length() const
 	}
 }
 
-EAP_FUNC_EXPORT u32_t gsmsim_header_c::get_sub_type_offset() const
+u32_t gsmsim_header_c::get_sub_type_offset() const
 {
 	return eap_header_base_c::get_header_length() + eap_header_base_c::get_type_field_length() + m_subtype_delta_offset;
 }

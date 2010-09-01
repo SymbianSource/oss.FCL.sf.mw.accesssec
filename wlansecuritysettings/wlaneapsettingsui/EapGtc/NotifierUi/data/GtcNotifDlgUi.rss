@@ -1,0 +1,126 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Resorce file of GtcNotif.
+*
+*/
+
+/*
+* %version: 16 %
+*/
+
+// RESOURCE IDENTIFIER
+NAME EGTC
+
+
+// INCLUDES
+#include <eikon.rh>
+#include <eikon.rsg>
+
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <apsettings.mbg>
+
+#include <avkon.hrh>
+#include <avkon.loc>
+
+#include <gtcnotifdlg.loc>
+
+
+// RESOURCE DEFINITIONS 
+
+RESOURCE RSS_SIGNATURE { }
+
+
+RESOURCE CBA r_gtcnotif_softkeys_ok_cancel_select
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOk; txt = text_softkey_ok; },
+        CBA_BUTTON { id = EAknSoftkeyCancel; txt = text_softkey_cancel; },
+        CBA_BUTTON { id = EAknSoftkeyOk; txt = qtn_msk_select; }
+        };
+    }
+    
+
+RESOURCE DIALOG r_gtc_password_query
+    {
+    flags = EEikDialogFlagNoDrag | EEikDialogFlagNoTitleBar | 
+            EEikDialogFlagCbaButtons | EEikDialogFlagNotifyEsc;
+    buttons = r_gtcnotif_softkeys_ok_cancel_select;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control= AVKON_DATA_QUERY 
+                { 
+                layout = ECodeLayout;
+                label = "";
+                control = SECRETED 
+                    {
+                    num_letters = 255;
+                    };
+                };
+            }
+        };
+    }
+    
+
+RESOURCE CBA r_gtcnotif_softkeys_ok___select
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOk; txt = text_softkey_ok; },
+        CBA_BUTTON { },
+        CBA_BUTTON { id = EAknSoftkeyOk; txt = qtn_msk_select; }
+        };
+    }
+
+
+RESOURCE DIALOG r_message_query
+    {
+    flags = EEikDialogFlagNoDrag | EEikDialogFlagNoTitleBar | 
+            EEikDialogFlagCbaButtons | EEikDialogFlagNotifyEsc;
+    buttons = r_gtcnotif_softkeys_ok___select;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtPopupHeadingPane;
+            id = EAknMessageQueryHeaderId;
+            control = AVKON_HEADING
+                {
+                label = qtn_wlan_eap_gtc_notif_message;
+                };
+            },
+
+        DLG_LINE
+            {
+            type = EAknCtMessageQuery;
+            id = EAknMessageQueryContentId;
+            control = AVKON_MESSAGE_QUERY
+                {
+                };
+            }
+        };
+    }
+
+
+RESOURCE TBUF r_gtc_response    { buf = qtn_wlan_eap_gtc_notif_response; }
+RESOURCE TBUF r_gtc_message     { buf = qtn_wlan_eap_gtc_notif_message; }
+RESOURCE TBUF r_gtc_username    { buf = qtn_wlan_eap_gtc_notif_username; }
+
+
+// End of File

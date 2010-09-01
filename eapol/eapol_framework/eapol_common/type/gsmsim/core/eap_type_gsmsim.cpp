@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 37 %
+* %version: 27.1.4 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -344,7 +344,7 @@ EAP_FUNC_EXPORT eap_type_gsmsim_c::eap_type_gsmsim_c(
 #if !defined(NO_EAP_TYPE_GSMSIM_MESSAGE_STATE_CHECK)
 
 //
-EAP_FUNC_EXPORT void eap_type_gsmsim_c::initialize_state(
+void eap_type_gsmsim_c::initialize_state(
 				const eap_type_gsmsim_state_variable_e state,
 				const bool must_be_initiator,
 				const bool must_be_responder,
@@ -626,7 +626,7 @@ EAP_FUNC_EXPORT const eap_type_gsmsim_state_variable_parameters_c * eap_type_gsm
  * This function saves the current m_state to m_saved_previous_state.
  * The saved state is restored in error case.
  */
-EAP_FUNC_EXPORT void eap_type_gsmsim_c::save_current_state()
+void eap_type_gsmsim_c::save_current_state()
 {
 	m_saved_previous_state = m_state;
 }
@@ -636,7 +636,7 @@ EAP_FUNC_EXPORT void eap_type_gsmsim_c::save_current_state()
 /**
  * This function restores the saved state.
  */
-EAP_FUNC_EXPORT void eap_type_gsmsim_c::restore_saved_previous_state()
+void eap_type_gsmsim_c::restore_saved_previous_state()
 {
 	set_state(m_saved_previous_state);
 }
@@ -2719,7 +2719,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_gsmsim_c::parse_generic_payload(
 			payload->get_payload_length(),
 			payload->get_reserved()));
 
-		status = p_gsmsim_payloads->get_counter_too_small()->set_buffer(
+		status = p_gsmsim_payloads->get_COUNTER_TOO_SMALL()->set_buffer(
 			payload, 0, 0u, false, false);
 
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -3665,6 +3665,8 @@ EAP_FUNC_EXPORT eap_status_e eap_type_gsmsim_c::handle_gsmsim_packet(
 
 //--------------------------------------------------
 
+#if defined(USE_EAP_TRACE)
+
 // 
 EAP_FUNC_EXPORT void eap_type_gsmsim_c::packet_trace(
 	eap_const_string prefix,
@@ -3775,6 +3777,7 @@ EAP_FUNC_EXPORT void eap_type_gsmsim_c::packet_trace(
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
 
+#endif //#if defined(USE_EAP_TRACE)
 
 //--------------------------------------------------
 
@@ -4653,8 +4656,8 @@ EAP_FUNC_EXPORT eap_status_e eap_type_gsmsim_c::gsmsim_packet_process(
 		TRACE_FLAGS_DEFAULT, 
 		(EAPL("received: GSMSIM packet"),
 		 received_gsmsim->get_header_buffer(
-			 received_gsmsim->get_header_buffer_length()),
-		 received_gsmsim->get_header_buffer_length()));
+			 received_gsmsim->get_header_length()+received_gsmsim->get_data_length()),
+		 received_gsmsim->get_header_length()+received_gsmsim->get_data_length()));
 
 	if (received_gsmsim->get_type() == eap_type_identity)
 	{
@@ -6476,6 +6479,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_gsmsim_c::configure()
 
 	//----------------------------------------------------------
 
+#if defined(USE_EAP_EXPANDED_TYPES)
 	{
 		eap_variable_data_c use_eap_expanded_type(m_am_tools);
 
@@ -6509,6 +6513,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_gsmsim_c::configure()
 			}
 		}
 	}
+#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 
 	//----------------------------------------------------------
 
@@ -6782,6 +6787,21 @@ EAP_FUNC_EXPORT eap_status_e eap_type_gsmsim_c::cancel_timer(
 	const eap_status_e status = get_type_partner()->cancel_timer(
 		p_initializer, 
 		p_id);
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
+//
+EAP_FUNC_EXPORT eap_status_e eap_type_gsmsim_c::cancel_all_timers()
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_ASSERT(m_am_tools->get_global_mutex()->get_is_reserved() == true);
+
+	const eap_status_e status = get_type_partner()->cancel_all_timers();
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);

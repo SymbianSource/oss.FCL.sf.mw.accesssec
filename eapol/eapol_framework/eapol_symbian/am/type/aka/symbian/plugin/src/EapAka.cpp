@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 25 %
+* %version: 15.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -37,11 +37,12 @@
 #include <EapTypeInfo.h>
 #include "eap_am_type_aka_symbian.h"
 #include "EapAkaDbUtils.h"
-#include "EapConversion.h"
+
+#include <EapAkaUiConnection.h>
+#include "EapAkaUi.h"
+
 
 #include "eap_am_tools_symbian.h"
-#include "EapTraceSymbian.h"
-
 
 // LOCAL CONSTANTS
 
@@ -137,19 +138,40 @@ eap_base_type_c* CEapAka::GetStackInterfaceL(abs_eap_am_tools_c* const aTools,
 }
 
 // ----------------------------------------------------------
+TInt CEapAka::InvokeUiL()
+{
+	TInt buttonId(0);
+ 
+#ifdef USE_EAP_EXPANDED_TYPES
 
-CEapTypeInfo* CEapAka::GetInfoL()
+    CEapAkaUiConnection uiConn(iIndexType, iIndex, iTunnelingType.get_vendor_type());
+	
+#else
+
+    CEapAkaUiConnection uiConn(iIndexType, iIndex, iTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
+ 
+	CEapAkaUi* ui = CEapAkaUi::NewL(&uiConn);
+	CleanupStack::PushL(ui);
+	buttonId = ui->InvokeUiL();
+	CleanupStack::PopAndDestroy(ui);
+	return buttonId;
+}
+
+// ----------------------------------------------------------
+CEapTypeInfo* CEapAka::GetInfoLC()
 {
 	CEapTypeInfo* info = new(ELeave) CEapTypeInfo(
 		(TDesC&)KReleaseDate, 
 		(TDesC&)KEapTypeVersion,
 		(TDesC&)KManufacturer);
 
+	CleanupStack::PushL(info);
 	return info;
 }
 
 // ----------------------------------------------------------
-
 void CEapAka::DeleteConfigurationL()
 {		
 	EapAkaDbUtils::DeleteConfigurationL(iIndexType, iIndex, iTunnelingType);
@@ -164,22 +186,19 @@ TUint CEapAka::GetInterfaceVersion()
 
 // ----------------------------------------------------------
 
-void CEapAka::SetTunnelingType(const TEapExpandedType aTunnelingType)
-    {
-    EAP_TRACE_DATA_DEBUG_SYMBIAN(
-         (EAPL("CEapAka::SetTunnelingType - tunneling type"),
-         aTunnelingType.GetValue().Ptr(), aTunnelingType.GetValue().Length()));
-   
-    eap_type_value_e aInternalType;
-    
-    TInt err = CEapConversion::ConvertExpandedEAPTypeToInternalType(
-            &aTunnelingType,
-            &aInternalType);
-    
-    iTunnelingType = aInternalType;
-    
-    
-    }
+void CEapAka::SetTunnelingType(const TInt aTunnelingType)
+{
+#ifdef USE_EAP_EXPANDED_TYPES
+
+	// Vendor id is eap_type_vendor_id_ietf always in this plugin.
+	iTunnelingType.set_eap_type_values(eap_type_vendor_id_ietf, aTunnelingType);
+
+#else
+
+	iTunnelingType = static_cast<eap_type_value_e>(aTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
+}
 
 
 // ----------------------------------------------------------
@@ -204,16 +223,13 @@ void CEapAka::SetIndexL(
 
 	RDbNamedDatabase db;
 
-	RFs session;
+	RDbs session;
+	
+	EapAkaDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-	TInt error = session.Connect();
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapAka::SetIndexL(): - session.Connect(), error=%d\n"), error));
-	User::LeaveIfError(error);
-
-	EapAkaDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-	
+		
 	EapAkaDbUtils::SetIndexL(
 		db, 
 		iIndexType, 
@@ -226,11 +242,7 @@ void CEapAka::SetIndexL(
 	iIndexType = aIndexType;
 	iIndex = aIndex;
 
-	db.Close();
-	session.Close();
-
-	CleanupStack::PopAndDestroy(&db);
-	CleanupStack::PopAndDestroy(&session);
+	CleanupStack::PopAndDestroy(2); // db	
 }
 
 // ----------------------------------------------------------
@@ -239,29 +251,22 @@ void CEapAka::SetConfigurationL(const EAPSettings& aSettings)
 {
 	RDbNamedDatabase db;
 
-	RFs session;
-
-	CleanupClosePushL(session);
-	CleanupClosePushL(db);
-	TInt error = session.Connect();
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapAka::SetConfigurationL(): - session.Connect(), error=%d\n"), error));
-	User::LeaveIfError(error);
-
+	RDbs session;	
+	
 	// This also creates the IAP entry if it doesn't exist
 	EapAkaDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
 	
+	CleanupClosePushL(session);
+	CleanupClosePushL(db);
+
 	EapAkaDbUtils::SetConfigurationL(
 		db,
 		aSettings, 
 		iIndexType,
 		iIndex,
 		iTunnelingType);		
-
-	db.Close();
-	session.Close();
-
-	CleanupStack::PopAndDestroy(&db);
-	CleanupStack::PopAndDestroy(&session);
+		
+	CleanupStack::PopAndDestroy(2); // db, session
 }
 
 // ----------------------------------------------------------
@@ -270,16 +275,13 @@ void CEapAka::GetConfigurationL(EAPSettings& aSettings)
 {
 	RDbNamedDatabase db;
 
-	RFs session;
-
-	CleanupClosePushL(session);
-	CleanupClosePushL(db);
-	TInt error = session.Connect();
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapAka::SetConfigurationL(): - session.Connect(), error=%d\n"), error));
-	User::LeaveIfError(error);
-
+	RDbs session;
+	
 	// This also creates the IAP entry if it doesn't exist
 	EapAkaDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+	
+	CleanupClosePushL(session);
+	CleanupClosePushL(db);
 
 	EapAkaDbUtils::GetConfigurationL(
 		db,
@@ -287,12 +289,8 @@ void CEapAka::GetConfigurationL(EAPSettings& aSettings)
 		iIndexType,
 		iIndex,
 		iTunnelingType);
-
-	db.Close();
-	session.Close();
-
-	CleanupStack::PopAndDestroy(&db);
-	CleanupStack::PopAndDestroy(&session);
+		
+	CleanupStack::PopAndDestroy(2); // db, session
 }
 
 // ----------------------------------------------------------
@@ -318,16 +316,13 @@ void CEapAka::CopySettingsL(
 
 	RDbNamedDatabase db;
 
-	RFs session;
-
+	RDbs session;
+	
+	EapAkaDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
+	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-	TInt error = session.Connect();
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapAka::CopySettingsL(): - session.Connect(), error=%d\n"), error));
-	User::LeaveIfError(error);
-
-	EapAkaDbUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType);
-
+		
 	EapAkaDbUtils::CopySettingsL(
 		db,
 		iIndexType,
@@ -336,12 +331,8 @@ void CEapAka::CopySettingsL(
 		aDestinationIndexType, 
 		aDestinationIndex, 
 		iTunnelingType);
-
-	db.Close();
-	session.Close();
-
-	CleanupStack::PopAndDestroy(&db);
-	CleanupStack::PopAndDestroy(&session);
+		
+	CleanupStack::PopAndDestroy(2); // db
+	
 }
-
 // End of file

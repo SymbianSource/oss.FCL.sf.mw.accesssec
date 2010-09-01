@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 9 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -76,8 +76,8 @@ EAP_FUNC_EXPORT bool eap_type_gsmsim_state_variable_parameters_c::check_valid_ty
 
 EAP_FUNC_EXPORT bool eap_type_gsmsim_state_variable_parameters_c::check_initiator(const bool is_initiator) const
 {
-	if ((m_must_be_initiator == true && is_initiator == false)
-		|| (m_must_be_responder == true && is_initiator == true))
+	if (m_must_be_initiator == true && is_initiator == false
+		|| m_must_be_responder == true && is_initiator == true)
 	{
 		return false;
 	}

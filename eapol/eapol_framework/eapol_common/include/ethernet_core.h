@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 33 %
+* %version: 19.1.2 %
 */
 
 #if !defined(_ETHERNET_CORE_H_)
@@ -32,14 +32,12 @@
 #include "eap_core_map.h"
 #include "abs_eap_stack_interface.h"
 #include "eapol_rsna_key_header.h"
-#include "eap_database_reference_if.h"
 
 
 /// This class defines the ethernet protocol layer.
 class EAP_EXPORT ethernet_core_c
 : public abs_eapol_core_c
 , public abs_eap_stack_interface_c
-, public eap_database_reference_if_c
 {
 private:
 	//--------------------------------------------------
@@ -249,6 +247,7 @@ public:
 	EAP_FUNC_IMPORT eap_status_e get_eap_type_list(
 		eap_array_c<eap_type_value_e> * const eap_type_list);
 
+#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 	/**
 	 * Function creates a state for later use. This is for optimazing 4-Way Handshake.
 	 * @param receive_network_id carries the MAC addresses.
@@ -260,8 +259,10 @@ public:
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type
 		);
+#endif //#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 
+#if defined(USE_EAPOL_KEY_STATE)
 	/**
 	 * This function need to be called when client STA (re)associates to AP.
 	 * @param receive_network_id carries the MAC addresses.
@@ -279,16 +280,18 @@ public:
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e eapol_pairwise_cipher,
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e eapol_group_cipher,
 		const eap_variable_data_c * const pre_shared_key);
+#endif //#if defined(USE_EAPOL_KEY_STATE)
 
+#if defined(USE_EAPOL_KEY_STATE)
 	/**
 	 * This function need to be called when client STA disassociates from AP.
 	 * @param receive_network_id carries the MAC addresses.
 	 * MAC address of Authenticator should be in source address. MAC address of Supplicant should be in destination address.
 	 */
 	EAP_FUNC_IMPORT eap_status_e disassociation(
-		const bool complete_to_lower_layer,
 		const eap_am_network_id_c * const receive_network_id
 		);
+#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 	/// @see abs_eap_core_c::add_rogue_ap().
 	EAP_FUNC_IMPORT eap_status_e add_rogue_ap(eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list);
@@ -297,38 +300,6 @@ public:
 		const eap_am_network_id_c * const receive_network_id,
 		const bool fatal_failure_when_true,
 		const eapol_RSNA_key_header_c::eapol_tkip_mic_failure_type_e tkip_mic_failure_type);
-
-	EAP_FUNC_IMPORT eap_status_e complete_check_pmksa_cache(
-		EAP_TEMPLATE_CONST eap_array_c<eap_am_network_id_c> * const bssid_sta_receive_network_ids);
-
-#if defined(USE_EAP_SIMPLE_CONFIG)
-
-	EAP_FUNC_IMPORT eap_status_e save_simple_config_session(
-		const simple_config_state_e state,
-		EAP_TEMPLATE_CONST eap_array_c<simple_config_credential_c> * const credential_array,
-		const eap_variable_data_c * const new_password,
-		const simple_config_Device_Password_ID_e Device_Password_ID,
-		const simple_config_payloads_c * const other_configuration);
-
-#endif // #if defined(USE_EAP_SIMPLE_CONFIG)
-
-	EAP_FUNC_IMPORT eap_status_e set_eap_database_reference_values(
-		const eap_variable_data_c * const reference);
-
-	EAP_FUNC_IMPORT eap_status_e get_802_11_authentication_mode(
-		const eap_am_network_id_c * const receive_network_id,
-		const eapol_key_authentication_type_e authentication_type,
-		const eap_variable_data_c * const SSID,
-		const eap_variable_data_c * const preshared_key);
-
-	EAP_FUNC_IMPORT eap_status_e complete_get_802_11_authentication_mode(
-		const eap_status_e completion_status,
-		const eap_am_network_id_c * const receive_network_id,
-		const eapol_key_802_11_authentication_mode_e mode);
-
-	EAP_FUNC_IMPORT eap_status_e complete_disassociation(
-		const bool complete_to_lower_layer,
-		const eap_am_network_id_c * const receive_network_id);
 
 	//--------------------------------------------------
 }; // class ethernet_core_c

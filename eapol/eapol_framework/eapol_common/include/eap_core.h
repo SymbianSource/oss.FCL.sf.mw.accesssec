@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 15 %
 */
 
 /**
@@ -914,6 +914,9 @@ public:
 	EAP_FUNC_IMPORT eap_status_e cancel_timer(
 		abs_eap_base_timer_c * const p_initializer, 
 		const u32_t p_id);
+
+	// This is documented in abs_eap_base_type_c::cancel_all_timers().
+	EAP_FUNC_IMPORT eap_status_e cancel_all_timers();
 
 	// This is documented in abs_eap_base_type_c::set_authentication_role().
 	EAP_FUNC_IMPORT eap_status_e set_authentication_role(const bool when_true_set_client);

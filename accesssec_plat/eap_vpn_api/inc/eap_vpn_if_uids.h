@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8.1.2 %
+* %version: 10 %
 */
 
 #ifndef __EAPPLUGINUIDS_H__

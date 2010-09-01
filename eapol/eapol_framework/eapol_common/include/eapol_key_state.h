@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 14.1.5 %
 */
 
 #if !defined(_EAPOL_KEY_STATE_H_)
@@ -289,7 +289,9 @@ private:
 	/// The configuration option is EAPOL_key_state_TEST_group_key_update.
 	bool m_server_TEST_group_key_update;
 
+#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 	bool m_is_associated;
+#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -438,9 +440,9 @@ EAP_KEY_TEST_PUBLIC_FUNCTION
 EAP_KEY_TEST_PRIVATE_FUNCTION
 
 
-	eap_status_e derive_WPXM_WPXK1_WPXK2();
+	EAP_FUNC_IMPORT eap_status_e derive_WPXM_WPXK1_WPXK2();
 
-	eap_status_e derive_WPXM_PTK(const u32_t WPXM_WPXC);
+	EAP_FUNC_IMPORT eap_status_e derive_WPXM_PTK(const u32_t WPXM_WPXC);
 
 	EAP_FUNC_IMPORT eap_status_e verify_field_is_zero(
 		const u8_t * const field,
@@ -817,16 +819,27 @@ public:
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e eapol_group_cipher,
 		const eap_variable_data_c * const pre_shared_key);
 
+#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
+
 	EAP_FUNC_IMPORT eap_status_e initialize(
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type);
+
+#endif //#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 	EAP_FUNC_IMPORT eapol_key_state_c *copy(const eap_am_network_id_c * const receive_network_id);
 
 	EAP_FUNC_IMPORT bool get_is_encryption_on();
 
+
+#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
+
 	EAP_FUNC_IMPORT bool get_is_associated();
 
+#endif //#if defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
+
+
+	//
 	EAP_FUNC_IMPORT eap_status_e started_eap_authentication();
 
 	/**

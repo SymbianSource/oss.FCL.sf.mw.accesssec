@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 19 %
+* %version: 11.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -40,8 +40,9 @@
 #include <EapTypeInfo.h>
 #include "eap_am_type_protected_setup_symbian.h"
 #include "EapProtectedSetupGlobal.h"
-#include "EapTraceSymbian.h"
-#include "EapConversion.h"
+#include "eap_am_trace_symbian.h"
+
+//#include "EapAkaDbUtils.h"
 
 #include "eap_am_tools_symbian.h"
 
@@ -95,7 +96,7 @@ eap_base_type_c* CEapProtectedSetup::GetStackInterfaceL(abs_eap_am_tools_c* cons
 		(_L("CEapProtectedSetup::GetStackInterfaceL - Start")));
 
 	// Create AM
-	CEapAmProtectedSetupSymbian* amEapType = CEapAmProtectedSetupSymbian::NewL(
+	eap_am_type_protected_setup_symbian_c* amEapType = eap_am_type_protected_setup_symbian_c::NewL(
 		aTools, 
 		aPartner, 
 		iIndexType,
@@ -110,7 +111,7 @@ eap_base_type_c* CEapProtectedSetup::GetStackInterfaceL(abs_eap_am_tools_c* cons
 	{
 	
 		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("ERROR: GetStackInterfaceL : CEapAmProtectedSetupSymbian(): failed.")));
+			(_L("ERROR: GetStackInterfaceL : eap_am_type_protected_setup_symbian_c(): failed.")));
 	
 		delete amEapType;
 		User::Leave(KErrNoMemory);
@@ -182,18 +183,27 @@ eap_base_type_c* CEapProtectedSetup::GetStackInterfaceL(abs_eap_am_tools_c* cons
 }
 
 // ----------------------------------------------------------
+TInt CEapProtectedSetup::InvokeUiL()
+{
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("ERROR: CEapProtectedSetup::InvokeUiL - THIS IS NOT SUPPORTED")));
 
-
+	TInt buttonId(0);
+ 
+	// This is a dummy function.
+	
+	return buttonId;
+}
 
 // ----------------------------------------------------------
-
-CEapTypeInfo* CEapProtectedSetup::GetInfoL()
+CEapTypeInfo* CEapProtectedSetup::GetInfoLC()
 {
 	CEapTypeInfo* info = new(ELeave) CEapTypeInfo(
 		(TDesC&)KReleaseDate, 
 		(TDesC&)KEapTypeVersion,
 		(TDesC&)KManufacturer);
 
+	CleanupStack::PushL(info);
 	return info;
 }
 
@@ -213,20 +223,14 @@ TUint CEapProtectedSetup::GetInterfaceVersion()
 
 // ----------------------------------------------------------
 
-void CEapProtectedSetup::SetTunnelingType(const TEapExpandedType aTunnelingType)
+void CEapProtectedSetup::SetTunnelingType(const TInt aTunnelingType)
 {
-	EAP_TRACE_DATA_DEBUG_SYMBIAN(
-		(EAPL("CEapProtectedSetup::SetTunnelingType - tunneling type"),
-		aTunnelingType.GetValue().Ptr(), aTunnelingType.GetValue().Length()));
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("CEapProtectedSetup::SetTunnelingType - tunneling type=%d"),
+		aTunnelingType));
 
-	eap_type_value_e aInternalType;
-
-	    TInt err = CEapConversion::ConvertExpandedEAPTypeToInternalType(
-	            &aTunnelingType,
-	            &aInternalType);
-
-	    iTunnelingType = aInternalType;
-
+	// Vendor id is eap_type_vendor_id_ietf always in this plugin.
+	iTunnelingType.set_eap_type_values(eap_type_vendor_id_ietf, aTunnelingType);
 }
 
 

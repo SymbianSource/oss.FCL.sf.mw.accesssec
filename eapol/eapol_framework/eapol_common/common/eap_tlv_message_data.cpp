@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 19.1.2 %
+* %version: 21 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -138,7 +138,7 @@ EAP_FUNC_EXPORT eap_status_e eap_tlv_message_data_c::set_message_data(
 
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
-		EAP_TRACE_FLAGS_NEVER,
+		EAP_TRACE_FLAGS_MESSAGE_DATA,
 		(EAPL("set_message_data()"),
 		value,
 		length));

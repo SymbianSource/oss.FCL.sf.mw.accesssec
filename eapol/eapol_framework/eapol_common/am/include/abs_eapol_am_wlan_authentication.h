@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 4 %
 */
 
 #if !defined(_ABS_EAPOL_AM_WLAN_AUTHENTICATION_H_)

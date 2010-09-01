@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 9 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -153,7 +153,7 @@ EAP_FUNC_EXPORT u32_t eap_am_bloom_algorithm_c::bloom_filter_get_index(
 		}
 		else
 		{
-			const u8_t mask = static_cast<const u8_t>(0xff << shift);
+			const u8_t mask = 0xff << shift;
 			bit_index |= (input_data[data_ind] & mask) >> (shift);
 		}
 	}

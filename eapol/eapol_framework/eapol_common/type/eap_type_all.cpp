@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 18 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -88,11 +88,8 @@ EAP_C_FUNC_EXPORT eap_base_type_c * const new_eap_type(
 	abs_eap_base_type_c * const partner,
 	const eap_type_value_e eap_type,
 	const bool is_client_when_true,
-	const eap_am_network_id_c * const receive_network_id
-#if defined(USE_EAP_SIMPLE_CONFIG)
-	, abs_eap_configuration_if_c * const configuration_if
-#endif // #if defined(USE_EAP_SIMPLE_CONFIG)
-	)
+	const eap_am_network_id_c * const receive_network_id,
+	abs_eap_configuration_if_c * const configuration_if)
 {
 	EAP_TRACE_BEGIN(tools, TRACE_FLAGS_DEFAULT);
 	eap_base_type_c *type = 0;
@@ -534,6 +531,7 @@ EAP_C_FUNC_EXPORT eap_base_type_c * const new_eap_type(
 	}
 	else
 #endif
+#if defined(USE_EAP_EXPANDED_TYPES)
 #if defined(USE_EAP_SIMPLE_CONFIG)
 	if (eap_type == eap_expanded_type_simple_config.get_type())
 	{
@@ -587,6 +585,7 @@ EAP_C_FUNC_EXPORT eap_base_type_c * const new_eap_type(
 	}
 	else
 #endif //#if defined(USE_EAP_SIMPLE_CONFIG)
+#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 #if defined(USE_FAST_EAP_TYPE)
 	if (eap_type == eap_type_fast)
 	{
@@ -684,10 +683,8 @@ EAP_C_FUNC_EXPORT eap_base_type_c * const new_eap_type(
 		EAP_TRACE_ERROR(
 			tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("ERROR: new_eap_type(): EAP-type=0xfe%06x%08x=%s not supported in this module.\n"),
-			eap_type.get_vendor_id(),
-			eap_type.get_vendor_type(),
-			eap_header_string_c::get_eap_type_string(eap_type)));
+			(EAPL("ERROR: new_eap_type(): EAP-type=0x%08x not supported in this module.\n"),
+			convert_eap_type_to_u32_t(eap_type)));
 	}
 	EAP_TRACE_END(tools, TRACE_FLAGS_DEFAULT);
 	return type;

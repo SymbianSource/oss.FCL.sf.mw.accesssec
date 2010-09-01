@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 16 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -30,13 +30,11 @@
 
 // INCLUDE FILES
 #include <e32base.h>
-//#include "EapTlsPeapUtils.h"
+#include "EapTlsPeapUtils.h"
 #include <EapTlsPeapUiConnection.h>
 #include <EapTlsPeapUiEapTypes.h>
 #include <EapTlsPeapUiEapType.h>
-#include <EapTraceSymbian.h>
-#include "EapConversion.h"
-#include <EapType.h>
+#include "eap_am_trace_symbian.h"
 
 const TUint KNumberOfSupportedEAPTypes = 10; //Now 10, including EAP-FAST & TTLS-PAP
 
@@ -44,14 +42,17 @@ CEapTlsPeapUiEapTypes::CEapTlsPeapUiEapTypes(CEapTlsPeapUiConnection * const aUi
 : iIsOpened(EFalse)
 , iUiConn(aUiConn)
 , iDataPtr(NULL)
-, iEapTypeConnection(NULL)
 {
 }
 
 
 CEapTlsPeapUiEapTypes::~CEapTlsPeapUiEapTypes()
 {
-    Close();
+    if (iUiConn)
+    {
+        Close();
+        iUiConn = NULL;
+    }
 }
 
 
@@ -62,48 +63,49 @@ TInt CEapTlsPeapUiEapTypes::Open()
         return KErrAlreadyExists;
     }
 
-	TEapExpandedType aEapType(iUiConn->GetEapType());
+    TInt err = iUiConn->GetDatabase(iDatabase);
+    if (err != KErrNone)
+    {
+        return err;
+    }
 
-	TRAPD(error, iEapTypeConnection = CEapType::NewL(iUiConn->GetIndexType(), iUiConn->GetIndex(), aEapType));
-	if (error != KErrNone)
-	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiEapTypes::Open() CEapType::NewL() error=%d\n"),error));
-		return error;
-	}
-    
-    iEapTypeConnection->SetTunnelingType(iUiConn->GetTunnelingType());
-    
     iIsOpened = ETrue;
 
     return KErrNone;
 }
 
 
-TInt CEapTlsPeapUiEapTypes::GetEapTypes(RPointerArray<TEapTlsPeapUiEapType> ** aDataPtr)
+TInt CEapTlsPeapUiEapTypes::GetEapTypes(CArrayFixFlat<TEapTlsPeapUiEapType> ** aDataPtr)
 {
     if (aDataPtr == NULL)
     {
         return KErrArgument;
     }
-
-	if (iIsOpened == EFalse)
+    if (iIsOpened == EFalse)
     {
         return KErrSessionClosed;
     }
-
     if (iDataPtr != 0)
     {
     	*aDataPtr = iDataPtr;
     	return KErrNone;
     }
-
-    iDataPtr = new RPointerArray<TEapTlsPeapUiEapType>(KNumberOfSupportedEAPTypes);
+    iDataPtr = new CArrayFixFlat<TEapTlsPeapUiEapType>(KNumberOfSupportedEAPTypes);
     if (!iDataPtr)
     {
         return KErrNoMemory;
     }
 
+#ifdef USE_EAP_EXPANDED_TYPES
+
     TRAPD(err, FetchExpandedDataL());
+
+#else
+
+    TRAPD(err, FetchDataL());
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
+        
     if (err != KErrNone)
     {
         delete iDataPtr;
@@ -119,10 +121,55 @@ TInt CEapTlsPeapUiEapTypes::GetEapTypes(RPointerArray<TEapTlsPeapUiEapType> ** a
 TInt CEapTlsPeapUiEapTypes::Update()
 {
 
+#ifdef USE_EAP_EXPANDED_TYPES
+
 	TRAPD(err, UpdateExpandedDataL());
+
+#else
+
+	TRAPD(err, UpdateL());
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	return err;
 }
+
+#ifndef USE_EAP_EXPANDED_TYPES
+
+void CEapTlsPeapUiEapTypes::UpdateL()
+{
+	TEapArray eapTypes;
+	TEap* eapTmp; 	
+	
+	TInt i(0);
+	
+	for(i = 0; i < iDataPtr->Count(); i++)
+	{
+		eapTmp = new (ELeave) TEap;
+		CleanupStack::PushL(eapTmp);
+		eapTmp->Enabled	= iDataPtr->At(i).iIsEnabled;
+		eapTmp->UID.Copy(iDataPtr->At(i).iEapType);
+		User::LeaveIfError(eapTypes.Append(eapTmp));
+		CleanupStack::Pop(eapTmp);
+	}	
+
+	TRAPD(err, EapTlsPeapUtils::SetEapDataL(
+			iDatabase, 
+			0, 
+			eapTypes, 
+			iUiConn->GetIndexType(),
+			iUiConn->GetIndex(),
+			static_cast<eap_type_value_e>(iUiConn->GetTunnelingType()),
+			static_cast<eap_type_value_e>(iUiConn->GetEapType())));
+
+	eapTypes.ResetAndDestroy();	
+	if (err != KErrNone)
+	{
+		User::Leave(err);
+	}
+}
+#endif // #ifndef USE_EAP_EXPANDED_TYPES
+
 
 TInt CEapTlsPeapUiEapTypes::Close()
 {
@@ -135,158 +182,217 @@ TInt CEapTlsPeapUiEapTypes::Close()
     iDataPtr = 0;
 		
     iUiConn = NULL;
-
-	if (iEapTypeConnection)
-	{
-		delete iEapTypeConnection;
-		iEapTypeConnection = 0;
-	}
-
-	iIsOpened = EFalse;
-
     return KErrNone;
 }
+
+#ifndef USE_EAP_EXPANDED_TYPES
+
+void CEapTlsPeapUiEapTypes::FetchDataL()
+{		
+	TEapArray eapTypes;
+	
+	TRAPD(err, EapTlsPeapUtils::GetEapDataL(
+			iDatabase, 
+			0, 
+			eapTypes, 
+			iUiConn->GetIndexType(), 
+			iUiConn->GetIndex(), 
+			static_cast<eap_type_value_e>(iUiConn->GetTunnelingType()),
+			static_cast<eap_type_value_e>(iUiConn->GetEapType())));
+
+	if (err != KErrNone)
+	{
+		eapTypes.ResetAndDestroy();
+		User::Leave(err);
+	}
+	
+	TInt i(0);
+	for	(i = 0; i < eapTypes.Count(); i++)	
+	{
+		TEapTlsPeapUiEapType tmp;
+
+		tmp.iIsEnabled = eapTypes[i]->Enabled;
+		
+		tmp.iEapType.Copy(eapTypes[i]->UID);
+		
+		TRAPD(err, iDataPtr->AppendL(tmp));
+		if (err != KErrNone)
+		{
+			eapTypes.ResetAndDestroy();
+			User::Leave(err);
+		}
+	}
+	eapTypes.ResetAndDestroy();	
+}
+#endif // #ifndef USE_EAP_EXPANDED_TYPES
+
+#ifdef USE_EAP_EXPANDED_TYPES
 
 void CEapTlsPeapUiEapTypes::FetchExpandedDataL()
 {
 	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiEapTypes::FetchExpandedDataL: Start\n")));
 
-    EAPSettings aSettings;
-    
-	TRAPD(error,iEapTypeConnection->GetConfigurationL(aSettings));
-	if (error)
-	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiEapTypes::FetchExpandedDataL(): GetConfigurationL() failed %d\n"), error));
-		User::Leave(error);
-	}
+	RExpandedEapTypePtrArray enabledEAPTypes;
+	RExpandedEapTypePtrArray disabledEAPTypes;
 
+	eap_type_value_e tunnelingType(static_cast<eap_type_ietf_values_e>(iUiConn->GetTunnelingType()));
+	eap_type_value_e eapType(static_cast<eap_type_ietf_values_e>(iUiConn->GetEapType()));
+
+	TRAPD(err, EapTlsPeapUtils::GetTunnelingExpandedEapDataL(
+			iDatabase, 
+			0, 
+			enabledEAPTypes,
+			disabledEAPTypes, 
+			iUiConn->GetIndexType(), 
+			iUiConn->GetIndex(), 
+			tunnelingType,
+			eapType));
+
+	if (err != KErrNone)
+	{
+		enabledEAPTypes.ResetAndDestroy();
+		disabledEAPTypes.ResetAndDestroy();
+		
+		EAP_TRACE_DEBUG_SYMBIAN(
+			(_L("CEapTlsPeapUiEapTypes::FetchExpandedDataL: Error from GetTunnelingExpandedEapDataL:%d\n"),
+			err));		
+		
+		User::Leave(err);
+	}
+	
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("CEapTlsPeapUiEapTypes::FetchExpandedDataL: Got tunneling EAPs from DB: enabled=%d,disabled=%d\n"),
+		enabledEAPTypes.Count(), disabledEAPTypes.Count()));		
+	
 	TInt i(0);
-
+	
+	// First fill the enabled EAP types.	
+	for	(i = 0; i < enabledEAPTypes.Count(); i++)	
 	{
-		TEapExpandedType enabledEAPType(*EapExpandedTypeNone.GetType());
+		TEapTlsPeapUiEapType tmpEAP;
 
-		if (aSettings.iEnabledEncapsulatedEAPExpandedTypesPresent)
+		tmpEAP.iIsEnabled = ETrue; // All EAP types here are enabled.
+		
+		tmpEAP.iEapType.Copy(enabledEAPTypes[i]->iExpandedEAPType);
+		
+		TRAPD(err, iDataPtr->AppendL(tmpEAP));
+		if (err != KErrNone)
 		{
-			// First fill the enabled EAP types.	
-			for	(i = 0; i < aSettings.iEnabledEncapsulatedEAPExpandedTypes.Count(); i++)	
-			{
-				TEapTlsPeapUiEapType * tmpEAP = new (ELeave) TEapTlsPeapUiEapType;
-				if (tmpEAP == 0)
-				{
-					User::Leave(KErrNoMemory);
-				}
-
-				tmpEAP->SetIsEnabled(ETrue); // All EAP types here are enabled.
-				
-				tmpEAP->SetEapType(aSettings.iEnabledEncapsulatedEAPExpandedTypes[i]);
-				
-				TRAPD(err, iDataPtr->AppendL(tmpEAP));
-				if (err != KErrNone)
-				{
-					User::Leave(err);
-				}
-				
-				EAP_TRACE_DATA_DEBUG_SYMBIAN(("CEapTlsPeapUiEapTypes::FetchExpandedDataL(): Appended ENABLED EAP type:",
-					tmpEAP->GetEapType().GetValue().Ptr(), 
-					tmpEAP->GetEapType().GetValue().Length() ) );		
-			}
+			enabledEAPTypes.ResetAndDestroy();
+			User::Leave(err);
 		}
+		
+		EAP_TRACE_DATA_DEBUG_SYMBIAN(("CEapTlsPeapUiEapTypes::FetchExpandedDataL:Appended ENABLED EAP type:",
+			tmpEAP.iEapType.Ptr(), 
+			tmpEAP.iEapType.Size() ) );		
 	}
 
+	// Now fill the disabled EAP types.	
+	for	(i = 0; i < disabledEAPTypes.Count(); i++)	
 	{
-		TEapExpandedType disabledEAPType(*EapExpandedTypeNone.GetType());
+		TEapTlsPeapUiEapType tmpEAP;
 
-		if (aSettings.iDisabledEncapsulatedEAPExpandedTypesPresent)
+		tmpEAP.iIsEnabled = EFalse; // All EAP types here are disabled.
+		
+		tmpEAP.iEapType.Copy(disabledEAPTypes[i]->iExpandedEAPType);
+		
+		TRAPD(err, iDataPtr->AppendL(tmpEAP));
+		if (err != KErrNone)
 		{
-			// Now fill the disabled EAP types.	
-			for	(i = 0; i < aSettings.iDisabledEncapsulatedEAPExpandedTypes.Count(); i++)	
-			{
-				TEapTlsPeapUiEapType * tmpEAP = new (ELeave) TEapTlsPeapUiEapType;
-				if (tmpEAP == 0)
-				{
-					User::Leave(KErrNoMemory);
-				}
-
-				tmpEAP->SetIsEnabled(EFalse); // All EAP types here are disabled.
-				
-				tmpEAP->SetEapType(aSettings.iDisabledEncapsulatedEAPExpandedTypes[i]);
-				
-				TRAPD(err, iDataPtr->AppendL(tmpEAP));
-				if (err != KErrNone)
-				{
-					User::Leave(err);
-				}
-				
-				EAP_TRACE_DATA_DEBUG_SYMBIAN(("CEapTlsPeapUiEapTypes::FetchExpandedDataL(): Appended DISABLED EAP type:",
-					tmpEAP->GetEapType().GetValue().Ptr(), 
-					tmpEAP->GetEapType().GetValue().Length() ) );		
-			}
+			disabledEAPTypes.ResetAndDestroy();
+			User::Leave(err);
 		}
+		
+		EAP_TRACE_DATA_DEBUG_SYMBIAN(("CEapTlsPeapUiEapTypes::FetchExpandedDataL:Appended DISABLED EAP type:",
+			tmpEAP.iEapType.Ptr(), 
+			tmpEAP.iEapType.Size() ) );		
 	}
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiEapTypes::FetchExpandedDataL(): End\n")));	
+	
+	enabledEAPTypes.ResetAndDestroy();		
+	disabledEAPTypes.ResetAndDestroy();
+	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiEapTypes::FetchExpandedDataL: End\n")));	
 }
 
 void CEapTlsPeapUiEapTypes::UpdateExpandedDataL()
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiEapTypes::UpdateExpandedDataL(): Start\n")));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiEapTypes::UpdateExpandedDataL: Start\n")));
 
-	if (iDataPtr == 0)
-	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiEapTypes::UpdateExpandedDataL(): iDataPtr == 0\n")));
-		User::Leave(KErrArgument);
-	}
-
-    EAPSettings aSettings;
-
+	RExpandedEapTypePtrArray enabledEAPTypes;
+	RExpandedEapTypePtrArray disabledEAPTypes;
+	SExpandedEAPType* expandedEAPTmp;
+	
 	for(TInt i=0 ; i < iDataPtr->Count(); i++)
 	{
-		if ((*iDataPtr)[i] != 0)
+		expandedEAPTmp = new (ELeave) SExpandedEAPType;
+		CleanupStack::PushL(expandedEAPTmp);
+		
+		expandedEAPTmp->iExpandedEAPType.Copy(iDataPtr->At(i).iEapType);
+		
+		if(iDataPtr->At(i).iIsEnabled)
 		{
-			TEapExpandedType expandedEAPTmp = (*iDataPtr)[i]->GetEapType();
-			
-			if((*iDataPtr)[i]->GetIsEnabled())
+			// Enabled
+			TInt error = enabledEAPTypes.Append(expandedEAPTmp);
+
+			if (error != KErrNone)
 			{
-				// Enabled
-				TInt error = aSettings.iEnabledEncapsulatedEAPExpandedTypes.Append(expandedEAPTmp);
-
-				if (error != KErrNone)
-				{
-					User::LeaveIfError(error);
-				}
-			
-				aSettings.iEnabledEncapsulatedEAPExpandedTypesPresent = ETrue;
-
-				EAP_TRACE_DATA_DEBUG_SYMBIAN(("CEapTlsPeapUiEapTypes::UpdateExpandedDataL(): Appended ENABLED EAP type:",
-					expandedEAPTmp.GetValue().Ptr(), 
-					expandedEAPTmp.GetValue().Size() ) );
+				enabledEAPTypes.ResetAndDestroy();
+				disabledEAPTypes.ResetAndDestroy();
+				User::LeaveIfError(error);
 			}
-			else
-			{
-				// Disabled
-				TInt error = aSettings.iDisabledEncapsulatedEAPExpandedTypes.Append(expandedEAPTmp);
-
-				if (error != KErrNone)
-				{
-					User::LeaveIfError(error);
-				}
-
-				aSettings.iDisabledEncapsulatedEAPExpandedTypesPresent = ETrue;
-
-				EAP_TRACE_DATA_DEBUG_SYMBIAN(("CEapTlsPeapUiEapTypes::UpdateExpandedDataL(): Appended DISABLED EAP type:",
-					expandedEAPTmp.GetValue().Ptr(), 
-					expandedEAPTmp.GetValue().Size() ) );
-			}
+		
+			EAP_TRACE_DATA_DEBUG_SYMBIAN(("CEapTlsPeapUiEapTypes::UpdateExpandedDataL:Appended ENABLED EAP type:",
+				expandedEAPTmp->iExpandedEAPType.Ptr(), 
+				expandedEAPTmp->iExpandedEAPType.Size() ) );
 		}
-	} // for()
+		else
+		{
+			// Disabled
+			TInt error = disabledEAPTypes.Append(expandedEAPTmp);
 
-	TRAPD(error,iEapTypeConnection->SetConfigurationL(aSettings));
+			if (error != KErrNone)
+			{
+				enabledEAPTypes.ResetAndDestroy();
+				disabledEAPTypes.ResetAndDestroy();
+				User::LeaveIfError(error);
+			}
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiEapTypes::UpdateExpandedDataL(): error = %d\n"),error));
+			EAP_TRACE_DATA_DEBUG_SYMBIAN(("CEapTlsPeapUiEapTypes::UpdateExpandedDataL:Appended DISABLED EAP type:",
+				expandedEAPTmp->iExpandedEAPType.Ptr(), 
+				expandedEAPTmp->iExpandedEAPType.Size() ) );
+		}
+		
+		CleanupStack::Pop(expandedEAPTmp);	
+	}	
 
-	User::LeaveIfError(error);
+	eap_type_value_e tunnelingType(static_cast<eap_type_ietf_values_e>(iUiConn->GetTunnelingType()));
+	eap_type_value_e eapType(static_cast<eap_type_ietf_values_e>(iUiConn->GetEapType()));
+
+	TRAPD(err, EapTlsPeapUtils::SetTunnelingExpandedEapDataL(
+			iDatabase, 
+			0, 
+			enabledEAPTypes,
+			disabledEAPTypes, 
+			iUiConn->GetIndexType(),
+			iUiConn->GetIndex(),
+			tunnelingType,
+			eapType));
+
+	enabledEAPTypes.ResetAndDestroy();
+	disabledEAPTypes.ResetAndDestroy();
+		
+	if (err != KErrNone)
+	{
+		EAP_TRACE_DEBUG_SYMBIAN(
+			(_L("CEapTlsPeapUiEapTypes::UpdateExpandedDataL: Error from SetTunnelingExpandedEapDataL:%d\n"),
+			err));		
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiEapTypes::UpdateExpandedDataL(): End\n")));	
+		User::Leave(err);
+	}
+	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiEapTypes::UpdateExpandedDataL: End\n")));	
 }
+    
+#endif // #ifdef USE_EAP_EXPANDED_TYPES
 
 // End of file

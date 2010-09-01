@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 12 %
 */
 
 #ifndef EAP_AM_TYPE_LEAP_H

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 10 %
 */
 
 #if !defined( _ABS_EAP_AM_SEMAPHORE_H_ )

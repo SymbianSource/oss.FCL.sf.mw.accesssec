@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -11,12 +11,12 @@
 *
 * Contributors:
 *
-* Description:  defines header of Attribute-Value Pairs used in protected setup.
+* Description:  EAP and WLAN authentication protocols.
 *
 */
 
 /*
-* %version: 9.1.2 %
+* %version: 11 %
 */
 
 #if !defined(_SIMPLE_CONFIG_TLV_HEADER_H_)
@@ -69,9 +69,9 @@ protected:
 	/// This is enumeration of offsets to data fields.
 	enum offsets
 	{
-		m_tlv_type_offset = 0ul,                           ///< This is offset to tlv type 16-bit field.
+		m_tlv_type_offset = 0ul,                                     ///< This is offset to fags and tlv type 16-bit field.
 		m_length_offset = m_tlv_type_offset+sizeof(u16_t), ///< This is offset to length 16-bit field.
-		m_data_offset = m_length_offset+sizeof(u16_t),     ///< This is offset to data field.
+		m_data_offset = m_length_offset+sizeof(u16_t),               ///< This is offset to data field.
 	};
 
 	//--------------------------------------------------
@@ -115,7 +115,7 @@ public:
 	/**
 	 * This function returns the header length of TLV.
 	 */
-	EAP_FUNC_IMPORT static u32_t get_header_length();
+	static u32_t get_header_length();
 
 	/**
 	 * This function returns pointer to the offset of data of TLV.

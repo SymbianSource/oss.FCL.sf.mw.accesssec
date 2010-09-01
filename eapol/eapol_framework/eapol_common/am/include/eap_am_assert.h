@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 6 %
 */
 
 #if !defined(_EAP_ASSERT_H_)

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 19.1.2 %
 */
 
 #if !defined(_ABS_TLS_BASE_APPLICATION_H_)
@@ -208,6 +208,17 @@ public:
 	virtual eap_status_e cancel_timer(
 		abs_eap_base_timer_c * const initializer, 
 		const u32_t id) = 0;
+
+	/**
+	 * The cancel_all_timers() function cancels all timers.
+	 * User should use this in termination of the stack before
+	 * the adaptation module of tools is deleted.
+	 * Preferred mode is to cancel each timer directly
+	 * using cancel_timer() function.
+	 *
+	 * Adaptation module internally implements the timer.
+	 */
+	virtual eap_status_e cancel_all_timers() = 0;
 
 	/**
 	 * This is needed by PEAP type.

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16 %
+* %version: 15.1.5 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -85,15 +85,11 @@ CEapSimIsaInterface::~CEapSimIsaInterface()
 
 	if(IsActive())
 	{
-		Cancel();		
+		Cancel();
 	}
 	
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Closing RMobilePhone and MMETEL.\n")));
-	
-	iPhone.Close();
-	iServer.Close(); // Phone module is unloaded automatically when RTelServer session is closed
-	iCustomAPI.Close();	
-		
+	DisconnectMMETel();
+
 	delete iAuthenticationData;
 	iAuthenticationData = NULL;
 		
@@ -169,13 +165,18 @@ void CEapSimIsaInterface::QueryKcAndSRESL(const TDesC8& aRand)
  
 void CEapSimIsaInterface::DoCancel()
 {
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapSimIsaInterface::DoCancel() - Cancelling MMETEL query.\n") ) );
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapSimIsaInterface::DoCancel(): iQueryId=%d\n"),
+		iQueryId) );
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapSimIsaInterface::DoCancel()");
 
 	if (iQueryId == EQuerySRESandKC)
 	{
+		iQueryId = EQueryNone;
+
 		// Cancel the request.
 		iCustomAPI.CancelAsyncRequest( ECustomGetSimAuthenticationDataIPC );
+
+		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapSimIsaInterface::DoCancel(): CANCELLED CUSTOM API REQUEST\n") ) );
 	}
 }
 
@@ -208,7 +209,9 @@ void CEapSimIsaInterface::RunL()
 				EAP_TRACE_DATA_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("IMSI"),
 						iSubscriberId.Ptr(),
 						iSubscriberId.Size()));
-				
+
+				iQueryId = EQueryNone;
+
 				// Convert the IMSI from unicode to UTF8 characters.
 
 				completion_status = imsiInUnicode.set_buffer(iSubscriberId.Ptr(), iSubscriberId.Size(), false, false);
@@ -228,7 +231,9 @@ void CEapSimIsaInterface::RunL()
 						EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ISA interface: Could not convert IMSI from UNICODE to UTF8. Not proceeding further here.\n")));
 					}
 				}
-							
+
+				DisconnectMMETel();
+
 				TRAP(error, iParent->complete_SIM_imsi_L(&imsi, completion_status));
 			
 			break;
@@ -244,6 +249,8 @@ void CEapSimIsaInterface::RunL()
 						iEAPSim.iKC.Ptr(),
 						iEAPSim.iKC.Size()));
 						
+				iQueryId = EQueryNone;
+
 				// Trim the length of SRES -  Remove once the correct length is set for SRES, may be by the API or some where else.
 				iEAPSim.iSRES.SetLength(SIM_SRES_LENGTH);
 				EAP_TRACE_DATA_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("SRES after Trimming"),
@@ -253,9 +260,8 @@ void CEapSimIsaInterface::RunL()
 				delete iAuthenticationData;
 				iAuthenticationData = NULL;
 							
-				// Close the custom API since we don't need it any more.
-				iCustomAPI.Close();
-			
+				DisconnectMMETel();
+
 				// Complete
 				TRAP(error, iParent->complete_SIM_kc_and_sres_L(iEAPSim.iKC, iEAPSim.iSRES, completion_status));			
 			
@@ -268,9 +274,9 @@ void CEapSimIsaInterface::RunL()
 		
 		if( EQuerySRESandKC == iQueryId )
 		{
-			// We have to close the custom API anyway. 
-			// Rest will be taken care in destructor.
-			iCustomAPI.Close();	
+			iQueryId = EQueryNone;
+
+			DisconnectMMETel();
 			
 			// Handle duplicate RAND values.
 			// If duplicate RAND values are being used, we get KErrArgument here.
@@ -291,12 +297,18 @@ void CEapSimIsaInterface::RunL()
 		{
 			completion_status = m_am_tools->convert_am_error_to_eapol_error(iStatus.Int());
 			
+			iQueryId = EQueryNone;
+
+			DisconnectMMETel();
+
 			TRAP(error, iParent->complete_SIM_imsi_L(&imsi, completion_status));
 		}
 	}	
-	
+
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
+
+//--------------------------------------------------
 
 TInt CEapSimIsaInterface::CreateMMETelConnectionL()
 {
@@ -361,5 +373,31 @@ TInt CEapSimIsaInterface::CreateMMETelConnectionL()
     
     return errorCode;	
 }
+
+void CEapSimIsaInterface::DisconnectMMETel()
+{
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapSimIsaInterface::DisconnectMMETel()\n")));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapSimIsaInterface::DisconnectMMETel()");
+
+	iQueryId = EQueryNone;
+
+	// Close the custom API since we don't need it any more.
+	iCustomAPI.Close();
+
+    if( iMMETELConnectionStatus )
+    {
+		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Closing RMobilePhone and MMETEL.\n")));
+		
+		iPhone.Close();
+		iServer.Close(); // Phone module is unloaded automatically when RTelServer session is closed
+		
+		iMMETELConnectionStatus = EFalse;
+    }
+    else
+    {
+		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("RMobilePhone and MMETEL already closed.\n")));    	
+    }	
+}
+
 
 // End of file

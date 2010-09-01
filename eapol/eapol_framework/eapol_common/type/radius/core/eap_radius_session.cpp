@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 11.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -947,8 +947,7 @@ EAP_FUNC_EXPORT eap_status_e eap_radius_session_c::timer_delete_data(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_radius_session_c::remove_eap_session(
-	const bool complete_to_lower_layer,
+EAP_FUNC_EXPORT eap_status_e eap_radius_session_c::synchronous_remove_eap_session(
 	const eap_am_network_id_c * const receive_network_id)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1019,7 +1018,7 @@ eap_status_e eap_radius_session_c::asynchronous_init_remove_eap_session(
 		(EAPL("eap_radius_session_c::asynchronous_init_remove_eap_session(): %s.\n"),
 		 (m_is_client == true) ? "client": "server"));
 
-	// NOTE: we cannot call directly remove_eap_session(), because we will
+	// NOTE: we cannot call directly synchronous_remove_eap_session(), because we will
 	// return from here to removed object.
 
 	eap_status_e status = eap_status_process_general_error;

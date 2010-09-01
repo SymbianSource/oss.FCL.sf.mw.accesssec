@@ -3,17 +3,15 @@
   <name>EAP Type API</name>
   <description>Generic API for configuring EAP type plugins</description>
   <type>c++</type>
-  <subsystem>accesssec</subsystem>
+  <subsystem>wlaneapol</subsystem>
   <libs>
-    eapsymbiantools.lib
-    eaptools.lib
   </libs>
   <release category="domain"/>
   <attributes>
      <!-- This indicates wether the api provedes separate html documentation -->
      <!-- or is the additional documentation generated from headers. -->
      <!-- If you are unsuere then the value is "no" -->
-     <htmldocprovided>no</htmldocprovided>
+     <htmldocprovided>yes</htmldocprovided>
      <adaptation>no</adaptation>
   </attributes>
 </api>

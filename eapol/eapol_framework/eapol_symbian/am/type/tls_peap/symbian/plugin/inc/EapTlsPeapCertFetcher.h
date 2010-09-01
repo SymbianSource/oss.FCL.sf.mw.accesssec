@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 13.1.2 %
 */
 
 #ifndef _EAPTLSPEAPCERTFETCHER_H_
@@ -29,16 +29,14 @@
 #include "EapTlsPeapUtils.h"
 
 
-class CAbsEapCertificateFetcher;
+class CEapTlsPeapUiCertificates;
 
 // CLASS DECLARATION
 class CEapTlsPeapCertFetcher 
 : public CActive
 {
-
 public:
-
-	static CEapTlsPeapCertFetcher* NewL(CAbsEapCertificateFetcher* const aParent);
+	static CEapTlsPeapCertFetcher* NewL(CEapTlsPeapUiCertificates* const aParent);	
 	
 	virtual ~CEapTlsPeapCertFetcher();	
 	
@@ -46,11 +44,11 @@ public:
 
 	// DON'T USE THESE. ONLY USED FOR EapTlsPeapUtils.
 	static CEapTlsPeapCertFetcher* NewL();	
-	void GetSymbianSubjectKeyIdL( TDes8& aSubjectKeyId, EapCertificateEntry aCertEntry );
+	void GetSymbianSubjectKeyIdL( TDes8& aSubjectKeyId, CertificateEntry aCertEntry );
 	
 protected:
 	
-	CEapTlsPeapCertFetcher(CAbsEapCertificateFetcher* const aParent);
+	CEapTlsPeapCertFetcher(CEapTlsPeapUiCertificates* const aParent);
 	
 	void ConstructL();
 	
@@ -63,23 +61,19 @@ private:
 	// DON'T USE THIS. ONLY USED FOR EapTlsPeapUtils.
 	CEapTlsPeapCertFetcher();	
 
-	void InitializeQuery();
-
 private:
 
 	enum TState
 	{
-		EGetCertificatesNone,
 		EGetCertificatesInitStore,
 		EGetCertificatesGetCertList,
-		EGetCertificatesGetUserCertList,
 		EGetCertificatesRetrieveCert,
 		EGetSymbianSubjectKeyId // DON'T USE THIS. ONLY USED FOR EapTlsPeapUtils.		
 	};
 	
 	TState iState;
 	
-	CAbsEapCertificateFetcher* const iParent;
+	CEapTlsPeapUiCertificates* const iParent;
 
 	RMPointerArray<CCTCertInfo> iCertInfos;
 	
@@ -89,15 +83,16 @@ private:
 
 	CCertAttributeFilter* iCertFilter;
 
-	RPointerArray<EapCertificateEntry> iUserCerts;
+	RArray<SCertEntry> iUserCerts;
 	
-	RPointerArray<EapCertificateEntry> iCACerts;
+	RArray<SCertEntry> iCACerts;
 	
+    // For wrapping asynchronous calls.
+    CActiveSchedulerWait iWait;
+    
 	HBufC8* iEncodedCertificate;
 	TPtr8 iCertPtr;
 
-	TCertificateOwnerType iOwnertype;
-	TInt iCertInfoIndex;
 	
 }; 
 

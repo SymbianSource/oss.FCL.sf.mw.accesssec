@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 4 %
 */
 
 #if !defined(_EAP_GSMSIM_STATE_NOTIFICATION_H_)
@@ -65,6 +65,8 @@ public:
 		bool allow_send_eap_success);
 
 
+#if defined(USE_EAP_EXPANDED_TYPES)
+
 	EAP_FUNC_IMPORT eap_type_gsmsim_state_notification_c(
 		abs_eap_am_tools_c * const tools,
 		const eap_am_network_id_c * const send_network_id,
@@ -76,6 +78,8 @@ public:
 		u32_t current_state,
 		u8_t eap_identifier,
 		bool allow_send_eap_success);
+
+#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 
 
 	EAP_FUNC_IMPORT eap_type_gsmsim_state_notification_c(

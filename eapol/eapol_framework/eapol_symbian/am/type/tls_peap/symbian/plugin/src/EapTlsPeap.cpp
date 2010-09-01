@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 67 %
+* %version: 35.1.3 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -35,26 +35,31 @@
 #include "EapTlsPeapGlobal.h"
 #include <EapTypeInfo.h>
 
+#include <EapTlsPeapUiConnection.h>
+#include <EapTlsUi.h>
+#include <EapPeapUi.h>
+#if defined(USE_TTLS_EAP_TYPE)
+	#include <EapTtlsUi.h>
+#endif
+
 #if defined(USE_FAST_EAP_TYPE)
+#include <eapfastui.h>
 #include "tls_application_eap_fast.h"
 #endif 
 
 #include "eap_am_type_tls_peap_symbian.h"
 #include "eap_type_tls_peap.h"
 #include "tls_record.h"
-#include "dummy_eap_core.h"
 #include "eap_core.h"
 #include "tls_application_eap_core.h"
 #include "eap_am_tools_symbian.h"
-#include "EapTraceSymbian.h"
-#include "EapConversion.h"
-#include "EapExpandedType.h"
+#include "eap_am_trace_symbian.h"
 
 #ifdef USE_PAC_STORE
 #include "pac_store_db_symbian.h"
 #endif
 
-#include "eapol_key_types.h"
+#include <papui.h>
 
 // LOCAL CONSTANTS
 
@@ -62,10 +67,6 @@
 // common for all three plug-in interfaces.
 const TUint KInterfaceVersion = 1;
 
-#if defined(USE_FAST_EAP_TYPE)
-	const u8_t EAP_RAS_SOURCE[] = "ras_src";
-	const u8_t EAP_RAS_DESTINATION[] = "ras_des";
-#endif //#if defined(USE_FAST_EAP_TYPE)
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -77,77 +78,14 @@ CEapTlsPeap::CEapTlsPeap(const TIndexType aIndexType,
 , iIndex(aIndex)
 , iEapType(aEapType)
 , iTunnelingType(eap_type_none)
-#if defined(USE_FAST_EAP_TYPE)
-, iApplication(NULL)
-#endif
-, m_am_tools(abs_eap_am_tools_c::new_abs_eap_am_tools_c())
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::CEapTlsPeap()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::CEapTlsPeap()\n"));
 
-	if (m_am_tools == 0)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return;
-	}
+#ifdef USE_EAP_EXPANDED_TYPES
 
-#if defined(USE_FAST_EAP_TYPE)
-	if(iEapType == eap_type_fast)
-	{
-		eap_variable_data_c source(m_am_tools);
+	ASSERT(iEapType.get_vendor_id() == eap_type_vendor_id_ietf);
+	ASSERT(iTunnelingType.get_vendor_id() == eap_type_vendor_id_ietf);
 
-		eap_status_e status = source.set_copy_of_buffer(
-			EAP_RAS_SOURCE,
-			sizeof(EAP_RAS_SOURCE));
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeap::CEapTlsPeap(): status = %s\n"),
-				eap_status_string_c::get_status_string(status)));
-			return;
-		}
-
-		eap_variable_data_c destination(m_am_tools);
-
-		status = destination.set_copy_of_buffer(
-			EAP_RAS_DESTINATION,
-			sizeof(EAP_RAS_DESTINATION));
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeap::CEapTlsPeap(): status = %s\n"),
-				eap_status_string_c::get_status_string(status)));
-			return;
-		}
-
-		eap_am_network_id_c dummy_id(m_am_tools, &source, &destination, eapol_ethernet_type_pae);
-	
-		if (dummy_id.get_is_valid() == false)
-		{
-			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeap::NewPeapL() dummy_id not valid\n")));
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return;
-		}
-	
-		if (dummy_id.get_is_valid_data() == false)
-		{
-			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeap::NewPeapL() dummy_id data not valid\n")));
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return;
-		}
-	
-		
-		TRAPD(err, iApplication = GetTlsInterfaceL(
-			m_am_tools, 
-			true,
-			&dummy_id));
-		if (err)
-		{
-			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeap::NewPeapL() iApplication couldn't be created\n")));
-				
-		}
-	}
-#endif //#if defined(USE_FAST_EAP_TYPE)
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 }
 
@@ -155,9 +93,6 @@ CEapTlsPeap::CEapTlsPeap(const TIndexType aIndexType,
 
 CEapTlsPeap* CEapTlsPeap::NewTlsL(SIapInfo *aIapInfo)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::NewTlsL()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::NewTlsL()\n"));
-
 	return new (ELeave) CEapTlsPeap(aIapInfo->indexType, aIapInfo->index, eap_type_tls);
 }
 
@@ -165,9 +100,6 @@ CEapTlsPeap* CEapTlsPeap::NewTlsL(SIapInfo *aIapInfo)
 
 CEapTlsPeap* CEapTlsPeap::NewPeapL(SIapInfo *aIapInfo)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::NewPeapL()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::NewPeapL()\n"));
-
 	return new (ELeave) CEapTlsPeap(aIapInfo->indexType, aIapInfo->index, eap_type_peap);
 }
 
@@ -177,9 +109,6 @@ CEapTlsPeap* CEapTlsPeap::NewPeapL(SIapInfo *aIapInfo)
 
 CEapTlsPeap* CEapTlsPeap::NewTtlsL(SIapInfo *aIapInfo)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::NewTtlsL()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::NewTtlsL()\n"));
-
 	return new (ELeave) CEapTlsPeap(aIapInfo->indexType, aIapInfo->index, eap_type_ttls);
 }
 
@@ -195,11 +124,8 @@ CEapTlsPeap* CEapTlsPeap::NewTtlsL(SIapInfo *aIapInfo)
 
 CEapTlsPeap* CEapTlsPeap::NewTtlsPapL( SIapInfo* aIapInfo )
     {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::NewTtlsPapL()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::NewTtlsPapL()\n"));
-
 	return new (ELeave) CEapTlsPeap(
-		aIapInfo->indexType, aIapInfo->index, eap_expanded_type_ttls_plain_pap.get_type() );    
+		aIapInfo->indexType, aIapInfo->index, eap_type_ttls_plain_pap );    
     }
 
 
@@ -209,9 +135,6 @@ CEapTlsPeap* CEapTlsPeap::NewTtlsPapL( SIapInfo* aIapInfo )
 
 CEapTlsPeap* CEapTlsPeap::NewFastL(SIapInfo *aIapInfo)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::NewFastL()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::NewFastL()\n"));
-
 	return new (ELeave) CEapTlsPeap(aIapInfo->indexType, aIapInfo->index, eap_type_fast);
 }
 
@@ -221,187 +144,9 @@ CEapTlsPeap* CEapTlsPeap::NewFastL(SIapInfo *aIapInfo)
 
 CEapTlsPeap::~CEapTlsPeap()
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::~CEapTlsPeap()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::~CEapTlsPeap()\n"));
-
 	iEapArray.ResetAndDestroy();
-	
-	if (iType != NULL)
-		{
-		iType->shutdown();
-		// type deletes all
-		delete iType;
-		iType = NULL;
-		}
-		
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::~CEapTlsPeap() iType deleted\n")));
-
-#if defined(USE_FAST_EAP_TYPE)
-	if (iApplication != NULL)
-		{
-//		iApplication->shutdown();
-//		delete iApplication;
-		iApplication = NULL;
-		}
-#endif //#if defined(USE_FAST_EAP_TYPE)
-		
-	abs_eap_am_tools_c::delete_abs_eap_am_tools_c(m_am_tools);
 }
 
-#if defined(USE_FAST_EAP_TYPE)
-// ----------------------------------------------------------
-tls_application_eap_fast_c* CEapTlsPeap::GetTlsInterfaceL(abs_eap_am_tools_c* const aTools, 
-											   const bool is_client_when_true,
-											   const eap_am_network_id_c * const receive_network_id)
-{
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::GetTlsInterfaceL()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::GetTlsInterfaceL()\n"));
-
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("CEapTlsPeap::GetTlsInterfaceL -Start- iIndexType=%d, iIndex=%d, Tunneling vendor type=%d, Eap vendor type=%d \n"),
-		iIndexType,iIndex, iTunnelingType.get_vendor_type(), iEapType.get_vendor_type()));
-
-	// Create adaptation layer
-	eap_am_type_tls_peap_symbian_c* amEapType;
-	tls_record_c* record;
-
-	eap_core_c* const eap_core = reinterpret_cast<eap_core_c *> (new dummy_eap_core_c(
-		aTools,
-		0,
-		is_client_when_true,
-		receive_network_id,
-		true));
-	if (eap_core == 0)
-	{
-		// Out of memory
-		User::Leave(KErrNoMemory);
-	} 
-	else if (eap_core->get_is_valid() == false)
-	{
-		// Out of memory
-		eap_core->shutdown();
-		delete eap_core;
-		User::Leave(KErrGeneral);
-	}
-	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("CEapTlsPeap::GetTlsInterfaceL - created eap_core_c \n")));
-
-	amEapType = eap_am_type_tls_peap_symbian_c::NewL(
-		aTools,
-		eap_core,
-		iIndexType,
-		iIndex,
-		iTunnelingType,
-		iEapType,
-		is_client_when_true,
-		receive_network_id);
-	if (amEapType->get_is_valid() == false)
-	{
-		amEapType->shutdown();
-		delete amEapType;
-		User::Leave(KErrGeneral);
-	}
-	
-	amEapType->configure();
-	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("CEapTlsPeap::GetTlsInterfaceL - created eap_am_type_tls_peap_symbian_c \n")));
-
-	tls_application_eap_fast_c* application = 0;
-		
-	if(iEapType == eap_type_fast)
-	{
-		application = new tls_application_eap_fast_c(
-			aTools,
-			eap_core,
-			true,
-			is_client_when_true,
-			iEapType,
-			receive_network_id,
-			amEapType);
-		
-		if (application)
-			{
-			application->configure();
-		
-			EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("CEapTlsPeap::GetTlsInterfaceL - created tls_application_eap_fast_c \n")));			
-			application->start_initialize_PAC_store();
-			}
-	}
-
-
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("CEapTlsPeap::GetTlsInterfaceL - Creating tls_record_c \n")));
-
-	record = new tls_record_c(
-		aTools,
-		amEapType,
-		false,
-		application,
-		true,
-		is_client_when_true,
-		iEapType,
-		receive_network_id);		
-	if (record == 0)
-	{
-		// Out of memory
-		// application takes care of eap_core_c deletion
-		application->shutdown();
-		delete application;
-		amEapType->shutdown();
-		delete amEapType;
-		User::Leave(KErrGeneral);		
-	}
-	else if (record->get_is_valid() == false)
-	{
-		// Out of memory
-		// record takes care of application deletion
-		record->shutdown();
-		delete record;
-		amEapType->shutdown();
-		delete amEapType;
-		User::Leave(KErrGeneral);					
-	}	
-
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("CEapTlsPeap::GetTlsInterfaceL - Creating the OS independent portion - eap_type_tls_peap_c \n")));
-	
-	// Create the OS independent portion
-	
-	iType = new eap_type_tls_peap_c(
-		aTools, 
-		eap_core, 
-		amEapType, 
-		true, 
-		record, 
-		true, 
-		is_client_when_true, 
-		iEapType, 
-		receive_network_id);	
-	if (iType == 0)
-	{
-		// Out of memory
-		// record takes care of application deletion
-		record->shutdown();
-		delete record;
-		amEapType->shutdown();
-		delete amEapType;
-		User::Leave(KErrNoMemory);							
-	}
-	else if(iType->get_is_valid() == false)
-	{
-		iType->shutdown();
-		// type deletes all
-		delete iType;
-		iType = NULL;
-		User::Leave(KErrGeneral);		
-	}
-	
-	return application;
-}
-#endif
 // ----------------------------------------------------------
 
 #ifdef USE_EAP_SIMPLE_CONFIG
@@ -421,12 +166,19 @@ eap_base_type_c* CEapTlsPeap::GetStackInterfaceL(abs_eap_am_tools_c* const aTool
 	
 #endif // #ifdef USE_EAP_SIMPLE_CONFIG
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::GetStackInterfaceL()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::GetStackInterfaceL()\n"));
-
+#ifdef USE_EAP_EXPANDED_TYPES
+	
 	EAP_TRACE_DEBUG_SYMBIAN(
 		(_L("CEapTlsPeap::GetStackInterfaceL -Start- iIndexType=%d, iIndex=%d, Tunneling vendor type=%d, Eap vendor type=%d \n"),
 		iIndexType,iIndex, iTunnelingType.get_vendor_type(), iEapType.get_vendor_type()));
+	
+#else
+	
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("CEapTlsPeap::GetStackInterfaceL -Start- iIndexType=%d, iIndex=%d, iTunnelingType=%d, iEapType=%d \n"),
+		iIndexType, iIndex, iTunnelingType, iEapType));
+	
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	// Create adaptation layer
 	eap_am_type_tls_peap_symbian_c* amEapType;
@@ -633,15 +385,107 @@ eap_base_type_c* CEapTlsPeap::GetStackInterfaceL(abs_eap_am_tools_c* const aTool
 }
 
 // ----------------------------------------------------------
-
-CEapTypeInfo* CEapTlsPeap::GetInfoL()
+TInt CEapTlsPeap::InvokeUiL()
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::GetInfoL()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::GetInfoL()\n"));
+	TInt buttonId(0);
 
+#ifdef USE_EAP_EXPANDED_TYPES
+
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("CEapTlsPeap::InvokeUiL -Start- iIndexType=%d, iIndex=%d, Tunneling vendor type=%d, Eap vendor type=%d \n"),
+		iIndexType,iIndex, iTunnelingType.get_vendor_type(), iEapType.get_vendor_type()));
+
+	CEapTlsPeapUiConnection uiConn(iIndexType, iIndex, 
+									iTunnelingType.get_vendor_type(), iEapType.get_vendor_type());
+	
+#else
+
+	EAP_TRACE_DEBUG_SYMBIAN(
+		(_L("CEapTlsPeap::InvokeUiL -Start- iIndexType=%d, iIndex=%d, iTunnelingType=%d, iEapType=%d \n"),
+		iIndexType, iIndex, iTunnelingType, iEapType));
+
+    CEapTlsPeapUiConnection uiConn(iIndexType, iIndex, iTunnelingType, iEapType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
+
+	EAP_TRACE_DEBUG_SYMBIAN(
+			(_L("CEapTlsPeap::InvokeUiL Created UI connection \n")));
+
+#ifdef USE_EAP_EXPANDED_TYPES
+
+	switch (iEapType.get_vendor_type())
+	
+#else
+
+	switch (iEapType)
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
+	{
+	case eap_type_tls:
+		{
+			CEapTlsUi* tls_ui = CEapTlsUi::NewL(&uiConn);	
+			CleanupStack::PushL(tls_ui);
+			buttonId = tls_ui->InvokeUiL();
+			CleanupStack::PopAndDestroy(tls_ui);	
+		}
+		break;
+
+	case eap_type_peap:
+		{
+			CEapPeapUi* peap_ui = CEapPeapUi::NewL(&uiConn, iIndexType, iIndex);
+			CleanupStack::PushL(peap_ui);
+			buttonId = peap_ui->InvokeUiL();
+			CleanupStack::PopAndDestroy(peap_ui);
+		}
+		break;
+
+#if defined (USE_TTLS_EAP_TYPE)
+	case eap_type_ttls:
+		{
+			CEapTtlsUi* ttls_ui = CEapTtlsUi::NewL(&uiConn, iIndexType, iIndex);
+			CleanupStack::PushL(ttls_ui);
+			buttonId = ttls_ui->InvokeUiL();
+			CleanupStack::PopAndDestroy(ttls_ui);
+		}
+		break;
+#endif
+
+#if defined (USE_FAST_EAP_TYPE)
+	case eap_type_fast:
+		{
+			CEapFastUi* fast_ui = CEapFastUi::NewL(&uiConn, iIndexType, iIndex);
+			CleanupStack::PushL(fast_ui);
+			buttonId = fast_ui->InvokeUiL();
+			CleanupStack::PopAndDestroy(fast_ui);
+		}
+		break;
+#endif
+		
+	case eap_type_ttls_plain_pap:
+	    {
+	        CPapUi* papUi = CPapUi::NewL( &uiConn );
+	        CleanupStack::PushL( papUi );
+	        buttonId = papUi->InvokeUiL();
+	        CleanupStack::PopAndDestroy( papUi );
+	    }
+	    break;
+
+	default:
+		// Should never happen
+		User::Leave(KErrArgument);
+	}
+	
+	EAP_TRACE_DEBUG_SYMBIAN(
+			(_L("CEapTlsPeap::InvokeUiL -End-\n")));
+	
+	return buttonId;
+}
+// ----------------------------------------------------------
+CEapTypeInfo* CEapTlsPeap::GetInfoLC()
+{
 	CEapTypeInfo* info = new(ELeave) CEapTypeInfo((TDesC&)KReleaseDate, (TDesC&)KEapTypeVersion,
 												   (TDesC&)KManufacturer);
-
+	CleanupStack::PushL(info);
 	return info;
 }
 
@@ -649,11 +493,17 @@ CEapTypeInfo* CEapTlsPeap::GetInfoL()
 
 void CEapTlsPeap::DeleteConfigurationL()
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::DeleteConfigurationL()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::DeleteConfigurationL()\n"));
-
+#ifdef USE_EAP_EXPANDED_TYPES
+	
 	TUint aTunnelingVendorType = iTunnelingType.get_vendor_type();
 	TUint aEapVendorType = iEapType.get_vendor_type();
+	
+#else
+	
+	TUint aTunnelingVendorType = static_cast<TUint>(iTunnelingType);
+	TUint aEapVendorType = static_cast<TUint>(iEapType);
+	
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::DeleteConfigurationL:Start:iIndexType=%d,iIndex=%d,TunnelingType=%d,EapType=%d"),
 			iIndexType, iIndex, aTunnelingVendorType, aEapVendorType));
@@ -669,7 +519,7 @@ void CEapTlsPeap::DeleteConfigurationL()
 		|| iEapType == eap_type_fast
 #endif		
 
-		|| iEapType == eap_expanded_type_ttls_plain_pap.get_type()
+		|| iEapType == eap_type_ttls_plain_pap
 
 
 	) 
@@ -679,14 +529,14 @@ void CEapTlsPeap::DeleteConfigurationL()
 			
 		for (TInt i = 0; i < iEapArray.Count(); i++)
 		{
-			if ((iEapType == eap_type_peap && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i])) 
-				|| (iEapType == eap_type_ttls && !CEapTypePlugin::IsDisallowedInsideTTLS(*iEapArray[i]))
+			if ((iEapType == eap_type_peap && !CEapType::IsDisallowedInsidePEAP(*iEapArray[i])) 
+				|| (iEapType == eap_type_ttls && !CEapType::IsDisallowedInsideTTLS(*iEapArray[i]))
 				
 #ifdef USE_FAST_EAP_TYPE
-				|| (iEapType == eap_type_fast && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i]))
+				|| (iEapType == eap_type_fast && !CEapType::IsDisallowedInsidePEAP(*iEapArray[i]))
 #endif						
 
-				|| (iEapType == eap_expanded_type_ttls_plain_pap.get_type() && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i]))
+				|| (iEapType == eap_type_ttls_plain_pap && !CEapType::IsDisallowedInsidePEAP(*iEapArray[i]))
 					
 
 			)
@@ -696,14 +546,16 @@ void CEapTlsPeap::DeleteConfigurationL()
 				EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::DeleteConfigurationL: Deleting encapsulated types for EAP type=%d"),
 						aEapVendorType));
 			
-				CEapTypePlugin* eapType;
+				CEapType* eapType;
 			
-				TEapExpandedType expandedCue = iEapArray[i]->DataType();
+#ifdef USE_EAP_EXPANDED_TYPES		
+			
+				TBuf8<KExpandedEAPTypeSize> expandedCue = iEapArray[i]->DataType();
 			
 				EAP_TRACE_DATA_DEBUG_SYMBIAN(("CEapTlsPeap::DeleteConfigurationL: Expanded cue:",
-					expandedCue.GetValue().Ptr(), expandedCue.GetValue().Size()));
+				expandedCue.Ptr(), expandedCue.Size()));
 			
-				eapType = CEapTypePlugin::NewL(expandedCue.GetValue(), iIndexType, iIndex);
+				eapType = CEapType::NewL(expandedCue, iIndexType, iIndex);
 				
 				if(eapType == NULL)
 				{
@@ -711,14 +563,7 @@ void CEapTlsPeap::DeleteConfigurationL()
 					User::Leave(KErrNotFound);
 				}
 				
-//				eapType->SetTunnelingType(iEapType.get_vendor_type());						
-			    TEapExpandedType aExpandedType;
-			    
-                TInt err = CEapConversion::ConvertInternalTypeToExpandedEAPType(
-			            &iEapType,
-			            &aExpandedType);
-
-			    eapType->SetTunnelingType(aExpandedType);
+				eapType->SetTunnelingType(iEapType.get_vendor_type());						
 
 #ifdef USE_FAST_EAP_TYPE
 				
@@ -749,7 +594,29 @@ void CEapTlsPeap::DeleteConfigurationL()
 				}
 				
 #endif // #ifdef USE_FAST_EAP_TYPE
+#endif // USE_EAP_EXPANDED_TYPES		
 	
+
+#ifndef USE_EAP_EXPANDED_TYPES		
+//#else // For normal EAP types.
+			
+				TBuf8<3> cue = iEapArray[i]->DataType();
+
+				EAP_TRACE_DATA_DEBUG_SYMBIAN(("CEapTlsPeap::DeleteConfigurationL: cue:",
+						cue.Ptr(), cue.Size()));
+
+				eapType = CEapType::NewL(cue, iIndexType, iIndex);	
+
+				if(eapType == NULL)
+					{
+						EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::DeleteConfigurationL: Ecom Error - No specified EAP plugin")) );
+						User::Leave(KErrNotFound);
+					}
+				
+				eapType->SetTunnelingType(iEapType);					
+
+#endif //#ifndef USE_EAP_EXPANDED_TYPES
+								
 				EAP_TRACE_DEBUG_SYMBIAN(
 						(_L("CEapTlsPeap::DeleteConfigurationL: PushL(...)")));	
 				
@@ -772,43 +639,41 @@ void CEapTlsPeap::DeleteConfigurationL()
 
 TUint CEapTlsPeap::GetInterfaceVersion()
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::GetInterfaceVersion()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::GetInterfaceVersion()\n"));
-
 	return KInterfaceVersion;
 }
 
 // ----------------------------------------------------------
 
-void CEapTlsPeap::SetTunnelingType(const TEapExpandedType aTunnelingType)
-    {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::SetTunnelingType()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::SetTunnelingType()\n"));
+void CEapTlsPeap::SetTunnelingType(const TInt aTunnelingType)
+{
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_DATA_DEBUG_SYMBIAN(
-        (EAPL("CEapTlsPeap::SetTunnelingType - tunneling type"),
-        aTunnelingType.GetValue().Ptr(), aTunnelingType.GetValue().Length()));
-    
-    eap_type_value_e aInternalType;
-    
-    TInt err = CEapConversion::ConvertExpandedEAPTypeToInternalType(
-            &aTunnelingType,
-            &aInternalType);
-    
-    iTunnelingType = aInternalType;
-    }
+	// Vendor id is eap_type_vendor_id_ietf always in this plugin.
+	iTunnelingType.set_eap_type_values(eap_type_vendor_id_ietf, aTunnelingType);
+
+#else
+
+	iTunnelingType = static_cast<eap_type_value_e>(aTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
+}
 
 // ----------------------------------------------------------
-
 void CEapTlsPeap::SetIndexL(
 		const TIndexType aIndexType, 
 		const TInt aIndex)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::SetIndexL()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::SetIndexL()\n"));
-
+#ifdef USE_EAP_EXPANDED_TYPES
+	
 	TUint aTunnelingVendorType = iTunnelingType.get_vendor_type();
 	TUint aEapVendorType = iEapType.get_vendor_type();
+	
+#else
+	
+	TUint aTunnelingVendorType = static_cast<TUint>(iTunnelingType);
+	TUint aEapVendorType = static_cast<TUint>(iEapType);
+	
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::SetIndexL:Start: Old: iIndexType=%d,iIndex=%d,TunnelingType=%d,EapType=%d"),
 			iIndexType, iIndex, aTunnelingVendorType, aEapVendorType));
@@ -833,16 +698,13 @@ void CEapTlsPeap::SetIndexL(
 	
 	RDbNamedDatabase db;
 
-	RFs session;
-
-	CleanupClosePushL(session);
-	CleanupClosePushL(db);
-	TInt error = session.Connect();
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::SetIndexL(): - session.Connect(), error=%d\n"), error));
-	User::LeaveIfError(error);
+	RDbs session;
 
     EapTlsPeapUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType, iEapType);
-
+	
+	CleanupClosePushL(session);
+	CleanupClosePushL(db);
+	
 	TPtrC settings;
 	TPtrC usercerts;
 	TPtrC cacerts;
@@ -852,49 +714,68 @@ void CEapTlsPeap::SetIndexL(
 	TPtrC fastSpecialSettings;
 #endif
 	
-	if (iEapType == eap_type_tls)
+#ifdef USE_EAP_EXPANDED_TYPES
+
+	switch (iEapType.get_vendor_type())
+	
+#else
+
+	switch (iEapType)
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 	{
-		settings.Set(KTlsDatabaseTableName);
-		usercerts.Set(KTlsAllowedUserCertsDatabaseTableName);
-		cacerts.Set(KTlsAllowedCACertsDatabaseTableName);
-		ciphersuites.Set(KTlsAllowedCipherSuitesDatabaseTableName);
-	}
-	else if (iEapType == eap_type_peap)
-	{
-		settings.Set(KPeapDatabaseTableName);
-		usercerts.Set(KPeapAllowedUserCertsDatabaseTableName);
-		cacerts.Set(KPeapAllowedCACertsDatabaseTableName);
-		ciphersuites.Set(KPeapAllowedCipherSuitesDatabaseTableName);
-	}
+	case eap_type_tls:
+		{
+			settings.Set(KTlsDatabaseTableName);
+			usercerts.Set(KTlsAllowedUserCertsDatabaseTableName);
+			cacerts.Set(KTlsAllowedCACertsDatabaseTableName);
+			ciphersuites.Set(KTlsAllowedCipherSuitesDatabaseTableName);
+		}
+		break;
+
+	case eap_type_peap:
+		{
+			settings.Set(KPeapDatabaseTableName);
+			usercerts.Set(KPeapAllowedUserCertsDatabaseTableName);
+			cacerts.Set(KPeapAllowedCACertsDatabaseTableName);
+			ciphersuites.Set(KPeapAllowedCipherSuitesDatabaseTableName);
+		}
+		break;
+
 #if defined (USE_TTLS_EAP_TYPE)
-	else if (iEapType == eap_type_ttls)
-	{
-		settings.Set(KTtlsDatabaseTableName);
-		usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
-		cacerts.Set(KTtlsAllowedCACertsDatabaseTableName);
-		ciphersuites.Set(KTtlsAllowedCipherSuitesDatabaseTableName);
-	}
+	case eap_type_ttls:
+		{
+			settings.Set(KTtlsDatabaseTableName);
+			usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
+			cacerts.Set(KTtlsAllowedCACertsDatabaseTableName);
+			ciphersuites.Set(KTtlsAllowedCipherSuitesDatabaseTableName);
+		}
+		break;
 #endif
+
 #ifdef USE_FAST_EAP_TYPE
-	else if (iEapType == eap_type_fast)
-	{
-		settings.Set(KFastGeneralSettingsDBTableName); // This is general settings for FAST.
-		fastSpecialSettings.Set(KFastSpecialSettingsDBTableName);
-		
-		usercerts.Set(KFastAllowedUserCertsDatabaseTableName);
-		cacerts.Set(KFastAllowedCACertsDatabaseTableName);
-		ciphersuites.Set(KFastAllowedCipherSuitesDatabaseTableName);			
-	}
+	case eap_type_fast:
+		{
+			settings.Set(KFastGeneralSettingsDBTableName); // This is general settings for FAST.
+			fastSpecialSettings.Set(KFastSpecialSettingsDBTableName);
+			
+			usercerts.Set(KFastAllowedUserCertsDatabaseTableName);
+			cacerts.Set(KFastAllowedCACertsDatabaseTableName);
+			ciphersuites.Set(KFastAllowedCipherSuitesDatabaseTableName);			
+		}
+		break;
 #endif		
-	else if (iEapType == eap_expanded_type_ttls_plain_pap.get_type())
-	{
-		settings.Set(KTtlsDatabaseTableName);
-		usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
-		cacerts.Set(KTtlsAllowedCACertsDatabaseTableName);
-		ciphersuites.Set(KTtlsAllowedCipherSuitesDatabaseTableName);
-	}
-	else
-	{
+
+	case eap_type_ttls_plain_pap:
+		{
+			settings.Set(KTtlsDatabaseTableName);
+			usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
+			cacerts.Set(KTtlsAllowedCACertsDatabaseTableName);
+			ciphersuites.Set(KTtlsAllowedCipherSuitesDatabaseTableName);
+		}
+		break;
+		
+	default:
 		// Should never happen
 		User::Leave(KErrArgument);
 	}	
@@ -980,10 +861,7 @@ void CEapTlsPeap::SetIndexL(
 #endif // End: #ifdef USE_FAST_EAP_TYPE
 		
 	db.Close();
-	session.Close();
-
-	CleanupStack::PopAndDestroy(&db);
-	CleanupStack::PopAndDestroy(&session);
+	CleanupStack::PopAndDestroy(2); // db, session.
 	
 	//////// Encapsulated types
 
@@ -994,7 +872,7 @@ void CEapTlsPeap::SetIndexL(
 		|| iEapType == eap_type_fast
 #endif				
 
-		|| iEapType == eap_expanded_type_ttls_plain_pap.get_type()
+		|| iEapType == eap_type_ttls_plain_pap
 			
 
 	)
@@ -1004,14 +882,14 @@ void CEapTlsPeap::SetIndexL(
 				
 		for (TInt i = 0; i < iEapArray.Count(); i++)
 		{
-			if ((iEapType == eap_type_peap && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i])) 
-				|| (iEapType == eap_type_ttls && !CEapTypePlugin::IsDisallowedInsideTTLS(*iEapArray[i]))
+			if ((iEapType == eap_type_peap && !CEapType::IsDisallowedInsidePEAP(*iEapArray[i])) 
+				|| (iEapType == eap_type_ttls && !CEapType::IsDisallowedInsideTTLS(*iEapArray[i]))
 
 #ifdef USE_FAST_EAP_TYPE
-				|| (iEapType == eap_type_fast && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i]))
+				|| (iEapType == eap_type_fast && !CEapType::IsDisallowedInsidePEAP(*iEapArray[i]))
 #endif										
 
-				|| (iEapType == eap_expanded_type_ttls_plain_pap.get_type() && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i]))
+				|| (iEapType == eap_type_ttls_plain_pap && !CEapType::IsDisallowedInsidePEAP(*iEapArray[i]))
 										
 
 			)
@@ -1022,14 +900,16 @@ void CEapTlsPeap::SetIndexL(
 				EAP_TRACE_DEBUG_SYMBIAN(
 		    		(_L("EapTlsPeapUtils::SetIndexL - Setting the index to encapsulated EAP types\n")));	
 				
-				CEapTypePlugin* eapType;
+				CEapType* eapType;
 			
-				TEapExpandedType expandedCue = iEapArray[i]->DataType();
+#ifdef USE_EAP_EXPANDED_TYPES		
+			
+				TBuf8<KExpandedEAPTypeSize> expandedCue = iEapArray[i]->DataType();
 			
 				EAP_TRACE_DATA_DEBUG_SYMBIAN(("CEapTlsPeap::SetIndexL: Expanded cue:",
-					expandedCue.GetValue().Ptr(), expandedCue.GetValue().Size()));
+				expandedCue.Ptr(), expandedCue.Size()));
 			
-				eapType = CEapTypePlugin::NewL(expandedCue.GetValue(), iIndexType, iIndex);
+				eapType = CEapType::NewL(expandedCue, iIndexType, iIndex);
 
 				if(eapType == NULL)
 				{
@@ -1037,14 +917,17 @@ void CEapTlsPeap::SetIndexL(
 					User::Leave(KErrNotFound);
 				}				
 				
-			    TEapExpandedType aExpandedType;
-			    
-			    eap_type_value_e value = iEapType;//.get_vendor_type();
-			    TInt err = CEapConversion::ConvertInternalTypeToExpandedEAPType(
-			            &value,
-			            &aExpandedType);
+				eapType->SetTunnelingType(iEapType.get_vendor_type());						
 
-			    eapType->SetTunnelingType(aExpandedType);						
+#else // For normal EAP types.
+			
+				TBuf8<3> cue = iEapArray[i]->DataType();
+			
+				eapType = CEapType::NewL(cue, iIndexType, iIndex);	
+				
+				eapType->SetTunnelingType(iEapType);					
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 				CleanupStack::PushL(eapType);
 				
@@ -1064,25 +947,17 @@ void CEapTlsPeap::SetIndexL(
 		(_L("EapTlsPeapUtils::SetIndexL - End\n")));		
 }
 
-// ----------------------------------------------------------
-
 void CEapTlsPeap::SetConfigurationL(const EAPSettings& aSettings)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::SetConfigurationL()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::SetConfigurationL()\n"));
-
 	RDbNamedDatabase db;
 
-	RFs session;
-
-	CleanupClosePushL(session);
-	CleanupClosePushL(db);
-	TInt error = session.Connect();
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::SetConfigurationL(): - session.Connect(), error=%d\n"), error));
-	User::LeaveIfError(error);
-
+	RDbs session;	
+	
 	// This also creates the IAP entry if it doesn't exist
 	EapTlsPeapUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType, iEapType);
+	
+	CleanupClosePushL(session);
+	CleanupClosePushL(db);
 
 	EapTlsPeapUtils::SetConfigurationL(
 		db,
@@ -1092,32 +967,20 @@ void CEapTlsPeap::SetConfigurationL(const EAPSettings& aSettings)
 		iTunnelingType,
 		iEapType);		
 		
-	db.Close();
-	session.Close();
-
-	CleanupStack::PopAndDestroy(&db);
-	CleanupStack::PopAndDestroy(&session);
+	CleanupStack::PopAndDestroy(2); // db, session
 }
-
-// ----------------------------------------------------------
 
 void CEapTlsPeap::GetConfigurationL(EAPSettings& aSettings)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::GetConfigurationL()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::GetConfigurationL()\n"));
-
 	RDbNamedDatabase db;
 
-	RFs session;
+	RDbs session;
+	
+	// This also creates the IAP entry if it doesn't exist
+	EapTlsPeapUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType, iEapType);
 	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-	TInt error = session.Connect();
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::GetConfigurationL(): - session.Connect(), error=%d\n"), error));
-	User::LeaveIfError(error);
-
-	// This also creates the IAP entry if it doesn't exist
-	EapTlsPeapUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType, iEapType);
 
 	EapTlsPeapUtils::GetConfigurationL(
 		db,
@@ -1128,23 +991,24 @@ void CEapTlsPeap::GetConfigurationL(EAPSettings& aSettings)
 		iEapType);
 		
 	db.Close();
-	session.Close();
-
-	CleanupStack::PopAndDestroy(&db);
-	CleanupStack::PopAndDestroy(&session);
+	CleanupStack::PopAndDestroy(2); // db, session
 }
-
-// ----------------------------------------------------------
 
 void CEapTlsPeap::CopySettingsL(
 	const TIndexType aDestinationIndexType,
 	const TInt aDestinationIndex)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::CopySettingsL()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::CopySettingsL()\n"));
-
+#ifdef USE_EAP_EXPANDED_TYPES
+	
 	TUint aTunnelingVendorType = iTunnelingType.get_vendor_type();
 	TUint aEapVendorType = iEapType.get_vendor_type();
+	
+#else
+	
+	TUint aTunnelingVendorType = static_cast<TUint>(iTunnelingType);
+	TUint aEapVendorType = static_cast<TUint>(iEapType);
+	
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::CopySettingsL:Start:iIndexType=%d,iIndex=%d,TunnelingType=%d,EapType=%d"),
 			iIndexType, iIndex, aTunnelingVendorType, aEapVendorType));
@@ -1165,16 +1029,13 @@ void CEapTlsPeap::CopySettingsL(
 	
 	RDbNamedDatabase db;
 
-	RFs session;
+	RDbs session;
+	
+	EapTlsPeapUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType, iEapType);
 	
 	CleanupClosePushL(session);
 	CleanupClosePushL(db);
-	TInt error = session.Connect();
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::CopySettingsL(): - session.Connect(), error=%d\n"), error));
-	User::LeaveIfError(error);
-
-	EapTlsPeapUtils::OpenDatabaseL(db, session, iIndexType, iIndex, iTunnelingType, iEapType);
-
+	
 	TPtrC settings;
 	TPtrC usercerts;
 	TPtrC cacerts;
@@ -1184,49 +1045,68 @@ void CEapTlsPeap::CopySettingsL(
 	TPtrC fastSpecialSettings;
 #endif
 	
-	if (iEapType == eap_type_tls)
+#ifdef USE_EAP_EXPANDED_TYPES
+
+	switch (iEapType.get_vendor_type())
+	
+#else
+
+	switch (iEapType)
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 	{
-		settings.Set(KTlsDatabaseTableName);
-		usercerts.Set(KTlsAllowedUserCertsDatabaseTableName);
-		cacerts.Set(KTlsAllowedCACertsDatabaseTableName);
-		ciphersuites.Set(KTlsAllowedCipherSuitesDatabaseTableName);
-	}
-	else if (iEapType == eap_type_peap)
-	{
-		settings.Set(KPeapDatabaseTableName);
-		usercerts.Set(KPeapAllowedUserCertsDatabaseTableName);
-		cacerts.Set(KPeapAllowedCACertsDatabaseTableName);
-		ciphersuites.Set(KPeapAllowedCipherSuitesDatabaseTableName);
-	}
+	case eap_type_tls:
+		{
+			settings.Set(KTlsDatabaseTableName);
+			usercerts.Set(KTlsAllowedUserCertsDatabaseTableName);
+			cacerts.Set(KTlsAllowedCACertsDatabaseTableName);
+			ciphersuites.Set(KTlsAllowedCipherSuitesDatabaseTableName);
+		}
+		break;
+
+	case eap_type_peap:
+		{
+			settings.Set(KPeapDatabaseTableName);
+			usercerts.Set(KPeapAllowedUserCertsDatabaseTableName);
+			cacerts.Set(KPeapAllowedCACertsDatabaseTableName);
+			ciphersuites.Set(KPeapAllowedCipherSuitesDatabaseTableName);
+		}
+		break;
+
 #if defined (USE_TTLS_EAP_TYPE)
-	else if (iEapType == eap_type_ttls)
-	{
-		settings.Set(KTtlsDatabaseTableName);
-		usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
-		cacerts.Set(KTtlsAllowedCACertsDatabaseTableName);
-		ciphersuites.Set(KTtlsAllowedCipherSuitesDatabaseTableName);
-	}
+	case eap_type_ttls:
+		{
+			settings.Set(KTtlsDatabaseTableName);
+			usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
+			cacerts.Set(KTtlsAllowedCACertsDatabaseTableName);
+			ciphersuites.Set(KTtlsAllowedCipherSuitesDatabaseTableName);
+		}
+		break;
 #endif
-	else if (iEapType == eap_expanded_type_ttls_plain_pap.get_type())
-	{
-		settings.Set(KTtlsDatabaseTableName);
-		usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
-		cacerts.Set(KTtlsAllowedCACertsDatabaseTableName);
-		ciphersuites.Set(KTtlsAllowedCipherSuitesDatabaseTableName);
-	}
-#ifdef USE_FAST_EAP_TYPE
-	else if (iEapType == eap_type_fast)
-	{
-		settings.Set(KFastGeneralSettingsDBTableName); // This is general settings for FAST.
-		fastSpecialSettings.Set(KFastSpecialSettingsDBTableName);
+
+	case eap_type_ttls_plain_pap:
+		{
+			settings.Set(KTtlsDatabaseTableName);
+			usercerts.Set(KTtlsAllowedUserCertsDatabaseTableName);
+			cacerts.Set(KTtlsAllowedCACertsDatabaseTableName);
+			ciphersuites.Set(KTtlsAllowedCipherSuitesDatabaseTableName);
+		}
+		break;
 		
-		usercerts.Set(KFastAllowedUserCertsDatabaseTableName);
-		cacerts.Set(KFastAllowedCACertsDatabaseTableName);
-		ciphersuites.Set(KFastAllowedCipherSuitesDatabaseTableName);			
-	}
+#ifdef USE_FAST_EAP_TYPE
+	case eap_type_fast:
+		{
+			settings.Set(KFastGeneralSettingsDBTableName); // This is general settings for FAST.
+			fastSpecialSettings.Set(KFastSpecialSettingsDBTableName);
+			
+			usercerts.Set(KFastAllowedUserCertsDatabaseTableName);
+			cacerts.Set(KFastAllowedCACertsDatabaseTableName);
+			ciphersuites.Set(KFastAllowedCipherSuitesDatabaseTableName);			
+		}
+		break;
 #endif		
-	else
-	{
+
+	default:
 		// Should never happen
 		User::Leave(KErrArgument);
 	}	
@@ -1312,10 +1192,7 @@ void CEapTlsPeap::CopySettingsL(
 #endif // End: #ifdef USE_FAST_EAP_TYPE	
 	
 	db.Close();
-	session.Close();
-
-	CleanupStack::PopAndDestroy(&db);
-	CleanupStack::PopAndDestroy(&session);
+	CleanupStack::PopAndDestroy(2); // db, session
 	
 	//////// Copy Encapsulated types
 	
@@ -1327,7 +1204,7 @@ void CEapTlsPeap::CopySettingsL(
 		|| iEapType == eap_type_fast
 #endif						
 
-		|| iEapType == eap_expanded_type_ttls_plain_pap.get_type()
+		|| iEapType == eap_type_ttls_plain_pap
 						
 
 	)
@@ -1340,27 +1217,29 @@ void CEapTlsPeap::CopySettingsL(
 				
 		for (TInt i = 0; i < iEapArray.Count(); i++)
 		{
-			if ((iEapType == eap_type_peap && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i])) 
-				|| (iEapType == eap_type_ttls && !CEapTypePlugin::IsDisallowedInsideTTLS(*iEapArray[i]))
+			if ((iEapType == eap_type_peap && !CEapType::IsDisallowedInsidePEAP(*iEapArray[i])) 
+				|| (iEapType == eap_type_ttls && !CEapType::IsDisallowedInsideTTLS(*iEapArray[i]))
 
 #ifdef USE_FAST_EAP_TYPE
-				|| (iEapType == eap_type_fast && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i]))
+				|| (iEapType == eap_type_fast && !CEapType::IsDisallowedInsidePEAP(*iEapArray[i]))
 #endif										
 
-				|| (iEapType == eap_expanded_type_ttls_plain_pap.get_type() && !CEapTypePlugin::IsDisallowedInsidePEAP(*iEapArray[i]))
+				|| (iEapType == eap_type_ttls_plain_pap && !CEapType::IsDisallowedInsidePEAP(*iEapArray[i]))
 									
 			)
 			{
 				// Copying the settings of encapsulated EAP type configurations possible inside PEAP and TTLS.
 			
-				CEapTypePlugin* eapType;
+				CEapType* eapType;
 			
-				TEapExpandedType expandedCue = iEapArray[i]->DataType();
+#ifdef USE_EAP_EXPANDED_TYPES		
+			
+				TBuf8<KExpandedEAPTypeSize> expandedCue = iEapArray[i]->DataType();
 			
 				EAP_TRACE_DATA_DEBUG_SYMBIAN(("CEapTlsPeap::CopySettingsL: Expanded cue:",
-					expandedCue.GetValue().Ptr(), expandedCue.GetValue().Size()));
+				expandedCue.Ptr(), expandedCue.Size()));
 			
-				eapType = CEapTypePlugin::NewL(expandedCue.GetValue(), iIndexType, iIndex);
+				eapType = CEapType::NewL(expandedCue, iIndexType, iIndex);
 				
 				if(eapType == NULL)
 				{
@@ -1368,16 +1247,18 @@ void CEapTlsPeap::CopySettingsL(
 					User::Leave(KErrNotFound);
 				}
 				
-                TEapExpandedType aExpandedType;
-                
-                TInt err = CEapConversion::ConvertInternalTypeToExpandedEAPType(
-                        &iEapType,
-                        &aExpandedType);
+				eapType->SetTunnelingType(iEapType.get_vendor_type());						
 
-                eapType->SetTunnelingType(aExpandedType);
+#else // For normal EAP types.
+			
+				TBuf8<3> cue = iEapArray[i]->DataType();
+			
+				eapType = CEapType::NewL(cue, iIndexType, iIndex);	
+				
+				eapType->SetTunnelingType(iEapType);					
 
-                //eapType->SetTunnelingType(iEapType.get_vendor_type());						
-
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
+				
 				CleanupStack::PushL(eapType);
 				
 				eapType->CopySettingsL(aDestinationIndexType, aDestinationIndex);
@@ -1395,17 +1276,12 @@ void CEapTlsPeap::CopySettingsL(
 
 }
 
-// ----------------------------------------------------------
-
 #ifdef USE_PAC_STORE
 
 void CEapTlsPeap::UpdatePacStoreCleanupTableL(const TIndexType aIndexType,
 	const TInt aIndex, 
 	const eap_type_value_e aTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeap::UpdatePacStoreCleanupTableL()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeap::UpdatePacStoreCleanupTableL()\n"));
-
 	EAP_TRACE_DEBUG_SYMBIAN(
 	(_L("CEapTlsPeap::UpdatePacStoreCleanupTableL: Start")));
 	
@@ -1434,11 +1310,10 @@ void CEapTlsPeap::UpdatePacStoreCleanupTableL(const TIndexType aIndexType,
 			
 	EAP_TRACE_DEBUG_SYMBIAN(
 	(_L("CEapTlsPeap::UpdatePacStoreCleanupTableL: End")));	
-
+	User::Leave(KErrNone);
 }
 
 #endif // #ifdef USE_PAC_STORE
 
-// ----------------------------------------------------------
 // End of file
 

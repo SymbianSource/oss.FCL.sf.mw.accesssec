@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 6 %
 */
 
 #if !defined(_EAPOL_KEY_STATE_STRING_H_)
@@ -69,7 +69,6 @@ public:
 	 */
 	EAP_FUNC_IMPORT static eap_const_string get_eapol_key_descriptor_type_string(
 		const eapol_key_descriptor_type_e key_descriptor_type);
-
 };
 
 //--------------------------------------------------

@@ -17,7 +17,7 @@
 */
 
 /*
-* %version: %
+* %version: 10 %
 */
 
 #ifndef __EAPPLUGINRESOLVER_H__

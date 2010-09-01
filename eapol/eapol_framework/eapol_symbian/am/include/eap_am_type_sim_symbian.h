@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 8 %
 */
 
 #if !defined(_EAP_AM_TYPE_SIM_SYMBIAN_H_)

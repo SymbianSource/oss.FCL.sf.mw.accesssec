@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 5 %
 */
 
 #if !defined( _ABS_EAP_AM_MUTEX_H_ )

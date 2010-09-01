@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 25.1.3 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -301,14 +301,14 @@ EAP_FUNC_EXPORT void eap_am_tools_c::trace_data(
 				data_start = ind;
 			}
 
-			*cursor_ascii++ = static_cast<u8_t>((*data >= 0x20 && *data < 0x7f) ? *data : '.');
+			*cursor_ascii++ = (*data >= 0x20 && *data < 0x7f) ? *data : '.';
 
 			*cursor++ = octet_to_ascii(((*data) & 0xf0) >> 4);
 			*cursor++ = octet_to_ascii(((*data) & 0x0f));
 			data++;
 
-			if ((ind > 0u
-				 && ((ind+1) % byte_group_size) == 0)
+			if (ind > 0u
+				&& ((ind+1) % byte_group_size) == 0
 				|| byte_group_size == 1ul)
 			{
 				*cursor++ = ' ';
@@ -445,7 +445,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::timer_thread_function()
 
 EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::timer_thread_function()
 {
-	EAP_TRACE_TIMER(this, TRACE_FLAGS_TIMER, (EAPL("TIMER: Timer thread starts.\n")));
+	EAP_TRACE_TIMER(this, TRACE_FLAGS_DEFAULT, (EAPL("TIMER: Timer thread starts.\n")));
 
 	u32_t static_sleep_time = get_timer_resolution_ms();
 	u64_t start_time = get_clock_ticks();
@@ -462,7 +462,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::timer_thread_function()
 	// Note 64-bit casted to 32-bit.
 	EAP_TRACE_TIMER(
 		this,
-		TRACE_FLAGS_TIMER, (EAPL("TIMER: get_clock_ticks_of_second() = %lu\n"),
+		TRACE_FLAGS_DEFAULT, (EAPL("TIMER: get_clock_ticks_of_second() = %lu\n"),
 		static_cast<u32_t>(get_clock_ticks_of_second())));
 
 	hw_ticks_of_millisecond = get_clock_ticks_of_second();
@@ -488,14 +488,14 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::timer_thread_function()
 
 	EAP_TRACE_TIMER(
 		this,
-		TRACE_FLAGS_TIMER,
+		TRACE_FLAGS_DEFAULT,
 		(EAPL("MUTEX: eap_am_tools_c::timer_thread_function(): mutex_enter(): begin\n")));
 
 	mutex->mutex_enter();
 
 	EAP_TRACE_TIMER(
 		this,
-		TRACE_FLAGS_TIMER,
+		TRACE_FLAGS_DEFAULT,
 		(EAPL("MUTEX: eap_am_tools_c::timer_thread_function(): mutex_enter(): end\n")));
 
 	while(get_is_timer_thread_active())
@@ -506,7 +506,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::timer_thread_function()
 
 		EAP_TRACE_TIMER(
 			this,
-			TRACE_FLAGS_TIMER,
+			TRACE_FLAGS_DEFAULT,
 			(EAPL("TIMER: timer_sleep(): current_sleep_time=%d\n"),
 			 static_cast<u32_t>(current_sleep_time)));
 
@@ -515,14 +515,14 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::timer_thread_function()
 
 		EAP_TRACE_TIMER(
 			this,
-			TRACE_FLAGS_TIMER,
+			TRACE_FLAGS_DEFAULT,
 			(EAPL("MUTEX: eap_am_tools_c::timer_thread_function(): mutex_leave(): begin\n")));
 
 		mutex->mutex_leave(this);
 
 		EAP_TRACE_TIMER(
 			this,
-			TRACE_FLAGS_TIMER,
+			TRACE_FLAGS_DEFAULT,
 			(EAPL("MUTEX: eap_am_tools_c::timer_thread_function(): mutex_leave(): end\n")));
 
 		// Sleep happens outside of the mutex.
@@ -530,14 +530,14 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::timer_thread_function()
 
 		EAP_TRACE_TIMER(
 			this,
-			TRACE_FLAGS_TIMER,
+			TRACE_FLAGS_DEFAULT,
 			(EAPL("MUTEX: eap_am_tools_c::timer_thread_function(): mutex_enter(): begin\n")));
 
 		mutex->mutex_enter();
 
 		EAP_TRACE_TIMER(
 			this,
-			TRACE_FLAGS_TIMER,
+			TRACE_FLAGS_DEFAULT,
 			(EAPL("MUTEX: eap_am_tools_c::timer_thread_function(): mutex_enter(): end\n")));
 
 		end_time = get_clock_ticks();
@@ -549,7 +549,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::timer_thread_function()
 			delay_time = 0ul;
 			EAP_TRACE_TIMER(
 				this,
-				TRACE_FLAGS_TIMER,
+				TRACE_FLAGS_DEFAULT,
 				(EAPL("TIMER: empty timer queue\n")));
 		}
 		else
@@ -568,7 +568,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::timer_thread_function()
 		{
 			EAP_TRACE_TIMER(
 				this,
-				TRACE_FLAGS_TIMER,
+				TRACE_FLAGS_DEFAULT,
 				(EAPL("TIMER: real_sleep_time=%d, delay_time=%d\n"),
 				 static_cast<u32_t>(real_sleep_time),
 				 static_cast<u32_t>(delay_time)));
@@ -609,7 +609,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::timer_thread_function()
 
 		EAP_TRACE_TIMER(
 			this,
-			TRACE_FLAGS_TIMER,
+			TRACE_FLAGS_DEFAULT,
 			(EAPL("TIMER: Timer thread pulse_timer, sleep time = %4d ms, real_sleep_time %4d ms, ")
 			 EAPL("virtual_time %6d, real_time %6d, next_sleep_time %4d, delay_time %4d.\n"),
 			 current_sleep_time,
@@ -623,19 +623,19 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::timer_thread_function()
 
 	EAP_TRACE_TIMER(
 		this,
-		TRACE_FLAGS_TIMER,
+		TRACE_FLAGS_DEFAULT,
 		(EAPL("MUTEX: eap_am_tools_c::timer_thread_function(): mutex_leave(): begin\n")));
 
 	mutex->mutex_leave(this);
 
 	EAP_TRACE_TIMER(
 		this,
-		TRACE_FLAGS_TIMER,
+		TRACE_FLAGS_DEFAULT,
 		(EAPL("MUTEX: eap_am_tools_c::timer_thread_function(): mutex_leave(): end\n")));
 
 	delete mutex;
 
-	EAP_TRACE_TIMER(this, TRACE_FLAGS_TIMER, (EAPL("TIMER: Timer thread stops.\n")));
+	EAP_TRACE_TIMER(this, TRACE_FLAGS_DEFAULT, (EAPL("TIMER: Timer thread stops.\n")));
 
 	m_thread_stopped =true;
 
@@ -663,7 +663,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::convert_ascii_to_uppercase(
 	{
 		if (source_bytes[ind] >= 'a' && source_bytes[ind] <= 'z')
 		{
-			source_bytes[ind] = static_cast<u8_t>(source_bytes[ind] - 32);
+			source_bytes[ind] -= 32;
 		}
 	}
 
@@ -1064,7 +1064,7 @@ EAP_FUNC_EXPORT void eap_am_tools_c::restore_selected_bytes_from_ascii_armor(
 		// +-+-+-+-+-+-+-+-+-+-+
 		*/
 		value = octet_from_ascii_armor(source_byte);
-		target[*output_ind] = static_cast<u8_t>(target[*output_ind] | (value & 0x30) >> 4u);
+		target[*output_ind] |= (value & 0x30) >> 4u;
 		++(*output_ind);
 		if (last_input_byte == false)
 		{
@@ -1098,7 +1098,7 @@ EAP_FUNC_EXPORT void eap_am_tools_c::restore_selected_bytes_from_ascii_armor(
 		// +-+-+-+-+-+-+-+-+-+-+-+-+
 		*/
 		value = octet_from_ascii_armor(source_byte);
-		target[*output_ind] = static_cast<u8_t>(target[*output_ind] | ((value >> 2u) & 0x0f));
+		target[*output_ind] |= (value >> 2u) & 0x0f;
 		++(*output_ind);
 		if (last_input_byte == false)
 		{
@@ -1134,7 +1134,7 @@ EAP_FUNC_EXPORT void eap_am_tools_c::restore_selected_bytes_from_ascii_armor(
 		// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 		*/
 		value = octet_from_ascii_armor(source_byte);
-		target[*output_ind] = static_cast<u8_t>(target[*output_ind] | value);
+		target[*output_ind] |= value;
 		++(*output_ind);
 		*missing_bit_count = 0u;
 	}
@@ -1656,12 +1656,8 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::shutdown_am_tools()
 	if (m_shutdown_was_called == false)
 	{
 		m_shutdown_was_called = true;
-		
-		// stop tracing as tools get deleted
-		set_trace_mask(eap_trace_mask_none);
 
 		#if !defined(NO_EAP_AM_MEMORY_STORE)
-		(void) am_cancel_all_timers();
 		if (m_memory_store != 0)
 		{
 			status = m_memory_store->shutdown();
@@ -1894,7 +1890,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::generate_random_error(
 			}
 
 			previous_data = data[ind];
-			data[ind] = static_cast<u8_t>(data[ind] ^ rnd);
+			data[ind] ^= rnd;
 
 			if (previous_data != data[ind])
 			{
@@ -1972,7 +1968,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::generate_random_error(
 					}
 
 					previous_data = data[index];
-					data[index] = static_cast<u8_t>(data[index] ^ rnd);
+					data[index] ^= rnd;
 				}
 				while(previous_data == data[index]);
 
@@ -2036,8 +2032,8 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::generate_random_error(
 						return EAP_STATUS_RETURN(this, status);
 					}
 
-					delta_length = static_cast<u8_t>(delta_length % (static_cast<i32_t>(sent_packet->get_data_length())
-													- static_cast<i32_t>(minimum_packet_length)));
+					delta_length %= (static_cast<i32_t>(sent_packet->get_data_length())
+									 - static_cast<i32_t>(minimum_packet_length) /*eapol_ethernet_header_wr_c::get_header_length()*/ );
 
 					if (delta_length == 0)
 					{
@@ -2435,13 +2431,13 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::create_uuid_v5(
 
 	// set the four most significant bits (bits 12 through 15) of the
 	// time_hi_and_version field to the appropriate 4-bit version number
-	hash[6] = static_cast<u8_t>(hash[6] & 0x0F);
-	hash[6] = static_cast<u8_t>(hash[6] | 0x50);
+	hash[6] &= 0x0F;
+	hash[6] |= 0x50;
 
 	// set the two most significant bits (bits 6 and 7) of the
     // clock_seq_hi_and_reserved to zero and one, respectively
-	hash[8] = static_cast<u8_t>(hash[8] & 0x3F);
-	hash[8] = static_cast<u8_t>(hash[8] | 0x80);
+	hash[8] &= 0x3F;
+	hash[8] |= 0x80;
 
 	return EAP_STATUS_RETURN(this, eap_status_ok);
 }

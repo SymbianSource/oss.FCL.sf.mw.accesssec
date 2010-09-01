@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 38.1.26 %
+* %version: 43 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -34,13 +34,10 @@
 #include <x509keys.h>
 #include <x509cert.h>
 #include "eap_tlv_message_data.h"
-#include "EapTraceSymbian.h"
-#include "eap_automatic_variable.h"
+#include "eap_am_trace_symbian.h"
 
-#if defined(USE_EAP_TLS_PEAP_UNIFIED_KEY_STORE_CACHE)
-	const TText8 KKeyStoreHandlePrefix[] = "EapTlsPeapKeyStoreHandler";
-	const TText8 KKeyStoreHandleKey[] = "CEapTlsPeapCertInterface KeyStore handle";
-#endif //#if defined(USE_EAP_TLS_PEAP_UNIFIED_KEY_STORE_CACHE)
+const TText8 KKeyStoreHandlePrefix[] = "EapTlsPeapKeyStoreHandler";
+const TText8 KKeyStoreHandleKey[] = "CEapTlsPeapCertInterface KeyStore handle";
 
 enum TAlgorithmAndSignedType
 {
@@ -64,14 +61,6 @@ enum eap_type_tlspeap_stored_e
 CEapTlsPeapCertInterface* CEapTlsPeapCertInterface::NewL(abs_eap_am_tools_c* const aTools, 
 											   eap_am_type_tls_peap_symbian_c* const aParent)
 {
-	EAP_TRACE_DEBUG(
-		aTools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::NewL()\n")));
-
-	EAP_TRACE_RETURN_STRING(aTools, "returns: CEapTlsPeapCertInterface::NewL()");
-
-
 	CEapTlsPeapCertInterface* self = new(ELeave) CEapTlsPeapCertInterface(aTools, aParent);
 	CleanupStack::PushL(self);
 	self->ConstructL();
@@ -83,22 +72,14 @@ CEapTlsPeapCertInterface* CEapTlsPeapCertInterface::NewL(abs_eap_am_tools_c* con
 
 CEapTlsPeapCertInterface::CEapTlsPeapCertInterface(abs_eap_am_tools_c* const aTools, eap_am_type_tls_peap_symbian_c* const aParent)
 : CActive(CActive::EPriorityStandard)
-, iParent(aParent)
-, m_am_tools(aTools)
-, iAllowedUserCerts(1)
-, iEncodedCertificate(0)
-, iCertPtr(0,0)
-, iMatchingUserCertInfos(1)
-, iCAIndex(0)
-, iUseAutomaticCaCertificate(EFalse)
+,iParent(aParent)
+,m_am_tools(aTools)
+,iAllowedUserCerts(1)
+,iEncodedCertificate(0)
+,iCertPtr(0,0)
+,iMatchingUserCertInfos(1)
+,iCAIndex(0)
 {
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::CEapTlsPeapCertInterface()\n")));
-
-	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapTlsPeapCertInterface::CEapTlsPeapCertInterface()");
-
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
@@ -107,13 +88,8 @@ CEapTlsPeapCertInterface::CEapTlsPeapCertInterface(abs_eap_am_tools_c* const aTo
 
 void CEapTlsPeapCertInterface::ConstructL()
 {
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::ConstructL()\n")));
-
-	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapTlsPeapCertInterface::ConstructL()");
-
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+	
 	User::LeaveIfError(iFs.Connect());
 	
 	CActiveScheduler::Add(this);		
@@ -130,80 +106,19 @@ void CEapTlsPeapCertInterface::ConstructL()
 
 CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface()
 {
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface()\n")));
-
-	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface()");
-
-	if(IsActive())
-	{
-		Cancel();		
-	}
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iMatchingUserCerts.ResetAndDestroy(): count=%d\n"),
-		iMatchingUserCerts.Count()));
-
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+	
 	iMatchingUserCerts.ResetAndDestroy();
 
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iMatchingUserCertInfos.ResetAndDestroy(): count=%d\n"),
-		iMatchingUserCertInfos.Count()));
-
-	iMatchingUserCertInfos.ResetAndDestroy();
+	iMatchingUserCertInfos.Reset();
 	
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iAllowedUserCerts.ResetAndDestroy(): count=%d\n"),
-		iAllowedUserCerts.Count()));
-
-	iAllowedUserCerts.ResetAndDestroy();
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iAllowedCACerts.ResetAndDestroy(): count=%d\n"),
-		iAllowedCACerts.Count()));
-
-	iAllowedCACerts.ResetAndDestroy();
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iRootCerts.ResetAndDestroy(): count=%d\n"),
-		iRootCerts.Count()));
+	iAllowedUserCerts.Reset();
 
 	iRootCerts.ResetAndDestroy();
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iUserCertChain.ResetAndDestroy(): count=%d\n"),
-		iUserCertChain.Count()));
-
 	iUserCertChain.ResetAndDestroy();
 	
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iCertAuthorities.ResetAndDestroy(): count=%d\n"),
-		iCertAuthorities.Count()));
-
 	iCertAuthorities.ResetAndDestroy();
 	
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iCertInfos.Reset(): count=%d\n"),
-		iCertInfos.Count()));
-
 	TInt i(0);
 	for (i = 0; i < iCertInfos.Count(); i++)
 	{
@@ -211,22 +126,11 @@ CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface()
 	}
 	iCertInfos.Reset();
 
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iKeyInfos.Reset(): count=%d\n"),
-		iKeyInfos.Count()));
-
 	for (i = 0; i < iKeyInfos.Count(); i++)
 	{
 		iKeyInfos[i]->Release();
 	}
 	iKeyInfos.Reset();
-
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete rest\n")));
 
 	delete iCertFilter;
 	delete iCertStore;
@@ -242,15 +146,9 @@ CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface()
 	delete iRSASignature;
 	delete iDSASignature;
 	delete iKeyFilter;
-
-#if !defined(USE_EAP_TLS_PEAP_UNIFIED_KEY_STORE_CACHE)
-
-	delete iKeyStore;
-
-#endif //#if !defined(USE_EAP_TLS_PEAP_UNIFIED_KEY_STORE_CACHE)
+		
+	iFs.Close();	
 	
-	iFs.Close();
-
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
@@ -262,7 +160,7 @@ CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface()
 //--------------------------------------------------
 
 void CEapTlsPeapCertInterface::GetMatchingCertificatesL(
-	const RPointerArray<EapCertificateEntry>& aAllowedUserCerts,
+	const RArray<SCertEntry>& aAllowedUserCerts,
 	const TBool aUseCertAuthoritiesFilter,
 	EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * const aCertAuthorities,
 	const TBool aUseCertTypesFilter,
@@ -270,61 +168,54 @@ void CEapTlsPeapCertInterface::GetMatchingCertificatesL(
 	const TBool aUseAllowedCipherSuitesFilter,
 	const RArray<TUint>& aAllowedCipherSuites)
 {
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::GetMatchingCertificatesL(): Total allowed user certs=%d, aAllowedUserCerts=0x%08x, iAllowedUserCerts=0x%08x, aCertAuthorities=0x%08x, aCertTypes=0x%08x, aAllowedCipherSuites=0x%08x\n"),
-		aAllowedUserCerts.Count(),
-		&aAllowedUserCerts,
-		&iAllowedUserCerts,
-		aCertAuthorities,
-		aCertTypes,
-		&aAllowedCipherSuites));
-
-	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapTlsPeapCertInterface::GetMatchingCertificatesL()");
-
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+	
 	iUseCertAuthoritiesFilter = aUseCertAuthoritiesFilter;
 	
 	iUseCertTypesFilter = aUseCertTypesFilter;
 	
 	iUseAllowedCipherSuitesFilter = aUseAllowedCipherSuitesFilter;
 
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::GetMatchingCertificatesL(): iAllowedUserCerts.Count()=%d\n"),
-		iAllowedUserCerts.Count()));
-
-	iAllowedUserCerts.ResetAndDestroy();
+	iAllowedUserCerts.Reset();
 	
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::GetMatchingCertificatesL(): UseCertAuthoritiesFilter=%d, UseCertTypesFilter=%d, UseAllowedCipherSuitesFilter=%d\n"),
-		iUseCertAuthoritiesFilter,
-		iUseCertTypesFilter,
-		iUseAllowedCipherSuitesFilter));		
+		(EAPL("CEapTlsPeapCertInterface::GetMatchingCertificatesL: Total allowed user certs=%d\n"),
+		aAllowedUserCerts.Count()));		
+	
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::GetMatchingCertificatesL:UseCertAuthoritiesFilter=%d, UseCertTypesFilter=%d, UseAllowedCipherSuitesFilter=%d\n"),
+		iUseCertAuthoritiesFilter,iUseCertTypesFilter,iUseAllowedCipherSuitesFilter));		
 	
 	for (TInt j = 0; j < aAllowedUserCerts.Count(); j++)
 	{
-		EapCertificateEntry * const copy_cert = aAllowedUserCerts[j]->Copy();
-		if (copy_cert == 0)
-		{
-			User::Leave(KErrNoMemory);
-		}
+		iAllowedUserCerts.AppendL(aAllowedUserCerts[j]);
+		
+#if defined(_DEBUG) || defined(DEBUG)
 
-		iAllowedUserCerts.AppendL(copy_cert);
-
-		EAP_TRACE_SETTINGS(copy_cert);
+		// This is just for the debug prints.
+		TCertLabel tempLabel = iAllowedUserCerts[j].iLabel;
+		TKeyIdentifier tempSubjectKeyId = iAllowedUserCerts[j].iSubjectKeyId;
+		
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("CEapTlsPeapCertInterface::GetMatchingCertificatesL: details of allowed user certs,Label=%S\n"),
+		&tempLabel));		
+		
+		EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "GetMatchingCertificatesL : Subject Key Id:",
+		tempSubjectKeyId.Ptr(), tempSubjectKeyId.Size() ) );			
+#endif
 	}
 
 	if (iCertAuthorities.Count() > 0)
 	{
 		iCertAuthorities.ResetAndDestroy();
 	}
-
-	if (aUseCertAuthoritiesFilter
-		&& aCertAuthorities)
+	if (aUseCertAuthoritiesFilter)
 	{
 		for (TUint i = 0; i < aCertAuthorities->get_object_count(); i++)
 		{
@@ -335,8 +226,8 @@ void CEapTlsPeapCertInterface::GetMatchingCertificatesL(
 
 			// Try to form distiguished name
 			CX500DistinguishedName* tmp = 0;
-			TRAPD(error, tmp = CX500DistinguishedName::NewL(ptr));
-			if (error == KErrNone)
+			TRAPD(err, tmp = CX500DistinguishedName::NewL(ptr));
+			if (err == KErrNone)
 			{
 				CleanupStack::PushL(tmp);
 				// Distinguished name was found -> add it to array.
@@ -374,7 +265,7 @@ void CEapTlsPeapCertInterface::GetMatchingCertificatesL(
 	
 	if (iCertStore == 0)
 	{
-		iCertStore = CUnifiedCertStore::NewL(iFs, EFalse);
+		iCertStore = CUnifiedCertStore::NewL(iFs, false);
 		iCertStore->Initialize(iStatus);		
 	}
 	else
@@ -389,22 +280,16 @@ void CEapTlsPeapCertInterface::GetMatchingCertificatesL(
 
 //--------------------------------------------------
 
-void CEapTlsPeapCertInterface::ReadCertificateL(EapCertificateEntry& aCertInfo, const TBool aRetrieveChain)
+void CEapTlsPeapCertInterface::ReadCertificateL(SCertEntry& aCertInfo, const TBool aRetrieveChain)
 {	
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::ReadCertificateL()\n")));
-
-	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapTlsPeapCertInterface::ReadCertificateL()");
-
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	iCertInfo = aCertInfo;
 	iRetrieveChain = aRetrieveChain;
 	iState = EReadCertInitStore;
 	
 	if (iCertStore == 0)
 	{
-		iCertStore = CUnifiedCertStore::NewL(iFs, EFalse);
+		iCertStore = CUnifiedCertStore::NewL(iFs, false);
 		iCertStore->Initialize(iStatus);		
 	}
 	else
@@ -418,21 +303,17 @@ void CEapTlsPeapCertInterface::ReadCertificateL(EapCertificateEntry& aCertInfo, 
 
 //--------------------------------------------------
 
-void CEapTlsPeapCertInterface::ReadCACertificateL(EapCertificateEntry& aCertInfo)
+void CEapTlsPeapCertInterface::ReadCACertificateL(SCertEntry& aCertInfo)
 {	
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::ReadCACertificateL()\n")));
-
-	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapTlsPeapCertInterface::ReadCACertificateL()");
-
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapTlsPeapCertInterface::ReadCACertificateL.\n")));
+	
 	iCertInfo = aCertInfo;
 	iState = EReadCACertInitStore;
 	
 	if (iCertStore == 0)
 	{
-		iCertStore = CUnifiedCertStore::NewL(iFs, EFalse);
+		iCertStore = CUnifiedCertStore::NewL(iFs, false);
 		iCertStore->Initialize(iStatus);		
 	}
 	else
@@ -447,48 +328,19 @@ void CEapTlsPeapCertInterface::ReadCACertificateL(EapCertificateEntry& aCertInfo
 
 //--------------------------------------------------
 
-void CEapTlsPeapCertInterface::ValidateChainL(
-	TDesC8& aCertChain,
-	RPointerArray<EapCertificateEntry>& aAllowedCACerts,
-	const TBool aUseAutomaticCaCertificate)
-{
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::ValidateChainL(): aUseAutomaticCaCertificate=%d\n"),
-		aUseAutomaticCaCertificate));
-
-	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapTlsPeapCertInterface::ValidateChainL()");
-
-	iUseAutomaticCaCertificate = aUseAutomaticCaCertificate;
+void CEapTlsPeapCertInterface::ValidateChainL(TDesC8& aCertChain, RArray<SCertEntry>& aAllowedCACerts)
+{	
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);	
 	iCAIndex = 0;
-	iAllowedCACerts.ResetAndDestroy();
-
-	if (!iUseAutomaticCaCertificate)
-	{
-		for (TInt j = 0; j < aAllowedCACerts.Count(); j++)
-		{
-			EapCertificateEntry * const copy_cert = aAllowedCACerts[j]->Copy();
-			if (copy_cert == 0)
-			{
-				User::Leave(KErrNoMemory);
-			}
-
-			iAllowedCACerts.AppendL(copy_cert);
-
-			EAP_TRACE_SETTINGS(copy_cert);
-		}
-	}
-
+	iAllowedCACerts = aAllowedCACerts;
 	delete iInputCertChain;
 
 	iInputCertChain = 0;
 	iInputCertChain = aCertChain.AllocL();
 	iState = EValidateChainInitStore;
-
 	if (iCertStore == 0)
 	{
-		iCertStore = CUnifiedCertStore::NewL(iFs, EFalse);
+		iCertStore = CUnifiedCertStore::NewL(iFs, false);
 		iCertStore->Initialize(iStatus);		
 	}
 	else
@@ -496,9 +348,7 @@ void CEapTlsPeapCertInterface::ValidateChainL(
 		TRequestStatus* status = &iStatus;
 		User::RequestComplete(status, KErrNone);		
 	}
-
 	SetActive();
-
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
 
@@ -506,12 +356,12 @@ void CEapTlsPeapCertInterface::ValidateChainL(
 
 void CEapTlsPeapCertInterface::DoCancel()
 {
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
 		(EAPL("CEapTlsPeapCertInterface::DoCancel()\n")));
-
-	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapTlsPeapCertInterface::DoCancel()");
 
 	if (iCertStore != 0 && iCertStore->IsActive())
 	{
@@ -610,23 +460,15 @@ void CEapTlsPeapCertInterface::DoCancel()
 //--------------------------------------------------
 	
 void CEapTlsPeapCertInterface::SignL(
-	const TKeyIdentifier& aKeyId,
+	TKeyIdentifier& aKeyId,
 	const TDesC8& aHashIn,
 	const TUint aSignatureLength)
 {
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::SignL()\n")));
-
-	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapTlsPeapCertInterface::SignL()");
-
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);	
 	iKeyIdentifier = aKeyId;
 	if (aHashIn.Size() > KMaxHashLength)
 	{
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Illegal hash size %d to SignL(), shoudbe <= %d.\n"),
-			aHashIn.Size(),
-			KMaxHashLength));
+		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Illegal hash size to SignL.\n")));
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		User::Leave(KErrGeneral);		
 	}
@@ -654,9 +496,6 @@ void CEapTlsPeapCertInterface::SignL(
 	
 	if (iKeyStore == 0)
 	{
-
-#if defined(USE_EAP_TLS_PEAP_UNIFIED_KEY_STORE_CACHE)
-
 		// Try to get the keystore class pointer from memory store
 		eap_variable_data_c key(m_am_tools);
 		eap_status_e status = key.set_copy_of_buffer(KKeyStoreHandlePrefix, sizeof(KKeyStoreHandlePrefix));
@@ -675,17 +514,12 @@ void CEapTlsPeapCertInterface::SignL(
 		eap_tlv_message_data_c tlv_data(m_am_tools);
 		
 		status = m_am_tools->memory_store_get_data(&key, &tlv_data);
-
 		if (status != eap_status_ok)
 		{
-
-#endif //#if defined(USE_EAP_TLS_PEAP_UNIFIED_KEY_STORE_CACHE)
-
-
 			EAP_TRACE_DEBUG(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
-				(EAPL("EAP_type_TLSPEAP: CEapTlsPeapCertInterface::SignL(): cannot get previous CUnifiedKeyStore handle.\n")));
+				(EAPL("EAP_type_TLSPEAP: cannot get previous keystore handle.\n")));
 
 
 			// At this point we can set the passphrase timeout because it the passphrase 
@@ -696,8 +530,6 @@ void CEapTlsPeapCertInterface::SignL(
 			iKeyStore = CUnifiedKeyStore::NewL(iFs);
 			iKeyStore->Initialize(iStatus);		
 			
-#if defined(USE_EAP_TLS_PEAP_UNIFIED_KEY_STORE_CACHE)
-
 			status = tlv_data.add_message_data(
 				eap_type_tlspeap_stored_keystore_handle,
 				sizeof(iKeyStore),
@@ -772,24 +604,15 @@ void CEapTlsPeapCertInterface::SignL(
 				User::Leave(KErrGeneral);
 			}			
 		}
-
-#endif //#if defined(USE_EAP_TLS_PEAP_UNIFIED_KEY_STORE_CACHE)
-
 	}
 	else
 	{
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("EAP_type_TLSPEAP: CEapTlsPeapCertInterface::SignL(): uses previous CUnifiedKeyStore handle.\n")));
-
 		// Skip passphrase setting because it clears the passphrase cache
 		iState = ESetPassphraseTimeout;
 
 		TRequestStatus* status = &iStatus;
 		User::RequestComplete(status, KErrNone);
 	}		
-
 	SetActive();
 
 
@@ -800,16 +623,10 @@ void CEapTlsPeapCertInterface::SignL(
 //--------------------------------------------------
 	
 void CEapTlsPeapCertInterface::DecryptL(
-	const TKeyIdentifier& aKeyId,
+	TKeyIdentifier& aKeyId,
 	const TDesC8& aDataIn)
 {
-	EAP_TRACE_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::DecryptL()\n")));
-
-	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapTlsPeapCertInterface::DecryptL()");
-
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);	
 	iKeyIdentifier = aKeyId;
 
 	delete iDataIn;
@@ -833,9 +650,6 @@ void CEapTlsPeapCertInterface::DecryptL(
 	// Try to get the keystore handler class from memory store 
 	if (iKeyStore == 0)
 	{
-
-#if defined(USE_EAP_TLS_PEAP_UNIFIED_KEY_STORE_CACHE)
-
 		// Try to get the keystore class pointer from memory store
 		eap_variable_data_c key(m_am_tools);
 		eap_status_e status = key.set_copy_of_buffer(KKeyStoreHandlePrefix, sizeof(KKeyStoreHandlePrefix));
@@ -854,22 +668,16 @@ void CEapTlsPeapCertInterface::DecryptL(
 		eap_tlv_message_data_c tlv_data(m_am_tools);
 		
 		status = m_am_tools->memory_store_get_data(&key, &tlv_data);
-
 		if (status != eap_status_ok)
 		{
-
-#endif //#if defined(USE_EAP_TLS_PEAP_UNIFIED_KEY_STORE_CACHE)
-
 			EAP_TRACE_DEBUG(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
-				(EAPL("EAP_type_TLSPEAP: CEapTlsPeapCertInterface::DecryptL(): cannot get previous CUnifiedKeyStore handle.\n")));
+				(EAPL("EAP_type_TLSPEAP: cannot get previous keystore handle.\n")));
 
 			iKeyStore = CUnifiedKeyStore::NewL(iFs);
 			iKeyStore->Initialize(iStatus);		
 			
-#if defined(USE_EAP_TLS_PEAP_UNIFIED_KEY_STORE_CACHE)
-
 			status = tlv_data.add_message_data(
 				eap_type_tlspeap_stored_keystore_handle,
 				sizeof(iKeyStore),
@@ -895,7 +703,7 @@ void CEapTlsPeapCertInterface::DecryptL(
 			EAP_TRACE_DEBUG(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
-				(EAPL("EAP_type_TLSPEAP: CEapTlsPeapCertInterface::DecryptL(): Found previous keystore handle.\n")));
+				(EAPL("EAP_type_TLSPEAP: Found previous keystore handle.\n")));
 
 			// Parse read data.
 			eap_array_c<eap_tlv_header_c> tlv_blocks(m_am_tools);
@@ -938,23 +746,14 @@ void CEapTlsPeapCertInterface::DecryptL(
 				User::Leave(KErrGeneral);
 			}
 		}
-
-#endif //#if defined(USE_EAP_TLS_PEAP_UNIFIED_KEY_STORE_CACHE)
-
 	}
 	else
 	{
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("EAP_type_TLSPEAP: CEapTlsPeapCertInterface::DecryptL(): uses previous CUnifiedKeyStore handle.\n")));
-
 		TRequestStatus* status = &iStatus;
 		User::RequestComplete(status, KErrNone);
 	}		
 
-	SetActive();
-
+	SetActive();	
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
 
@@ -962,51 +761,49 @@ void CEapTlsPeapCertInterface::DecryptL(
 
 void CEapTlsPeapCertInterface::RunL()
 {
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);		
+	
+	EAP_TRACE_DEBUG_SYMBIAN(
+	(_L("CEapTlsPeapCertInterface::RunL(): TEMP iStatus=%d, iState=%d"),
+	iStatus.Int(), iState));
+					
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::RunL(): TEMP iStatus=%d, iState=%d\n"),
-		iStatus.Int(),
-		iState));
-
-	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapTlsPeapCertInterface::RunL()");
+		(EAPL("CEapTlsPeapCertInterface::RunL(): iStatus %d\n"),
+		iStatus.Int()));
 
 	if (!(iStatus.Int() == KErrNone))
 	{		
 		EAP_TRACE_ERROR(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("ERROR: EAP-TLS certificate interface failed: error=%d.\n"),
+			(EAPL("ERROR: EAP-TLS certificate interface failed: %d.\n"),
 			iStatus.Int()));
 		iParent->SendErrorNotification(eap_status_user_cancel_authentication);
 		
 		if(iState == ESignOpenKeyStore)
 		{
 			// User probably cancelled the keystore password query.
-
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("CEapTlsPeapCertInterface::RunL(): ESignOpenKeyStore Failed\n")));
-
+			
+			EAP_TRACE_DEBUG_SYMBIAN(
+			(_L("CEapTlsPeapCertInterface::RunL(): ESignOpenKeyStore Failed")));
+			
 			if(iRSASigner != NULL)
 			{
 				iRSASigner->Release();
 				
-				EAP_TRACE_DEBUG(
-					m_am_tools,
-					TRACE_FLAGS_DEFAULT,
-					(EAPL("CEapTlsPeapCertInterface::RunL(): iRSASigner->Release() OK\n")));
+				EAP_TRACE_DEBUG_SYMBIAN(
+				(_L("CEapTlsPeapCertInterface::RunL(): iRSASigner->Release() OK")));
+				
 			}
 			
 			if(iDSASigner != NULL)
 			{
 				iDSASigner->Release(); 
 				
-				EAP_TRACE_DEBUG(
-					m_am_tools,
-					TRACE_FLAGS_DEFAULT,
-					(EAPL("CEapTlsPeapCertInterface::RunL(): iDSASigner->Release() OK\n")));
+				EAP_TRACE_DEBUG_SYMBIAN(
+				(_L("CEapTlsPeapCertInterface::RunL(): iDSASigner->Release() OK")));							
 			}		
 		}
 		
@@ -1033,12 +830,12 @@ void CEapTlsPeapCertInterface::RunL()
 			}
 			iCertInfos.Reset();			
 			
-			TRAPD(error, iCertFilter = CCertAttributeFilter::NewL());
-			if (error != KErrNone)
+			TRAPD(err, iCertFilter = CCertAttributeFilter::NewL());
+			if (err != KErrNone)
 			{ 
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				
-				RPointerArray<EapCertificateEntry> tmp(sizeof(EapCertificateEntry));
+				CArrayFixFlat<SCertEntry> tmp(sizeof(SCertEntry));
 
 				m_am_tools->enter_global_mutex();
 				
@@ -1069,7 +866,7 @@ void CEapTlsPeapCertInterface::RunL()
 				(EAPL("CEapTlsPeapCertInterface::RunL(): EGetMatchingCertsInitialize, Total Certs: iCertInfos.Count()=%d\n"),
 				iCertInfos.Count()));
 
-			iMatchingUserCertInfos.ResetAndDestroy();
+			iMatchingUserCertInfos.Reset();
 
 			// Remove non-allowed
 			TInt i(0);
@@ -1078,10 +875,10 @@ void CEapTlsPeapCertInterface::RunL()
 			{
 				for (j = 0; j < iAllowedUserCerts.Count(); j++)
 				{				
-					if ( (iCertInfos[i]->Label().Compare(*(iAllowedUserCerts[j]->GetLabel())) == 0
+					if ( (iCertInfos[i]->Label().Compare(iAllowedUserCerts[j].iLabel) == 0
 						 || iCertInfos[i]->Label().Length() == 0
-						 || iAllowedUserCerts[j]->GetLabel()->Length() == 0)
-						&& iCertInfos[i]->SubjectKeyId() == iAllowedUserCerts[j]->GetSubjectKeyId())
+						 || iAllowedUserCerts[j].iLabel.Length() == 0)
+						&& iCertInfos[i]->SubjectKeyId() == iAllowedUserCerts[j].iSubjectKeyId)
 					{
 
 						EAP_TRACE_DEBUG(
@@ -1089,19 +886,14 @@ void CEapTlsPeapCertInterface::RunL()
 							TRACE_FLAGS_DEFAULT,
 							(EAPL("RunL(): EGetMatchingCertsInitialize, Found a Matching USER cert\n")));
 
-						EAP_TRACE_DATA_DEBUG(
+						EAP_TRACE_DEBUG(
 							m_am_tools,
 							TRACE_FLAGS_DEFAULT,
-							(EAPL("RunL(): EGetMatchingCertsInitialize, Label of matching cert"),
-							iCertInfos[i]->Label().Ptr(),
-							iCertInfos[i]->Label().Size()));
-
-						EAP_TRACE_DATA_DEBUG(
-							m_am_tools,
-							TRACE_FLAGS_DEFAULT,
-							(EAPL("RunL(): EGetMatchingCertsInitialize, SubjectkeyID of matching cert"),
-							iCertInfos[i]->SubjectKeyId().Ptr(),
-							iCertInfos[i]->SubjectKeyId().Size()));
+							(EAPL("RunL(): EGetMatchingCertsInitialize,Label of matching cert=%S\n"),
+							&(iCertInfos[i]->Label())));		
+						
+						EAP_TRACE_DATA_DEBUG_SYMBIAN(("RunL(): EGetMatchingCertsInitialize,SubjectkeyID of matching cert",
+						iCertInfos[i]->SubjectKeyId().Ptr(), iCertInfos[i]->SubjectKeyId().Size()));			
 
 						break;
 					}
@@ -1112,8 +904,7 @@ void CEapTlsPeapCertInterface::RunL()
 					iCertInfos.Remove(i);
 					i--;
 				}
-			}
-
+			}	
 			if (iCertInfos.Count() == 0)
 			{
 				EAP_TRACE_DEBUG(
@@ -1122,16 +913,23 @@ void CEapTlsPeapCertInterface::RunL()
 					(EAPL("CEapTlsPeapCertInterface::RunL(): EGetMatchingCertsInitialize - No matching Certificates.\n")));
 			
 				// No matching certs
-			
-				// Timeout handles error situation
-				RPointerArray<EapCertificateEntry> empty(sizeof(EapCertificateEntry));
-
+				
+				CArrayFixFlat<SCertEntry>* tmp = NULL;
+				
+				TRAPD(err, tmp = new (ELeave) CArrayFixFlat<SCertEntry>(1) );
+				if (tmp == 0 || err != KErrNone)
+				{
+					// Timeout handles error situation
+					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));					
+				}
+				
 				m_am_tools->enter_global_mutex();
-
-				iParent->complete_get_matching_certificates(empty, eap_status_illegal_certificate); //Failure
-
+				
+				iParent->complete_get_matching_certificates(*tmp, eap_status_illegal_certificate); //Failure
+				
 				m_am_tools->leave_global_mutex();
 
+				delete tmp;
 				break;
 			}
 
@@ -1144,32 +942,29 @@ void CEapTlsPeapCertInterface::RunL()
 
 			iEncodedCertificate->Des().SetLength(0);
 			
-			HBufC8 * tmpCert = 0;
-			TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(iCertInfos[iUserCertIndex]->Size()));
-			if (error != KErrNone)
+			TRAPD(err, iEncodedCertificate = iEncodedCertificate->ReAllocL(iCertInfos[iUserCertIndex]->Size()));
+			if (err != KErrNone)
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
-
-				RPointerArray<EapCertificateEntry> empty(sizeof(EapCertificateEntry));
-
+				
+				CArrayFixFlat<SCertEntry> tmp(sizeof(SCertEntry));
+											
 				m_am_tools->enter_global_mutex();
-
-				iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
-
+				
+				iParent->complete_get_matching_certificates(tmp, eap_status_allocation_error); //Failure
+				
 				m_am_tools->leave_global_mutex();
 
 				break;
 			}
-
-			iEncodedCertificate = tmpCert;
-
+			
 			iCertPtr.Set(iEncodedCertificate->Des());
 
 			iCertStore->Retrieve(
 				*(iCertInfos[iUserCertIndex]), 
 				iCertPtr,
 				iStatus);
-
+			
 			SetActive();						
 		}		
 		break;
@@ -1182,16 +977,16 @@ void CEapTlsPeapCertInterface::RunL()
 				(EAPL("CEapTlsPeapCertInterface::RunL(): EGetMatchingCertsLoop\n")));
 
 			CX509Certificate* cert = 0;
-			TRAPD(error, cert = CX509Certificate::NewL(iEncodedCertificate->Des()));
-			if (error != KErrNone || cert == 0)
+			TRAPD(err, cert = CX509Certificate::NewL(iEncodedCertificate->Des()));
+			if (err != KErrNone || cert == 0)
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				
-				RPointerArray<EapCertificateEntry> empty(sizeof(EapCertificateEntry));
+				CArrayFixFlat<SCertEntry> tmp(sizeof(SCertEntry));
 											
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
+				iParent->complete_get_matching_certificates(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 
@@ -1203,57 +998,37 @@ void CEapTlsPeapCertInterface::RunL()
 				delete cert;
 				EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				
-				RPointerArray<EapCertificateEntry> empty(sizeof(EapCertificateEntry));
+				CArrayFixFlat<SCertEntry> tmp(sizeof(SCertEntry));
 
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
+				iParent->complete_get_matching_certificates(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 							
 				break;
 			}
-
+			
 			// No need to validate iCertInfos here as the execution doesn't come to this case if iCertInfos
 			// is empty, check is done in the above case.
-
-			EapCertificateEntry * entry = new EapCertificateEntry;
-			if (entry == 0)
-			{
-				// Timeout handles error situation
-				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));					
-
-				RPointerArray<EapCertificateEntry> empty(sizeof(EapCertificateEntry));
-
-				m_am_tools->enter_global_mutex();
-				
-				iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
-				
-				m_am_tools->leave_global_mutex();
-
-				delete entry;
-
-				break;
-			}
-
-			entry->SetLabel(iCertInfos[iUserCertIndex]->Label());
-			entry->SetSubjectKeyId(iCertInfos[iUserCertIndex]->SubjectKeyId());
+						
+			SCertEntry entry;
+			entry.iLabel.Copy(iCertInfos[iUserCertIndex]->Label());
+			entry.iSubjectKeyId = iCertInfos[iUserCertIndex]->SubjectKeyId();
 			
-			TRAP(error, iMatchingUserCertInfos.AppendL(entry));
-			if (error != KErrNone)
+			TRAP(err, iMatchingUserCertInfos.AppendL(entry));
+			if (err != KErrNone)
 			{
 				EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				
-				RPointerArray<EapCertificateEntry> empty(sizeof(EapCertificateEntry));
-
+				CArrayFixFlat<SCertEntry> tmp(sizeof(SCertEntry));
+				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
+				iParent->complete_get_matching_certificates(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 							
-				delete entry;
-
 				break;
 			}
 
@@ -1280,15 +1055,13 @@ void CEapTlsPeapCertInterface::RunL()
 								// Matches
 								break;
 							}
-						} // for()
-
+						}
 						if (j == iCertAuthorities.Count())
 						{						
 							// No match. Remove
 							delete iMatchingUserCerts[i];
 							iMatchingUserCerts.Remove(i);
-							delete iMatchingUserCertInfos[i];
-							iMatchingUserCertInfos.Remove(i);
+							iMatchingUserCertInfos.Delete(i);
 							i--;
 							
 							EAP_TRACE_DEBUG(
@@ -1299,8 +1072,7 @@ void CEapTlsPeapCertInterface::RunL()
 					}
 				}
 				// Check Certificate types
-				if (iUseCertTypesFilter
-					&& iCertTypes != 0)
+				if (iUseCertTypesFilter)
 				{
 					for (i = 0; i < (TInt) iMatchingUserCerts.Count(); i++)
 					{
@@ -1312,33 +1084,27 @@ void CEapTlsPeapCertInterface::RunL()
 						for (j = 0; j < iCertTypes->get_object_count(); j++)
 						{
 							u8_t* val = iCertTypes->get_object(j);
-
-							if (val != 0)
+							if (algorithm == ERSA 
+								&& (*val == ERSASign
+								|| *val == ERSASignWithFixedDH 
+								|| *val == ERSASignWithEphemeralDH))
 							{
-								if (algorithm == ERSA 
-									&& (*val == ERSASign
-									|| *val == ERSASignWithFixedDH 
-									|| *val == ERSASignWithEphemeralDH))
-								{
-									break;				
-								}
-								else if (algorithm == EDSA 
-									&& (*val == EDSASign
-									|| *val == EDSASignWithFixedDH 
-									|| *val == EDSASignWithEphemeralDH))
-								{
-									break;				
-								}
+								break;				
 							}
-						} // for()
-
+							if (algorithm == EDSA 
+								&& (*val == EDSASign
+								|| *val == EDSASignWithFixedDH 
+								|| *val == EDSASignWithEphemeralDH))
+							{
+								break;				
+							}
+						}
 						if (j == iCertTypes->get_object_count())
 						{
 							// No match. Remove
 							delete iMatchingUserCerts[i];
 							iMatchingUserCerts.Remove(i);
-							delete iMatchingUserCertInfos[i];
-							iMatchingUserCertInfos.Remove(i);
+							iMatchingUserCertInfos.Delete(i);
 							i--;
 							
 							EAP_TRACE_DEBUG(
@@ -1350,7 +1116,6 @@ void CEapTlsPeapCertInterface::RunL()
 
 					}
 				}
-
 				// Check cipher suites
 				if (iUseAllowedCipherSuitesFilter)
 				{
@@ -1370,8 +1135,7 @@ void CEapTlsPeapCertInterface::RunL()
 							// No match. Remove
 							delete iMatchingUserCerts[i];
 							iMatchingUserCerts.Remove(i);
-							delete iMatchingUserCertInfos[i];
-							iMatchingUserCertInfos.Remove(i);
+							iMatchingUserCertInfos.Delete(i);
 							i--;
 							
 							EAP_TRACE_DEBUG(
@@ -1396,24 +1160,21 @@ void CEapTlsPeapCertInterface::RunL()
 
 				iEncodedCertificate->Des().SetLength(0);
 
-				HBufC8 * tmpCert = 0;
-				TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(iCertInfos[iUserCertIndex]->Size()));
-				if (error != KErrNone)
+				TRAPD(err, iEncodedCertificate = iEncodedCertificate->ReAllocL(iCertInfos[iUserCertIndex]->Size()));
+				if (err != KErrNone)
 				{
 					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				
-					RPointerArray<EapCertificateEntry> empty(sizeof(EapCertificateEntry));
+					CArrayFixFlat<SCertEntry> tmp(sizeof(SCertEntry));
 
 					m_am_tools->enter_global_mutex();
 					
-					iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
+					iParent->complete_get_matching_certificates(tmp, eap_status_allocation_error); //Failure
 					
 					m_am_tools->leave_global_mutex();
 					
 					break;
 				}
-
-				iEncodedCertificate = tmpCert;
 				
 				iCertPtr.Set(iEncodedCertificate->Des());
 
@@ -1444,16 +1205,16 @@ void CEapTlsPeapCertInterface::RunL()
 			}
 			iCertInfos.Reset();			
 			
-			TRAPD(error, iCertFilter = CCertAttributeFilter::NewL());
-			if (error != KErrNone || iCertFilter == 0)
+			TRAPD(err, iCertFilter = CCertAttributeFilter::NewL());
+			if (err != KErrNone || iCertFilter == 0)
 			{ 
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				
-				RPointerArray<CX509Certificate> empty;
+				RPointerArray<CX509Certificate> tmp;
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1462,13 +1223,10 @@ void CEapTlsPeapCertInterface::RunL()
 			
 			iCertFilter->SetFormat(EX509Certificate);
 			iCertFilter->SetOwnerType(EUserCertificate);
-			iCertFilter->SetSubjectKeyId(iCertInfo.GetSubjectKeyId());
-
-			if (iCertInfo.GetLabel()->Size() > 0)
-			{
-				iCertFilter->SetLabel(*(iCertInfo.GetLabel())); // We can not use Label in the filter as certificates saved
+			iCertFilter->SetSubjectKeyId(iCertInfo.iSubjectKeyId);
+			if (iCertInfo.iLabel.Size()>0)
+				iCertFilter->SetLabel(iCertInfo.iLabel); // We can not use Label in the filter as certificates saved
 													   // by using SetConfigurationL (OMA DM etc uses it) will not have Label.
-			}
 
 			iState = EReadCertList;
 			iCertStore->List(
@@ -1492,11 +1250,11 @@ void CEapTlsPeapCertInterface::RunL()
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: EReadCertList iCertInfos.Count = 0.\n")));			
 				
-				RPointerArray<CX509Certificate> empty;
+				RPointerArray<CX509Certificate> tmp;
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_illegal_certificate); //Failure
+				iParent->complete_read_own_certificate(tmp, eap_status_illegal_certificate); //Failure
 				
 				m_am_tools->leave_global_mutex();
 
@@ -1511,24 +1269,21 @@ void CEapTlsPeapCertInterface::RunL()
 			
 			iEncodedCertificate->Des().SetLength(0);
 
-			HBufC8 * tmpCert = 0;
-			TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(info->Size()));
-			if (error != KErrNone)
+			TRAPD(err, iEncodedCertificate = iEncodedCertificate->ReAllocL(info->Size()));
+			if (err != KErrNone)
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
 				
-				RPointerArray<CX509Certificate> empty;
+				RPointerArray<CX509Certificate> tmp;
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
 				break;
 			}
-
-			iEncodedCertificate = tmpCert;
 				
 			iCertPtr.Set(iEncodedCertificate->Des());
 			
@@ -1548,16 +1303,16 @@ void CEapTlsPeapCertInterface::RunL()
 				(EAPL("CEapTlsPeapCertInterface::RunL(): EReadCert\n")));
 
 			CX509Certificate* cert = 0;
-			TRAPD(error, cert = CX509Certificate::NewL(iEncodedCertificate->Des()));
-			if (error != KErrNone)
+			TRAPD(err, cert = CX509Certificate::NewL(iEncodedCertificate->Des()));
+			if (err != KErrNone)
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
 				
-				RPointerArray<CX509Certificate> empty;
+				RPointerArray<CX509Certificate> tmp;
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1570,11 +1325,11 @@ void CEapTlsPeapCertInterface::RunL()
 				delete cert;
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
 				
-				RPointerArray<CX509Certificate> empty;
+				RPointerArray<CX509Certificate> tmp;
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1592,7 +1347,7 @@ void CEapTlsPeapCertInterface::RunL()
 				iState = ERetrieveChainInitStore;
 				if (iCertStore == 0)
 				{
-					iCertStore = CUnifiedCertStore::NewL(iFs, EFalse);
+					iCertStore = CUnifiedCertStore::NewL(iFs, false);
 					iCertStore->Initialize(iStatus);		
 				}
 				else
@@ -1626,16 +1381,16 @@ void CEapTlsPeapCertInterface::RunL()
 			}
 			iCertInfos.Reset();			
 			
-			TRAPD(error, iCertFilter = CCertAttributeFilter::NewL());
-			if (error != KErrNone)
+			TRAPD(err, iCertFilter = CCertAttributeFilter::NewL());
+			if (err != KErrNone)
 			{ 
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				
-				RPointerArray<CX509Certificate> empty;
+				RPointerArray<CX509Certificate> tmp;
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1700,25 +1455,21 @@ void CEapTlsPeapCertInterface::RunL()
 			iState = ECreateCertChain;
 			
 			iEncodedCertificate->Des().SetLength(0);
-
-			HBufC8 * tmpCert = 0;
-			TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(info->Size()));
-			if (error != KErrNone)
+			TRAPD(err, iEncodedCertificate = iEncodedCertificate->ReAllocL(info->Size()));
+			if (err != KErrNone)
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
 				
-				RPointerArray<CX509Certificate> empty;
+				RPointerArray<CX509Certificate> tmp;
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
 				break;
 			}
-
-			iEncodedCertificate = tmpCert;
 				
 			iCertPtr.Set(iEncodedCertificate->Des());
 			
@@ -1739,16 +1490,16 @@ void CEapTlsPeapCertInterface::RunL()
 				(EAPL("CEapTlsPeapCertInterface::RunL(): ECreateCertChain\n")));
 
 			CX509Certificate* cert = 0;
-			TRAPD(error, cert = CX509Certificate::NewL(iEncodedCertificate->Des()));
-			if (error != KErrNone || cert == 0)
+			TRAPD(err, cert = CX509Certificate::NewL(iEncodedCertificate->Des()));
+			if (err != KErrNone || cert == 0)
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
 				
-				RPointerArray<CX509Certificate> empty;
+				RPointerArray<CX509Certificate> tmp;
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1757,33 +1508,24 @@ void CEapTlsPeapCertInterface::RunL()
 			
 #if defined(_DEBUG) || defined(DEBUG)
 				
-			{
 				// No need to validate iCertInfos in here as it is done in case: EGetAllCerts
 				CCTCertInfo* tempInfo;
 				tempInfo = iCertInfos[iCAIndex];
 
 				// These are for the trace debug.
 				TCertLabel label = tempInfo->Label();				
-				TKeyIdentifier SubjectKeyId = tempInfo->SubjectKeyId();
+				TKeyIdentifier KeyIdentifier = tempInfo->SubjectKeyId();
 				TKeyIdentifier IssuerId = tempInfo->IssuerKeyId();
 				TCertificateFormat format = tempInfo->CertificateFormat();
 				TCertificateOwnerType ownerType = tempInfo->CertificateOwnerType();			
 				
-				EAP_TRACE_DEBUG_SYMBIAN((_L("\n CEapTlsPeapCertInterface::RunL() : About to retrieve Cert with details, Label = %S"),
-					&label));
-
-				EAP_TRACE_DEBUG(
-					m_am_tools,
-					TRACE_FLAGS_DEFAULT,
-					(EAPL("Other detials- Format=%d, Owner type=%d, IsDeletable=%d, Type UID=%d\n"),
-					format,
-					ownerType,
-					tempInfo->IsDeletable(),
-					tempInfo->Type()));
+				EAP_TRACE_DEBUG_SYMBIAN((_L("\n CEapTlsPeapCertInterface::RunL() : About to retrieve Cert with details, Label = %S"), &label));
+				EAP_TRACE_DEBUG_SYMBIAN((_L("Other detials- Format=%d, Owner type=%d, IsDeletable=%d, Type UID=%d"),
+									format, ownerType, tempInfo->IsDeletable(), tempInfo->Type()));
 				
 				EAP_TRACE_DATA_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Subject key Id is"),
-					SubjectKeyId.Ptr(),
-					SubjectKeyId.Size()));
+					KeyIdentifier.Ptr(),
+					KeyIdentifier.Size()));
 
 				EAP_TRACE_DATA_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Issuer Id is"),
 					IssuerId.Ptr(),
@@ -1811,15 +1553,14 @@ void CEapTlsPeapCertInterface::RunL()
 					}
 					else
 					{
-						EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("WARNING: No extension for this certificate\n")));			
+						EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("WARNING: No extension for this certificate\n")));			
 					}
 				}
 				else
 				{
 					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: No Certs here!\n")));			
 				}
-			}
-
+					
 #endif
 			
 		
@@ -1829,11 +1570,11 @@ void CEapTlsPeapCertInterface::RunL()
 				delete cert;
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
 				
-				RPointerArray<CX509Certificate> empty;
+				RPointerArray<CX509Certificate> tmp;
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1887,42 +1628,42 @@ void CEapTlsPeapCertInterface::RunL()
 							const CSubjectPublicKeyInfo& key = iRootCerts[i]->PublicKey();
 							const TPtrC8 params = key.EncodedParams();	
 							
-							TRAPD(error, dsaParams = CX509DSAPublicKey::DSAParametersL(params));
-							if (error != KErrNone)
+							TRAPD(err, dsaParams = CX509DSAPublicKey::DSAParametersL(params));
+							if (err != KErrNone)
 							{				
 				
-								RPointerArray<CX509Certificate> empty;
+								RPointerArray<CX509Certificate> tmp;
 								m_am_tools->enter_global_mutex();
 								
-								iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+								iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
 								
 								m_am_tools->leave_global_mutex();
 				
 								return;
 							}					
 									
-							TRAP(error, signParams = CSigningKeyParameters::NewL());
-							if (error != KErrNone)
+							TRAP(err, signParams = CSigningKeyParameters::NewL());
+							if (err != KErrNone)
 							{				
-								RPointerArray<CX509Certificate> empty;
+								RPointerArray<CX509Certificate> tmp;
 				
 								m_am_tools->enter_global_mutex();
 								
-								iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+								iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
 								
 								m_am_tools->leave_global_mutex();				
 
 								delete dsaParams;
 								return;
 							}
-							TRAP(error, signParams->SetDSAParamsL(*dsaParams));
-							if (error != KErrNone)
+							TRAP(err, signParams->SetDSAParamsL(*dsaParams));
+							if (err != KErrNone)
 							{				
-								RPointerArray<CX509Certificate> empty;
+								RPointerArray<CX509Certificate> tmp;
 								
 								m_am_tools->enter_global_mutex();
 								
-								iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+								iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
 								
 								m_am_tools->leave_global_mutex();
 				
@@ -1931,13 +1672,13 @@ void CEapTlsPeapCertInterface::RunL()
 								return;
 							}
 
-							TRAP(error, iUserCertChain[iUserCertChain.Count()-1]->SetParametersL(*signParams));
-							if (error != KErrNone)
+							TRAP(err, iUserCertChain[iUserCertChain.Count()-1]->SetParametersL(*signParams));
+							if (err != KErrNone)
 							{
-								RPointerArray<CX509Certificate> empty;
+								RPointerArray<CX509Certificate> tmp;
 								m_am_tools->enter_global_mutex();
 								
-								iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+								iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
 								
 								m_am_tools->leave_global_mutex();				
 							
@@ -1955,12 +1696,11 @@ void CEapTlsPeapCertInterface::RunL()
 								delete dsaParams;
 								delete signParams;
 								EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
-
-								RPointerArray<CX509Certificate> empty;
+								RPointerArray<CX509Certificate> tmp;
 								
 								m_am_tools->enter_global_mutex();
 								
-								iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+								iParent->complete_read_own_certificate(tmp, eap_status_allocation_error); //Failure
 								
 								m_am_tools->leave_global_mutex();
 				
@@ -2001,26 +1741,24 @@ void CEapTlsPeapCertInterface::RunL()
 					(EAPL("CEapTlsPeapCertInterface::RunL()- ECreateCertChain - Before Retrieve(): iCAIndex=%d, size=%d\n"),
 					iCAIndex, info->Size()));			
 
+				
+				
 				iEncodedCertificate->Des().SetLength(0);
-
-				HBufC8 * tmpCert = 0;
-				TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(info->Size()));
-				if (error != KErrNone)
+				TRAPD(err, iEncodedCertificate = iEncodedCertificate->ReAllocL(info->Size()));
+				if (err != KErrNone)
 				{
 					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
 				
-					RPointerArray<CX509Certificate> empty;
+					RPointerArray<CX509Certificate> tmp;
 					
 					m_am_tools->enter_global_mutex();
 					
-					iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
+					iParent->complete_read_ca_certificate(tmp, eap_status_allocation_error); //Failure
 					
 					m_am_tools->leave_global_mutex();
 				
 					break;
 				}
-
-				iEncodedCertificate = tmpCert;
 				
 				iCertPtr.Set(iEncodedCertificate->Des());
 			
@@ -2051,16 +1789,15 @@ void CEapTlsPeapCertInterface::RunL()
 			}
 			iCertInfos.Reset();			
 			
-			TRAPD(error, iCertFilter = CCertAttributeFilter::NewL());
-			if (error != KErrNone)
+			TRAPD(err, iCertFilter = CCertAttributeFilter::NewL());
+			if (err != KErrNone)
 			{ 
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
-
-				RPointerArray<CX509Certificate> empty;
+				RPointerArray<CX509Certificate> tmp;
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_ca_certificate(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2068,13 +1805,10 @@ void CEapTlsPeapCertInterface::RunL()
 			
 			iCertFilter->SetFormat(EX509Certificate);
 			iCertFilter->SetOwnerType(ECACertificate);
-			iCertFilter->SetSubjectKeyId(iCertInfo.GetSubjectKeyId());
-
-			if (iCertInfo.GetLabel()->Size() > 0)
-			{
-				iCertFilter->SetLabel(*(iCertInfo.GetLabel()));// We can not use Label in the filter as certificates saved
+			iCertFilter->SetSubjectKeyId(iCertInfo.iSubjectKeyId);
+			if (iCertInfo.iLabel.Size()>0)
+				iCertFilter->SetLabel(iCertInfo.iLabel);// We can not use Label in the filter as certificates saved
 													// by using SetConfigurationL (OMA DM etc uses it) will not have Label.
-			}
 
 			iState = EReadCACertList;
 			iCertStore->List(
@@ -2097,12 +1831,11 @@ void CEapTlsPeapCertInterface::RunL()
 			if (iCertInfos.Count() == 0)
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: EReadCACertList iCertInfos.Count = 0.\n")));
-
-				RPointerArray<CX509Certificate> empty;
+				RPointerArray<CX509Certificate> tmp;
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_ca_certificate(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2116,23 +1849,19 @@ void CEapTlsPeapCertInterface::RunL()
 			
 			iEncodedCertificate->Des().SetLength(0);
 
-			HBufC8 * tmpCert = 0;
-			TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(info->Size()));
-			if (error != KErrNone)
+			TRAPD(err, iEncodedCertificate = iEncodedCertificate->ReAllocL(info->Size()));
+			if (err != KErrNone)
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
-
-				RPointerArray<CX509Certificate> empty;
+				RPointerArray<CX509Certificate> tmp;
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_ca_certificate(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
 			}
-
-			iEncodedCertificate = tmpCert;
 				
 			iCertPtr.Set(iEncodedCertificate->Des());
 			
@@ -2159,16 +1888,15 @@ void CEapTlsPeapCertInterface::RunL()
 				iEncodedCertificate->Size()));		
 
 			CX509Certificate* cert = 0;
-			TRAPD(error, cert = CX509Certificate::NewL(iEncodedCertificate->Des()));
-			if (error != KErrNone)
+			TRAPD(err, cert = CX509Certificate::NewL(iEncodedCertificate->Des()));
+			if (err != KErrNone)
 			{
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
-
-				RPointerArray<CX509Certificate> empty;
+				RPointerArray<CX509Certificate> tmp;
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_ca_certificate(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2180,12 +1908,11 @@ void CEapTlsPeapCertInterface::RunL()
 			{
 				delete cert;
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
-
-				RPointerArray<CX509Certificate> empty;
+				RPointerArray<CX509Certificate> tmp;
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_ca_certificate(tmp, eap_status_allocation_error); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2212,26 +1939,23 @@ void CEapTlsPeapCertInterface::RunL()
 			}
 			iCertInfos.Reset();			
 			
-			TRAPD(error, iCertFilter = CCertAttributeFilter::NewL());
-			if (error != KErrNone)
+			TRAPD(err, iCertFilter = CCertAttributeFilter::NewL());
+			if (err != KErrNone)
 			{ 
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
-
-				const CPKIXValidationResult * const empty = 0;
+				CPKIXValidationResult* tmp = 0;
 				
 				m_am_tools->enter_global_mutex();
 
-				iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
+				iParent->complete_validate_chain(*tmp, eap_status_ca_certificate_unknown); //Failure.
 
 				m_am_tools->leave_global_mutex();
 				break;
 			}
-
 			iCertFilter->SetOwnerType(ECACertificate);
 			iCertFilter->SetFormat(EX509Certificate);
 
 			iState = EValidateChainGetCACertList;
-
 			iCertStore->List(
 				iCertInfos,
 				*iCertFilter, 
@@ -2248,89 +1972,74 @@ void CEapTlsPeapCertInterface::RunL()
 				(EAPL("CEapTlsPeapCertInterface::RunL(): EValidateChainGetCACertList\n")));
 
 			int index;			
-			TIdentityRelation<EapCertificateEntry> comparator(&EapTlsPeapUtils::CompareSCertEntries);
-
-			if (iUseAutomaticCaCertificate)
+			TIdentityRelation<SCertEntry> comparator(&EapTlsPeapUtils::CompareSCertEntries);
+			// Remove disallowed CA certs from the array
+			for (TInt i = 0; i < iCertInfos.Count(); i++)
 			{
-				// All CA certificates are allowed.
-				EAP_TRACE_DEBUG(
-					m_am_tools,
-					TRACE_FLAGS_DEFAULT,
-					(EAPL("CEapTlsPeapCertInterface::RunL(): EValidateChainGetCACertList: All CA certificates are allowed.\n")));
-			}
-			else
-			{
-				// Remove disallowed CA certs from the array
-				for (TInt i = 0; i < iCertInfos.Count(); i++)
+				SCertEntry certEntry;
+				certEntry.iLabel.Copy(iCertInfos[i]->Label());
+				certEntry.iSubjectKeyId.Copy(iCertInfos[i]->SubjectKeyId());
+				index = iAllowedCACerts.Find(certEntry, comparator);
+				
+				if (index == KErrNotFound)
 				{
-					EapCertificateEntry certEntry;
-					certEntry.SetLabel(iCertInfos[i]->Label());
-					certEntry.SetSubjectKeyId(iCertInfos[i]->SubjectKeyId());
-					index = iAllowedCACerts.Find(&certEntry, comparator);
-					
-					if (index == KErrNotFound)
-					{
-						// Remove					
-						iCertInfos[i]->Release();
-						iCertInfos.Remove(i);
-						i--;
-					}
+					// Remove					
+					iCertInfos[i]->Release();
+					iCertInfos.Remove(i);
+					i--;
 				}
 			}
-
 			if (iCertInfos.Count() == 0)
 			{	
 				// Create new validation result for this failure case. 
 				// CPKIXValidationResult does include a Reset-member function
 				// but it is not in x500.lib as the documentation says.
-				const CPKIXValidationResult * const empty = 0;
-
-				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: No cert infos\n")));
-
+				CPKIXValidationResult* validationResult = 0;
+				TRAPD(err, validationResult = CPKIXValidationResult::NewL());
+				if (err != KErrNone)
+				{
+					// Do nothing. Session timeout takes care of cleanup...
+					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
+				}
 				m_am_tools->enter_global_mutex();
 
-				iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
+				iParent->complete_validate_chain(*validationResult, eap_status_ca_certificate_unknown); //Failure.
+
+				m_am_tools->leave_global_mutex();
+				delete validationResult;
+				break;
+			}
+			
+			CCTCertInfo* info;
+			info = iCertInfos[0];
+			iCAIndex = 0;
+
+			iState = EValidateChainGetCACert;
+			
+			iEncodedCertificate->Des().SetLength(0);
+			TRAPD(err, iEncodedCertificate = iEncodedCertificate->ReAllocL(info->Size()));
+			if (err != KErrNone)
+			{
+				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
+				
+				CPKIXValidationResult* tmp = 0;
+				
+				m_am_tools->enter_global_mutex();
+
+				iParent->complete_validate_chain(*tmp, eap_status_ca_certificate_unknown); //Failure.
 
 				m_am_tools->leave_global_mutex();
 				break;
 			}
-
-			{
-				CCTCertInfo* info;
-				info = iCertInfos[0];
-				iCAIndex = 0;
-
-				iState = EValidateChainGetCACert;
-
-				iEncodedCertificate->Des().SetLength(0);
-
-				HBufC8 * tmpCert = 0;
-				TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(info->Size()));
-				if (error != KErrNone)
-				{
-					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
-					
-					const CPKIXValidationResult * const empty = 0;
-					
-					m_am_tools->enter_global_mutex();
-
-					iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
-
-					m_am_tools->leave_global_mutex();
-					break;
-				}
-
-				iEncodedCertificate = tmpCert;
-
-				iCertPtr.Set(iEncodedCertificate->Des());
-
-				iCertStore->Retrieve(
-					*info, 
-					iCertPtr,
-					iStatus);
 				
-				SetActive();
-			}
+			iCertPtr.Set(iEncodedCertificate->Des());			
+
+			iCertStore->Retrieve(
+				*info, 
+				iCertPtr,
+				iStatus);
+			
+			SetActive();			
 		}
 		break;
 
@@ -2342,16 +2051,15 @@ void CEapTlsPeapCertInterface::RunL()
 				(EAPL("CEapTlsPeapCertInterface::RunL(): EValidateChainGetCACert\n")));
 
 			CX509Certificate* cert = 0;
-			TRAPD(error, cert = CX509Certificate::NewL(iEncodedCertificate->Des()));
-			if (error != KErrNone)
+			TRAPD(err, cert = CX509Certificate::NewL(iEncodedCertificate->Des()));
+			if (err != KErrNone)
 			{
-				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
-
-				const CPKIXValidationResult * const empty = 0;
+				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
+				CPKIXValidationResult* tmp = 0;
 				
 				m_am_tools->enter_global_mutex();
 
-				iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
+				iParent->complete_validate_chain(*tmp, eap_status_ca_certificate_unknown); //Failure.
 
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2361,13 +2069,12 @@ void CEapTlsPeapCertInterface::RunL()
 			if (iRootCerts.Append(cert) != KErrNone)
 			{
 				delete cert;
-				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
-
-				const CPKIXValidationResult * const empty = 0;
+				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
+				CPKIXValidationResult* tmp = 0;
 				
 				m_am_tools->enter_global_mutex();
 
-				iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
+				iParent->complete_validate_chain(*tmp, eap_status_ca_certificate_unknown); //Failure.
 
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2379,46 +2086,35 @@ void CEapTlsPeapCertInterface::RunL()
 				delete iCertChain;
 				iCertChain = 0;
 
-				TRAPD(error, iCertChain = CPKIXCertChain::NewL(iFs, *iInputCertChain, iRootCerts));
-				if (error != KErrNone)
+				TRAPD(err, iCertChain = CPKIXCertChain::NewL(iFs, *iInputCertChain, iRootCerts));
+				if (err != KErrNone)
 				{
-					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: EAP-TLS error %d.\n"), error));
-
-					const CPKIXValidationResult * const empty = 0;
+					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: EAP-TLS error %d.\n"), err));
+					CPKIXValidationResult* tmp = 0;
 					
 					m_am_tools->enter_global_mutex();
 
-					iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
+					iParent->complete_validate_chain(*tmp, eap_status_ca_certificate_unknown); //Failure.
 
 					m_am_tools->leave_global_mutex();
 					break;
 				}
-
 				// Set the current time
 				iTime.UniversalTime();
 				iState = EValidateChainEnd;
-
-				EAP_TRACE_DEBUG(
-					m_am_tools,
-					TRACE_FLAGS_DEFAULT,
-					(EAPL("CEapTlsPeapCertInterface::RunL(): EValidateChainGetCACert, calls iCertChain->ValidateL(), count of root CA certificates = %d\n"),
-					iRootCerts.Count()));
-
-				TRAP(error, iCertChain->ValidateL(*iValidationResult, iTime, iStatus));
-				if (error != KErrNone)
+				TRAP(err, iCertChain->ValidateL(*iValidationResult, iTime, iStatus));
+				if (err != KErrNone)
 				{
-					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Error in certificate validation in EAP-TLS, error = %d.\n"),
-						error));
-
-					const CPKIXValidationResult * const empty = 0;
+					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Error in certificate validation in EAP-TLS.\n")));			
+					CPKIXValidationResult* tmp = 0;
 					
 					m_am_tools->enter_global_mutex();
 
-					iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
+					iParent->complete_validate_chain(*tmp, eap_status_ca_certificate_unknown); //Failure.
 
 					m_am_tools->leave_global_mutex();
 					break;
-				}
+				}				
 				SetActive();	// Validate.
 			}
 			else
@@ -2429,24 +2125,19 @@ void CEapTlsPeapCertInterface::RunL()
 				iState = EValidateChainGetCACert;
 				
 				iEncodedCertificate->Des().SetLength(0);
-
-				HBufC8 * tmpCert = 0;
-				TRAPD(error, tmpCert = iEncodedCertificate->ReAllocL(info->Size()));
-				if (error != KErrNone)
+				TRAPD(err, iEncodedCertificate = iEncodedCertificate->ReAllocL(info->Size()));
+				if (err != KErrNone)
 				{
-					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
-
-					const CPKIXValidationResult * const empty = 0;
+					EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));			
+					CPKIXValidationResult* tmp = 0;
 					
 					m_am_tools->enter_global_mutex();
 
-					iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
+					iParent->complete_validate_chain(*tmp, eap_status_ca_certificate_unknown); //Failure.
 
 					m_am_tools->leave_global_mutex();
 					break;
 				}
-
-				iEncodedCertificate = tmpCert;
 				
 				iCertPtr.Set(iEncodedCertificate->Des());
 			
@@ -2465,12 +2156,11 @@ void CEapTlsPeapCertInterface::RunL()
 		EAP_TRACE_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("CEapTlsPeapCertInterface::RunL(): EValidateChainEnd, iValidationResult->Error().iReason=%d\n"),
-			iValidationResult->Error().iReason));
+			(EAPL("CEapTlsPeapCertInterface::RunL(): EValidateChainEnd\n")));
 		
 		m_am_tools->enter_global_mutex();
-
-		iParent->complete_validate_chain(iValidationResult, eap_status_ok);
+		
+		iParent->complete_validate_chain(*iValidationResult, eap_status_ok);
 
 		m_am_tools->leave_global_mutex();
 		// Ignore error because there is nothing that can be done.
@@ -2500,8 +2190,8 @@ void CEapTlsPeapCertInterface::RunL()
 			delete iKeyFilter;
 			iKeyFilter = 0;
 			
-			iKeyFilter = new (ELeave) TCTKeyAttributeFilter;
-			if (!iKeyFilter)
+			TRAPD(err, iKeyFilter = new (ELeave) TCTKeyAttributeFilter);
+			if (err != KErrNone)
 			{ 
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				RInteger tmp;
@@ -2623,11 +2313,11 @@ void CEapTlsPeapCertInterface::RunL()
 				CleanupStack::PushL(R);
 				
 				iParent->complete_sign(R, reinterpret_cast<const RInteger&>(iRSASignature->S()), eap_status_ok);
+				
+				CleanupStack::PopAndDestroy();
 
 				delete iRSASignature;
 				iRSASignature = 0;
-				
-				CleanupStack::PopAndDestroy();
 				
 				iRSASigner->Release(); // This seems to be needed.
 			}
@@ -2655,8 +2345,8 @@ void CEapTlsPeapCertInterface::RunL()
 			delete iKeyFilter;
 			iKeyFilter = 0;
 			
-			iKeyFilter = new (ELeave) TCTKeyAttributeFilter;
-			if (!iKeyFilter)
+			TRAPD(err, iKeyFilter = new (ELeave) TCTKeyAttributeFilter);
+			if (err != KErrNone)
 			{ 
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				TBuf8<1> tmp;
@@ -2744,17 +2434,13 @@ void CEapTlsPeapCertInterface::RunL()
 	return;
 }
 
-//--------------------------------------------------
-
 void CEapTlsPeapCertInterface::CancelSignWithPrivateKey()
 {
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::CancelSignWithPrivateKey(): iState=%d (13=ESign)\n"),
-		iState));
-
-	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapTlsPeapCertInterface::CancelSignWithPrivateKey()");
+		(EAPL("CEapTlsPeapCertInterface::CancelSignWithPrivateKey():Cancelling Signing - iState=%d (13=ESign)\n"),
+		iState));		
 
 	if(IsActive())
 	{
@@ -2782,6 +2468,4 @@ void CEapTlsPeapCertInterface::CancelSignWithPrivateKey()
 	}	
 }
 
-
-//--------------------------------------------------
 // End of file

@@ -1,0 +1,41 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: UI strings for WLAN EAP-MsChapV2 Notifier
+*
+*/
+
+/*
+* %version: %
+*/
+
+//  LOCALISATION STRINGS
+
+
+//d:Username query string.
+//l:popup_query_data_code_window
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_mschapv2_notif_username    "EAP-MSCHAPv2 user name:"
+
+
+//d:Password query string.
+//l:popup_query_data_code_window/opt2
+//w:
+//r:3.1
+//
+#define qtn_wlan_eap_mschapv2_notif_password    "Password:"
+
+
+// End of File

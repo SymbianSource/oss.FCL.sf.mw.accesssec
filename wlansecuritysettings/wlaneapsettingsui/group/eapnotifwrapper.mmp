@@ -1,0 +1,56 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: This is project specification file for the eapnotifwrapper
+*
+*/
+
+/*
+* %version: tr1cfwln#10 %
+*/
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET      eapnotifwrapper.dll
+TARGETTYPE  PLUGIN 
+UID         0x10009D8D 0x2000CF2E
+VENDORID    VID_DEFAULT
+CAPABILITY  CAP_ECOM_PLUGIN
+
+LANG    SC
+
+SOURCEPATH  ../eapnotifwrapper/src
+SOURCE  eapnotifwrapper.cpp 
+
+USERINCLUDE			../eapnotifwrapper/inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+START RESOURCE ../data/2000cf2e.rss 
+TARGET eapnotifwrapper.rsc
+TARGETPATH ECOM_RESOURCE_DIR
+END
+
+
+LIBRARY ecom.lib
+LIBRARY	aknnotifierwrapper.lib
+LIBRARY euser.lib
+
+DEBUGLIBRARY flogger.lib
+DEBUGLIBRARY efsrv.lib
+DEBUGLIBRARY cone.lib 
+
+
+// End of File

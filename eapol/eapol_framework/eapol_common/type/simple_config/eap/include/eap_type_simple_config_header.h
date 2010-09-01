@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 11 %
 */
 
 #if !defined(_EAP_SIMPLE_CONFIG_HEADER_H_)
@@ -32,6 +32,9 @@
 
 const u8_t SIMPLE_CONFIG_NAI_AT_BYTE = '@';
 
+#if !defined(USE_EAP_EXPANDED_TYPES)
+	#error You MUST define USE_EAP_EXPANDED_TYPES compiler flag. WFA Simple Config uses that.
+#endif //#if !defined(USE_EAP_EXPANDED_TYPES)
 
 //----------------------------------------------------------------------------
 

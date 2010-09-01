@@ -17,7 +17,7 @@
 */
 
 /*
-* %version: tr1cfwln#17 %
+* %version: tr1cfwln#5.1.2 %
 */
 
 #include <platform_paths.hrh>
@@ -27,16 +27,8 @@ DEFAULT
 
 PRJ_EXPORTS
 
-../inc/EapTraceSymbian.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTraceSymbian.h)
-../inc/EapExpandedType.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapExpandedType.h)
-../inc/EapTypeDefinitions.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTypeDefinitions.h)
 ../inc/EapType.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapType.h)
 ../inc/EapType.inl     MW_LAYER_PLATFORM_EXPORT_PATH(EapType.inl)
-../inc/EapTypePlugin.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTypePlugin.h)
-../inc/EapTypePlugin.inl     MW_LAYER_PLATFORM_EXPORT_PATH(EapTypePlugin.inl)
 ../inc/EapSettings.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapSettings.h)
+../inc/EapSettings.inl     MW_LAYER_PLATFORM_EXPORT_PATH(EapSettings.inl)
 ../inc/EapTypeInfo.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTypeInfo.h)
-../inc/EapGeneralSettings.inl     MW_LAYER_PLATFORM_EXPORT_PATH(EapGeneralSettings.inl)
-../inc/EapGeneralSettings.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapGeneralSettings.h)
-
-// end

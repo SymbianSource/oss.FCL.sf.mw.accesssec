@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 52 %
+* %version: 18.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -28,23 +28,21 @@
 #endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 
 #include <e32base.h>
-//#include "EapTlsPeapUtils.h"
+#include "EapTlsPeapUtils.h"
 #include "EapTlsPeapDbDefaults.h"
 #include "EapTlsPeapDbParameterNames.h"
 #include <EapTlsPeapUiConnection.h>
 #include <EapTlsPeapUiCertificates.h>
-#include <EapGeneralSettings.h>
+#include <EapTlsPeapUiCertificate.h>
+#include "EapTlsPeapCertFetcher.h"
 #include <AbsEapTlsPeapUiCertificates.h>
-#include <EapTraceSymbian.h>
-#include "EapConversion.h"
-#include <EapType.h>
+#include "eap_am_trace_symbian.h"
 
 #include <unifiedcertstore.h>
 #include <mctwritablecertstore.h>
 
+const TUint KMaxSqlQueryLength = 256;
 const TUint KCertArrayGranularity = 16;
-
-// ----------------------------------------------------------
 
 CEapTlsPeapUiCertificates::CEapTlsPeapUiCertificates(
 	CEapTlsPeapUiConnection * const aUiConn,
@@ -53,117 +51,83 @@ CEapTlsPeapUiCertificates::CEapTlsPeapUiCertificates(
 , iUiConn(aUiConn)
 , iUserCerts(0)
 , iCACerts(0)
-, iEapGeneralSettings(0)
 , iParent(aParent)
-, iEapTypeConnection(0)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::CEapTlsPeapUiCertificates()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiCertificates::CEapTlsPeapUiCertificates()\n"));
-
 }
 
-// ----------------------------------------------------------
 
 CEapTlsPeapUiCertificates::~CEapTlsPeapUiCertificates()
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::~CEapTlsPeapUiCertificates()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiCertificates::~CEapTlsPeapUiCertificates()\n"));
-
-	Close();
+    if (iUiConn)
+    {
+        Close();
+        iUiConn = NULL;
+    }
 }
 
-// ----------------------------------------------------------
 
 TInt CEapTlsPeapUiCertificates::Open()
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::Open()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiCertificates::Open()\n"));
-
     if (iIsOpened)
     {
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiCertificates::Open(): KErrAlreadyExists\n")));
         return KErrAlreadyExists;
     }
 
-	TEapExpandedType aEapType(iUiConn->GetEapType());
+    TInt err = iUiConn->GetDatabase(iDatabase);
+    if (err != KErrNone)
+    {
+        return err;
+    }
 
-	TRAPD(error, iEapTypeConnection = CEapType::NewL(iUiConn->GetIndexType(), iUiConn->GetIndex(), aEapType));
-	if (error != KErrNone)
+	TRAP(err, iCertFetcher = CEapTlsPeapCertFetcher::NewL(this));
+	if (err != KErrNone)
 	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiCertificates::Open(): CEapType::NewL() error=%d\n"),error));
-		return error;
+		return err;
 	}
-    
-    iEapTypeConnection->SetTunnelingType(iUiConn->GetTunnelingType());
-
-    TRAP(error, iEapGeneralSettings = CEapGeneralSettings::NewL(iUiConn->GetIndexType(), iUiConn->GetIndex()));
-    if (error != KErrNone)
-        {
-        EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::Open(): CEapGeneralSettings::NewL() error=%d\n"),error));
-        return error;
-        }
 
     iIsOpened = ETrue;
 
     return KErrNone;
 }
 
-// ----------------------------------------------------------
 
 TInt CEapTlsPeapUiCertificates::Close()
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::Close()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiCertificates::Close()\n"));
+    if (iIsOpened == EFalse)
+    {
+        return KErrNone;
+    }
 
-	if (iIsOpened == EFalse)
-	{
-		return KErrNone;
-	}
-
-	delete iUserCerts;
-	iUserCerts = 0;
-
-	delete iCACerts;
-	iCACerts = 0;
-
-	delete iEapGeneralSettings;
-	iEapGeneralSettings = 0;
-
-	iUiConn = NULL;
-
-	iIsOpened = EFalse;
-
-	return KErrNone;
+    delete iUserCerts;
+    iUserCerts = 0;
+    
+    delete iCACerts;
+    iCACerts = 0;
+    
+    delete iCertFetcher;
+	iCertFetcher = 0;
+	    
+    iUiConn = NULL;
+    return KErrNone;
 }
 
-// ----------------------------------------------------------
-
-TInt CEapTlsPeapUiCertificates::GetCertificates(
-	RPointerArray<EapCertificateEntry> ** aUserCerts,
-	RPointerArray<EapCertificateEntry> ** aCACerts)
+TInt CEapTlsPeapUiCertificates::GetCertificates(CArrayFixFlat<TEapTlsPeapUiCertificate> ** aUserCerts,
+					CArrayFixFlat<TEapTlsPeapUiCertificate> ** aCACerts)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::GetCertificates()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiCertificates::GetCertificates()\n"));
-
 	if (aUserCerts == NULL
 		|| aCACerts == NULL)
     {
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiCertificates::GetCertificates(): KErrArgument\n")));
         return KErrArgument;
     }
-
     if (iIsOpened == EFalse)
     {
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiCertificates::GetCertificates(): KErrSessionClosed\n")));
         return KErrSessionClosed;
     }
-
     if (iUserCerts == 0)
     {
-    	iUserCerts = new RPointerArray<EapCertificateEntry>(KCertArrayGranularity);
+    	iUserCerts = new CArrayFixFlat<TEapTlsPeapUiCertificate>(KCertArrayGranularity);
     	if (!iUserCerts)
     	{
-			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiCertificates::GetCertificates(): iUserCerts, KErrNoMemory\n")));
 	        return KErrNoMemory;
 	    }	
     }
@@ -172,236 +136,460 @@ TInt CEapTlsPeapUiCertificates::GetCertificates(
     
     if (iCACerts == 0)
     {
-	    iCACerts = new RPointerArray<EapCertificateEntry>(KCertArrayGranularity);
+	    iCACerts = new CArrayFixFlat<TEapTlsPeapUiCertificate>(KCertArrayGranularity);
 	    if (!iUserCerts)
 	    {
-			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiCertificates::GetCertificates(): iCACerts, KErrNoMemory\n")));
 	        return KErrNoMemory;
 	    }
     }
     *aCACerts = iCACerts;
     
-	TInt error(KErrNone);
-
-	error = iEapGeneralSettings->GetCertificateLists(
-		*iUserCerts,
-		*iCACerts);
-
-	if (error != KErrNone)
-	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiCertificates::GetCertificates(): GetCertificateLists() error=%d\n"),
-			error));
-		iParent->CompleteReadCertificates(error);
-	    return error;
-	}
-
-	TRAP(error, SelectActiveCertificatesL());
+	TRAPD(err, iCertFetcher->GetCertificatesL());
 	
-	return error;
+	return err;
 }
+						 
 
-// ----------------------------------------------------------
-
-void CEapTlsPeapUiCertificates::SelectCertificatesL(
-	const EapCertificateEntry::TCertType aCertType,
-	const EAPSettings & aSettings,
-	RPointerArray<EapCertificateEntry>& aAvailableCerts)
+void CEapTlsPeapUiCertificates::CompleteReadCertificatesL(
+		const RArray<SCertEntry>& aAvailableUserCerts, 
+		const RArray<SCertEntry>& aAvailableCACerts)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::SelectCertificatesL(): - Available cert count in device aAvailableCerts.Count()=%d, aSettings.iCertificates.Count()=%d\n"),
-		aAvailableCerts.Count(),
-		aSettings.iCertificates.Count()));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiCertificates::SelectCertificatesL()\n"));
 
-	// Loop through available certs
-	TInt avail_ind(0);
-
-	for (avail_ind = 0; avail_ind < aAvailableCerts.Count(); ++avail_ind)
-	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::SelectCertificatesL(): loops aAvailableCerts avail_ind=%d, aAvailableCerts.Count()=%d, aSettings.iCertificates.Count()=%d\n"),
-			avail_ind,
-			aAvailableCerts.Count(),
-			aSettings.iCertificates.Count()) );
-
-		EapCertificateEntry * const avail_cert = aAvailableCerts[avail_ind];
-
-		EAP_TRACE_SETTINGS(avail_cert);
-
-		avail_cert->SetIsEnabled(EFalse);
-
-		if (aSettings.iCertificatesPresent)
-		{
-			TInt select_ind(0);
-
-			for (select_ind = 0; select_ind < aSettings.iCertificates.Count(); ++select_ind)
-			{
-				EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::SelectCertificatesL(): loops aSettings.iCertificates select_ind=%d\n"),
-					select_ind ) );
-
-				EapCertificateEntry * const conf_cert = aSettings.iCertificates[select_ind];
-
-				EAP_TRACE_SETTINGS(conf_cert);
-
-				if (aCertType == conf_cert->GetCertType()
-					&& avail_cert->GetSubjectKeyId() == conf_cert->GetSubjectKeyId())
-				{
-					avail_cert->SetIsEnabled(ETrue);
-
-					EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::SelectCertificatesL(): - Reading certificate details from the DB - Label=%S \n"),
-						avail_cert->GetLabel() ) );
-
-					EAP_TRACE_DATA_DEBUG_SYMBIAN(("Subject Key Id:",
-						avail_cert->GetSubjectKeyId().Ptr(),
-						avail_cert->GetSubjectKeyId().Length()));
-				}
-			}
-		}
-	}
-}
-
-// ----------------------------------------------------------
-
-void CEapTlsPeapUiCertificates::SelectActiveCertificatesL()
-{
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::SelectActiveCertificatesL(): - Available cert count in device - USER=%d, CA=%d \n"),
-		iUserCerts->Count(), iCACerts->Count()));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiCertificates::SelectActiveCertificatesL()\n"));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::CompleteReadCertificatesL - Available cert count in device - USER=%d, CA=%d \n"),
+	aAvailableUserCerts.Count(), aAvailableCACerts.Count()));
 
 	// Now all available certificates have been read.
-	// Get the allowed certs from the server and set their iIsEnabled flag -> ETrue.
-
-    EAPSettings aSettings;
-    
-	TRAPD(error, iEapTypeConnection->GetConfigurationL(aSettings));
-	if (error)
+	// Get the allowed certs from the database and set their iIsEnabled flag -> ETrue.
+    TInt err(KErrNone);
+	if (iUiConn->GetEapType() == eap_type_tls)
 	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiCertificates::SelectActiveCertificatesL(): GetConfigurationL(): failed %d\n"), error));
-		iParent->CompleteReadCertificates(error);
-		User::Leave(error);
-	}
+		TRAP(err, FetchDataL(KTlsAllowedUserCertsDatabaseTableName, aAvailableUserCerts, iUserCerts));
+		if (err != KErrNone)
+		{
+			EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::CompleteReadCertificatesL -TLS- USER cert - LEAVE from FetchDataL err=%d\n"),
+			err));
+		
+			iParent->CompleteReadCertificates(err);
+			return;
+		}
+		TRAP(err, FetchDataL(KTlsAllowedCACertsDatabaseTableName, aAvailableCACerts, iCACerts));
+		if (err != KErrNone)
+		{
+			EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::CompleteReadCertificatesL -TLS- CA cert - LEAVE from FetchDataL err=%d\n"),
+			err));
 
-	TRAP(error, SelectCertificatesL(EapCertificateEntry::EUser, aSettings, *iUserCerts));
-	if (error)
+			iParent->CompleteReadCertificates(err);
+			return;
+		}
+		
+	}
+	else if (iUiConn->GetEapType() == eap_type_peap)
+	{	
+	
+		TRAP(err, FetchDataL(KPeapAllowedUserCertsDatabaseTableName, aAvailableUserCerts, iUserCerts));
+		if (err != KErrNone)
+		{
+			EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::CompleteReadCertificatesL -PEAP- USER cert - LEAVE from FetchDataL err=%d\n"),
+			err));
+		
+			iParent->CompleteReadCertificates(err);
+			return;
+		}
+		TRAP(err, FetchDataL(KPeapAllowedCACertsDatabaseTableName, aAvailableCACerts, iCACerts));
+		if (err != KErrNone)
+		{
+			EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::CompleteReadCertificatesL -PEAP- CA cert - LEAVE from FetchDataL err=%d\n"),
+			err));
+		
+			iParent->CompleteReadCertificates(err);
+			return;
+		}
+	}
+	else if (iUiConn->GetEapType() == eap_type_ttls || iUiConn->GetEapType() == eap_type_ttls_plain_pap)
+	{	
+	
+		TRAP(err, FetchDataL(KTtlsAllowedUserCertsDatabaseTableName, aAvailableUserCerts, iUserCerts));
+		if (err != KErrNone)
+		{
+			EAP_TRACE_DEBUG_SYMBIAN((_L(
+			"CEapTlsPeapUiCertificates::CompleteReadCertificatesL -TTLS- USER cert - LEAVE from FetchDataL err=%d\n"),
+			err));
+		
+			iParent->CompleteReadCertificates(err);
+			return;
+		}
+		TRAP(err, FetchDataL(KTtlsAllowedCACertsDatabaseTableName, aAvailableCACerts, iCACerts));
+		if (err != KErrNone)
+		{
+			EAP_TRACE_DEBUG_SYMBIAN((_L(
+			"CEapTlsPeapUiCertificates::CompleteReadCertificatesL -TTLS- CA cert - LEAVE from FetchDataL err=%d\n"),
+			err));
+		
+			iParent->CompleteReadCertificates(err);
+			return;
+		}
+	}
+	
+#ifdef USE_FAST_EAP_TYPE
+	else if (iUiConn->GetEapType() == eap_type_fast)
+	{	
+	
+		TRAP(err, FetchDataL(KFastAllowedUserCertsDatabaseTableName, aAvailableUserCerts, iUserCerts));
+		if (err != KErrNone)
+		{
+			EAP_TRACE_DEBUG_SYMBIAN((_L(
+			"CEapTlsPeapUiCertificates::CompleteReadCertificatesL -FAST- USER cert - LEAVE from FetchDataL err=%d\n"),
+			err));
+		
+			iParent->CompleteReadCertificates(err);
+			return;
+		}
+		TRAP(err, FetchDataL(KFastAllowedCACertsDatabaseTableName, aAvailableCACerts, iCACerts));
+		if (err != KErrNone)
+		{
+			EAP_TRACE_DEBUG_SYMBIAN((_L(
+			"CEapTlsPeapUiCertificates::CompleteReadCertificatesL -FAST- CA cert - LEAVE from FetchDataL err=%d\n"),
+			err));
+		
+			iParent->CompleteReadCertificates(err);
+			return;
+		}
+	}
+#endif //#ifdef USE_FAST_EAP_TYPE
+	
+	else 
 	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiCertificates::SelectActiveCertificatesL(): SelectCertificatesL(iUserCerts): failed %d\n"), error));
-		iParent->CompleteReadCertificates(error);
-		User::Leave(error);
+		iParent->CompleteReadCertificates(KErrNotSupported);
+		return;
 	}
-
-	TRAP(error, SelectCertificatesL(EapCertificateEntry::ECA, aSettings, *iCACerts));
-	if (error)
-	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiCertificates::SelectActiveCertificatesL(): SelectCertificatesL(iCACerts): failed %d\n"), error));
-		iParent->CompleteReadCertificates(error);
-		User::Leave(error);
-	}
-
+	
 	// Operation was successful
 	iParent->CompleteReadCertificates(KErrNone);
 }
 
-// ----------------------------------------------------------
-
-void CEapTlsPeapUiCertificates::SaveCertificatesL(
-	const EapCertificateEntry::TCertType /* aCertType */,
-	const RPointerArray<EapCertificateEntry>* const aAvailableCerts,
-	EAPSettings & aSettings)
+void CEapTlsPeapUiCertificates::FetchDataL(
+	const TDesC& aTableName,
+	const RArray<SCertEntry>& aAvailableCerts,
+	CArrayFixFlat<TEapTlsPeapUiCertificate>* const aArray)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::SaveCertificatesL(): - Available cert count %d \n"),
-		aAvailableCerts->Count()));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiCertificates::SaveCertificatesL()\n"));
 
-	TInt avail_ind(0);
-	for (avail_ind = 0; avail_ind < aAvailableCerts->Count(); avail_ind++)
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::FetchDataL - Fetching & comparing cert details from table:%S\n"),
+	&aTableName));
+
+	aArray->Reset();
+	
+	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
+	TPtr sqlStatement = buf->Des();
+
+	// Form the query. Query everything.
+	_LIT(KSQLQuery, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+
+	sqlStatement.Format(KSQLQuery,						
+						&aTableName,
+						&KServiceType,
+						iUiConn->GetIndexType(),
+						&KServiceIndex,
+						iUiConn->GetIndex(),
+						&KTunnelingType, 
+						iUiConn->GetTunnelingType());
+	
+	// Evaluate view
+	RDbView view;
+	User::LeaveIfError(view.Prepare(iDatabase, TDbQuery(sqlStatement)));
+	CleanupClosePushL(view);
+	User::LeaveIfError(view.EvaluateAll());	
+	
+	// Get column set so we get the correct column numbers
+	CDbColSet* colSet = view.ColSetL();
+	CleanupStack::PushL(colSet);
+	
+	TEapTlsPeapUiCertificate tmp;
+	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::FetchDataL - Available certs=%d\n"),
+	aAvailableCerts.Count()));
+	
+	// Loop through available certs
+	TInt i(0);
+	for (i = 0; i < aAvailableCerts.Count(); i++)
 	{
-		if ((*aAvailableCerts)[avail_ind]->GetIsEnabled())
+		SCertEntry cert = aAvailableCerts[i];
+		
+		tmp.iCertEntry = cert;
+		tmp.iIsEnabled = EFalse;
+		
+		// Try to find the cert from the database rows
+		if (view.FirstL())
 		{
-			EAP_TRACE_SETTINGS((*aAvailableCerts)[avail_ind]);
-
-			// Validate data lengths.
-			if((*aAvailableCerts)[avail_ind]->GetLabel()->Length() > KMaxCertLabelLengthInDB 
-				|| (*aAvailableCerts)[avail_ind]->GetSubjectKeyId().Length() > KMaxSubjectKeyIdLengthInDB)
+			do 
 			{
-				// Too long data. Can not be stored in DB.
-
-				EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiCertificates::UpdateL(): User : Too long Label or SubjectKeyId. Length: Label=%d, SubjectKeyId=%d \n"),
-					(*aAvailableCerts)[avail_ind]->GetLabel()->Length(),
-					(*aAvailableCerts)[avail_ind]->GetSubjectKeyId().Length()));
-								
-				User::Leave(KErrArgument);
-			}
-
-#if 1
-
-			EapCertificateEntry * const aCertEntry = (*aAvailableCerts)[avail_ind]->Copy();
-			if (aCertEntry == 0)
-			{
-				User::Leave(KErrNoMemory);
-			}
-			CleanupStack::PushL(aCertEntry);
-
-#else
-
-			EapCertificateEntry * const aCertEntry = new EapCertificateEntry;
-			if (aCertEntry == 0)
-			{
-				User::Leave(KErrNoMemory);
-			}
-			CleanupStack::PushL(aCertEntry);
-
-			aCertEntry->SetCertType(aCertType);
-			aCertEntry->GetSubjectKeyIdWritable()->Copy(*((*aAvailableCerts)[avail_ind]->GetSubjectKeyId()));
-
-#endif
-
-			EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::UpdateL(): - Wrote User cert details to the DB - Label=%S \n"),
-				aCertEntry->GetLabel() ) );
-			
-			EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "Subject Key Id:",
-				aCertEntry->GetSubjectKeyId().Ptr(),
-				aCertEntry->GetSubjectKeyId().Length() ) );
-
-			EAP_TRACE_SETTINGS(aCertEntry);
-
-			aSettings.iCertificates.AppendL(aCertEntry);
-
-			aSettings.iCertificatesPresent = ETrue;
-
-			CleanupStack::Pop(aCertEntry);
+				view.GetL();
+				if ((view.ColDes(colSet->ColNo(KCertLabel)) == cert.iLabel 
+					|| view.IsColNull(colSet->ColNo(KCertLabel)))
+					&& view.ColDes8(colSet->ColNo(KSubjectKeyIdentifier)) == cert.iSubjectKeyId)
+				{
+					tmp.iIsEnabled = ETrue;
+					
+					EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::FetchDataL - Reading certificate details from the DB - Label=%S \n"),
+					&(cert.iLabel) ) );
+					
+					EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "Subject Key Id:", cert.iSubjectKeyId.Ptr(), 
+																cert.iSubjectKeyId.Size() ) );					
+					break;
+				}
+			} while (view.NextL() != EFalse);
 		}
+		
+		aArray->AppendL(tmp);
 	}
+	CleanupStack::PopAndDestroy(); // colset
+	CleanupStack::PopAndDestroy(); // view
+    CleanupStack::PopAndDestroy(buf);
 }
-
-// ----------------------------------------------------------
 
 TInt CEapTlsPeapUiCertificates::Update()
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::Update()\n")));
-	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapTlsPeapUiCertificates::Update()\n"));
-
-    EAPSettings aSettings;
-    
-	TRAPD(error, SaveCertificatesL(EapCertificateEntry::EUser, iUserCerts, aSettings));
-	if (error)
+	TRAPD(err, UpdateL());
+	
+	if(KErrNone != err)
 	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiCertificates::Update() SaveCertificatesL(iUserCerts): failed %d\n"), error));
-		iParent->CompleteReadCertificates(error);
-		return error;
+		EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::Update - UpdateL LEAVES with error =%d \n"),
+		err));		
 	}
 
-	TRAP(error, SaveCertificatesL(EapCertificateEntry::ECA, iCACerts, aSettings));
-	if (error)
-	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: CEapTlsPeapUiCertificates::Update() SaveCertificatesL(iCACerts): failed %d\n"), error));
-		iParent->CompleteReadCertificates(error);
-		return error;
-	}
-
-	TRAP(error,iEapTypeConnection->SetConfigurationL(aSettings));
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::Update(): error = %d\n"),error));
-
-	return error;
+	return err;
 }
 
-// ----------------------------------------------------------
+
+void CEapTlsPeapUiCertificates::UpdateL()
+{
+	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
+	TPtr sqlStatement = buf->Des();
+
+	// USER CERTIFICATES
+	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	
+	if (iUiConn->GetEapType() == eap_type_tls)
+	{
+		sqlStatement.Format(
+			KSQL, 
+			&KTlsAllowedUserCertsDatabaseTableName, 
+			&KServiceType, 
+			iUiConn->GetIndexType(), 
+			&KServiceIndex,
+			iUiConn->GetIndex(), 
+			&KTunnelingType, 
+			iUiConn->GetTunnelingType());
+	}
+	else if (iUiConn->GetEapType() == eap_type_peap)
+	{
+		sqlStatement.Format(
+			KSQL, 
+			&KPeapAllowedUserCertsDatabaseTableName, 
+			&KServiceType, 
+			iUiConn->GetIndexType(), 
+			&KServiceIndex,
+			iUiConn->GetIndex(), 
+			&KTunnelingType, 
+			iUiConn->GetTunnelingType());
+	}	
+	else if (iUiConn->GetEapType() == eap_type_ttls || iUiConn->GetEapType() == eap_type_ttls_plain_pap)
+	{
+		sqlStatement.Format(
+			KSQL, 
+			&KTtlsAllowedUserCertsDatabaseTableName, 
+			&KServiceType, 
+			iUiConn->GetIndexType(), 
+			&KServiceIndex,
+			iUiConn->GetIndex(), 
+			&KTunnelingType, 
+			iUiConn->GetTunnelingType());
+	}
+	
+#ifdef USE_FAST_EAP_TYPE	
+	else if (iUiConn->GetEapType() == eap_type_fast)
+	{
+		sqlStatement.Format(
+			KSQL, 
+			&KFastAllowedUserCertsDatabaseTableName, 
+			&KServiceType, 
+			iUiConn->GetIndexType(), 
+			&KServiceIndex,
+			iUiConn->GetIndex(), 
+			&KTunnelingType, 
+			iUiConn->GetTunnelingType());
+	}
+#endif //#ifdef USE_FAST_EAP_TYPE	
+
+	RDbView view;	
+	User::LeaveIfError(view.Prepare(iDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));	
+	CleanupClosePushL(view);
+	User::LeaveIfError(view.EvaluateAll());
+
+	// Get column set so we get the correct column numbers
+	CDbColSet* colSet;
+	colSet = view.ColSetL();
+	CleanupStack::PushL(colSet);
+
+	// Delete old rows
+	if (view.FirstL())
+	{		
+		do {
+			view.DeleteL();
+		} while (view.NextL() != EFalse);
+	}
+	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::UpdateL - About to update cert details in the DB - User cert count=%d \n"),
+	iUserCerts->Count()));
+	
+	TInt i(0);
+	for (i = 0; i < iUserCerts->Count(); i++)
+	{
+		if ((*iUserCerts)[i].iIsEnabled)
+		{
+			// Validate data lengths.
+			if((*iUserCerts)[i].iCertEntry.iLabel.Length() > KMaxCertLabelLengthInDB 
+				|| (*iUserCerts)[i].iCertEntry.iSubjectKeyId.Length() > KMaxSubjectKeyIdLengthInDB)
+			{
+				// Too long data. Can not be stored in DB.
+
+				EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::UpdateL: User : Too long Label or SubjectKeyId. Length: Label=%d, SubjectKeyId=%d \n"),
+				(*iUserCerts)[i].iCertEntry.iLabel.Length(), (*iUserCerts)[i].iCertEntry.iSubjectKeyId.Length()));
+								
+				User::Leave(KErrArgument);
+			}
+						
+			view.InsertL();
+			// Set the default values. The other three tables (certs, ca certs & cipher suites) are empty by default.
+			view.SetColL(colSet->ColNo(KServiceType), static_cast<TUint>(iUiConn->GetIndexType()));
+			view.SetColL(colSet->ColNo(KServiceIndex), static_cast<TUint>(iUiConn->GetIndex()));
+			view.SetColL(colSet->ColNo(KTunnelingType), static_cast<TUint>(iUiConn->GetTunnelingType()));
+			view.SetColL(colSet->ColNo(KCertLabel), (*iUserCerts)[i].iCertEntry.iLabel);
+			view.SetColL(colSet->ColNo(KSubjectKeyIdentifier), (*iUserCerts)[i].iCertEntry.iSubjectKeyId);
+			view.SetColL(colSet->ColNo(KActualSubjectKeyIdentifier), (*iUserCerts)[i].iCertEntry.iSubjectKeyId);
+			view.PutL();
+			
+			EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::UpdateL - Wrote User cert details to the DB - Label=%S \n"),
+			&((*iUserCerts)[i].iCertEntry.iLabel) ) );
+			
+			EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "Subject Key Id:", (*iUserCerts)[i].iCertEntry.iSubjectKeyId.Ptr(), 
+			(*iUserCerts)[i].iCertEntry.iSubjectKeyId.Size() ) );			
+		}
+	}
+	
+	CleanupStack::PopAndDestroy(colSet);
+	CleanupStack::PopAndDestroy(); // view	
+	
+	// CA CERTIFICATES
+	_LIT(KSQL2, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	
+	if (iUiConn->GetEapType() == eap_type_tls)
+	{
+		sqlStatement.Format(
+			KSQL2, 
+			&KTlsAllowedCACertsDatabaseTableName, 
+			&KServiceType, 
+			iUiConn->GetIndexType(), 
+			&KServiceIndex,
+			iUiConn->GetIndex(), 
+			&KTunnelingType, 
+			iUiConn->GetTunnelingType());
+	}
+	else if (iUiConn->GetEapType() == eap_type_peap)
+	{
+		sqlStatement.Format(
+			KSQL2, 
+			&KPeapAllowedCACertsDatabaseTableName, 
+			&KServiceType, 
+			iUiConn->GetIndexType(), 
+			&KServiceIndex,
+			iUiConn->GetIndex(), 
+			&KTunnelingType, 
+			iUiConn->GetTunnelingType());
+	}	
+	else if (iUiConn->GetEapType() == eap_type_ttls || iUiConn->GetEapType() == eap_type_ttls_plain_pap)
+	{
+		sqlStatement.Format(
+			KSQL2, 
+			&KTtlsAllowedCACertsDatabaseTableName, 
+			&KServiceType, 
+			iUiConn->GetIndexType(), 
+			&KServiceIndex,
+			iUiConn->GetIndex(), 
+			&KTunnelingType, 
+			iUiConn->GetTunnelingType());
+	}
+
+#ifdef USE_FAST_EAP_TYPE
+	else if (iUiConn->GetEapType() == eap_type_fast)
+	{
+		sqlStatement.Format(
+			KSQL2, 
+			&KFastAllowedCACertsDatabaseTableName, 
+			&KServiceType, 
+			iUiConn->GetIndexType(), 
+			&KServiceIndex,
+			iUiConn->GetIndex(), 
+			&KTunnelingType, 
+			iUiConn->GetTunnelingType());
+	}	
+#endif // #ifdef USE_FAST_EAP_TYPE	
+			
+	User::LeaveIfError(view.Prepare(iDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));	
+	CleanupClosePushL(view);
+	User::LeaveIfError(view.EvaluateAll());
+
+	// Get column set so we get the correct column numbers
+	colSet = view.ColSetL();
+	CleanupStack::PushL(colSet);
+
+	// Delete old rows
+	if (view.FirstL())
+	{		
+		do {
+			view.DeleteL();
+		} while (view.NextL() != EFalse);
+	}
+	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::UpdateL - About to update cert details in the DB - CA cert count=%d \n"),
+	iCACerts->Count()));
+	
+	for (i = 0; i < iCACerts->Count(); i++)
+	{
+		if ((*iCACerts)[i].iIsEnabled)
+		{
+			// Validate data lengths.
+			if((*iCACerts)[i].iCertEntry.iLabel.Length() > KMaxCertLabelLengthInDB 
+				|| (*iCACerts)[i].iCertEntry.iSubjectKeyId.Length() > KMaxSubjectKeyIdLengthInDB)
+			{
+				// Too long data. Can not be stored in DB.
+
+				EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::UpdateL: CA : Too long Label or SubjectKeyId. Length: Label=%d, SubjectKeyId=%d \n"),
+				(*iCACerts)[i].iCertEntry.iLabel.Length(), (*iCACerts)[i].iCertEntry.iSubjectKeyId.Length()));
+				
+				User::Leave(KErrArgument);
+			}
+		
+			view.InsertL();
+			// Set the default values. The other three tables (certs, ca certs & cipher suites) are empty by default.
+			view.SetColL(colSet->ColNo(KServiceType), static_cast<TUint>(iUiConn->GetIndexType()));
+			view.SetColL(colSet->ColNo(KServiceIndex), static_cast<TUint>(iUiConn->GetIndex()));
+			view.SetColL(colSet->ColNo(KTunnelingType), static_cast<TUint>(iUiConn->GetTunnelingType()));
+			view.SetColL(colSet->ColNo(KCertLabel), (*iCACerts)[i].iCertEntry.iLabel);
+			view.SetColL(colSet->ColNo(KSubjectKeyIdentifier), (*iCACerts)[i].iCertEntry.iSubjectKeyId);			
+			view.SetColL(colSet->ColNo(KActualSubjectKeyIdentifier), (*iCACerts)[i].iCertEntry.iSubjectKeyId);
+			view.PutL();
+
+			EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTlsPeapUiCertificates::UpdateL - Wrote CA cert details to the DB - Label=%S \n"),
+			&((*iCACerts)[i].iCertEntry.iLabel) ) );
+			
+			EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "Subject Key Id:", (*iCACerts)[i].iCertEntry.iSubjectKeyId.Ptr(), 
+			(*iCACerts)[i].iCertEntry.iSubjectKeyId.Size() ) );
+		}
+	}
+	CleanupStack::PopAndDestroy(colSet);
+	CleanupStack::PopAndDestroy(); // view
+	
+	CleanupStack::PopAndDestroy(buf);
+}
+
 // End of file

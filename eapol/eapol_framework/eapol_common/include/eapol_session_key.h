@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 5 %
 */
 
 #if !defined(_EAPOL_SESSION_KEY_H_)

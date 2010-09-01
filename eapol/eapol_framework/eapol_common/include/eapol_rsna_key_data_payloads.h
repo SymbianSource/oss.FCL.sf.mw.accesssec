@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 11 %
 */
 
 #if !defined(_EAPOL_RSNA_KEY_DATA_PAYLOADS_H_)

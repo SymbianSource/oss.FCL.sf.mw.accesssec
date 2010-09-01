@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 11 %
 */
 
 #if !defined(_ISAKMP_HEADER_H_)

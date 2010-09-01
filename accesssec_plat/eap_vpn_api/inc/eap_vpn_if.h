@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 9.1.2 %
+* %version: 11 %
 */
 
 #ifndef __EAPPLUGININTERFACE_H__

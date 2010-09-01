@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 13.1.2 %
 */
 
 #if !defined(_EAPAKADBPARAMETERNAMES_H_)
@@ -28,7 +28,6 @@
 
 _LIT(KServiceType, "ServiceType");
 _LIT(KServiceIndex, "ServiceIndex");
-_LIT(KTunnelingTypeVendorId, "TunnelingTypeVendorId");
 _LIT(KTunnelingType, "TunnelingType");
 _LIT(KPseudonymId, "PseudonymId");
 _LIT(KXKey, "XKEY");

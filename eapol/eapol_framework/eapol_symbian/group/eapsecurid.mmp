@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16.1.14 %
+* %version: 16.2.3 %
 */
 
 #include <platform_paths.hrh>
@@ -28,8 +28,6 @@ TARGETTYPE    PLUGIN
 
 TARGET        eapsecurid.dll
 UID	          0x10009d8d 0x101F8E74
-
-deffile eapsecurid.def
 
 SOURCEPATH    ../am/type/securid/symbian/plugin/src
 
@@ -58,6 +56,16 @@ SOURCE		  eap_type_securid_state.cpp
 	SOURCE		  eap_type_securid_server.cpp
 #endif
 
+SOURCEPATH    ../am/common/symbian
+SOURCE		  eap_am_trace_symbian.cpp
+
+SOURCEPATH    ../am/type/securid/symbian/plugin/src
+SOURCE		  EapGtcUiConnection.cpp
+SOURCE        EapGtcUiDataConnection.cpp
+SOURCE        EapGtcUiGtcData.cpp
+LIBRARY       avkon.lib
+STATICLIBRARY eapgtcui.lib
+
 USERINCLUDE   ../am/type/securid/symbian/plugin/inc
 USERINCLUDE   ../../eapol_common/type/securid/include
 USERINCLUDE   ../../eapol_common/include
@@ -65,23 +73,21 @@ USERINCLUDE   ../am/include
 USERINCLUDE   ../../eapol_common/am/include
 USERINCLUDE	  ../am/type/symbian/plugin/include
 USERINCLUDE   ../../eapol_common/type
-USERINCLUDE   ../am/eap_notifier/inc
+
+//SYSTEMINCLUDE /epoc32/include/ecom
+//SYSTEMINCLUDE /epoc32/include/libc
+//SYSTEMINCLUDE /epoc32/include/cshelp
 
 MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
 
-LIBRARY     euser.lib ecom.lib eaptools.lib eaptrace.lib eapsymbiantools.lib edbms.lib efsrv.lib cone.lib eikcoctl.lib
+LIBRARY     euser.lib ecom.lib eapol.lib edbms.lib efsrv.lib cone.lib eikcoctl.lib
 LIBRARY		bafl.lib
 LIBRARY     eikdlg.lib
 LIBRARY     eikcore.lib
 LIBRARY     hlplch.lib
 LIBRARY		featmgr.lib
 
-LIBRARY		HbCore.lib
-LIBRARY		HbWidgets.lib
-LIBRARY   eap_notifier.lib
-
 LANG		  SC
-
 
 //-------------------------------------------------------------------
 

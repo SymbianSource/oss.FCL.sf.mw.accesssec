@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 5.1.2 %
 */
 
 #ifndef EAPSECURIDDBPARAMETERNAMES_H
@@ -28,7 +28,6 @@
 
 _LIT(KServiceType, "ServiceType");
 _LIT(KServiceIndex, "ServiceIndex");
-_LIT(KTunnelingTypeVendorId, "TunnelingTypeVendorId");
 _LIT(KTunnelingType, "TunnelingType");
 
 #endif // EAPSECURIDDBPARAMETERNAMES_H

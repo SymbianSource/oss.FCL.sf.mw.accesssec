@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11.1.2 %
+* %version: 13 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -53,6 +53,7 @@ EAP_FUNC_EXPORT eap_general_header_base_c::eap_general_header_base_c(
 	, m_error_detected(true)
 #endif //#if defined(USE_EAP_ERROR_TESTS)
 {
+	EAP_ASSERT((m_header_buffer != 0 && m_header_buffer_length > 0ul) || (m_header_buffer == 0 && m_header_buffer_length == 0ul));
 }
 
 EAP_FUNC_EXPORT void eap_general_header_base_c::set_header_buffer(u8_t * const header_buffer, const u32_t header_buffer_length)
@@ -63,6 +64,8 @@ EAP_FUNC_EXPORT void eap_general_header_base_c::set_header_buffer(u8_t * const h
 
 EAP_FUNC_EXPORT u8_t * eap_general_header_base_c::get_header_buffer(const u32_t data_length) const
 {
+	EAP_ASSERT(m_header_buffer != 0 && m_header_buffer_length > 0ul && m_header_buffer_length >= data_length);
+
 	if (m_header_buffer_length >= data_length)
 	{
 		return m_header_buffer;

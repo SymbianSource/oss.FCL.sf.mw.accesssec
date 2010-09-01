@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 57.1.6 %
+* %version: 61 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -45,7 +45,7 @@
 
 //--------------------------------------------------
 //
-EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::create_4_way_handshake_message_2(
+eap_status_e eapol_key_state_c::create_4_way_handshake_message_2(
 	eap_buf_chain_wr_c * const sent_packet,
 	const u32_t eapol_header_offset,
 	u32_t * const data_length,
@@ -260,7 +260,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::create_4_way_handshake_message_2
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::create_4_way_handshake_message_4(
+eap_status_e eapol_key_state_c::create_4_way_handshake_message_4(
 	eap_buf_chain_wr_c * const sent_packet,
 	const u32_t eapol_header_offset,
 	u32_t * const data_length,
@@ -411,7 +411,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::create_4_way_handshake_message_4
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_1(
+eap_status_e eapol_key_state_c::process_4_way_handshake_message_1(
 	const eap_am_network_id_c * const receive_network_id,
 	eapol_RSNA_key_header_c * const eapol_key_message,
 	const u32_t /* packet_length */)
@@ -421,12 +421,14 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_
 
 	eap_status_e status = eap_status_process_general_error;
 
+	eapol_key_state_string_c state_string;
+
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
 		(EAPL("EAPOL_KEY: %s: eapol_key_state_c::process_4_way_handshake_message_1(): eapol_key_descriptor_type = %s = 0x%02x\n"),
 		(m_is_client == true ? "client": "server"),
-		eapol_key_state_string_c::get_eapol_key_descriptor_type_string(eapol_key_message->get_key_descriptor_type()),
+		state_string.get_eapol_key_descriptor_type_string(eapol_key_message->get_key_descriptor_type()),
 		eapol_key_message->get_key_descriptor_type()));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_key_state_c::process_4_way_handshake_message_1()");
@@ -434,7 +436,6 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_
 	// Only client (supplicant) could receive 4-Way Handshake message 1.
 	EAP_ASSERT_ALWAYS(m_is_client == true);
 
-#if 0
 	if (m_eapol_key_handshake_type == eapol_key_handshake_type_none)
 	{
 		// 4-Way Handshake started again.
@@ -447,12 +448,10 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_
 			(EAPL("EAPOL_KEY: %s: process_4_way_handshake_message_1(): 4-Way Handshake restarted.\n"),
 			(m_is_client == true ? "client": "server")));
 	}
-#endif
 
 	if (get_eapol_key_state() != eapol_key_state_wait_4_way_handshake_message_1
 		&& get_eapol_key_state() != eapol_key_state_wait_4_way_handshake_message_3
 		&& get_eapol_key_state() != eapol_key_state_4_way_handshake_successfull
-		&& get_eapol_key_state() != eapol_key_state_group_key_handshake_successfull
 		&& get_eapol_key_state() != eapol_key_state_preauthenticated
 #if defined(EAP_USE_WPXM)
 		&& get_eapol_key_state() != eapol_key_state_wpxm_reassociation_finished_successfull
@@ -464,7 +463,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("WARNING: EAPOL_KEY: %s: process_4_way_handshake_message_1(): wrong state %s\n"),
 			(m_is_client == true ? "client": "server"),
-			eapol_key_state_string_c::get_eapol_key_state_string(get_eapol_key_state())));
+			state_string.get_eapol_key_state_string(get_eapol_key_state())));
 
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_wrong_eap_type_state);
@@ -770,7 +769,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_3_payloads_a(
+eap_status_e eapol_key_state_c::process_4_way_handshake_message_3_payloads_a(
 	const eap_am_network_id_c * const receive_network_id,
 	eapol_RSNA_key_header_c * const eapol_key_message,
 	const u32_t packet_length,
@@ -963,7 +962,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_3_payloads_b(
+eap_status_e eapol_key_state_c::process_4_way_handshake_message_3_payloads_b(
 	const eap_am_network_id_c * const receive_network_id,
 	eapol_RSNA_key_header_c * const eapol_key_message,
 	const u32_t /* packet_length */,
@@ -1121,13 +1120,15 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_
 	}
 	else
 	{
+		eapol_key_state_string_c state_string;
+
 		EAP_TRACE_DEBUG(
 			m_am_tools, 
 			TRACE_FLAGS_DEFAULT, 
 			(EAPL("WARNING: EAPOL_KEY: eapol_key_state_c::process_4_way_handshake_message_3_payloads_b(): ")
 			 EAPL("No keys are set on state %d=%s.\n"),
 			 get_eapol_key_state(),
-			 eapol_key_state_string_c::get_eapol_key_state_string(get_eapol_key_state())));
+			 state_string.get_eapol_key_state_string(get_eapol_key_state())));
 	}
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -1137,7 +1138,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_3(
+eap_status_e eapol_key_state_c::process_4_way_handshake_message_3(
 	const eap_am_network_id_c * const receive_network_id,
 	eapol_RSNA_key_header_c * const eapol_key_message,
 	const u32_t packet_length)
@@ -1147,12 +1148,14 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_
 
 	eap_status_e status = eap_status_process_general_error;
 
+	eapol_key_state_string_c state_string;
+
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
 		(EAPL("EAPOL_KEY: %s: eapol_key_state_c::process_4_way_handshake_message_3(): eapol_key_descriptor_type = %s = 0x%02x\n"),
 		(m_is_client == true ? "client": "server"),
-		eapol_key_state_string_c::get_eapol_key_descriptor_type_string(eapol_key_message->get_key_descriptor_type()),
+		state_string.get_eapol_key_descriptor_type_string(eapol_key_message->get_key_descriptor_type()),
 		eapol_key_message->get_key_descriptor_type()));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_key_state_c::process_4_way_handshake_message_3()");
@@ -1165,12 +1168,13 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_
 	if (m_eapol_key_handshake_type != eapol_key_handshake_type_4_way_handshake
 		&& m_eapol_key_handshake_type != eapol_key_handshake_type_group_key_handshake)
 	{
+		eapol_key_state_string_c state_string;
 		EAP_TRACE_ERROR(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("WARNING: EAPOL_KEY: %s: process_4_way_handshake_message_3(): wrong handshake type %s\n"),
 			(m_is_client == true ? "client": "server"),
-			eapol_key_state_string_c::get_eapol_key_handshake_type_string(m_eapol_key_handshake_type)));
+			state_string.get_eapol_key_handshake_type_string(m_eapol_key_handshake_type)));
 
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_wrong_eap_type_state);
@@ -1188,7 +1192,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("WARNING: EAPOL_KEY: %s: process_4_way_handshake_message_3(): wrong state %s\n"),
 			(m_is_client == true ? "client": "server"),
-			eapol_key_state_string_c::get_eapol_key_state_string(get_eapol_key_state())));
+			state_string.get_eapol_key_state_string(get_eapol_key_state())));
 
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_wrong_eap_type_state);
@@ -1425,13 +1429,15 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_
 	}
 	else
 	{
+		eapol_key_state_string_c state_string;
+
 		EAP_TRACE_DEBUG(
 			m_am_tools, 
 			TRACE_FLAGS_DEFAULT, 
 			(EAPL("WARNING: EAPOL_KEY: eapol_key_state_c::process_4_way_handshake_message_3(): ")
 			 EAPL("No keys are set on state %d=%s.\n"),
 			 get_eapol_key_state(),
-			 eapol_key_state_string_c::get_eapol_key_state_string(get_eapol_key_state())));
+			 state_string.get_eapol_key_state_string(get_eapol_key_state())));
 	}
 
 
@@ -1442,7 +1448,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_4_way_handshake_message_
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::create_eapol_key_handshake_message_0(
+eap_status_e eapol_key_state_c::create_eapol_key_handshake_message_0(
 	const bool true_when_4_way_handshake, ///< With false initiates Group Key Handshake.
 	eap_buf_chain_wr_c * const sent_packet,
 	const u32_t eapol_header_offset,
@@ -1572,7 +1578,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::create_eapol_key_handshake_messa
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::create_group_key_handshake_message_2(
+eap_status_e eapol_key_state_c::create_group_key_handshake_message_2(
 	eap_buf_chain_wr_c * const sent_packet,
 	const u32_t eapol_header_offset,
 	u32_t * const data_length,
@@ -1715,7 +1721,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::create_group_key_handshake_messa
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_group_key_handshake_message_1(
+eap_status_e eapol_key_state_c::process_group_key_handshake_message_1(
 	const eap_am_network_id_c * const receive_network_id,
 	eapol_RSNA_key_header_c * const eapol_key_message,
 	const u32_t packet_length)
@@ -1748,12 +1754,13 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_group_key_handshake_mess
 	if (m_eapol_key_handshake_type != eapol_key_handshake_type_none
 		&& m_eapol_key_handshake_type != eapol_key_handshake_type_group_key_handshake)
 	{
+		eapol_key_state_string_c state_string;
 		EAP_TRACE_ERROR(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("WARNING: EAPOL_KEY: %s: start_group_key_handshake(): wrong handshake type %s\n"),
 			(m_is_client == true ? "client": "server"),
-			eapol_key_state_string_c::get_eapol_key_handshake_type_string(m_eapol_key_handshake_type)));
+			state_string.get_eapol_key_handshake_type_string(m_eapol_key_handshake_type)));
 
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_wrong_eap_type_state);
@@ -1767,12 +1774,13 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_group_key_handshake_mess
 #endif //#if defined(EAP_USE_WPXM)
 		)
 	{
+		eapol_key_state_string_c state_string;
 		EAP_TRACE_ERROR(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("WARNING: EAPOL_KEY: %s: process_group_key_handshake_message_1(): wrong state %s\n"),
 			(m_is_client == true ? "client": "server"),
-			eapol_key_state_string_c::get_eapol_key_state_string(get_eapol_key_state())));
+			state_string.get_eapol_key_state_string(get_eapol_key_state())));
 
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_wrong_eap_type_state);
@@ -2109,7 +2117,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_group_key_handshake_mess
 
 		set_eapol_key_state(eapol_key_state_group_key_handshake_successfull);
 
-		m_eapol_key_handshake_type = eapol_key_handshake_type_authenticated;
+		m_eapol_key_handshake_type = eapol_key_handshake_type_none;
 
 		if (get_is_WPXM() == true)
 		{
@@ -2135,13 +2143,15 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_group_key_handshake_mess
 	}
 	else
 	{
+		eapol_key_state_string_c state_string;
+
 		EAP_TRACE_DEBUG(
 			m_am_tools, 
 			TRACE_FLAGS_DEFAULT, 
 			(EAPL("WARNING: EAPOL_KEY: eapol_key_state_c::process_group_key_handshake_message_1(): ")
 			 EAPL("No keys are set on state %d=%s.\n"),
 			 get_eapol_key_state(),
-			 eapol_key_state_string_c::get_eapol_key_state_string(get_eapol_key_state())));
+			 state_string.get_eapol_key_state_string(get_eapol_key_state())));
 	}
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -2151,7 +2161,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_group_key_handshake_mess
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_RC4_key_descriptor(
+eap_status_e eapol_key_state_c::process_RC4_key_descriptor(
 	const eap_am_network_id_c * const receive_network_id,
 	eap_general_header_base_c * const packet_data,
 	const u32_t packet_length)
@@ -2169,12 +2179,13 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_RC4_key_descriptor(
 
 	if (m_eapol_key_handshake_type != eapol_key_handshake_type_dynamic_WEP)
 	{
+		eapol_key_state_string_c state_string;
 		EAP_TRACE_ERROR(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("ERROR: EAPOL_KEY: %s: process_RC4_key_descriptor(): wrong handshake type %s\n"),
 			(m_is_client == true ? "client": "server"),
-			eapol_key_state_string_c::get_eapol_key_handshake_type_string(m_eapol_key_handshake_type)));
+			state_string.get_eapol_key_handshake_type_string(m_eapol_key_handshake_type)));
 
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_wrong_eap_type_state);
@@ -2182,12 +2193,13 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_RC4_key_descriptor(
 
 	if (get_eapol_key_state() != eapol_key_state_wait_rc4_key_message)
 	{
+		eapol_key_state_string_c state_string;
 		EAP_TRACE_ERROR(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("WARNING: EAPOL_KEY: %s: process_RC4_key_descriptor(): wrong state %s\n"),
 			(m_is_client == true ? "client": "server"),
-			eapol_key_state_string_c::get_eapol_key_state_string(get_eapol_key_state())));
+			state_string.get_eapol_key_state_string(get_eapol_key_state())));
 
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_wrong_eap_type_state);
@@ -2549,7 +2561,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::process_RC4_key_descriptor(
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::initialize_4_way_handshake(
+eap_status_e eapol_key_state_c::initialize_4_way_handshake(
 	const eap_am_network_id_c * const receive_network_id,
 	const eapol_protocol_version_e used_eapol_version)
 {
@@ -2564,24 +2576,20 @@ EAP_FUNC_EXPORT eap_status_e eapol_key_state_c::initialize_4_way_handshake(
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
-		(EAPL("EAPOL_KEY: %s: eapol_key_state_c::initialize_4_way_handshake(): m_eapol_key_handshake_type=%d=%s, m_eapol_key_state=%d=%s\n"),
-		(m_is_client == true ? "client": "server"),
-		m_eapol_key_handshake_type,
-		eapol_key_state_string_c::get_eapol_key_handshake_type_string(m_eapol_key_handshake_type),
-		m_eapol_key_state,
-		eapol_key_state_string_c::get_eapol_key_state_string(m_eapol_key_state)));
+		(EAPL("EAPOL_KEY: %s: eapol_key_state_c::initialize_4_way_handshake()\n"),
+		(m_is_client == true ? "client": "server")));
 
 	if (m_eapol_key_handshake_type != eapol_key_handshake_type_none
-		&& m_eapol_key_handshake_type != eapol_key_handshake_type_authenticated
 		&& m_eapol_key_handshake_type != eapol_key_handshake_type_group_key_handshake
 		&& m_eapol_key_handshake_type != eapol_key_handshake_type_4_way_handshake)
 	{
+		eapol_key_state_string_c state_string;
 		EAP_TRACE_ERROR(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("WARNING: EAPOL_KEY: %s: initialize_4_way_handshake(): wrong handshake type %s\n"),
 			(m_is_client == true ? "client": "server"),
-			eapol_key_state_string_c::get_eapol_key_handshake_type_string(m_eapol_key_handshake_type)));
+			state_string.get_eapol_key_handshake_type_string(m_eapol_key_handshake_type)));
 
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_wrong_eap_type_state);

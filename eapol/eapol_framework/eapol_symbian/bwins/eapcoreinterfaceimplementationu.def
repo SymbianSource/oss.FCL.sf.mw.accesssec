@@ -1,6 +1,0 @@
-EXPORTS
-	?ImplementationGroupProxy@@YAPBUTImplementationProxy@@AAH@Z @ 1 NONAME ; struct TImplementationProxy const * ImplementationGroupProxy(int &)
-	??1EapClientIf@@UAE@XZ @ 2 NONAME ; EapClientIf::~EapClientIf(void)
-	?GetServerNameAndExe@EapClientIf@@KAHPAV?$TBuf@$0BI@@@0@Z @ 3 NONAME ; int EapClientIf::GetServerNameAndExe(class TBuf<24> *, class TBuf<24> *)
-	??0EapClientIf@@QAE@XZ @ 4 NONAME ; EapClientIf::EapClientIf(void)
-

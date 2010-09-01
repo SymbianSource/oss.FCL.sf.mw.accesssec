@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 54 %
+* %version: 29.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -34,146 +34,160 @@
 #include "EapAkaDbParameterNames.h"
 #include "eap_type_aka_types.h"
 
-#include <EapTraceSymbian.h>
-#include "EapPluginTools.h"
+#include "eap_am_trace_symbian.h"
 
 const TInt KMaxSqlQueryLength = 2048;
 const TInt KMicroSecsInAMinute = 60000000; // 60000000 micro seconds is 1 minute.
 
 // ================= MEMBER FUNCTIONS =======================
 
-// ----------------------------------------------------------
-
-void EapAkaDbUtils::OpenDatabaseL(
-	RDbNamedDatabase& aDatabase,
-	RFs& aFileServerSession,
-	const TIndexType aIndexType,
-	const TInt aIndex,
-	const eap_type_value_e aTunnelingType)
+void EapAkaDbUtils::OpenDatabaseL(RDbNamedDatabase& aDatabase, RDbs& aSession, const TIndexType aIndexType,
+	const TInt aIndex, const eap_type_value_e aTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapAkaDbUtils::OpenDatabaseL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingVendorType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()) );
+#ifdef USE_EAP_EXPANDED_TYPES
+
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
+
+#else
+
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapAkaDbUtils::OpenDatabaseL -Start- aIndexType=%d, aIndex=%d, aTunnelingVendorType=%d \n"),
+	aIndexType,aIndex,aTunnelingVendorType) );
 
 	// 1. Open/create a database	
 	
-	TInt error(KErrNone);
-	TFileName aPrivateDatabasePathName;
-
-	EapPluginTools::CreateDatabaseLC(
-		aDatabase,
-		aFileServerSession,
-		error,
-		KEapAkaDatabaseName,
-		aPrivateDatabasePathName);
-
-	if(error == KErrNone)
+	// Connect to the DBMS server.
+	User::LeaveIfError(aSession.Connect());		
+	CleanupClosePushL(aSession);	
+	// aSession and aDatabase are pushed to the cleanup stack even though they may be member
+	// variables of the calling class and would be closed in the destructor anyway. This ensures
+	// that if they are not member variables they will be closed. Closing the handle twice
+	// does no harm.	
+	
+#ifdef SYMBIAN_SECURE_DBMS
+	
+	// Create the secure shared database with the specified secure policy.
+	// Database will be created in the data caging path for DBMS (C:\private\100012a5).
+	
+	TInt err = aDatabase.Create(aSession, KDatabaseName, KSecureUIDFormat);
+	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapAkaDbUtils::OpenDatabaseL - Created Secure DB for eapaka.dat. err=%d\n"), err));
+	
+	
+	if(err == KErrNone)
 	{
 		aDatabase.Close();
-	}
-	else if (error != KErrAlreadyExists) 
+		
+	} else if (err != KErrAlreadyExists) 
 	{
-		User::LeaveIfError(error);
+		User::LeaveIfError(err);
 	}
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapAkaDbUtils::OpenDatabaseL(): - calls aDatabase.Open()\n")));
-
-	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapAkaDbUtils::OpenDatabaseL(): - Opened private DB for EAP-AKA. error=%d\n"), error));
-
-	User::LeaveIfError(error);
+	User::LeaveIfError(aDatabase.Open(aSession, KDatabaseName, KSecureUIDFormat));
+	CleanupClosePushL(aDatabase);		
+		
+#else
+	// For non-secured database. The database will be created in the old location (c:\system\data).
+	
+	RFs fsSession;		
+	User::LeaveIfError(fsSession.Connect());
+	CleanupClosePushL(fsSession);	
+	TInt err = aDatabase.Create(fsSession, KDatabaseName);
+	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapAkaDbUtils::OpenDatabaseL - Created Non-Secure DB for eapaka.dat. err=%d\n"), err));
+	
+	
+	if(err == KErrNone)
+	{
+		aDatabase.Close();
+		
+	} else if (err != KErrAlreadyExists) 
+	{
+		User::LeaveIfError(err);
+	}
+	CleanupStack::PopAndDestroy( &fsSession ); // close fsSession
+	
+	User::LeaveIfError(aDatabase.Open(aSession, KDatabaseName));
+	CleanupClosePushL(aDatabase);		
+	    
+#endif // #ifdef SYMBIAN_SECURE_DBMS
 
 	// 2. Create the eapaka table to database (ignore error if exists)
 	
-	// Table columns:
-	//// NAME ///////////////////////////////////////////////// TYPE ////////////// Constant /////////
-	//| ServiceType									| UNSIGNED INTEGER 	| KServiceType      |//
-	//| ServiceIndex								| UNSIGNED INTEGER 	| KServiceIndex     |//
-	//| TunnelingTypeVendorId                       | UNSIGNED INTEGER  | KTunnelingTypeVendorId    |//
-	//| TunnelingType								| UNSIGNED INTEGER 	| KTunnelingType    |//
-	//| EAP_AKA_use_manual_realm					| UNSIGNED INTEGER 	| cf_str_EAP_AKA_use_manual_realm_literal   |//
-	//| EAP_AKA_manual_realm						| VARCHAR(255)	   	| cf_str_EAP_AKA_manual_realm_literal		    |//
-	//| EAP_AKA_use_manual_username					| UNSIGNED INTEGER 	| cf_str_EAP_AKA_use_manual_username_literal|//
-	//| EAP_AKA_manual_username						| VARCHAR(255)	   	| cf_str_EAP_AKA_manual_username_literal|//
-	//| PseudonymId									| LONG VARBINARY   	| KPseudonymId      |//
-	//| XKEY										| BINARY(20)       	| KXKey             |//
-	//| K_aut										| BINARY(16)       	| KK_aut            |//
-	//| K_encr										| BINARY(16)       	| KK_encr           |//
-	//| ReauthCounter								| UNSIGNED INTEGER 	| KReauthCounter    |//
-	//| ReauthId									| LONG VARBINARY   	| KReauthId         |//
-	//| PreviousIMSI								| VARBINARY(15)   	| KPreviousIMSI	   	|//
-	//| EAP_AKA_use_pseudonym_identity				| UNSIGNED INTEGER 	| cf_str_EAP_AKA_use_pseudonym_identity_literal	   	|//
-	//| EAP_AKA_max_session_validity_time			| BIGINT		   	| cf_str_EAP_AKA_max_session_validity_time_literal   |//
-	//| EAP_AKA_last_full_authentication_time		| BIGINT		   	| KAKALastFullAuthTime	|//
-	//////////////////////////////////////////////////////////////////////////////////////////////////
+// Table columns:
+//// NAME ///////////////////////////////////////////////// TYPE ////////////// Constant /////////
+//| ServiceType									| UNSIGNED INTEGER 	| KServiceType      |//
+//| ServiceIndex								| UNSIGNED INTEGER 	| KServiceIndex     |//
+//| TunnelingType								| UNSIGNED INTEGER 	| KTunnelingType    |//
+//| EAP_AKA_use_manual_realm					| UNSIGNED INTEGER 	| cf_str_EAP_AKA_use_manual_realm_literal   |//
+//| EAP_AKA_manual_realm						| VARCHAR(255)	   	| cf_str_EAP_AKA_manual_realm_literal		    |//
+//| EAP_AKA_use_manual_username					| UNSIGNED INTEGER 	| cf_str_EAP_AKA_use_manual_username_literal|//
+//| EAP_AKA_manual_username						| VARCHAR(255)	   	| cf_str_EAP_AKA_manual_username_literal|//
+//| PseudonymId									| LONG VARBINARY   	| KPseudonymId      |//
+//| XKEY										| BINARY(20)       	| KXKey             |//
+//| K_aut										| BINARY(16)       	| KK_aut            |//
+//| K_encr										| BINARY(16)       	| KK_encr           |//
+//| ReauthCounter								| UNSIGNED INTEGER 	| KReauthCounter    |//
+//| ReauthId									| LONG VARBINARY   	| KReauthId         |//
+//| PreviousIMSI								| VARBINARY(15)   	| KPreviousIMSI	   	|//
+//| EAP_AKA_use_pseudonym_identity				| UNSIGNED INTEGER 	| cf_str_EAP_AKA_use_pseudonym_identity_literal	   	|//
+//| EAP_AKA_max_session_validity_time			| BIGINT		   	| cf_str_EAP_AKA_max_session_validity_time_literal   |//
+//| EAP_AKA_last_full_authentication_time		| BIGINT		   	| KAKALastFullAuthTime	|//
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 	
-	_LIT(KSQLCreateTable, "CREATE TABLE %S \
-		(%S UNSIGNED INTEGER, \
-		 %S UNSIGNED INTEGER, \
-		 %S UNSIGNED INTEGER, \
-		 %S UNSIGNED INTEGER, \
-		 %S UNSIGNED INTEGER, \
-		 %S VARCHAR(%d), \
-		 %S UNSIGNED INTEGER, \
-		 %S VARCHAR(%d), \
-		 %S LONG VARBINARY, \
-		 %S BINARY(%d), \
-		 %S BINARY(%d), \
-		 %S BINARY(%d), \
-		 %S UNSIGNED INTEGER, \
-		 %S LONG VARBINARY, \
-		 %S VARBINARY(%d), \
-		 %S UNSIGNED INTEGER, \
-		 %S BIGINT, \
-		 %S BIGINT)");
+	_LIT(KSQLCreateTable, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
+												 %S UNSIGNED INTEGER, \
+												 %S UNSIGNED INTEGER, \
+												 %S UNSIGNED INTEGER, \
+												 %S VARCHAR(%d), \
+												 %S UNSIGNED INTEGER, \
+												 %S VARCHAR(%d), \
+												 %S LONG VARBINARY, \
+												 %S BINARY(%d), \
+												 %S BINARY(%d), \
+												 %S BINARY(%d), \
+												 %S UNSIGNED INTEGER, \
+												 %S LONG VARBINARY, \
+												 %S VARBINARY(%d), \
+												 %S UNSIGNED INTEGER, \
+												 %S BIGINT, \
+												 %S BIGINT)");
 
-	sqlStatement.Format(KSQLCreateTable,
-		&KAkaTableName,
-		&KServiceType,
-		&KServiceIndex,
-		&KTunnelingTypeVendorId,
-		&KTunnelingType,
-		&cf_str_EAP_AKA_use_manual_realm_literal,
-		&cf_str_EAP_AKA_manual_realm_literal, KMaxRealmLengthInDB,
-		&cf_str_EAP_AKA_use_manual_username_literal, 
-		&cf_str_EAP_AKA_manual_username_literal, KMaxUsernameLengthInDB,
-		&KPseudonymId, 
-		&KXKey, KMaxXKeyLengthInDB,
-		&KK_aut, KMaxK_autLengthInDB,
-		&KK_encr, KMaxK_encrLengthInDB,
-		&KReauthCounter, 
-		&KReauthId, 
-		&KPreviousIMSI, KMaxIMSILengthInDB,
-		&cf_str_EAP_AKA_use_pseudonym_identity_literal,
-		&cf_str_EAP_AKA_max_session_validity_time_literal, 
-		&KAKALastFullAuthTime);
+	sqlStatement.Format(KSQLCreateTable, &KAkaTableName, &KServiceType,
+														 &KServiceIndex,
+														 &KTunnelingType,
+														 &cf_str_EAP_AKA_use_manual_realm_literal,
+														 &cf_str_EAP_AKA_manual_realm_literal,KMaxManualRealmLengthInDB,
+														 &cf_str_EAP_AKA_use_manual_username_literal, 
+														 &cf_str_EAP_AKA_manual_username_literal, KMaxManualUsernameLengthInDB,
+														 &KPseudonymId, 
+														 &KXKey, KMaxXKeyLengthInDB,
+														 &KK_aut, KMaxK_autLengthInDB,
+														 &KK_encr, KMaxK_encrLengthInDB,
+														 &KReauthCounter, 
+														 &KReauthId, 
+														 &KPreviousIMSI, KMaxIMSILengthInDB,
+														 &cf_str_EAP_AKA_use_pseudonym_identity_literal,
+														 &cf_str_EAP_AKA_max_session_validity_time_literal, 
+														 &KAKALastFullAuthTime);
 																					
-	error = aDatabase.Execute(sqlStatement);
-	if (error != KErrNone && error != KErrAlreadyExists)
+	err = aDatabase.Execute(sqlStatement);
+	if (err != KErrNone && err != KErrAlreadyExists)
 	{
-		User::Leave(error);
+		User::Leave(err);
 	}
 	
 	// 4. Check if database table contains a row for this service type and id  
 	
-	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-	sqlStatement.Format(KSQLQueryRow,
-		&cf_str_EAP_AKA_manual_realm_literal,
-		&KAkaTableName, 
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
+	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLQueryRow, &cf_str_EAP_AKA_manual_realm_literal, &KAkaTableName, 
+		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
 		
 	RDbView view;
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
@@ -202,14 +216,13 @@ void EapAkaDbUtils::OpenDatabaseL(
 		view.InsertL();
 		view.SetColL(colSet->ColNo(KServiceType), static_cast<TInt>(aIndexType));
 		view.SetColL(colSet->ColNo(KServiceIndex), aIndex);
-		view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
-		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
+		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingVendorType);
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_AKA_use_manual_realm_literal), default_EAP_AKA_use_manual_realm);	
-		view.SetColL(colSet->ColNo(cf_str_EAP_AKA_manual_realm_literal), default_EAP_realm);	
+		view.SetColL(colSet->ColNo(cf_str_EAP_AKA_manual_realm_literal), default_EAP_AKA_manual_realm);	
 
 		view.SetColL(colSet->ColNo(cf_str_EAP_AKA_use_manual_username_literal), default_EAP_AKA_use_manual_username);
-		view.SetColL(colSet->ColNo(cf_str_EAP_AKA_manual_username_literal), default_EAP_username);
+		view.SetColL(colSet->ColNo(cf_str_EAP_AKA_manual_username_literal), default_EAP_AKA_manual_username);
 
 		view.SetColL(colSet->ColNo(cf_str_EAP_AKA_use_pseudonym_identity_literal), default_EAP_AKA_use_pseudonym_identity);
 
@@ -219,19 +232,18 @@ void EapAkaDbUtils::OpenDatabaseL(
 
 		view.PutL();
 		
-		CleanupStack::PopAndDestroy( colSet );
+		CleanupStack::PopAndDestroy( colSet ); // Delete colSet.
 		
-		CleanupStack::PopAndDestroy( &view );
+		CleanupStack::PopAndDestroy( &view ); // Close view.
 	}
 	
-	aDatabase.Compact();
-
-	CleanupStack::PopAndDestroy( buf );
+	CleanupStack::PopAndDestroy( buf ); // Delete buf
+	
 	CleanupStack::Pop( &aDatabase );	
-	CleanupStack::Pop( &aFileServerSession );
+	CleanupStack::Pop( &aSession );	
+	
+	aDatabase.Compact();
 }
-
-// ----------------------------------------------------------
 
 void EapAkaDbUtils::SetIndexL(
 	RDbNamedDatabase& aDatabase, 		
@@ -242,37 +254,25 @@ void EapAkaDbUtils::SetIndexL(
 	const TInt aNewIndex,
 	const eap_type_value_e aNewTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapAkaDbUtils::SetIndexL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()));
-	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapAkaDbUtils::SetIndexL(): -Start- aNewIndexType=%d, aNewIndex=%d, aNewTunnelingType=0xfe%06x%08x\n"),
-		aNewIndexType,
-		aNewIndex,
-		aNewTunnelingType.get_vendor_id(),
-		aNewTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapAkaDbUtils::SetIndexL()\n"));
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
+	TUint aNewTunnelingVendorType = aNewTunnelingType.get_vendor_type();
+
+#else
+
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+	TUint aNewTunnelingVendorType = static_cast<TUint>(aNewTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
 
-	sqlStatement.Format(KSQL,
-		&KAkaTableName, 
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
+	sqlStatement.Format(KSQL, &KAkaTableName, 
+		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
 	
 	RDbView view;
 	
@@ -301,18 +301,15 @@ void EapAkaDbUtils::SetIndexL(
 	view.UpdateL();
 	
     view.SetColL(colSet->ColNo(KServiceType), aNewIndexType);
+    
     view.SetColL(colSet->ColNo(KServiceIndex), aNewIndex);
-	view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aNewTunnelingType.get_vendor_id());
-	view.SetColL(colSet->ColNo(KTunnelingType), aNewTunnelingType.get_vendor_type());
+    
+    view.SetColL(colSet->ColNo(KTunnelingType), aNewTunnelingVendorType);
 
     view.PutL();
     	
-	CleanupStack::PopAndDestroy(colSet);
-	CleanupStack::PopAndDestroy(&view);
-	CleanupStack::PopAndDestroy(buf);
+	CleanupStack::PopAndDestroy(3); // view, colset, buf
 }
-
-// ----------------------------------------------------------
 
 void EapAkaDbUtils::SetConfigurationL(
 	RDbNamedDatabase& aDatabase,
@@ -321,20 +318,80 @@ void EapAkaDbUtils::SetConfigurationL(
 	const TInt aIndex,
 	const eap_type_value_e aTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapAkaDbUtils::SetConfigurationL -Start- aIndexType=%d, aIndex=%d, aTunnelingVendorType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
+
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
+
+#else
+
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapAkaDbUtils::SetConfigurationL -Start- aIndexType=%d, aIndex=%d, aTunnelingVendorType=%d\n"),
+						aIndexType,aIndex, aTunnelingVendorType));
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("*************************** SetConfigurationL(): Set the below values: ***************************\n")) );
+	EAP_TRACE_DEBUG_SYMBIAN((_L("*************************** SetConfigurationL - Set the below values: ***************************\n")) );
+	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - Set these values for EAPType=%d"),aSettings.iEAPType) );
+	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, Username=%S"),aSettings.iUsernamePresent, &(aSettings.iUsername)) );
+	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, Password=%S"),aSettings.iPasswordPresent, &(aSettings.iPassword)) );
+	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, Realm=%S"),aSettings.iRealmPresent, &(aSettings.iRealm)) );
+	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, UsePseudonyms=%d"),aSettings.iUsePseudonymsPresent, aSettings.iUsePseudonyms) );
+	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, VerifyServerRealm=%d"),
+						aSettings.iVerifyServerRealmPresent, aSettings.iVerifyServerRealm) );
 
-	EAP_TRACE_SETTINGS(&aSettings);
+	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, RequireClientAuthentication=%d"),
+						aSettings.iRequireClientAuthenticationPresent, aSettings.iRequireClientAuthentication) );
+						
+	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, SessionValidityTime=%d minutes"),
+						aSettings.iSessionValidityTimePresent, aSettings.iSessionValidityTime) );
+												
+	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, CipherSuites Count=%d"),
+						aSettings.iCipherSuitesPresent, aSettings.iCipherSuites.Count()) );
+	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, PEAPv0Allowed=%d, PEAPv1Allowed=%d, PEAPv2Allowed=%d"),
+						aSettings.iPEAPVersionsPresent, aSettings.iPEAPv0Allowed,aSettings.iPEAPv1Allowed, aSettings.iPEAPv2Allowed ) );
+		
+	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, Certificates Count=%d"),
+						aSettings.iCertificatesPresent, aSettings.iCertificates.Count()) );
+						
+	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - Certificate details below: \n")) );
+	
+	for( TInt n=0; n < aSettings.iCertificates.Count(); n++ )
+	{
+		EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - Certificate type:%d \n"), aSettings.iCertificates[n].iCertType) );
+		
+		EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - certificates - present=%d, SubjectName=%S"),
+						aSettings.iCertificates[n].iSubjectNamePresent, &(aSettings.iCertificates[n].iSubjectName) ) );
+						
+		EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - certificates - present=%d, IssuerName=%S"),
+						aSettings.iCertificates[n].iIssuerNamePresent, &(aSettings.iCertificates[n].iIssuerName) ) );
+						
+		EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - certificates - present=%d, SerialNumber=%S"),
+						aSettings.iCertificates[n].iSerialNumberPresent, &(aSettings.iCertificates[n].iSerialNumber) ) );
+						
+		EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - certificates - SubjectKeyID present=%d"),
+						aSettings.iCertificates[n].iSubjectKeyIDPresent ) );						
+						
+		EAP_TRACE_DATA_DEBUG_SYMBIAN( ( "SubjectKeyID:", aSettings.iCertificates[n].iSubjectKeyID.Ptr(), 
+													aSettings.iCertificates[n].iSubjectKeyID.Size() ) );
+						
+		EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - certificates - present=%d, Thumbprint=%S"),
+						aSettings.iCertificates[n].iThumbprintPresent, &(aSettings.iCertificates[n].iThumbprint) ) );
+	}						
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("*************************** SetConfigurationL(): Set the above values: ***************************\n")) );
+	EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - present=%d, EncapsulatedEAPTypes Count=%d"),
+						aSettings.iEncapsulatedEAPTypesPresent, aSettings.iEncapsulatedEAPTypes.Count()) );
+	for( TInt m=0; m < aSettings.iEncapsulatedEAPTypes.Count(); m++ )
+	{	
+		EAP_TRACE_DEBUG_SYMBIAN((_L("SetConfigurationL - EncapsulatedEAPTypes=%d"),
+						aSettings.iEncapsulatedEAPTypes[m]) );
+	}						
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("*************************** SetConfigurationL - Set the above values: ***************************\n")) );
 
 	// Check if the settings are for the correct type
-	if (aSettings.iEAPExpandedType != (*EapExpandedTypeAka.GetType()))
+	if (aSettings.iEAPType != EAPSettings::EEapAka)
 	{
 		User::Leave(KErrNotSupported);
 	}
@@ -344,17 +401,9 @@ void EapAkaDbUtils::SetConfigurationL(
 
 	RDbView view;
 
-	_LIT(KSQLQuery, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-	sqlStatement.Format(KSQLQuery,
-		&KAkaTableName, 
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
+	_LIT(KSQLQuery, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLQuery, &KAkaTableName, 
+		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
 	
 	// Evaluate view
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
@@ -371,98 +420,90 @@ void EapAkaDbUtils::SetConfigurationL(
 	CDbColSet* colSet = view.ColSetL();
 	CleanupStack::PushL(colSet);
 
-
-	if (aSettings.iUseAutomaticUsernamePresent)
+	// Manual username
+	//if (aSettings.iUsernamePresent) // no need to check as there may be empty usernames with the present status is EFlase.
 	{
+		// Check if length of username is less than the max length.
+		if(aSettings.iUsername.Length() > KMaxManualUsernameLengthInDB)
+		{
+			// Username too long. Can not be stored in DB.
+			
+			EAP_TRACE_DEBUG_SYMBIAN((_L("EapAkaDbUtils::SetConfigurationL: Too long Username. Length=%d \n"),
+			aSettings.iUsername.Length()));
+			
+			User::Leave(KErrArgument);
+		}
+		
+		// Length is ok. Set the value in DB.
+		view.SetColL(colSet->ColNo(cf_str_EAP_AKA_manual_username_literal), aSettings.iUsername);
+		
 		// This is to set the automatic or manual status.
 		TUint useManualUsernameStatus;
 		
-		if (aSettings.iUseAutomaticUsername)
+		if (aSettings.iUsernamePresent)
 		{
-			useManualUsernameStatus = EEapDbFalse;
+			useManualUsernameStatus = EAKAUseManualUsernameYes;
 		}
 		else
 		{
-			useManualUsernameStatus = EEapDbTrue;
+			useManualUsernameStatus = EAKAUseManualUsernameNo;
 		}
 		
 		// Set the value.
 		view.SetColL(colSet->ColNo(cf_str_EAP_AKA_use_manual_username_literal), useManualUsernameStatus);
 	}
-
-
-	if (aSettings.iUseAutomaticRealmPresent)
-	{
-		// This is to set the automatic or manual status.
-		TUint useManualRealmStatus;
-		
-		if (aSettings.iUseAutomaticRealm)
-		{
-			useManualRealmStatus = EEapDbFalse;
-		}
-		else
-		{
-			useManualRealmStatus = EEapDbTrue;
-		}
-
-		// Set the value.
-		view.SetColL(colSet->ColNo(cf_str_EAP_AKA_use_manual_realm_literal), useManualRealmStatus);
-	}
-
-
-	// Manual username
-	if (aSettings.iUsernamePresent) // no need to check as there may be empty usernames with the present status is EFlase.
-	{
-		// Check if length of username is less than the max length.
-		if(aSettings.iUsername.Length() > KMaxUsernameLengthInDB)
-		{
-			// Username too long. Can not be stored in DB.
-			
-			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapAkaDbUtils::SetConfigurationL(): Too long Username. Length=%d \n"),
-				aSettings.iUsername.Length()));
-			
-			User::Leave(KErrArgument);
-		}
-
-		// Length is ok. Set the value in DB.
-		view.SetColL(colSet->ColNo(cf_str_EAP_AKA_manual_username_literal), aSettings.iUsername);
-	}
 		
 	// Manual realm
-	if (aSettings.iRealmPresent)  // no need to check as there may be empty realms with the present status is EFlase.
+	//if (aSettings.iRealmPresent)  // no need to check as there may be empty realms with the present status is EFlase.
 	{
 		// Check if length of realm is less than the max length.
-		if(aSettings.iRealm.Length() > KMaxRealmLengthInDB)
+		if(aSettings.iRealm.Length() > KMaxManualRealmLengthInDB)
 		{
 			// Realm too long. Can not be stored in DB.
 
-			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapAkaDbUtils::SetConfigurationL: Too long Realm. Length=%d \n"),
-				aSettings.iRealm.Length()));
+			EAP_TRACE_DEBUG_SYMBIAN((_L("EapAkaDbUtils::SetConfigurationL: Too long Realm. Length=%d \n"),
+			aSettings.iRealm.Length()));
 			
 			User::Leave(KErrArgument);
 		}
 
 		// Length is ok. Set the value in DB. Value could be empty. It doesn't matter.
 		view.SetColL(colSet->ColNo(cf_str_EAP_AKA_manual_realm_literal), aSettings.iRealm);
+
+		// This is to set the automatic or manual status.
+		TUint useManualRealmStatus;
+		
+		if (aSettings.iRealmPresent)
+		{
+			useManualRealmStatus = EAKAUseManualRealmYes;
+		}
+		else
+		{
+			useManualRealmStatus = EAKAUseManualRealmNo;
+		}
+
+		// Set the value.
+		view.SetColL(colSet->ColNo(cf_str_EAP_AKA_use_manual_realm_literal), useManualRealmStatus);
 	}
 	
+	// UsePseudonym
 	if (aSettings.iUsePseudonymsPresent)
 	{
 		if (aSettings.iUsePseudonyms)
 		{
 			// Use pseudonym.
-			view.SetColL(colSet->ColNo(cf_str_EAP_AKA_use_pseudonym_identity_literal), EEapDbTrue);
+			view.SetColL(colSet->ColNo(cf_str_EAP_AKA_use_pseudonym_identity_literal), EAKAUsePseudonymIdYes);
 		}
 		else
 		{			
 			// Don't use pseudonym.
-			view.SetColL(colSet->ColNo(cf_str_EAP_AKA_use_pseudonym_identity_literal), EEapDbFalse);			
+			view.SetColL(colSet->ColNo(cf_str_EAP_AKA_use_pseudonym_identity_literal), EAKAUsePseudonymIdNo);			
 		}
 	}
 	else
 	{
 		// Value is not configured. Value is read from config file if needed.
-		view.SetColL(colSet->ColNo(cf_str_EAP_AKA_use_pseudonym_identity_literal), EEapDbNotValid);		
+		view.SetColL(colSet->ColNo(cf_str_EAP_AKA_use_pseudonym_identity_literal), EAKAUsePseudonymIdNotValid);		
 	}
 	
 	// Session validity time
@@ -484,17 +525,13 @@ void EapAkaDbUtils::SetConfigurationL(
 		
 		view.SetColL(colSet->ColNo(KAKALastFullAuthTime), default_FullAuthTime);
 
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapAkaDbUtils::SetConfigurationL(): Session Validity: Resetting Full Auth Time since settings are modified\n")));
+		EAP_TRACE_DEBUG_SYMBIAN((_L("Session Validity: EAP-Type=%d, Resetting Full Auth Time since settings are modified\n"),
+									aSettings.iEAPType ));
 	}
 
 	view.PutL();
-
-	CleanupStack::PopAndDestroy(colSet);
-	CleanupStack::PopAndDestroy(&view);
-	CleanupStack::PopAndDestroy(buf);
+	CleanupStack::PopAndDestroy(3); // view, colset, buf
 }
-
-// ----------------------------------------------------------
 
 void EapAkaDbUtils::GetConfigurationL(
 	RDbNamedDatabase& aDatabase,
@@ -503,14 +540,15 @@ void EapAkaDbUtils::GetConfigurationL(
 	const TInt aIndex,
 	const eap_type_value_e aTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapAkaDbUtils::GetConfigurationL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapAkaDbUtils::GetConfigurationL()\n"));
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
+
+#else
+
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();	
@@ -518,17 +556,9 @@ void EapAkaDbUtils::GetConfigurationL(
 	RDbView view;
 
 	// Form the query
-	_LIT(KSQLQuery, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-	sqlStatement.Format(KSQLQuery,
-		&KAkaTableName, 
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
+	_LIT(KSQLQuery, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLQuery, &KAkaTableName, 
+		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
 	
 	// Evaluate view
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
@@ -545,99 +575,69 @@ void EapAkaDbUtils::GetConfigurationL(
 	CDbColSet* colSet = view.ColSetL();
 	CleanupStack::PushL(colSet);
 
-	aSettings.iEAPExpandedType = *EapExpandedTypeAka.GetType();
-
+	aSettings.iEAPType = EAPSettings::EEapAka;
+	
+	// Username
+	TPtrC username = view.ColDes(colSet->ColNo(cf_str_EAP_AKA_manual_username_literal));
+	aSettings.iUsername.Copy(username);
+	
+	// For manual or automatic status.
+	TUint useUsername = view.ColUint(colSet->ColNo(cf_str_EAP_AKA_use_manual_username_literal));
+	if(useUsername == EAKAUseManualUsernameNo)
 	{
-		// For manual or automatic username.
-		TUint useUsername = view.ColUint(colSet->ColNo(cf_str_EAP_AKA_use_manual_username_literal));
-
-		aSettings.iUseAutomaticUsernamePresent = ETrue;
-
-		if(useUsername == EEapDbTrue)
-		{
-			aSettings.iUseAutomaticUsername = EFalse;		
-		}
-		else
-		{
-			aSettings.iUseAutomaticUsername = ETrue;		
-		}
+		aSettings.iUsernamePresent = EFalse;		
 	}
-
+	else
 	{
-		// For manual or automatic realm.
-		TUint useRealm = view.ColUint(colSet->ColNo(cf_str_EAP_AKA_use_manual_realm_literal));
-
-		aSettings.iUseAutomaticRealmPresent = ETrue;
-
-		if(useRealm == EEapDbTrue)
-		{
-			aSettings.iUseAutomaticRealm = EFalse;
-		}
-		else
-		{
-			aSettings.iUseAutomaticRealm = ETrue;
-		}
-	}
-
-	{
-		// Username
-		TPtrC username = view.ColDes(colSet->ColNo(cf_str_EAP_AKA_manual_username_literal));
-
-		aSettings.iUsernamePresent = ETrue;
-
-		aSettings.iUsername.Copy(username);
-	}
-
-	{
-		// Realm
-		TPtrC realm = view.ColDes(colSet->ColNo(cf_str_EAP_AKA_manual_realm_literal));
-
-		aSettings.iRealmPresent = ETrue;
-
-		aSettings.iRealm.Copy(realm);
-	}
-
-	{
-		TInt usePseudonym = view.ColUint(colSet->ColNo(cf_str_EAP_AKA_use_pseudonym_identity_literal));
-		
-		if (usePseudonym == EEapDbNotValid)
-		{
-			aSettings.iUsePseudonymsPresent = EFalse;
-		}
-		else
-		{
-			if (usePseudonym == EEapDbFalse)
-			{
-				aSettings.iUsePseudonyms = EFalse;
-			}
-			else
-			{
-				aSettings.iUsePseudonyms = ETrue;
-			}
-			
-			aSettings.iUsePseudonymsPresent = ETrue;		
-		}
-	}
-
-	{
-		// Session validity time	
-		TInt64 maxSessionTimeMicro = view.ColInt64(colSet->ColNo(cf_str_EAP_AKA_max_session_validity_time_literal));
-		
-		// Convert the time to minutes.	
-		TInt64 maxSessionTimeMin = maxSessionTimeMicro / KMicroSecsInAMinute;
-		
-		aSettings.iSessionValidityTime = static_cast<TUint>(maxSessionTimeMin);
-		aSettings.iSessionValidityTimePresent = ETrue;
+		aSettings.iUsernamePresent = ETrue;		
 	}
 	
-	CleanupStack::PopAndDestroy(colSet);
-	CleanupStack::PopAndDestroy(&view);
-	CleanupStack::PopAndDestroy(buf);
-
-	EAP_TRACE_SETTINGS(&aSettings);
+	// Realm
+	TPtrC realm = view.ColDes(colSet->ColNo(cf_str_EAP_AKA_manual_realm_literal));
+	aSettings.iRealm.Copy(realm);
+	
+	// For manual or automatic status.
+	TUint useRealm = view.ColUint(colSet->ColNo(cf_str_EAP_AKA_use_manual_realm_literal));
+	if(useRealm == EAKAUseManualRealmNo)
+	{
+		aSettings.iRealmPresent = EFalse;
+	}
+	else
+	{
+		aSettings.iRealmPresent = ETrue;
+	}
+	
+	TInt usePseudonym = view.ColUint(colSet->ColNo(cf_str_EAP_AKA_use_pseudonym_identity_literal));
+	
+	if (usePseudonym == EAKAUsePseudonymIdNotValid)
+	{
+		aSettings.iUsePseudonymsPresent = EFalse;
+	}
+	else
+	{
+		if (usePseudonym == EAKAUsePseudonymIdNo)
+		{
+			aSettings.iUsePseudonyms = EFalse;
+		}
+		else
+		{
+			aSettings.iUsePseudonyms = ETrue;
+		}
+		
+		aSettings.iUsePseudonymsPresent = ETrue;		
+	}
+	
+	// Session validity time	
+	TInt64 maxSessionTimeMicro = view.ColInt64(colSet->ColNo(cf_str_EAP_AKA_max_session_validity_time_literal));
+	
+	// Convert the time to minutes.	
+	TInt64 maxSessionTimeMin = maxSessionTimeMicro / KMicroSecsInAMinute;
+	
+	aSettings.iSessionValidityTime = static_cast<TUint>(maxSessionTimeMin);
+	aSettings.iSessionValidityTimePresent = ETrue;
+	
+	CleanupStack::PopAndDestroy(3); // view, colset, buf
 }
-
-// ----------------------------------------------------------
 
 void EapAkaDbUtils::CopySettingsL(
 	RDbNamedDatabase& aDatabase, 		
@@ -648,37 +648,25 @@ void EapAkaDbUtils::CopySettingsL(
 	const TInt aDestIndex,
 	const eap_type_value_e aDestTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapAkaDbUtils::CopySettingsL(): -Start- aSrcIndexType=%d, aSrcIndex=%d, aSrcTunnelingType=0xfe%06x%08x\n"),
-		aSrcIndexType,
-		aSrcIndex,
-		aSrcTunnelingType.get_vendor_id(),
-		aSrcTunnelingType.get_vendor_type()));
-	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapAkaDbUtils::CopySettingsL(): -Start- aDestIndexType=%d, aDestTunnelingType=0xfe%06x%08x\n"),
-		aDestIndexType,
-		aDestIndex,
-		aDestTunnelingType.get_vendor_id(),
-		aDestTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapAkaDbUtils::CopySettingsL()\n"));
+	TUint aSrcTunnelingVendorType = aSrcTunnelingType.get_vendor_type();
+	TUint aDestTunnelingVendorType = aDestTunnelingType.get_vendor_type();
+
+#else
+
+	TUint aSrcTunnelingVendorType = static_cast<TUint>(aSrcTunnelingType);
+	TUint aDestTunnelingVendorType = static_cast<TUint>(aDestTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
 
-	sqlStatement.Format(KSQL,
-		&KAkaTableName, 
-		&KServiceType,
-		aSrcIndexType,
-		&KServiceIndex,
-		aSrcIndex,
-		&KTunnelingTypeVendorId,
-		aSrcTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aSrcTunnelingType.get_vendor_type());
+	sqlStatement.Format(KSQL, &KAkaTableName, 
+		&KServiceType, aSrcIndexType, &KServiceIndex, aSrcIndex, &KTunnelingType, aSrcTunnelingVendorType);
 	
 	RDbView view;
 	
@@ -709,107 +697,112 @@ void EapAkaDbUtils::CopySettingsL(
 	CleanupStack::PushL(colSet);
 		
 	view.SetColL(colSet->ColNo(KServiceType), static_cast<TUint>(aDestIndexType));
+    
     view.SetColL(colSet->ColNo(KServiceIndex), aDestIndex);
-	view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aDestTunnelingType.get_vendor_id());
-	view.SetColL(colSet->ColNo(KTunnelingType), aDestTunnelingType.get_vendor_type());
+    
+    view.SetColL(colSet->ColNo(KTunnelingType), static_cast<TUint>(aDestTunnelingVendorType));
 
     view.PutL();
     	
-	CleanupStack::PopAndDestroy(colSet);
-	CleanupStack::PopAndDestroy(&view);
-	CleanupStack::PopAndDestroy(buf);
+	CleanupStack::PopAndDestroy(3); // view, colset, buf
 }
-
-// ----------------------------------------------------------
 
 void EapAkaDbUtils::DeleteConfigurationL(	
 	const TIndexType aIndexType,
 	const TInt aIndex,
 	const eap_type_value_e aTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapAkaDbUtils::DeleteConfigurationL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapAkaDbUtils::DeleteConfigurationL()\n"));
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
 
-	RDbNamedDatabase aDatabase;
-	RFs aFileServerSession;
+#else
 
-	TInt error(KErrNone);
-	TFileName aPrivateDatabasePathName;
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
+
+	RDbs session;
+	RDbNamedDatabase database;
+	// Connect to the DBMS server.
+	User::LeaveIfError(session.Connect());
+	CleanupClosePushL(session);	
+		
+#ifdef SYMBIAN_SECURE_DBMS
 	
-	error = aFileServerSession.Connect();
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapAkaDbUtils::DeleteConfigurationL(): - aFileServerSession.Connect(), error=%d\n"), error));
-	User::LeaveIfError(error);
-
-	EapPluginTools::CreateDatabaseLC(
-		aDatabase,
-		aFileServerSession,
-		error,
-		KEapAkaDatabaseName,
-		aPrivateDatabasePathName);
-
-	if(error == KErrNone)
+	// Create the secure shared database with the specified secure policy.
+	// Database will be created in the data caging path for DBMS (C:\private\100012a5).
+	
+	TInt err = database.Create(session, KDatabaseName, KSecureUIDFormat);
+	
+	if(err == KErrNone)
 	{
 		// Database was created so it was empty. No need for further actions.
-		aDatabase.Destroy();
-		CleanupStack::PopAndDestroy(&aDatabase);
-		CleanupStack::PopAndDestroy(&aFileServerSession);
+		database.Destroy();
+		CleanupStack::PopAndDestroy();
 		return;
-	}
-	else if (error != KErrAlreadyExists) 
+		
+	} 
+	else if (err != KErrAlreadyExists) 
 	{
-		User::LeaveIfError(error);
+		User::LeaveIfError(err);
 	}
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapAkaDbUtils::DeleteConfigurationL(): - calls aDatabase.Open()\n")));
+	// Database existed, open it.
+	User::LeaveIfError(database.Open(session, KDatabaseName, KSecureUIDFormat));
+	CleanupClosePushL(database);
+		
+#else
+	// For non-secured database. The database will be created in the old location (c:\system\data).
+	
+	RFs fsSession;		
+	User::LeaveIfError(fsSession.Connect());
+	CleanupClosePushL(fsSession);	
+	TInt err = database.Create(fsSession, KDatabaseName);
 
-	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapAkaDbUtils::DeleteConfigurationL(): - Opened private DB for EAP-AKA. error=%d\n"), error));
-
-	User::LeaveIfError(error);
+	if(err == KErrNone)
+	{
+		// Database was created so it was empty. No need for further actions.
+		database.Destroy();
+		CleanupStack::PopAndDestroy(2); // fsSession, database session
+		return;
+		
+	} 
+	else if (err != KErrAlreadyExists) 
+	{
+		User::LeaveIfError(err);
+	}
+	
+	CleanupStack::PopAndDestroy(); // close fsSession
+	
+	User::LeaveIfError(database.Open(session, KDatabaseName));
+	CleanupClosePushL(database);		
+	    
+#endif // #ifdef SYMBIAN_SECURE_DBMS
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
 	// Main settings table
-	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-	sqlStatement.Format(KSQL,
-		&KAkaTableName, 
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
-
+	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQL, &KAkaTableName, 
+		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
 	// Evaluate view
 	RDbView view;
-	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
+	User::LeaveIfError(view.Prepare(database,TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 	CleanupClosePushL(view);
 	User::LeaveIfError(view.EvaluateAll());
 
 	// Delete rows
 	if (view.FirstL())
-	{
+	{		
 		do {
 			view.DeleteL();
 		} while (view.NextL() != EFalse);
 	}
 
-	CleanupStack::PopAndDestroy(&view);
-	CleanupStack::PopAndDestroy(buf);
-	CleanupStack::PopAndDestroy(&aDatabase);
-	CleanupStack::PopAndDestroy(&aFileServerSession);
+	// Close database
+	CleanupStack::PopAndDestroy(4); // view, buf, database, session
 }
-
-// ----------------------------------------------------------
 
 // End of file

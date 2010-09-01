@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 47 %
+* %version: 18.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -35,218 +35,177 @@
 #include "EapGtcDbParameterNames.h"
 #include "EapSecurIDDbParameterNames.h"
 
-#include <EapTraceSymbian.h>
-#include "EapPluginTools.h"
+#include "eap_am_trace_symbian.h"
 
 const TUint KMaxSqlQueryLength = 512;
 const TInt KMicroSecsInAMinute = 60000000; // 60000000 micro seconds is 1 minute.
 
 // ================= MEMBER FUNCTIONS =======================
 
-void EapGtcDbUtils::OpenDatabaseL(
-	RDbNamedDatabase& aDatabase,
-	RFs& aFileServerSession,
-	const TIndexType aIndexType,
-	const TInt aIndex,
-	const eap_type_value_e aTunnelingType)
+void EapGtcDbUtils::OpenDatabaseL(RDbNamedDatabase& aDatabase, RDbs& aSession, const TIndexType aIndexType,
+	const TInt aIndex, const eap_type_value_e aTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapGtcDbUtils::OpenDatabaseL(): - Start - aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapGtcDbUtils::OpenDatabaseL()\n"));
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
+
+#else
+
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL -Start- aIndexType=%d, aIndex=%d, aTunnelingVendorType=%d \n"),
+	aIndexType,aIndex,aTunnelingVendorType) );
 
 	// 1. Open/create a database	
 	
-	TInt error(KErrNone);
-	TFileName aPrivateDatabasePathName;
+	// Connect to the DBMS server.
+	User::LeaveIfError(aSession.Connect());		
+	CleanupClosePushL(aSession);	
+	// aSession and aDatabase are pushed to the cleanup stack even though they may be member
+	// variables of the calling class and would be closed in the destructor anyway. This ensures
+	// that if they are not member variables they will be closed. Closing the handle twice
+	// does no harm.	
+	
+#ifdef SYMBIAN_SECURE_DBMS
+	
+	// Create the secure shared database with the specified secure policy.
+	// Database will be created in the data caging path for DBMS (C:\private\100012a5).
+	
+	TInt err = aDatabase.Create(aSession, KGtcDatabaseName, KGtcSecureUIDFormat);
 
-	EapPluginTools::CreateDatabaseLC(
-		aDatabase,
-		aFileServerSession,
-		error,
-		KEapGtcDatabaseName,
-		aPrivateDatabasePathName);
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL - Created Secure DB for eapgtc.dat. err=%d\n"), err));
 
-	if(error == KErrNone)
+	
+	if(err == KErrNone)
 	{
 		aDatabase.Close();
-	}
-	else if (error != KErrAlreadyExists) 
+		
+	} else if (err != KErrAlreadyExists) 
 	{
-		User::LeaveIfError(error);
+		User::LeaveIfError(err);
 	}
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): - calls aDatabase.Open()\n")));
-
-	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): - Opened private DB for EAP-GTC. error=%d\n"), error));
-
-	User::LeaveIfError(error);
+	User::LeaveIfError(aDatabase.Open(aSession, KGtcDatabaseName, KGtcSecureUIDFormat));
+	CleanupClosePushL(aDatabase);		
+		
+#else
+	// For non-secured database. The database will be created in the old location (c:\system\data).
+	
+	RFs fsSession;		
+	User::LeaveIfError(fsSession.Connect());
+	CleanupClosePushL(fsSession);	
+	TInt err = aDatabase.Create(fsSession, KGtcDatabaseName);
+	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL - Created Non-Secure DB for eapgtc.dat. err=%d\n"), err));
+	
+	
+	if(err == KErrNone)
+	{
+		aDatabase.Close();
+		
+	} else if (err != KErrAlreadyExists) 
+	{
+		User::LeaveIfError(err);
+	}
+	CleanupStack::PopAndDestroy(); // close fsSession
+	
+	User::LeaveIfError(aDatabase.Open(aSession, KGtcDatabaseName));
+	CleanupClosePushL(aDatabase);		
+	    
+#endif // #ifdef SYMBIAN_SECURE_DBMS
 
 	// 2. Create the eap-securid table to database (ignore error if exists)
 	
-	// Table columns:
-	//// NAME ///////////////////////////////////////////////// TYPE ////////////// Constant /////////
-	//| ServiceType								| UNSIGNED INTEGER 	| KServiceType      |//
-	//| ServiceIndex							| UNSIGNED INTEGER 	| KServiceIndex     |//
-	//| TunnelingTypeVendorId                   | UNSIGNED INTEGER  | KTunnelingTypeVendorId    |//
-	//| TunnelingType							| UNSIGNED INTEGER 	| KTunnelingType    |//
-	//| EAP_GTC_identity				    	| VARCHAR(255)     	| cf_str_EAP_GTC_identity_literal	|//
-	//| EAP_GTC_max_session_validity_time	    | BIGINT		   	| cf_str_EAP_GTC_max_session_validity_time_literal   |//
-	//| EAP_GTC_last_full_authentication_time	| BIGINT		   	| KGTCLastFullAuthTime	|//
-	//| EAP_GTC_password_prompt                        | UNSIGNED INTEGER  | cf_str_EAP_GTC_passcode_prompt_literal   |//
-	//| EAP_GTC_password                               | VARCHAR(255)      | cf_str_EAP_GTC_passcode_literal         |//
+// Table columns:
+//// NAME ///////////////////////////////////////////////// TYPE ////////////// Constant /////////
+//| ServiceType								| UNSIGNED INTEGER 	| KServiceType      |//
+//| ServiceIndex							| UNSIGNED INTEGER 	| KServiceIndex     |//
+//| TunnelingType							| UNSIGNED INTEGER 	| KTunnelingType    |//
+//| EAP_GTC_identity				    	| VARCHAR(255)     	| cf_str_EAP_GTC_identity_literal	|//
+//| EAP_GTC_max_session_validity_time	    | BIGINT		   	| cf_str_EAP_GTC_max_session_validity_time_literal   |//
+//| EAP_GTC_last_full_authentication_time	| BIGINT		   	| KGTCLastFullAuthTime	|//
 	//////////////////////////////////////////////////////////////////////////////////////////////////
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): calls HBufC::NewLC()\n")));
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 	
-	_LIT(KSQLCreateTable1, "CREATE TABLE %S \
-		(%S UNSIGNED INTEGER, \
-		 %S UNSIGNED INTEGER, \
-		 %S UNSIGNED INTEGER, \
-		 %S UNSIGNED INTEGER, \
-		 %S VARCHAR(255), \
-		 %S BIGINT, \
-		 %S BIGINT, \
-		 %S UNSIGNED INTEGER, \
-		 %S VARCHAR(255))");
+	_LIT(KSQLCreateTable1, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
+											 %S UNSIGNED INTEGER, \
+											 %S UNSIGNED INTEGER, \
+											 %S VARCHAR(255), \
+											 %S BIGINT, \
+											 %S BIGINT)");
 											 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): calls sqlStatement.Format()\n")));
-
 	sqlStatement.Format(KSQLCreateTable1, 
 						&KGtcTableName, 
 						&KServiceType, 
 						&KServiceIndex, 
-						&KTunnelingTypeVendorId,
 						&KTunnelingType, 
 						&cf_str_EAP_GTC_identity_literal,
 						&cf_str_EAP_GTC_max_session_validity_time_literal, 
-						&KGTCLastFullAuthTime,
-						&cf_str_EAP_GTC_passcode_prompt_literal,
-						&cf_str_EAP_GTC_passcode_literal);
+						&KGTCLastFullAuthTime);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): calls aDatabase.Execute()\n")));
-
-	error = aDatabase.Execute(sqlStatement);
-	if (error != KErrNone && error != KErrAlreadyExists)
+	err = aDatabase.Execute(sqlStatement);
+	if (err != KErrNone && err != KErrAlreadyExists)
 	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapGtcDbUtils::OpenDatabaseL(): aDatabase.Execute() error=%d\n"),
-			error));
-
-		User::Leave(error);
+		User::Leave(err);
 	}
 
 	// 4. Check if database table contains a row for this service type and id  
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): calls sqlStatement.Format()\n")));
-
-	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-
-	sqlStatement.Format(KSQLQueryRow,
-		&cf_str_EAP_GTC_identity_literal,
-		&KGtcTableName, 
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
+	
+	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLQueryRow, &cf_str_EAP_GTC_identity_literal, &KGtcTableName, 
+		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
 			
 	RDbView view;
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): calls view.Prepare()\n")));
-
-	error = view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited);
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): view.Prepare() error=%d\n"),
-		error));
-
-	User::LeaveIfError(error);
+	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 	// View must be closed when no longer needed
 	CleanupClosePushL(view);
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): calls view.EvaluateAll()\n")));
-
-	error = view.EvaluateAll();
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): view.EvaluateAll() error=%d\n"),
-		error));
-
-	User::LeaveIfError(error);
+	User::LeaveIfError(view.EvaluateAll());
 	
 	// 5. If row is not found then add it
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): calls view.CountL()\n")));
-
 	TInt rows = view.CountL();
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): view.CountL() rows=%d\n"),
-		rows));
-
-	CleanupStack::PopAndDestroy(&view);
+	CleanupStack::PopAndDestroy(); // view
 	if (rows == 0)
 	{		
 		_LIT(KSQLInsert, "SELECT * FROM %S");
 		sqlStatement.Format(KSQLInsert, &KGtcTableName);		
-
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): calls view.Prepare()\n")));
-
-		error = view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited, RDbView::EInsertOnly);
-
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): view.Prepare() error=%d\n"),
-			error));
-
+		
+		view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited, RDbView::EInsertOnly);
 		CleanupClosePushL(view);
 		
 		// Get column set so we get the correct column numbers
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): calls view.ColSetL()\n")));
-
 		CDbColSet* colSet = view.ColSetL();		
 		CleanupStack::PushL(colSet);
 		
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): calls view.InsertL()\n")));
-
 		view.InsertL();
 		view.SetColL(colSet->ColNo(KServiceType), static_cast<TInt> (aIndexType));
 		view.SetColL(colSet->ColNo(KServiceIndex), aIndex);
-		view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
-		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
-		view.SetColL(colSet->ColNo(cf_str_EAP_GTC_identity_literal), default_EAP_identity);
+		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingVendorType);
+		view.SetColL(colSet->ColNo(cf_str_EAP_GTC_identity_literal), default_EAP_GTC_identity);
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_GTC_max_session_validity_time_literal), default_MaxSessionTime);
 		
 		view.SetColL(colSet->ColNo(KGTCLastFullAuthTime), default_FullAuthTime);		
-		view.SetColL(colSet->ColNo(cf_str_EAP_GTC_passcode_prompt_literal), default_EAP_password_prompt);
-		view.SetColL(colSet->ColNo(cf_str_EAP_GTC_passcode_literal), default_EAP_password);
 				
 		view.PutL();
 
-		CleanupStack::PopAndDestroy( colSet );
+		CleanupStack::PopAndDestroy( colSet ); // Delete colSet.
 		
-		CleanupStack::PopAndDestroy( &view );
+		CleanupStack::PopAndDestroy( &view ); // Close view.
 		
 	}
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::OpenDatabaseL(): calls aDatabase.Compact()\n")));
-
-	aDatabase.Compact();
-
-	CleanupStack::PopAndDestroy( buf );
+	
+	CleanupStack::PopAndDestroy( buf ); // Delete buf	
 	CleanupStack::Pop( &aDatabase );	
-	CleanupStack::Pop( &aFileServerSession );
+	CleanupStack::Pop( &aSession );	
+	
+	aDatabase.Compact();
 }
 
-// ----------------------------------------------------------
 
 void EapGtcDbUtils::SetIndexL(
 	RDbNamedDatabase& aDatabase, 		
@@ -257,37 +216,25 @@ void EapGtcDbUtils::SetIndexL(
 	const TInt aNewIndex,
 	const eap_type_value_e aNewTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapGtcDbUtils::SetIndexL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()));
-	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapGtcDbUtils::SetIndexL(): -Start- aNewIndexType=%d, aNewIndex=%d, aNewTunnelingType=0xfe%06x%08x\n"),
-		aNewIndexType,
-		aNewIndex,
-		aNewTunnelingType.get_vendor_id(),
-		aNewTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapGtcDbUtils::SetIndexL()\n"));
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
+	TUint aNewTunnelingVendorType = aNewTunnelingType.get_vendor_type();
+
+#else
+
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+	TUint aNewTunnelingVendorType = static_cast<TUint>(aNewTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
 
-	sqlStatement.Format(KSQL,
-		&KGtcTableName, 
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
+	sqlStatement.Format(KSQL, &KGtcTableName, 
+		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
 	
 	RDbView view;
 	
@@ -317,19 +264,16 @@ void EapGtcDbUtils::SetIndexL(
 	
 	view.UpdateL();
 	
-	view.SetColL(colSet->ColNo(KServiceType), static_cast<TUint>(aNewIndexType));
-	view.SetColL(colSet->ColNo(KServiceIndex), aNewIndex);
-	view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aNewTunnelingType.get_vendor_id());
-	view.SetColL(colSet->ColNo(KTunnelingType), aNewTunnelingType.get_vendor_type());
+        view.SetColL(colSet->ColNo(KServiceType), static_cast<TUint>(aNewIndexType));
+    
+    view.SetColL(colSet->ColNo(KServiceIndex), aNewIndex);
+    
+    view.SetColL(colSet->ColNo(KTunnelingType), aNewTunnelingVendorType);
 
     view.PutL();
     	
-	CleanupStack::PopAndDestroy(colSet);
-	CleanupStack::PopAndDestroy(&view);
-	CleanupStack::PopAndDestroy(buf);
+	CleanupStack::PopAndDestroy(3); // view, colset, buf
 }
-
-// ----------------------------------------------------------
 
 void EapGtcDbUtils::SetConfigurationL(
 	RDbNamedDatabase& aDatabase,
@@ -338,19 +282,18 @@ void EapGtcDbUtils::SetConfigurationL(
 	const TInt aIndex,
 	const eap_type_value_e aTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapGtcDbUtils::SetConfigurationL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapGtcDbUtils::SetConfigurationL()\n"));
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
 
-	EAP_TRACE_SETTINGS(&aSettings);
+#else
+
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	// Check if the settings are for the correct type
-	if (aSettings.iEAPExpandedType != (*EapExpandedTypeGtc.GetType()))
+	if (aSettings.iEAPType != EAPSettings::EEapGtc)
 	{
 		User::Leave(KErrNotSupported);
 	}
@@ -361,18 +304,9 @@ void EapGtcDbUtils::SetConfigurationL(
 
 	RDbView view;
 
-	_LIT(KSQLQuery, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-
-	sqlStatement.Format(KSQLQuery,
-		&KGtcTableName, 
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
+	_LIT(KSQLQuery, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLQuery, &KGtcTableName, 
+		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
 	
 	// Evaluate view
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
@@ -397,7 +331,7 @@ void EapGtcDbUtils::SetConfigurationL(
 		{
 			// Username too long. Can not be stored in DB.
 			
-			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapGtcDbUtils::SetConfigurationL(): Too long Username. Length=%d \n"),
+			EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::SetConfigurationL: Too long Username. Length=%d \n"),
 			aSettings.iUsername.Length()));
 			
 			User::Leave(KErrArgument);
@@ -417,60 +351,20 @@ void EapGtcDbUtils::SetConfigurationL(
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_GTC_max_session_validity_time_literal), validityInMicro);
 	}
-
+	
 	// Last full authentication time should be made zero when EAP configurations are modified.
 	// This makes sure that the next authentication with this EAP would be full authentication
 	// instead of reauthentication even if the session is still valid.
-
+	
 	view.SetColL(colSet->ColNo(KGTCLastFullAuthTime), default_FullAuthTime);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::SetConfigurationL(): Session Validity: Resetting Full Auth Time since settings are modified\n")));
-
-	// Password existence.
-	if (aSettings.iPasswordExistPresent
-		&& !aSettings.iPasswordExist)
-	{
-		// Clear password from database.
-		view.SetColL(colSet->ColNo(cf_str_EAP_GTC_passcode_literal), KNullPasswordData);
-		view.SetColNullL(colSet->ColNo(cf_str_EAP_GTC_passcode_literal));
-	}
-
-	// Password
-	if (aSettings.iPasswordPresent)
-	{
-		// Validate length.
-		if(aSettings.iPassword.Length() > KMaxPasswordLengthInDB)
-		{
-			// Password too long. Can not be stored in DB.
+	EAP_TRACE_DEBUG_SYMBIAN((_L("Session Validity: EAP-Type=%d, Resetting Full Auth Time since settings are modified\n"),
+								aSettings.iEAPType ));
 			
-			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapGtcDbUtils::SetConfigurationL(): Too long Password. Length=%d \n"),
-				aSettings.iPassword.Length()));
-			
-			User::Leave(KErrArgument);
-		}
-					
-		// Length is ok. Set the value in DB.	
-		view.SetColL(colSet->ColNo(cf_str_EAP_GTC_passcode_literal), aSettings.iPassword);
-		
-	}
-			
-	if (aSettings.iShowPassWordPromptPresent)
-		{	
-		// If password was supplied set password prompting off
-		if (aSettings.iShowPassWordPrompt != EFalse)
-			view.SetColL(colSet->ColNo(cf_str_EAP_GTC_passcode_prompt_literal), EEapDbTrue);		
-		else
-			view.SetColL(colSet->ColNo(cf_str_EAP_GTC_passcode_prompt_literal), EEapDbFalse);		
-		}
-		
 	view.PutL();
+	CleanupStack::PopAndDestroy(3); // view, colset, buf
 
-	CleanupStack::PopAndDestroy(colSet);
-	CleanupStack::PopAndDestroy(&view);
-	CleanupStack::PopAndDestroy(buf);
 }
-
-// ----------------------------------------------------------
 
 void EapGtcDbUtils::GetConfigurationL(
 	RDbNamedDatabase& aDatabase,
@@ -479,14 +373,15 @@ void EapGtcDbUtils::GetConfigurationL(
 	const TInt aIndex,
 	const eap_type_value_e aTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapGtcDbUtils::GetConfigurationL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapGtcDbUtils::GetConfigurationL()\n"));
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
+
+#else
+
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();	
@@ -494,18 +389,9 @@ void EapGtcDbUtils::GetConfigurationL(
 	RDbView view;
 
 	// Form the query
-	_LIT(KSQLQuery, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-
-	sqlStatement.Format(KSQLQuery,
-		&KGtcTableName, 
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
+	_LIT(KSQLQuery, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLQuery, &KGtcTableName, 
+		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
 	
 	// Evaluate view
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
@@ -522,38 +408,13 @@ void EapGtcDbUtils::GetConfigurationL(
 	CDbColSet* colSet = view.ColSetL();
 	CleanupStack::PushL(colSet);
 
-	aSettings.iEAPExpandedType = *EapExpandedTypeGtc.GetType();
+	aSettings.iEAPType = EAPSettings::EEapGtc;
 	
 	// Username
 	TPtrC username = view.ColDes(colSet->ColNo(cf_str_EAP_GTC_identity_literal));
 	aSettings.iUsername.Copy(username);
 	aSettings.iUsernamePresent = ETrue;
 	
-	// Password existence.
-	aSettings.iPasswordExistPresent = ETrue;
-	aSettings.iPasswordExist = ! view.IsColNull(colSet->ColNo(cf_str_EAP_GTC_passcode_literal));
-
-#if defined(USE_EAP_PASSWORD_READ_FROM_DATABASE)
-	// Password
-	TPtrC password = view.ColDes(colSet->ColNo(cf_str_EAP_GTC_passcode_literal));
-	aSettings.iPassword.Copy(password);
-	aSettings.iPasswordPresent = ETrue;
-#else
-	EAP_TRACE_DEBUG_SYMBIAN((_L("WARNING: EapGtcDbUtils::GetConfigurationL(): Password read is disabled\n")));
-#endif //#if defined(USE_EAP_PASSWORD_READ_FROM_DATABASE)
-
-	aSettings.iShowPassWordPromptPresent = ETrue;
-
-	TUint aShow = view.ColUint(colSet->ColNo(cf_str_EAP_GTC_passcode_prompt_literal));
-	if(aShow == EEapDbFalse)
-	{
-		aSettings.iShowPassWordPrompt = EFalse;
-	}
-	else
-	{
-		aSettings.iShowPassWordPrompt = ETrue;
-	}
-
 	// Session validity time	
 	TInt64 maxSessionTimeMicro = view.ColInt64(colSet->ColNo(cf_str_EAP_GTC_max_session_validity_time_literal));
 	
@@ -563,14 +424,8 @@ void EapGtcDbUtils::GetConfigurationL(
 	aSettings.iSessionValidityTime = static_cast<TUint>(maxSessionTimeMin);
 	aSettings.iSessionValidityTimePresent = ETrue;
 	
-	CleanupStack::PopAndDestroy(colSet);
-	CleanupStack::PopAndDestroy(&view);
-	CleanupStack::PopAndDestroy(buf);
-
-	EAP_TRACE_SETTINGS(&aSettings);
+	CleanupStack::PopAndDestroy(3); // view, colset, buf
 }
-
-// ----------------------------------------------------------
 
 void EapGtcDbUtils::CopySettingsL(
 	RDbNamedDatabase& aDatabase, 		
@@ -581,37 +436,25 @@ void EapGtcDbUtils::CopySettingsL(
 	const TInt aDestIndex,
 	const eap_type_value_e aDestTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapGtcDbUtils::CopySettingsL(): -Start- aSrcIndexType=%d, aSrcIndex=%d, aSrcTunnelingType=0xfe%06x%08x\n"),
-		aSrcIndexType,
-		aSrcIndex,
-		aSrcTunnelingType.get_vendor_id(),
-		aSrcTunnelingType.get_vendor_type()));
-	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapGtcDbUtils::CopySettingsL(): -Start- aDestIndexType=%d, aDestTunnelingType=0xfe%06x%08x\n"),
-		aDestIndexType,
-		aDestIndex,
-		aDestTunnelingType.get_vendor_id(),
-		aDestTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapGtcDbUtils::CopySettingsL()\n"));
+	TUint aSrcTunnelingVendorType = aSrcTunnelingType.get_vendor_type();
+	TUint aDestTunnelingVendorType = aDestTunnelingType.get_vendor_type();
+
+#else
+
+	TUint aSrcTunnelingVendorType = static_cast<TUint>(aSrcTunnelingType);
+	TUint aDestTunnelingVendorType = static_cast<TUint>(aDestTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
 
-	sqlStatement.Format(KSQL,
-		&KGtcTableName, 
-		&KServiceType,
-		aSrcIndexType,
-		&KServiceIndex,
-		aSrcIndex,
-		&KTunnelingTypeVendorId,
-		aSrcTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aSrcTunnelingType.get_vendor_type());
+	sqlStatement.Format(KSQL, &KGtcTableName, 
+		&KServiceType, aSrcIndexType, &KServiceIndex, aSrcIndex, &KTunnelingType, aSrcTunnelingVendorType);
 	
 	RDbView view;
 	
@@ -642,91 +485,99 @@ void EapGtcDbUtils::CopySettingsL(
 	CleanupStack::PushL(colSet);
 		
 	view.SetColL(colSet->ColNo(KServiceType), static_cast<TUint>(aDestIndexType));
+    
     view.SetColL(colSet->ColNo(KServiceIndex), aDestIndex);
-	view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aDestTunnelingType.get_vendor_id());
-	view.SetColL(colSet->ColNo(KTunnelingType), aDestTunnelingType.get_vendor_type());
+    
+    view.SetColL(colSet->ColNo(KTunnelingType), aDestTunnelingVendorType);
 
     view.PutL();
     	
-	CleanupStack::PopAndDestroy(colSet);
-	CleanupStack::PopAndDestroy(&view);
-	CleanupStack::PopAndDestroy(buf);
+	CleanupStack::PopAndDestroy(3); // view, colset, buf
 }
-
-// ----------------------------------------------------------
 
 void EapGtcDbUtils::DeleteConfigurationL(	
 	const TIndexType aIndexType,
 	const TInt aIndex,
 	const eap_type_value_e aTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapGtcDbUtils::DeleteConfigurationL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapGtcDbUtils::DeleteConfigurationL()\n"));
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
 
-	RDbNamedDatabase aDatabase;
-	RFs aFileServerSession;
+#else
 
-	TInt error(KErrNone);
-	TFileName aPrivateDatabasePathName;
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
+
+	RDbs session;
+	RDbNamedDatabase database;
+	// Connect to the DBMS server.
+	User::LeaveIfError(session.Connect());
+	CleanupClosePushL(session);	
+		
+#ifdef SYMBIAN_SECURE_DBMS
 	
-	error = aFileServerSession.Connect();
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::DeleteConfigurationL(): - aFileServerSession.Connect(), error=%d\n"), error));
-	User::LeaveIfError(error);
-
-	EapPluginTools::CreateDatabaseLC(
-		aDatabase,
-		aFileServerSession,
-		error,
-		KEapGtcDatabaseName,
-		aPrivateDatabasePathName);
-
-	if(error == KErrNone)
+	// Create the secure shared database with the specified secure policy.
+	// Database will be created in the data caging path for DBMS (C:\private\100012a5).
+	
+	TInt err = database.Create(session, KGtcDatabaseName, KGtcSecureUIDFormat);
+	
+	if(err == KErrNone)
 	{
 		// Database was created so it was empty. No need for further actions.
-		aDatabase.Destroy();
-		CleanupStack::PopAndDestroy(&aDatabase);
-		CleanupStack::PopAndDestroy(&aFileServerSession);
+		database.Destroy();
+		CleanupStack::PopAndDestroy();
 		return;
-	}
-	else if (error != KErrAlreadyExists) 
+		
+	} 
+	else if (err != KErrAlreadyExists) 
 	{
-		User::LeaveIfError(error);
+		User::LeaveIfError(err);
 	}
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::DeleteConfigurationL(): - calls aDatabase.Open()\n")));
+	// Database existed, open it.
+	User::LeaveIfError(database.Open(session, KGtcDatabaseName, KGtcSecureUIDFormat));
+	CleanupClosePushL(database);
+		
+#else
+	// For non-secured database. The database will be created in the old location (c:\system\data).
+	
+	RFs fsSession;		
+	User::LeaveIfError(fsSession.Connect());
+	CleanupClosePushL(fsSession);	
+	TInt err = database.Create(fsSession, KGtcDatabaseName);
 
-	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapGtcDbUtils::DeleteConfigurationL(): - Opened private DB for EAP-GTC. error=%d\n"), error));
-
-	User::LeaveIfError(error);
+	if(err == KErrNone)
+	{
+		// Database was created so it was empty. No need for further actions.
+		database.Destroy();
+		CleanupStack::PopAndDestroy(2); // fsSession, database session
+		return;
+		
+	} 
+	else if (err != KErrAlreadyExists) 
+	{
+		User::LeaveIfError(err);
+	}
+	
+	CleanupStack::PopAndDestroy(); // close fsSession
+	
+	User::LeaveIfError(database.Open(session, KGtcDatabaseName));
+	CleanupClosePushL(database);		
+	    
+#endif // #ifdef SYMBIAN_SECURE_DBMS
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
 	// Main settings table
-	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-
-	sqlStatement.Format(KSQL,
-		&KGtcTableName, 
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
-
+	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQL, &KGtcTableName, 
+		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
 	// Evaluate view
 	RDbView view;
-	User::LeaveIfError(view.Prepare(aDatabase,TDbQuery(sqlStatement), TDbWindow::EUnlimited));
+	User::LeaveIfError(view.Prepare(database,TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 	CleanupClosePushL(view);
 	User::LeaveIfError(view.EvaluateAll());
 
@@ -738,12 +589,8 @@ void EapGtcDbUtils::DeleteConfigurationL(
 		} while (view.NextL() != EFalse);
 	}
 
-	CleanupStack::PopAndDestroy(&view);
-	CleanupStack::PopAndDestroy(buf);
-	CleanupStack::PopAndDestroy(&aDatabase);
-	CleanupStack::PopAndDestroy(&aFileServerSession);
+	// Close database
+	CleanupStack::PopAndDestroy(4); // view, buf, database, session
 }
-
-// ----------------------------------------------------------
 
 // End of File

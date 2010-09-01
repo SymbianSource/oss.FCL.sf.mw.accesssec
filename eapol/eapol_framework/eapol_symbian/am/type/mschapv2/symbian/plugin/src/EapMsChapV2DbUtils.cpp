@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 56 %
+* %version: 21.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -34,96 +34,116 @@
 #include "EapMsChapV2DbDefaults.h"
 #include "EapMsChapV2DbParameterNames.h"
 
-#include <EapTraceSymbian.h>
-#include "EapPluginTools.h"
+#include "eap_am_trace_symbian.h"
 
 const TUint KMaxSqlQueryLength = 512;
 const TInt KMicroSecsInAMinute = 60000000; // 60000000 micro seconds is 1 minute.
 
 // ================= MEMBER FUNCTIONS =======================
 
-void EapMsChapV2DbUtils::OpenDatabaseL(
-	RDbNamedDatabase& aDatabase,
-	RFs& aFileServerSession,
-	const TIndexType aIndexType,
-	const TInt aIndex,
-	const eap_type_value_e aTunnelingType)
+void EapMsChapV2DbUtils::OpenDatabaseL(RDbNamedDatabase& aDatabase, RDbs& aSession, const TIndexType aIndexType,
+	const TInt aIndex, const eap_type_value_e aTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapMsChapV2DbUtils::OpenDatabaseL(): - Start - aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapMsChapV2DbUtils::OpenDatabaseL()\n"));
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
+
+#else
+
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
+
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL -Start- aIndexType=%d, aIndex=%d, aTunnelingVendorType=%d \n"),
+	aIndexType,aIndex,aTunnelingVendorType) );
 
 	// 1. Open/create a database	
 	
-	TInt error(KErrNone);
-	TFileName aPrivateDatabasePathName;
+	// Connect to the DBMS server.
+	User::LeaveIfError(aSession.Connect());		
+	CleanupClosePushL(aSession);	
+	// aSession and aDatabase are pushed to the cleanup stack even though they may be member
+	// variables of the calling class and would be closed in the destructor anyway. This ensures
+	// that if they are not member variables they will be closed. Closing the handle twice
+	// does no harm.	
+	
+#ifdef SYMBIAN_SECURE_DBMS
+	
+	// Create the secure shared database with the specified secure policy.
+	// Database will be created in the data caging path for DBMS (C:\private\100012a5).
+	
+	TInt err = aDatabase.Create(aSession, KDatabaseName, KSecureUIDFormat);
+	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL - Created Secure DB for eapmsmhapv2.dat. err=%d\n"), err));
 
-	EapPluginTools::CreateDatabaseLC(
-		aDatabase,
-		aFileServerSession,
-		error,
-		KEapMsChapV2DatabaseName,
-		aPrivateDatabasePathName);
-
-	if(error == KErrNone)
+	
+	if(err == KErrNone)
 	{
 		aDatabase.Close();
-	}
-	else if (error != KErrAlreadyExists) 
+		
+	} else if (err != KErrAlreadyExists) 
 	{
-		User::LeaveIfError(error);
+		User::LeaveIfError(err);
 	}
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): - calls aDatabase.Open()\n")));
+	User::LeaveIfError(aDatabase.Open(aSession, KDatabaseName, KSecureUIDFormat));
+	CleanupClosePushL(aDatabase);		
+		
+#else
+	// For non-secured database. The database will be created in the old location (c:\system\data).
+	
+	RFs fsSession;		
+	User::LeaveIfError(fsSession.Connect());
+	CleanupClosePushL(fsSession);	
+	TInt err = aDatabase.Create(fsSession, KDatabaseName);
+	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL - Created Non-Secure DB for eapmsmhapv2.dat. err=%d\n"), err));
 
-	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
+	
+	if(err == KErrNone)
+	{
+		aDatabase.Close();
+		
+	} else if (err != KErrAlreadyExists) 
+	{
+		User::LeaveIfError(err);
+	}
+	CleanupStack::PopAndDestroy(); // close fsSession
+	
+	User::LeaveIfError(aDatabase.Open(aSession, KDatabaseName));
+	CleanupClosePushL(aDatabase);		
+	    
+#endif // #ifdef SYMBIAN_SECURE_DBMS
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): - Opened private DB for EAP-MsChapV2. error=%d\n"), error));
-
-	User::LeaveIfError(error);
-
-	// 2. Create the MSCHAPv2 table to database (ignore error if database exists)
-	// Table columns:
-	//// NAME ///////////////////////////////////////////////// TYPE ////////////// Constant /////////
-	//| ServiceType                                         | UNSIGNED INTEGER  | KServiceType      |//
-	//| ServiceIndex                                        | UNSIGNED INTEGER  | KServiceIndex     |//
-	//| TunnelingTypeVendorId                               | UNSIGNED INTEGER  | KTunnelingTypeVendorId    |//
-	//| TunnelingType                                       | UNSIGNED INTEGER  | KTunnelingType    |//
-	//| EAP_MSCHAPV2_password_prompt                        | UNSIGNED INTEGER  | cf_str_EAP_MSCHAPV2_password_prompt_literal   |//
-	//| EAP_MSCHAPV2_username                               | VARCHAR(255)      | cf_str_EAP_MSCHAPV2_username_literal         |//
-	//| EAP_MSCHAPV2_password                               | VARCHAR(255)      | cf_str_EAP_MSCHAPV2_password_literal         |//
-	//| EAP_MSCHAPv2_max_session_validity_time				      | BIGINT		   	    | cf_str_EAP_MSCHAPv2_max_session_validity_time_literal   |//
-	//| EAP_MSCHAPv2_last_full_authentication_time			    | BIGINT		   	    | KMSCHAPv2LastFullAuthTime	|//
-	//////////////////////////////////////////////////////////////////////////////////////////////////
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): calls HBufC::NewLC()\n")));
+// 2. Create the MSCHAPv2 table to database (ignore error if database exists)
+// Table columns:
+//// NAME ///////////////////////////////////////////////// TYPE ////////////// Constant /////////
+//| ServiceType                                         | UNSIGNED INTEGER  | KServiceType      |//
+//| ServiceIndex                                        | UNSIGNED INTEGER  | KServiceIndex     |//
+//| TunnelingType                                       | UNSIGNED INTEGER  | KTunnelingType    |//
+//| EAP_MSCHAPV2_password_prompt                        | UNSIGNED INTEGER  | cf_str_EAP_MSCHAPV2_password_prompt_literal   |//
+//| EAP_MSCHAPV2_username                               | VARCHAR(255)      | cf_str_EAP_MSCHAPV2_username_literal         |//
+//| EAP_MSCHAPV2_password                               | VARCHAR(255)      | cf_str_EAP_MSCHAPV2_password_literal         |//
+//| EAP_MSCHAPv2_max_session_validity_time				| BIGINT		   	| cf_str_EAP_MSCHAPv2_max_session_validity_time_literal   |//
+//| EAP_MSCHAPv2_last_full_authentication_time			| BIGINT		   	| KMSCHAPv2LastFullAuthTime	|//
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQLCreateTable1, "CREATE TABLE %S \
-		(%S UNSIGNED INTEGER, \
-		 %S UNSIGNED INTEGER, \
-		 %S UNSIGNED INTEGER, \
-		 %S UNSIGNED INTEGER, \
-		 %S UNSIGNED INTEGER, \
-		 %S VARCHAR(255), \
-		 %S VARCHAR(255), \
-		 %S BIGINT, \
-		 %S BIGINT)");
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): calls sqlStatement.Format()\n")));
+	_LIT(KSQLCreateTable1, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
+											 %S UNSIGNED INTEGER, \
+											 %S UNSIGNED INTEGER, \
+											 %S UNSIGNED INTEGER, \
+											 %S VARCHAR(255), \
+											 %S VARCHAR(255), \
+											 %S BIGINT, \
+											 %S BIGINT)");
 
 	sqlStatement.Format(KSQLCreateTable1,
 						&KMsChapV2TableName,
 						&KServiceType,
 						&KServiceIndex,
-						&KTunnelingTypeVendorId,
 						&KTunnelingType,
 						&cf_str_EAP_MSCHAPV2_password_prompt_literal,
 						&cf_str_EAP_MSCHAPV2_username_literal,
@@ -131,100 +151,57 @@ void EapMsChapV2DbUtils::OpenDatabaseL(
 						&cf_str_EAP_MSCHAPv2_max_session_validity_time_literal, 
 						&KMSCHAPv2LastFullAuthTime);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): calls aDatabase.Execute()\n")));
-
-	error = aDatabase.Execute(sqlStatement);
-	if (error != KErrNone && error != KErrAlreadyExists)
+	err = aDatabase.Execute(sqlStatement);
+	if (err != KErrNone && err != KErrAlreadyExists)
 	{
-		EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapMsChapV2DbUtils::OpenDatabaseL(): aDatabase.Execute() error=%d\n"),
-			error));
-
-		User::Leave(error);
+		User::Leave(err);
 	}
 
 	// 4. Check if database table contains a row for this service type and id  
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): calls sqlStatement.Format()\n")));
-
-	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
+	
+	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
 	sqlStatement.Format(KSQLQueryRow,
-		&cf_str_EAP_MSCHAPV2_username_literal,
-		&KMsChapV2TableName,
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
-
+						&cf_str_EAP_MSCHAPV2_username_literal,
+						&KMsChapV2TableName,
+						&KServiceType,
+						aIndexType,
+						&KServiceIndex,
+						aIndex,
+						&KTunnelingType, 
+						aTunnelingVendorType);
+							
 	RDbView view;
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): calls view.Prepare()\n")));
-
-	error = view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited);
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): view.Prepare() error=%d\n"),
-		error));
-
-	User::LeaveIfError(error);
+	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 	// View must be closed when no longer needed
 	CleanupClosePushL(view);
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): calls view.EvaluateAll()\n")));
-
-	error = view.EvaluateAll();
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): view.EvaluateAll() error=%d\n"),
-		error));
-
-	User::LeaveIfError(error);
+	User::LeaveIfError(view.EvaluateAll());
 	
 	// 5. If row is not found then add it
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): calls view.CountL()\n")));
-
 	TInt rows = view.CountL();
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): view.CountL() rows=%d\n"),
-		rows));
-
-	CleanupStack::PopAndDestroy(&view);
+	CleanupStack::PopAndDestroy(); // view
 	if (rows == 0)
 	{
 		_LIT(KSQLInsert, "SELECT * FROM %S");
 		sqlStatement.Format(KSQLInsert, &KMsChapV2TableName);		
-		
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): calls view.Prepare()\n")));
-
-		error = view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited, RDbView::EInsertOnly);
-
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): view.Prepare() error=%d\n"),
-			error));
-
-		User::LeaveIfError(error);
+										
+		view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited, RDbView::EInsertOnly);
 		CleanupClosePushL(view);
-
+		
 		// Get column set so we get the correct column numbers
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): calls view.ColSetL()\n")));
-
 		CDbColSet* colSet = view.ColSetL();		
 		CleanupStack::PushL(colSet);
-
-		EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::OpenDatabaseL(): calls view.InsertL()\n")));
-
+		
 		view.InsertL();
 		view.SetColL(colSet->ColNo(KServiceType), static_cast<TInt> (aIndexType));
 		view.SetColL(colSet->ColNo(KServiceIndex), aIndex);
-		view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
-		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
+		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingVendorType);
 		
-		view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_prompt_literal), default_EAP_password_prompt);
+		view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_prompt_literal), default_EAP_MSCHAPV2_password_prompt);
 		
-		view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_username_literal), default_EAP_username);
+		view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_username_literal), default_EAP_MSCHAPV2_username);
 		
-		view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_literal), default_EAP_password);
+		view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_literal), default_EAP_MSCHAPV2_password);
 		
 		view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPv2_max_session_validity_time_literal), default_MaxSessionTime);
 		
@@ -232,15 +209,16 @@ void EapMsChapV2DbUtils::OpenDatabaseL(
 		
 		view.PutL();
 				
-		CleanupStack::PopAndDestroy(colSet);
-		CleanupStack::PopAndDestroy(&view);
+		CleanupStack::PopAndDestroy( colSet ); // Delete colSet.
+		
+		CleanupStack::PopAndDestroy( &view ); // Close view.		
 	} 
-
-	aDatabase.Compact();
-
-	CleanupStack::PopAndDestroy( buf );
+	
+	CleanupStack::PopAndDestroy( buf ); // Delete buf	
 	CleanupStack::Pop( &aDatabase );	
-	CleanupStack::Pop( &aFileServerSession );
+	CleanupStack::Pop( &aSession );	
+		
+	aDatabase.Compact();
 }
 
 
@@ -253,37 +231,25 @@ void EapMsChapV2DbUtils::SetIndexL(
 	const TInt aNewIndex,
 	const eap_type_value_e aNewTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapMsChapV2DbUtils::SetIndexL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()));
-	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapMsChapV2DbUtils::SetIndexL(): -Start- aNewIndexType=%d, aNewIndex=%d, aNewTunnelingType=0xfe%06x%08x\n"),
-		aNewIndexType,
-		aNewIndex,
-		aNewTunnelingType.get_vendor_id(),
-		aNewTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapMsChapV2DbUtils::SetIndexL()\n"));
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
+	TUint aNewTunnelingVendorType = aNewTunnelingType.get_vendor_type();
+
+#else
+
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+	TUint aNewTunnelingVendorType = static_cast<TUint>(aNewTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
 
-	sqlStatement.Format(KSQL,
-		&KMsChapV2TableName, 
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
+	sqlStatement.Format(KSQL, &KMsChapV2TableName, 
+		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
 	
 	RDbView view;
 	
@@ -313,15 +279,14 @@ void EapMsChapV2DbUtils::SetIndexL(
 	view.UpdateL();
 	
     view.SetColL(colSet->ColNo(KServiceType), static_cast<TUint>(aNewIndexType));
+    
     view.SetColL(colSet->ColNo(KServiceIndex), aNewIndex);
-	view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aNewTunnelingType.get_vendor_id());
-	view.SetColL(colSet->ColNo(KTunnelingType), aNewTunnelingType.get_vendor_type());
+    
+    view.SetColL(colSet->ColNo(KTunnelingType), aNewTunnelingVendorType);
 
     view.PutL();
     	
-	CleanupStack::PopAndDestroy(colSet);
-	CleanupStack::PopAndDestroy(&view);
-	CleanupStack::PopAndDestroy(buf);
+	CleanupStack::PopAndDestroy(3); // view, colset, buf
 }
 
 void EapMsChapV2DbUtils::SetConfigurationL(
@@ -331,20 +296,19 @@ void EapMsChapV2DbUtils::SetConfigurationL(
 	const TInt aIndex,
 	const eap_type_value_e aTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapMsChapV2DbUtils::SetConfigurationL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapMsChapV2DbUtils::SetConfigurationL()\n"));
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
 
-	EAP_TRACE_SETTINGS(&aSettings);
+#else
+
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	// Check if the settings are for the correct type
-	if (aSettings.iEAPExpandedType != (*EapExpandedTypeMsChapv2.GetType())
-		&& aSettings.iEAPExpandedType != (*EapExpandedPlainMsChapv2.GetType()))
+	if (aSettings.iEAPType != EAPSettings::EEapMschapv2 &&
+		aSettings.iEAPType != EAPSettings::EPlainMschapv2)
 	{
 		User::Leave(KErrNotSupported);
 	}
@@ -354,18 +318,9 @@ void EapMsChapV2DbUtils::SetConfigurationL(
 
 	RDbView view;
 
-	_LIT(KSQLQuery, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-
-	sqlStatement.Format(KSQLQuery,
-		&KMsChapV2TableName, 
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
+	_LIT(KSQLQuery, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLQuery, &KMsChapV2TableName, 
+		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
 	
 	// Evaluate view
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
@@ -390,7 +345,7 @@ void EapMsChapV2DbUtils::SetConfigurationL(
 		{
 			// Username too long. Can not be stored in DB.
 			
-			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapMsChapV2DbUtils::SetConfigurationL(): Too long Username. Length=%d \n"),
+			EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::SetConfigurationL: Too long Username. Length=%d \n"),
 			aSettings.iUsername.Length()));
 			
 			User::Leave(KErrArgument);
@@ -400,15 +355,6 @@ void EapMsChapV2DbUtils::SetConfigurationL(
 		view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_username_literal), aSettings.iUsername);		
 	}
 		
-	// Password existence.
-	if (aSettings.iPasswordExistPresent
-		&& !aSettings.iPasswordExist)
-	{
-		// Clear password from database.
-		view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_literal), KNullPasswordData);
-		view.SetColNullL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_literal));
-	}
-
 	// Password
 	if (aSettings.iPasswordPresent)
 	{
@@ -417,7 +363,7 @@ void EapMsChapV2DbUtils::SetConfigurationL(
 		{
 			// Password too long. Can not be stored in DB.
 			
-			EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: EapMsChapV2DbUtils::SetConfigurationL(): Too long Password. Length=%d \n"),
+			EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::SetConfigurationL: Too long Password. Length=%d \n"),
 			aSettings.iPassword.Length()));
 			
 			User::Leave(KErrArgument);
@@ -426,21 +372,10 @@ void EapMsChapV2DbUtils::SetConfigurationL(
 		// Length is ok. Set the value in DB.	
 		view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_literal), aSettings.iPassword);
 		
+		// If password was supplied set password prompting off
+		view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_prompt_literal), EMSCHAPV2PasswordPromptOff);		
 	}
 			
-	if (aSettings.iShowPassWordPromptPresent)
-		{	
-		// If password was supplied set password prompting off
-		if (aSettings.iShowPassWordPrompt == EFalse)
-			{
-				view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_prompt_literal), EEapDbFalse );
-			}
-		else
-			{
-				view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_prompt_literal), EEapDbTrue );
-			}		
-		}
-
 	// Session validity time
 	if (aSettings.iSessionValidityTimePresent)
 	{
@@ -457,23 +392,22 @@ void EapMsChapV2DbUtils::SetConfigurationL(
 		
 		if( validityInMicro != 0)
 		{
-			view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_prompt_literal), EEapDbTrue);
+			view.SetColL(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_prompt_literal), EMSCHAPV2PasswordPromptOn);
 		}		
 	}
 	
 	// Last full authentication time should be made zero when EAP configurations are modified.
 	// This makes sure that the next authentication with this EAP would be full authentication
 	// instead of reauthentication even if the session is still valid.
-
+	
 	view.SetColL(colSet->ColNo(KMSCHAPv2LastFullAuthTime), default_FullAuthTime);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::SetConfigurationL(): Session Validity: Resetting Full Auth Time since settings are modified\n")));
-
+	EAP_TRACE_DEBUG_SYMBIAN((_L("Session Validity: EAP-Type=%d, Resetting Full Auth Time since settings are modified\n"),
+								aSettings.iEAPType ));
+	
 	view.PutL();
+	CleanupStack::PopAndDestroy(3); // view, colset, buf
 
-	CleanupStack::PopAndDestroy(colSet);
-	CleanupStack::PopAndDestroy(&view);
-	CleanupStack::PopAndDestroy(buf);
 }
 
 void EapMsChapV2DbUtils::GetConfigurationL(
@@ -483,14 +417,15 @@ void EapMsChapV2DbUtils::GetConfigurationL(
 	const TInt aIndex,
 	const eap_type_value_e aTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapMsChapV2DbUtils::GetConfigurationL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapMsChapV2DbUtils::GetConfigurationL()\n"));
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
+
+#else
+
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();	
@@ -498,18 +433,9 @@ void EapMsChapV2DbUtils::GetConfigurationL(
 	RDbView view;
 
 	// Form the query
-	_LIT(KSQLQuery, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-
-	sqlStatement.Format(KSQLQuery,
-		&KMsChapV2TableName, 
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
+	_LIT(KSQLQuery, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLQuery, &KMsChapV2TableName, 
+		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
 	
 	// Evaluate view
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement)));
@@ -526,38 +452,18 @@ void EapMsChapV2DbUtils::GetConfigurationL(
 	CDbColSet* colSet = view.ColSetL();
 	CleanupStack::PushL(colSet);
 
-	aSettings.iEAPExpandedType = *EapExpandedTypeMsChapv2.GetType(); 
+	aSettings.iEAPType = EAPSettings::EEapMschapv2; 
 	
 	// Username
 	TPtrC username = view.ColDes(colSet->ColNo(cf_str_EAP_MSCHAPV2_username_literal));
 	aSettings.iUsername.Copy(username);
 	aSettings.iUsernamePresent = ETrue;
 	
-	// Password existence.
-	aSettings.iPasswordExistPresent = ETrue;
-	aSettings.iPasswordExist = ! view.IsColNull(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_literal));
-
-#if defined(USE_EAP_PASSWORD_READ_FROM_DATABASE)
 	// Password
 	TPtrC password = view.ColDes(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_literal));
 	aSettings.iPassword.Copy(password);
 	aSettings.iPasswordPresent = ETrue;
-#else
-	EAP_TRACE_DEBUG_SYMBIAN((_L("WARNING: EapMsChapV2DbUtils::GetConfigurationL(): Password read is disabled\n")));
-#endif //#if defined(USE_EAP_PASSWORD_READ_FROM_DATABASE)
 
-	aSettings.iShowPassWordPromptPresent = ETrue;
-
-	TUint aShow = view.ColUint(colSet->ColNo(cf_str_EAP_MSCHAPV2_password_prompt_literal));
-	if(aShow == EEapDbFalse)
-	{
-		aSettings.iShowPassWordPrompt = EFalse;
-	}
-	else
-	{
-		aSettings.iShowPassWordPrompt = ETrue;
-	}
-	
 	// Session validity time	
 	TInt64 maxSessionTimeMicro = view.ColInt64(colSet->ColNo(cf_str_EAP_MSCHAPv2_max_session_validity_time_literal));
 	
@@ -567,11 +473,7 @@ void EapMsChapV2DbUtils::GetConfigurationL(
 	aSettings.iSessionValidityTime = static_cast<TUint>(maxSessionTimeMin);
 	aSettings.iSessionValidityTimePresent = ETrue;
 		
-	CleanupStack::PopAndDestroy(colSet);
-	CleanupStack::PopAndDestroy(&view);
-	CleanupStack::PopAndDestroy(buf);
-
-	EAP_TRACE_SETTINGS(&aSettings);
+	CleanupStack::PopAndDestroy(3); // view, colset, buf
 }
 
 void EapMsChapV2DbUtils::CopySettingsL(
@@ -583,37 +485,25 @@ void EapMsChapV2DbUtils::CopySettingsL(
 	const TInt aDestIndex,
 	const eap_type_value_e aDestTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapMsChapV2DbUtils::CopySettingsL(): -Start- aSrcIndexType=%d, aSrcIndex=%d, aSrcTunnelingType=0xfe%06x%08x\n"),
-		aSrcIndexType,
-		aSrcIndex,
-		aSrcTunnelingType.get_vendor_id(),
-		aSrcTunnelingType.get_vendor_type()));
-	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapMsChapV2DbUtils::CopySettingsL(): -Start- aDestIndexType=%d, aDestTunnelingType=0xfe%06x%08x\n"),
-		aDestIndexType,
-		aDestIndex,
-		aDestTunnelingType.get_vendor_id(),
-		aDestTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapMsChapV2DbUtils::CopySettingsL()\n"));
+	TUint aSrcTunnelingVendorType = aSrcTunnelingType.get_vendor_type();
+	TUint aDestTunnelingVendorType = aDestTunnelingType.get_vendor_type();
+
+#else
+
+	TUint aSrcTunnelingVendorType = static_cast<TUint>(aSrcTunnelingType);
+	TUint aDestTunnelingVendorType = static_cast<TUint>(aDestTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
+	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
 
-	sqlStatement.Format(KSQL,
-		&KMsChapV2TableName, 
-		&KServiceType,
-		aSrcIndexType,
-		&KServiceIndex,
-		aSrcIndex,
-		&KTunnelingTypeVendorId,
-		aSrcTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aSrcTunnelingType.get_vendor_type());
+	sqlStatement.Format(KSQL, &KMsChapV2TableName, 
+		&KServiceType, aSrcIndexType, &KServiceIndex, aSrcIndex, &KTunnelingType, aSrcTunnelingVendorType);
 	
 	RDbView view;
 	
@@ -644,15 +534,14 @@ void EapMsChapV2DbUtils::CopySettingsL(
 	CleanupStack::PushL(colSet);
 		
 	view.SetColL(colSet->ColNo(KServiceType), static_cast<TUint>(aDestIndexType));
+    
     view.SetColL(colSet->ColNo(KServiceIndex), aDestIndex);
-	view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aDestTunnelingType.get_vendor_id());
-	view.SetColL(colSet->ColNo(KTunnelingType), aDestTunnelingType.get_vendor_type());
+    
+    view.SetColL(colSet->ColNo(KTunnelingType), aDestTunnelingVendorType);
 
     view.PutL();
     	
-	CleanupStack::PopAndDestroy(colSet);
-	CleanupStack::PopAndDestroy(&view);
-	CleanupStack::PopAndDestroy(buf);
+	CleanupStack::PopAndDestroy(3); // view, colset, buf
 }
 
 void EapMsChapV2DbUtils::DeleteConfigurationL(	
@@ -660,88 +549,97 @@ void EapMsChapV2DbUtils::DeleteConfigurationL(
 	const TInt aIndex,
 	const eap_type_value_e aTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapMsChapV2DbUtils::DeleteConfigurationL(): -Start- aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapMsChapV2DbUtils::DeleteConfigurationL()\n"));
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
 
-	RDbNamedDatabase aDatabase;
-	RFs aFileServerSession;
+#else
 
-	TInt error(KErrNone);
-	TFileName aPrivateDatabasePathName;
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
+
+	RDbs session;
+	RDbNamedDatabase database;
+	// Connect to the DBMS server.
+	User::LeaveIfError(session.Connect());
+	CleanupClosePushL(session);	
+		
+#ifdef SYMBIAN_SECURE_DBMS
 	
-	error = aFileServerSession.Connect();
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::DeleteConfigurationL(): - aFileServerSession.Connect(), error=%d\n"), error));
-	User::LeaveIfError(error);
-
-	EapPluginTools::CreateDatabaseLC(
-		aDatabase,
-		aFileServerSession,
-		error,
-		KEapMsChapV2DatabaseName,
-		aPrivateDatabasePathName);
-
-	if(error == KErrNone)
+	// Create the secure shared database with the specified secure policy.
+	// Database will be created in the data caging path for DBMS (C:\private\100012a5).
+	
+	TInt err = database.Create(session, KDatabaseName, KSecureUIDFormat);
+	
+	if(err == KErrNone)
 	{
 		// Database was created so it was empty. No need for further actions.
-		aDatabase.Destroy();
-		CleanupStack::PopAndDestroy(&aDatabase);
-		CleanupStack::PopAndDestroy(&aFileServerSession);
+		database.Destroy();
+		CleanupStack::PopAndDestroy();
 		return;
-	}
-	else if (error != KErrAlreadyExists) 
+		
+	} 
+	else if (err != KErrAlreadyExists) 
 	{
-		User::LeaveIfError(error);
+		User::LeaveIfError(err);
 	}
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::DeleteConfigurationL(): - calls aDatabase.Open()\n")));
+	// Database existed, open it.
+	User::LeaveIfError(database.Open(session, KDatabaseName, KSecureUIDFormat));
+	CleanupClosePushL(database);
+		
+#else
+	// For non-secured database. The database will be created in the old location (c:\system\data).
+	
+	RFs fsSession;		
+	User::LeaveIfError(fsSession.Connect());
+	CleanupClosePushL(fsSession);	
+	TInt err = database.Create(fsSession, KDatabaseName);
 
-	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapMsChapV2DbUtils::DeleteConfigurationL(): - Opened private DB for EAP-MsChapV2. error=%d\n"), error));
-
-	User::LeaveIfError(error);
+	if(err == KErrNone)
+	{
+		// Database was created so it was empty. No need for further actions.
+		database.Destroy();
+		CleanupStack::PopAndDestroy(2); // fsSession, database session
+		return;
+		
+	} 
+	else if (err != KErrAlreadyExists) 
+	{
+		User::LeaveIfError(err);
+	}
+	
+	CleanupStack::PopAndDestroy(); // close fsSession
+	
+	User::LeaveIfError(database.Open(session, KDatabaseName));
+	CleanupClosePushL(database);		
+	    
+#endif // #ifdef SYMBIAN_SECURE_DBMS
 
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
 	// Main settings table
-	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-
-	sqlStatement.Format(KSQL,
-		&KMsChapV2TableName, 
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
-
+	_LIT(KSQL, "SELECT * FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQL, &KMsChapV2TableName, 
+		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
 	// Evaluate view
 	RDbView view;
-	User::LeaveIfError(view.Prepare(aDatabase,TDbQuery(sqlStatement), TDbWindow::EUnlimited));
+	User::LeaveIfError(view.Prepare(database,TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 	CleanupClosePushL(view);
 	User::LeaveIfError(view.EvaluateAll());
 
 	// Delete rows
 	if (view.FirstL())
-	{
+	{		
 		do {
 			view.DeleteL();
 		} while (view.NextL() != EFalse);
 	}
 
-	CleanupStack::PopAndDestroy(&view);
-	CleanupStack::PopAndDestroy(buf);
-	CleanupStack::PopAndDestroy(&aDatabase);
-	CleanupStack::PopAndDestroy(&aFileServerSession);
+	// Close database
+	CleanupStack::PopAndDestroy(4); // view, buf, database, session
 }
 
 // End of File

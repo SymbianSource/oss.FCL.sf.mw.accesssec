@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 11 %
 */
 
 #ifndef EAP_TYPE_MSCHAPV2_CREDENTIAL_STORE_H

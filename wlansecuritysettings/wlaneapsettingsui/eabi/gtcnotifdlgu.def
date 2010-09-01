@@ -1,0 +1,9 @@
+EXPORTS
+	_Z13NotifierArrayv @ 1 NONAME
+	_ZTI16CGtcDialogPlugin @ 2 NONAME ; #<TI>#
+	_ZTI23CGTCResponseQueryDialog @ 3 NONAME ; #<TI>#
+	_ZTI24CGTCMessageDisplayDialog @ 4 NONAME ; #<TI>#
+	_ZTV16CGtcDialogPlugin @ 5 NONAME ; #<VT>#
+	_ZTV23CGTCResponseQueryDialog @ 6 NONAME ; #<VT>#
+	_ZTV24CGTCMessageDisplayDialog @ 7 NONAME ; #<VT>#
+

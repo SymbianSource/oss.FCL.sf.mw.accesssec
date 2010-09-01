@@ -16,23 +16,48 @@
 */
 
 /*
-* %version: %
+* %version: 17 %
 */
 
 #if !defined(_EAPAKADBDEFAULTS_H_)
 #define _EAPAKADBDEFAULTS_H_
 
-#include "EapPluginDbDefaults.h"
+enum TAKAUsePseudonymId 
+{
+	EAKAUsePseudonymIdNo,		// False. Don't use pseudonym id.
+	EAKAUsePseudonymIdYes,		// True. Use pseudonym id.
+	EAKAUsePseudonymIdNotValid 	// This indicates that the value is not configured.
+};
+
+enum TAKAUseManualRealm 
+{
+	EAKAUseManualRealmNo,		// False. Don't use Manual Realm.
+	EAKAUseManualRealmYes,		// True. Use Manual Realm.
+};
+
+enum TAKAUseManualUsername 
+{
+	EAKAUseManualUsernameNo,		// False. Don't use Manual Username.
+	EAKAUseManualUsernameYes,		// True. Use Manual Username.
+};
 
 // LOCAL CONSTANTS
-const TUint default_EAP_AKA_use_manual_realm = EEapDbFalse;
+const TUint default_EAP_AKA_use_manual_realm = EAKAUseManualRealmNo;
+_LIT(default_EAP_AKA_manual_realm, "");
 
-const TUint default_EAP_AKA_use_manual_username = EEapDbFalse;
+const TUint default_EAP_AKA_use_manual_username = EAKAUseManualUsernameNo;
+_LIT(default_EAP_AKA_manual_username, "");
 
-const TUint default_EAP_AKA_use_pseudonym_identity = EEapDbTrue; // Default is use pseudonym identity.
+const TUint default_EAP_AKA_use_pseudonym_identity = EAKAUsePseudonymIdYes; // Default is use pseudonym identity.
+
+const TInt64 default_MaxSessionTime = 0; // 0 means read from configuration file.
+const TInt64 default_FullAuthTime = 0;
 
 const TUint KMaxPseudonymIdLengthInDB = 1020; 	// This is the max possible length of an EAP packet.
 const TUint KMaxReauthIdLengthInDB = 1020; 		// pseudonym id or reauth id can't be more than that.
+
+const TUint KMaxManualUsernameLengthInDB = 255;
+const TUint KMaxManualRealmLengthInDB = 255;
 
 const TUint KMaxIMSILengthInDB = 15;
 

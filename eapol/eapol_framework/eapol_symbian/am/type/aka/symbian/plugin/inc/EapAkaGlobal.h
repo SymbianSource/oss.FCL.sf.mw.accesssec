@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 7 %
 */
 
 #ifndef _EAPAKAGLOBAL_H_
@@ -26,9 +26,9 @@
 
 // Release date must be of format YYYYMMDD:. Will be localised automatically. 
 // Note that days and months start from 0.
-_LIT(KReleaseDate, ""); 
+_LIT(KReleaseDate, "20040829:"); 
 _LIT(KEapTypeVersion, "1.0");
-_LIT(KManufacturer, "");
+_LIT(KManufacturer, "Nokia");
 _LIT(KNokiaSignature, ""); // Not used
 _LIT(KExtraInfo1, ""); // Not used
 _LIT(KExtraInfo2, ""); // Not used

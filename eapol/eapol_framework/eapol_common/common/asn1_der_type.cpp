@@ -16,16 +16,8 @@
 */
 
 /*
-* %version: %
+* %version: 34 %
 */
-
-// This is enumeration of EAPOL source code.
-#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
-	#undef EAP_FILE_NUMBER_ENUM
-	#define EAP_FILE_NUMBER_ENUM 761 
-	#undef EAP_FILE_NUMBER_DATE 
-	#define EAP_FILE_NUMBER_DATE 1127594498 
-#endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 
 #include "asn1_der_type.h"
 #include "eap_automatic_variable.h"
@@ -682,7 +674,7 @@ eap_status_e asn1_der_type_c::debug_object_identifier(eap_variable_data_c * cons
 				"%02x \0",
 				oid_octet);
 
-			u8_t oid = static_cast<u8_t>(oid_octet & (~OID_HIGH_BIT));
+			u8_t oid = oid_octet & (~OID_HIGH_BIT);
 
 			if (ind > offset)
 			{
@@ -934,7 +926,7 @@ u16_t asn1_der_type_c::get_offset_of_length_field()
 		{
 			if ((extented_tag[0] & static_cast<u8_t>(asn1_high_bit_mask_tag)) == 0)
 			{
-				return static_cast<u16_t>(extented_tag - m_input_data);
+				return (extented_tag - m_input_data);
 			}
 
 			++extented_tag;
@@ -965,7 +957,7 @@ u16_t asn1_der_type_c::get_offset_of_contents_field()
 	if ((length_octet1 & static_cast<u8_t>(asn1_high_bit_mask_tag)) == 0)
 	{
 		// Short Length field.
-		return static_cast<u16_t>(m_offset_of_length_field + asn1_identifier_const_short_length_size);
+		return m_offset_of_length_field + asn1_identifier_const_short_length_size;
 	}
 	else if (m_input_data_length > static_cast<u32_t>(m_offset_of_length_field + asn1_identifier_const_short_length_size))
 	{
@@ -1644,7 +1636,7 @@ EAP_FUNC_EXPORT eap_status_e asn1_der_type_c::decode(const eap_variable_data_c *
 			status = sub_type->initialize(
 				current_type->get_unused_data_length(),
 				current_type->get_unused_data(),
-				static_cast<u16_t>(current_type->get_recursion() + 1u),
+				current_type->get_recursion() + 1u,
 				current_type->get_count_of_sub_types(),
 				debug_buffer);
 			if (status != eap_status_ok)

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 19.1.4 %
 */
 
 #if !defined(_EAP_ARRAY_ALGORITHMS_H_)

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 6.1.7 %
+* %version: 8 %
 */
 
 #ifndef EAPSECURIDDBUTILS_H
@@ -29,10 +29,21 @@
 
 // LOCAL CONSTANTS
 
-// For EAP-GTC private database. Database will be in the private folder of EAP-server (20026FCB).
-// The maximum length of database name is 0x40 (KDbMaxName), which is defined in d32dbms.h.
+#ifdef SYMBIAN_SECURE_DBMS
+// For EAP SecureID secure database.
+// Full path is not needed. The database eapsecurid.dat will be saved in the 
+// data cage path for DBMS. So it will be in "\private\100012a5\eapsecurid.dat" in C: drive.
+// The maximum length of database name is 0x40 (KDbMaxName) , which is defined in d32dbms.h.
 
-_LIT(KSecurIDDatabaseName, "eapsecurid.dat");
+_LIT(KDatabaseName, "c:eapsecurid.dat");
+
+_LIT(KSecureUIDFormat, "SECURE[102072e9]"); // For the security policy.
+
+#else
+
+_LIT(KDatabaseName, "c:\\system\\data\\eapsecurid.dat");
+
+#endif // #ifdef SYMBIAN_SECURE_DBMS
 
 _LIT(KSecurIDTableName, "eapsecurid");
 
@@ -49,8 +60,8 @@ public:
 	* @param aIndex Index
 	*/
 	static void OpenDatabaseL(
-		RDbNamedDatabase& aDatabase,
-		RFs& aFileServerSession,
+		RDbNamedDatabase& aDatabase, 
+		RDbs& aSession, 
 		const TIndexType aIndexType,
 		const TInt aIndex,
 		const eap_type_value_e aTunnelingType);

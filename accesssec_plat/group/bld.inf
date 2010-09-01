@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -11,12 +11,12 @@
 *
 * Contributors:
 *
-* Description:  Build information file
+* Description: Build information file
 *
 */
 
 /*
-* %version: 9 %
+* %version: 6 %
 */
 
 PRJ_PLATFORMS
@@ -25,7 +25,19 @@ DEFAULT
 PRJ_EXPORTS
 
 PRJ_MMPFILES
+#include "../wapi_security_settings_ui_api/group/bld.inf"
+#include "../wep_security_settings_ui_api/group/bld.inf"
+#include "../wi-fi_protected_setup_ui_api/group/bld.inf"
+#include "../wlan_eap_settings_ui_api/group/bld.inf"
+#include "../wpa_security_settings_ui_api/group/bld.inf"
 #include "../eap_vpn_api/group/bld.inf"
+#include "../eapsim_db_api/group/bld.inf"
 #include "../eap_type_api/group/bld.inf"
+#include "../eaptlspeap_db_api/group/bld.inf"
+#include "../eapleap_db_api/group/bld.inf"
+#include "../eapgtc_db_api/group/bld.inf"
+#include "../eapmschapv2_db_api/group/bld.inf"
+#include "../eapaka_db_api/group/bld.inf"
+#include "../wapi_db_api/group/bld.inf"
 
 PRJ_TESTMMPFILES

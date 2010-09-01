@@ -11,21 +11,13 @@
 *
 * Contributors:
 *
-* Description:  This class defines Credential attributes for protected setup (previously known as simple config).
+* Description:  EAP and WLAN authentication protocols.
 *
 */
 
 /*
-* %version: 8 %
+* %version: 5.1.2 %
 */
-
-// This is enumeration of EAPOL source code.
-#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
-	#undef EAP_FILE_NUMBER_ENUM
-	#define EAP_FILE_NUMBER_ENUM 763 
-	#undef EAP_FILE_NUMBER_DATE 
-	#define EAP_FILE_NUMBER_DATE 1127594498 
-#endif //#if defined(USE_EAP_MINIMUM_RELEASE_TRACES)
 
 #include "eap_tools.h"
 #include "simple_config_credential.h"
@@ -74,7 +66,7 @@ EAP_FUNC_EXPORT void simple_config_credential_c::set_network_index(const u8_t in
 
 //----------------------------------------------------------------------------
 
-EAP_FUNC_EXPORT u8_t simple_config_credential_c::get_network_index() const
+EAP_FUNC_EXPORT u8_t simple_config_credential_c::get_network_index()
 {
 	return m_network_index;
 }
@@ -82,13 +74,6 @@ EAP_FUNC_EXPORT u8_t simple_config_credential_c::get_network_index() const
 //----------------------------------------------------------------------------
 
 EAP_FUNC_EXPORT eap_variable_data_c * simple_config_credential_c::get_SSID()
-{
-	return &m_SSID;
-}
-
-//----------------------------------------------------------------------------
-
-EAP_FUNC_EXPORT const eap_variable_data_c * simple_config_credential_c::get_SSID_const() const
 {
 	return &m_SSID;
 }
@@ -130,21 +115,7 @@ EAP_FUNC_EXPORT eap_array_c<network_key_and_index_c> * simple_config_credential_
 
 //----------------------------------------------------------------------------
 
-EAP_FUNC_EXPORT const eap_array_c<network_key_and_index_c> * simple_config_credential_c::get_network_keys_const() const
-{
-	return &m_network_keys;
-}
-
-//----------------------------------------------------------------------------
-
 EAP_FUNC_EXPORT eap_variable_data_c * simple_config_credential_c::get_MAC_address()
-{
-	return &m_MAC_address;
-}
-
-//----------------------------------------------------------------------------
-
-EAP_FUNC_EXPORT const eap_variable_data_c * simple_config_credential_c::get_MAC_address_const() const
 {
 	return &m_MAC_address;
 }

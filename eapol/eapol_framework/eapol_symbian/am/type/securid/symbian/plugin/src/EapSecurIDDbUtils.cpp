@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 29 %
+* %version: 14.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -34,64 +34,88 @@
 #include "EapSecurIDDbDefaults.h"
 #include "EapSecurIDDbParameterNames.h"
 
-#include <EapTraceSymbian.h>
-#include "EapPluginTools.h"
+#include "eap_am_trace_symbian.h"
 
 const TUint KMaxSqlQueryLength = 512;
 
 // ================= MEMBER FUNCTIONS =======================
 
-void EapSecurIDDbUtils::OpenDatabaseL(
-	RDbNamedDatabase& aDatabase,
-	RFs& aFileServerSession,
-	const TIndexType aIndexType,
-	const TInt aIndex,
-	const eap_type_value_e aTunnelingType)
+void EapSecurIDDbUtils::OpenDatabaseL(RDbNamedDatabase& aDatabase, RDbs& aSession, const TIndexType aIndexType,
+	const TInt aIndex, const eap_type_value_e aTunnelingType)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("EapSecurIDDbUtils::OpenDatabaseL(): - Start - aIndexType=%d, aIndex=%d, aTunnelingType=0xfe%06x%08x\n"),
-		aIndexType,
-		aIndex,
-		aTunnelingType.get_vendor_id(),
-		aTunnelingType.get_vendor_type()));
+#ifdef USE_EAP_EXPANDED_TYPES
 
-    EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: EapSecurIDDbUtils::OpenDatabaseL()\n"));
+	TUint aTunnelingVendorType = aTunnelingType.get_vendor_type();
+
+#else
+
+	TUint aTunnelingVendorType = static_cast<TUint>(aTunnelingType);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
 
 	// 1. Open/create a database	
+	
+	// Connect to the DBMS server.
+	User::LeaveIfError(aSession.Connect());		
+	CleanupClosePushL(aSession);	
+	// aSession and aDatabase are pushed to the cleanup stack even though they may be member
+	// variables of the calling class and would be closed in the destructor anyway. This ensures
+	// that if they are not member variables they will be closed. Closing the handle twice
+	// does no harm.	
+	
+#ifdef SYMBIAN_SECURE_DBMS
+	
+	// Create the secure shared database with the specified secure policy.
+	// Database will be created in the data caging path for DBMS (C:\private\100012a5).
+	
+	TInt err = aDatabase.Create(aSession, KDatabaseName, KSecureUIDFormat);
 
-	TInt error(KErrNone);
-	TFileName aPrivateDatabasePathName;
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSecurIDDbUtils::OpenDatabaseL - Created Secure DB for eapsecurid.dat. err=%d\n"), err));
 
-	EapPluginTools::CreateDatabaseLC(
-		aDatabase,
-		aFileServerSession,
-		error,
-		KSecurIDDatabaseName,
-		aPrivateDatabasePathName);
-
-	if(error == KErrNone)
+	
+	if(err == KErrNone)
 	{
 		aDatabase.Close();
-	}
-	else if (error != KErrAlreadyExists) 
+		
+	} else if (err != KErrAlreadyExists) 
 	{
-		User::LeaveIfError(error);
+		User::LeaveIfError(err);
 	}
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSecurIDDbUtils::OpenDatabaseL(): - calls aDatabase.Open()\n")));
-
-	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
-
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSecurIDDbUtils::OpenDatabaseL(): - Opened private DB for EAP-SecurID. error=%d\n"), error));
-
-	User::LeaveIfError(error);
+	User::LeaveIfError(aDatabase.Open(aSession, KDatabaseName, KSecureUIDFormat));
+	CleanupClosePushL(aDatabase);		
+		
+#else
+	// For non-secured database. The database will be created in the old location (c:\system\data).
+	
+	RFs fsSession;		
+	User::LeaveIfError(fsSession.Connect());
+	CleanupClosePushL(fsSession);	
+	TInt err = aDatabase.Create(fsSession, KDatabaseName);
+	
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapSecurIDDbUtils::OpenDatabaseL - Created Non-Secure DB for eapsecurid.dat. err=%d\n"), err));
+	
+	
+	if(err == KErrNone)
+	{
+		aDatabase.Close();
+		
+	} else if (err != KErrAlreadyExists) 
+	{
+		User::LeaveIfError(err);
+	}
+	CleanupStack::PopAndDestroy(); // close fsSession
+	
+	User::LeaveIfError(aDatabase.Open(aSession, KDatabaseName));
+	CleanupClosePushL(aDatabase);		
+	    
+#endif // #ifdef SYMBIAN_SECURE_DBMS
 
 	// 2. Create the eap-securid table to database (ignore error if exists)
 	// Table columns:
 	//// NAME ///////////////////////////////////////////////// TYPE ////////////// Constant /////////
 	//| ServiceType											| UNSIGNED INTEGER | KServiceType      |//
 	//| ServiceIndex										| UNSIGNED INTEGER | KServiceIndex     |//
-	//| TunnelingTypeVendorId                               | UNSIGNED INTEGER  | KTunnelingTypeVendorId    |//
 	//| TunnelingType										| UNSIGNED INTEGER | KTunnelingType    |//
 	//| EAP_SECURID_identity				        		| VARCHAR(255)     | cf_str_EAP_SECURID_identity_literal         |//
 	//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,43 +123,22 @@ void EapSecurIDDbUtils::OpenDatabaseL(
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQLCreateTable1, "CREATE TABLE %S \
-		(%S UNSIGNED INTEGER, \
-		 %S UNSIGNED INTEGER, \
-		 %S UNSIGNED INTEGER, \
-		 %S UNSIGNED INTEGER, \
-		 %S VARCHAR(255))");
-
-	sqlStatement.Format(KSQLCreateTable1,
-		&KSecurIDTableName,
-		&KServiceType,
-		&KServiceIndex,
-		&KTunnelingTypeVendorId,
-		&KTunnelingType,
-		&cf_str_EAP_SECURID_identity_literal);
-
-	error = aDatabase.Execute(sqlStatement);
-	if (error != KErrNone && error != KErrAlreadyExists)
+	_LIT(KSQLCreateTable1, "CREATE TABLE %S (%S UNSIGNED INTEGER, \
+											 %S UNSIGNED INTEGER, \
+											 %S UNSIGNED INTEGER, \
+											 %S VARCHAR(255))");
+	sqlStatement.Format(KSQLCreateTable1, &KSecurIDTableName, &KServiceType, &KServiceIndex, &KTunnelingType, &cf_str_EAP_SECURID_identity_literal);
+	err = aDatabase.Execute(sqlStatement);
+	if (err != KErrNone && err != KErrAlreadyExists)
 	{
-		User::Leave(error);
+		User::Leave(err);
 	}
 
 	// 4. Check if database table contains a row for this service type and id  
 	
-	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-
-	sqlStatement.Format(KSQLQueryRow,
-		&cf_str_EAP_SECURID_identity_literal,
-		&KSecurIDTableName, 
-		&KServiceType,
-		aIndexType,
-		&KServiceIndex,
-		aIndex,
-		&KTunnelingTypeVendorId,
-		aTunnelingType.get_vendor_id(),
-		&KTunnelingType, 
-		aTunnelingType.get_vendor_type());
-
+	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLQueryRow, &cf_str_EAP_SECURID_identity_literal, &KSecurIDTableName, 
+		&KServiceType, aIndexType, &KServiceIndex, aIndex, &KTunnelingType, aTunnelingVendorType);
 	RDbView view;
 	User::LeaveIfError(view.Prepare(aDatabase, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
 	// View must be closed when no longer needed
@@ -143,7 +146,7 @@ void EapSecurIDDbUtils::OpenDatabaseL(
 	User::LeaveIfError(view.EvaluateAll());
 	// 5. If row is not found then add it
 	TInt rows = view.CountL();
-	CleanupStack::PopAndDestroy(&view);
+	CleanupStack::PopAndDestroy(); // view
 	if (rows == 0)
 	{
 		_LIT(KSQLInsert, "SELECT * FROM %S");
@@ -159,8 +162,7 @@ void EapSecurIDDbUtils::OpenDatabaseL(
 		view.InsertL();
 		view.SetColL(colSet->ColNo(KServiceType), static_cast<TInt> (aIndexType));
 		view.SetColL(colSet->ColNo(KServiceIndex), aIndex);
-		view.SetColL(colSet->ColNo(KTunnelingTypeVendorId), aTunnelingType.get_vendor_id());
-		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingType.get_vendor_type());
+		view.SetColL(colSet->ColNo(KTunnelingType), aTunnelingVendorType);
 		view.SetColL(colSet->ColNo(cf_str_EAP_SECURID_identity_literal), default_EAP_SECURID_identity);
 		view.PutL();
 		
@@ -169,11 +171,9 @@ void EapSecurIDDbUtils::OpenDatabaseL(
 		CleanupStack::PopAndDestroy( &view ); // Close view.
 	} 
 	
+	CleanupStack::PopAndDestroy(); // sqlStatement
+	CleanupStack::Pop(2); // database, session
 	aDatabase.Compact();
-
-	CleanupStack::PopAndDestroy( buf );
-	CleanupStack::Pop( &aDatabase );	
-	CleanupStack::Pop( &aFileServerSession );
 }
 
 // End of File

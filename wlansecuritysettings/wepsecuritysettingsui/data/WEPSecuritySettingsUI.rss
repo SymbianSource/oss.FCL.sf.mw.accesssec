@@ -1,0 +1,390 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: This file contains all the resources for the WEP Security Settings UI. 
+*
+*/
+
+/*
+* %version: tr1cfwln#7.1.11 %
+*/
+
+//  RESOURCE IDENTIFIER
+NAME    AWSS // 4 letter ID
+
+//  INCLUDES
+#include <eikon.rh>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.loc>
+#include <avkon.hrh>
+
+#include "WEPSecuritySettingsUI.hrh"
+#include <wepsecuritysettingsui.loc>
+
+
+//  RESOURCE DEFINITIONS
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf="WEPSecuritySettings"; }
+
+
+//----------------------------------------------------
+//
+//  r_wep_security_settings_menubar
+//  Menubar    
+//
+//----------------------------------------------------
+//
+RESOURCE MENU_BAR r_wep_security_settings_menubar
+    {
+    titles=
+        {
+        MENU_TITLE 
+            { 
+            menu_pane = r_wep_security_settings_menu;
+            }
+        };
+    }
+
+
+
+//----------------------------------------------------
+//
+//  r_wep_security_settings_menu
+//  The Options menu
+//
+//----------------------------------------------------
+//
+RESOURCE MENU_PANE r_wep_security_settings_menu
+    {
+    items=
+        {
+        MENU_ITEM 
+            { 
+            command = EWepSelCmdChange; 
+            txt = qtn_set_options_change; 
+            flags = EEikMenuItemAction;
+            },
+
+        MENU_ITEM 
+            { 
+            command = EAknCmdHelp; 
+            txt = qtn_options_help; 
+            },
+
+        MENU_ITEM 
+            { 
+            command = EAknCmdExit; 
+            txt = qtn_options_exit; 
+            }
+        };
+    }
+
+
+
+//----------------------------------------------------
+//
+//    r_wepsettings_pane_softkeys_options_back_edit
+//    WEP Security Settings softkeys
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_wepsettings_pane_softkeys_options_back_edit
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_back; },
+        CBA_BUTTON { id = EWepSelCmdChange; txt = qtn_msk_change; }
+        };
+    }
+
+
+
+//----------------------------------------------------
+//
+//  r_wepsettings_dialog
+//  WEP Security Settings main dialog
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_wepsettings_dialog
+    {
+    flags = EEikDialogFlagWait | EEikDialogFlagNoDrag | 
+            EEikDialogFlagNoTitleBar | EEikDialogFlagFillAppClientRect |
+            EEikDialogFlagCbaButtons;
+
+    buttons = r_wepsettings_pane_softkeys_options_back_edit;
+
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtSettingListBox;
+            id = KWepMainSettingsListboxId;
+            control = LISTBOX 
+                { 
+                flags = EAknListBoxSelectionList;
+                };
+            }
+        };
+    }
+
+
+
+//----------------------------------------------------
+//   
+//  r_setting_app_edwin_key_data
+//  Window to enter key data
+//
+//----------------------------------------------------
+//
+RESOURCE EDWIN r_setting_app_edwin_key_data
+    {
+    avkon_flags = EAknEditorFlagNoT9 | EAknEditorFlagLatinInputModesOnly;
+    lines = 8;
+    }
+
+
+//----------------------------------------------------
+//   
+//  r_text_setting_page_key_data
+//  Setting page for entering key data
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_text_setting_page_key_data
+    {
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    number= EAknSettingPageNoOrdinalDisplayed;
+    label= qtn_wlan_sett_wep_key_data;
+    type = EEikCtEdwin;
+    editor_resource_id = r_setting_app_edwin_key_data;
+    }
+
+
+
+//----------------------------------------------------
+//   
+//  r_setting_app_listbox
+//  Listbox for setting page
+//
+//----------------------------------------------------
+//
+RESOURCE LISTBOX r_setting_app_listbox
+    {
+    flags = EEikListBoxMultipleSelection;
+    }
+
+
+
+//----------------------------------------------------
+//
+//    r_wepsettings_pane_softkeys_ok_cancel_select
+//    WEP Security Settings softkeys
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_wepsettings_pane_softkeys_ok_cancel_select
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOk; txt = text_softkey_ok; },
+        CBA_BUTTON { id = EAknSoftkeyCancel; txt = text_softkey_cancel; },
+        CBA_BUTTON { id = EAknSoftkeyOk; txt = qtn_msk_select; }
+        };
+    }
+
+
+//----------------------------------------------------
+//   
+//  r_radio_button_setting_page
+//  Setting page with radio buttons
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_radio_button_setting_page
+    {
+    number = EAknSettingPageNoOrdinalDisplayed;
+    softkey_resource = r_wepsettings_pane_softkeys_ok_cancel_select;
+    type =  EAknSetListBox;
+    editor_resource_id= r_setting_app_listbox;
+    }
+
+
+
+//----------------------------------------------------
+//   
+//    r_wep_sec_sett_conf_query
+//    ConfirmationQuery dialog
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_wep_sec_sett_conf_query
+	{
+	flags = EGeneralQueryFlags;
+	buttons = R_AVKON_SOFTKEYS_YES_NO__YES;
+	items =
+		{
+		DLG_LINE
+			{
+			type = EAknCtQuery;
+			id = EGeneralQuery;
+			control = AVKON_CONFIRMATION_QUERY
+				{
+				layout = EConfirmationQueryLayout;
+				};
+			}
+		};
+	}
+
+
+
+RESOURCE TBUF r_wep_view_text_cannot_access_db      
+    { 
+    buf = qtn_set_err_db_inaccessible; 
+    }
+
+RESOURCE TBUF r_wep_key_in_use                      
+    { 
+    buf = qtn_wlan_sett_wep_key_in_use; 
+    }
+
+RESOURCE TBUF r_wep_authentication                  
+    { 
+    buf = qtn_wlan_sett_wep_auth_mode; 
+    }
+
+RESOURCE TBUF r_wep_key_configuration               
+    { 
+    buf = qtn_wlan_sett_wep_key_settings; 
+    }
+
+RESOURCE TBUF r_wep_key_number_1                    
+    { 
+    buf = qtn_wlan_sett_wep_key_1; 
+    }
+
+RESOURCE TBUF r_wep_key_number_2                    
+    { 
+    buf = qtn_wlan_sett_wep_key_2; 
+    }
+
+RESOURCE TBUF r_wep_key_number_3                    
+    { 
+    buf = qtn_wlan_sett_wep_key_3; 
+    }
+
+RESOURCE TBUF r_wep_key_number_4                    
+    { 
+    buf = qtn_wlan_sett_wep_key_4; 
+    }
+    
+RESOURCE TBUF r_wep_tab_key_1
+    {
+    buf = qtn_wlan_tab_wep_key_1;
+    }
+    
+RESOURCE TBUF r_wep_tab_key_2
+    {
+    buf = qtn_wlan_tab_wep_key_2;
+    }
+    
+RESOURCE TBUF r_wep_tab_key_3
+    {
+    buf = qtn_wlan_tab_wep_key_3;
+    }
+    
+RESOURCE TBUF r_wep_tab_key_4
+    {
+    buf = qtn_wlan_tab_wep_key_4;
+    }
+
+RESOURCE TBUF r_wep_authentication_open             
+    { 
+    buf = qtn_wlan_sett_wep_auth_mode_open; 
+    }
+
+RESOURCE TBUF r_wep_authentication_shared           
+    { 
+    buf = qtn_wlan_sett_wep_auth_mode_shared; 
+    }
+
+RESOURCE TBUF r_wep_key_length                      
+    { 
+    buf = qtn_wlan_sett_wep_key_length; 
+    }
+
+RESOURCE TBUF r_wep_key_format                      
+    { 
+    buf = qtn_wlan_sett_wep_key_format; 
+    }
+
+RESOURCE TBUF r_wep_key_data                        
+    { 
+    buf = qtn_wlan_sett_wep_key_data; 
+    }
+
+RESOURCE TBUF r_wep_key_length_64_bits              
+    { 
+    buf = qtn_wlan_sett_wep_key_length_64_bits; 
+    }
+
+RESOURCE TBUF r_wep_key_length_128_bits
+    { 
+    buf = qtn_wlan_sett_wep_key_length_128_bits; 
+    }
+
+RESOURCE TBUF r_wep_key_length_256_bits             
+    { 
+    buf = qtn_wlan_sett_wep_key_length_256_bits; 
+    }
+
+RESOURCE TBUF r_wep_key_format_ascii                
+    { 
+    buf = qtn_wlan_sett_wep_key_format_ascii; 
+    }
+
+RESOURCE TBUF r_wep_key_format_hex                  
+    { 
+    buf = qtn_wlan_sett_wep_key_format_hexa; 
+    }
+
+RESOURCE TBUF r_wep_key_data_must_be_defined        
+    { 
+    buf = qtn_selec_setting_compulsory; 
+    }
+
+RESOURCE TBUF r_wep_key_data_stars                  
+    { 
+    buf = qtn_wlan_sett_wep_key_format_hexa; 
+    }
+
+RESOURCE TBUF r_wep_data_missing                    
+    { 
+    buf = qtn_wlan_quest_wep_key_data_missing; 
+    }
+
+RESOURCE TBUF r_info_wep_key_too_short              
+    { 
+    buf = qtn_wlan_info_wep_key_too_short; 
+    }
+
+RESOURCE TBUF r_info_wep_key_illegal_chars          
+    { 
+    buf = qtn_wlan_info_wep_key_illegal_chars; 
+    }
+
+// End of File

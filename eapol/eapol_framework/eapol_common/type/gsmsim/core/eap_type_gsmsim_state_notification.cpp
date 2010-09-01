@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 10 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -65,6 +65,8 @@ EAP_FUNC_EXPORT eap_type_gsmsim_state_notification_c::eap_type_gsmsim_state_noti
 }
 
 
+#if defined(USE_EAP_EXPANDED_TYPES)
+
 EAP_FUNC_EXPORT eap_type_gsmsim_state_notification_c::eap_type_gsmsim_state_notification_c(
 	abs_eap_am_tools_c * const tools,
 	const eap_am_network_id_c * const send_network_id,
@@ -89,6 +91,8 @@ EAP_FUNC_EXPORT eap_type_gsmsim_state_notification_c::eap_type_gsmsim_state_noti
 		allow_send_eap_success)
 {
 }
+
+#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 
 
 EAP_FUNC_EXPORT eap_type_gsmsim_state_notification_c::eap_type_gsmsim_state_notification_c(

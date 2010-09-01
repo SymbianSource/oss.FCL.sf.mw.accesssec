@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 25 %
 */
 
 #if !defined(_SIMPLE_CONFIG_AM_SERVICES_H_)
@@ -52,11 +52,10 @@ protected:
 public:
 	//--------------------------------------------------
 
-	/* The destructor does nothing */
 	virtual ~simple_config_am_services_c()
 	{
 	}
-	
+
 	/**
 	 * Object must indicate it's validity.
 	 * If object initialization fails this function must return false.

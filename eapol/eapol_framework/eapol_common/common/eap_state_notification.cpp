@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 20.1.2 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -33,13 +33,10 @@
 #include "eap_am_tools.h"
 #include "eap_tools.h"
 #include "eapol_key_types.h"
-#include "eap_am_network_id.h"
 
 
 EAP_FUNC_EXPORT eap_state_notification_c::~eap_state_notification_c()
 {
-	delete m_send_network_id;
-	m_send_network_id = 0;
 }
 
 EAP_FUNC_EXPORT eap_state_notification_c::eap_state_notification_c(
@@ -61,30 +58,15 @@ EAP_FUNC_EXPORT eap_state_notification_c::eap_state_notification_c(
 	, m_eap_type(eap_type_none)
 	, m_previous_state(previous_state)
 	, m_current_state(current_state)
-	, m_send_network_id(0)
+	, m_send_network_id(send_network_id)
 	, m_is_client(is_client)
 	, m_eap_identifier(eap_identifier)
 	, m_allow_send_eap_success(allow_send_eap_success)
 	, m_authentication_error(eap_status_ok)
 {
-	if (send_network_id == 0
-		|| send_network_id->get_is_valid() == false)
-	{
-		(void)EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		return;
-	}
-
-	m_send_network_id = send_network_id->copy();
-
-	if (m_send_network_id == 0
-		|| m_send_network_id->get_is_valid() == false)
-	{
-		delete m_send_network_id;
-		m_send_network_id = 0;
-		(void)EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		return;
-	}
 }
+
+#if defined(USE_EAP_EXPANDED_TYPES)
 
 EAP_FUNC_EXPORT eap_state_notification_c::eap_state_notification_c(
 	abs_eap_am_tools_c * const tools,
@@ -105,30 +87,15 @@ EAP_FUNC_EXPORT eap_state_notification_c::eap_state_notification_c(
 	, m_eap_type(eap_type)
 	, m_previous_state(previous_state)
 	, m_current_state(current_state)
-	, m_send_network_id(0)
+	, m_send_network_id(send_network_id)
 	, m_is_client(is_client)
 	, m_eap_identifier(eap_identifier)
 	, m_allow_send_eap_success(allow_send_eap_success)
 	, m_authentication_error(eap_status_ok)
 {
-	if (send_network_id == 0
-		|| send_network_id->get_is_valid() == false)
-	{
-		(void)EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		return;
-	}
-
-	m_send_network_id = send_network_id->copy();
-
-	if (m_send_network_id == 0
-		|| m_send_network_id->get_is_valid() == false)
-	{
-		delete m_send_network_id;
-		m_send_network_id = 0;
-		(void)EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		return;
-	}
 }
+
+#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 
 
 EAP_FUNC_EXPORT eap_state_notification_c::eap_state_notification_c(
@@ -150,29 +117,12 @@ EAP_FUNC_EXPORT eap_state_notification_c::eap_state_notification_c(
 	, m_eap_type(eap_type)
 	, m_previous_state(previous_state)
 	, m_current_state(current_state)
-	, m_send_network_id(0)
+	, m_send_network_id(send_network_id)
 	, m_is_client(is_client)
 	, m_eap_identifier(eap_identifier)
 	, m_allow_send_eap_success(allow_send_eap_success)
 	, m_authentication_error(eap_status_ok)
 {
-	if (send_network_id == 0
-		|| send_network_id->get_is_valid() == false)
-	{
-		(void)EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		return;
-	}
-
-	m_send_network_id = send_network_id->copy();
-
-	if (m_send_network_id == 0
-		|| m_send_network_id->get_is_valid() == false)
-	{
-		delete m_send_network_id;
-		m_send_network_id = 0;
-		(void)EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		return;
-	}
 }
 
 EAP_FUNC_EXPORT const eap_am_network_id_c * eap_state_notification_c::get_send_network_id() const
@@ -421,7 +371,6 @@ EAP_FUNC_EXPORT eap_const_string eap_state_notification_c::get_protocol_string(c
 #if defined(USE_WAPI_CORE)
 		else EAP_IF_RETURN_STRING(protocol, eapol_key_handshake_type_wai_handshake)
 #endif //#if defined(USE_WAPI_CORE)
-		else EAP_IF_RETURN_STRING(protocol, eapol_key_handshake_type_authenticated)
 		else
 		{
 			return EAPL("Unknown EAPOL protocol");

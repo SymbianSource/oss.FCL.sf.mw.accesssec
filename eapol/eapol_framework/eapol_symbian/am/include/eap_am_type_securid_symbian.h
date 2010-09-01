@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16.1.11 %
+* %version: 18 %
 */
 
 #ifndef EAP_AM_TYPE_SECURID_SYMBIAN_H
@@ -27,8 +27,7 @@
 #include "abs_eap_base_type.h"
 #include "eap_am_type_securid.h"
 #include "eap_am_network_id.h"
-#include "eap_auth_notifier.h"
-
+#include "EapSecurIDNotifierStructs.h"
 #include <EapType.h>
 #include <d32dbms.h>
 
@@ -39,16 +38,11 @@ const TUint KDefaultTimeoutEAPSecurId = 120000;
 * For Symbian OS.
 */
 class EAP_EXPORT eap_am_type_securid_symbian_c
-	: public CActive
-	, public eap_am_type_securid_c
-	, public abs_eap_base_timer_c
-	, public MNotificationCallback
-
-
+	: public CActive, public eap_am_type_securid_c
 {
 private:
 
-	RFs m_session;
+	RDbs m_session;
 
 	RDbNamedDatabase m_database;
 
@@ -57,17 +51,15 @@ private:
 		EHandlingIdentityQuery,
 		EHandlingPasscodeQuery,
 		EHandlingPincodeQuery,
-		EHandlingGTCQuery,
-		EHandlingTimerCall
+		EHandlingGTCQuery
 	};
 
 	TState m_state;
 
 	RNotifier m_notifier;
 
-	CEapAuthNotifier::TEapDialogInfo * m_dialog_data_ptr;
-	TPckg<CEapAuthNotifier::TEapDialogInfo> * m_dialog_data_pckg_ptr;
-
+	TEapSecurIDStruct * m_dialog_data_ptr;
+	TPckg<TEapSecurIDStruct> * m_dialog_data_pckg_ptr;
 
 	abs_eap_am_tools_c * const m_am_tools;
 
@@ -96,12 +88,19 @@ private:
 	// This holds the max session time read from the configuration file.
 	TInt64 m_max_session_time;
 	
+	// This is the vendor-type for tunneling EAP type.
+	// Valid for both expanded and non-expanded EAP types.
+	// This is used since m_tunneling_type can not be used in the same way 
+	// in expanded and non-expanded cases. 
+	// Unlike EAP type, Tunneling type is still non-expanded
+	// for both cases especially for using in the EAP databases.
+	u32_t m_tunneling_vendor_type;	
+
+	u32_t m_eap_vendor_type; // This is needed in certain cases.
+	
 	void send_error_notification(const eap_status_e error);
 	
 	bool is_session_validL();	
-
-	CEapAuthNotifier* iEapAuthNotifier;
-
 
 protected:
 
@@ -205,17 +204,6 @@ public:
 	 * Returns appropriate error if storing fails. eap_status_ok for successful storing.
 	 */
 	eap_status_e store_authentication_time();
-
-	void DlgComplete( TInt aStatus );
-
-	TInt IsDlgReadyToCompleteL();
-
-	EAP_FUNC_IMPORT eap_status_e timer_expired(
-		const u32_t id, void *data);
-
-	//
-	EAP_FUNC_IMPORT eap_status_e timer_delete_data(
-		const u32_t id, void *data);
 
 }; // class eap_am_type_securid_symbian_c
 

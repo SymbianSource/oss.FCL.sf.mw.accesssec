@@ -1,0 +1,42 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  File that exports the files belonging to 
+:                EAP-TLS-PEAP DB API
+*
+*/
+
+/*
+* %version: tr1cfwln#7.1.2 %
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+../inc/CertEntry.h     MW_LAYER_PLATFORM_EXPORT_PATH(CertEntry.h)
+../inc/AbsEapTlsPeapUiCertificates.h     MW_LAYER_PLATFORM_EXPORT_PATH(AbsEapTlsPeapUiCertificates.h)
+../inc/EapTlsPeapUiCipherSuite.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTlsPeapUiCipherSuite.h)
+../inc/EapTlsPeapUiEapType.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTlsPeapUiEapType.h)
+../inc/EapTlsPeapUiConnection.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTlsPeapUiConnection.h)
+../inc/EapTlsPeapUiCertificate.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTlsPeapUiCertificate.h)
+../inc/EapTlsPeapUiCipherSuites.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTlsPeapUiCipherSuites.h)
+../inc/EapTlsPeapUiTlsPeapData.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTlsPeapUiTlsPeapData.h)
+../inc/EapTlsPeapUiEapTypes.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTlsPeapUiEapTypes.h)
+../inc/EapTlsPeapUiDataConnection.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTlsPeapUiDataConnection.h)
+../inc/EapTlsPeapUiCertificates.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTlsPeapUiCertificates.h)
+../inc/EapFastNotifierStruct.h    MW_LAYER_PLATFORM_EXPORT_PATH(EapFastNotifierStruct.h)
+../inc/EapTtlsPapNotifierStruct.h    MW_LAYER_PLATFORM_EXPORT_PATH(EapTtlsPapNotifierStruct.h)

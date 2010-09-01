@@ -11,12 +11,12 @@
 *
 * Contributors:
 *
-* Description:  This file defines the constants and types of the protected setup protocol.
+* Description:  EAP and WLAN authentication protocols.
 *
 */
 
 /*
-* %version: 26 %
+* %version: 22.1.3 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -61,7 +61,7 @@ EAP_FUNC_EXPORT network_key_and_index_c::network_key_and_index_c(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT u8_t network_key_and_index_c::get_network_key_index() const
+EAP_FUNC_EXPORT u8_t network_key_and_index_c::get_network_key_index()
 {
 	return m_network_key_index;
 }
@@ -76,13 +76,6 @@ EAP_FUNC_EXPORT void network_key_and_index_c::set_network_key_index(u8_t index)
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_variable_data_c * network_key_and_index_c::get_network_key()
-{
-	return &m_network_key;
-}
-
-//--------------------------------------------------
-
-EAP_FUNC_EXPORT const eap_variable_data_c * network_key_and_index_c::get_network_key_const() const
 {
 	return &m_network_key;
 }

@@ -16,14 +16,11 @@
 */
 
 /*
-* %version: 16.1.11 %
+* %version: 18 %
 */
 
 #ifndef EAP_AM_TYPE_LEAP_SYMBIAN_H
 #define EAP_AM_TYPE_LEAP_SYMBIAN_H
-
-// This flag is for testing memory leaks that occurs in QT notifier.
-#define USE_EAP_AUTH_NOTIFIER
 
 // INCLUDES
 
@@ -31,11 +28,7 @@
 #include "abs_eap_base_type.h"
 #include "eap_am_type_leap.h"
 #include "eap_am_network_id.h"
-
-#if defined(USE_EAP_AUTH_NOTIFIER)
-#include "eap_auth_notifier.h"
-#endif //#if defined(USE_EAP_AUTH_NOTIFIER)
-
+#include "EapLeapNotifierStructs.h"
 #include <EapType.h>
 #include <d32dbms.h>
 
@@ -49,10 +42,6 @@ const TUint KDefaultTimeoutLEAP = 120000;
 */
 class EAP_EXPORT eap_am_type_leap_symbian_c
 : public CActive, public eap_am_type_leap_c
-#if defined(USE_EAP_AUTH_NOTIFIER)
-	, public MNotificationCallback
-#endif //#if defined(USE_EAP_AUTH_NOTIFIER)
-
 {
 private:
 	//--------------------------------------------------
@@ -61,17 +50,15 @@ private:
 
 	abs_eap_base_type_c * const m_partner;
 
-	RFs m_session;
+	RDbs m_session;
 
 	RDbNamedDatabase m_database;
 
-#if defined(USE_EAP_AUTH_NOTIFIER)
 	RNotifier m_notifier;
 
-	CEapAuthNotifier::TEapDialogInfo * m_input_output_data_ptr;
+	TEapLeapUsernamePasswordInfo * m_input_output_data_ptr;
 
-	TPckg<CEapAuthNotifier::TEapDialogInfo> * m_input_output_pckg_ptr;
-#endif //#if defined(USE_EAP_AUTH_NOTIFIER)
+	TPckg<TEapLeapUsernamePasswordInfo> * m_input_output_pckg_ptr;
 
 	eap_am_network_id_c m_receive_network_id;
 
@@ -95,9 +82,18 @@ private:
 
 	bool m_shutdown_was_called;
 	
-
+	bool m_is_notifier_connected; // Tells if notifier server is connected.
+	
 	// This holds the max session time read from the configuration file.
 	TInt64 m_max_session_time;
+	
+	// This is the vendor-type for tunneling EAP type.
+	// Valid for both expanded and non-expanded EAP types.
+	// This is used since m_tunneling_type can not be used in the same way 
+	// in expanded and non-expanded cases. 
+	// Unlike EAP type, Tunneling type is still non-expanded
+	// for both cases especially for using in the EAP databases.
+	u32_t m_tunneling_vendor_type;	
 	
 	void send_error_notification(const eap_status_e error);
 
@@ -109,9 +105,6 @@ private:
 	 
 	bool is_session_validL();	
 
-#if defined(USE_EAP_AUTH_NOTIFIER)
-	CEapAuthNotifier* iEapAuthNotifier;
-#endif //#if defined(USE_EAP_AUTH_NOTIFIER)
 
 	//--------------------------------------------------
 protected:
@@ -204,10 +197,6 @@ public:
 	 */
 	eap_status_e store_authentication_time();
 
-	void DlgComplete( TInt aStatus );
-
-	TInt IsDlgReadyToCompleteL();
-	
 }; // class eap_am_type_leap_symbian_c
 
 

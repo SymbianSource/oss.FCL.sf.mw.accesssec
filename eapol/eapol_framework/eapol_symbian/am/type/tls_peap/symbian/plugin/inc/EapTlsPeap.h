@@ -16,23 +16,21 @@
 */
 
 /*
-* %version: 27 %
+* %version: 17.1.2 %
 */
 
 #ifndef _EAPTLSPEAP_H_
 #define _EAPTLSPEAP_H_
 
 // INCLUDES
-#include <EapTypePlugin.h>
+#include <EapType.h>
 #include "eap_header.h"
-#if defined(USE_FAST_EAP_TYPE)
-#include "tls_application_eap_fast.h"
-#endif
+
 // CLASS DECLARATION
 /**
 * Class that implements the generic EAP type interface. Implements EAP TLS protocol.
 */
-class CEapTlsPeap : public CEapTypePlugin
+class CEapTlsPeap : public CEapType
 {
 public:		
 
@@ -122,13 +120,16 @@ public:
 	
 #endif // #ifdef USE_EAP_SIMPLE_CONFIG
 	
-
+	/**
+	* Invokes the configuration UI.
+	**/
+	TInt InvokeUiL();
 	
 	/**
 	* Gets information about EAP type. 
 	* @return Pointer to a class that contains the EAP type information. Also pushed to cleanup stack.
 	*/
-	CEapTypeInfo* GetInfoL();
+	CEapTypeInfo* GetInfoLC();
 	
 	/**
 	* Deletes EAP type configuration
@@ -150,7 +151,7 @@ public:
 	* EAP type. 
 	* @param aTunnelingType Type number for the tunneling type
 	*/	
-	void SetTunnelingType(const TEapExpandedType aTunnelingType);
+	void SetTunnelingType(const TInt aTunnelingType);
 
 	/**
 	* Changes the index of the saved parameters.
@@ -185,12 +186,7 @@ protected:
 	* Constructor initialises member variables.
 	*/
 	CEapTlsPeap(const TIndexType aIndexType, const TInt aIndex, const eap_type_value_e aEapType);
-
-#if defined(USE_FAST_EAP_TYPE)
-	tls_application_eap_fast_c* GetTlsInterfaceL(abs_eap_am_tools_c* const aTools, 
-											   const bool is_client_when_true,
-											   const eap_am_network_id_c * const receive_network_id);	
-#endif
+	
 private:
 
 #ifdef USE_PAC_STORE
@@ -217,16 +213,6 @@ private:
 	
 	// EAP array for deleting and changing index
 	RImplInfoPtrArray iEapArray;
-	
-#if defined(USE_FAST_EAP_TYPE)
-	tls_application_eap_fast_c* iApplication;
-#endif	
-		/// This is pointer to the tools class.
-	abs_eap_am_tools_c * const m_am_tools;
-	
-	eap_base_type_c* iType;
-
-
 };
 
 #endif // _EAPTLSPEAP_H_

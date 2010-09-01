@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 7.1.2 %
 */
 
 #if !defined(_EAP_AM_SYMBIAN_H_)
@@ -92,7 +92,7 @@ public:
 
 #if defined(USE_EAPOL_LLC_INTERFACE)
 	//
-	EAP_FUNC_IMPORT eap_status_e packet_process(
+	EAP_FUNC_EXPORT eap_status_e packet_process(
 		RMBufChain& aPdu);
 #endif //#if defined(USE_EAPOL_LLC_INTERFACE)
 

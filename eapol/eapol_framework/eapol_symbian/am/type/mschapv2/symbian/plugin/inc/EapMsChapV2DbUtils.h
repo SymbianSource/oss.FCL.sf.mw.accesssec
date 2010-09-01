@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8.1.8 %
+* %version: 10 %
 */
 
 #ifndef _EAPMSCHAPV2DBUTILS_H_
@@ -30,10 +30,21 @@
 
 // LOCAL CONSTANTS
 
-// For EAP-MsChapV2 private database. Database will be in the private folder of EAP-server (20026FCB).
-// The maximum length of database name is 0x40 (KDbMaxName), which is defined in d32dbms.h.
+#ifdef SYMBIAN_SECURE_DBMS
+// For EAP MSCHAPV2 secure database.
+// Full path is not needed. The database eapmsmhapv2.dat will be saved in the 
+// data cage path for DBMS. So it will be in "\private\100012a5\eapmsmhapv2.dat" in C: drive.
+// The maximum length of database name is 0x40 (KDbMaxName) , which is defined in d32dbms.h.
 
-_LIT(KEapMsChapV2DatabaseName, "eapmschapv2.dat");
+_LIT(KDatabaseName, "c:eapmschapv2.dat");
+
+_LIT(KSecureUIDFormat, "SECURE[102072e9]"); // For the security policy.
+
+#else
+
+_LIT(KDatabaseName, "c:\\system\\data\\eapmschapv2.dat");
+
+#endif // #ifdef SYMBIAN_SECURE_DBMS
 
 _LIT(KMsChapV2TableName, "eapmschapv2");
 
@@ -43,8 +54,8 @@ class EapMsChapV2DbUtils
 public:
 	
 	static void OpenDatabaseL(
-		RDbNamedDatabase& aDatabase,
-		RFs& aFileServerSession,
+		RDbNamedDatabase& aDatabase, 
+		RDbs& aSession, 
 		const TIndexType aIndexType,
 		const TInt aIndex,
 		const eap_type_value_e aTunnelingType);
@@ -88,6 +99,7 @@ public:
 		const TIndexType aIndexType,
 		const TInt aIndex,
 		const eap_type_value_e aTunnelingType);
+
 };
 
 #endif // _EAPMSCHAPV2DBUTILS_H_

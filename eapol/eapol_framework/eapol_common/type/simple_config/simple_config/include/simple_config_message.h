@@ -11,12 +11,12 @@
 *
 * Contributors:
 *
-* Description:  This class defines one SIMPLE_CONFIG-message.
+* Description:  EAP and WLAN authentication protocols.
 *
 */
 
 /*
-* %version: 12.1.2 %
+* %version: 14 %
 */
 
 #if !defined(_SIMPLE_CONFIG_MESSAGE_H_)
@@ -32,10 +32,16 @@
 //----------------------------------------------------------------------------
 
 
-/// This class defines one SIMPLE_CONFIG-message.
+/// This class defines one SIMPLE_CONFIG-message. One SIMPLE_CONFIG message could include many SIMPLE_CONFIG-records.
 /**
  * This class defined one SIMPLE_CONFIG-message.
  * Parse and analyse of SIMPLE_CONFIG-message is asyncronous.
+ * m_analyse_index tells the index of message where asyncronous
+ * analyse of SIMPLE_CONFIG-message must continue.
+ * Analysed messages are skipped during the asyncronous
+ * analyse of messages. Asyncronous analyse is needed
+ * because of the PKI functions are asyncronous in
+ * Symbian.
  */
 class EAP_EXPORT simple_config_message_c
 {
@@ -48,8 +54,9 @@ private:
 	/// This buffer includes copy of the whole received SIMPLE_CONFIG-message data.
 	eap_variable_data_c m_simple_config_message_data;
 
-	/// This is EAP-identifier of the EAP-packet that includes SIMPLE_CONFIG-message.
+	/// This is EAP-identifier of the EAP-packet that includes SIMPLE_CONFIG-message. This is needed in XP-PEAP.
 	u8_t m_received_eap_identifier;
+
 
 	/// This indicates whether this object is client (true) or server (false). This is mostly for traces.
 	const bool m_is_client;
@@ -81,7 +88,7 @@ public:
 
 	/**
 	 * This function copies the received SIMPLE_CONFIG-message data and EAP-identifier.
-	 * EAP-identifier is needed in PEAPv0. That PEAP version uses
+	 * EAP-identifier is needed in XP PEAPv0. That stupid version uses
 	 * same EAP-identifier with PEAP header and tunneled EAP-header.
 	 */
 	EAP_FUNC_IMPORT eap_status_e set_simple_config_message_data(

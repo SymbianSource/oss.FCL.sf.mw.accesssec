@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 82.1.3 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -1629,7 +1629,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_tls_peap_c::handle_eap_identity_query(
 		}
 
 		if (user_certificate_identity != 0
-			&& user_certificate_identity->get_is_valid_data() == true)
+			&& user_certificate_identity->get_is_valid() == true)
 		{
 			eap_variable_data_c username(m_am_tools);
 			eap_variable_data_c realm(m_am_tools);
@@ -1710,7 +1710,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_tls_peap_c::handle_eap_identity_query(
 		else
 #endif //#if defined(USE_EAP_TLS_IDENTITY_PRIVACY)
 		if (user_certificate_identity != 0
-			&& user_certificate_identity->get_is_valid_data() == true)
+			&& user_certificate_identity->get_is_valid() == true)
 		{
 			EAP_TRACE_DEBUG(
 				m_am_tools,
@@ -1795,7 +1795,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_tls_peap_c::handle_eap_identity_query(
 		}
 	}
 	else if (user_certificate_identity != 0
-		&& user_certificate_identity->get_is_valid_data() == true)
+		&& user_certificate_identity->get_is_valid() == true)
 	{
 		EAP_TRACE_DEBUG(
 			m_am_tools,
@@ -1813,19 +1813,14 @@ EAP_FUNC_EXPORT eap_status_e eap_type_tls_peap_c::handle_eap_identity_query(
 	}
 	else
 	{
-		EAP_TRACE_DEBUG(
+		EAP_TRACE_ERROR(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("WARNING: EAP_type_TLS_PEAP: %s: eap_type_tls_peap_c::handle_eap_identity_query(): no identity configured, creates random identity.\n"),
+			(EAPL("EAP_type_TLS_PEAP: %s: eap_type_tls_peap_c::handle_eap_identity_query(): no identity.\n"),
 			(m_is_client == true ? "client": "server")));
 
-		// Last possibility is random username.
-		status = create_random_eap_identity(&local_identity);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_eap_identity);
 	}
 
 	status = m_current_identity.set_copy_of_buffer(&local_identity);
@@ -1947,13 +1942,11 @@ eap_status_e eap_type_tls_peap_c::check_received_eap_identifier(
 				m_am_tools,
 				TRACE_FLAGS_TLS_PEAP_ERROR,
 				(EAPL("ERROR: eap_type_tls_peap_c::check_received_eap_identifier() failed,")
-				 EAPL("status %d=%s, received EAP-type 0xfe%06x%08x=%s, received EAP-code %d, ")
+				 EAPL("status %d=%s, received EAP-type 0x%08x, received EAP-code %d, ")
 				 EAPL("received EAP-identifier %d, current EAP-identifier %d, state %s\n"),
 				 status,
 				 status_string.get_status_string(status),
-				 eap_header->get_type().get_vendor_id(),
-				 eap_header->get_type().get_vendor_type(),
-				 eap_header_string_c::get_eap_type_string(eap_header->get_type()),
+				 convert_eap_type_to_u32_t(eap_header->get_type()),
 				 eap_header->get_code(),
 				 eap_header->get_identifier(),
 				 get_last_eap_identifier(),
@@ -1977,13 +1970,11 @@ eap_status_e eap_type_tls_peap_c::check_received_eap_identifier(
 				m_am_tools,
 				TRACE_FLAGS_TLS_PEAP_ERROR,
 				(EAPL("ERROR: eap_type_tls_peap_c::check_received_eap_identifier() failed,")
-				 EAPL("status %d=%s, received EAP-type 0xfe%06x%08x=%s, received EAP-code %d, ")
+				 EAPL("status %d=%s, received EAP-type 0x%08x, received EAP-code %d, ")
 				 EAPL("received EAP-identifier %d, current EAP-identifier %d, state %s\n"),
 				 status,
 				 status_string.get_status_string(status),
-				 eap_header->get_type().get_vendor_id(),
-				 eap_header->get_type().get_vendor_type(),
-				 eap_header_string_c::get_eap_type_string(eap_header->get_type()),
+				 convert_eap_type_to_u32_t(eap_header->get_type()),
 				 eap_header->get_code(),
 				 eap_header->get_identifier(),
 				 get_last_eap_identifier(),
@@ -2142,13 +2133,11 @@ EAP_FUNC_EXPORT eap_status_e eap_type_tls_peap_c::packet_process(
 					m_am_tools,
 					TRACE_FLAGS_TLS_PEAP_ERROR,
 					(EAPL("ERROR: eap_type_tls_peap_c::packet_process() failed,")
-					 EAPL("status %d=%s, received EAP-type 0xfe%06x%08x=%s, received EAP-code %d, ")
+					 EAPL("status %d=%s, received EAP-type 0x%08x, received EAP-code %d, ")
 					 EAPL("received EAP-identifier %d, current EAP-identifier %d, state %s\n"),
 					 status,
 					 status_string.get_status_string(status),
-					 eap_header->get_type().get_vendor_id(),
-					 eap_header->get_type().get_vendor_type(),
-					 eap_header_string_c::get_eap_type_string(eap_header->get_type()),
+					 convert_eap_type_to_u32_t(eap_header->get_type()),
 					 eap_header->get_code(),
 					 eap_header->get_identifier(),
 					 get_last_eap_identifier(),
@@ -4003,11 +3992,9 @@ EAP_FUNC_EXPORT eap_status_e eap_type_tls_peap_c::tls_peap_packet_process(
 							EAP_TRACE_ERROR(
 								m_am_tools,
 								TRACE_FLAGS_DEFAULT|TRACE_TEST_VECTORS,
-								(EAPL("ERROR: EAP_type_TLS_PEAP: %s, unknown EAP-type 0xfe%06x%08x=%s\n"),
+								(EAPL("ERROR: EAP_type_TLS_PEAP: %s, unknown EAP-type 0x%08x\n"),
 								 (m_is_client == true) ? "client": "server",
-								 m_current_eap_type.get_vendor_id(),
-								 m_current_eap_type.get_vendor_type(),
-								 eap_header_string_c::get_eap_type_string(m_current_eap_type)));
+								 convert_eap_type_to_u32_t(m_current_eap_type)));
 
 							restore_saved_reassembly_state();
 							EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -4845,6 +4832,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_tls_peap_c::configure()
 
 	//----------------------------------------------------------
 
+#if defined(USE_EAP_EXPANDED_TYPES)
 	{
 		eap_variable_data_c use_eap_expanded_type(m_am_tools);
 
@@ -4878,6 +4866,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_tls_peap_c::configure()
 			}
 		}
 	}
+#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 
 	//----------------------------------------------------------
 
@@ -5153,11 +5142,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("ERROR: %s: eap_type_tls_peap_c::state_notification(): ")
-				 EAPL("authentication failed: EAP-type 0xfe%06x%08x=%s\n"),
+				 EAPL("authentication failed: EAP-type 0x%08x\n"),
 				 (m_is_client == true ? "client": "server"),
-				 m_current_eap_type.get_vendor_id(),
-				 m_current_eap_type.get_vendor_type(),
-				 eap_header_string_c::get_eap_type_string(m_current_eap_type)));
+				 convert_eap_type_to_u32_t(m_current_eap_type)));
 
 			m_tunneled_eap_type_authentication_state
 				= eap_state_authentication_terminated_unsuccessfully;
@@ -5198,11 +5185,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("%s: eap_type_tls_peap_c::state_notification(): ")
-				 EAPL("PEAPv1 authentication tunneled EAP-SUCCESS: EAP-type 0xfe%06x%08x=%s\n"),
+				 EAPL("PEAPv1 authentication tunneled EAP-SUCCESS: EAP-type 0x%08x\n"),
 				 (m_is_client == true ? "client": "server"),
-				 m_current_eap_type.get_vendor_id(),
-				 m_current_eap_type.get_vendor_type(),
-				 eap_header_string_c::get_eap_type_string(m_current_eap_type)));
+				 convert_eap_type_to_u32_t(m_current_eap_type)));
 
 			m_tunneled_eap_type_authentication_state
 				= static_cast<eap_state_variable_e>(state->get_current_state());
@@ -5220,11 +5205,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("%s: eap_type_tls_peap_c::state_notification(): ")
-				 EAPL("authentication EAP-SUCCESS: EAP-type 0xfe%06x%08x=%s\n"),
+				 EAPL("authentication EAP-SUCCESS: EAP-type 0x%08x\n"),
 				 (m_is_client == true ? "client": "server"),
-				 m_current_eap_type.get_vendor_id(),
-				 m_current_eap_type.get_vendor_type(),
-				 eap_header_string_c::get_eap_type_string(m_current_eap_type)));
+				 convert_eap_type_to_u32_t(m_current_eap_type)));
 
 			m_tunneled_eap_type_authentication_state
 				= eap_state_authentication_finished_successfully;
@@ -5406,11 +5389,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("%s: eap_type_tls_peap_c::state_notification(): TLS tunneled ")
-				 EAPL("authentication failed: EAP-type 0xfe%06x%08x=%s, tunnel type %s\n"),
+				 EAPL("authentication failed: EAP-type 0x%08x, tunnel type %s\n"),
 				 (m_is_client == true ? "client": "server"),
-				 m_current_eap_type.get_vendor_id(),
-				 m_current_eap_type.get_vendor_type(),
-				 eap_header_string_c::get_eap_type_string(m_current_eap_type),
+				 convert_eap_type_to_u32_t(m_current_eap_type),
 				 tls_trace.get_peap_version_string(m_current_peap_version)));
 
 			set_state(eap_type_tls_peap_state_failure);
@@ -5430,11 +5411,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 						TRACE_FLAGS_DEFAULT,
 						(EAPL("%s: eap_type_tls_peap_c::state_notification(): ")
 						 EAPL("TLS tunneled authentication ")
-						 EAPL("EAP-SUCCESS: EAP-type 0xfe%06x%08x=%s, tunnel type %s, style %d\n"),
+						 EAPL("EAP-SUCCESS: EAP-type 0x%08x, tunnel type %s, style %d\n"),
 						 (m_is_client == true ? "client": "server"),
-						 m_current_eap_type.get_vendor_id(),
-						 m_current_eap_type.get_vendor_type(),
-						 eap_header_string_c::get_eap_type_string(m_current_eap_type),
+						 convert_eap_type_to_u32_t(m_current_eap_type),
 						 tls_trace.get_peap_version_string(m_current_peap_version),
 						 m_use_tppd_tls_peap));
 					
@@ -5477,11 +5456,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 						TRACE_FLAGS_DEFAULT,
 						(EAPL("%s: eap_type_tls_peap_c::state_notification(): ")
 						 EAPL("TLS resumed session authentication ")
-						 EAPL("EAP-SUCCESS: EAP-type 0xfe%06x%08x=%s, m_tls_session_type=%d=%s, tunnel type %s\n"),
+						 EAPL("EAP-SUCCESS: EAP-type 0x%08x, m_tls_session_type=%d=%s, tunnel type %s\n"),
 						 (m_is_client == true ? "client": "server"),
-						 m_current_eap_type.get_vendor_id(),
-						 m_current_eap_type.get_vendor_type(),
-						 eap_header_string_c::get_eap_type_string(m_current_eap_type),
+						 convert_eap_type_to_u32_t(m_current_eap_type),
 						 get_tls_session_type(),
 						 eap_tls_trace_string_c::get_tls_session_type_string(get_tls_session_type()),
 						 tls_trace.get_peap_version_string(m_current_peap_version)));
@@ -5513,11 +5490,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 						m_am_tools,
 						TRACE_FLAGS_DEFAULT,
 						(EAPL("%s: eap_type_tls_peap_c::state_notification(): ")
-						 EAPL("plain TLS authentication EAP-SUCCESS: EAP-type 0xfe%06x%08x=%s, tunnel type %s\n"),
+						 EAPL("plain TLS authentication EAP-SUCCESS: EAP-type 0x%08x, tunnel type %s\n"),
 						 (m_is_client == true ? "client": "server"),
-						 m_current_eap_type.get_vendor_id(),
-						 m_current_eap_type.get_vendor_type(),
-						 eap_header_string_c::get_eap_type_string(m_current_eap_type),
+						 convert_eap_type_to_u32_t(m_current_eap_type),
 						 tls_trace.get_peap_version_string(m_current_peap_version)));
 
 					// Plain TLS.
@@ -5560,11 +5535,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 							EAP_TRACE_ERROR(
 								m_am_tools,
 								TRACE_FLAGS_DEFAULT|TRACE_TEST_VECTORS,
-								(EAPL("ERROR: EAP_type_TLS_PEAP: %s, unknown EAP-type 0xfe%06x%08x=%s\n"),
+								(EAPL("ERROR: EAP_type_TLS_PEAP: %s, unknown EAP-type 0x%08x\n"),
 								 (m_is_client == true) ? "client": "server",
-								 m_current_eap_type.get_vendor_id(),
-								 m_current_eap_type.get_vendor_type(),
-								 eap_header_string_c::get_eap_type_string(m_current_eap_type)));
+								 convert_eap_type_to_u32_t(m_current_eap_type)));
 							
 							EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 							set_state(eap_type_tls_peap_state_failure);
@@ -5599,11 +5572,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("%s: eap_type_tls_peap_c::state_notification(): ")
-				 EAPL("full TLS authentication: EAP-type 0xfe%06x%08x=%s\n"),
+				 EAPL("full TLS authentication: EAP-type 0x%08x\n"),
 				 (m_is_client == true ? "client": "server"),
-				 m_current_eap_type.get_vendor_id(),
-				 m_current_eap_type.get_vendor_type(),
-				 eap_header_string_c::get_eap_type_string(m_current_eap_type)));
+				 convert_eap_type_to_u32_t(m_current_eap_type)));
 		}
 		else if (state->get_current_state() == tls_peap_state_original_session_resumption)
 		{
@@ -5611,11 +5582,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("%s: eap_type_tls_peap_c::state_notification(): ")
-				 EAPL("TLS session resumption: EAP-type 0xfe%06x%08x=%s\n"),
+				 EAPL("TLS session resumption: EAP-type 0x%08x\n"),
 				 (m_is_client == true ? "client": "server"),
-				 m_current_eap_type.get_vendor_id(),
-				 m_current_eap_type.get_vendor_type(),
-				 eap_header_string_c::get_eap_type_string(m_current_eap_type)));
+				 convert_eap_type_to_u32_t(m_current_eap_type)));
 		}
 #if defined(USE_EAP_TLS_SESSION_TICKET)
 		else if (state->get_current_state() == tls_peap_state_stateless_session_resumption)
@@ -5624,11 +5593,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("%s: eap_type_tls_peap_c::state_notification(): ")
-				 EAPL("TLS stateless session resumption: EAP-type 0xfe%06x%08x=%s\n"),
+				 EAPL("TLS stateless session resumption: EAP-type 0x%08x\n"),
 				 (m_is_client == true ? "client": "server"),
-				 m_current_eap_type.get_vendor_id(),
-				 m_current_eap_type.get_vendor_type(),
-				 eap_header_string_c::get_eap_type_string(m_current_eap_type)));
+				 convert_eap_type_to_u32_t(m_current_eap_type)));
 		}
 #endif // #if defined(USE_EAP_TLS_SESSION_TICKET)
 #if defined(USE_EAP_TLS_PEAP_TPPD_PEAP_V1_NEW_FIXES)
@@ -5639,11 +5606,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("%s: eap_type_tls_peap_c::state_notification(): ")
-				 EAPL("PEAPv1 waits EAP-Success or tunneled packet: EAP-type 0xfe%06x%08x=%s\n"),
+				 EAPL("PEAPv1 waits EAP-Success or tunneled packet: EAP-type 0x%08x\n"),
 				 (m_is_client == true ? "client": "server"),
-				 m_current_eap_type.get_vendor_id(),
-				 m_current_eap_type.get_vendor_type(),
-				 eap_header_string_c::get_eap_type_string(m_current_eap_type)));
+				 convert_eap_type_to_u32_t(m_current_eap_type)));
 
 			set_state(eap_type_tls_peap_state_tppd_peapv1_waits_eap_success_or_tunneled_packet);
 		}
@@ -5655,11 +5620,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("%s: eap_type_tls_peap_c::state_notification(): ")
-				 EAPL("sends TTLS/plain MsChapv2 empty Ack: EAP-type 0xfe%06x%08x=%s\n"),
+				 EAPL("sends TTLS/plain MsChapv2 empty Ack: EAP-type 0x%08x\n"),
 				 (m_is_client == true ? "client": "server"),
-				 m_current_eap_type.get_vendor_id(),
-				 m_current_eap_type.get_vendor_type(),
-				 eap_header_string_c::get_eap_type_string(m_current_eap_type)));
+				 convert_eap_type_to_u32_t(m_current_eap_type)));
 
 			// Send empty acknowledge message.
 			eap_status_e status = send_empty_eap_ack();
@@ -5679,11 +5642,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("%s: eap_type_tls_peap_c::state_notification(): ")
-				 EAPL("waits TTLS/plain MsChapv2 empty Ack: EAP-type 0xfe%06x%08x=%s\n"),
+				 EAPL("waits TTLS/plain MsChapv2 empty Ack: EAP-type 0x%08x\n"),
 				 (m_is_client == true ? "client": "server"),
-				 m_current_eap_type.get_vendor_id(),
-				 m_current_eap_type.get_vendor_type(),
-				 eap_header_string_c::get_eap_type_string(m_current_eap_type)));
+				 convert_eap_type_to_u32_t(m_current_eap_type)));
 
 			set_state(eap_type_tls_peap_state_server_waits_ttls_plain_ms_chap_v2_empty_ack);
 		}
@@ -5694,11 +5655,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("%s: eap_type_tls_peap_c::state_notification(): ")
-				 EAPL("TLS tunnel ready: EAP-type 0xfe%06x%08x=%s\n"),
+				 EAPL("TLS tunnel ready: EAP-type 0x%08x\n"),
 				 (m_is_client == true ? "client": "server"),
-				 m_current_eap_type.get_vendor_id(),
-				 m_current_eap_type.get_vendor_type(),
-				 eap_header_string_c::get_eap_type_string(m_current_eap_type)));
+				 convert_eap_type_to_u32_t(m_current_eap_type)));
 
 			if (m_is_client == true)
 			{
@@ -5810,11 +5769,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 					EAP_TRACE_ERROR(
 						m_am_tools,
 						TRACE_FLAGS_DEFAULT|TRACE_TEST_VECTORS,
-						(EAPL("ERROR: EAP_type_TLS_PEAP: %s, unknown EAP-type 0xfe%06x%08x=%s\n"),
+						(EAPL("ERROR: EAP_type_TLS_PEAP: %s, unknown EAP-type 0x%08x\n"),
 						 (m_is_client == true) ? "client": "server",
-						 m_current_eap_type.get_vendor_id(),
-						 m_current_eap_type.get_vendor_type(),
-						 eap_header_string_c::get_eap_type_string(m_current_eap_type)));
+						 convert_eap_type_to_u32_t(m_current_eap_type)));
 					
 					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 					set_state(eap_type_tls_peap_state_failure);
@@ -5851,11 +5808,9 @@ EAP_FUNC_EXPORT void eap_type_tls_peap_c::state_notification(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("%s: eap_type_tls_peap_c::state_notification(): ")
-				 EAPL("TLS tunnel ready: EAP-type 0xfe%06x%08x=%s\n"),
+				 EAPL("TLS tunnel ready: EAP-type 0x%08x\n"),
 				 (m_is_client == true ? "client": "server"),
-				 m_current_eap_type.get_vendor_id(),
-				 m_current_eap_type.get_vendor_type(),
-				 eap_header_string_c::get_eap_type_string(m_current_eap_type)));
+				 convert_eap_type_to_u32_t(m_current_eap_type)));
 
 			if (m_is_client == true)
 			{
@@ -6239,6 +6194,19 @@ EAP_FUNC_EXPORT eap_status_e eap_type_tls_peap_c::cancel_timer(
 	eap_status_e status = get_type_partner()->cancel_timer(
 		p_initializer, 
 		p_id);
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
+//
+EAP_FUNC_EXPORT eap_status_e eap_type_tls_peap_c::cancel_all_timers()
+{
+	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	eap_status_e status = get_type_partner()->cancel_all_timers();
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);

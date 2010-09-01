@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 47 %
+* %version: 28.1.3 %
 */
 
 #if !defined(_EAPOL_CORE_H_)
@@ -24,19 +24,22 @@
 
 #include "eap_tools.h"
 #include "eap_am_export.h"
-#include "abs_eap_session_core.h"
+#include "abs_eap_core.h"
 #include "eap_core.h"
 #include "abs_eapol_core.h"
 #include "eap_base_type.h"
 #include "eap_variable_data.h"
 #include "abs_eap_am_mutex.h"
-#include "eap_session_core_base.h"
+#if !defined(NO_EAP_SESSION_CORE)
+	#include "eap_session_core.h"
+#endif
 #include "abs_eap_stack_interface.h"
 #include "abs_eapol_key_state.h"
 #include "eapol_rsna_key_header.h"
-#include "eapol_key_state.h"
-#include "abs_eapol_key_state_map.h"
-#include "eap_database_reference_if.h"
+#if defined(USE_EAPOL_KEY_STATE)
+	#include "eapol_key_state.h"
+	#include "abs_eapol_key_state_map.h"
+#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 
 /** @file */
@@ -71,12 +74,13 @@ class eapol_RC4_key_header_c;
 
 /// A eapol_core_c class implements the basic functionality of EAPOL.
 class EAP_EXPORT eapol_core_c
-: public abs_eap_session_core_c
+: public abs_eap_core_c
 , public abs_eap_base_timer_c
 , public abs_eap_stack_interface_c
+#if defined(USE_EAPOL_KEY_STATE)
 , public abs_eapol_key_state_c
 , public abs_eapol_key_state_map_c
-, public eap_database_reference_if_c
+#endif //#if defined(USE_EAPOL_KEY_STATE)
 {
 
 private:
@@ -88,11 +92,17 @@ private:
 	/// This is pointer to the eap_core object. The eapol_core object gives
 	/// the received packets to the eap_core object. The eap_core object sends
 	/// packets through the eapol_core object.
-	eap_session_core_base_c * m_eap_core;
+#if !defined(NO_EAP_SESSION_CORE)
+	eap_session_core_c * const m_eap_core;
+#else
+	eap_core_c * const m_eap_core;
+#endif
 
+#if defined(USE_EAPOL_KEY_STATE)
 	/// This stores eapol_key_state_c objects using eap_variable_data selector.
 	/// Selector data includes send addresses of the Ethernet packet.
 	eap_core_map_c<eapol_key_state_c, abs_eapol_key_state_map_c, eap_variable_data_c> m_eapol_key_state_map;
+#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 	/// This is pointer to the tools class.
 	abs_eap_am_tools_c * const m_am_tools;
@@ -131,10 +141,13 @@ private:
 
 	bool m_block_state_notifications;
 
+#if defined(USE_EAPOL_KEY_STATE)
 	/// This flag will skip start of 4-Way Handshake with true value.
 	bool m_skip_start_4_way_handshake;
+#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 
+#if defined(USE_EAPOL_KEY_STATE)
 	EAP_FUNC_IMPORT eap_status_e indicate_eapol_key_state_started_eap_authentication(
 		const eap_am_network_id_c * const send_network_id);
 
@@ -142,8 +155,7 @@ private:
 		const eap_am_network_id_c * const send_network_id);
 
 	EAP_FUNC_IMPORT eap_status_e remove_eapol_key_state(
-		const eap_am_network_id_c * const send_network_id,
-		const bool force_remove);
+		const eap_am_network_id_c * const send_network_id);
 
 	eap_status_e copy_eapol_key_state(
 		const eap_am_network_id_c * const old_receive_network_id, ///< source includes remote address, destination includes local address.
@@ -155,6 +167,7 @@ private:
 		const eap_am_network_id_c * const old_receive_network_id, ///< source includes remote address, destination includes local address.
 		const eap_am_network_id_c * const new_receive_network_id ///< source includes remote address, destination includes local address.
 		);
+#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 	//--------------------------------------------------
 protected:
@@ -443,16 +456,23 @@ public:
 		const u32_t p_id);
 
 	//
+	EAP_FUNC_IMPORT eap_status_e cancel_all_timers();
+
+	//
 	EAP_FUNC_IMPORT eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);
 
 	// See abs_eap_core_c::get_eap_type_list().
 	EAP_FUNC_IMPORT eap_status_e get_eap_type_list(
 		eap_array_c<eap_type_value_e> * const eap_type_list);
 
+#if defined(USE_EAPOL_KEY_STATE)
 	// See abs_eapol_key_state_c::get_and_increment_global_key_counter().
 	EAP_FUNC_IMPORT eap_status_e get_and_increment_global_key_counter(
 		eap_variable_data_c * const key_counter);
+#endif //#if defined(USE_EAPOL_KEY_STATE)
 
+
+#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
 
 	/**
 	 * Function creates a state for later use. This is for optimazing 4-Way Handshake.
@@ -465,6 +485,11 @@ public:
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type
 		);
+
+#endif //#if defined(USE_EAPOL_KEY_STATE) && defined(USE_EAPOL_KEY_STATE_OPTIMIZED_4_WAY_HANDSHAKE)
+
+
+#if defined(USE_EAPOL_KEY_STATE)
 
 	/**
 	 * This function need to be called when client STA (re)associates to AP.
@@ -485,25 +510,35 @@ public:
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e eapol_group_cipher,
 		const eap_variable_data_c * const pre_shared_key);
 
+#endif //#if defined(USE_EAPOL_KEY_STATE)
+
+
+#if defined(USE_EAPOL_KEY_STATE)
 	/**
 	 * This function need to be called when client STA disassociates from AP.
 	 * @param receive_network_id carries the MAC addresses.
 	 * MAC address of Authenticator should be in source address. MAC address of Supplicant should be in destination address.
 	 */
 	EAP_FUNC_IMPORT eap_status_e disassociation(
-		const bool complete_to_lower_layer,
 		const eap_am_network_id_c * const receive_network_id);
+#endif //#if defined(USE_EAPOL_KEY_STATE)
 
+#if defined(USE_EAPOL_KEY_STATE)
 	EAP_FUNC_IMPORT eap_status_e asynchronous_init_remove_eapol_key_state(
 		const eap_am_network_id_c * const send_netword_id);
+#endif //#if defined(USE_EAPOL_KEY_STATE)
 
+#if defined(USE_EAPOL_KEY_STATE)
 	EAP_FUNC_IMPORT static eap_status_e shutdown_operation(
 		eapol_key_state_c * const handler,
 		abs_eap_am_tools_c * const m_am_tools);
+#endif //#if defined(USE_EAPOL_KEY_STATE)
 
+#if defined(USE_EAPOL_KEY_STATE)
 	EAP_FUNC_IMPORT static eap_status_e cancel_authentication_session(
 		eapol_key_state_c * const handler,
 		abs_eap_am_tools_c * const m_am_tools);
+#endif //#if defined(USE_EAPOL_KEY_STATE)
 
 	/// @see abs_eap_core_c::add_rogue_ap().
 	EAP_FUNC_IMPORT eap_status_e add_rogue_ap(eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list);
@@ -517,37 +552,25 @@ public:
 	EAP_FUNC_IMPORT eap_status_e set_session_timeout(
 		const u32_t session_timeout_ms);
 
-#if defined(USE_EAP_SIMPLE_CONFIG)
-
-	EAP_FUNC_IMPORT eap_status_e save_simple_config_session(
-		const simple_config_state_e state,
-		EAP_TEMPLATE_CONST eap_array_c<simple_config_credential_c> * const credential_array,
-		const eap_variable_data_c * const new_password,
-		const simple_config_Device_Password_ID_e Device_Password_ID,
-		const simple_config_payloads_c * const other_configuration);
-
-#endif // #if defined(USE_EAP_SIMPLE_CONFIG)
-
-	EAP_FUNC_IMPORT eap_status_e set_eap_database_reference_values(
-		const eap_variable_data_c * const reference);
-
-	EAP_FUNC_IMPORT eap_status_e get_802_11_authentication_mode(
-		const eap_am_network_id_c * const receive_network_id,
-		const eapol_key_authentication_type_e authentication_type,
-		const eap_variable_data_c * const SSID,
-		const eap_variable_data_c * const preshared_key);
-
-	EAP_FUNC_IMPORT eap_status_e complete_get_802_11_authentication_mode(
-		const eap_status_e completion_status,
-		const eap_am_network_id_c * const receive_network_id,
-		const eapol_key_802_11_authentication_mode_e mode);
-
-	EAP_FUNC_IMPORT eap_status_e complete_remove_eap_session(
-		const bool complete_to_lower_layer,
-		const eap_am_network_id_c * const receive_network_id);
-
 private:
 
+
+#if !defined(USE_EAPOL_KEY_STATE)
+	/**
+	 * The handle_RC4_key_descriptor() function parses the EAPOL-Key frame 
+	 * that includes RC4 Key Descriptor.
+	 * This function retrieves the traffic encryption key from it. It forwards the key
+	 * to lower layers. The format of EAPOL-Key frame is described in
+	 * draft-congdon-radius-8021x-23.txt (RFC ????)
+	 * @param eapol is the received packet
+	 * @param packet_length is the length of the packet
+	 */
+	eap_status_e handle_RC4_key_descriptor(
+		const eap_am_network_id_c * const receive_network_id,
+		eapol_RC4_key_header_c * const eapol,
+		const u32_t packet_length);
+#endif //#if !defined(USE_EAPOL_KEY_STATE)
+	
 	//--------------------------------------------------
 }; // class eapol_core_c
 

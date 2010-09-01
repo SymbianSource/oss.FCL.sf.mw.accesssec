@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 5 %
 */
 
 #if !defined( _ABS_EAP_AM_TOOLS_MEMORY_STORE_DATA_H_ )

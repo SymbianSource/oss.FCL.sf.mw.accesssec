@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 9 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -66,6 +66,8 @@ EAP_FUNC_EXPORT eap_radius_state_notification_c::eap_radius_state_notification_c
 }
 
 
+#if defined(USE_EAP_EXPANDED_TYPES)
+
 EAP_FUNC_EXPORT eap_radius_state_notification_c::eap_radius_state_notification_c(
 	abs_eap_am_tools_c * const tools,
 	const eap_am_network_id_c * const send_network_id,
@@ -91,6 +93,8 @@ EAP_FUNC_EXPORT eap_radius_state_notification_c::eap_radius_state_notification_c
 	, m_allow_send_eap_success(allow_send_eap_success)
 {
 }
+
+#endif //#if defined(USE_EAP_EXPANDED_TYPES)
 
 
 EAP_FUNC_EXPORT eap_radius_state_notification_c::eap_radius_state_notification_c(

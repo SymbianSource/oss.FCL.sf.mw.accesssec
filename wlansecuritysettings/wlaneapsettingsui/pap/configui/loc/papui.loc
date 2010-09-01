@@ -1,0 +1,62 @@
+/*
+* Copyright (c) 2001-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: UI strings for WLAN PAP configuration settings
+*
+*/
+
+/*
+* %version: %
+*/
+
+// LOCALISATION STRINGS
+
+
+//d:UI title for main view
+//l:title_pane_t2/opt9
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_eap_pap_title     "PAP settings"
+
+
+//d:One of the setting item values for qtn_wlan_eap_pap_sett_password
+//l:list_set_graphic_pane_t1
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_eap_pap_sett_password_prompt     "Prompt"
+
+
+//d:One of the setting item values for qtn_wlan_eap_pap_sett_password
+//l:list_set_graphic_pane_t1
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_eap_pap_sett_password_udef      "User defined"
+
+//d:Information note when user accepts a password but
+//d: the user name is undefined
+//l:popup_note_window
+//w:
+//r:5.0.1
+//
+#define qtn_wlan_eap_pap_define_user_name      "Please define a user name"
+
+
+
+
+
+
+
+// End of File

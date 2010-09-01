@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 8 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -239,9 +239,8 @@ void tls_peap_tlv_header_c::set_flag_tlv_type(tls_peap_tlv_type_e type)
 	EAP_ASSERT(flag_tlv_type_data != 0);
 	
 	flag_tlv_type_data[0] = static_cast<u8_t>(
-		(flag_tlv_type_data[0] & (m_flag_mask_mandatory_tlv|m_flag_mask_reserved))
-		| (((type & 0xff00) >> 8) & ~(m_flag_mask_mandatory_tlv|m_flag_mask_reserved)));
-
+		flag_tlv_type_data[0] & (m_flag_mask_mandatory_tlv|m_flag_mask_reserved)
+		| ((type & 0xff00) >> 8) & ~(m_flag_mask_mandatory_tlv|m_flag_mask_reserved));
 	flag_tlv_type_data[1] = static_cast<u8_t>(type & 0x00ff);
 }
 
@@ -255,11 +254,11 @@ void tls_peap_tlv_header_c::set_flag_reserved(bool reserved)
 	
 	if (reserved == true)
 	{
-		flag_tlv_type_data[0] = static_cast<u8_t>(flag_tlv_type_data[0] | m_flag_mask_reserved);
+		flag_tlv_type_data[0] |= m_flag_mask_reserved;
 	}
 	else
 	{
-		flag_tlv_type_data[0] = static_cast<u8_t>(flag_tlv_type_data[0] & ~m_flag_mask_reserved);
+		flag_tlv_type_data[0] &= ~m_flag_mask_reserved;
 	}
 }
 
@@ -273,11 +272,11 @@ void tls_peap_tlv_header_c::set_flag_mandatory_tlv(const bool mandatory_when_tru
 	
 	if (mandatory_when_true == true)
 	{
-		flag_tlv_type_data[0] = static_cast<u8_t>(flag_tlv_type_data[0] | m_flag_mask_mandatory_tlv);
+		flag_tlv_type_data[0] |= m_flag_mask_mandatory_tlv;
 	}
 	else
 	{
-		flag_tlv_type_data[0] = static_cast<u8_t>(flag_tlv_type_data[0] & ~m_flag_mask_mandatory_tlv);
+		flag_tlv_type_data[0] &= ~m_flag_mask_mandatory_tlv;
 	}
 }
 

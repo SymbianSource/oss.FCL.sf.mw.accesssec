@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18.1.4 %
+* %version: 20 %
 */
 
 #if !defined(_EAP_AM_TYPE_AKA_SYMBIAN_H_)
@@ -423,10 +423,8 @@ private:
 	void store_authentication_timeL();
 
 private:
-
 	//--------------------------------------------------
-
-	RFs m_session;
+	RDbs m_session;
 	
 	RDbNamedDatabase m_database;	
 
@@ -495,6 +493,14 @@ private:
 
 	// This holds the max session time read from the configuration file.
 	TInt64 m_max_session_time;
+	
+	// This is the vendor-type for tunneling EAP type.
+	// Valid for both expanded and non-expanded EAP types.
+	// This is used since m_tunneling_type can not be used in the same way 
+	// in expanded and non-expanded cases. 
+	// Unlike EAP type, Tunneling type is still non-expanded
+	// for both cases especially for using in the EAP databases.
+	u32_t m_tunneling_vendor_type;	
 	
 }; // class eap_am_type_aka_symbian_c
 

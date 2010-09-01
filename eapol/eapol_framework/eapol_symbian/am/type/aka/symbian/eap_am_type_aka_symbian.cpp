@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 46.1.10 %
+* %version: 49 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -36,7 +36,7 @@
 #include "EapAkaDbDefaults.h"
 #include "EapAkaDbParameterNames.h"
 #include "EapAkaDbUtils.h"
-#include "EapTraceSymbian.h"
+#include "eap_am_trace_symbian.h"
 
 #include <d32dbms.h>	// For DBMS
 #include <s32strm.h> 	// For RReadStream
@@ -154,6 +154,16 @@ eap_am_type_aka_symbian_c::eap_am_type_aka_symbian_c(
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
+#ifdef USE_EAP_EXPANDED_TYPES
+
+	m_tunneling_vendor_type = m_tunneling_type.get_vendor_type();
+
+#else
+
+	m_tunneling_vendor_type = static_cast<TUint>(m_tunneling_type);
+
+#endif //#ifdef USE_EAP_EXPANDED_TYPES
+
 	if (receive_network_id != 0
 		&& receive_network_id->get_is_valid_data() == true)
 	{
@@ -195,10 +205,6 @@ void eap_am_type_aka_symbian_c::ConstructL()
 	}
 #endif // #if defined (USE_EAP_TYPE_SERVER_AKA)	
 
-	TInt error = m_session.Connect();
-	EAP_TRACE_DEBUG_SYMBIAN((_L("eap_am_type_aka_symbian_c::ConstructL(): - m_session.Connect(), error=%d\n"), error));
-	User::LeaveIfError(error);
-
 	// Open/create database
 	EapAkaDbUtils::OpenDatabaseL(m_database, m_session, m_index_type, m_index, m_tunneling_type);	
 		
@@ -219,7 +225,7 @@ void eap_am_type_aka_symbian_c::ConstructL()
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_am_type_aka_symbian_c* eap_am_type_aka_symbian_c::NewL(
+eap_am_type_aka_symbian_c* eap_am_type_aka_symbian_c::NewL(
 	abs_eap_am_tools_c * const aTools,
 	abs_eap_base_type_c * const aPartner,
 	const TIndexType aIndexType,
@@ -308,7 +314,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_aka_symbian_c::configure()
 		// Read Maximum Session Validity Time from the config file
 		eap_variable_data_c sessionTimeFromFile(m_am_tools);
 		
-		eap_status_e status = type_configure_read(
+		eap_status_e status = m_partner->read_configure(
 			cf_str_EAP_AKA_max_session_validity_time.get_field(),
 			&sessionTimeFromFile);
 		
@@ -331,7 +337,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_aka_symbian_c::configure()
 	// We have to set the values for K, OP and AMF in simulator.
 	
 	{
-		eap_status_e status = type_configure_read(
+		eap_status_e status = m_partner->read_configure(
 			cf_str_EAP_AKA_simulator_aka_k.get_field(),
 			&m_simulator_aka_K);
 		if (status == eap_status_ok
@@ -360,7 +366,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_aka_symbian_c::configure()
 	}
 
 	{
-		eap_status_e status = type_configure_read(
+		eap_status_e status = m_partner->read_configure(
 			cf_str_EAP_AKA_simulator_aka_op.get_field(),
 			&m_simulator_aka_OP);
 		if (status == eap_status_ok
@@ -389,7 +395,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_aka_symbian_c::configure()
 	}
 
 	{
-		eap_status_e status = type_configure_read(
+		eap_status_e status = m_partner->read_configure(
 			cf_str_EAP_AKA_simulator_aka_amf.get_field(),
 			&m_simulator_aka_AMF);
 		if (status == eap_status_ok
@@ -576,19 +582,9 @@ void eap_am_type_aka_symbian_c::store_pseudonym_idL(
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQLInsert, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-	sqlStatement.Format(
-		KSQLInsert,
-		&KPseudonymId,
-		&KAkaTableName, 
-		&KServiceType,
-		m_index_type,
-		&KServiceIndex,
-		m_index,
-		&KTunnelingTypeVendorId,
-		m_tunneling_type.get_vendor_id(),
-		&KTunnelingType, 
-		m_tunneling_type.get_vendor_type());
+	_LIT(KSQLInsert, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLInsert, &KPseudonymId, &KAkaTableName, 
+		&KServiceType, m_index_type, &KServiceIndex, m_index, &KTunnelingType, m_tunneling_vendor_type);
 
 	// Evaluate view
 	RDbView view;
@@ -688,19 +684,9 @@ void eap_am_type_aka_symbian_c::store_reauthentication_idL(
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQLInsert, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-	sqlStatement.Format(
-		KSQLInsert,
-		&KReauthId,
-		&KAkaTableName, 
-		&KServiceType,
-		m_index_type,
-		&KServiceIndex,
-		m_index,
-		&KTunnelingTypeVendorId,
-		m_tunneling_type.get_vendor_id(),
-		&KTunnelingType, 
-		m_tunneling_type.get_vendor_type());
+	_LIT(KSQLInsert, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLInsert, &KReauthId, &KAkaTableName, 
+		&KServiceType, m_index_type, &KServiceIndex, m_index, &KTunnelingType, m_tunneling_vendor_type);
 		
 	// Evaluate view
 	RDbView view;
@@ -826,22 +812,9 @@ void eap_am_type_aka_symbian_c::store_reauth_parametersL(
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQLInsert, "SELECT %S, %S, %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-	sqlStatement.Format(
-		KSQLInsert,
-		&KXKey,
-		&KK_aut,
-		&KK_encr,
-		&KReauthCounter,
-		&KAkaTableName, 
-		&KServiceType,
-		m_index_type,
-		&KServiceIndex,
-		m_index,
-		&KTunnelingTypeVendorId,
-		m_tunneling_type.get_vendor_id(),
-		&KTunnelingType, 
-		m_tunneling_type.get_vendor_type());
+	_LIT(KSQLInsert, "SELECT %S, %S, %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLInsert, &KXKey, &KK_aut, &KK_encr, &KReauthCounter, &KAkaTableName, 
+		&KServiceType, m_index_type, &KServiceIndex, m_index, &KTunnelingType, m_tunneling_vendor_type);
 		
 	// Evaluate view
 	RDbView view;
@@ -980,22 +953,9 @@ void eap_am_type_aka_symbian_c::query_reauth_parametersL(
 	TPtr sqlStatement = buf->Des();
 
 	// Form the query
-	_LIT(KSQLQuery, "SELECT %S, %S, %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-	sqlStatement.Format(
-		KSQLQuery,
-		&KXKey,
-		&KK_aut,
-		&KK_encr,
-		&KReauthCounter,
-		&KAkaTableName, 
-		&KServiceType,
-		m_index_type,
-		&KServiceIndex,
-		m_index,
-		&KTunnelingTypeVendorId,
-		m_tunneling_type.get_vendor_id(),
-		&KTunnelingType, 
-		m_tunneling_type.get_vendor_type());
+	_LIT(KSQLQuery, "SELECT %S, %S, %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLQuery, &KXKey, &KK_aut, &KK_encr, &KReauthCounter, &KAkaTableName, 
+		&KServiceType, m_index_type, &KServiceIndex, m_index, &KTunnelingType, m_tunneling_vendor_type);
 		
 	RDbView view;
 	// Evaluate view
@@ -1104,19 +1064,9 @@ void eap_am_type_aka_symbian_c::increase_reauth_counterL()
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQLInsert, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-	sqlStatement.Format(
-		KSQLInsert,
-		&KReauthCounter,
-		&KAkaTableName, 
-		&KServiceType,
-		m_index_type,
-		&KServiceIndex,
-		m_index,
-		&KTunnelingTypeVendorId,
-		m_tunneling_type.get_vendor_id(),
-		&KTunnelingType, 
-		m_tunneling_type.get_vendor_type());
+	_LIT(KSQLInsert, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLInsert, &KReauthCounter, &KAkaTableName, 
+		&KServiceType, m_index_type, &KServiceIndex, m_index, &KTunnelingType, m_tunneling_vendor_type);
 		
 	// Evaluate view
 	RDbView view;
@@ -1229,22 +1179,11 @@ void eap_am_type_aka_symbian_c::query_AKA_IMSI_or_pseudonym_or_reauthentication_
 	m_stored_reauth_id.reset();
 	m_previous_imsi.reset();
 
-	_LIT(KSQLQuery, "SELECT %S, %S, %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-	sqlStatement.Format(
-		KSQLQuery,
-		&KReauthId,
-		&KReauthCounter,
-		&KPseudonymId,
-		&KPreviousIMSI,
-		&KAkaTableName,
-		&KServiceType,
-		m_index_type, 
-		&KServiceIndex,
-		m_index,
-		&KTunnelingTypeVendorId,
-		m_tunneling_type.get_vendor_id(),
-		&KTunnelingType, 
-		m_tunneling_type.get_vendor_type());
+	_LIT(KSQLQuery, "SELECT %S, %S, %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLQuery, &KReauthId, &KReauthCounter, &KPseudonymId,
+						&KPreviousIMSI, &KAkaTableName,
+						&KServiceType, m_index_type, 
+						&KServiceIndex, m_index, &KTunnelingType, m_tunneling_vendor_type);
 
 	RDbView view;
 	// Evaluate view
@@ -1447,7 +1386,7 @@ void eap_am_type_aka_symbian_c::query_AKA_IMSI_or_pseudonym_or_reauthentication_
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_am_type_aka_symbian_c::complete_AKA_imsi_L(
+eap_status_e eap_am_type_aka_symbian_c::complete_AKA_imsi_L(
 	const eap_variable_data_c * const IMSI,
 	const eap_status_e completion_status )
 {
@@ -1605,19 +1544,9 @@ void eap_am_type_aka_symbian_c::store_imsiL(
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQLInsert, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-	sqlStatement.Format(
-		KSQLInsert,
-		&KPreviousIMSI,
-		&KAkaTableName, 
-		&KServiceType,
-		m_index_type,
-		&KServiceIndex,
-		m_index,
-		&KTunnelingTypeVendorId,
-		m_tunneling_type.get_vendor_id(),
-		&KTunnelingType, 
-		m_tunneling_type.get_vendor_type());
+	_LIT(KSQLInsert, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLInsert, &KPreviousIMSI, &KAkaTableName, 
+		&KServiceType, m_index_type, &KServiceIndex, m_index, &KTunnelingType, m_tunneling_vendor_type);
 		
 	// Evaluate view
 	RDbView view;
@@ -1771,7 +1700,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_aka_symbian_c::query_AKA_RES(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_am_type_aka_symbian_c::complete_AKA_RES_L(
+eap_status_e eap_am_type_aka_symbian_c::complete_AKA_RES_L(
 	eap_variable_data_c * const aRES, 
 	eap_variable_data_c * const aCK,
 	eap_variable_data_c * const aIK,
@@ -2676,7 +2605,7 @@ eap_status_e eap_am_type_aka_symbian_c::query_imsi_from_username_syncronous(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_am_type_aka_symbian_c::generate_reauthentication_id(
+eap_status_e eap_am_type_aka_symbian_c::generate_reauthentication_id(
 	const eap_am_network_id_c * const send_network_id,
 	const eap_variable_data_c * const imsi,
 	eap_variable_data_c * const reauthentication_identity,
@@ -2889,19 +2818,9 @@ void eap_am_type_aka_symbian_c::type_configure_readL(
 	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
 	TPtr sqlStatement = buf->Des();
 
-	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-	sqlStatement.Format(
-		KSQLQueryRow,
-		&unicodeString,
-		&KAkaTableName, 
-		&KServiceType,
-		m_index_type,
-		&KServiceIndex,
-		m_index,
-		&KTunnelingTypeVendorId,
-		m_tunneling_type.get_vendor_id(),
-		&KTunnelingType, 
-		m_tunneling_type.get_vendor_type());
+	_LIT(KSQLQueryRow, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLQueryRow, &unicodeString, &KAkaTableName, 
+		&KServiceType, m_index_type, &KServiceIndex, m_index, &KTunnelingType, m_tunneling_vendor_type);
 	
 	RDbView view;
 	User::LeaveIfError(view.Prepare(m_database, TDbQuery(sqlStatement), TDbWindow::EUnlimited));
@@ -3063,7 +2982,7 @@ eap_status_e eap_am_type_aka_symbian_c::check_is_valid_imsi(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT bool eap_am_type_aka_symbian_c::is_session_valid()
+bool eap_am_type_aka_symbian_c::is_session_valid()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	
@@ -3097,20 +3016,11 @@ bool eap_am_type_aka_symbian_c::is_session_validL()
 	TPtr sqlStatement = buf->Des();
 	
 	// Query all the relevant parameters
-	_LIT(KSQLQuery, "SELECT %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-	sqlStatement.Format(
-		KSQLQuery,
-		&cf_str_EAP_AKA_max_session_validity_time_literal,
-		&KAKALastFullAuthTime,
-		&KAkaTableName,
-		&KServiceType,
-		m_index_type, 
-		&KServiceIndex,
-		m_index,
-		&KTunnelingTypeVendorId,
-		m_tunneling_type.get_vendor_id(),
-		&KTunnelingType, 
-		m_tunneling_type.get_vendor_type());
+	_LIT(KSQLQuery, "SELECT %S, %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLQuery, &cf_str_EAP_AKA_max_session_validity_time_literal,
+						&KAKALastFullAuthTime, &KAkaTableName,
+						&KServiceType, m_index_type, 
+						&KServiceIndex, m_index, &KTunnelingType, m_tunneling_vendor_type);
 
 	RDbView view;
 	// Evaluate view
@@ -3228,19 +3138,10 @@ void eap_am_type_aka_symbian_c::store_authentication_timeL()
 	TPtr sqlStatement = buf->Des();
 	
 	// Query all the relevant parameters
-	_LIT(KSQLQuery, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d");
-	sqlStatement.Format(
-		KSQLQuery,
-		&KAKALastFullAuthTime,
-		&KAkaTableName,
-		&KServiceType,
-		m_index_type, 
-		&KServiceIndex,
-		m_index,
-		&KTunnelingTypeVendorId,
-		m_tunneling_type.get_vendor_id(),
-		&KTunnelingType, 
-		m_tunneling_type.get_vendor_type());
+	_LIT(KSQLQuery, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d");
+	sqlStatement.Format(KSQLQuery, &KAKALastFullAuthTime, &KAkaTableName,
+						&KServiceType, m_index_type, 
+						&KServiceIndex, m_index, &KTunnelingType, m_tunneling_vendor_type);
 
 	RDbView view;
 	// Evaluate view

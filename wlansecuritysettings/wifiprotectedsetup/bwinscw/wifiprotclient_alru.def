@@ -1,0 +1,8 @@
+EXPORTS
+	??1CWiFiProtUiClient@@UAE@XZ @ 1 NONAME ; CWiFiProtUiClient::~CWiFiProtUiClient(void)
+	?CancelWiFiProt@CWiFiProtUiClient@@QAEXXZ @ 2 NONAME ; void CWiFiProtUiClient::CancelWiFiProt(void)
+	?NewL@CWiFiProtUiClient@@SAPAV1@XZ @ 3 NONAME ; class CWiFiProtUiClient * CWiFiProtUiClient::NewL(void)
+	?StartWiFiProtL@CWiFiProtUiClient@@QAEXABV?$TBuf8@$0CA@@@HAAV?$RArray@K@@AAW4TWiFiReturn@WiFiProt@@AAVTRequestStatus@@@Z @ 4 NONAME ; void CWiFiProtUiClient::StartWiFiProtL(class TBuf8<32> const &, int, class RArray<unsigned long> &, enum WiFiProt::TWiFiReturn &, class TRequestStatus &)
+	?StartWiFiProtSyncL@CWiFiProtUiClient@@QAE?AW4TWiFiReturn@WiFiProt@@ABV?$TBuf8@$0CA@@@HAAV?$RArray@K@@@Z @ 5 NONAME ; enum WiFiProt::TWiFiReturn CWiFiProtUiClient::StartWiFiProtSyncL(class TBuf8<32> const &, int, class RArray<unsigned long> &)
+	?StartWiFiProtConnL@CWiFiProtUiClient@@QAEXABV?$TBuf8@$0CA@@@AAUTWlanProtectedSetupCredentialAttribute@@AAW4TWiFiReturn@WiFiProt@@AAVTRequestStatus@@@Z @ 6 NONAME ; void CWiFiProtUiClient::StartWiFiProtConnL(class TBuf8<32> const &, struct TWlanProtectedSetupCredentialAttribute &, enum WiFiProt::TWiFiReturn &, class TRequestStatus &)
+

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 14 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -364,8 +364,7 @@ EAP_FUNC_EXPORT const eap_variable_data_c * eap_am_network_id_c::get_source_id()
 // 
 EAP_FUNC_EXPORT const u8_t * eap_am_network_id_c::get_source() const
 {
-	if (m_data == 0
-		|| m_data->m_source.get_is_valid_data() == false)
+	if (m_data == 0)
 	{
 		return 0;
 	}
@@ -389,8 +388,7 @@ EAP_FUNC_EXPORT const eap_variable_data_c * eap_am_network_id_c::get_destination
 // 
 EAP_FUNC_EXPORT const u8_t * eap_am_network_id_c::get_destination() const
 {
-	if (m_data == 0
-		|| m_data->m_destination.get_is_valid_data() == false)
+	if (m_data == 0)
 	{
 		return 0;
 	}
@@ -402,8 +400,7 @@ EAP_FUNC_EXPORT const u8_t * eap_am_network_id_c::get_destination() const
 // 
 EAP_FUNC_EXPORT u32_t eap_am_network_id_c::get_source_length() const
 {
-	if (m_data == 0
-		|| m_data->m_source.get_is_valid_data() == false)
+	if (m_data == 0)
 	{
 		return 0;
 	}
@@ -415,8 +412,7 @@ EAP_FUNC_EXPORT u32_t eap_am_network_id_c::get_source_length() const
 // 
 EAP_FUNC_EXPORT u32_t eap_am_network_id_c::get_destination_length() const
 {
-	if (m_data == 0
-		|| m_data->m_destination.get_is_valid_data() == false)
+	if (m_data == 0)
 	{
 		return 0;
 	}
