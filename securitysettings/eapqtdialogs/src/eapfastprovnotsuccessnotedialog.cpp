@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 4 %
+* %version: 5 %
 */
 
 // System includes
@@ -27,6 +27,7 @@
 #include "eapfastprovnotsuccessnotedialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
+#include "eapfastprovnotsuccessnotedialogTraces.h"
 #endif
 
 /*!

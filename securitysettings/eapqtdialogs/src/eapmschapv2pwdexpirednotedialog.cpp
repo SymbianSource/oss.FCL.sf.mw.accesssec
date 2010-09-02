@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 3 %
+* %version: 4 %
 */
 
 // System includes
@@ -27,6 +27,7 @@
 #include "eapmschapv2pwdexpirednotedialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
+#include "eapmschapv2pwdexpirednotedialogTraces.h"
 #endif
 
 /*!

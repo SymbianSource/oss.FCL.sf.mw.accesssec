@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 3 %
+* %version: 4 %
 */
 
 // System includes
@@ -29,6 +29,7 @@
 #include "eapquerydialog.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
+#include "eapquerydialogTraces.h"
 #endif
 
 /*!

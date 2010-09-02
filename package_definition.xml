@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SystemDefinition schema="3.0.0"  xmlns:qt="http://www.nokia.com/qt">
+ <package id="accesssec" name="Access Security" levels="plugin framework server generic specific">
+  <collection id="accesssec_plat" name="Access Security Platform Interfaces" level="specific">
+   <component id="eap_vpn_api" name="EAP VPN API" class="api" filter="s60">
+    <meta rel="Api" href="accesssec_plat/eap_vpn_api/eap_vpn_api.metaxml"/>
+    <unit bldFile="accesssec_plat/eap_vpn_api/group"/>
+   </component>
+   <component id="eap_type_api" name="EAP Type API" class="api" filter="s60">
+    <meta rel="Api" href="accesssec_plat/eap_type_api/eap_type_api.metaxml"/>
+    <unit bldFile="accesssec_plat/eap_type_api/group"/>
+   </component>
+   <component id="eap_qt_configuration_api" name="EAP Qt Configuration API" class="api" filter="s60" introduced="^4">
+    <unit bldFile="accesssec_plat" qt:proFile="accesssec_plat.pro"/>
+   </component>
+  </collection>
+  <collection id="securitysettings" name="WLAN Security Settings" level="specific">
+   <component id="accesssec_qtconfigutils" filter="s60" name="Access Security Config Utils" introduced="^4">
+    <unit bldFile="securitysettings/qtconfigutils" qt:proFile="qtconfigutils.pro"/>
+   </component>
+   <component id="cpwlansecurityuiplugins" filter="s60" name="Control Panel WLAN Security UI Plugins" class="plugin" introduced="^4">
+    <unit bldFile="securitysettings/cpwlansecurityuiplugins" qt:proFile="cpwlansecurityuiplugins.pro"/>
+   </component>
+   <component id="cpeapuiplugins" filter="s60" name="Control Panel EAP UI Pugins" class="plugin"  introduced="^4">
+    <unit bldFile="securitysettings/cpeapuiplugins" qt:proFile="cpeapuiplugins.pro"/>
+   </component>
+   <component id="eapqtdialogs" filter="s60" name="EAP Qt Dialogs" introduced="^4">
+    <unit bldFile="securitysettings/eapqtdialogs" qt:proFile="eapqtdialogs.pro"/>
+   </component>
+  </collection>
+  <collection id="eapol" name="EAPOL" level="framework">
+   <component id="eapol_framework" filter="s60" name="EAPOL Framework" introduced="9.2">
+    <unit bldFile="eapol/group"/>
+   </component>
+  </collection>
+ </package>
+</SystemDefinition>
