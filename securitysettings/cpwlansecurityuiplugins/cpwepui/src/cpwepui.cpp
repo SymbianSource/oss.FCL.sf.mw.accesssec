@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: tr1cfwln#24 %
+ * %version: tr1cfwln#25 %
  */
 
 //User Includes
@@ -177,9 +177,11 @@ CpSettingFormItemData* CpWepUi::uiInstance(CpItemDataHelper &dataHelpper)
     mUi = new CpSettingFormItemData(HbDataFormModelItem::GroupItem, hbTrId(
             "txt_occ_subhead_security_settings"));
 
+    mUi->setContentWidgetData("objectName", "CpWepUi");
+    
     CpSettingFormItemData *wepKeyInUse = new CpSettingFormItemData(
             HbDataFormModelItem::ComboBoxItem, hbTrId(
-                    "txt_occ_setlabel_wep_key_in_use"), mUi);
+                    "txt_occ_setlabel_wep_key_in_use"));
     QStringList wepKeys;
     wepKeys.append(hbTrId("txt_occ_setlabel_wep_key_in_val_1"));
     wepKeys.append(hbTrId("txt_occ_setlabel_wep_key_in_val_2"));
@@ -188,6 +190,8 @@ CpSettingFormItemData* CpWepUi::uiInstance(CpItemDataHelper &dataHelpper)
 
     wepKeyInUse->setContentWidgetData("items", wepKeys);
     wepKeyInUse->setContentWidgetData("currentIndex", mNewKeySelected);
+    wepKeyInUse->setContentWidgetData("objectName", "CpWepUiKeyInUse");
+    
     dataHelpper.addConnection(wepKeyInUse, SIGNAL(currentIndexChanged(int)),
             this, SLOT(wepKeyInUseChanged(int)));
     mUi->appendChild(wepKeyInUse);
@@ -265,16 +269,19 @@ void CpWepUi::createWEPKeyGroup(int index)
         }
         
     mWepKeyText[index] = new CpSettingFormItemData(
-            HbDataFormModelItem::TextItem,
-            textId, mUi);
+        HbDataFormModelItem::TextItem,
+        textId);
+    
 
     if (mKeyData[index].length() != 0) {
-        mWepKeyText[index]->setContentWidgetData("text",
-                mKeyData[index]);
+        mWepKeyText[index]->setContentWidgetData("text", mKeyData[index]);
     }
     mWepKeyText[index]->setContentWidgetData("echoMode",HbLineEdit::PasswordEchoOnEdit);
     mWepKeyText[index]->setContentWidgetData("smileysEnabled", "false");
-
+    QString objectName;
+    objectName.setNum(index);
+    objectName.prepend("CpWepUiKeyEditor");
+    mWepKeyText[index]->setContentWidgetData("objectName", objectName);
     
     mUi->appendChild(mWepKeyText[index]);
     OstTraceFunctionExit1(CPWEPUI_CREATEWEPKEYGROUP_EXIT,this);
@@ -643,6 +650,7 @@ void CpWepUi::showMessageBox(HbMessageBox::MessageBoxType type,
 
     // Create a message box
     mMessageBox = QSharedPointer<HbMessageBox> (new HbMessageBox(type));
+    mMessageBox->setObjectName("CpWepUiMessageBox");
     mMessageBox->setText(text);
     mMessageBox->open();
 
