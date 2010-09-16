@@ -27,13 +27,34 @@
 #include "eap_am_memory.h"
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_STATE_SELECTOR_H)
+	#define EAP_CLASS_VISIBILITY_EAP_STATE_SELECTOR_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_STATE_SELECTOR_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_STATE_SELECTOR_H 
+	#define EAP_FUNC_EXPORT_EAP_STATE_SELECTOR_H 
+	#define EAP_C_FUNC_EXPORT_EAP_STATE_SELECTOR_H 
+#elif defined(EAP_EXPORT_EAP_STATE_SELECTOR_H)
+	#define EAP_CLASS_VISIBILITY_EAP_STATE_SELECTOR_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_STATE_SELECTOR_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_STATE_SELECTOR_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_STATE_SELECTOR_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_STATE_SELECTOR_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_STATE_SELECTOR_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_STATE_SELECTOR_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_STATE_SELECTOR_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_STATE_SELECTOR_H 
+	#define EAP_C_FUNC_EXPORT_EAP_STATE_SELECTOR_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_variable_data.h"
 #include "sae_cookie.h"
 
 
 //--------------------------------------------------
 
-class EAP_EXPORT eap_state_selector_c
+class EAP_CLASS_VISIBILITY_EAP_STATE_SELECTOR_H eap_state_selector_c
 : public eap_variable_data_c
 {
 private:

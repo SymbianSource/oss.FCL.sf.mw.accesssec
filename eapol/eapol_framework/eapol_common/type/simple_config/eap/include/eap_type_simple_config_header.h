@@ -27,6 +27,29 @@
 #include "eap_tools.h"
 #include "eap_header.h"
 #include "simple_config_types.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_TYPE_SIMPLE_CONFIG_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_SIMPLE_CONFIG_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_SIMPLE_CONFIG_HEADER_H 
+#elif defined(EAP_EXPORT_EAP_TYPE_SIMPLE_CONFIG_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_SIMPLE_CONFIG_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_SIMPLE_CONFIG_HEADER_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_SIMPLE_CONFIG_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_SIMPLE_CONFIG_HEADER_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 /** @file */
 
@@ -58,7 +81,7 @@ const u8_t SIMPLE_CONFIG_NAI_AT_BYTE = '@';
  * @endcode
  *
  */
-class EAP_EXPORT eap_simple_config_header_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H eap_simple_config_header_c
 : public eap_header_base_c
 {
 private:
@@ -111,121 +134,121 @@ public:
 	};
 
 
-	EAP_FUNC_IMPORT virtual ~eap_simple_config_header_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H virtual ~eap_simple_config_header_c();
 
 	// 
-	EAP_FUNC_IMPORT eap_simple_config_header_c(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H eap_simple_config_header_c(
 		abs_eap_am_tools_c * const tools,
 		u8_t * const header_begin,
 		const u32_t header_buffer_length);
 
-	EAP_FUNC_IMPORT eap_code_value_e get_eap_code() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H eap_code_value_e get_eap_code() const;
 
-	EAP_FUNC_IMPORT u8_t get_eap_identifier() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H u8_t get_eap_identifier() const;
 
-	EAP_FUNC_IMPORT u16_t get_eap_length() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H u16_t get_eap_length() const;
 
-	EAP_FUNC_IMPORT eap_type_value_e get_eap_type() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H eap_type_value_e get_eap_type() const;
 
-	EAP_FUNC_IMPORT u16_t get_data_length() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H u16_t get_data_length() const;
 
-	EAP_FUNC_IMPORT u32_t get_simple_config_min_header_length() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H u32_t get_simple_config_min_header_length() const;
 
-	EAP_FUNC_IMPORT static u32_t get_simple_config_max_header_length();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H static u32_t get_simple_config_max_header_length();
 
-	EAP_FUNC_IMPORT u32_t get_header_length() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H u32_t get_header_length() const;
 
-	EAP_FUNC_IMPORT u32_t get_start_offset_of_data() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H u32_t get_start_offset_of_data() const;
 
-	EAP_FUNC_IMPORT u8_t * get_data_offset(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H u8_t * get_data_offset(
 		abs_eap_am_tools_c * const m_am_tools,
 		const u32_t offset,
 		const u32_t contignuous_bytes) const;
 
 
-	EAP_FUNC_IMPORT u8_t * get_data(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H u8_t * get_data(
 		abs_eap_am_tools_c * const m_am_tools,
 		const u32_t contignuous_bytes) const;
 
 
-	EAP_FUNC_IMPORT u32_t get_sc_op_code_offset() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H u32_t get_sc_op_code_offset() const;
 
-	EAP_FUNC_IMPORT u32_t get_sc_flags_offset() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H u32_t get_sc_flags_offset() const;
 
-	EAP_FUNC_IMPORT u32_t get_sc_length_offset() const;
-
-
-	EAP_FUNC_IMPORT op_code_e get_sc_op_code() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H u32_t get_sc_length_offset() const;
 
 
-	EAP_FUNC_IMPORT u8_t * get_simple_config_flags() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H op_code_e get_sc_op_code() const;
 
-	EAP_FUNC_IMPORT bool get_simple_config_flag_bit(
+
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H u8_t * get_simple_config_flags() const;
+
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H bool get_simple_config_flag_bit(
 		const u32_t mask) const;
 
-	EAP_FUNC_IMPORT u8_t get_simple_config_flag_value(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H u8_t get_simple_config_flag_value(
 		const u32_t mask,
 		const u32_t shift) const;
 
-	EAP_FUNC_IMPORT bool get_flag_simple_config_length_included() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H bool get_flag_simple_config_length_included() const;
 
-	EAP_FUNC_IMPORT bool get_flag_more_fragments() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H bool get_flag_more_fragments() const;
 	
-	EAP_FUNC_IMPORT u8_t get_flag_reserved() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H u8_t get_flag_reserved() const;
 
-	EAP_FUNC_IMPORT eap_status_e get_simple_config_message_length(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H eap_status_e get_simple_config_message_length(
 		u32_t * const simple_config_length) const;
 
 
-	EAP_FUNC_IMPORT eap_status_e check_header(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H eap_status_e check_header(
 		abs_eap_am_tools_c * const tools,
 		const bool is_client_when_true) const;
 
-	EAP_FUNC_IMPORT eap_const_string get_code_string() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H eap_const_string get_code_string() const;
 
-	EAP_FUNC_IMPORT eap_const_string get_eap_type_string() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H eap_const_string get_eap_type_string() const;
 
-	EAP_FUNC_IMPORT eap_const_string get_sc_op_code_string() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H eap_const_string get_sc_op_code_string() const;
 
 
-	EAP_FUNC_IMPORT void set_eap_code(const eap_code_value_e p_code);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H void set_eap_code(const eap_code_value_e p_code);
 
-	EAP_FUNC_IMPORT void set_eap_identifier(const u8_t p_identifier);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H void set_eap_identifier(const u8_t p_identifier);
 
-	EAP_FUNC_IMPORT void set_eap_length(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H void set_eap_length(
 		const u16_t p_length,
 		const bool expanded_type_when_true);
 
-	EAP_FUNC_IMPORT void set_eap_type(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H void set_eap_type(
 		const eap_type_value_e p_type,
 		const bool expanded_type_when_true);
 
 
-	EAP_FUNC_IMPORT void set_sc_op_code(const op_code_e op_code);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H void set_sc_op_code(const op_code_e op_code);
 
 
-	EAP_FUNC_IMPORT void set_simple_config_flag_value(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H void set_simple_config_flag_value(
 		const u8_t value,
 		const u32_t mask,
 		const u32_t shift) const;
 
-	EAP_FUNC_IMPORT void set_simple_config_flag_bit(const bool flag, u32_t mask) const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H void set_simple_config_flag_bit(const bool flag, u32_t mask) const;
 
-	EAP_FUNC_IMPORT void set_flag_reserved(const u8_t reserved);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H void set_flag_reserved(const u8_t reserved);
 
-	EAP_FUNC_IMPORT void set_flag_simple_config_length_included(const bool simple_config_length_included);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H void set_flag_simple_config_length_included(const bool simple_config_length_included);
 
-	EAP_FUNC_IMPORT void set_flag_more_fragments(const bool more_fragments);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H void set_flag_more_fragments(const bool more_fragments);
 
 
-	EAP_FUNC_IMPORT void set_data_length(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H void set_data_length(
 		const u32_t p_data_length,
 		const bool expanded_type_when_true);
 
-	EAP_FUNC_IMPORT void set_simple_config_message_length(const u32_t simple_config_length);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H void set_simple_config_message_length(const u32_t simple_config_length);
 
 
-	EAP_FUNC_IMPORT void reset_header(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_SIMPLE_CONFIG_HEADER_H void reset_header(
 		abs_eap_am_tools_c * const m_am_tools,
 		const u32_t buffer_length,
 		const bool expanded_type_when_true);

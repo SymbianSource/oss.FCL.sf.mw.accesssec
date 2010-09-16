@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 256 %
+* %version: 294 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -60,8 +60,6 @@
 #include "abs_tls_am_application_eap_fast.h"
 #include "eap_fast_strings.h"
 #include "eap_fast_tlv_payloads.h"
-//#include "eap_am_async_wait_symbian.h"
-#include "EapFastActive.h"
 #include "eap_tlv_header.h"
 #include "eap_tlv_message_data.h"
 #endif
@@ -120,51 +118,53 @@ eap_am_type_tls_peap_symbian_c::eap_am_type_tls_peap_symbian_c(
 	const bool aIsClient,
 	const eap_am_network_id_c * const receive_network_id)
 	: CActive(CActive::EPriorityStandard)
-	  , m_index_type(aIndexType)
-	  , m_index(aIndex)
-	  , m_tunneling_type(aTunnelingType)
-	  , m_partner(aPartner)
-	  , m_am_tools(static_cast<eap_am_tools_symbian_c*> (aTools))
-	  , m_tls_am_partner(0)
+	, m_index_type(aIndexType)
+	, m_index(aIndex)
+	, m_tunneling_type(aTunnelingType)
+	, m_partner(aPartner)
+	, m_am_tools(static_cast<eap_am_tools_symbian_c*> (aTools))
+	, m_tls_am_partner(0)
+
 #if defined(USE_FAST_EAP_TYPE)
-	  , m_tls_application(0)
-	  //, iWaitNoteCancelled( EFalse )
-
+	, m_tls_application(0)
+	//, iWaitNoteCancelled( EFalse )
 #endif //#if defined(USE_FAST_EAP_TYPE)
-	  , m_is_valid(false)
-	  , m_is_client(aIsClient)
-	  , m_current_eap_type(aEapType)
-	  , m_max_count_of_session_resumes(0ul)
-	  , m_cipher_suite(tls_cipher_suites_TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA)
-	  , m_ca_certificate(0)
-	  , m_own_certificate(0)
-	  , m_peer_certificate(0)
-	  , m_cert_if(0)
-	  , m_receive_network_id(aTools)
-	  , m_eap_identifier(0u)
-	  , m_subject_key_id(0)
-	  , m_allowed_user_certs(1)
-	  , m_allowed_server_certs(1)
-	  , m_peer_public_key(aTools)
-	  , m_param_p(aTools)
-	  , m_param_q(aTools)
-	  , m_param_g(aTools)
-	  , m_shutdown_was_called(false)
 
-	  , m_tunneled_type(eap_type_none)
-	  , m_verify_certificate_realm(true)
-	  , m_allow_subdomain_matching(false)
-	  , m_latest_alert_description(tls_alert_description_none)
-	  , m_use_manual_username(false)
-	  , m_manual_username(aTools)
-	  , m_use_manual_realm(false)
-	  , m_manual_realm(aTools)
-	  , m_tls_peap_server_authenticates_client_policy_flag(true)
-	  , m_use_automatic_ca_certificate(false)
-	  , m_configured(false)
-	  , m_max_session_time(0)
+	, m_is_valid(false)
+	, m_is_client(aIsClient)
+	, m_current_eap_type(aEapType)
+	, m_max_count_of_session_resumes(0ul)
+	, m_cipher_suite(tls_cipher_suites_TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA)
+	, m_ca_certificate(0)
+	, m_own_certificate(0)
+	, m_peer_certificate(0)
+	, m_cert_if(0)
+	, m_receive_network_id(aTools)
+	, m_eap_identifier(0u)
+	, m_subject_key_id(0)
+	, m_allowed_user_certs(1)
+	, m_allowed_server_certs(1)
+	, m_peer_public_key(aTools)
+	, m_param_p(aTools)
+	, m_param_q(aTools)
+	, m_param_g(aTools)
+	, m_shutdown_was_called(false)
+
+	, m_tunneled_type(eap_type_none)
+	, m_verify_certificate_realm(true)
+	, m_allow_subdomain_matching(false)
+	, m_latest_alert_description(tls_alert_description_none)
+	, m_use_manual_username(false)
+	, m_manual_username(aTools)
+	, m_use_manual_realm(false)
+	, m_manual_realm(aTools)
+	, m_tls_peap_server_authenticates_client_policy_flag(true)
+	, m_use_automatic_ca_certificate(false)
+	, m_configured(false)
+	, m_max_session_time(0)
+
 #if defined(USE_EAP_TLS_SESSION_TICKET)
-	  , m_use_session_ticket(false)
+	, m_use_session_ticket(false)
 #endif //#if defined(USE_EAP_TLS_SESSION_TICKET)
 
 #if defined(USE_FAST_EAP_TYPE)
@@ -189,10 +189,7 @@ eap_am_type_tls_peap_symbian_c::eap_am_type_tls_peap_symbian_c(
 	, m_ready_references_and_data_blocks(aTools)
 	, m_serv_unauth_prov_mode(false)
 	, m_serv_auth_prov_mode(false)
-
-	, m_notifier_data_to_user(NULL)
-	, m_notifier_data_pckg_to_user(NULL)
-
+	, m_is_pac_store_initialization(false)
 	, iMMETELConnectionStatus(false)
 	, m_completed_with_zero(false)
 	, m_verificationStatus(false)
@@ -210,7 +207,8 @@ eap_am_type_tls_peap_symbian_c::eap_am_type_tls_peap_symbian_c(
 	, iCompletion(eap_fast_initialize_pac_store_completion_none)
 #endif //#if defined(USE_FAST_EAP_TYPE)
 
-	, m_notifier_complete(false)
+	, m_notifier_data_to_user(NULL)
+	, m_notifier_data_pckg_to_user(NULL)
 
 #ifdef USE_PAC_STORE
 	,iPacStoreDb(NULL)
@@ -231,6 +229,13 @@ eap_am_type_tls_peap_symbian_c::eap_am_type_tls_peap_symbian_c(
 
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("TLS: %s: function: eap_am_type_tls_peap_symbian_c::eap_am_type_tls_peap_symbian_c(): this = 0x%08x\n"),
+		 (m_is_client == true ? "client": "server"),
+		 this));
 
 	// Set the database table name based on the type
 	if (m_current_eap_type == eap_type_tls)
@@ -330,7 +335,7 @@ eap_am_type_tls_peap_symbian_c* eap_am_type_tls_peap_symbian_c::NewL(
 		User::Leave(KErrNotSupported);
 	}
 
-	eap_am_type_tls_peap_symbian_c* self = new(ELeave) eap_am_type_tls_peap_symbian_c(
+	eap_am_type_tls_peap_symbian_c* self = new eap_am_type_tls_peap_symbian_c(
 		aTools, 
 		aPartner, 
 		aIndexType, 
@@ -340,16 +345,29 @@ eap_am_type_tls_peap_symbian_c* eap_am_type_tls_peap_symbian_c::NewL(
 		aIsClient,
 		receive_network_id);
 
-	CleanupStack::PushL(self);
-
-	if (self->get_is_valid() != true)
+	if (self == 0
+		|| self->get_is_valid() != true)
 	{
+		if (self != 0)
+		{
+			self->shutdown();
+		}
+
+		delete self;
+
 		User::Leave(KErrGeneral);
 	}
 
-	self->ConstructL();
+	TRAPD(error, self->ConstructL());
+
+	if (error != KErrNone)
+	{
+		self->shutdown();
+		delete self;
+
+		User::Leave(error);
+	}
 	
-	CleanupStack::Pop();
 	return self;
 }
 
@@ -359,7 +377,12 @@ eap_am_type_tls_peap_symbian_c* eap_am_type_tls_peap_symbian_c::NewL(
 void eap_am_type_tls_peap_symbian_c::ConstructL()
 {
 	TInt error = m_session.Connect();
-	EAP_TRACE_DEBUG_SYMBIAN((_L("eap_am_type_tls_peap_symbian_c::ConstructL(): - m_session.Connect(), error=%d\n"), error));
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::ConstructL(): m_session.Connect(), error=%d\n"), error));
+
 	User::LeaveIfError(error);
 
 	// Open/create database
@@ -369,23 +392,23 @@ void eap_am_type_tls_peap_symbian_c::ConstructL()
 
 	CActiveScheduler::Add(this);
 
-	// Create and open PAC store (only for EAP-FAST at the moment)
 #ifdef USE_PAC_STORE
 #ifdef USE_FAST_EAP_TYPE
 	
-	if(m_current_eap_type == eap_type_fast && iPacStoreDb == NULL)
+	if(m_current_eap_type == eap_type_fast
+		&& iPacStoreDb == NULL)
 	{
-		iPacStoreDb = CPacStoreDatabase::NewL( this );
+		// Create PAC-store (only for EAP-FAST at the moment)
+		iPacStoreDb = CPacStoreDatabase::NewL(m_am_tools);
 		User::LeaveIfNull(iPacStoreDb);
 		
-		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::ConstructL Created PAC store")));	
-		
-		iPacStoreDb->OpenPacStoreL();
-		
-		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::ConstructL Opened PAC store")));		
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::ConstructL(): Created PAC store, this = 0x%08x"),
+			this));
 	}
+
 	m_info_array.ResetAndDestroy();
 	
 #endif	// End: #ifdef USE_FAST_EAP_TYPE
@@ -410,70 +433,65 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::shutdown()
 
 	if(IsActive())
 	{
-	    RDebug::Print( _L("eap_am_type_tls_peap_symbian_c::shutdown() cancelling active object") );
+		RDebug::Print( _L("eap_am_type_tls_peap_symbian_c::shutdown() cancelling active object") );
 		Cancel();		
 	}
-	
+
 	else
 	{
-		if(m_cert_if->IsActive())
+		if(m_cert_if != 0
+			&& m_cert_if->IsActive())
 		{
 			m_cert_if->Cancel();
 		}		
 	}
 
 	if (iEapAuthNotifier != 0)
-		{
+	{
 		iEapAuthNotifier->Cancel();
-		}
+	}
 
-	
+	if (m_partner != NULL)
+	{
 
-	
-#if defined(USE_FAST_EAP_TYPE)
-
-
-
-#endif 
-
-		if (m_partner != NULL)
-		    {
-		    EAP_TRACE_DEBUG_SYMBIAN(
-				(_L(" eap_am_type_tls_peap_symbian_c::shutdown - Cancel timers ...")));
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL(" eap_am_type_tls_peap_symbian_c::shutdown(): Cancel timers ...")));
 
 #if defined(USE_FAST_EAP_TYPE)
-		    m_partner->cancel_timer(
-				this, 
-				KRemoveIAPReferenceTimerID);
 
-		    m_partner->cancel_timer(
-				this, 
-				KImportFileTimerID);
-		
-		    m_partner->cancel_timer(
-				this, 
-				KCompleteReadPacstoreTimerID);
+		m_partner->cancel_timer(
+			this, 
+			KRemoveIAPReferenceTimerID);
 
-		    m_partner->cancel_timer(
-				this, 
-				KHandleReadPacstoreTimerID);
+		m_partner->cancel_timer(
+			this, 
+			KImportFileTimerID);
+	
+		m_partner->cancel_timer(
+			this, 
+			KCompleteReadPacstoreTimerID);
 
-		    m_partner->cancel_timer(
-				this, 
-				KHandleCompletePacstoreNokTimerID);
+		m_partner->cancel_timer(
+			this, 
+			KHandleReadPacstoreTimerID);
 
-		    m_partner->cancel_timer(
-				this, 
-				KHandleCompletePacstoreOkTimerID);
-				
+		m_partner->cancel_timer(
+			this, 
+			KHandleCompletePacstoreNokTimerID);
+
+		m_partner->cancel_timer(
+			this, 
+			KHandleCompletePacstoreOkTimerID);
+
 #endif
-		    EAP_TRACE_DEBUG_SYMBIAN(
-				(_L(" eap_am_type_tls_peap_symbian_c::shutdown - Timers canceled")));
-		    }
-		
-#if defined(USE_FAST_EAP_TYPE)
 
-#endif // #if defined(USE_FAST_EAP_TYPE)
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL(" eap_am_type_tls_peap_symbian_c::shutdown(): Timers canceled")));
+	}
 	
 
 	m_allowed_server_certs.ResetAndDestroy();
@@ -483,26 +501,59 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::shutdown()
 
 #ifdef USE_PAC_STORE
 #ifdef USE_FAST_EAP_TYPE
-	
-	if(m_current_eap_type == eap_type_fast && iPacStoreDb != NULL)
+
+	if(iPacStoreDb != NULL)
 	{
 		iPacStoreDb->Close();
 	}
-	
+
 	m_info_array.ResetAndDestroy();
 
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L(" eap_am_type_tls_peap_symbian_c::shutdown - Arrays cleared")));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL(" eap_am_type_tls_peap_symbian_c::shutdown(): Arrays cleared")));
 
 #endif	// End: #ifdef USE_FAST_EAP_TYPE	
 #endif	// End: #ifdef USE_PAC_STORE
 		
 	m_shutdown_was_called = true;
-	
+
 #if defined(USE_EAP_CONFIGURATION_TO_SKIP_USER_INTERACTIONS)
-   delete m_fileconfig;
-   m_fileconfig = 0;
+	delete m_fileconfig;
+	m_fileconfig = 0;
 #endif
+
+	m_database.Close();
+	m_session.Close();
+
+	delete m_notifier_data_to_user;
+	m_notifier_data_to_user = 0;
+	delete m_notifier_data_pckg_to_user;
+	m_notifier_data_pckg_to_user = 0;
+		
+	delete m_cert_if;
+	m_cert_if = 0;
+
+	delete m_ca_certificate;
+	m_ca_certificate = 0;
+	delete m_own_certificate;
+	m_own_certificate = 0;
+	delete m_peer_certificate;
+	m_peer_certificate = 0;
+
+	m_enabled_tunneling_exp_eap_array.ResetAndDestroy();
+	m_disabled_tunneling_exp_eap_array.ResetAndDestroy();
+
+#ifdef USE_PAC_STORE
+	
+	delete iPacStoreDb;
+	iPacStoreDb = 0;
+	
+#endif // #ifdef USE_PAC_STORE	
+
+	delete iEapAuthNotifier;
+	iEapAuthNotifier = 0;
 
 	EAP_TRACE_DEBUG(
 		m_am_tools,
@@ -529,35 +580,6 @@ EAP_FUNC_EXPORT eap_am_type_tls_peap_symbian_c::~eap_am_type_tls_peap_symbian_c(
 
 	EAP_ASSERT(m_shutdown_was_called == true);	
 
-	m_database.Close();
-	m_session.Close();
-
-	delete m_notifier_data_to_user;
-	delete m_notifier_data_pckg_to_user;
-		
-	delete m_cert_if;
-
-	delete m_ca_certificate;
-	delete m_own_certificate;
-	delete m_peer_certificate;
-
-	m_enabled_tunneling_exp_eap_array.ResetAndDestroy();
-	m_disabled_tunneling_exp_eap_array.ResetAndDestroy();
-
-	EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eap_am_type_tls_peap_symbian_c::~eap_am_type_tls_peap_symbian_c() tunneling done.\n")));
-
-#ifdef USE_PAC_STORE
-	
-	delete iPacStoreDb;
-	
-#endif // #ifdef USE_PAC_STORE	
-
-	delete iEapAuthNotifier;
-	iEapAuthNotifier = 0;
-
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
 //--------------------------------------------------
@@ -567,8 +589,7 @@ EAP_FUNC_EXPORT void eap_am_type_tls_peap_symbian_c::DlgComplete( TInt aStatus )
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("TLS: function: eap_am_type_tls_peap_symbian_c::DlgComplete(): m_notifier_complete=%d, m_state=%d\n"),
-		m_notifier_complete,
+		(EAPL("TLS: function: eap_am_type_tls_peap_symbian_c::DlgComplete():  m_state=%d\n"),
 		m_state));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_am_type_tls_peap_symbian_c::DlgComplete()");
@@ -579,16 +600,14 @@ EAP_FUNC_EXPORT void eap_am_type_tls_peap_symbian_c::DlgComplete( TInt aStatus )
 
 	eap_status_e status = m_am_tools->convert_am_error_to_eapol_error(aStatus);
 
-	if(m_notifier_complete)
-	{
-		EAP_TRACE_DATA_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL( "m_notifier_data_pckg_to_user" ),
-			m_notifier_data_pckg_to_user->Ptr(),
-			m_notifier_data_pckg_to_user->Size() ) );
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL( "m_notifier_data_pckg_to_user" ),
+		m_notifier_data_pckg_to_user->Ptr(),
+		m_notifier_data_pckg_to_user->Size() ) );
 
-		if ( aStatus == KErrCancel )
+		if ( aStatus != KErrNone)
 		{
 			EAP_TRACE_DEBUG(
 				m_am_tools,
@@ -598,34 +617,24 @@ EAP_FUNC_EXPORT void eap_am_type_tls_peap_symbian_c::DlgComplete( TInt aStatus )
 #ifdef USE_FAST_EAP_TYPE
 			m_userAction = EEapFastNotifierUserActionCancel;	
 #endif
-		}		
-		else if( aStatus != KErrNone )
-		{
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("ERROR: TLS: function: eap_am_type_tls_peap_symbian_c::DlgComplete(): dialog error=%d\n"),
-				aStatus));
-
-			TBuf8<KMaxNotifItemLength> userNameUtf8;
-			TBuf8<KMaxUiDataLength> challengeUtf8;
-			userNameUtf8.Zero();
-			challengeUtf8.Zero();
-
-			CompleteQueryTtlsPapUserNameAndPassword(
-				status, userNameUtf8, challengeUtf8 );
-
-			return; // m_am_tools->convert_am_error_to_eapol_error(aStatus);		
 		}
-
+#ifdef USE_FAST_EAP_TYPE
+		else
+			{
+			m_userAction = EEapFastNotifierUserActionOk;	
+			}	
+#endif
+			
 		if ( m_notifier_data_to_user->iPassword.Size() > 0 )
 		{
 			HBufC8* notifier_data8 = NULL;
-			TRAPD(err, notifier_data8 = HBufC8::NewL(m_notifier_data_to_user->iPassword.Size()));
-			if (err)
+			TRAPD(error, notifier_data8 = HBufC8::NewL(m_notifier_data_to_user->iPassword.Size()));
+			if (error)
 			{
+				delete notifier_data8;
 				return;	
 			}
+
 			TPtr8 notifier_dataPtr8 = notifier_data8->Des();
 
 			notifier_dataPtr8.Copy(m_notifier_data_to_user->iPassword); // Unicode -> ascii.
@@ -642,11 +651,8 @@ EAP_FUNC_EXPORT void eap_am_type_tls_peap_symbian_c::DlgComplete( TInt aStatus )
 				notifier_dataPtr8.Ptr(),
 				notifier_dataPtr8.Size());
 #endif			
-			CleanupStack::PopAndDestroy( notifier_data8 );
+			delete notifier_data8;
 		}
-	}
-
-	m_notifier_complete = 0;
 
 	if ( m_state == EPapChallenge)
 	{
@@ -660,8 +666,8 @@ EAP_FUNC_EXPORT void eap_am_type_tls_peap_symbian_c::DlgComplete( TInt aStatus )
 
 		if (iEapAuthNotifier == 0)
 		{
-			TRAPD(err, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
-			if (err)
+			TRAPD(error, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
+			if (error)
 			{
 			eap_variable_data_c userNameUtf8( m_am_tools );
 			eap_variable_data_c passwordUtf8( m_am_tools );
@@ -848,14 +854,44 @@ EAP_FUNC_EXPORT void eap_am_type_tls_peap_symbian_c::DlgComplete( TInt aStatus )
 
 //--------------------------------------------------
 
-//
+TBool eap_am_type_tls_peap_symbian_c::IsMasterKeyAndPasswordMatchingL(
+	      const TDesC16 & aPassword)
+{
+EAP_UNREFERENCED_PARAMETER(aPassword);
+ 
+#ifdef USE_FAST_EAP_TYPE
+
+	HBufC8 * pacStorePWBuf8 = HBufC8::NewLC(aPassword.Length());
+	TPtr8 pacStorePWPtr8 = pacStorePWBuf8->Des();
+
+	CnvUtfConverter::ConvertFromUnicodeToUtf8(pacStorePWPtr8, aPassword);
+
+	TBool verification = iPacStoreDb->IsMasterKeyAndPasswordMatchingL(pacStorePWPtr8);
+
+	CleanupStack::PopAndDestroy(pacStorePWBuf8);
+
+	return verification;
+
+#else
+
+	return EFalse;
+
+#endif
+
+}
+
+//--------------------------------------------------
+
 void eap_am_type_tls_peap_symbian_c::RunL()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);		
 	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::RunL - iStatus.Int()=%d, m_state=%d "),
-		iStatus.Int() , m_state));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::RunL(): iStatus.Int()=%d, m_state=%d.\n"),
+		iStatus.Int(),
+		m_state));
 	
 #ifdef USE_FAST_EAP_TYPE
 	if (m_state == ENone)
@@ -863,12 +899,12 @@ void eap_am_type_tls_peap_symbian_c::RunL()
 		return;		
 		}
 
-		if ( m_state == EHandlingDeviceSeedQuery)
-			{
-		  CompleteCreateDeviceSeedL( iStatus.Int() );     
+	if ( m_state == EHandlingDeviceSeedQuery)
+		{
+		CompleteCreateDeviceSeedL( iStatus.Int() );
 
-		  return;
-			}
+		return;
+		}
 #endif // #ifdef USE_FAST_EAP_TYPE
 
 	if (iStatus.Int() != KErrNone)
@@ -946,13 +982,13 @@ void eap_am_type_tls_peap_symbian_c::RunL()
 		}
 		
 		TInt allowed_user_cert_count = m_allowed_user_certs.Count();
-		TInt err(KErrNone);
+		TInt error(KErrNone);
 		
 		if(allowed_user_cert_count > 0)
 		{
-			TRAP(err, m_cert_if->ReadCertificateL(*m_allowed_user_certs[index], retrieve_chain));			
+			TRAP(error, m_cert_if->ReadCertificateL(*m_allowed_user_certs[index], retrieve_chain));			
 		}
-		if (err != KErrNone || allowed_user_cert_count <= 0)
+		if (error != KErrNone || allowed_user_cert_count <= 0)
 		{
 			EAP_TRACE_ERROR(
 			m_am_tools,
@@ -1005,14 +1041,18 @@ eap_status_e eap_am_type_tls_peap_symbian_c::CreateDeviceSeedAsync()
 {   
     EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
-    EAP_TRACE_DEBUG_SYMBIAN(
-        (_L("eap_am_type_tls_peap_symbian_c::CreateDeviceSeedAsync-Start ActiveStatus=%d"),
-        IsActive()));       
-    
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::CreateDeviceSeedAsync-Start ActiveStatus=%d"),
+        IsActive()));
+
     if ( IsActive() )
     {
-        EAP_TRACE_DEBUG_SYMBIAN(
-            (_L("CreateDeviceSeedAsync: Already active when tried to create device seed")));       
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("CreateDeviceSeedAsync: Already active when tried to create device seed")));       
         
         return eap_status_device_busy;
     }
@@ -1028,25 +1068,64 @@ eap_status_e eap_am_type_tls_peap_symbian_c::CreateDeviceSeedAsync()
         return m_am_tools->convert_am_error_to_eapol_error(error);
     }
     
-    iPhone.GetPhoneId( iStatus, iDeviceId ); 
+#if defined(__WINS__)
 
-    SetActive();
-    return status;
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("WARNING: No iPhone.GetPhoneId() call.\n")));
+
+	_LIT(MANUFACTURER, "Test MANUFACTURER");
+    iDeviceId.iManufacturer.Copy(MANUFACTURER);
+
+	_LIT(MODEL, "Test MODEL");
+    iDeviceId.iModel.Copy(MODEL);
+
+	_LIT(REVISION, "1");
+    iDeviceId.iRevision.Copy(REVISION);
+
+	_LIT(SERIALNUMBER, "0123456789");
+    iDeviceId.iSerialNumber.Copy(SERIALNUMBER);
+
+    {
+		TRequestStatus* ao_status = &iStatus;
+		User::RequestComplete(ao_status, KErrNone);
+	}
+
+#else
+
+	iPhone.GetPhoneId( iStatus, iDeviceId ); 
+
+#endif //#if defined(__WINS__)
+
+    EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("WARNING: Not opened phone subsession on WINS.\n")));
+
+	SetActive();
+	return EAP_STATUS_RETURN(m_am_tools, status);
 } // eap_am_type_tls_peap_symbian_c::CreateDeviceSeedAsynch()
 
 //--------------------------------------------------
 
 void eap_am_type_tls_peap_symbian_c::CompleteCreateDeviceSeedL( TInt aStatus )
 {
-    EAP_TRACE_DEBUG_SYMBIAN(
-            (_L("eap_am_type_tls_peap_symbian_c::CompleteCreateDeviceSeedL aStatus=%d"),
-            iStatus.Int()));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::CompleteCreateDeviceSeedL aStatus=%d"),
+		iStatus.Int()));
+
     if ( aStatus != KErrNone )
         {
-        EAP_TRACE_DEBUG_SYMBIAN(
-                (_L("eap_am_type_tls_peap_symbian_c::CompleteCreateDeviceSeedL ERROR: aStatus=%d"),
-                iStatus.Int()));        
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::CompleteCreateDeviceSeedL(): aStatus=%d"),
+			iStatus.Int()));        
         }
+
     EAP_TRACE_DATA_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Manufacturer"),
         iDeviceId.iManufacturer.Ptr(),
         iDeviceId.iManufacturer.Size()));
@@ -1107,13 +1186,18 @@ void eap_am_type_tls_peap_symbian_c::CompleteCreateDeviceSeedL( TInt aStatus )
 } // eap_am_type_tls_peap_symbian_c::CompleteCreateDeviceSeedL()
 
 #endif
+
 //--------------------------------------------------
 
 void eap_am_type_tls_peap_symbian_c::DoCancel()
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);	
     
-	RDebug::Print( _L("eap_am_type_tls_peap_symbian_c::DoCancel()\n") );
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::DoCancel(): iStatus.Int()=%d\n"),
+		iStatus.Int()));
 
 	if(m_cert_if->IsActive())
 	{
@@ -1165,8 +1249,12 @@ eap_status_e eap_am_type_tls_peap_symbian_c::SaveManualIdentityL(
 		|| manual_realm.Length() > KMaxRealmLengthInDB)
 	{
 		// Username or realm too long. Can not be stored in DB.
-		EAP_TRACE_DEBUG_SYMBIAN((_L("eap_am_type_tls_peap_symbian_c::SaveManualIdentityL: Too long username or realm. Length: manual_username=%d, manual_realm=%d\n"),
-		manual_username.Length(), manual_realm.Length()));
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::SaveManualIdentityL: Too long username or realm. Length: manual_username=%d, manual_realm=%d\n"),
+			manual_username.Length(),
+			manual_realm.Length()));
 		
 		User::Leave(KErrArgument);
 	}
@@ -1302,21 +1390,28 @@ eap_status_e
 eap_am_type_tls_peap_symbian_c::CompleteQueryUserPermissionForAid(
 	EEapFastNotifierUserAction aUserAction )
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::CompleteQueryUserPermissionForAid")));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::CompleteQueryUserPermissionForAid")));
+
 	if ( aUserAction == EEapFastNotifierUserActionOk )
 		{
-		EAP_TRACE_DEBUG_SYMBIAN(
-		    (_L("eap_am_type_tls_peap_symbian_c::CompleteQueryUserPermissionForAid eap_status_ok")));
-		m_eap_fast_completion_status = m_tls_application->
-		    complete_query_user_permission_for_A_ID(
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::CompleteQueryUserPermissionForAid eap_status_ok")));
+
+		m_eap_fast_completion_status = m_tls_application->complete_query_user_permission_for_A_ID(
 			eap_status_ok,
 			m_pending_operation );
  		}
   	else //if (userAction == EEapFastNotifierUserActionCancel)
   		{
-		EAP_TRACE_DEBUG_SYMBIAN(
-				_L("eap_am_type_tls_peap_symbian_c::CompleteQueryUserPermissionForAid eap_status_user_cancel_authentication"));
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::CompleteQueryUserPermissionForAid eap_status_user_cancel_authentication")));
 
 		// comlete query
   		m_eap_fast_completion_status = m_tls_application->
@@ -1339,7 +1434,10 @@ EAP_FUNC_EXPORT void eap_am_type_tls_peap_symbian_c::notify_configuration_error(
 	{
 		EAP_UNREFERENCED_PARAMETER(configuration_status); // in release
 
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("EAP-TLS: Configuration error notification, %d.\n"),
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("ERROR: EAP-TLS: Configuration error notification, %d.\n"),
 			configuration_status));
 
 		// Here we swap the addresses.
@@ -1396,7 +1494,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::configure()
 	//----------------------------------------------------------
 
 	{
-		TRAPD(err, EapTlsPeapUtils::ReadCertRowsToArrayL(
+		TRAPD(error, EapTlsPeapUtils::ReadCertRowsToArrayL(
 			m_database,
 			m_am_tools, 			
 			m_db_user_cert_table_name, 			 
@@ -1405,25 +1503,28 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::configure()
 			m_tunneling_type,
 			m_allowed_user_certs));
 
-		if (err != KErrNone)
+		if (error != KErrNone)
 		{
-			EAP_TRACE_ERROR(m_am_tools, 
-				TRACE_FLAGS_DEFAULT, (
-				EAPL("eap_am_type_tls_peap_symbian_c::configure(): ReadCertRowsToArrayL, User cert, Error =%d \n"),
-				err));
+			EAP_TRACE_ERROR(
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::configure(): ReadCertRowsToArrayL, User cert, Error =%d \n"),
+				error));
 		
 			// Convert the leave error code to EAPOL stack error code.
-			status = m_am_tools->convert_am_error_to_eapol_error(err);
+			status = m_am_tools->convert_am_error_to_eapol_error(error);
 			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 		else
 		{
-			EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::configure, EapTlsPeapUtils::ReadCertRowsToArrayL success, m_allowed_user_certs count=%d"),
-			m_allowed_user_certs.Count()));	
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::configure, EapTlsPeapUtils::ReadCertRowsToArrayL success, m_allowed_user_certs count=%d"),
+				m_allowed_user_certs.Count()));	
 		}
 
-		TRAP(err, EapTlsPeapUtils::ReadCertRowsToArrayL(
+		TRAP(error, EapTlsPeapUtils::ReadCertRowsToArrayL(
 			m_database,
 			m_am_tools, 			
 			m_db_ca_cert_table_name, 
@@ -1431,25 +1532,27 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::configure()
 			m_index, 
 			m_tunneling_type,
 			m_allowed_ca_certs));
-		if (err != KErrNone)
+		if (error != KErrNone)
 		{
 			EAP_TRACE_ERROR(m_am_tools, 
 				TRACE_FLAGS_DEFAULT, (
 				EAPL("eap_am_type_tls_peap_symbian_c::configure(): ReadCertRowsToArrayL, CA cert, Error =%d \n"),
-				err));
+				error));
 		
 			// Convert the leave error code to EAPOL stack error code.
-			status = m_am_tools->convert_am_error_to_eapol_error(err);			
+			status = m_am_tools->convert_am_error_to_eapol_error(error);			
 			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 		else
 		{
-			EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::configure, EapTlsPeapUtils::ReadCertRowsToArrayL success, m_allowed_ca_certs count=%d"),
-			m_allowed_ca_certs.Count()));	
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::configure, EapTlsPeapUtils::ReadCertRowsToArrayL success, m_allowed_ca_certs count=%d"),
+				m_allowed_ca_certs.Count()));	
 		}
 		
-		TRAP(err, EapTlsPeapUtils::ReadUintRowsToArrayL(
+		TRAP(error, EapTlsPeapUtils::ReadUintRowsToArrayL(
 			m_database,
 			m_am_tools, 
 			m_db_cipher_suite_table_name, 
@@ -1458,15 +1561,15 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::configure()
 			m_index, 
 			m_tunneling_type,
 			m_allowed_cipher_suites));
-		if (err != KErrNone)
+		if (error != KErrNone)
 		{
 			EAP_TRACE_ERROR(m_am_tools, 
 				TRACE_FLAGS_DEFAULT, (
 				EAPL("eap_am_type_tls_peap_symbian_c::configure(): ReadUintRowsToArrayL, CipherSuit, Error =%d \n"),
-				err));
+				error));
 
 			// Convert the leave error code to EAPOL stack error code.
-			status = m_am_tools->convert_am_error_to_eapol_error(err);			
+			status = m_am_tools->convert_am_error_to_eapol_error(error);			
 			return EAP_STATUS_RETURN(m_am_tools, status);
 		}	
 	}
@@ -1485,7 +1588,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::configure()
 		
 		)
 	{
-		TRAPD(err, EapTlsPeapUtils::GetTunnelingExpandedEapDataL(
+		TRAPD(error, EapTlsPeapUtils::GetTunnelingExpandedEapDataL(
 			m_database,
 			m_am_tools,
 			m_enabled_tunneling_exp_eap_array,
@@ -1495,15 +1598,15 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::configure()
 			m_tunneling_type,
 			m_current_eap_type));
 	
-		if (err != KErrNone)
+		if (error != KErrNone)
 		{
 			EAP_TRACE_ERROR(m_am_tools, 
 				TRACE_FLAGS_DEFAULT, (
 				EAPL("eap_am_type_tls_peap_symbian_c::configure(): GetEapDataL or GetTunnelingExpandedEapDataL, Error =%d \n"),
-				err));
+				error));
 
 			// Convert the leave error code to EAPOL stack error code.
-			status = m_am_tools->convert_am_error_to_eapol_error(err);			
+			status = m_am_tools->convert_am_error_to_eapol_error(error);			
 			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 	}
@@ -1902,15 +2005,15 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::configure()
 			// needed because of nonworking wrong settings
 #if defined(USE_FAST_EAP_TYPE)
 			if(m_current_eap_type == eap_type_fast
-				&& m_serv_auth_prov_mode != true)
+				&& m_serv_unauth_prov_mode == true)
 			{
-				// In the case of EAP-FAST, CA cert is must if m_serv_auth_prov_mode is TRUE.
+				// In the case of EAP-FAST, no CA cert is needed if m_serv_unauth_prov_mode is true.
 				status = eap_status_ok;
 				
 				EAP_TRACE_DEBUG(
 					m_am_tools, 
 					TRACE_FLAGS_DEFAULT,
-					(EAPL("eap_am_type_tls_peap_symbian_c::configure(): No CA certificate but exception for EAP-FAST as m_serv_auth_prov_mode is FALSE and for all m_serv_unauth_prov_mode \n")));
+					(EAPL("eap_am_type_tls_peap_symbian_c::configure(): No CA certificate but exception for EAP-FAST because m_serv_unauth_prov_mode is true\n")));
 			}
 			else	
 #endif // #if defined(USE_FAST_EAP_TYPE)
@@ -1918,11 +2021,10 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::configure()
 				EAP_TRACE_ERROR(
 					m_am_tools, 
 					TRACE_FLAGS_DEFAULT,
-					(EAPL("eap_am_type_tls_peap_symbian_c::configure(): Error - No CA certificate\n")));
+					(EAPL("WARNING: eap_am_type_tls_peap_symbian_c::configure(): No CA certificate and no unauthenticated provision\n")));
 			
-				// No root certificate selected. Cannot continue.
-				status = eap_status_ca_certificate_unknown;
-				send_error_notification(status);
+				// No root certificate selected and no unauthenticated provision.
+				// Cannot continue if no tunnel PAC exists. That can be checked only on authentication.
 			}			
 		}
 		else
@@ -1953,13 +2055,13 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::configure()
 
 			if (m_use_manual_username == false)
 			{
-				TRAPD(err, status=ConfigureL());
-				if (err != KErrNone)
+				TRAPD(error, status=ConfigureL());
+				if (error != KErrNone)
 				{
 					EAP_TRACE_ERROR(m_am_tools, 
 							TRACE_FLAGS_DEFAULT, (
 							EAPL("eap_am_type_tls_peap_symbian_c::configure LEAVE from ConfigureL, Error =%d \n"),
-							err));
+							error));
 				}
 			}
 		}
@@ -1992,7 +2094,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::configure()
 			EAP_TRACE_ERROR(
 				m_am_tools, 
 				TRACE_FLAGS_DEFAULT,
-				(EAPL("eap_am_type_tls_peap_symbian_c::configure(): Error - No USER certificate\n")));
+				(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::configure(): Error - No USER certificate\n")));
 		
 			// No user certificate selected. Cannot continue.
 			status = eap_status_user_certificate_unknown;
@@ -2000,24 +2102,29 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::configure()
 	    }
 	}
 
-	if (m_allowed_cipher_suites.Count() == 0)
+#if defined(USE_FAST_EAP_TYPE)
+	if (m_is_pac_store_initialization == false)
+#endif //#if defined(USE_FAST_EAP_TYPE)
 	{
-		EAP_TRACE_ERROR(
-			m_am_tools, 
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eap_am_type_tls_peap_symbian_c::configure(): Error - No cipher suit\n")));
+		if (m_allowed_cipher_suites.Count() == 0)
+		{
+			EAP_TRACE_ERROR(
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::configure(): Error - No cipher suit\n")));
 
-		// No sipher suites selected. Cannot continue.
-		status = eap_status_illegal_cipher_suite;
-		send_error_notification(status);
-	}
-	else
-	{
-		EAP_TRACE_DEBUG(
-			m_am_tools, 
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eap_am_type_tls_peap_symbian_c::configure(): %d cipher suites selected.\n"),
-			m_allowed_cipher_suites.Count()));
+			// No sipher suites selected. Cannot continue.
+			status = eap_status_illegal_cipher_suite;
+			send_error_notification(status);
+		}
+		else
+		{
+			EAP_TRACE_DEBUG(
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::configure(): %d cipher suites selected.\n"),
+				m_allowed_cipher_suites.Count()));
+		}
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2071,9 +2178,11 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ConfigureL()
 		
 		u8_t * toBinaryPtr8ForTools = const_cast<u8_t *>(ConvertedtempUserBuf8->Ptr());
 		
-		EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::configure,Call convert_bytes_to_hex_ascii, toBinaryPtr8SizeForTools=%d"),
-		toBinaryPtr8SizeForTools));	
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::configure,Call convert_bytes_to_hex_ascii, toBinaryPtr8SizeForTools=%d"),
+			toBinaryPtr8SizeForTools));	
 		
 		// Convert hex to ascii string.
 		status = m_am_tools->convert_bytes_to_hex_ascii(
@@ -2083,13 +2192,15 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ConfigureL()
 			&toBinaryPtr8SizeForTools);	
 
 		if(status != eap_status_ok)
-		{
-			EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::configure, Error in convert_hex_ascii_to_bytes. status=%d"),
-			status));		
+			{
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::configure, Error in convert_hex_ascii_to_bytes. status=%d"),
+				status));		
 		
 			User::Leave(m_am_tools->convert_eapol_error_to_am_error(status));
-		}
+			}
 		
 		ConvertedtempUserBufPtr8.SetLength(KMacAddressLength*2);
 		
@@ -2120,6 +2231,7 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ConfigureL()
 				bufPtr.Ptr(), 
 				bufPtr.Size());
 		}
+
 	EAP_TRACE_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
@@ -2132,7 +2244,7 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ConfigureL()
 
 	m_use_manual_username = true;
 	
-	return status;
+	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
 #endif // #if defined(USE_FAST_EAP_TYPE)
@@ -2155,17 +2267,35 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::authentication_fini
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
+#if defined(USE_FAST_EAP_TYPE)
+	bool serv_unauth_prov_mode(m_serv_unauth_prov_mode);
+#else
+	bool serv_unauth_prov_mode(false);
+#endif
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("TLS: %s: function: eap_am_type_tls_peap_symbian_c::authentication_finished(): true_when_successful=%d, tls_session_type=%d=%s, m_serv_unauth_prov_mode=%d\n"),
+		(m_is_client == true ? "client": "server"),
+		true_when_successful,
+		tls_session_type,
+		eap_tls_trace_string_c::get_tls_session_type_string(tls_session_type),
+		serv_unauth_prov_mode));
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_am_type_tls_peap_symbian_c::authentication_finished()");
+
 	eap_status_e status(eap_status_ok);
 
-	TRAPD(err, authentication_finishedL(true_when_successful, tls_session_type));
-	if (err != KErrNone)
+	TRAPD(error, authentication_finishedL(true_when_successful, tls_session_type));
+	if (error != KErrNone)
 	{
+		EAP_UNREFERENCED_PARAMETER(serv_unauth_prov_mode); // in release
 		EAP_TRACE_DEBUG(m_am_tools, 
 			TRACE_FLAGS_DEFAULT, 
-			(EAPL("eap_am_type_tls_peap_symbian_c::authentication_finished, TRAP ERROR=%d\n"),
-			err));	
+			(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::authentication_finished(): TRAP error=%d\n"),
+			error));	
 	
-		status = m_am_tools->convert_am_error_to_eapol_error(err);
+		status = m_am_tools->convert_am_error_to_eapol_error(error);
 		send_error_notification(status);
 	}
 
@@ -2181,6 +2311,11 @@ void eap_am_type_tls_peap_symbian_c::authentication_finishedL(
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::authentication_finishedL()")));
+
 	if (m_is_client == false)
 	{
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -2190,70 +2325,86 @@ void eap_am_type_tls_peap_symbian_c::authentication_finishedL(
 	// In EAP-FAST this could be called when provisioning is successfull.
 	// If there was provisioning, We have to toggle 
 	// cf_str_EAP_FAST_allow_server_unauthenticated_provisioning_mode_ADHP_literal 
-	
+
+#if defined(USE_FAST_EAP_TYPE)
+	if(m_is_pac_store_initialization == false)
+#endif //#if defined(USE_FAST_EAP_TYPE)
+	{
+
 #if defined(USE_FAST_EAP_TYPE)
 	
-	if(m_current_eap_type == eap_type_fast &&
-	   m_serv_unauth_prov_mode == true)
-	{		
-		EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::authentication_finishedL EAP-FAST Provisioning!")));			
-		
-		eap_variable_data_c unauthProvMode(m_am_tools);		
-		unauthProvMode.set_copy_of_buffer(
+		if(m_current_eap_type == eap_type_fast
+			&& m_serv_unauth_prov_mode == true)
+		{
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::authentication_finishedL(): EAP-FAST Provisioning!")));
+
+			eap_variable_data_c unauthProvMode(m_am_tools);
+
+			eap_status_e status = unauthProvMode.set_copy_of_buffer(
 				&default_EAP_FAST_Unauth_Prov_Mode_Allowed, 
 				sizeof(default_EAP_FAST_Unauth_Prov_Mode_Allowed));
-		
-		EapTlsPeapUtils::SetEapSettingsDataL(
-			m_database,
-			m_index_type,
-			m_index,
-			m_tunneling_type,
-			m_current_eap_type,
-			cf_str_EAP_FAST_allow_server_unauthenticated_provisioning_mode_ADHP_literal,
-			&unauthProvMode);	
-		
-		EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::authentication_finishedL Unauth Prov mode set to default (NO)!")));					
-	}
-#endif
-	
-	// Store the authentication time if the full authentication is successful
-	if (true_when_successful == true
-		&& tls_session_type == tls_session_type_full_authentication)
-	{
-		store_authentication_timeL();
-	}
-	
-	if (m_latest_alert_description == tls_alert_description_certificate_expired)
-	{
-		send_error_notification(eap_status_certificate_expired);
-	}
-	else if (m_latest_alert_description == tls_alert_description_bad_certificate)
-	{
-		send_error_notification(eap_status_bad_certificate);
-	}
-	else if (m_latest_alert_description == tls_alert_description_unsupported_certificate)
-	{
-		send_error_notification(eap_status_unsupported_certificate);
-	}
-	else if (m_latest_alert_description == tls_alert_description_certificate_revoked)
-	{
-		send_error_notification(eap_status_certificate_revoked);
-	}
-	else if (m_latest_alert_description == tls_alert_description_certificate_unknown)
-	{
-		send_error_notification(eap_status_user_certificate_unknown);
-	}
-	else if(m_latest_alert_description != tls_alert_description_none)
-	{
-		// Send error notification any alert other than tls_alert_description_none.
-		send_error_notification(eap_status_process_general_error);
-	}
+			if (status != eap_status_ok)
+			{
+				User::Leave(m_am_tools->convert_eapol_error_to_am_error(EAP_STATUS_RETURN(m_am_tools, status)));
+			}
 
-	if (true_when_successful == false)
-	{
-		ResetSessionIdL();	
+			EapTlsPeapUtils::SetEapSettingsDataL(
+				m_database,
+				m_index_type,
+				m_index,
+				m_tunneling_type,
+				m_current_eap_type,
+				cf_str_EAP_FAST_allow_server_unauthenticated_provisioning_mode_ADHP_literal,
+				&unauthProvMode);
+
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::authentication_finishedL(): Unauth Prov mode set to default (NO)!")));
+		}
+
+#endif //#if defined(USE_FAST_EAP_TYPE)
+	
+		// Store the authentication time if the full authentication is successful
+		if (true_when_successful == true
+			&& tls_session_type == tls_session_type_full_authentication)
+		{
+			store_authentication_timeL();
+		}
+		
+		if (m_latest_alert_description == tls_alert_description_certificate_expired)
+		{
+			send_error_notification(eap_status_certificate_expired);
+		}
+		else if (m_latest_alert_description == tls_alert_description_bad_certificate)
+		{
+			send_error_notification(eap_status_bad_certificate);
+		}
+		else if (m_latest_alert_description == tls_alert_description_unsupported_certificate)
+		{
+			send_error_notification(eap_status_unsupported_certificate);
+		}
+		else if (m_latest_alert_description == tls_alert_description_certificate_revoked)
+		{
+			send_error_notification(eap_status_certificate_revoked);
+		}
+		else if (m_latest_alert_description == tls_alert_description_certificate_unknown)
+		{
+			send_error_notification(eap_status_user_certificate_unknown);
+		}
+		else if(m_latest_alert_description != tls_alert_description_none)
+		{
+			// Send error notification any alert other than tls_alert_description_none.
+			send_error_notification(eap_status_process_general_error);
+		}
+
+		if (true_when_successful == false)
+		{
+			ResetSessionIdL();	
+		}
 	}
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -2281,7 +2432,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_eap_identity(
 	if (m_own_certificate == 0)
 	{
 		// Get the matching certificates. This function call is completed asyncronously by complete_get_matching_certificates() function call.
-		TRAPD(err, m_cert_if->GetMatchingCertificatesL(
+		TRAPD(error, m_cert_if->GetMatchingCertificatesL(
 			m_allowed_user_certs, 
 			EFalse, 
 			0, 
@@ -2289,9 +2440,9 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_eap_identity(
 			0, 
 			ETrue, 
 			m_allowed_cipher_suites));
-		if (err != KErrNone)
+		if (error != KErrNone)
 		{
-			status = m_am_tools->convert_am_error_to_eapol_error(err);
+			status = m_am_tools->convert_am_error_to_eapol_error(error);
 		}
 		else
 		{
@@ -2419,8 +2570,8 @@ eap_status_e eap_am_type_tls_peap_symbian_c::complete_read_own_certificate(
 		delete m_own_certificate;
 	
 		// Create a copy of the certificate
-		TRAPD(err, m_own_certificate = CX509Certificate::NewL(*aCertChain[0]));
-		if (err != KErrNone)
+		TRAPD(error, m_own_certificate = CX509Certificate::NewL(*aCertChain[0]));
+		if (error != KErrNone)
 		{				
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
@@ -2434,16 +2585,16 @@ eap_status_e eap_am_type_tls_peap_symbian_c::complete_read_own_certificate(
 			eap_variable_data_c subjectIdentity(m_am_tools);
 			eap_variable_data_c IssuerIdentity(m_am_tools);
 			
-			TRAPD(err, get_identity_from_alternative_nameL(m_own_certificate, &subjectIdentity));
-			if (err != KErrNone)
+			TRAPD(error, get_identity_from_alternative_nameL(m_own_certificate, &subjectIdentity));
+			if (error != KErrNone)
 			{
 				EAP_TRACE_DEBUG(
 					m_am_tools,
 					TRACE_FLAGS_DEFAULT,
 					(EAPL("Could not find identity in SubjectAltName field.\n")));
 
-				TRAPD(err, get_identities_from_distinguished_namesL(m_own_certificate, &subjectIdentity, &IssuerIdentity));
-				if (err != KErrNone)
+				TRAPD(error, get_identities_from_distinguished_namesL(m_own_certificate, &subjectIdentity, &IssuerIdentity));
+				if (error != KErrNone)
 				{
 					EAP_TRACE_DEBUG(
 						m_am_tools,
@@ -2688,8 +2839,8 @@ eap_status_e eap_am_type_tls_peap_symbian_c::complete_read_ca_certificate(
 		delete m_ca_certificate;
 	
 		// Create a copy of the certificate
-		TRAPD(err, m_ca_certificate = CX509Certificate::NewL(*aCertChain[0]));
-		if (err != KErrNone)
+		TRAPD(error, m_ca_certificate = CX509Certificate::NewL(*aCertChain[0]));
+		if (error != KErrNone)
 		{				
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
@@ -2915,18 +3066,18 @@ void eap_am_type_tls_peap_symbian_c::get_identity_from_alternative_nameL(
 		TPtrC8 name = ext->Data();
 	
 		EAP_TRACE_DATA_DEBUG(
-		m_am_tools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_type_tls_peap_symbian_c::get_identity_from_alternative_nameL: Alt Name from Cert extn:"),
- 		name.Ptr(),
- 		name.Size()));		 			
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::get_identity_from_alternative_nameL: Alt Name from Cert extn:"),
+ 			name.Ptr(),
+ 			name.Size()));		 			
 
 		if(0 == name.Size())
 		{
 			EAP_TRACE_DEBUG(
-			m_am_tools, 
-			TRACE_FLAGS_DEFAULT, 
-			(EAPL("ERROR:get_identity_from_alternative_nameL:No Alternative Name in cert extension\n")));
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT, 
+				(EAPL("ERROR: get_identity_from_alternative_nameL:No Alternative Name in cert extension\n")));
 					
 			User::Leave(KErrNotFound);			
 		}
@@ -2939,9 +3090,9 @@ void eap_am_type_tls_peap_symbian_c::get_identity_from_alternative_nameL(
 		if(NULL == pOct)
 		{
 			EAP_TRACE_DEBUG(
-			m_am_tools, 
-			TRACE_FLAGS_DEFAULT, 
-			(EAPL("ERROR:get_identity_from_alternative_nameL:No ASN1DecOctetString or DecodeDER failed\n")));
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT, 
+				(EAPL("ERROR:get_identity_from_alternative_nameL:No ASN1DecOctetString or DecodeDER failed\n")));
 					
 			User::Leave(KErrNotFound);			
 		}
@@ -2956,9 +3107,9 @@ void eap_am_type_tls_peap_symbian_c::get_identity_from_alternative_nameL(
 		if(0 == pSeq->Count())
 		{
 			EAP_TRACE_DEBUG(
-			m_am_tools, 
-			TRACE_FLAGS_DEFAULT, 
-			(EAPL("ERROR:get_identity_from_alternative_nameL:No ASN1DecSequence or DecodeDER failed\n")));
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT, 
+				(EAPL("ERROR: get_identity_from_alternative_nameL:No ASN1DecSequence or DecodeDER failed\n")));
 					
 			User::Leave(KErrNotFound);			
 		}
@@ -2969,18 +3120,18 @@ void eap_am_type_tls_peap_symbian_c::get_identity_from_alternative_nameL(
 		if (gen == 0)
 		{
 			EAP_TRACE_DEBUG(
-			m_am_tools, 
-			TRACE_FLAGS_DEFAULT, 
-			(EAPL("ERROR:get_identity_from_alternative_nameL:No ASN1DecGeneric\n")));
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT, 
+				(EAPL("ERROR: get_identity_from_alternative_nameL:No ASN1DecGeneric\n")));
 
 			User::Leave(KErrNotFound);
 		}
 		if (gen->Tag() != 0)  // Only parse otherName in the CHOICE at the moment.
 		{
 			EAP_TRACE_DEBUG(
-			m_am_tools, 
-			TRACE_FLAGS_DEFAULT, 
-			(EAPL("ERROR:get_identity_from_alternative_nameL:Some Tag in ASN1DecGeneric\n")));
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT, 
+				(EAPL("ERROR: get_identity_from_alternative_nameL:Some Tag in ASN1DecGeneric\n")));
 		
 			User::Leave(KErrNotSupported);
 		}
@@ -2995,9 +3146,9 @@ void eap_am_type_tls_peap_symbian_c::get_identity_from_alternative_nameL(
 		if(NULL == objId)
 		{
 			EAP_TRACE_DEBUG(
-			m_am_tools, 
-			TRACE_FLAGS_DEFAULT, 
-			(EAPL("ERROR:get_identity_from_alternative_name_L:No ASN1DecObjectIdentifier or DecodeDER failed\n")));
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT, 
+				(EAPL("ERROR: get_identity_from_alternative_name_L:No ASN1DecObjectIdentifier or DecodeDER failed\n")));
 					
 			User::Leave(KErrNotFound);			
 		}
@@ -3011,9 +3162,9 @@ void eap_am_type_tls_peap_symbian_c::get_identity_from_alternative_nameL(
 			// Not supported object type
 		
 			EAP_TRACE_DEBUG(
-			m_am_tools, 
-			TRACE_FLAGS_DEFAULT, 
-			(EAPL("ERROR:get_identity_from_alternative_nameL:Not supported object type\n")));
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT, 
+				(EAPL("ERROR: get_identity_from_alternative_nameL:Not supported object type\n")));
 
 			User::Leave(KErrNotSupported);
 		}
@@ -3026,9 +3177,9 @@ void eap_am_type_tls_peap_symbian_c::get_identity_from_alternative_nameL(
 		if(NULL == utf8name)
 		{
 			EAP_TRACE_DEBUG(
-			m_am_tools, 
-			TRACE_FLAGS_DEFAULT, 
-			(EAPL("ERROR:get_identity_from_alternative_nameL:No ASN1DecUTF8String or DecodeDER failed\n")));
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT, 
+				(EAPL("ERROR: get_identity_from_alternative_nameL:No ASN1DecUTF8String or DecodeDER failed\n")));
 					
 			User::Leave(KErrNotFound);			
 		}
@@ -3067,9 +3218,9 @@ void eap_am_type_tls_peap_symbian_c::get_identity_from_alternative_nameL(
 	else
 	{
 		EAP_TRACE_DEBUG(
-		m_am_tools, 
-		TRACE_FLAGS_DEFAULT, 
-		(EAPL("get_identity_from_alternative_nameL:No X509 Cert Extension\n")));
+			m_am_tools, 
+			TRACE_FLAGS_DEFAULT, 
+			(EAPL("get_identity_from_alternative_nameL:No X509 Cert Extension\n")));
 	
 		User::Leave(KErrNotFound);
 	}
@@ -3088,58 +3239,81 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::timer_expired(
 
 	eap_status_e status = eap_status_ok;
 
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("TIMER: [0x%08x]->eap_am_type_tls_peap_symbian_c::timer_expired(id 0x%02x, data 0x%08x).\n"),
-		this, id, data));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("TIMER: [0x%08x]->eap_am_type_tls_peap_symbian_c::timer_expired(id 0x%02x, data 0x%08x).\n"),
+		this,
+		id,
+		data));
 
 #if defined(USE_FAST_EAP_TYPE)
 
 	if(id == KHandleCompletePacstoreNokTimerID)
-	    {
-        m_eap_fast_completion_status = eap_status_file_does_not_exist;
-        m_tls_application->complete_initialize_PAC_store( iCompletionOperation, iCompletion );
-        return eap_status_ok;
-	    }
-    if(id == KHandleCompletePacstoreOkTimerID)
-        {
-        m_eap_fast_completion_status = eap_status_ok;
-        m_tls_application->complete_initialize_PAC_store( iCompletionOperation, iCompletion );
-        return eap_status_ok;
-        }
-    if (id == KRemoveIAPReferenceTimerID)
+		{
+
+#ifdef USE_PAC_STORE
+		if (m_is_pac_store_initialization == true)
+			{
+			// First shutdown everything, this closes PAC-store, then others can use it immediately.
+			shutdown();
+			}
+#endif //#ifdef USE_PAC_STORE
+
+		m_eap_fast_completion_status = eap_status_file_does_not_exist;
+		m_tls_application->complete_initialize_PAC_store( iCompletionOperation, iCompletion );
+		return eap_status_ok;
+		}
+	else if(id == KHandleCompletePacstoreOkTimerID)
+		{
+
+#ifdef USE_PAC_STORE
+		if (m_is_pac_store_initialization == true)
+			{
+			// First shutdown everything, this closes PAC-store, then others can use it immediately.
+			shutdown();
+			}
+#endif //#ifdef USE_PAC_STORE
+
+		m_eap_fast_completion_status = eap_status_ok;
+		m_tls_application->complete_initialize_PAC_store( iCompletionOperation, iCompletion );
+		return eap_status_ok;
+		}
+	else if (id == KRemoveIAPReferenceTimerID)
 		{
 		status = RemoveIAPReference();
-
 		}
-	if (id == KImportFileTimerID)
+	else if (id == KImportFileTimerID)
 		{
-		TRAPD(err, status = ImportFilesL());
-		if (err != KErrNone)
+		TRAPD(error, status = ImportFilesL());
+		if (error != KErrNone)
 			{
-			EAP_TRACE_DEBUG(m_am_tools, 
-					TRACE_FLAGS_DEFAULT, 
-					(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Leave From ImportFilesL %d\n"),err));
+			EAP_TRACE_DEBUG(
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT, 
+				(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Leave From ImportFilesL %d\n"),error));
 			}
 		}
-
-	if (id == KCompleteReadPacstoreTimerID)
+	else if (id == KCompleteReadPacstoreTimerID)
 		{
-		TRAPD(err, FinalCompleteReadPACStoreDataL(m_eap_fast_completion_status));
-		if (err != KErrNone)
+		TRAPD(error, FinalCompleteReadPACStoreDataL(m_eap_fast_completion_status));
+		if (error != KErrNone)
 			{
-			EAP_TRACE_DEBUG(m_am_tools, 
-					TRACE_FLAGS_DEFAULT, 
-					(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Leave From FinalCompleteReadPACStoreDataL %d\n"),err));
+			EAP_TRACE_DEBUG(
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT, 
+				(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Leave From FinalCompleteReadPACStoreDataL %d\n"),error));
 			}
 		}
-
-	if (id == KHandleReadPacstoreTimerID)
+	else if (id == KHandleReadPacstoreTimerID)
 		{
 		if (m_state == EPasswordCancel)
 			{
 			m_eap_fast_completion_status = eap_status_user_cancel_authentication;
-			EAP_TRACE_DEBUG(m_am_tools, 
-					TRACE_FLAGS_DEFAULT, 
-					(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - PW query Cancel\n")));
+			EAP_TRACE_DEBUG(
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT, 
+				(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - PW query Cancel\n")));
 			
 			
 			status = m_partner->set_timer(
@@ -3153,33 +3327,38 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::timer_expired(
 			{
 			if (m_userResponse.get_data_length()>0)
 				{
-				EAP_TRACE_DEBUG(m_am_tools, 
-						TRACE_FLAGS_DEFAULT, 
-						(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Masterkey Create\n")));
+				EAP_TRACE_DEBUG(
+					m_am_tools, 
+					TRACE_FLAGS_DEFAULT, 
+					(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Masterkey Create\n")));
+
 				m_verificationStatus = ETrue;
-				TRAPD(err, m_eap_fast_completion_status=CreateMasterkeyL());
-				if (err != KErrNone)
+				TRAPD(error, m_eap_fast_completion_status=CreateMasterkeyL());
+				if (error != KErrNone)
 					{
-					EAP_TRACE_DEBUG(m_am_tools, 
-							TRACE_FLAGS_DEFAULT, 
-							(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Leave From CreateMasterkeyL %d\n"),err));
+					EAP_TRACE_DEBUG(
+						m_am_tools, 
+						TRACE_FLAGS_DEFAULT, 
+						(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Leave From CreateMasterkeyL %d\n"),error));
 					}
 				}
 			else
 				{
-				EAP_TRACE_DEBUG(m_am_tools, 
-						TRACE_FLAGS_DEFAULT, 
-						(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Masterkey, no data -> final complete for PW\n")));
+				EAP_TRACE_DEBUG(
+					m_am_tools, 
+					TRACE_FLAGS_DEFAULT, 
+					(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Masterkey, no data -> final complete for PW\n")));
+
 				m_state = EWrongPassword;
 				m_verificationStatus = EFalse;
 
-	        	status = m_partner->set_timer(
+				status = m_partner->set_timer(
 						this,
 						KCompleteReadPacstoreTimerID,  
 						0,
 						0);
 
-	        	return status;
+				return EAP_STATUS_RETURN(m_am_tools, status);
 				}
 			}
 
@@ -3187,20 +3366,24 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::timer_expired(
 			{
 			if (m_verificationStatus == EFalse)
 				{
-				TRAPD(err, status = PasswordQueryL());
+				TRAPD(error, status = PasswordQueryL());
+
 				m_eap_fast_completion_status = m_am_tools->convert_am_error_to_eapol_error(status);
-				if (err != KErrNone)
+
+				if (error != KErrNone)
 					{
-					EAP_TRACE_DEBUG(m_am_tools, 
-							TRACE_FLAGS_DEFAULT, 
-							(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Leave From PasswordQueryL %d\n"),err));
+					EAP_TRACE_DEBUG(
+						m_am_tools, 
+						TRACE_FLAGS_DEFAULT, 
+						(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Leave From PasswordQueryL %d\n"),error));
 					}
 
 				if (m_eap_fast_completion_status != eap_status_ok)
 					{
-					EAP_TRACE_DEBUG(m_am_tools, 
-							TRACE_FLAGS_DEFAULT, 
-							(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - PW query NOK, final complete for PW\n")));
+					EAP_TRACE_DEBUG(
+						m_am_tools, 
+						TRACE_FLAGS_DEFAULT, 
+						(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - PW query NOK, final complete for PW\n")));
 					
 					status = m_partner->set_timer(
 							this,
@@ -3211,83 +3394,95 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::timer_expired(
 				}
 			if (m_verificationStatus != EFalse)
 				{
-				TRAPD(err, CompletePasswordQueryL());
-				if (err != KErrNone)
+				TRAPD(error, CompletePasswordQueryL());
+				if (error != KErrNone)
 					{
-					EAP_TRACE_DEBUG(m_am_tools, 
-							TRACE_FLAGS_DEFAULT, 
-							(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Leave From CompletePasswordQueryL %d\n"),err));
+					EAP_TRACE_DEBUG(
+						m_am_tools, 
+						TRACE_FLAGS_DEFAULT, 
+						(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Leave From CompletePasswordQueryL %d\n"),error));
 					}
 
 				EAP_TRACE_DEBUG(
-						m_am_tools,
-						TRACE_FLAGS_DEFAULT,
-						(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Complete_password_query, m_both_completed=%d, m_both_asked=%d status=%d.\n"),
-								m_both_completed,
-								m_both_asked,
-								m_eap_fast_completion_status));
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Complete_password_query, m_both_completed=%d, m_both_asked=%d status=%d.\n"),
+					m_both_completed,
+					m_both_asked,
+					m_eap_fast_completion_status));
+
 				if (m_both_completed == m_both_asked)
 					{
 					m_both_completed = 0;
 					m_both_asked = 0;
 					m_verificationStatus = EFalse;
 					
-					EAP_TRACE_DEBUG(m_am_tools, 
-							TRACE_FLAGS_DEFAULT, 
-							(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - All OK, final complete for PW\n")));
+					EAP_TRACE_DEBUG(
+						m_am_tools, 
+						TRACE_FLAGS_DEFAULT, 
+						(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - All OK, final complete for PW\n")));
+
 					status = m_partner->set_timer(
 							this,
 							KCompleteReadPacstoreTimerID,  
 							0,
 							0);
-					return status;
+					return EAP_STATUS_RETURN(m_am_tools, status);
 					}
 				}
 			}
 
 		if (m_state == EFilePasswordQuery)
 			{
-			TRAPD( err, status = CompleteFilePasswordQueryL());
-			if (err != KErrNone)
+			TRAPD( error, status = CompleteFilePasswordQueryL());
+			if (error != KErrNone)
 				{
-				EAP_TRACE_DEBUG(m_am_tools, 
-						TRACE_FLAGS_DEFAULT, 
-						(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Leave From CompleteFilePasswordQueryL %d\n"),err));
+				EAP_TRACE_DEBUG(
+					m_am_tools, 
+					TRACE_FLAGS_DEFAULT, 
+					(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Leave From CompleteFilePasswordQueryL %d\n"),error));
 				}
 
 			EAP_TRACE_DEBUG(
-					m_am_tools,
-					TRACE_FLAGS_DEFAULT,
-					(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Complete_file_password_query, m_both_completed=%d, m_both_asked=%d status=%d.\n"),
-							m_both_completed,
-							m_both_asked,
-							status));
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - Complete_file_password_query, m_both_completed=%d, m_both_asked=%d status=%d.\n"),
+				m_both_completed,
+				m_both_asked,
+				status));
 			if (status != eap_status_ok)
 				{
-				EAP_TRACE_DEBUG(m_am_tools, 
-						TRACE_FLAGS_DEFAULT, 
-						(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - PW query NOK, final complete for PW\n")));
+				EAP_TRACE_DEBUG(
+					m_am_tools, 
+					TRACE_FLAGS_DEFAULT, 
+					(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - PW query NOK, final complete for PW\n")));
+
 				status = m_partner->set_timer(
 						this,
 						KCompleteReadPacstoreTimerID,  
 						&status,
 						0);
-				return status;
+				return EAP_STATUS_RETURN(m_am_tools, status);
 				}
+
 			if (m_both_completed == m_both_asked)
 				{
-				EAP_TRACE_DEBUG(m_am_tools, 
-						TRACE_FLAGS_DEFAULT, 
-						(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - All ok, final complete for PW\n")));
+				EAP_TRACE_DEBUG(
+					m_am_tools, 
+					TRACE_FLAGS_DEFAULT, 
+					(EAPL("eap_am_type_tls_peap_symbian_c::timer_expired - All ok, final complete for PW\n")));
+
 				m_both_completed = 0;
 				m_both_asked = 0;
+
 				status = m_partner->set_timer(
 						this,
 						KCompleteReadPacstoreTimerID,  
 						&status,
 						0);
 				}
-			return status;
+
+			return EAP_STATUS_RETURN(m_am_tools, status);
 			}
 		}
 #endif //#if defined(USE_FAST_EAP_TYPE)
@@ -3325,8 +3520,13 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::timer_delete_data(
 
 	eap_status_e status = eap_status_ok;
 
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("TIMER: [0x%08x]->eap_am_type_tls_peap_symbian_c::timer_delete_data(id 0x%02x, data 0x%08x).\n"),
-		this, id, data));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("TIMER: [0x%08x]->eap_am_type_tls_peap_symbian_c::timer_delete_data(id 0x%02x, data 0x%08x).\n"),
+		this,
+		id,
+		data));
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
@@ -3345,9 +3545,11 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::type_configure_read
 	// that calls this function does not know anything about Symbian.	
 	eap_status_e status(eap_status_ok);
 	
-	EAP_TRACE_DEBUG(m_am_tools, 
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
 		TRACE_FLAGS_DEFAULT, 
-		(EAPL("eap_am_type_tls_peap_symbian_c::type_configure_read - Start\n")));
+		(EAPL("eap_am_type_tls_peap_symbian_c::type_configure_read(): this=0x%08x\n"),
+		this));
 	
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_am_type_tls_peap_symbian_c::type_configure_read()");
 
@@ -3430,7 +3632,10 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::type_configure_read
 				// No EAP types are ENABLED as tunneling type.
 				if (m_is_client)
 				{
-					EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: No ENABLED encapsulated EAP types.\n")));
+					EAP_TRACE_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("ERROR: No ENABLED encapsulated EAP types.\n")));
 				}
 				
 				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -3499,13 +3704,27 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::type_configure_read
 		}
 	} // End of if (m_current_eap_type == eap_type_peap
 
-	TRAPD(err, type_configure_readL(
+	TRAPD(error, type_configure_readL(
 		field->get_field(),
 		field->get_field_length(),
 		data));
-	if (err != KErrNone) 
-	{	
+	if (error != KErrNone)
+	{
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("WARNING: eap_am_type_tls_peap_symbian_c::type_configure_readL() failed, error=%d, tries m_partner->read_configure(), partner=0x%08x.\n"),
+			error,
+			m_partner));
+
 		status = m_partner->read_configure(field, data);
+
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("m_partner->read_configure() returns status=%d=%s.\n"),
+			status,
+			eap_status_string_c::get_status_string(status)));
 	}
 
 	m_am_tools->trace_configuration(
@@ -3526,6 +3745,14 @@ void eap_am_type_tls_peap_symbian_c::type_configure_readL(
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 	EAP_UNREFERENCED_PARAMETER(field_length);
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eap_am_type_tls_peap_symbian_c::type_configure_readL(): this=0x%08x\n"),
+		this));
+	
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_am_type_tls_peap_symbian_c::type_configure_readL()");
 
 	// Create a buffer for the ascii strings - initialised with the argument
 	HBufC8* asciibuf = HBufC8::NewLC(KMaxDBFieldNameLength);
@@ -3565,7 +3792,8 @@ void eap_am_type_tls_peap_symbian_c::type_configure_readL(
 	   || (unicodeString.Compare(KFASTPACGroupImportReferenceCollection) == 0)
 	   || (unicodeString.Compare(KFASTPACGroupDBReferenceCollection) == 0)))
 	{
-		EAP_TRACE_DEBUG(m_am_tools, 
+		EAP_TRACE_DEBUG(
+			m_am_tools, 
 			TRACE_FLAGS_DEFAULT, 
 			(EAPL("eap_am_type_tls_peap_symbian_c::type_configure_readL This field will be read from EAP-FAST's special table\n")));
 		
@@ -3673,7 +3901,10 @@ void eap_am_type_tls_peap_symbian_c::type_configure_readL(
 			}
 			break;
 		default:
-			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("type_configure_readL: Unexpected column type.\n")));
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("type_configure_readL: Unexpected column type.\n")));
 			User::Leave(KErrGeneral);
 			break;
 		}
@@ -3681,7 +3912,10 @@ void eap_am_type_tls_peap_symbian_c::type_configure_readL(
 	else
 	{
 		// Could not find parameter
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("type_configure_readL: Could not find configuration parameter.\n")));
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("type_configure_readL: Could not find configuration parameter.\n")));
 		User::Leave(KErrArgument);
 	}		
 
@@ -3896,7 +4130,9 @@ void eap_am_type_tls_peap_symbian_c::ResetSessionIdL()
 	eap_variable_data_c session_id(m_am_tools);
 	eap_variable_data_c master_secret(m_am_tools);
 
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, 
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("ResetSessionIdL - clearing session resume info.\n")));
 		
 	{	
@@ -3935,7 +4171,10 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::alert_received(
 
 	eap_tls_trace_string_c tls_trace;
 
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("\n")));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("\n")));
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
@@ -4017,8 +4256,14 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_cipher_suites
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("\n")));
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("TLS: %s: function: query_cipher_suites_and_previous_session()\n"),
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("\n")));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("TLS: %s: function: query_cipher_suites_and_previous_session()\n"),
 		(m_is_client == true ? "client": "server")));
 
 	EAP_ASSERT_ALWAYS(m_is_client == true);
@@ -4041,9 +4286,10 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_cipher_suites
 	if(m_current_eap_type == eap_type_fast &&
 	   m_serv_unauth_prov_mode == true)
 	{
-		EAP_TRACE_DEBUG(m_am_tools, 
-			TRACE_FLAGS_DEFAULT, (
-			EAPL("eap_am_type_tls_peap_symbian_c::query_cipher_suites_and_previous_session-Exception for EAP-FAST as m_serv_unauth_prov_mode is true \n")));			
+		EAP_TRACE_DEBUG(
+			m_am_tools, 
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::query_cipher_suites_and_previous_session-Exception for EAP-FAST as m_serv_unauth_prov_mode is true \n")));			
 			
 		tls_session_type = tls_session_type_eap_fast_server_unauthenticated_provisioning_mode_ADHP;
 		
@@ -4092,17 +4338,18 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_cipher_suites
 				{
 					// Exception for EAP-FAST
 					
-					EAP_TRACE_DEBUG(m_am_tools, 
-					TRACE_FLAGS_DEFAULT, (
-					EAPL("eap_am_type_tls_peap_symbian_c::query_cipher_suites_and_previous_session - No CA certificate but exception for EAP-FAST\n")));				
+					EAP_TRACE_DEBUG(
+						m_am_tools, 
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_am_type_tls_peap_symbian_c::query_cipher_suites_and_previous_session - No CA certificate but exception for EAP-FAST\n")));				
 				}
 				else	
 #endif // #if defined(USE_FAST_EAP_TYPE)
 				{
 					m_state = EHandlingCipherSuiteQuery;
 					
-					TRAPD(err, m_cert_if->ReadCACertificateL(*m_allowed_ca_certs[0]));
-					if (err != KErrNone)
+					TRAPD(error, m_cert_if->ReadCACertificateL(*m_allowed_ca_certs[0]));
+					if (error != KErrNone)
 					{
 						// Error occurred. Just select all cipher suites.
 						select_all_cipher_suites = true;
@@ -4331,8 +4578,8 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_cipher_suites
 				(EAPL("TLS: %s: query_cipher_suites_and_previous_session(): creates new session.\n"),
 				(m_is_client == true ? "client": "server")));
 
-			TRAPD(err, ResetSessionIdL());
-			if (err != KErrNone)
+			TRAPD(error, ResetSessionIdL());
+			if (error != KErrNone)
 			{
 				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 				return EAP_STATUS_RETURN(m_am_tools, eap_status_process_general_error);					
@@ -4394,7 +4641,10 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_new_session_t
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("\n")));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("\n")));
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
@@ -4421,8 +4671,14 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::select_cipher_suite
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("\n")));
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("TLS: %s: function: select_cipher_suite_and_check_session_id()\n"),
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("\n")));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("TLS: %s: function: select_cipher_suite_and_check_session_id()\n"),
 		(m_is_client == true ? "client": "server")));
 
 	EAP_ASSERT_ALWAYS(m_is_client == false);
@@ -4524,11 +4780,11 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::select_cipher_suite
 				{	
 					stored_session_id.reset();
 
-					TRAPD(err, WriteBinaryParamL(
+					TRAPD(error, WriteBinaryParamL(
 						cf_str_EAP_TLS_PEAP_saved_session_id.get_field()->get_field(),
 						cf_str_EAP_TLS_PEAP_saved_session_id.get_field()->get_field_length(),
 						&stored_session_id));
-					if (err != KErrNone)
+					if (error != KErrNone)
 					{
 						EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 						return EAP_STATUS_RETURN(m_am_tools, eap_status_process_general_error);
@@ -4538,11 +4794,11 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::select_cipher_suite
 				{
 					stored_master_secret.reset();
 
-					TRAPD(err, WriteBinaryParamL(
+					TRAPD(error, WriteBinaryParamL(
 						cf_str_EAP_TLS_PEAP_saved_master_secret.get_field()->get_field(),
 						cf_str_EAP_TLS_PEAP_saved_master_secret.get_field()->get_field_length(),
 						&stored_master_secret));
-					if (err != KErrNone)
+					if (error != KErrNone)
 					{
 						EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 						return EAP_STATUS_RETURN(m_am_tools, eap_status_process_general_error);
@@ -4550,11 +4806,11 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::select_cipher_suite
 				}					
 
 				{
-					TRAPD(err, WriteIntParamL(
+					TRAPD(error, WriteIntParamL(
 						cf_str_EAP_TLS_PEAP_saved_cipher_suite.get_field()->get_field(),
 						cf_str_EAP_TLS_PEAP_saved_cipher_suite.get_field()->get_field_length(),
 						tls_cipher_suites_TLS_NULL_WITH_NULL_NULL));
-					if (err != KErrNone)
+					if (error != KErrNone)
 					{
 						EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 						return EAP_STATUS_RETURN(m_am_tools, eap_status_process_general_error);					
@@ -4609,9 +4865,17 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::verify_certificate_
 	EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * const certificate_chain,
 	const tls_cipher_suites_e required_cipher_suite)
 {
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("\n")));
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("TLS: %s: message_function: verify_certificate_chain()\n"),
+	EAP_TRACE_BEGIN(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT);
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("\n")));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("TLS: %s: message_function: verify_certificate_chain()\n"),
 		(m_is_client == true ? "client": "server")));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_am_type_tls_peap_symbian_c::verify_certificate_chain()");
@@ -4620,16 +4884,16 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::verify_certificate_
 
 	eap_status_e status(eap_status_ok);
 
-	TRAPD(err, verify_certificate_chainL(certificate_chain, required_cipher_suite));
-	if (err != KErrNone)
+	TRAPD(error, verify_certificate_chainL(certificate_chain, required_cipher_suite));
+	if (error != KErrNone)
 	{
-		if (err == KErrArgument)
+		if (error == KErrArgument)
 		{
 			status = eap_status_illegal_certificate;
 		}
 		else
 		{
-			status = m_am_tools->convert_am_error_to_eapol_error(err);
+			status = m_am_tools->convert_am_error_to_eapol_error(error);
 		}
 	}
 
@@ -4774,7 +5038,10 @@ void eap_am_type_tls_peap_symbian_c::verify_certificate_chainL(
 		}
 		else
 		{
-			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Client subject realm is empty.\n")));
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("Client subject realm is empty.\n")));
 		}
 		
 		if (manual_client_subject_realm.get_is_valid_data() == true)
@@ -4786,7 +5053,10 @@ void eap_am_type_tls_peap_symbian_c::verify_certificate_chainL(
 		}
 		else
 		{
-			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Client manual realm is empty.\n")));
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("Client manual realm is empty.\n")));
 		}
 		
 		EAP_TRACE_DATA_DEBUG(m_am_tools, 
@@ -4885,7 +5155,10 @@ void eap_am_type_tls_peap_symbian_c::verify_certificate_chainL(
 			}
 		}
 
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Server certificate realm verification OK.\n")));
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("Server certificate realm verification OK.\n")));
 	}
 	else
 	{
@@ -5132,7 +5405,10 @@ void eap_am_type_tls_peap_symbian_c::complete_validate_chain(
 	eap_status_e status = m_peer_public_key.set_copy_of_buffer(ptr.Ptr(), ptr.Length());
 	if (status != eap_status_ok)
 	{		
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: complete_validate_chain: could not allocate memory.")));
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("ERROR: complete_validate_chain: could not allocate memory.")));
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
 		return;
 	}
@@ -5195,7 +5471,7 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ReadFileConfig()
 
 	iPacStoreDb->SkipUserActions(m_skip_user_interactions);        
 
-	return status;
+	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
 #endif //#if defined(USE_EAP_CONFIGURATION_TO_SKIP_USER_INTERACTIONS)
@@ -5218,13 +5494,13 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_certificate_c
 
 	eap_status_e status(eap_status_pending_request);
 	m_state = EHandlingChainQuery;
-	TInt err(KErrNone);
+	TInt error(KErrNone);
 
 	if (m_is_client)
 	{
 		// client
 		// Get the matching certificates. This function call is completed asyncronously by complete_get_matching_certificates() function call.
-		TRAPD(err, m_cert_if->GetMatchingCertificatesL(
+		TRAPD(error, m_cert_if->GetMatchingCertificatesL(
 			m_allowed_user_certs, 
 			ETrue, 
 			certificate_authorities, 
@@ -5233,13 +5509,13 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_certificate_c
 			ETrue, 
 			m_allowed_cipher_suites));
 	
-		(void)EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(err));
+		(void)EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(error));
 	}
 	else
 	{
 		// server
 		// Get the matching certificates. This function call is completed asyncronously by complete_get_matching_certificates() function call.
-		TRAPD(err, m_cert_if->GetMatchingCertificatesL(
+		TRAPD(error, m_cert_if->GetMatchingCertificatesL(
 				m_allowed_user_certs, 
 				EFalse, 
 				0, 
@@ -5248,20 +5524,20 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_certificate_c
 				ETrue, 
 				m_allowed_cipher_suites));
 
-		if (err != KErrNone)
+		if (error != KErrNone)
 		{
-			status = m_am_tools->convert_am_error_to_eapol_error(err);
+			status = m_am_tools->convert_am_error_to_eapol_error(error);
 		}		
 	}
 
-	if (err == KErrNone)
+	if (error == KErrNone)
 	{
 		status = eap_status_pending_request;
 	} 
 	else
 	{	
 		// Convert the leave error code to EAPOL stack error code.
-		status = m_am_tools->convert_am_error_to_eapol_error(err);
+		status = m_am_tools->convert_am_error_to_eapol_error(error);
 	}	
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
@@ -5278,10 +5554,11 @@ void eap_am_type_tls_peap_symbian_c::complete_get_matching_certificates(
 
 	EAP_UNREFERENCED_PARAMETER(aStatus);
 
-	EAP_TRACE_DEBUG(m_am_tools, 
-	TRACE_FLAGS_DEFAULT, 
-	(EAPL("eap_am_type_tls_peap_symbian_c::complete_get_matching_certificates-Matching cert count after possible cert removal=%d, m_state=%d, aStatus=%d\n"),
-	aMatchingCerts.Count(), m_state, aStatus));
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eap_am_type_tls_peap_symbian_c::complete_get_matching_certificates-Matching cert count after possible cert removal=%d, m_state=%d, aStatus=%d\n"),
+		aMatchingCerts.Count(), m_state, aStatus));
 	
 	if (m_state == EHandlingIdentityQuery)
 	{
@@ -5346,7 +5623,10 @@ void eap_am_type_tls_peap_symbian_c::complete_get_matching_certificates(
 		if (m_allowed_user_certs.Count() == 0)
 		{
 			// No allowed user certificates. 
-			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("EAP-TLS: No allowed user certificates configured.\n")));
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("EAP-TLS: No allowed user certificates configured.\n")));
 			
 			if (m_tls_peap_server_authenticates_client_policy_flag == true)
 			{
@@ -5381,14 +5661,14 @@ void eap_am_type_tls_peap_symbian_c::complete_get_matching_certificates(
 					(EAPL("eap_am_type_tls_peap_symbian_c::complete_get_matching_certificates(): no manual realm - no user cert. Get realm from CA certificate.\n")));
 				
 				TInt allowed_ca_cert_count = m_allowed_ca_certs.Count();
-				TInt err(KErrNone);
+				TInt error(KErrNone);
 
 				if(allowed_ca_cert_count > 0)
 				{
-					TRAP(err, m_cert_if->ReadCACertificateL(*m_allowed_ca_certs[0]));
+					TRAP(error, m_cert_if->ReadCACertificateL(*m_allowed_ca_certs[0]));
 				}
 
-				if (err != KErrNone
+				if (error != KErrNone
 					|| allowed_ca_cert_count <= 0)
 				{
 					if (m_use_automatic_ca_certificate == false)
@@ -5486,7 +5766,10 @@ void eap_am_type_tls_peap_symbian_c::complete_get_matching_certificates(
 
 				if (error != KErrNone)
 				{
-					EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: eap_am_type_tls_peap_symbian_c::complete_get_matching_certificates -EHandlingChainQuery- Error=%d\n"),
+					EAP_TRACE_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::complete_get_matching_certificates -EHandlingChainQuery- Error=%d\n"),
 						error));
 								
 					get_tls_am_partner()->complete_query_certificate_chain(0, eap_status_allocation_error);
@@ -5708,8 +5991,8 @@ eap_status_e eap_am_type_tls_peap_symbian_c::get_realms_from_certificate(
 
 	// SUBJECT
 	// Try alternative name first
-	TRAPD(err, get_identity_from_alternative_nameL(certificate, &subject_identity));
-	if (err == KErrNone)
+	TRAPD(error, get_identity_from_alternative_nameL(certificate, &subject_identity));
+	if (error == KErrNone)
 	{
 		// Parse realm from identity
 		TPtr8 ptr(
@@ -5723,8 +6006,8 @@ eap_status_e eap_am_type_tls_peap_symbian_c::get_realms_from_certificate(
 	if (offset == KErrNotFound)
 	{
 		// Check DN
-		TRAPD(err, get_identities_from_distinguished_namesL(certificate, &subject_identity, &issuer_identity));	
-		if (err != KErrNone)
+		TRAPD(error, get_identities_from_distinguished_namesL(certificate, &subject_identity, &issuer_identity));	
+		if (error != KErrNone)
 		{
 			EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: EAP-TLS: Could not find realm from certificate.\n")));
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_certificate);
@@ -5754,8 +6037,8 @@ eap_status_e eap_am_type_tls_peap_symbian_c::get_realms_from_certificate(
 
 	// ISSUER
 	// Check DN
-	TRAP(err, get_identities_from_distinguished_namesL(certificate, &subject_identity, &issuer_identity));	
-	if (err != KErrNone)
+	TRAP(error, get_identities_from_distinguished_namesL(certificate, &subject_identity, &issuer_identity));	
+	if (error != KErrNone)
 	{
 		EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: EAP-TLS: Could not find realm from certificate.\n")));
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_certificate);
@@ -5821,42 +6104,42 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::save_tls_session(
 		}
 	
 		{			
-			TRAPD(err, WriteBinaryParamL(
+			TRAPD(error, WriteBinaryParamL(
 				cf_str_EAP_TLS_PEAP_saved_session_id.get_field()->get_field(),
 				cf_str_EAP_TLS_PEAP_saved_session_id.get_field()->get_field_length(),
 				session_id));
-			if (err != KErrNone)
+			if (error != KErrNone)
 			{
 				// Convert the leave error code to EAPOL stack error code.
-				status = m_am_tools->convert_am_error_to_eapol_error(err);
+				status = m_am_tools->convert_am_error_to_eapol_error(error);
 				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 				return EAP_STATUS_RETURN(m_am_tools, status);
 			}
 		}
 
 		{
-			TRAPD(err, WriteBinaryParamL(
+			TRAPD(error, WriteBinaryParamL(
 				cf_str_EAP_TLS_PEAP_saved_master_secret.get_field()->get_field(),
 				cf_str_EAP_TLS_PEAP_saved_master_secret.get_field()->get_field_length(),
 				master_secret));
-			if (err != KErrNone)
+			if (error != KErrNone)
 			{
 				// Convert the leave error code to EAPOL stack error code.
-				status = m_am_tools->convert_am_error_to_eapol_error(err);
+				status = m_am_tools->convert_am_error_to_eapol_error(error);
 				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 				return EAP_STATUS_RETURN(m_am_tools, status);
 			}
 		}
 
 		{
-			TRAPD(err, WriteIntParamL(
+			TRAPD(error, WriteIntParamL(
 				cf_str_EAP_TLS_PEAP_saved_cipher_suite.get_field()->get_field(),
 				cf_str_EAP_TLS_PEAP_saved_cipher_suite.get_field()->get_field_length(),
 				used_cipher_suite));
-			if (err != KErrNone)
+			if (error != KErrNone)
 			{
 				// Convert the leave error code to EAPOL stack error code.
-				status = m_am_tools->convert_am_error_to_eapol_error(err);
+				status = m_am_tools->convert_am_error_to_eapol_error(error);
 				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 				return EAP_STATUS_RETURN(m_am_tools, status);
 			}
@@ -5892,10 +6175,12 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::rsa_encrypt_with_pu
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_process_general_error);
 	}
 
-	EAP_TRACE_DATA_DEBUG(m_am_tools, 
-		TRACE_FLAGS_DEFAULT, (EAPL("TLS: rsa_encrypt_with_public_key() m_peer_public_key"),
-		   m_peer_public_key.get_data(m_peer_public_key.get_data_length()),
-		   m_peer_public_key.get_data_length()));
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("TLS: rsa_encrypt_with_public_key() m_peer_public_key"),
+		m_peer_public_key.get_data(m_peer_public_key.get_data_length()),
+		m_peer_public_key.get_data_length()));
 
 
 	crypto_rsa_c rsa(m_am_tools);
@@ -5941,10 +6226,10 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::rsa_decrypt_with_pr
 
 	HBufC8* data = 0;
 
-	TRAPD(err, data = HBufC8::NewL(encrypted_premaster_secret->get_data_length()));
-	if (err != KErrNone)
+	TRAPD(error, data = HBufC8::NewL(encrypted_premaster_secret->get_data_length()));
+	if (error != KErrNone)
 	{
-		status = m_am_tools->convert_am_error_to_eapol_error(err);
+		status = m_am_tools->convert_am_error_to_eapol_error(error);
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
@@ -5954,11 +6239,11 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::rsa_decrypt_with_pr
 	ptr.Copy(encrypted_premaster_secret->get_data(encrypted_premaster_secret->get_data_length()), 
 		encrypted_premaster_secret->get_data_length());
 
-	TRAP(err, m_cert_if->DecryptL(m_own_certificate_info.GetSubjectKeyId(), *data));
+	TRAP(error, m_cert_if->DecryptL(m_own_certificate_info.GetSubjectKeyId(), *data));
 
-	if (err != KErrNone)
+	if (error != KErrNone)
 	{
-		status = m_am_tools->convert_am_error_to_eapol_error(err);
+		status = m_am_tools->convert_am_error_to_eapol_error(error);
 	}
 	else
 	{
@@ -6042,10 +6327,10 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::sign_with_private_k
 
 
 	HBufC8* buf = 0;
-	TRAPD(err, buf = HBufC8::NewL(message_hash->get_data_length()))
-	if (err != KErrNone)
+	TRAPD(error, buf = HBufC8::NewL(message_hash->get_data_length()))
+	if (error != KErrNone)
 	{
-		status = m_am_tools->convert_am_error_to_eapol_error(err);		
+		status = m_am_tools->convert_am_error_to_eapol_error(error);		
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
@@ -6075,10 +6360,10 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::sign_with_private_k
 		signature_length = public_key_data.Size();
 	}
 
-	TRAP(err, m_cert_if->SignL(m_own_certificate_info.GetSubjectKeyId(), hash, signature_length));
-	if (err != KErrNone)
+	TRAP(error, m_cert_if->SignL(m_own_certificate_info.GetSubjectKeyId(), hash, signature_length));
+	if (error != KErrNone)
 	{
-		status = m_am_tools->convert_am_error_to_eapol_error(err);
+		status = m_am_tools->convert_am_error_to_eapol_error(error);
 	}
 	else
 	{
@@ -6105,11 +6390,11 @@ void eap_am_type_tls_peap_symbian_c::complete_sign(
 		return;
 	}
 	
-	TRAPD(err, complete_signL(aR, aS, eap_status_ok));
-	if (err != KErrNone)
+	TRAPD(error, complete_signL(aR, aS, eap_status_ok));
+	if (error != KErrNone)
 	{
 		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: complete_signL leaved.\n")));
-		get_tls_am_partner()->complete_sign_with_private_key(0, m_am_tools->convert_am_error_to_eapol_error(err));
+		get_tls_am_partner()->complete_sign_with_private_key(0, m_am_tools->convert_am_error_to_eapol_error(error));
 	}
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
@@ -6236,11 +6521,11 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::verify_with_public_
 
 	if (EapTlsPeapUtils::CipherSuiteUseDSAKeys(m_cipher_suite))
 	{
-		TRAPD(err, read_dsa_parametersL());
-		if (err != KErrNone)
+		TRAPD(error, read_dsa_parametersL());
+		if (error != KErrNone)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(err));
+			return EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(error));
 		}
 		crypto_dsa_c dsa(m_am_tools);
 
@@ -6763,13 +7048,13 @@ bool eap_am_type_tls_peap_symbian_c::is_session_valid()
 	
 	bool sessionValidity(false);
 	
-	TRAPD(err, sessionValidity = is_session_validL());
-	if (err != KErrNone) 
+	TRAPD(error, sessionValidity = is_session_validL());
+	if (error != KErrNone) 
 	{
 		EAP_TRACE_ERROR(m_am_tools, 
 			TRACE_FLAGS_DEFAULT, (
 			EAPL("eap_am_type_tls_peap_symbian_c::is_session_valid - LEAVE - error=%d, Assuming session is invalid \n"),
-			err));
+			error));
 			
 		sessionValidity = false;
 	}
@@ -6901,27 +7186,47 @@ bool eap_am_type_tls_peap_symbian_c::is_session_validL()
 		
 	TDateTime fullAuthDateTime = lastFullAuthTime.DateTime();
 	
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT,
-	(EAPL("Session Validity - Current Time,        %2d-%2d-%4d : %2d-%2d-%2d-%d\n"), 
-	currentDateTime.Day()+1, currentDateTime.Month()+1, currentDateTime.Year(), currentDateTime.Hour(),
-	currentDateTime.Minute(), currentDateTime.Second(), currentDateTime.MicroSecond()));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("Session Validity - Current Time,        %04d-%02d-%02d : %02d-%02d-%02d.%06d\n"), 
+		currentDateTime.Year(),
+		currentDateTime.Month()+1,
+		currentDateTime.Day()+1,
+		currentDateTime.Hour(),
+		currentDateTime.Minute(),
+		currentDateTime.Second(),
+		currentDateTime.MicroSecond()));
 
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT,
-	(EAPL("Session Validity - Last Full Auth Time, %2d-%2d-%4d : %2d-%2d-%2d-%d\n"), 
-	fullAuthDateTime.Day()+1, fullAuthDateTime.Month()+1, fullAuthDateTime.Year(), fullAuthDateTime.Hour(),
-	fullAuthDateTime.Minute(), fullAuthDateTime.Second(), fullAuthDateTime.MicroSecond()));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("Session Validity - Last Full Auth Time, %04d-%02d-%02d : %02d-%02d-%02d.%06d\n"), 
+		fullAuthDateTime.Year(),
+		fullAuthDateTime.Month()+1,
+		fullAuthDateTime.Day()+1,
+		fullAuthDateTime.Hour(),
+		fullAuthDateTime.Minute(),
+		fullAuthDateTime.Second(),
+		fullAuthDateTime.MicroSecond()));
 
 #endif
 
 	TTimeIntervalMicroSeconds interval = currentTime.MicroSecondsFrom(lastFullAuthTime);
 		
-	EAP_TRACE_DATA_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT,(EAPL("eap_am_type_tls_peap_symbian_c::is_session_valid:interval in microseconds:"),
-			&(interval.Int64()),
-			sizeof(interval.Int64()) ) );
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::is_session_valid:interval in microseconds:"),
+		&(interval.Int64()),
+		sizeof(interval.Int64()) ) );
 			
-	EAP_TRACE_DATA_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT,(EAPL("eap_am_type_tls_peap_symbian_c::is_session_valid:max session time in microseconds:"),
-			&(maxSessionTime),
-			sizeof(maxSessionTime) ) );
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::is_session_valid:max session time in microseconds:"),
+		&(maxSessionTime),
+		sizeof(maxSessionTime) ) );
 	
 #if defined(_DEBUG) || defined(DEBUG)
 
@@ -7051,10 +7356,17 @@ void eap_am_type_tls_peap_symbian_c::store_authentication_timeL()
 	
 	TDateTime currentDateTime = currentTime.DateTime();
 	
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT,
-	(EAPL("eap_am_type_tls_peap_symbian_c::store_authentication_time, %2d-%2d-%4d : %2d-%2d-%2d-%d\n"), 
-	currentDateTime.Day()+1, currentDateTime.Month()+1,currentDateTime.Year(), currentDateTime.Hour(),
-	currentDateTime.Minute(), currentDateTime.Second(), currentDateTime.MicroSecond()));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::store_authentication_time, %04d-%02d-%02d : %02d-%02d-%02d.%06d\n"), 
+		currentDateTime.Year(),
+		currentDateTime.Month()+1,
+		currentDateTime.Day()+1,
+		currentDateTime.Hour(),
+		currentDateTime.Minute(),
+		currentDateTime.Second(),
+		currentDateTime.MicroSecond()));
 
 #endif
 
@@ -7177,16 +7489,16 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_user_permissi
 
  	if (in_pac_attribute_A_ID_info->get_data_length()>0)
 		{
-		TRAPD(err, status = QueryUserPermissionForAIDL(in_pac_attribute_A_ID_info, in_pac_attribute_A_ID ));
-		if (err != KErrNone)
+		TRAPD(error, status = QueryUserPermissionForAIDL(in_pac_attribute_A_ID_info, in_pac_attribute_A_ID ));
+		if (error != KErrNone)
 			{
 			EAP_TRACE_DEBUG(
 					m_am_tools,
 					TRACE_FLAGS_DEFAULT,
 					(EAPL("EAP-FAST: eap_am_type_tls_peap_symbian_c::read_PAC_store_data() ERROR: LEAVE from QueryUserPermissionForAIDL error=%d"),
-					err));
+					error));
 					
-				m_eap_fast_completion_status = m_am_tools->convert_am_error_to_eapol_error(err);
+				m_eap_fast_completion_status = m_am_tools->convert_am_error_to_eapol_error(error);
 			 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 				return EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
 			}
@@ -7226,15 +7538,19 @@ eap_status_e eap_am_type_tls_peap_symbian_c::QueryUserPermissionForAIDL(
 	
 	A_IDPtr.Copy(in_pac_attribute_A_ID->get_data(in_pac_attribute_A_ID->get_data_length()),in_pac_attribute_A_ID->get_data_length() );
 
-	EAP_TRACE_DATA_DEBUG_SYMBIAN(
-			("eap_am_type_tls_peap_symbian_c::query_user_permission_for_A_ID(): in_pac_attribute_A_ID_info",
-			(A_ID_infoPtr.Ptr()),
-			(in_pac_attribute_A_ID_info->get_data_length())));
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::query_user_permission_for_A_ID(): in_pac_attribute_A_ID_info"),
+		(A_ID_infoPtr.Ptr()),
+		(in_pac_attribute_A_ID_info->get_data_length())));
 
- 	EAP_TRACE_DATA_DEBUG_SYMBIAN(
-			("eap_am_type_tls_peap_symbian_c::query_user_permission_for_A_ID(): in_pac_attribute_A_ID",
-			(A_IDPtr.Ptr()),
-			(in_pac_attribute_A_ID->get_data_length())));
+ 	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::query_user_permission_for_A_ID(): in_pac_attribute_A_ID"),
+		(A_IDPtr.Ptr()),
+		(in_pac_attribute_A_ID->get_data_length())));
 
  	if (A_ID_infoPtr.Size()>=KMaxNotifItemLength)
 	{
@@ -7251,8 +7567,8 @@ eap_status_e eap_am_type_tls_peap_symbian_c::QueryUserPermissionForAIDL(
     
     if (iEapAuthNotifier == 0)
     	{
-    	TRAPD(err, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
-	  	if (err)
+    	TRAPD(error, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
+	  	if (error)
 	  		{
 	  			return eap_status_process_general_error;
 	  		}
@@ -7276,7 +7592,7 @@ eap_status_e eap_am_type_tls_peap_symbian_c::QueryUserPermissionForAIDL(
 
  	CleanupStack::PopAndDestroy(3); // A_ID, A_ID_info
  	
- 	return status;
+ 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
 //--------------------------------------------------
@@ -7356,8 +7672,10 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::read_PAC_store_data
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -	
 	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::read_PAC_store_data-End, m_eap_fast_completion_status=%d"),
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::read_PAC_store_data-End, m_eap_fast_completion_status=%d"),
 		m_eap_fast_completion_status));			
 	
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -7381,7 +7699,9 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 
-	m_eap_fast_completion_status = eap_status_ok;
+	eap_status_e status(eap_status_ok);
+
+	m_eap_fast_completion_status = status;
 
 	m_eap_fast_pac_store_pending_operation = in_pending_operation;
 
@@ -7404,8 +7724,10 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 				pacStoreDataRefType,
 				eap_fast_tlv_header_string_c::get_fast_pac_store_data_string(pacStoreDataRefType)));
 				
-			EAP_TRACE_DATA_DEBUG_SYMBIAN(
-				("ReadPACStoredataL(): data_reference reference:",
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("ReadPACStoredataL(): data_reference reference:"),
 				data_reference->get_reference()->get_data(data_reference->get_reference()->get_data_length()), 
 				data_reference->get_reference()->get_data_length()));
 			
@@ -7444,32 +7766,34 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 					new_data->set_type(pacStoreDataRefType);					
 
 					// Set the reference.
-					m_eap_fast_completion_status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 					
-					m_eap_fast_completion_status = new_data->get_writable_data()->set_copy_of_buffer(&master_key);
+					status = new_data->get_writable_data()->set_copy_of_buffer(&master_key);
 
-					if (m_eap_fast_completion_status != eap_status_ok)
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					automatic_new_data.do_not_free_variable();
 
-					m_eap_fast_completion_status = m_references_and_data_blocks.add_object(new_data, true);
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = m_references_and_data_blocks.add_object(new_data, true);
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 					
-					EAP_TRACE_DATA_DEBUG_SYMBIAN(
-						("eap_pac_store_data_type_PAC_store_master_key - added data",
+					EAP_TRACE_DATA_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_pac_store_data_type_PAC_store_master_key - added data"),
 						(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
 						(new_data->get_data())->get_data_length()));						
 					
@@ -7501,40 +7825,42 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 
 					if (new_data == 0)
 					{
-						m_eap_fast_completion_status = eap_status_allocation_error;
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						status = eap_status_allocation_error;
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					new_data->set_type(pacStoreDataRefType);
 					
 					// Set the reference.
-					m_eap_fast_completion_status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 					
 
-					m_eap_fast_completion_status = new_data->get_writable_data()->set_copy_of_buffer(&reference_counter);
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = new_data->get_writable_data()->set_copy_of_buffer(&reference_counter);
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					automatic_new_data.do_not_free_variable();
 
-					m_eap_fast_completion_status = m_references_and_data_blocks.add_object(new_data, true);
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = m_references_and_data_blocks.add_object(new_data, true);
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 					
-					EAP_TRACE_DATA_DEBUG_SYMBIAN(
-						("eap_pac_store_data_type_reference_counter - added data",
+					EAP_TRACE_DATA_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_pac_store_data_type_reference_counter - added data"),
 						(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
 						(new_data->get_data())->get_data_length()));
 					
@@ -7567,39 +7893,41 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 
 					if (new_data == 0)
 					{
-						m_eap_fast_completion_status = eap_status_allocation_error;
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						status = eap_status_allocation_error;
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					new_data->set_type(pacStoreDataRefType);					
 
 					// Set the reference.
-					m_eap_fast_completion_status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 					
-					m_eap_fast_completion_status = new_data->get_writable_data()->set_copy_of_buffer(&group_data);
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = new_data->get_writable_data()->set_copy_of_buffer(&group_data);
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					automatic_new_data.do_not_free_variable();
 
-					m_eap_fast_completion_status = m_references_and_data_blocks.add_object(new_data, true);
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = m_references_and_data_blocks.add_object(new_data, true);
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 					
-					EAP_TRACE_DATA_DEBUG_SYMBIAN(
-						("eap_pac_store_data_type_group_data - added data",
+					EAP_TRACE_DATA_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_pac_store_data_type_group_data - added data"),
 						(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
 						(new_data->get_data())->get_data_length()));
 					
@@ -7632,39 +7960,41 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 
 					if (new_data == 0)
 					{
-						m_eap_fast_completion_status = eap_status_allocation_error;
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						status = eap_status_allocation_error;
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					new_data->set_type(pacStoreDataRefType);					
 
 					// Set the reference.
-					m_eap_fast_completion_status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 					
-					m_eap_fast_completion_status = new_data->get_writable_data()->set_copy_of_buffer(&aid_data);
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = new_data->get_writable_data()->set_copy_of_buffer(&aid_data);
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					automatic_new_data.do_not_free_variable();
 
-					m_eap_fast_completion_status = m_references_and_data_blocks.add_object(new_data, true);
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = m_references_and_data_blocks.add_object(new_data, true);
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}	
 					
-					EAP_TRACE_DATA_DEBUG_SYMBIAN(
-						("eap_pac_store_data_type_A_ID_data - added data",
+					EAP_TRACE_DATA_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_pac_store_data_type_A_ID_data - added data"),
 						(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
 						(new_data->get_data())->get_data_length()));
 					
@@ -7697,39 +8027,41 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 
 					if (new_data == 0)
 					{
-						m_eap_fast_completion_status = eap_status_allocation_error;
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						status = eap_status_allocation_error;
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					new_data->set_type(pacStoreDataRefType);					
 
 					// Set the reference.
-					m_eap_fast_completion_status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 					
-					m_eap_fast_completion_status = new_data->get_writable_data()->set_copy_of_buffer(&pac_data);
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = new_data->get_writable_data()->set_copy_of_buffer(&pac_data);
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					automatic_new_data.do_not_free_variable();
 
-					m_eap_fast_completion_status = m_references_and_data_blocks.add_object(new_data, true);
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = m_references_and_data_blocks.add_object(new_data, true);
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}	
 					
-					EAP_TRACE_DATA_DEBUG_SYMBIAN(
-						("eap_pac_store_data_type_PAC_data - added data",
+					EAP_TRACE_DATA_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_pac_store_data_type_PAC_data - added data"),
 						(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
 						(new_data->get_data())->get_data_length()));
 					
@@ -7771,8 +8103,10 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 					
 				iPacStoreDb->GetPacStoreDataL(dbTableName, m_info_array);
 				
-				EAP_TRACE_DEBUG_SYMBIAN(
-					(_L("eap_am_type_tls_peap_symbian_c::ReadPACStoredataL:Number of entries in table %S=%d\n"),
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("eap_am_type_tls_peap_symbian_c::ReadPACStoredataL:Number of entries in table %S=%d\n"),
 					&dbTableName, m_info_array.Count()));
 				
 				TInt first_index = 0;
@@ -7786,13 +8120,17 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 						TPtr8 infoDataPtr = m_info_array[first_index]->GetData()->Des();
 						TPtr8 infoRefPtr = m_info_array[first_index]->GetReference()->Des();
 						
-						EAP_TRACE_DATA_DEBUG_SYMBIAN(
-							("eap_am_type_tls_peap_symbian_c::ReadPACStoredataL: BINARY value from PAC DB (reference)",
+						EAP_TRACE_DATA_DEBUG(
+							m_am_tools,
+							TRACE_FLAGS_DEFAULT,
+							(EAPL("eap_am_type_tls_peap_symbian_c::ReadPACStoredataL: BINARY value from PAC DB (reference)"),
 							infoRefPtr.Ptr(),
 							infoRefPtr.Size()));
 						
-						EAP_TRACE_DATA_DEBUG_SYMBIAN(
-							("eap_am_type_tls_peap_symbian_c::ReadPACStoredataL: BINARY value from PAC DB (value)",
+						EAP_TRACE_DATA_DEBUG(
+							m_am_tools,
+							TRACE_FLAGS_DEFAULT,
+							(EAPL("eap_am_type_tls_peap_symbian_c::ReadPACStoredataL: BINARY value from PAC DB (value)"),
 							infoDataPtr.Ptr(),
 							infoDataPtr.Size()));					
 						
@@ -7803,27 +8141,27 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 
 						if (new_data == 0)
 						{
-							m_eap_fast_completion_status = eap_status_allocation_error;
-							(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+							status = eap_status_allocation_error;
+							(void) EAP_STATUS_RETURN(m_am_tools, status);
 							break;
 						}
 
 						new_data->set_type(dataType);					
 
 						// Set the reference.
-						m_eap_fast_completion_status = new_data->get_writable_reference()->set_copy_of_buffer(infoRefPtr.Ptr(), infoRefPtr.Size());
-						if (m_eap_fast_completion_status != eap_status_ok)
+						status = new_data->get_writable_reference()->set_copy_of_buffer(infoRefPtr.Ptr(), infoRefPtr.Size());
+						if (status != eap_status_ok)
 						{
-							(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+							(void) EAP_STATUS_RETURN(m_am_tools, status);
 							delete m_info_array[first_index];
 							m_info_array.Remove(first_index);
 							break;
 						}
 						
-						m_eap_fast_completion_status = new_data->get_writable_data()->set_copy_of_buffer(infoDataPtr.Ptr(), infoDataPtr.Size());
-						if (m_eap_fast_completion_status != eap_status_ok)
+						status = new_data->get_writable_data()->set_copy_of_buffer(infoDataPtr.Ptr(), infoDataPtr.Size());
+						if (status != eap_status_ok)
 						{
-							(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+							(void) EAP_STATUS_RETURN(m_am_tools, status);
 							delete m_info_array[first_index];
 							m_info_array.Remove(first_index);
 							break;
@@ -7831,16 +8169,19 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 
 						automatic_new_data.do_not_free_variable();
 
-						m_eap_fast_completion_status = m_references_and_data_blocks.add_object(new_data, true);
-						if (m_eap_fast_completion_status != eap_status_ok)
+						status = m_references_and_data_blocks.add_object(new_data, true);
+						if (status != eap_status_ok)
 						{
-							(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+							(void) EAP_STATUS_RETURN(m_am_tools, status);
 							delete m_info_array[first_index];
 							m_info_array.Remove(first_index);
 							break;
 						}
-						EAP_TRACE_DATA_DEBUG_SYMBIAN(
-							("For GROUP, AID, PAC INFOs - added data",
+
+						EAP_TRACE_DATA_DEBUG(
+							m_am_tools,
+							TRACE_FLAGS_DEFAULT,
+							(EAPL("For GROUP, AID, PAC INFOs - added data"),
 							(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
 							(new_data->get_data())->get_data_length()));					
 						}
@@ -7852,9 +8193,9 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 					} // End: while
 					
 				
-					if (m_eap_fast_completion_status != eap_status_ok)
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 				
@@ -7879,8 +8220,10 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 					{
 						// Nothing in the PAC store DB.
 						
-						EAP_TRACE_DEBUG_SYMBIAN(
-							(_L("eap_am_type_tls_peap_symbian_c::ReadPACStoredataL: NO PW in PAC store. Try Notifier")));					
+						EAP_TRACE_DEBUG(
+							m_am_tools,
+							TRACE_FLAGS_DEFAULT,
+							(EAPL("eap_am_type_tls_peap_symbian_c::ReadPACStoredataL: NO PW in PAC store. Try Notifier")));					
 						
 					
 						// Show the password query notifier to get the password.
@@ -7899,41 +8242,42 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 
 						if(iPacStoreDb->IsMasterKeyPresentL())
 							{
-				    TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
-				    
-				    m_notifier_data_to_user->iPassword.Zero();
-				    
-				    if (iEapAuthNotifier == 0)
-				    	{
-				    	iEapAuthNotifier = CEapAuthNotifier::NewL( *this );
-				    	}
-				    else
-					   	{
-						 	iEapAuthNotifier->Cancel();
-				     	}
-				
-				    iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastPacStorePwQueryDialog, m_notifier_data_to_user, aEapType);
+							TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
+							
+							m_notifier_data_to_user->iPassword.Zero();
+							
+							if (iEapAuthNotifier == 0)
+								{
+								iEapAuthNotifier = CEapAuthNotifier::NewL( *this );
+								}
+							else
+								{
+								iEapAuthNotifier->Cancel();
+								}
+						
+							m_eap_fast_completion_status = eap_status_pending_request;
 
-
+							iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastPacStorePwQueryDialog, m_notifier_data_to_user, aEapType);
 							}
 						else
 							{
 							m_state =  EMasterkeyQuery; 
-					    TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
-					    
-					    m_notifier_data_to_user->iPassword.Zero();
-					    
-					    if (iEapAuthNotifier == 0)
-					    	{
-					    	iEapAuthNotifier = CEapAuthNotifier::NewL( *this );
-					    	}
-					    else
-						   	{
-							 	iEapAuthNotifier->Cancel();
-					     	}
-					
-					    iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastCreateMasterkeyQueryDialog, m_notifier_data_to_user, aEapType);
+							TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
+							
+							m_notifier_data_to_user->iPassword.Zero();
+							
+							if (iEapAuthNotifier == 0)
+								{
+								iEapAuthNotifier = CEapAuthNotifier::NewL( *this );
+								}
+							else
+								{
+								iEapAuthNotifier->Cancel();
+								}
+						
+							m_eap_fast_completion_status = eap_status_pending_request;
 
+							iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastCreateMasterkeyQueryDialog, m_notifier_data_to_user, aEapType);
 							}
 
 						break;
@@ -7946,45 +8290,45 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 
 					if (new_data == 0)
 					{
-						m_eap_fast_completion_status = eap_status_allocation_error;
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						status = eap_status_allocation_error;
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					new_data->set_type(pacStoreDataRefType);
 					
 					// Set the reference.
-					m_eap_fast_completion_status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}					
 
-					m_eap_fast_completion_status = new_data->get_writable_data()->set_copy_of_buffer(&m_PAC_store_password);
+					status = new_data->get_writable_data()->set_copy_of_buffer(&m_PAC_store_password);
 
-					if (m_eap_fast_completion_status != eap_status_ok)
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					automatic_new_data.do_not_free_variable();
 
-					m_eap_fast_completion_status = m_references_and_data_blocks.add_object(new_data, true);
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = m_references_and_data_blocks.add_object(new_data, true);
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 					
-					EAP_TRACE_DATA_DEBUG_SYMBIAN(
-						("eap_pac_store_data_type_PAC_store_password - added data",
+					EAP_TRACE_DATA_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_pac_store_data_type_PAC_store_password - added data"),
 						(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
 						(new_data->get_data())->get_data_length()));
 				
-					m_eap_fast_completion_status = eap_status_pending_request;	
-					
 					break;
 					
 				} // End: case eap_pac_store_data_type_PAC_store_password:
@@ -7995,20 +8339,25 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 					
 					// Create a device seed.
 				
-				    eap_variable_data_c m_PAC_store_device_seed(m_am_tools);
-				    m_eap_fast_completion_status = m_PAC_store_device_seed.set_copy_of_buffer(
-				    	iPacStoreDeviceSeed );
-					if ( m_eap_fast_completion_status != eap_status_ok )
-					    {
-					    EAP_TRACE_DEBUG_SYMBIAN(
-							(_L("eap_am_type_tls_peap_symbian_c::ReadPACStoredataL: ERROR: seed data is not valid.")));	
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+					eap_variable_data_c m_PAC_store_device_seed(m_am_tools);
+					status = m_PAC_store_device_seed.set_copy_of_buffer(
+						iPacStoreDeviceSeed );
+					if ( status != eap_status_ok )
+						{
+						EAP_TRACE_DEBUG(
+							m_am_tools,
+							TRACE_FLAGS_DEFAULT,
+							(EAPL("eap_am_type_tls_peap_symbian_c::ReadPACStoredataL: ERROR: seed data is not valid.")));	
+
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
-					    }
-				    
+						}
+					
 					// continue normally
-					EAP_TRACE_DATA_DEBUG_SYMBIAN(
-						("Device Seed",
+					EAP_TRACE_DATA_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("Device Seed"),
 						m_PAC_store_device_seed.get_data(m_PAC_store_device_seed.get_data_length()),
 						m_PAC_store_device_seed.get_data_length()));
 										
@@ -8019,40 +8368,42 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 
 					if (new_data == 0)
 					{
-						m_eap_fast_completion_status = eap_status_allocation_error;
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						status = eap_status_allocation_error;
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					new_data->set_type(pacStoreDataRefType);
 					
 					// Set the reference.
-					m_eap_fast_completion_status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}					
 
-					m_eap_fast_completion_status = new_data->get_writable_data()->set_copy_of_buffer(&m_PAC_store_device_seed);
+					status = new_data->get_writable_data()->set_copy_of_buffer(&m_PAC_store_device_seed);
 
-					if (m_eap_fast_completion_status != eap_status_ok)
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					automatic_new_data.do_not_free_variable();
 
-					m_eap_fast_completion_status = m_references_and_data_blocks.add_object(new_data, true);
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = m_references_and_data_blocks.add_object(new_data, true);
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 					
-					EAP_TRACE_DATA_DEBUG_SYMBIAN(
-						("eap_pac_store_data_type_PAC_store_device_seed - added data",
+					EAP_TRACE_DATA_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_pac_store_data_type_PAC_store_device_seed - added data"),
 						(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
 						(new_data->get_data())->get_data_length()));					
 					
@@ -8070,18 +8421,18 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 
 					if (new_data == 0)
 					{
-						m_eap_fast_completion_status = eap_status_allocation_error;
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						status = eap_status_allocation_error;
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					new_data->set_type(pacStoreDataRefType);
 					
 					// Set the reference.
-					m_eap_fast_completion_status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = new_data->get_writable_reference()->set_copy_of_buffer(data_reference->get_reference());
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}					
 					
@@ -8095,42 +8446,44 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 					
 					// Copy the index and index type. The order of copying is important.
 					
-					m_eap_fast_completion_status = tmp_EAP_FAST_IAP_reference.set_copy_of_buffer(&tmpIndex,sizeof(i32_t));
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = tmp_EAP_FAST_IAP_reference.set_copy_of_buffer(&tmpIndex,sizeof(i32_t));
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 					
-					m_eap_fast_completion_status = tmp_EAP_FAST_IAP_reference.add_data(&tmpIndexType,sizeof(i32_t));
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = tmp_EAP_FAST_IAP_reference.add_data(&tmpIndexType,sizeof(i32_t));
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					if (tmp_EAP_FAST_IAP_reference.get_is_valid_data() == true)
 					{
-						m_eap_fast_completion_status = new_data->get_writable_data()->set_copy_of_buffer(&tmp_EAP_FAST_IAP_reference);
+						status = new_data->get_writable_data()->set_copy_of_buffer(&tmp_EAP_FAST_IAP_reference);
 
-						if (m_eap_fast_completion_status != eap_status_ok)
+						if (status != eap_status_ok)
 						{
-							(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+							(void) EAP_STATUS_RETURN(m_am_tools, status);
 							break;
 						}
 					}
 					
 					automatic_new_data.do_not_free_variable();					
 
-					m_eap_fast_completion_status = m_references_and_data_blocks.add_object(new_data, true);
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = m_references_and_data_blocks.add_object(new_data, true);
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 						
-					EAP_TRACE_DATA_DEBUG_SYMBIAN(
-						("eap_pac_store_data_type_PAC_store_IAP_reference - added data",
+					EAP_TRACE_DATA_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_pac_store_data_type_PAC_store_IAP_reference - added data"),
 						(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
 						(new_data->get_data())->get_data_length()));
 					
@@ -8157,8 +8510,10 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 					// groupDbReferenceData should have the value stored in PAC store DB.
 					// Doesn't matter even if it is empty. Proceed as normal case.
 					
-					EAP_TRACE_DATA_DEBUG_SYMBIAN(
-						("PAC group ref from PAC store DB",
+					EAP_TRACE_DATA_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("PAC group ref from PAC store DB"),
 						groupDbReferenceData.get_data(groupDbReferenceData.get_data_length()), 
 						groupDbReferenceData.get_data_length()));
 										
@@ -8169,18 +8524,18 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 
 					if (new_data == 0)
 					{
-						m_eap_fast_completion_status = eap_status_allocation_error;
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						status = eap_status_allocation_error;
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					new_data->set_type(pacStoreDataRefType);
 					
 					// Set the reference.
-					m_eap_fast_completion_status = new_data->get_writable_reference()->set_copy_of_buffer(&groupDbReferenceData);
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = new_data->get_writable_reference()->set_copy_of_buffer(&groupDbReferenceData);
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}					
 
@@ -8197,29 +8552,31 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 
 					if ( group_data_2.get_data_length() == 0 )
 						{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;						
 						}
 						
-					m_eap_fast_completion_status = new_data->get_writable_data()->set_copy_of_buffer(&group_data_2);
+					status = new_data->get_writable_data()->set_copy_of_buffer(&group_data_2);
 
-					if (m_eap_fast_completion_status != eap_status_ok)
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 
 					automatic_new_data.do_not_free_variable();
 
-					m_eap_fast_completion_status = m_references_and_data_blocks.add_object(new_data, true);
-					if (m_eap_fast_completion_status != eap_status_ok)
+					status = m_references_and_data_blocks.add_object(new_data, true);
+					if (status != eap_status_ok)
 					{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 					}
 					
-					EAP_TRACE_DATA_DEBUG_SYMBIAN(
-						("eap_pac_store_data_type_PAC_store_group_reference - added data",
+					EAP_TRACE_DATA_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_pac_store_data_type_PAC_store_group_reference - added data"),
 						(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
 						(new_data->get_data())->get_data_length()));										
 					
@@ -8243,24 +8600,24 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 
 					m_both_asked++;
 
-			    TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
-			    
-			    m_notifier_data_to_user->iPassword.Zero();
-			    
-			    if (iEapAuthNotifier == 0)
-			    	{
-			    	iEapAuthNotifier = CEapAuthNotifier::NewL( *this );
-			    	}
-			    else
-				   	{
-					 	iEapAuthNotifier->Cancel();
-			     	}
-			
-			    iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastPacFilePwQueryDialog, m_notifier_data_to_user, aEapType);
-
-					if (m_eap_fast_completion_status != eap_status_ok)
+					TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
+					
+					m_notifier_data_to_user->iPassword.Zero();
+					
+					if (iEapAuthNotifier == 0)
 						{
-						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+						iEapAuthNotifier = CEapAuthNotifier::NewL( *this );
+						}
+					else
+						{
+							iEapAuthNotifier->Cancel();
+						}
+				
+					iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastPacFilePwQueryDialog, m_notifier_data_to_user, aEapType);
+
+					if (status != eap_status_ok)
+						{
+						(void) EAP_STATUS_RETURN(m_am_tools, status);
 						break;
 						}
 
@@ -8272,11 +8629,13 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 				{
 					// Unknown data query.
 					
-					EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("eap_am_type_tls_peap_symbian_c::ReadPACStoredataL: ERROR: Unknown data type")));					
+					EAP_TRACE_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_am_type_tls_peap_symbian_c::ReadPACStoredataL: ERROR: Unknown data type")));					
 										
-					m_eap_fast_completion_status = eap_status_not_found;
-					(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+					status = eap_status_not_found;
+					(void) EAP_STATUS_RETURN(m_am_tools, status);
 					break;
 				}
 				
@@ -8284,17 +8643,24 @@ void eap_am_type_tls_peap_symbian_c::ReadPACStoredataL(
 		}
 	} // for ()
 
+
 	if (m_both_asked)
 	{
 		m_eap_fast_completion_status = eap_status_pending_request;
 	}
 
+
 	m_info_array.ResetAndDestroy();
 
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::ReadPACStoredataL-End, m_eap_fast_completion_status=%d"),
-		m_eap_fast_completion_status));			
-	
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::ReadPACStoredataL-End, status=%d=%s, m_eap_fast_completion_status=%d=%s"),
+		status,
+		eap_status_string_c::get_status_string(status),
+		m_eap_fast_completion_status,
+		eap_status_string_c::get_status_string(m_eap_fast_completion_status)));
+
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
 	return; 
 }
@@ -8362,9 +8728,12 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::write_PAC_store_dat
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -	
 	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::write_PAC_store_data-End, status=%d, m_eap_fast_completion_status=%d"),
-		status, m_eap_fast_completion_status));			
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::write_PAC_store_data-End, status=%d, m_eap_fast_completion_status=%d"),
+		status,
+		m_eap_fast_completion_status));			
 	
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);
@@ -8411,18 +8780,24 @@ void eap_am_type_tls_peap_symbian_c::WritePACStoreDataL(
 				data_reference->get_type(),
 				eap_fast_tlv_header_string_c::get_fast_pac_store_data_string(data_reference->get_type())));
 			
-			EAP_TRACE_DATA_DEBUG_SYMBIAN(
-				("WritePACStoreDataL(): data_reference data(value):",
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("WritePACStoreDataL(): data_reference data(value):"),
 				data_reference->get_data()->get_data(data_reference->get_data()->get_data_length()), 
 				data_reference->get_data()->get_data_length()));
 			
-			EAP_TRACE_DATA_DEBUG_SYMBIAN(
-				("WritePACStoreDataL(): data_reference reference:",
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("WritePACStoreDataL(): data_reference reference:"),
 				data_reference->get_reference()->get_data(data_reference->get_reference()->get_data_length()), 
 				data_reference->get_reference()->get_data_length()));
 			
-			EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("eap_am_type_tls_peap_symbian_c::WritePACStoreDataL: change status=%d (0=eap_pac_store_data_change_status_none)"),
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::WritePACStoreDataL: change status=%d (0=eap_pac_store_data_change_status_none)"),
 				data_reference->get_change_status()));
 
 			if (data_reference != 0
@@ -8448,8 +8823,10 @@ void eap_am_type_tls_peap_symbian_c::WritePACStoreDataL(
 				pacStoreDBColValPtr8.Copy(data_reference->get_data()->get_data(),
 										  data_reference->get_data()->get_data_length());
 				
-				EAP_TRACE_DATA_DEBUG_SYMBIAN(
-					("write_PAC_store_dataL(): 8 bit VALUE from common:",
+				EAP_TRACE_DATA_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("write_PAC_store_dataL(): 8 bit VALUE from common:"),
 					pacStoreDBColValPtr8.Ptr(), 
 					pacStoreDBColValPtr8.Size()));
 				
@@ -8459,8 +8836,10 @@ void eap_am_type_tls_peap_symbian_c::WritePACStoreDataL(
 				pacStoreDBColRefPtr8.Copy(data_reference->get_reference()->get_data(),
 										  data_reference->get_reference()->get_data_length());
 
-				EAP_TRACE_DATA_DEBUG_SYMBIAN(
-					("write_PAC_store_dataL(): 8 bit REFERENCE from common:",
+				EAP_TRACE_DATA_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("write_PAC_store_dataL(): 8 bit REFERENCE from common:"),
 					pacStoreDBColRefPtr8.Ptr(), 
 					pacStoreDBColRefPtr8.Size()));
 			
@@ -8558,8 +8937,10 @@ void eap_am_type_tls_peap_symbian_c::WritePACStoreDataL(
 					{
 						// Unknown data type.
 						
-						EAP_TRACE_DEBUG_SYMBIAN(
-							(_L("eap_am_type_tls_peap_symbian_c::WritePACStoreDataL: ERROR: Unknown data type")));					
+						EAP_TRACE_DEBUG(
+							m_am_tools,
+							TRACE_FLAGS_DEFAULT,
+							(EAPL("eap_am_type_tls_peap_symbian_c::WritePACStoreDataL: ERROR: Unknown data type")));
 											
 						m_eap_fast_completion_status = eap_status_not_found;
 						(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
@@ -8628,8 +9009,10 @@ void eap_am_type_tls_peap_symbian_c::WritePACStoreDataL(
 		}
 	} // for ()
 
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::WritePACStoreDataL-End, m_eap_fast_completion_status=%d"),
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::WritePACStoreDataL-End, m_eap_fast_completion_status=%d"),
 		m_eap_fast_completion_status));			
 	
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);		
@@ -8655,23 +9038,23 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::complete_add_import
 	
 	m_eap_fast_completion_status = eap_status_ok;
 
-	TRAPD(err, CompleteAddImportedPACFileL(in_imported_PAC_filename, out_used_group_reference));
-	if (err != KErrNone)
+	TRAPD(error, CompleteAddImportedPACFileL(in_imported_PAC_filename, out_used_group_reference));
+	if (error != KErrNone)
 		{
 		EAP_TRACE_DEBUG(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("EAP-FAST: eap_am_type_tls_peap_symbian_c::read_PAC_store_data() ERROR: LEAVE from CompleteAddImportedPACFfileL error=%d"),
-				err));
+				error));
 				
-			m_eap_fast_completion_status = m_am_tools->convert_am_error_to_eapol_error(err);
+			m_eap_fast_completion_status = m_am_tools->convert_am_error_to_eapol_error(error);
 		}
 
    	m_eap_fast_completion_status = m_partner->set_timer(
 		this,
 		KImportFileTimerID, // if nothing in db & remove_IAP_reference called already with 0 -> import
 		0,
-		1);
+		0);
 
 	if (m_eap_fast_completion_status != eap_status_ok)
 		{
@@ -8690,7 +9073,10 @@ void eap_am_type_tls_peap_symbian_c::CompleteAddImportedPACFileL(
 		const eap_variable_data_c * const out_used_group_reference)
 {
 	RFs aFs;
-	aFs.Connect( KFileServerDefaultMessageSlots );
+
+	TInt error = aFs.Connect( KFileServerDefaultMessageSlots );
+	User::LeaveIfError(error);
+	
 
 	HBufC8* buf = HBufC8::NewLC(in_imported_PAC_filename->get_data_length());
 	TPtr8 bufPtr = buf->Des();
@@ -8702,8 +9088,10 @@ void eap_am_type_tls_peap_symbian_c::CompleteAddImportedPACFileL(
 
 	eap_variable_data_c someVariableData(m_am_tools);
 
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::complete_add_imported_PAC_file: Get ImportReference from database")));					
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::complete_add_imported_PAC_file: Get ImportReference from database")));					
 
 	EapTlsPeapUtils::GetEapSettingsDataL(
 		m_database,
@@ -8733,12 +9121,16 @@ void eap_am_type_tls_peap_symbian_c::CompleteAddImportedPACFileL(
 		}
 	else
 		{
-		EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("eap_am_type_tls_peap_symbian_c::complete_add_imported_PAC_file: NO ImportReference !!!!")));	
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::complete_add_imported_PAC_file: NO ImportReference !!!!")));	
 		}
 	
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::complete_add_imported_PAC_file: Set GroupDBReference to database")));					
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::complete_add_imported_PAC_file: Set GroupDBReference to database")));					
 
 	if (out_used_group_reference->get_data_length()>0 && someVariableData.get_data_length()>0)
 		{
@@ -8757,8 +9149,10 @@ void eap_am_type_tls_peap_symbian_c::CompleteAddImportedPACFileL(
 		}
 	else
 		{
-		EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("eap_am_type_tls_peap_symbian_c::complete_add_imported_PAC_file: NO GROUP REFERENCE !!!!")));	
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::complete_add_imported_PAC_file: NO GROUP REFERENCE !!!!")));	
 
 		}
 
@@ -8797,11 +9191,11 @@ void eap_am_type_tls_peap_symbian_c::CompleteAddImportedPACFileL(
    	if(aFs.Delete(FilePathPtr)!= KErrNone)
    		{
    		EAP_TRACE_DATA_DEBUG(
-   				m_am_tools,
-   				TRACE_FLAGS_DEFAULT,
-   				(EAPL("eap_am_type_tls_peap_symbian_c::complete_add_imported_PAC_file: Couldn't delete file"),
-   						FilePathPtr.Ptr(),
-   						FilePathPtr.Size()));
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::complete_add_imported_PAC_file: Couldn't delete file"),
+			FilePathPtr.Ptr(),
+			FilePathPtr.Size()));
 
 
    		m_eap_fast_completion_status = eap_status_file_does_not_exist;
@@ -8821,10 +9215,14 @@ void eap_am_type_tls_peap_symbian_c::CompleteAddImportedPACFileL(
 //
 void eap_am_type_tls_peap_symbian_c::ContinueInitializePacStore()
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::ContinueInitializePacStore()")));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::ContinueInitializePacStore()")));
 
-	TRAPD(error, CheckPasswordTimeValidityL());
+	TBool RemoveCache(EFalse);
+
+	TRAPD(error, iPacStoreDb->CheckPasswordTimeValidityL(RemoveCache, m_index_type, m_index, m_max_session_time));
 
 	if(error != KErrNone)
 	{
@@ -8833,6 +9231,11 @@ void eap_am_type_tls_peap_symbian_c::ContinueInitializePacStore()
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("EAP-FAST: eap_am_type_tls_peap_symbian_c::ContinueInitializePacStore() ERROR: LEAVE from CheckPasswordTimeValidityL() error=%d"),
 			error));
+	}
+
+	if (RemoveCache)
+	{
+		m_tls_application->remove_cached_pac_store_data();
 	}
 	
 	EAP_TRACE_DEBUG(
@@ -8845,15 +9248,24 @@ void eap_am_type_tls_peap_symbian_c::ContinueInitializePacStore()
 	
 	m_eap_fast_completion_status = eap_status_ok;
 
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::ContinueInitializePacStore: Remove removed IAP references")));					
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::ContinueInitializePacStore: Remove removed IAP references")));					
 
 	m_eap_fast_completion_status = m_partner->set_timer(
 			this,
 			KRemoveIAPReferenceTimerID, 
 			0,
-			1);
+			0);
 
+}
+
+//--------------------------------------------------
+
+void eap_am_type_tls_peap_symbian_c::set_is_pac_store_initialization()
+{
+	m_is_pac_store_initialization = true;
 }
 
 //--------------------------------------------------
@@ -8941,7 +9353,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::complete_remove_IAP
 			this,
 			KRemoveIAPReferenceTimerID, 
 			0,
-			1);
+			0);
 		
 		if (m_eap_fast_completion_status != eap_status_ok)
 			{
@@ -8955,7 +9367,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::complete_remove_IAP
 			this,
 			KImportFileTimerID, // if nothing in db & remove_IAP_reference called already with 0 -> import
 			0,
-			1);
+			0);
 		
 		if (m_eap_fast_completion_status != eap_status_ok)
 			{
@@ -9006,8 +9418,8 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::initialize_PAC_stor
     iCompletionOperation = aCompletionOperation;
     iCompletion = aCompletion;
 
-    TRAPD( err, FixOldTableForPacStoreInitL() );
-    if ( err != KErrNone )
+    TRAPD( error, iPacStoreDb->FixOldTableForPacStoreInitL() );
+    if ( error != KErrNone )
     	{
         EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, ( EAPL(
         	"ERROR: eap_am_type_tls_peap_symbian_c::initialize_PAC_store() \
@@ -9018,20 +9430,26 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::initialize_PAC_stor
     	{
     	
     	TBool isInitialized = EFalse;
-    	TRAP( err, isInitialized = iPacStoreDb->IsInitializedL() );
-    	if ( err == KErrNone )
+    	TRAP( error, isInitialized = iPacStoreDb->IsInitializedL() );
+    	if ( error == KErrNone )
     		{
             if ( !isInitialized )
         	    {
-		        EAP_TRACE_DEBUG_SYMBIAN(
-			    (_L("eap_am_type_tls_peap_symbian_c::initialize_PAC_store(): PAC store initialized, erase memorystore")));	
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("eap_am_type_tls_peap_symbian_c::initialize_PAC_store(): PAC store initialized, erase memorystore")));
+
 		        m_tls_application->remove_cached_pac_store_data();
-		        TRAP( err, iPacStoreDb->SetPacStoreInitValueL(
+
+		        TRAP( error, iPacStoreDb->SetPacStoreInitValueL(
 		    	    CPacStoreDatabase::EPacStoreInitialized ) );
-		        if ( err != KErrNone )
+		        if ( error != KErrNone )
 		    	    {
-			        EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("eap_am_type_tls_peap_symbian_c::initialize_PAC_store(): ERROR: Leave in SetPacStoreInitValueL()")));	
+					EAP_TRACE_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_am_type_tls_peap_symbian_c::initialize_PAC_store(): ERROR: Leave in SetPacStoreInitValueL()")));	
 		    	    }
         	    }
 		    // asynch. call, return immediately
@@ -9039,11 +9457,13 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::initialize_PAC_stor
 		    }
     	else
     		{
-	        EAP_TRACE_DEBUG_SYMBIAN( ( _L(
-	        	"ERROR: eap_am_type_tls_peap_symbian_c::initialize_PAC_store(): Leave, IsInitializedL(), err=%d.\n"),
-	        	err ) );	
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::initialize_PAC_store(): Leave, IsInitializedL(), error=%d.\n"),
+				error ) );	
     		
-    		return m_am_tools->convert_am_error_to_eapol_error(err);
+    		return m_am_tools->convert_am_error_to_eapol_error(error);
     		}
     	}
 	
@@ -9115,7 +9535,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::indicates_eap_fast_
 
 
 
-	return status;
+	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
 // ---------------------------------------------------------------------------
@@ -9127,7 +9547,10 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::indicates_eap_fast_
     const eap_fast_completion_operation_e provisioning_mode,
     const eap_fast_pac_type_e pac_type )
 {	
-	EAP_TRACE_DEBUG_SYMBIAN( (_L("eap_am_type_tls_peap_symbian_c::indicates_eap_fast_provisioning_ends()")));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::indicates_eap_fast_provisioning_ends()")));
 
 	EAP_UNREFERENCED_PARAMETER(provisioning_mode);
 
@@ -9169,7 +9592,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::indicates_eap_fast_
 		}
 	} // if ( pac_type == eap_fast_pac_type_tunnel_pac )
 
-	return status;
+	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
 #endif //#if defined(USE_FAST_EAP_TYPE)
@@ -9183,14 +9606,18 @@ void eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL(
 	eap_variable_data_c * aPacStoreData,
 	const eap_variable_data_c * const aPacStoreReference /*=NULL*/)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL Start aPacStoreDataType=%d"),
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL(): Start aPacStoreDataType=%d"),
 		aPacStoreDataType));	
 	
 	if(m_current_eap_type != eap_type_fast || iPacStoreDb == NULL)
 	{
-		EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL ERROR: Unknown EAP type or No PAC store DB!")));
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL ERROR: Unknown EAP type or No PAC store DB!")));
 		
 		// Can't proceed.
 		User::Leave(KErrNotSupported);		
@@ -9221,8 +9648,10 @@ void eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL(
 		{
 			// Not in PAC store. This should not be called.
 
-			EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL ERROR: This is not in PAC store DB!")));
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL ERROR: This is not in PAC store DB!")));
 			
 			return;		
 		}		
@@ -9230,8 +9659,10 @@ void eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL(
 		{
 			// Not in PAC store. This should not be called.
 
-			EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL ERROR: This is not in PAC store DB!")));
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL ERROR: This is not in PAC store DB!")));
 			
 			return;		
 		}		
@@ -9239,8 +9670,10 @@ void eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL(
 		{
 			// Not in PAC store. This should not be called.
 
-			EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL ERROR: This is not in PAC store DB!")));
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL ERROR: This is not in PAC store DB!")));
 			
 			return;		
 		}		
@@ -9254,8 +9687,10 @@ void eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL(
 		{
 			// Not in PAC store. This should not be called.
 
-			EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL ERROR: This is not in PAC store DB!")));
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL ERROR: This is not in PAC store DB!")));
 			
 			return;		
 		}		
@@ -9306,14 +9741,14 @@ void eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL(
 		{
 			TPtr8 pacStoreDBColValPtr8 = pacStoreDBColValBuf8->Des();
 				
-			TRAPD( err, iPacStoreDb->GetPacStoreDataL(pacStoreDBColName, pacStoreDBColValPtr8) );
-			if ( err )
+			TRAPD( error, iPacStoreDb->GetPacStoreDataL(pacStoreDBColName, pacStoreDBColValPtr8) );
+			if ( error )
 				{
 				if(pacStoreDBColValBuf8 != NULL)
 					{
 						CleanupStack::PopAndDestroy(pacStoreDBColValBuf8);
 						pacStoreDBColValBuf8 = NULL;
-						User::Leave( err );
+						User::Leave( error );
 					}
 				}
 			
@@ -9328,22 +9763,28 @@ void eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL(
 		case eap_pac_store_data_type_A_ID_data:
 		case eap_pac_store_data_type_PAC_data:
 		{
-			EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL: To get GROUP, PAC or AID data")));			
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL: To get GROUP, PAC or AID data")));			
 			
 			
 			if(aPacStoreReference == NULL )//|| aPacStoreReference->get_data_length() <= 0)
 			{
-				EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL ERROR: Empty reference")));
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL ERROR: Empty reference")));
 				
 				// Can't proceed.
 				User::Leave(KErrArgument);		
 			}								
 			if ( aPacStoreReference->get_data_length() <= 0 )
 				{
-				EAP_TRACE_DEBUG_SYMBIAN(
-					(_L("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL reset aPacStoreData.")));				
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL reset aPacStoreData.")));				
 				aPacStoreData->reset();
 				break;
 				}
@@ -9355,15 +9796,17 @@ void eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL(
 			referencePtr8.Copy(aPacStoreReference->get_data(),
 					aPacStoreReference->get_data_length());
 	
-			EAP_TRACE_DATA_DEBUG_SYMBIAN(
-			("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL: reference to DB",
-			referencePtr8.Ptr(), 
-			referencePtr8.Size()));	
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL: reference to DB"),
+				referencePtr8.Ptr(), 
+				referencePtr8.Size()));	
 			
 			TPtr8 pacStoreDBColDataValPtr8(0,0);
 					
-			TRAPD( err, iPacStoreDb->GetPacStoreDataL(pacStoreDBColName, pacStoreDBColDataValPtr8, referencePtr8, &aDbBinaryColumnValue) );
-			if ( err )
+			TRAPD( error, iPacStoreDb->GetPacStoreDataL(pacStoreDBColName, pacStoreDBColDataValPtr8, referencePtr8, &aDbBinaryColumnValue) );
+			if ( error )
 				{
 				CleanupStack::PopAndDestroy(1); // reference8.
 				if(pacStoreDBColValBuf8 != NULL)
@@ -9371,7 +9814,7 @@ void eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL(
 						CleanupStack::PopAndDestroy(pacStoreDBColValBuf8);
 						pacStoreDBColValBuf8 = NULL;
 						delete (aDbBinaryColumnValue);
-						User::Leave( err );
+						User::Leave( error );
 					}
 				}
 			
@@ -9382,9 +9825,11 @@ void eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL(
 				{
 				TPtr8 aDbBinaryColumnValuePtr = aDbBinaryColumnValue->Des();
 			 
-				EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL, data size=%d"),
-								aDbBinaryColumnValuePtr.Size()));	
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL, data size=%d"),
+					aDbBinaryColumnValuePtr.Size()));	
 				
 				if (aDbBinaryColumnValuePtr.Size() > 0)
 					{
@@ -9394,16 +9839,20 @@ void eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL(
 					}
 				else
 					{
-					EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("eap_am_type_tls_peap_symbian_c::No data to fill !!")));	
+					EAP_TRACE_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_am_type_tls_peap_symbian_c::No data to fill !!")));	
 				
 					}
 				delete (aDbBinaryColumnValue);
 				}
 			else
 				{
-				EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("eap_am_type_tls_peap_symbian_c::Data NULL !!")));	
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("eap_am_type_tls_peap_symbian_c::Data NULL !!")));	
 				}
 			
 			error = m_am_tools->convert_eapol_error_to_am_error(status);
@@ -9417,15 +9866,19 @@ void eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL(
 		case eap_pac_store_data_type_PAC_info:
 		{
 			
-			EAP_TRACE_DEBUG_SYMBIAN(
-					(_L("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL:ERROR: Calls for INFOs should not come here !!!")));
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL:ERROR: Calls for INFOs should not come here !!!")));
 			
 			break;
 		}		
 		default:
 		{
-			EAP_TRACE_DEBUG_SYMBIAN(
-					(_L("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL - UNSUPPORTED Column !!!")));
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL - UNSUPPORTED Column !!!")));
 			
 			break;		
 		}
@@ -9436,8 +9889,10 @@ void eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL(
 		CleanupStack::PopAndDestroy(pacStoreDBColValBuf8);
 	}
 	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL-End")));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL-End")));
 	
 	User::LeaveIfError(error); // This could be success or error. Does't matter.	
 }
@@ -9447,12 +9902,16 @@ void eap_am_type_tls_peap_symbian_c::GetPacStoreDbDataL(
 //--------------------------------------------------
 
 #ifdef USE_FAST_EAP_TYPE
+
 //--------------------------------------------------
 
 eap_status_e eap_am_type_tls_peap_symbian_c::RemoveIAPReference()
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::RemoveIAPReference - Start")));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::RemoveIAPReference(): Start")));
+
 	m_eap_fast_completion_status = eap_status_ok;	
 			
 	eap_variable_data_c aIapReference(m_am_tools);
@@ -9483,35 +9942,41 @@ eap_status_e eap_am_type_tls_peap_symbian_c::RemoveIAPReference()
 	}
 	
 	if (aIapReference.get_data_length() > 0)
-		{
+	{
 		eap_fast_pac_store_data_c * const group_reference_and_data = new eap_fast_pac_store_data_c(m_am_tools);
 	
 	
 		m_eap_fast_completion_status = group_reference_and_data->get_writable_data()->set_copy_of_buffer(aGroupReferenceCollection.get_data(), aGroupReferenceCollection.get_data_length());
 	
 		if (aIapReference.get_data_length() > 0)
+		{
 			m_completed_with_zero = EFalse;
+		}
 		else
+		{
 			m_completed_with_zero = ETrue;
-			
-		
-			if (m_eap_fast_completion_status == eap_status_ok)
-			{
+		}
+
+		if (m_eap_fast_completion_status == eap_status_ok)
+		{
 			m_eap_fast_completion_status = m_tls_application->remove_IAP_reference(
 					&aIapReference,
 					group_reference_and_data);
-			}
 		}
+	}
 	else
-		{
+	{
 		m_eap_fast_completion_status = m_partner->set_timer(
 				this,
 				KImportFileTimerID, // if nothing in db, go right to file read 
 				0,
-				1);
-		}
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::RemoveIAPReference - End")));
+				0);
+	}
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::RemoveIAPReference - End")));
 		
 	return m_eap_fast_completion_status;
 }
@@ -9520,23 +9985,27 @@ eap_status_e eap_am_type_tls_peap_symbian_c::RemoveIAPReference()
 
 eap_status_e eap_am_type_tls_peap_symbian_c::ImportFilesL()
 {
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL(): Start")));
 
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::ImportFilesL - Start")));
-	
-	CDir* files;
+	CDir* files = 0;
 		 
 	RFs aFs;
-	aFs.Connect( KFileServerDefaultMessageSlots );
+	TInt error = aFs.Connect( KFileServerDefaultMessageSlots );
+	User::LeaveIfError(error);
 
 	m_eap_fast_completion_status = eap_status_pending_request;
-	
+
 	TBool aSuccess = EFalse;
-	
+
 	eap_variable_data_c ImportReference(m_am_tools);
 
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::ImportFilesL: Get ImportReference from database")));					
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: Get ImportReference from database")));					
 
 	EapTlsPeapUtils::GetEapSettingsDataL(
 		m_database,
@@ -9549,54 +10018,57 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ImportFilesL()
 
 	HBufC8* group_reference8 = HBufC8::NewLC(KMaxFileName);
 	TPtr8 group_referencePtr8 = group_reference8->Des();
-	
+
 	EAP_TRACE_DATA_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: ImportReference"),
-					ImportReference.get_data(),
-					ImportReference.get_data_length()));
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: ImportReference"),
+		ImportReference.get_data(),
+		ImportReference.get_data_length()));
 
 	if (ImportReference.get_data_length() != 0)
 		{
 		group_referencePtr8.Copy(ImportReference.get_data(), ImportReference.get_data_length());
 		EAP_TRACE_DATA_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: Reference"),
-						group_referencePtr8.Ptr(),
-						group_referencePtr8.Size()));
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: Reference"),
+			group_referencePtr8.Ptr(),
+			group_referencePtr8.Size()));
 						
 		}
 	else
 		{
- 	   	m_eap_fast_completion_status = m_partner->set_timer(
-                this,
-                KHandleCompletePacstoreOkTimerID, 
-                &m_eap_fast_completion_status,
-                1);
+ 		m_eap_fast_completion_status = m_partner->set_timer(
+				this,
+				KHandleCompletePacstoreOkTimerID, 
+				&m_eap_fast_completion_status,
+				0);
 
- 	   	CleanupStack::PopAndDestroy(group_reference8);
- 	   	
+ 		CleanupStack::PopAndDestroy(group_reference8);
+ 		
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
 		}
-	
+
 	HBufC8* tempUserBuf8 = HBufC8::NewLC(ImportReference.get_data_length());
 	TPtr8 tempUserBufPtr8 = tempUserBuf8->Des();
+
 	for (int i = 0; i< ImportReference.get_data_length();i++ )
 		{
 		tempUserBufPtr8.Append(group_referencePtr8.Ptr()[i++]);
 		}
+
 	group_referencePtr8.Copy(tempUserBufPtr8);
-  	CleanupStack::PopAndDestroy(tempUserBuf8);
+	CleanupStack::PopAndDestroy(tempUserBuf8);
 
 	EAP_TRACE_DATA_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: Reformatted Reference"),
-					group_referencePtr8.Ptr(),
-					group_referencePtr8.Size()));
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: Reformatted Reference"),
+		group_referencePtr8.Ptr(),
+		group_referencePtr8.Size()));
+
 	TInt fileCounter=0;
 	TBool directoryEmpty = false;
 	TBool directoryExists = true;
@@ -9612,7 +10084,7 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ImportFilesL()
 	TPtr8 PathPtr8 = Path8->Des();
 	HBufC8* readData = NULL;
 	TBool FileFound(EFalse);
-	
+
 	PathPtr8.Zero();
 	PathPtr8.Append(group_referencePtr8);
 	PathPtr8.Append(KSeparator);
@@ -9627,7 +10099,7 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ImportFilesL()
 	PathPtr.Zero();
 	// Copy is the only function that takes TPtr8 type of parameter.
 	PathPtr.Copy(PathPtr8);
-	
+
 	{
 		TFileName aPrivateDatabasePathName;
 
@@ -9647,74 +10119,81 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ImportFilesL()
 			PathPtr.Ptr(),
 			PathPtr.Size()));
 
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::ImportFilesL: Check directory availability")));					
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: Check directory availability")));
 
 	if (aFs.GetDir(PathPtr, KEntryAttNormal, ESortByName, files) == KErrNone)
 		{
-		EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("eap_am_type_tls_peap_symbian_c::ImportFilesL: Files %d"),
-						files->Count()));
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: Files %d"),
+			files->Count()));
 		
 		while (!FileFound && (fileCounter < files->Count()))
 			{
 			directoryExists = true;
-			
-			EAP_TRACE_DEBUG_SYMBIAN(
-					(_L("eap_am_type_tls_peap_symbian_c::ImportFilesL: Get directory contents")));					
+				
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: Get directory contents")));
 
-			directoryEmpty = false;
+			directoryEmpty = true;
 
 			while( fileCounter < files->Count())
 				{
 				if (!((*files)[fileCounter].IsDir()))
 					{
 					filesize = (*files)[fileCounter].iSize;
-					EAP_TRACE_DEBUG_SYMBIAN(
-							(_L("eap_am_type_tls_peap_symbian_c::ImportFilesL: File size %d"),
+
+					EAP_TRACE_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: File size %d"),
 									filesize));
+
 					filenamePtr8.Copy((*files)[fileCounter++].iName);
+
 					EAP_TRACE_DATA_DEBUG(
 							m_am_tools,
 							TRACE_FLAGS_DEFAULT,
 							(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: Filename"),
 							filenamePtr8.Ptr(),
 							filenamePtr8.Size()));
+
 					FileFound = ETrue;
+					directoryEmpty = false;
 					}
 				else
 					{
 					fileCounter++;
 					}
 				}
-			
-			if (!FileFound)
-				{
-				EAP_TRACE_DEBUG_SYMBIAN(
-					(_L("eap_am_type_tls_peap_symbian_c::ImportFilesL: DirectoryEmpty")));					
-				directoryEmpty = true;
-				}
 
-			if (directoryEmpty == true ||  directoryExists == false || FileFound == EFalse)
+			if (directoryEmpty == true || FileFound == EFalse)
 				{
-				if (directoryExists)
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: We would remove directory")));
+
 					{
-					EAP_TRACE_DEBUG_SYMBIAN(
-							(_L("eap_am_type_tls_peap_symbian_c::ImportFilesL: We would remove directory")));					
-					
-				   		{
-				           m_eap_fast_completion_status = m_partner->set_timer(
-				                    this,
-				                    KHandleCompletePacstoreOkTimerID, 
-				                    &m_eap_fast_completion_status,
-				                    1);
-					   	CleanupStack::PopAndDestroy(5); // Path, Path8, filename, buf2, group_reference8
-						EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-						return EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
-				   		}
+					m_eap_fast_completion_status = m_partner->set_timer(
+							  this,
+							  KHandleCompletePacstoreOkTimerID, 
+							  &m_eap_fast_completion_status,
+							  0);
+
+					CleanupStack::PopAndDestroy(5); // Path, Path8, filename, buf2, group_reference8
+
+					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+					return EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
 					}
 				}
-			else if(directoryEmpty == false &&  directoryExists == true && FileFound != EFalse)
+			else if(directoryEmpty == false && FileFound )
 				{
 				PathPtr8.Zero();
 				PathPtr8.Append(group_referencePtr8);
@@ -9750,8 +10229,10 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ImportFilesL()
 						PathPtr.Ptr(),
 						PathPtr.Size()));
 
-				EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("eap_am_type_tls_peap_symbian_c::ImportFilesL: Read file")));	
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: Read file")));	
 				
 				RFile file;
 
@@ -9762,9 +10243,11 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ImportFilesL()
 					file.Read(readDataPtr);
 					file.Close();
 					
-					EAP_TRACE_DEBUG_SYMBIAN(
-							(_L("eap_am_type_tls_peap_symbian_c::ImportFilesL: Copy data")));	
-					
+					EAP_TRACE_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: Copy data")));	
+
 					eap_variable_data_c * const in_imported_PAC_data = new eap_variable_data_c(m_am_tools);
 					// eap_automatic_variable_c can be used in this block because no functions are leaving here.
 					eap_automatic_variable_c<eap_variable_data_c> automatic_in_imported_PAC_data(m_am_tools, in_imported_PAC_data);
@@ -9813,77 +10296,87 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ImportFilesL()
 					else
 						m_eap_fast_completion_status = IAP_reference.set_copy_of_buffer(EAP_FAST_ZERO_REFERENCE, sizeof(EAP_FAST_ZERO_REFERENCE));
 						
-					EAP_TRACE_DEBUG_SYMBIAN(
-							(_L("eap_am_type_tls_peap_symbian_c::ImportFilesL: Complete operation")));	
+					EAP_TRACE_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: Complete operation")));	
 					
 					if (m_eap_fast_completion_status != eap_status_ok)
 						{
-					   	if (readData != NULL)
+						if (readData != NULL)
 							{
 					   		CleanupStack::PopAndDestroy(readData);
 							}
-					   	CleanupStack::PopAndDestroy(5); // filename, buf2, group_reference8, Path, path8
-					   	delete files;
+						CleanupStack::PopAndDestroy(5); // filename, buf2, group_reference8, Path, path8
+						delete files;
 						return EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
 						}
 					else
-					    {
+						{
 						m_eap_fast_completion_status = m_tls_application->add_imported_PAC_file(
 							&IAP_reference,
 							in_opt_group_reference_and_data,
 							in_imported_PAC_data,
 							in_imported_PAC_filename);
 						aSuccess = ETrue;
-					    }
+						}
 					}
-				}
-			else
-				{
-				badFile = true;
+				else
+					{
+					badFile = true;
+					}					
 				}
 			}
 		}
 	else
 		{
-		EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("eap_am_type_tls_peap_symbian_c::ImportFilesL: No Directory")));					
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: No Directory")));
+
 		directoryExists = false;
 		}
-	
-   	if (readData != NULL)
+
+	if (readData != NULL)
 		{
    		CleanupStack::PopAndDestroy(readData);
 		}
 	CleanupStack::PopAndDestroy(5); // Path, filename8, buf2, Path8, group_reference8
 
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::ImportFilesL: Operation failed or Complete")));	
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL: Operation failed or Complete")));
 
 	delete files;
-	
+
 	if (m_eap_fast_completion_status != eap_status_pending_request || aSuccess == EFalse)
 		{
 		if(badFile == true || directoryEmpty == true ||  directoryExists == false)   	
 			{
 			if (aSuccess == EFalse)
-			    m_eap_fast_completion_status = eap_status_ok;
-	        m_eap_fast_completion_status = m_partner->set_timer(
-	                this,
-	                KHandleCompletePacstoreNokTimerID, 
-	                &m_eap_fast_completion_status,
-	                0);
+				m_eap_fast_completion_status = eap_status_ok;
+			m_eap_fast_completion_status = m_partner->set_timer(
+					this,
+					KHandleCompletePacstoreNokTimerID, 
+					&m_eap_fast_completion_status,
+					0);
 			}
 		else
 			{
-		       m_eap_fast_completion_status = m_partner->set_timer(
-		                this,
-		                KHandleCompletePacstoreOkTimerID, 
-		                &m_eap_fast_completion_status,
-		                0);
+			   m_eap_fast_completion_status = m_partner->set_timer(
+						this,
+						KHandleCompletePacstoreOkTimerID, 
+						&m_eap_fast_completion_status,
+						0);
 			}
 		}
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::ImportFilesL - End")));
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::ImportFilesL - End")));
 
 	return m_eap_fast_completion_status;
 }
@@ -9892,30 +10385,44 @@ eap_status_e eap_am_type_tls_peap_symbian_c::ImportFilesL()
 
 eap_status_e eap_am_type_tls_peap_symbian_c::PasswordQueryL()
 {
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::PasswordQueryL()")));
 
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::PasswordQueryL")));
-
+	delete m_pacStorePWBuf8;
 	m_pacStorePWBuf8 = HBufC8::NewLC(m_userResponse.get_data_length());
 	TPtr8 pacStorePWPtr8 = m_pacStorePWBuf8->Des();
 	pacStorePWPtr8.Copy(m_userResponse.get_data(),m_userResponse.get_data_length() );
-	m_PAC_store_password.set_copy_of_buffer(m_userResponse.get_data(), m_userResponse.get_data_length());
-	EAP_TRACE_DATA_DEBUG_SYMBIAN(
-	("eap_am_type_tls_peap_symbian_c::PasswordQueryL:PW used for masterkey verification (8bits)",
-			pacStorePWPtr8.Ptr(), 
-			pacStorePWPtr8.Size()));	    
-   
 
-    if (iPacStoreDb->IsMasterKeyPresentL() && pacStorePWPtr8.Size()>0 )
-   	    m_verificationStatus = iPacStoreDb->IsMasterKeyAndPasswordMatchingL(pacStorePWPtr8);
-   	
-   	if ((pacStorePWPtr8.Size()==0 && (m_state == EPasswordQuery || m_state == EMasterkeyQuery ))
+	eap_status_e status = m_PAC_store_password.set_copy_of_buffer(m_userResponse.get_data(), m_userResponse.get_data_length());
+	if (status != eap_status_ok)
+	{
+		CleanupStack::PopAndDestroy(m_pacStorePWBuf8);
+		m_pacStorePWBuf8 = 0;
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);		
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}	
+
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::PasswordQueryL:PW used for masterkey verification (8bits)"),
+		pacStorePWPtr8.Ptr(), 
+		pacStorePWPtr8.Size()));
+
+
+	if (iPacStoreDb->IsMasterKeyPresentL() && pacStorePWPtr8.Size()>0 )
+   		m_verificationStatus = iPacStoreDb->IsMasterKeyAndPasswordMatchingL(pacStorePWPtr8);
+
+	if ((pacStorePWPtr8.Size()==0 && (m_state == EPasswordQuery || m_state == EMasterkeyQuery ))
    			|| m_userAction == EEapFastNotifierUserActionCancel || m_state == EPasswordCancel)
    		{
-    	m_verificationStatus = EFalse;
-    	m_state = EPasswordCancel;
-    	CleanupStack::PopAndDestroy(m_pacStorePWBuf8);
-   	
+		m_verificationStatus = EFalse;
+		m_state = EPasswordCancel;
+		CleanupStack::PopAndDestroy(m_pacStorePWBuf8);
+		m_pacStorePWBuf8 = 0;
+
    		m_eap_fast_completion_status = m_partner->set_timer(
 				this,
 				KHandleReadPacstoreTimerID, 
@@ -9923,34 +10430,35 @@ eap_status_e eap_am_type_tls_peap_symbian_c::PasswordQueryL()
 				0);
 		return m_eap_fast_completion_status;
  		}
-   	
-   	EAP_TRACE_DEBUG(
+
+	EAP_TRACE_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("EAP-FAST:eap_am_type_tls_peap_symbian_c::PasswordQueryL:State:%d Prev_State:%d verificationstatus:%d"),
-					m_state, 
-					m_prev_state,
-					m_verificationStatus));
-	
-	eap_status_e m_eap_fast_completion_status(eap_status_ok);
-	
-	  if (m_state == EPasswordQuery)
-		  {
-		  m_state = EWrongPassword;
+			m_state, 
+			m_prev_state,
+			m_verificationStatus));
 
-		  if(m_verificationStatus == EFalse)
-	    	{
-	    	CleanupStack::PopAndDestroy(m_pacStorePWBuf8);
-	    	
-		    TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
-		    
-		    m_notifier_data_to_user->iPassword.Zero();
-	
+	eap_status_e m_eap_fast_completion_status(eap_status_ok);
+
+	if (m_state == EPasswordQuery)
+		{
+		m_state = EWrongPassword;
+
+		if(m_verificationStatus == EFalse)
+			{
+			CleanupStack::PopAndDestroy(m_pacStorePWBuf8);
+			m_pacStorePWBuf8 = 0;
+
+			TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
+
+			m_notifier_data_to_user->iPassword.Zero();
+
 			return m_eap_fast_completion_status;
-			 	    
-	    	}
-		  else
-	    	{
+					
+			}
+		else
+			{
 			m_eap_fast_completion_status = m_partner->set_timer(
 					this,
 					KHandleReadPacstoreTimerID, 
@@ -9958,101 +10466,105 @@ eap_status_e eap_am_type_tls_peap_symbian_c::PasswordQueryL()
 					0);
 
 			CleanupStack::PopAndDestroy(m_pacStorePWBuf8);
-	  		return m_eap_fast_completion_status;
-	    	}
-		  }
-	  if (m_state == EWrongPassword)
-    	{
-        	m_state = EPasswordQuery;
- 
-       	EAP_TRACE_DEBUG(
+			m_pacStorePWBuf8 = 0;
+			return m_eap_fast_completion_status;
+			}
+		}
+
+	if (m_state == EWrongPassword)
+		{
+		m_state = EPasswordQuery;
+
+		EAP_TRACE_DEBUG(
     			m_am_tools,
     			TRACE_FLAGS_DEFAULT,
     			(EAPL("EAP-FAST:eap_am_type_tls_peap_symbian_c::PasswordQueryL (first pw ?):State:%d Prev_State:%d verificationstatus:%d"),
     					m_state, 
     					m_prev_state,
     					m_verificationStatus));
-       	pacStorePWPtr8.Zero();
-       	if (m_verificationStatus == EFalse)
-					{
-    TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
-    if (iEapAuthNotifier == 0)
-    	{
-    	TRAPD(err3, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
-    	if (err3)
-    		{
-    			return eap_status_process_general_error;
-    		}
-    	}
-    else
-    	{
-    	TRAPD(err4, iEapAuthNotifier->Cancel());
-    	if (err4)
-    		{
-    			return eap_status_process_general_error;
-    		}
-    	}
 
-		TRAPD(err5, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastPacStorePwQueryDialog, m_notifier_data_to_user, aEapType));
-  	if (err5)
-  		{
-  			return eap_status_process_general_error;
-  		}
- 
+		pacStorePWPtr8.Zero();
 
-					}
+		if (m_verificationStatus == EFalse)
+			{
+			TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
+			if (iEapAuthNotifier == 0)
+				{
+				TRAPD(err3, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
+				if (err3)
+    				{
+    					return eap_status_process_general_error;
+    				}
+				}
+			else
+				{
+				TRAPD(err4, iEapAuthNotifier->Cancel());
+				if (err4)
+    				{
+    					return eap_status_process_general_error;
+    				}
+				}
+
+			TRAPD(err5, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastPacStorePwQueryDialog, m_notifier_data_to_user, aEapType));
+			if (err5)
+  				{
+  					return eap_status_process_general_error;
+  				}
+			}
 		else
+			{
 			m_eap_fast_completion_status = m_partner->set_timer(
 				this,
 				KHandleReadPacstoreTimerID, 
 				&m_eap_fast_completion_status,
 				0);
-		
+			}
+
 		CleanupStack::PopAndDestroy(m_pacStorePWBuf8);
+		m_pacStorePWBuf8 = 0;
 		return m_eap_fast_completion_status;
-    	}
+		}
 
-    if (m_PAC_store_password.get_data_length()>0 && m_state == EMasterkeyQuery)
-    	{
-    	
-    	if ( m_verificationStatus != EFalse)
-    		{
-    		EAP_TRACE_DEBUG_SYMBIAN(
-    			(_L("eap_am_type_tls_peap_symbian_c::PasswordQueryL - EMasterkeyQuery - OK")));
-    		}
-     	else // temporary before masterkey creation is done dynamically !!!
-    		{
-    TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
-    if (iEapAuthNotifier == 0)
-    	{
-    	TRAPD(err, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
-	  	if (err)
-	  		{
-	  			return eap_status_process_general_error;
-	  		}
-    	}
-    else
-    	{
-    	TRAPD(err1, iEapAuthNotifier->Cancel());
-	  	if (err1)
-	  		{
-	  			return eap_status_process_general_error;
-	  		}
-    	}
-
-		TRAPD(err2, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastCreateMasterkeyQueryDialog, m_notifier_data_to_user, aEapType));
-  	if (err2)
-  		{
-  			return eap_status_process_general_error;
-  		}
-			
-
-
+	if (m_PAC_store_password.get_data_length()>0 && m_state == EMasterkeyQuery)
+		{
+		if ( m_verificationStatus != EFalse)
+			{
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::PasswordQueryL - EMasterkeyQuery - OK")));
+			}
+		else // temporary before masterkey creation is done dynamically !!!
+			{
+			TEapExpandedType aEapType(*EapExpandedTypeFast.GetType());
+			if (iEapAuthNotifier == 0)
+				{
+				TRAPD(error, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
+				if (error)
+					{
+  					return eap_status_process_general_error;
+					}
 				}
-    	}
+			else
+				{
+				TRAPD(err1, iEapAuthNotifier->Cancel());
+				if (err1)
+					{
+  					return eap_status_process_general_error;
+					}
+				}
 
-    CleanupStack::PopAndDestroy(m_pacStorePWBuf8);
-    
+			TRAPD(err2, iEapAuthNotifier->StartL(CEapAuthNotifier::EEapNotifierTypeFastCreateMasterkeyQueryDialog, m_notifier_data_to_user, aEapType));
+			if (err2)
+				{
+				return eap_status_process_general_error;
+				}
+			}
+		}
+
+	CleanupStack::PopAndDestroy(m_pacStorePWBuf8);
+	m_pacStorePWBuf8 = 0;
+
 	return m_eap_fast_completion_status;
 }
 
@@ -10060,9 +10572,10 @@ eap_status_e eap_am_type_tls_peap_symbian_c::PasswordQueryL()
 
 eap_status_e eap_am_type_tls_peap_symbian_c::CompletePasswordQueryL()
 {
-
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::CompletePasswordQueryL")));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::CompletePasswordQueryL()")));
 
 	// m_PAC_store_password should have the PW now. Proceed as normal case.	
 	
@@ -10077,6 +10590,7 @@ eap_status_e eap_am_type_tls_peap_symbian_c::CompletePasswordQueryL()
 		(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
 		return m_eap_fast_completion_status;
 	}
+
 	//eap_pac_store_data_type_PAC_store_password
 	EAP_TRACE_DEBUG(
 			m_am_tools,
@@ -10122,10 +10636,13 @@ eap_status_e eap_am_type_tls_peap_symbian_c::CompletePasswordQueryL()
 	{
 		(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
 	
-	EAP_TRACE_DATA_DEBUG_SYMBIAN(
-		("EAP-FAST: eap_am_type_tls_peap_symbian_c::CompletePasswordQueryL eap_pac_store_data_type_PAC_store_password - added data",
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("EAP-FAST: eap_am_type_tls_peap_symbian_c::CompletePasswordQueryL eap_pac_store_data_type_PAC_store_password - added data"),
 		(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
 		(new_data->get_data())->get_data_length()));
+
 	return m_eap_fast_completion_status;
 	}
 
@@ -10138,286 +10655,326 @@ eap_status_e eap_am_type_tls_peap_symbian_c::CompletePasswordQueryL()
 
 eap_status_e eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(eap_status_e status)
 {
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL")));
-	if (status == eap_status_ok && (m_new_references_and_data_blocks.get_object_count()>0))
-		{
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL()")));
+
+	if (status == eap_status_ok
+		&& (m_new_references_and_data_blocks.get_object_count() > 0))
+	{
 		for (u32_t ind = 0ul; ind < m_ready_references_array_index; ++ind)
-			{
-			eap_fast_pac_store_data_c * const new_data = new eap_fast_pac_store_data_c(m_am_tools);
-	
-			eap_automatic_variable_c<eap_fast_pac_store_data_c> automatic_new_data(
-				m_am_tools, new_data);
-	
-			if (new_data == 0)
+		{
+			const eap_fast_pac_store_data_c * const original_data = m_references_and_data_blocks.get_object(ind);
+			if (original_data == 0)
 			{
 				m_eap_fast_completion_status = eap_status_allocation_error;
+
 				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
 	
-				EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL:status nok")));
-				m_ready_references_and_data_blocks.reset();
-				
-				status = m_tls_application->complete_read_PAC_store_data(
-					m_eap_fast_completion_status,
-					m_eap_fast_pac_store_pending_operation,
-					&m_references_and_data_blocks);
-				
-				return status;
-			}
-	
-			new_data->set_type(m_references_and_data_blocks.get_object(ind)->get_type());
-			
-			// Set the reference.
-			m_eap_fast_completion_status = new_data->get_writable_reference()->set_copy_of_buffer(m_references_and_data_blocks.get_object(ind)->get_reference());
-			if (m_eap_fast_completion_status != eap_status_ok)
-			{
-				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
-				EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL:status nok")));
-				m_ready_references_and_data_blocks.reset();
-				
-				status = m_tls_application->complete_read_PAC_store_data(
-					m_eap_fast_completion_status,
-					m_eap_fast_pac_store_pending_operation,
-					&m_references_and_data_blocks);
-				
-				return status;
-			}					
-	
-			m_eap_fast_completion_status = new_data->get_writable_data()->set_copy_of_buffer(m_references_and_data_blocks.get_object(ind)->get_data());
-			if (m_eap_fast_completion_status != eap_status_ok)
-			{
-				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
-				EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL:status nok")));
-				m_ready_references_and_data_blocks.reset();
-				
-				status = m_tls_application->complete_read_PAC_store_data(
-					m_eap_fast_completion_status,
-					m_eap_fast_pac_store_pending_operation,
-					&m_references_and_data_blocks);
-				
-				return status;
-			}
-	
-			automatic_new_data.do_not_free_variable();
-	
-			m_eap_fast_completion_status = m_ready_references_and_data_blocks.add_object(new_data, true);
-			if (m_eap_fast_completion_status != eap_status_ok)
-			{
-				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
-				EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL:status nok")));
-				m_ready_references_and_data_blocks.reset();
-				
-				status = m_tls_application->complete_read_PAC_store_data(
-					m_eap_fast_completion_status,
-					m_eap_fast_pac_store_pending_operation,
-					&m_references_and_data_blocks);
-				
-				return status;
-			}
-			
-			EAP_TRACE_DATA_DEBUG_SYMBIAN(
-				("Final_complete_read_PAC_store_data - added original data",
-				(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
-				(new_data->get_data())->get_data_length()));										
-			
-			}
-	
-		eap_fast_pac_store_data_c * const new_data = new eap_fast_pac_store_data_c(m_am_tools);
-	
-		eap_automatic_variable_c<eap_fast_pac_store_data_c> automatic_new_data(
-			m_am_tools, new_data);
-	
-		if (new_data == 0)
-		{
-			m_eap_fast_completion_status = eap_status_allocation_error;
-			(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
-			EAP_TRACE_DEBUG_SYMBIAN(
-					(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL:status nok")));
-			m_ready_references_and_data_blocks.reset();
-			
-			status = m_tls_application->complete_read_PAC_store_data(
-				m_eap_fast_completion_status,
-				m_eap_fast_pac_store_pending_operation,
-				&m_references_and_data_blocks);
-			
-			return status;
-		}
-	
-		new_data->set_type(m_new_references_and_data_blocks.get_object(m_ready_references_array_index)->get_type());
-		
-		// Set the reference.
-		m_eap_fast_completion_status = new_data->get_writable_reference()->set_copy_of_buffer(m_new_references_and_data_blocks.get_object(m_ready_references_array_index)->get_reference());
-		if (m_eap_fast_completion_status != eap_status_ok)
-		{
-			(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
-			EAP_TRACE_DEBUG_SYMBIAN(
-					(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL:status nok")));
-			m_ready_references_and_data_blocks.reset();
-			
-			status = m_tls_application->complete_read_PAC_store_data(
-				m_eap_fast_completion_status,
-				m_eap_fast_pac_store_pending_operation,
-				&m_references_and_data_blocks);
-			
-			return status;
-		}					
-	
-		m_eap_fast_completion_status = new_data->get_writable_data()->set_copy_of_buffer(m_new_references_and_data_blocks.get_object(m_ready_references_array_index)->get_data());
-		if (m_eap_fast_completion_status != eap_status_ok)
-		{
-			(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
-			EAP_TRACE_DEBUG_SYMBIAN(
-					(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL:status nok")));
-			m_ready_references_and_data_blocks.reset();
-			
-			status = m_tls_application->complete_read_PAC_store_data(
-				m_eap_fast_completion_status,
-				m_eap_fast_pac_store_pending_operation,
-				&m_references_and_data_blocks);
-			
-			return status;
-		}
-	
-		automatic_new_data.do_not_free_variable();
-	
-		m_eap_fast_completion_status = m_ready_references_and_data_blocks.add_object(new_data, true);
-		if (m_eap_fast_completion_status != eap_status_ok)
-		{
-			(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
-			EAP_TRACE_DEBUG_SYMBIAN(
-					(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL:status nok")));
-			m_ready_references_and_data_blocks.reset();
-			
-			status = m_tls_application->complete_read_PAC_store_data(
-				m_eap_fast_completion_status,
-				m_eap_fast_pac_store_pending_operation,
-				&m_references_and_data_blocks);
-			
-			return status;
-		}
-		
-		EAP_TRACE_DATA_DEBUG_SYMBIAN(
-			("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL - added extra data",
-			(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
-			(new_data->get_data())->get_data_length()));										
-	
-		
-		for (u32_t ind = m_ready_references_array_index; ind < m_references_and_data_blocks.get_object_count(); ++ind)
-			{
-			eap_fast_pac_store_data_c * const new_data = new eap_fast_pac_store_data_c(m_am_tools);
-	
-			eap_automatic_variable_c<eap_fast_pac_store_data_c> automatic_new_data(
-				m_am_tools, new_data);
-	
-			if (new_data == 0)
-			{
-				m_eap_fast_completion_status = eap_status_allocation_error;
-				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
-				EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL:status nok")));
-				m_ready_references_and_data_blocks.reset();
-				
-				status = m_tls_application->complete_read_PAC_store_data(
-					m_eap_fast_completion_status,
-					m_eap_fast_pac_store_pending_operation,
-					&m_references_and_data_blocks);
-				
-				return status;
-			}
-	
-			new_data->set_type(m_references_and_data_blocks.get_object(ind)->get_type());
-			
-			// Set the reference.
-			m_eap_fast_completion_status = new_data->get_writable_reference()->set_copy_of_buffer(m_references_and_data_blocks.get_object(ind)->get_reference());
-			if (m_eap_fast_completion_status != eap_status_ok)
-			{
-				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
-				EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL:status nok")));
-				m_ready_references_and_data_blocks.reset();
-				
-				status = m_tls_application->complete_read_PAC_store_data(
-					m_eap_fast_completion_status,
-					m_eap_fast_pac_store_pending_operation,
-					&m_references_and_data_blocks);
-				
-				return status;
-			}					
-	
-			m_eap_fast_completion_status = new_data->get_writable_data()->set_copy_of_buffer(m_references_and_data_blocks.get_object(ind)->get_data());
-			if (m_eap_fast_completion_status != eap_status_ok)
-			{
-				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
-				EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL:status nok")));
-				m_ready_references_and_data_blocks.reset();
-				
-				status = m_tls_application->complete_read_PAC_store_data(
-					m_eap_fast_completion_status,
-					m_eap_fast_pac_store_pending_operation,
-					&m_references_and_data_blocks);
-				
-				return status;
-			}
-	
-			automatic_new_data.do_not_free_variable();
-	
-			m_eap_fast_completion_status = m_ready_references_and_data_blocks.add_object(new_data, true);
-			if (m_eap_fast_completion_status != eap_status_ok)
-			{
-				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
-				EAP_TRACE_DEBUG_SYMBIAN(
-						(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL:status nok")));
-				m_ready_references_and_data_blocks.reset();
-				
-				status = m_tls_application->complete_read_PAC_store_data(
-					m_eap_fast_completion_status,
-					m_eap_fast_pac_store_pending_operation,
-					&m_references_and_data_blocks);
-				
-				return status;
-			}
-			
-			EAP_TRACE_DATA_DEBUG_SYMBIAN(
-				("Final_complete_read_PAC_store_data - added original data",
-				(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
-				(new_data->get_data())->get_data_length()));										
-			}
-		
-		if (status == eap_status_ok)
-			{
-			EAP_TRACE_DEBUG(
+				EAP_TRACE_DEBUG(
 					m_am_tools,
 					TRACE_FLAGS_DEFAULT,
-					(EAPL("EAP-FAST: eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL: index=%d, original objects=%d, new=%d total=%d"),
-							m_ready_references_array_index,
-							m_references_and_data_blocks.get_object_count(),
-							 m_new_references_and_data_blocks.get_object_count(),
-							 m_ready_references_and_data_blocks.get_object_count())); 
-			
-	
-			EAP_TRACE_DEBUG_SYMBIAN(
-					(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL Reset unsent data")));
-			
-		m_references_and_data_blocks.reset();
-		m_new_references_and_data_blocks.reset();
+					(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): original_data is NULL.")));
 
-		EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL Reset Done")));
-		
-		status = m_tls_application->complete_read_PAC_store_data(
-			m_eap_fast_completion_status,
-			m_eap_fast_pac_store_pending_operation,
-			&m_ready_references_and_data_blocks);
-		}
-	else
+				m_ready_references_and_data_blocks.reset();
+				
+				status = m_tls_application->complete_read_PAC_store_data(
+					m_eap_fast_completion_status,
+					m_eap_fast_pac_store_pending_operation,
+					&m_references_and_data_blocks);
+				
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			eap_fast_pac_store_data_c * const new_data = original_data->copy();
+	
+			eap_automatic_variable_c<eap_fast_pac_store_data_c> automatic_new_data(
+				m_am_tools, new_data);
+	
+			if (new_data == 0)
+			{
+				m_eap_fast_completion_status = eap_status_allocation_error;
+
+				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+	
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): new_data allocation failed.")));
+
+				m_ready_references_and_data_blocks.reset();
+				
+				status = m_tls_application->complete_read_PAC_store_data(
+					m_eap_fast_completion_status,
+					m_eap_fast_pac_store_pending_operation,
+					&m_references_and_data_blocks);
+				
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+	
+			automatic_new_data.do_not_free_variable();
+	
+			m_eap_fast_completion_status = m_ready_references_and_data_blocks.add_object(new_data, true);
+			if (m_eap_fast_completion_status != eap_status_ok)
+			{
+				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): add_object failed, status=%d=%s"),
+					m_eap_fast_completion_status,
+					eap_status_string_c::get_status_string(m_eap_fast_completion_status)));
+
+				m_ready_references_and_data_blocks.reset();
+				
+				status = m_tls_application->complete_read_PAC_store_data(
+					m_eap_fast_completion_status,
+					m_eap_fast_pac_store_pending_operation,
+					&m_references_and_data_blocks);
+				
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+			
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("Final_complete_read_PAC_store_data - added original data"),
+				(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
+				(new_data->get_data())->get_data_length()));
+			
+		} // for()
+	
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 		{
-		EAP_TRACE_DEBUG_SYMBIAN(
-				(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL:status nok")));
+			const eap_fast_pac_store_data_c * const original_data = m_new_references_and_data_blocks.get_object(m_ready_references_array_index);
+			if (original_data == 0)
+			{
+				m_eap_fast_completion_status = eap_status_allocation_error;
+
+				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+	
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): original_data is NULL.")));
+
+				m_ready_references_and_data_blocks.reset();
+				
+				status = m_tls_application->complete_read_PAC_store_data(
+					m_eap_fast_completion_status,
+					m_eap_fast_pac_store_pending_operation,
+					&m_references_and_data_blocks);
+				
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			eap_fast_pac_store_data_c * const new_data = original_data->copy();
+		
+			eap_automatic_variable_c<eap_fast_pac_store_data_c> automatic_new_data(
+				m_am_tools, new_data);
+		
+			if (new_data == 0)
+			{
+				m_eap_fast_completion_status = eap_status_allocation_error;
+				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): new_data allocation failed, status=%d=%s"),
+					m_eap_fast_completion_status,
+					eap_status_string_c::get_status_string(m_eap_fast_completion_status)));
+
+				m_ready_references_and_data_blocks.reset();
+				
+				status = m_tls_application->complete_read_PAC_store_data(
+					m_eap_fast_completion_status,
+					m_eap_fast_pac_store_pending_operation,
+					&m_references_and_data_blocks);
+				
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			automatic_new_data.do_not_free_variable();
+		
+			m_eap_fast_completion_status = m_ready_references_and_data_blocks.add_object(new_data, true);
+			if (m_eap_fast_completion_status != eap_status_ok)
+			{
+				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): add_object() failed, status=%d=%s"),
+					m_eap_fast_completion_status,
+					eap_status_string_c::get_status_string(m_eap_fast_completion_status)));
+
+				m_ready_references_and_data_blocks.reset();
+				
+				status = m_tls_application->complete_read_PAC_store_data(
+					m_eap_fast_completion_status,
+					m_eap_fast_pac_store_pending_operation,
+					&m_references_and_data_blocks);
+				
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+			
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): added extra data"),
+				(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
+				(new_data->get_data())->get_data_length()));										
+
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		
+		for (u32_t ind = m_ready_references_array_index; ind < m_references_and_data_blocks.get_object_count(); ++ind)
+		{
+			const eap_fast_pac_store_data_c * const original_data = m_references_and_data_blocks.get_object(ind);
+			if (original_data == 0)
+			{
+				m_eap_fast_completion_status = eap_status_allocation_error;
+
+				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+	
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): original_data is NULL.")));
+
+				m_ready_references_and_data_blocks.reset();
+				
+				status = m_tls_application->complete_read_PAC_store_data(
+					m_eap_fast_completion_status,
+					m_eap_fast_pac_store_pending_operation,
+					&m_references_and_data_blocks);
+				
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+
+			eap_fast_pac_store_data_c * const new_data = original_data->copy();
+	
+			eap_automatic_variable_c<eap_fast_pac_store_data_c> automatic_new_data(
+				m_am_tools, new_data);
+	
+			if (new_data == 0)
+			{
+				m_eap_fast_completion_status = eap_status_allocation_error;
+
+				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): new_data allocation failed")));
+
+				m_ready_references_and_data_blocks.reset();
+				
+				status = m_tls_application->complete_read_PAC_store_data(
+					m_eap_fast_completion_status,
+					m_eap_fast_pac_store_pending_operation,
+					&m_references_and_data_blocks);
+				
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+	
+			automatic_new_data.do_not_free_variable();
+	
+			m_eap_fast_completion_status = m_ready_references_and_data_blocks.add_object(new_data, true);
+			if (m_eap_fast_completion_status != eap_status_ok)
+			{
+				(void) EAP_STATUS_RETURN(m_am_tools, m_eap_fast_completion_status);
+
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): add_object() failed, status=%d=%s"),
+					m_eap_fast_completion_status,
+					eap_status_string_c::get_status_string(m_eap_fast_completion_status)));
+
+				m_ready_references_and_data_blocks.reset();
+				
+				status = m_tls_application->complete_read_PAC_store_data(
+					m_eap_fast_completion_status,
+					m_eap_fast_pac_store_pending_operation,
+					&m_references_and_data_blocks);
+				
+				return EAP_STATUS_RETURN(m_am_tools, status);
+			}
+			
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("Final_complete_read_PAC_store_data - added original data"),
+				(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
+				(new_data->get_data())->get_data_length()));										
+
+		} // for()
+		
+		if (status == eap_status_ok)
+		{
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("EAP-FAST: eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): index=%d, original objects=%d, new=%d total=%d"),
+				m_ready_references_array_index,
+				m_references_and_data_blocks.get_object_count(),
+				m_new_references_and_data_blocks.get_object_count(),
+				m_ready_references_and_data_blocks.get_object_count())); 
+
+
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): Reset unsent data")));
+			
+			m_references_and_data_blocks.reset();
+			m_new_references_and_data_blocks.reset();
+
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): Reset Done")));
+
+			status = m_tls_application->complete_read_PAC_store_data(
+				m_eap_fast_completion_status,
+				m_eap_fast_pac_store_pending_operation,
+				&m_ready_references_and_data_blocks);
+		}
+		else
+		{
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): status=%d=%s"),
+				status,
+				eap_status_string_c::get_status_string(status)));
+
+			m_eap_fast_completion_status = eap_status_user_cancel_authentication;
+			m_new_references_and_data_blocks.reset();
+			m_ready_references_and_data_blocks.reset();
+
+			status = m_tls_application->complete_read_PAC_store_data(
+				m_eap_fast_completion_status,
+				m_eap_fast_pac_store_pending_operation,
+				&m_references_and_data_blocks);
+		}
+	}
+	else
+	{
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): status=%d=%s, m_new_references_and_data_blocks.get_object_count()=%d"),
+			status,
+			eap_status_string_c::get_status_string(status),
+			m_new_references_and_data_blocks.get_object_count()));
+
 		m_eap_fast_completion_status = eap_status_user_cancel_authentication;
 		m_new_references_and_data_blocks.reset();
 		m_ready_references_and_data_blocks.reset();
@@ -10426,39 +10983,33 @@ eap_status_e eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(eap_
 			m_eap_fast_completion_status,
 			m_eap_fast_pac_store_pending_operation,
 			&m_references_and_data_blocks);
-		}
-		}
-	else
-	{
-	EAP_TRACE_DEBUG_SYMBIAN(
-			(_L("eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL:status nok")));
-	m_eap_fast_completion_status = eap_status_user_cancel_authentication;
-	m_new_references_and_data_blocks.reset();
-	m_ready_references_and_data_blocks.reset();
-	
-	status = m_tls_application->complete_read_PAC_store_data(
-		m_eap_fast_completion_status,
-		m_eap_fast_pac_store_pending_operation,
-		&m_references_and_data_blocks);
 	}
 	
-	TRAPD(error, UpdatePasswordTimeL());
+	TRAPD(error, iPacStoreDb->UpdatePasswordTimeL());
 
 	if(error != KErrNone)
 	{
 		EAP_TRACE_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("EAP-FAST: eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL ERROR: LEAVE from UpdatePasswordTimeL() error=%d"),
+			(EAPL("ERROR: EAP-FAST: eap_am_type_tls_peap_symbian_c::FinalCompleteReadPACStoreDataL(): LEAVE from UpdatePasswordTimeL() error=%d"),
 			error));
+
+		status = m_am_tools->convert_am_error_to_eapol_error(error);
 	}
-	return status;
+
+	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
 //--------------------------------------------------
 
 eap_status_e eap_am_type_tls_peap_symbian_c::CompleteFilePasswordQueryL()
 {
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::CompleteFilePasswordQueryL()")));
+
 	eap_fast_pac_store_data_c * const new_data = new eap_fast_pac_store_data_c(m_am_tools);
 
 	eap_automatic_variable_c<eap_fast_pac_store_data_c> automatic_new_data(
@@ -10512,8 +11063,10 @@ eap_status_e eap_am_type_tls_peap_symbian_c::CompleteFilePasswordQueryL()
 		return m_eap_fast_completion_status;
 	}
 	
-	EAP_TRACE_DATA_DEBUG_SYMBIAN(
-		("EAP-FAST: eap_am_type_tls_peap_symbian_c::CompleteFilePasswordQueryL eap_pac_store_data_type_PAC_file_password - added data",
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("EAP-FAST: eap_am_type_tls_peap_symbian_c::CompleteFilePasswordQueryL eap_pac_store_data_type_PAC_file_password - added data"),
 		(new_data->get_data())->get_data((new_data->get_data())->get_data_length()), 
 		(new_data->get_data())->get_data_length()));
 	
@@ -10526,552 +11079,56 @@ eap_status_e eap_am_type_tls_peap_symbian_c::CompleteFilePasswordQueryL()
 
 void eap_am_type_tls_peap_symbian_c::ConvertUnicodeToAsciiL(const TDesC16& aFromUnicode, TDes8& aToAscii)
 {
-	EAP_TRACE_DATA_DEBUG_SYMBIAN(
-		("eap_am_type_tls_peap_symbian_c::ConvertUnicodeToAsciiL:From TEXT",
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::ConvertUnicodeToAsciiL(): From TEXT"),
 		aFromUnicode.Ptr(), 
 		aFromUnicode.Size()));	
 	
 	if(aFromUnicode.Length() <= 0)
 	{
-		EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::ConvertUnicodeToAsciiL: Return: NOTHING TO CONVERT")));
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("eap_am_type_tls_peap_symbian_c::ConvertUnicodeToAsciiL: Return: NOTHING TO CONVERT")));
 		
 		return;
 	}	
 	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::ConvertUnicodeToAsciiL, aFromUnicode.Length=%d, aFromUnicode.Size=%d"),
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::ConvertUnicodeToAsciiL, aFromUnicode.Length=%d, aFromUnicode.Size=%d"),
 		aFromUnicode.Length(), aFromUnicode.Size()));	
 	
 	// Convert from Unicode to ascii.
 	HBufC8* aFromUnicodeBuf8 = HBufC8::NewLC(aFromUnicode.Length()); // Half times size of source (or length) is enough here.
 	TPtr8 aFromUnicodePtr8 = aFromUnicodeBuf8->Des();
 	
-	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("eap_am_type_tls_peap_symbian_c::ConvertUnicodeToAsciiL, aFromUnicodePtr8.Length=%d, aFromUnicodePtr8.Size=%d, aFromUnicodePtr8.MaxLength=%d, aFromUnicodePtr8.MaxSize=%d"),
-		aFromUnicodePtr8.Length(), aFromUnicodePtr8.Size(), aFromUnicodePtr8.MaxLength(), aFromUnicodePtr8.MaxSize()));				
-	
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::ConvertUnicodeToAsciiL, aFromUnicodePtr8.Length=%d, aFromUnicodePtr8.Size=%d, aFromUnicodePtr8.MaxLength=%d, aFromUnicodePtr8.MaxSize=%d"),
+		aFromUnicodePtr8.Length(),
+		aFromUnicodePtr8.Size(),
+		aFromUnicodePtr8.MaxLength(),
+		aFromUnicodePtr8.MaxSize()));
+
 	aFromUnicodePtr8.Copy(aFromUnicode); // Unicode -> ascii.
 	
 	aToAscii = aFromUnicodePtr8;	
 
 	CleanupStack::PopAndDestroy(aFromUnicodeBuf8); // Delete aFromUnicodeBuf8.	
 
-	EAP_TRACE_DATA_DEBUG_SYMBIAN(
-		("eap_am_type_tls_peap_symbian_c::ConvertUnicodeToAsciiL:To ASCII",
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_type_tls_peap_symbian_c::ConvertUnicodeToAsciiL:To ASCII"),
 		aToAscii.Ptr(), 
-		aToAscii.Size()));	
+		aToAscii.Size()));
 }
 
-
-// ---------------------------------------------------------
-// eap_am_type_tls_peap_symbian_c::CheckPasswordTimeValidityL()
-// ---------------------------------------------------------
-//
-void eap_am_type_tls_peap_symbian_c::CheckPasswordTimeValidityL()
-{
-	/* Check validity of password against timelimit */
-	
-	EAP_TRACE_DEBUG(m_am_tools, 
-			TRACE_FLAGS_DEFAULT, (
-			EAPL("CheckPasswordTimeValidityL - Start\n")));
-
-	TInt64 maxSessionTime = 0;
-	TInt64 fullAuthTime = 0;
-	
-    // get max session time
-	HBufC* buf = HBufC::NewLC( KMaxSqlQueryLength );
-	TPtr sqlStatement = buf->Des();	
-
-	_LIT( KSqlQuery, "SELECT %S FROM %S WHERE %S=%d AND %S=%d AND %S=%d AND %S=%d" );
-
-	sqlStatement.Format(
-		KSqlQuery,
-		&cf_str_EAP_FAST_max_session_validity_time_literal,
-		&KFastGeneralSettingsDBTableName,
-		&KServiceType,
-		m_index_type, 
-		&KServiceIndex,
-		m_index,
-		&KTunnelingTypeVendorId,
-		m_tunneling_type.get_vendor_id(),
-		&KTunnelingType, 
-		m_tunneling_type.get_vendor_type());
-
-	TRAPD( err,  maxSessionTime =  ReadIntDbValueL(
-		m_database,
-		cf_str_EAP_FAST_max_session_validity_time_literal,
-		sqlStatement ) );
-	if ( err != KErrNone )
-		{
-		EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT,
-			( EAPL( "ERROR: Leave happened trying to read max session time,  \
-			error=%d.\n" ), err ) );
-		}
-	EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, (
-		EAPL("CheckPasswordTimeValidityL - maxSessionTime=%ld\n"),
-		maxSessionTime ) );	
-	
-#ifdef USE_PAC_STORE
-    sqlStatement.Zero();
-	if ( !iPacStoreDb )
-		{
-		EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, (
-			EAPL("CheckPasswordTimeValidityL - iPacStoreDb is NULL.\n")));
-		CleanupStack::PopAndDestroy( buf ); // Delete buf.
-		User::Leave( KErrArgument );
-		}
-	_LIT( KSqlQuery1, "SELECT %S FROM %S" );
-	sqlStatement.Format(
-		KSqlQuery1,
-		&KFASTLastPasswordIdentityTime,
-		&KPacStoreGeneralSettingsTableName );	
-	RDbNamedDatabase& db = iPacStoreDb->GetPacStoreDb();
-	TRAP( err, fullAuthTime = ReadIntDbValueL(
-		db,
-		KFASTLastPasswordIdentityTime,
-		sqlStatement ) );
-	if ( err == KErrNotFound ) // KFASTLastPasswordIdentityTime was not found
-		{
-		TRAP( err, FixOldTablesForPwdIdentityTimeL() );
-		if ( err != KErrNone  )
-			{
-		    EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, ( EAPL(
-		    	"ERROR: eap_am_type_tls_peap_symbian_c::CheckPasswordTimeValidityL() \
-		        Leave happened trying to fix old table for pwd \
-			    identity time, error=%d.\n" ), err ) );
-		    User::Leave( err );
-			}
-		TRAP( err, fullAuthTime = ReadIntDbValueL(
-			db,
-			KFASTLastPasswordIdentityTime,
-			sqlStatement ) );
- 		if ( err != KErrNone )
-			{
-			EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, ( EAPL(
-				"ERROR: eap_am_type_tls_peap_symbian_c::CheckPasswordTimeValidityL() \
-				Leave happened trying to read full auth. time, \
-			    error=%d.\n" ), err ) );		
-		    User::Leave( err );
-			}
-		}
-	else if ( err != KErrNone )
-		{
-		EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, ( EAPL(
-			"ERROR: eap_am_type_tls_peap_symbian_c::CheckPasswordTimeValidityL() \
-			Leave happened trying to read full auth. time,  \
-			error=%d.\n" ), err ) );
-		User::Leave( err );
-		}
-#else
-	EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, (
-		EAPL("CheckPasswordTimeValidityL - PAC store is not used.\n")));
-	CleanupStack::PopAndDestroy( buf ); // Delete buf.
-	User::Leave( KErrNotSupported );
-#endif
-	
-	EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT,
-		( EAPL( "CheckPasswordTimeValidityL - fullAuthTime=%ld.\n" ),
-	    fullAuthTime ) );		
-
-	CleanupStack::PopAndDestroy( buf ); // Delete buf.
-		
-	// If the max session time from DB is zero then we use the 
-	// one read from configuration file.	
-	if( maxSessionTime == 0)
-		{
-			EAP_TRACE_DEBUG(m_am_tools, 
-				TRACE_FLAGS_DEFAULT, (
-				EAPL("CheckPasswordTimeValidityL - Using max session validity time from config file\n")));
-		
-			maxSessionTime = m_max_session_time; // value from configuration file.
-		}
-	
-	// Get the current time.
-	EAP_TRACE_DEBUG(m_am_tools, 
-			TRACE_FLAGS_DEFAULT, (
-			EAPL("UpdatePasswordTimeL - Get time\n")));
-
-	TTime currentTime;
-	currentTime.UniversalTime();
-	
-	TTime lastFullAuthTime(fullAuthTime);
-	
-	#if defined(_DEBUG) || defined(DEBUG)	
-	
-	TDateTime currentDateTime = currentTime.DateTime();
-		
-	TDateTime fullAuthDateTime = lastFullAuthTime.DateTime();
-	
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT,
-	(EAPL("CheckPasswordTimeValidityL Session Validity - Current Time,        %2d-%2d-%4d : %2d-%2d-%2d-%d\n"), 
-	currentDateTime.Day()+1, currentDateTime.Month()+1, currentDateTime.Year(), currentDateTime.Hour(),
-	currentDateTime.Minute(), currentDateTime.Second(), currentDateTime.MicroSecond()));
-	
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT,
-	(EAPL("CheckPasswordTimeValidityL Session Validity - Last Full Auth Time, %2d-%2d-%4d : %2d-%2d-%2d-%d\n"), 
-	fullAuthDateTime.Day()+1, fullAuthDateTime.Month()+1, fullAuthDateTime.Year(), fullAuthDateTime.Hour(),
-	fullAuthDateTime.Minute(), fullAuthDateTime.Second(), fullAuthDateTime.MicroSecond()));
-	
-	#endif
-	
-	TTimeIntervalMicroSeconds interval = currentTime.MicroSecondsFrom(lastFullAuthTime);
-		
-	EAP_TRACE_DATA_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT,(EAPL("eap_am_type_tls_peap_symbian_c::CheckPasswordTimeValidityL:interval in microseconds:"),
-			&(interval.Int64()),
-			sizeof(interval.Int64()) ) );
-			
-	EAP_TRACE_DATA_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT,(EAPL("eap_am_type_tls_peap_symbian_c::CheckPasswordTimeValidityL:max session time in microseconds:"),
-			&(maxSessionTime),
-			sizeof(maxSessionTime) ) );
-	
-	#if defined(_DEBUG) || defined(DEBUG)
-	
-	TTimeIntervalMinutes intervalMins;
-	TInt error = currentTime.MinutesFrom(lastFullAuthTime, intervalMins);
-	
-	if(error == KErrNone)
-		{
-		EAP_TRACE_DEBUG(
-			m_am_tools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("eap_am_type_tls_peap_symbian_c::CheckPasswordTimeValidityL")
-			 EAPL("interval in Minutes =%d\n"),
-			 intervalMins.Int()));
-		}
-	
-	#endif
-	
-	if( maxSessionTime >= interval.Int64() )
-		{
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("eap_am_type_tls_peap_symbian_c::CheckPasswordTimeValidityL - Session Valid \n")));
-	
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);			
-	
-		/* do nothing */	
-		}
-	else
-		{
-		EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("eap_am_type_tls_peap_symbian_c::CheckPasswordTimeValidityL - Session NOT Valid \n")));
-	
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);			
-		
-		m_tls_application->remove_cached_pac_store_data();
-		
-		TRAPD(error, UpdatePasswordTimeL());
-
-		if(error != KErrNone)
-			{
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("EAP-FAST: eap_am_type_tls_peap_symbian_c::CheckPasswordTimeValidityL() ERROR: LEAVE from UpdatePasswordTimeL() error=%d"),
-				error));
-		
-			}
-		}
-	
-} // eap_am_type_tls_peap_symbian_c::CheckPasswordTimeValidityL()
-
-
-// ---------------------------------------------------------
-// eap_am_type_tls_peap_symbian_c::AlterTableL()
-// ---------------------------------------------------------
-//
-void eap_am_type_tls_peap_symbian_c::AlterTableL(
-	RDbNamedDatabase& aDb,
-	TAlterTableCmd aCmd,
-	const TDesC& aTableName,
-	const TDesC& aColumnName,
-	const TDesC& aColumnDef )
-{
-	EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, ( EAPL(
-		"eap_am_type_tls_peap_symbian_c::AlterTableL() IN\n" ) ) );
-	
-	CDbColSet* colSet = aDb.ColSetL( aTableName );
-	User::LeaveIfNull( colSet );
-	CleanupStack::PushL( colSet );	
-		
-	EAP_TRACE_DEBUG_SYMBIAN( ( _L(
-        "eap_am_type_tls_peap_symbian_c::AlterTableL() \
-        Number of columns in %S table is %d.\n" ),
-		&aTableName, colSet->Count() ) );
-	
-    if ( aCmd == EAddColumn )
-    	{
-    	// Check if there is a target column
-    	if( colSet->ColNo( aColumnName ) != KDbNullColNo )
-    		{
-    		EAP_TRACE_DEBUG_SYMBIAN( ( _L(
-   		        "eap_am_type_tls_peap_symbian_c::AlterTableL() \
-   		        Column %S exists already in table %S.\n" ),
-    			&aColumnName, &aTableName ) );
-    		CleanupStack::PopAndDestroy( colSet );
-    		return;
-    		}
-    	}
-    else
-    	{
-    	// Check if there is a target column
-    	if( colSet->ColNo( aColumnName ) == KDbNullColNo )
-    		{
-    		EAP_TRACE_DEBUG_SYMBIAN( ( _L(
-   		        "eap_am_type_tls_peap_symbian_c::AlterTableL() \
-   		        Column %S does not exists already in table %S.\n" ),
-    			&aColumnName, &aTableName ) );
-    		CleanupStack::PopAndDestroy( colSet );
-    		return;
-    		}
-    	}
-
-	HBufC* buf = HBufC::NewLC( KMaxSqlQueryLength );
-	TPtr sqlStatement = buf->Des();
-		
-	_LIT( KSqlAddCol, "ALTER TABLE %S ADD %S %S" );
-	_LIT( KSqlRemoveCol, "ALTER TABLE %S DROP %S" );
-	
-	if ( aCmd == EAddColumn )
-		{
-		sqlStatement.Format( KSqlAddCol, &aTableName, 
-		    &aColumnName, &aColumnDef );
-		}
-	else
-		{
-		sqlStatement.Format( KSqlRemoveCol, &aTableName, 
-	        &aColumnName );
-		}
-		
-	EAP_TRACE_DEBUG_SYMBIAN( ( _L(
-		"eap_am_type_tls_peap_symbian_c::AlterTableL(): sqlStatement=%S\n"),
-		&sqlStatement ) );
-	
-	User::LeaveIfError( aDb.Execute( sqlStatement ) );		
-	CleanupStack::PopAndDestroy( buf );
-	CleanupStack::PopAndDestroy( colSet );
-
-	CDbColSet* alteredColSet = aDb.ColSetL( aTableName );
-	User::LeaveIfNull( alteredColSet );
-	EAP_TRACE_DEBUG_SYMBIAN( ( _L(
-        "eap_am_type_tls_peap_symbian_c::AlterTableL() \
-        Number of columns in %S table is %d.\n" ),
-		&aTableName, alteredColSet->Count() ) );
-	delete alteredColSet;
-		
-	EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, ( EAPL(
-	    "eap_am_type_tls_peap_symbian_c::AlterTableL() OUT\n" ) ) );
-
-} // eap_am_type_tls_peap_symbian_c::AlterTableL()
-
-
-// ---------------------------------------------------------
-// eap_am_type_tls_peap_symbian_c::FixOldTablesForPwdIdentityTimeL()
-// ---------------------------------------------------------
-//
-void eap_am_type_tls_peap_symbian_c::FixOldTablesForPwdIdentityTimeL()
-{
-	EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, ( EAPL(
-	    "eap_am_type_tls_peap_symbian_c::FixOldTablesForPwdIdentityTimeL() IN" ) ) );	
-	
-	// remove password identity time from fast table	
-	_LIT( KColumnDef, "BIGINT" );
-	AlterTableL( m_database, ERemoveColumn, KFastGeneralSettingsDBTableName,
-		KFASTLastPasswordIdentityTime );
-	
-	// add password identity time to PAC store table
-#ifdef USE_PAC_STORE
-	if ( !iPacStoreDb )
-		{
-		EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, ( EAPL(
-			"ERROR: eap_am_type_tls_peap_symbian_c::FixOldTablesForPwdIdentityTimeL() \
-			iPacStoreDb is NULL.\n" ) ) );
-		User::Leave( KErrArgument );
-		}
-	RDbNamedDatabase& pacStoreDb = iPacStoreDb->GetPacStoreDb();
-	AlterTableL( pacStoreDb, EAddColumn , KPacStoreGeneralSettingsTableName,
-		KFASTLastPasswordIdentityTime, KColumnDef );
-#else
-	EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, (	EAPL(
-		"ERROR: eap_am_type_tls_peap_symbian_c::FixOldTablesForPwdIdentityTimeL() \
-		PAC store is not used.\n" ) ) );
-		User::Leave( KErrNotSupported );
-#endif
-		
-	// update password identity time
-	UpdatePasswordTimeL();
-	EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, ( EAPL(
-	    "eap_am_type_tls_peap_symbian_c::FixOldTablesForPwdIdentityTimeL() OUT" ) ) );
-	
-} // eap_am_type_tls_peap_symbian_c::FixOldTablesForPwdIdentityTimeL()
-
-
-// ---------------------------------------------------------
-// eap_am_type_tls_peap_symbian_c::FixOldTableForPacStoreInitL()
-// ---------------------------------------------------------
-//
-void eap_am_type_tls_peap_symbian_c::FixOldTableForPacStoreInitL()
-{
-	EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, ( EAPL(
-		"eap_am_type_tls_peap_symbian_c::FixOldTableForPacStoreInitL() IN\n" ) ) );
-	
-#ifdef USE_PAC_STORE
-	
-	if ( !iPacStoreDb )
-		{
-		EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, ( EAPL(
-			"ERROR: eap_am_type_tls_peap_symbian_c::FixOldTableForPacStoreInitL() \
-			iPacStoreDb is NULL.\n" ) ) );
-		User::Leave( KErrArgument );
-		}
-	RDbNamedDatabase& pacStoreDb = iPacStoreDb->GetPacStoreDb();
-	_LIT( KColumnDef, "UNSIGNED INTEGER" );
-	AlterTableL( pacStoreDb, EAddColumn, KPacStoreGeneralSettingsTableName,
-        KPacStoreInitialized, KColumnDef );
-
-#else
-	EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, (	EAPL(
-		"ERROR: eap_am_type_tls_peap_symbian_c::FixOldTableForPacStoreInitL() \
-		PAC store is not used.\n" ) ) );
-	User::Leave( KErrNotSupported );
-#endif
-		
-	EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, ( EAPL(
-	    "eap_am_type_tls_peap_symbian_c::FixOldTableForPacStoreInitL() OUT\n" ) ) );
-
-} // eap_am_type_tls_peap_symbian_c::FixOldTableForPacStoreInitL()
-
-
-// ---------------------------------------------------------
-// eap_am_type_tls_peap_symbian_c::ReadIntDbValue()
-// ---------------------------------------------------------
-//
-TInt64 eap_am_type_tls_peap_symbian_c::ReadIntDbValueL(
-	RDbNamedDatabase& aDb,
-	const TDesC& aColumnName,
-	const TDesC& aSqlStatement )
-{
-	EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, (
-			EAPL( "eap_am_type_tls_peap_symbian_c::ReadIntDbValueL()\n" ) ) );
-    TPtrC columnName;    
-	columnName.Set( aColumnName );
-	
-	RDbView view;
-	// Evaluate view
-	EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, (
-		EAPL( "ReadIntDbValue() prepare view\n" ) ) );
-	User::LeaveIfError( view.Prepare( aDb, TDbQuery(
-		aSqlStatement ) ) );
-	CleanupClosePushL( view );
-	
-	EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, (
-		EAPL("ReadIntDbValue() evaluate view\n" ) ) );
-	User::LeaveIfError( view.EvaluateAll() );		
-	// Get the first (and only) row
-	view.FirstL();
-	view.GetL();
-	// Get column set so we get the correct column numbers
-	CDbColSet* colSet = view.ColSetL();
-	CleanupStack::PushL( colSet );
-	TInt64 retVal = view.ColInt64( colSet->ColNo( columnName ) );
-
-	CleanupStack::PopAndDestroy( colSet ); // Delete colSet.
-	CleanupStack::PopAndDestroy( &view ); // Close view.
-
-	return retVal;
-} // eap_am_type_tls_peap_symbian_c::ReadIntDbValueL
-
-
-// ---------------------------------------------------------
-// eap_am_type_tls_peap_symbian_c::UpdatePasswordTimeL()
-// ---------------------------------------------------------
-//
-void eap_am_type_tls_peap_symbian_c::UpdatePasswordTimeL()
-{
-	/* update last password time */
-	TPtrC lastFullPasswordTimeString;
-	
-	EAP_TRACE_DEBUG(m_am_tools, 
-			TRACE_FLAGS_DEFAULT, (
-			EAPL("UpdatePasswordTimeL - Start\n")));
-
-	lastFullPasswordTimeString.Set(KFASTLastPasswordIdentityTime);
-	
-	HBufC* buf = HBufC::NewLC(KMaxSqlQueryLength);
-	TPtr sqlStatement = buf->Des();
-	
-	EAP_TRACE_DEBUG(m_am_tools, 
-			TRACE_FLAGS_DEFAULT, (
-			EAPL("UpdatePasswordTimeL - prepare query\n")));
-	// Query all the relevant parameters
-	_LIT(KSQLQuery, "SELECT %S FROM %S");
-	sqlStatement.Format( KSQLQuery, &lastFullPasswordTimeString,
-        &KPacStoreGeneralSettingsTableName );
-
-	RDbView view;
-	// Evaluate view
-	EAP_TRACE_DEBUG(m_am_tools, 
-			TRACE_FLAGS_DEFAULT, (
-			EAPL("UpdatePasswordTimeL - prepare view\n")));
-
-#ifdef USE_PAC_STORE
-	if ( !iPacStoreDb )
-		{
-		EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, (
-			EAPL("CheckPasswordTimeValidityL - iPacStoreDb is NULL.\n")));
-		CleanupStack::PopAndDestroy( buf ); // Delete buf.
-		User::Leave( KErrArgument );
-		}
-	RDbNamedDatabase& db = iPacStoreDb->GetPacStoreDb();
-	User::LeaveIfError( view.Prepare( db, TDbQuery( sqlStatement ),
-		TDbWindow::EUnlimited ) );
-	CleanupClosePushL( view );
-#else
-	EAP_TRACE_DEBUG( m_am_tools, TRACE_FLAGS_DEFAULT, (
-		EAPL("CheckPasswordTimeValidityL - PAC store is not used.\n")));
-	CleanupStack::PopAndDestroy( buf ); // Delete buf.
-	User::Leave( KErrNotSupported );
-#endif
-	
-	EAP_TRACE_DEBUG(m_am_tools, 
-			TRACE_FLAGS_DEFAULT, (
-			EAPL("UpdatePasswordTimeL - evaluate view\n")));
-	User::LeaveIfError(view.EvaluateAll());
-	
-	// Get the first (and only) row.
-	view.FirstL();
-	view.UpdateL();
-	
-	// Get column set so we get the correct column numbers
-	CDbColSet* colSet = view.ColSetL();
-	CleanupStack::PushL(colSet);
-	
-	// Get the current universal time.
-	EAP_TRACE_DEBUG(m_am_tools, 
-			TRACE_FLAGS_DEFAULT, (
-			EAPL("UpdatePasswordTimeL - Get time\n")));
-	TTime currentTime;
-	currentTime.UniversalTime();
-		
-	
-	TDateTime currentDateTime = currentTime.DateTime();
-	
-	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT,
-	(EAPL("eap_am_type_tls_peap_symbian_c::UpdatePasswordTimeL:store_authentication_time, %2d-%2d-%4d : %2d-%2d-%2d-%d\n"), 
-	currentDateTime.Day()+1, currentDateTime.Month()+1,currentDateTime.Year(), currentDateTime.Hour(),
-	currentDateTime.Minute(), currentDateTime.Second(), currentDateTime.MicroSecond()));
-	
-	TInt64 fullAuthTime = currentTime.Int64();
-	
-	view.SetColL(colSet->ColNo(lastFullPasswordTimeString), fullAuthTime);
-	
-	view.PutL();	
-	
-	CleanupStack::PopAndDestroy(colSet); // Delete colSet.
-	CleanupStack::PopAndDestroy(&view); // Close view.
-	CleanupStack::PopAndDestroy(buf); // Delete buf.
-	
-	/* update end */	
-	
-} // eap_am_type_tls_peap_symbian_c::UpdatePasswordTimeL()
 
 //--------------------------------------------------
 
@@ -11098,16 +11155,23 @@ eap_status_e eap_am_type_tls_peap_symbian_c::CreateMasterkeyL()
 //
 EAP_FUNC_EXPORT bool eap_am_type_tls_peap_symbian_c::is_ttls_pap_session_valid()
 {
-    EAP_TRACE_DEBUG_SYMBIAN((_L( "eap_am_type_tls_peap_symbian_c::is_ttls_pap_session_valid()" )));    
+    EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL( "eap_am_type_tls_peap_symbian_c::is_ttls_pap_session_valid()" )));    
 
     TBool isValid = EFalse;
-    TInt err = KErrNone;
+    TInt error = KErrNone;
     bool retVal = false;
 	
-    TRAP( err, isValid = IsTtlsPapSessionValidL() );
-    if ( err != KErrNone )
+    TRAP( error, isValid = IsTtlsPapSessionValidL() );
+    if ( error != KErrNone )
 	    {
-	    EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: eap_am_type_tls_peap_symbian_c::is_ttls_pap_session_valid(): Leave, err==%d."), err ));
+	    EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::is_ttls_pap_session_valid(): Leave, error==%d."), error ));
+
 	    retVal = false;
 	    }
     else
@@ -11124,7 +11188,10 @@ EAP_FUNC_EXPORT bool eap_am_type_tls_peap_symbian_c::is_ttls_pap_session_valid()
 EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_ttls_pap_username_and_password(
 	const eap_variable_data_c * const aInSrvChallengeUtf8 )
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L( "eap_am_type_tls_peap_symbian_c::query_ttls_pap_username_and_password()" )));    
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL( "eap_am_type_tls_peap_symbian_c::query_ttls_pap_username_and_password()" )));
 
 	eap_status_e status( eap_status_pending_request );
 	TEapExpandedType aEapType(*EapExpandedTypeTtlsPap.GetType());
@@ -11153,8 +11220,8 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_ttls_pap_user
 
 		if (iEapAuthNotifier == 0)
 		{
-			TRAPD(err, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
-			if (err)
+			TRAPD(error, iEapAuthNotifier = CEapAuthNotifier::NewL( *this ));
+			if (error)
 			{
 				return eap_status_process_general_error;
 			}
@@ -11247,7 +11314,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_type_tls_peap_symbian_c::query_ttls_pap_user
 		}
 	}
 
-	return status;
+	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
 // ================= TTLS-PAP public not exported =======================
@@ -11260,7 +11327,11 @@ eap_status_e eap_am_type_tls_peap_symbian_c::verify_ttls_pap_username_and_passwo
 	const eap_variable_data_c * const /*aUserName*/,
 	const eap_variable_data_c * const /*aUserPassword*/ )
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L( "eap_am_type_tls_peap_symbian_c::verify_ttls_pap_username_and_password()" )));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL( "eap_am_type_tls_peap_symbian_c::verify_ttls_pap_username_and_password()" )));
+
 	return eap_status_not_supported;
 }
 
@@ -11275,7 +11346,10 @@ eap_status_e eap_am_type_tls_peap_symbian_c::CompleteQueryTtlsPapUserNameAndPass
 	const TDesC8& aUserNameUtf8,
 	const TDesC8& aPasswordUtf8 )
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L( "eap_am_type_tls_peap_symbian_c::CompleteQueryTtlsPapUserNameAndPassword()" )));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL( "eap_am_type_tls_peap_symbian_c::CompleteQueryTtlsPapUserNameAndPassword()" )));
 	
 	eap_status_e retStatus = aStatus;
 	eap_status_e tmpStatus = eap_status_ok;
@@ -11297,7 +11371,11 @@ eap_status_e eap_am_type_tls_peap_symbian_c::CompleteQueryTtlsPapUserNameAndPass
 		}
 	if ( m_tls_am_partner == NULL )
 		{
-		EAP_TRACE_DEBUG_SYMBIAN((_L( "ERROR: eap_am_type_tls_peap_symbian_c::CompleteQueryTtlsPapUserNameAndPassword(): m_tls_am_partner is NULL." )));
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL( "ERROR: eap_am_type_tls_peap_symbian_c::CompleteQueryTtlsPapUserNameAndPassword(): m_tls_am_partner is NULL." )));
+
         return eap_status_process_general_error;
 		}
 	retStatus = m_tls_am_partner->
@@ -11314,7 +11392,11 @@ eap_status_e eap_am_type_tls_peap_symbian_c::CompleteQueryTtlsPapUserNameAndPass
 eap_status_e
 eap_am_type_tls_peap_symbian_c::ConvertAmErrorToEapolError( TInt aErr )
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L( "eap_am_type_tls_peap_symbian_c::ConvertAmErrorToEapolError()" )));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL( "eap_am_type_tls_peap_symbian_c::ConvertAmErrorToEapolError()" )));
+
     if ( m_am_tools )
     	{
     	return m_am_tools->convert_am_error_to_eapol_error( aErr );
@@ -11335,7 +11417,10 @@ eap_am_type_tls_peap_symbian_c::ConvertAmErrorToEapolError( TInt aErr )
 void eap_am_type_tls_peap_symbian_c::ReadTtlsPapDbL(
 	TTtlsPapDbInfo& aOutDbInfo )
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L( "eap_am_type_tls_peap_symbian_c::ReadTtlsPapDbL()" )));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL( "eap_am_type_tls_peap_symbian_c::ReadTtlsPapDbL()" )));
 	
 	HBufC* buf = HBufC::NewLC( KMaxSqlQueryLength );
 	TPtr sqlStatement = buf->Des();
@@ -11428,7 +11513,10 @@ void eap_am_type_tls_peap_symbian_c::ReadTtlsPapDbL(
 void eap_am_type_tls_peap_symbian_c::WriteTtlsPapDbL(
 	const TTtlsPapDbInfo& aInDbInfo )
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L( "eap_am_type_tls_peap_symbian_c::WriteTtlsPapDbL()" )));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL( "eap_am_type_tls_peap_symbian_c::WriteTtlsPapDbL()" )));
 	
 	
 	HBufC* buf = HBufC::NewLC( KMaxSqlQueryLength );
@@ -11522,7 +11610,10 @@ void eap_am_type_tls_peap_symbian_c::WriteTtlsPapDbL(
 //
 void eap_am_type_tls_peap_symbian_c::SetTtlsPapColumnToNullL( const TDesC& aColName )
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L( "eap_am_type_tls_peap_symbian_c::SetColumnNullL()" )));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL( "eap_am_type_tls_peap_symbian_c::SetColumnNullL()" )));
 
 	HBufC* buf = HBufC::NewLC( KMaxSqlQueryLength );
 	TPtr sqlStatement = buf->Des();
@@ -11581,17 +11672,24 @@ void eap_am_type_tls_peap_symbian_c::SetTtlsPapColumnToNullL( const TDesC& aColN
 //
 TBool eap_am_type_tls_peap_symbian_c::IsTtlsPapSessionValidL()
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L( "eap_am_type_tls_peap_symbian_c::IsTtlsPapSessionValidL()" )));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL( "eap_am_type_tls_peap_symbian_c::IsTtlsPapSessionValidL()" )));
 
 	TTtlsPapDbInfo dbInfo;
-	TInt err = KErrNone;
+	TInt error = KErrNone;
 	TBool retValue = EFalse;
 	
-	TRAP( err, ReadTtlsPapDbL( dbInfo ) );
+	TRAP( error, ReadTtlsPapDbL( dbInfo ) );
 	
-    if 	( err != KErrNone )
+    if 	( error != KErrNone )
         {
-        EAP_TRACE_DEBUG_SYMBIAN((_L("ERROR: eap_am_type_tls_peap_symbian_c::IsTtlsPapSessionValidL(): Leave happened, err=%d."), err ));
+        EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("ERROR: eap_am_type_tls_peap_symbian_c::IsTtlsPapSessionValidL(): Leave happened, error=%d."), error ));
+
         retValue = EFalse;
         }
     else
@@ -11602,7 +11700,10 @@ TBool eap_am_type_tls_peap_symbian_c::IsTtlsPapSessionValidL()
 			// one read from configuration file.
 		    if( dbInfo.iMaxSessionTime == 0 )
 	            {
-	            EAP_TRACE_DEBUG_SYMBIAN((_L( "eap_am_type_tls_peap_symbian_c::IsTtlsPapSessionValidL() Using max TTLS PAP session validity time from config file." )));
+	            EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL( "eap_am_type_tls_peap_symbian_c::IsTtlsPapSessionValidL() Using max TTLS PAP session validity time from config file." )));
 			
 				// use value from config file
 				dbInfo.iMaxSessionTime = iEapTtlsPapMaxSessionConfigTime;
@@ -11624,7 +11725,10 @@ TBool eap_am_type_tls_peap_symbian_c::CheckTtlsPapSessionValidity(
 	const TInt64& aInMaxSessionTime,
 	const TInt64& aInLastFullAuthTime )
 {
-	EAP_TRACE_DEBUG_SYMBIAN((_L( "eap_am_type_tls_peap_symbian_c::CheckTtlsPapSessionValidity()" )));
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL( "eap_am_type_tls_peap_symbian_c::CheckTtlsPapSessionValidity()" )));
 	
 	// Get the current time.
 	TTime currentTime;
@@ -11697,6 +11801,7 @@ TBool eap_am_type_tls_peap_symbian_c::CheckTtlsPapSessionValidity(
 } // eap_am_type_tls_peap_symbian_c::CheckTtlsPapSessionValidity
 
 //--------------------------------------------------
+
 #if defined(USE_FAST_EAP_TYPE)
 
 TInt eap_am_type_tls_peap_symbian_c::CreateMMETelConnectionL()
@@ -11743,10 +11848,18 @@ TInt eap_am_type_tls_peap_symbian_c::CreateMMETelConnectionL()
             EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Got phone info.\n")));
         } 
 
+#if defined(__WINS__)
+
+        EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("WARNING: Not opened phone subsession on WINS.\n")));
+
+#else
+
         // This function opens a phone subsession by name. ("DefaultPhone").
         User::LeaveIfError( iPhone.Open( iServer, phoneInfo.iName ) );  
-        
+
         EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("Opened phone subsession.\n")));
+
+#endif //#if defined(__WINS__)
         
         // MMETel connected and the phone module loaded fine.   
         iMMETELConnectionStatus = ETrue;    
@@ -11781,6 +11894,7 @@ void eap_am_type_tls_peap_symbian_c::DisconnectMMETel()
     }   
 }
 #endif
+
 //--------------------------------------------------
 
 // End of file.

@@ -7,12 +7,19 @@ EXPORTS
 	_ZN17CEapCoreInterface8shutdownEv @ 6 NONAME
 	_ZN17CEapCoreInterface9ConstrucLEP18abs_eap_am_tools_c @ 7 NONAME
 	_ZN17CEapCoreInterface9configureEPK19eap_variable_data_c @ 8 NONAME
-	_ZTI17CEapCoreInterface @ 9 NONAME
-	_ZTV17CEapCoreInterface @ 10 NONAME
-	_ZThn4_N17CEapCoreInterface8SendDataEPKvi @ 11 NONAME
-	_ZThn8_N17CEapCoreInterface11set_partnerEP23abs_eap_am_message_if_c @ 12 NONAME
-	_ZThn8_N17CEapCoreInterface12get_is_validEv @ 13 NONAME
-	_ZThn8_N17CEapCoreInterface12process_dataEPKvm @ 14 NONAME
-	_ZThn8_N17CEapCoreInterface8shutdownEv @ 15 NONAME
-	_ZThn8_N17CEapCoreInterface9configureEPK19eap_variable_data_c @ 16 NONAME
+	_ZN17CEapCoreInterfaceC1Em @ 9 NONAME
+	_ZN17CEapCoreInterfaceC2Em @ 10 NONAME
+	_ZN17CEapCoreInterfaceD0Ev @ 11 NONAME
+	_ZN17CEapCoreInterfaceD1Ev @ 12 NONAME
+	_ZN17CEapCoreInterfaceD2Ev @ 13 NONAME
+	_ZTI17CEapCoreInterface @ 14 NONAME
+	_ZTV17CEapCoreInterface @ 15 NONAME
+	_ZThn4_N17CEapCoreInterface8SendDataEPKvi @ 16 NONAME
+	_ZThn8_N17CEapCoreInterface11set_partnerEP23abs_eap_am_message_if_c @ 17 NONAME
+	_ZThn8_N17CEapCoreInterface12get_is_validEv @ 18 NONAME
+	_ZThn8_N17CEapCoreInterface12process_dataEPKvm @ 19 NONAME
+	_ZThn8_N17CEapCoreInterface8shutdownEv @ 20 NONAME
+	_ZThn8_N17CEapCoreInterface9configureEPK19eap_variable_data_c @ 21 NONAME
+	_ZThn8_N17CEapCoreInterfaceD0Ev @ 22 NONAME
+	_ZThn8_N17CEapCoreInterfaceD1Ev @ 23 NONAME
 

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 19.1.11 %
+* %version: 19.1.15 %
 */
 
 #ifndef __EAPPLUGIN_H__
@@ -26,6 +26,28 @@
 #include <d32dbms.h>
 
 #include <wdbifwlansettings.h>
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_VPN_IF_IMPLEMENTATION_H)
+	#define EAP_CLASS_VISIBILITY_EAP_VPN_IF_IMPLEMENTATION_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_VPN_IF_IMPLEMENTATION_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_VPN_IF_IMPLEMENTATION_H 
+	#define EAP_FUNC_EXPORT_EAP_VPN_IF_IMPLEMENTATION_H 
+	#define EAP_C_FUNC_EXPORT_EAP_VPN_IF_IMPLEMENTATION_H 
+#elif defined(EAP_EXPORT_EAP_VPN_IF_IMPLEMENTATION_H)
+	#define EAP_CLASS_VISIBILITY_EAP_VPN_IF_IMPLEMENTATION_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_VPN_IF_IMPLEMENTATION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_VPN_IF_IMPLEMENTATION_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_VPN_IF_IMPLEMENTATION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_VPN_IF_IMPLEMENTATION_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_VPN_IF_IMPLEMENTATION_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_VPN_IF_IMPLEMENTATION_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_VPN_IF_IMPLEMENTATION_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_VPN_IF_IMPLEMENTATION_H 
+	#define EAP_C_FUNC_EXPORT_EAP_VPN_IF_IMPLEMENTATION_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_vpn_if.h"
 //#include "abs_eap_core.h"
 #include "eapol_session_key.h"
@@ -49,7 +71,7 @@ class eap_process_tlv_message_data_c;
  *              This is concrete class, instance of which
  *              ECOM framework gives to ECOM clients.
  */
-class CEapVpnInterfaceImplementation
+class EAP_CLASS_VISIBILITY_EAP_VPN_IF_IMPLEMENTATION_H CEapVpnInterfaceImplementation
 	: public CEapVpnInterface
 	, public abs_eap_session_core_c
 	, public abs_eap_base_timer_c
@@ -366,6 +388,8 @@ private:
 		const eap_variable_data_c * const value_data
 		);
 
+	eap_status_e wait_complete_get_802_11_authentication_mode();
+
 protected:
 
 	/**
@@ -452,7 +476,11 @@ private:
     HBufC8 * iManualUsername;
     HBufC8 * iManualRealm;
     HBufC8 * iRealmPrefix;
-    TBool iHideInitialIdentity;    
+    TBool iHideInitialIdentity;
+
+	CActiveSchedulerWait iWait;
+
+	eap_status_e m_completion_status;
 };
 
 #endif //#ifndef __EAPPLUGIN_H__

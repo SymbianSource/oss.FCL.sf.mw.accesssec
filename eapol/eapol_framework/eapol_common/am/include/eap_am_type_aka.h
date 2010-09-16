@@ -25,12 +25,33 @@
 #include "eap_tools.h"
 #include "eap_variable_data.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_TYPE_AKA_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_AKA_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_AKA_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_AKA_H 
+#elif defined(EAP_EXPORT_EAP_AM_TYPE_AKA_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_AKA_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_AKA_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_AKA_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_AKA_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_AKA_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_AKA_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "abs_eap_am_type_aka.h"
 #include "eap_sim_triplets.h"
 #include "eap_am_network_id.h"
 
 /// This class is interface to adaptation module of AKA.
-class EAP_EXPORT eap_am_type_aka_c
+class EAP_CLASS_VISIBILITY_EAP_AM_TYPE_AKA_H eap_am_type_aka_c
 {
 private:
 	//--------------------------------------------------
@@ -328,7 +349,7 @@ public:
  * @param tools is pointer to the abs_eap_am_tools class created by the adaptation module.
  * AKA EAP-type will callback caller using the partner pointer.
  */
-EAP_C_FUNC_IMPORT  eap_am_type_aka_c *new_eap_am_type_aka(
+EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_H  eap_am_type_aka_c *new_eap_am_type_aka(
 	abs_eap_am_tools_c * const tools,
 	abs_eap_base_type_c * const partner,
 	const bool is_client_when_true,

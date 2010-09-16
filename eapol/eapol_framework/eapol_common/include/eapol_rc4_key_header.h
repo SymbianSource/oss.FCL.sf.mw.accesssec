@@ -25,6 +25,29 @@
 #include "eapol_header.h"
 #include "eapol_key_header.h"
 #include "eap_general_header_base.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPOL_RC4_KEY_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_RC4_KEY_HEADER_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H 
+	#define EAP_FUNC_EXPORT_EAPOL_RC4_KEY_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_RC4_KEY_HEADER_H 
+#elif defined(EAP_EXPORT_EAPOL_RC4_KEY_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_RC4_KEY_HEADER_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_RC4_KEY_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPOL_RC4_KEY_HEADER_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPOL_RC4_KEY_HEADER_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_RC4_KEY_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_RC4_KEY_HEADER_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 
 //------------------------------------------------------
@@ -80,7 +103,7 @@ enum eapol_RC4_key_header_constants_e
  * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  * @endcode
  */
-class EAP_EXPORT eapol_RC4_key_header_c
+class EAP_CLASS_VISIBILITY_EAPOL_RC4_KEY_HEADER_H eapol_RC4_key_header_c
 : public eap_general_header_base_c
 {
 private:
@@ -128,63 +151,63 @@ public:
 
 
 	// 
-	EAP_FUNC_IMPORT virtual ~eapol_RC4_key_header_c();
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H virtual ~eapol_RC4_key_header_c();
 
 	// 
-	EAP_FUNC_IMPORT eapol_RC4_key_header_c(
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H eapol_RC4_key_header_c(
 		abs_eap_am_tools_c * const tools,
 		void * const header_begin,
 		const u32_t header_buffer_length);
 
-	EAP_FUNC_IMPORT eapol_protocol_version_e get_eapol_protocol_version() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H eapol_protocol_version_e get_eapol_protocol_version() const;
 
-	EAP_FUNC_IMPORT eapol_packet_type_e get_eapol_packet_type() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H eapol_packet_type_e get_eapol_packet_type() const;
 
-	EAP_FUNC_IMPORT u16_t get_eapol_packet_body_length() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H u16_t get_eapol_packet_body_length() const;
 
-	EAP_FUNC_IMPORT eapol_key_descriptor_type_e get_key_descriptor_type() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H eapol_key_descriptor_type_e get_key_descriptor_type() const;
 
-	EAP_FUNC_IMPORT u16_t get_key_length() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H u16_t get_key_length() const;
 	
-	EAP_FUNC_IMPORT u8_t *get_replay_counter();
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H u8_t *get_replay_counter();
 	
-	EAP_FUNC_IMPORT u8_t *get_key_IV();
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H u8_t *get_key_IV();
 
-	EAP_FUNC_IMPORT eapol_RC4_key_flags_e get_key_flag() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H eapol_RC4_key_flags_e get_key_flag() const;
 
-	EAP_FUNC_IMPORT u8_t get_key_index() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H u8_t get_key_index() const;
 
-	EAP_FUNC_IMPORT u8_t *get_key_signature() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H u8_t *get_key_signature() const;
 
-	EAP_FUNC_IMPORT static u16_t get_header_length();
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H static u16_t get_header_length();
 
-	EAP_FUNC_IMPORT u8_t * get_key() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H u8_t * get_key() const;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 
-	EAP_FUNC_IMPORT eap_status_e set_eapol_protocol_version(eapol_protocol_version_e version);
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H eap_status_e set_eapol_protocol_version(eapol_protocol_version_e version);
 
-	EAP_FUNC_IMPORT eap_status_e set_eapol_packet_type(eapol_packet_type_e type);
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H eap_status_e set_eapol_packet_type(eapol_packet_type_e type);
 
-	EAP_FUNC_IMPORT eap_status_e set_eapol_packet_body_length(u16_t eapol_length);
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H eap_status_e set_eapol_packet_body_length(u16_t eapol_length);
 
-	EAP_FUNC_IMPORT eap_status_e set_key_descriptor_type(eapol_key_descriptor_type_e eapol_key_descriptor_type);
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H eap_status_e set_key_descriptor_type(eapol_key_descriptor_type_e eapol_key_descriptor_type);
 
-	EAP_FUNC_IMPORT eap_status_e set_key_length(u16_t length);
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H eap_status_e set_key_length(u16_t length);
 
-	EAP_FUNC_IMPORT eap_status_e set_key_flag(eapol_RC4_key_flags_e flags);
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H eap_status_e set_key_flag(eapol_RC4_key_flags_e flags);
 
-	EAP_FUNC_IMPORT eap_status_e set_key_index(u8_t index);
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H eap_status_e set_key_index(u8_t index);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 
-	EAP_FUNC_IMPORT void zero_key_signature(
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H void zero_key_signature(
 		abs_eap_am_tools_c * const m_am_tools
 		);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 
-	EAP_FUNC_IMPORT eap_status_e check_header() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RC4_KEY_HEADER_H eap_status_e check_header() const;
 
 	// 
 	//--------------------------------------------------

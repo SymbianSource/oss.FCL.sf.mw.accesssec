@@ -15,7 +15,7 @@
 #	Control Panel QT UI for TLS-based EAP methods configuration
 #
 
-# %version: 13 %
+# %version: 14 %
 
 
 TEMPLATE = lib
@@ -42,12 +42,14 @@ HEADERS +=  \
     ../inc/eapuidefs.h \
     inc/cpeaptlsmethodsui.h \
     inc/cpeaptlsmethodsplugin.h \
-    inc/cpeaptlsmethodsinnereapui.h  
+    inc/cpeaptlsmethodsinnereapui.h \
+    inc/cpeappacstoreui.h 
 
 SOURCES += \ 
     src/cpeaptlsmethodsui.cpp \
     src/cpeaptlsmethodsplugin.cpp \
-    src/cpeaptlsmethodsinnereapui.cpp
+    src/cpeaptlsmethodsinnereapui.cpp \
+    src/cpeappacstoreui.cpp
 
 symbian: { 
     TARGET.EPOCALLOWDLLDATA = 1

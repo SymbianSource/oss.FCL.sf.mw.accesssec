@@ -25,6 +25,27 @@
 #include "eap_am_types.h"
 #include "eap_variable_data.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_CRYPTO_MD4_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_CRYPTO_MD4_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_CRYPTO_MD4_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_CRYPTO_MD4_H 
+#elif defined(EAP_EXPORT_EAP_AM_CRYPTO_MD4_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_CRYPTO_MD4_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_CRYPTO_MD4_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_CRYPTO_MD4_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_CRYPTO_MD4_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_CRYPTO_MD4_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_CRYPTO_MD4_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_am_tools.h"
 
 
@@ -32,7 +53,7 @@
 
 /// The eap_am_crypto_md4_c class includes the state of 
 /// one instance of MD4 algorithm.
-class EAP_EXPORT eap_am_crypto_md4_c
+class EAP_CLASS_VISIBILITY_EAP_AM_CRYPTO_MD4_H eap_am_crypto_md4_c
 {
 
 private:
@@ -152,7 +173,7 @@ private:
 	/// @param W is an array of 16 input 32-bit unsigned integers
 	/// in host order.
 	/// @param W_count is count of integers in W array.
-	EAP_FUNC_IMPORT eap_status_e eap_md4_transform_host_order(
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H eap_status_e eap_md4_transform_host_order(
 		const u32_t * const W,
 		const u32_t W_count
 		);
@@ -160,7 +181,7 @@ private:
 	/// @param W is an array of 16 input 32-bit unsigned integers
 	/// in network order.
 	/// @param W_count is count of integers in W array.
-	EAP_FUNC_IMPORT eap_status_e eap_md4_process_data(
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H eap_status_e eap_md4_process_data(
 		const u32_t * const W,
 		const u32_t W_count
 		);
@@ -168,12 +189,12 @@ private:
 	/**
 	 * This function cleans up the MD4 context.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_cleanup();
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H eap_status_e hash_cleanup();
 
 	/**
 	 * This function copies the message digest to output buffer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e copy_message_digest(
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H eap_status_e copy_message_digest(
 		void * const output,
 		u32_t * const max_output_size);
 
@@ -184,7 +205,7 @@ private:
 	 * The eap_am_crypto_md4_c object calls this function after it is
 	 * initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_invalid();
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H void set_is_invalid();
 
 	/**
 	 * The set_is_valid() function sets the state of the eap_am_crypto_md4_c
@@ -192,12 +213,12 @@ private:
 	 * The eap_am_crypto_md4_c object calls this function after it is
 	 * initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H void set_is_valid();
 
 	/**
 	 * This function copies the context of MD4.
 	 */
-	EAP_FUNC_IMPORT eap_status_e copy_context(
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H eap_status_e copy_context(
 		const eap_variable_data_c * const saved_data,
 		const u64_t full_hashed_data_length,
 		const u32_t * const H,
@@ -210,39 +231,39 @@ public:
 	/**
 	 * Destructor does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~eap_am_crypto_md4_c();
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H virtual ~eap_am_crypto_md4_c();
 
 	/**
 	 * Constructor initializes the member attributes.
 	 */
-	EAP_FUNC_IMPORT eap_am_crypto_md4_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H eap_am_crypto_md4_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The get_is_valid() function returns the status of the
 	 * eap_am_crypto_md4_c object. 
 	 * True indicates the object is allocated successfully.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H bool get_is_valid();
 
 	/**
 	 * This function returns the size of message digest of HASH-algorithm.
 	 */
-	EAP_FUNC_IMPORT u32_t get_digest_length();
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H u32_t get_digest_length();
 
 	/**
 	 * This function returns the size of block of HASH-algorithm.
 	 */
-	EAP_FUNC_IMPORT u32_t get_block_size();
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H u32_t get_block_size();
 
 	/**
 	 * This function initializes the context of MD4-algorithm.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_init();
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H eap_status_e hash_init();
 
 	/**
 	 * This function updates the context of MD4-algorithm with data.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_update(
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H eap_status_e hash_update(
 		const void * const data,
 		const u32_t data_length);
 
@@ -250,14 +271,14 @@ public:
 	 * This function writes the message digest to buffer.
 	 * @param Length is set if md_length_or_null is non-NULL.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_final(
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H eap_status_e hash_final(
 		void * const message_digest,
 		u32_t *md_length_or_null);
 
 	/**
 	 * This function copies the context of MD4.
 	 */
-	EAP_FUNC_IMPORT eap_am_crypto_md4_c * copy();
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_MD4_H eap_am_crypto_md4_c * copy();
 };
 
 //--------------------------------------------------

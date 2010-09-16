@@ -24,11 +24,32 @@
 
 #include "eap_variable_data.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_TLS_PEAP_TLV_PAYLOADS_H)
+	#define EAP_CLASS_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H 
+	#define EAP_C_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H 
+	#define EAP_FUNC_EXPORT_TLS_PEAP_TLV_PAYLOADS_H 
+	#define EAP_C_FUNC_EXPORT_TLS_PEAP_TLV_PAYLOADS_H 
+#elif defined(EAP_EXPORT_TLS_PEAP_TLV_PAYLOADS_H)
+	#define EAP_CLASS_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_TLS_PEAP_TLV_PAYLOADS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_TLS_PEAP_TLV_PAYLOADS_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_TLS_PEAP_TLV_PAYLOADS_H 
+	#define EAP_C_FUNC_EXPORT_TLS_PEAP_TLV_PAYLOADS_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "tls_peap_tlv_header.h"
 
 
 
-class EAP_EXPORT peap_tlv_variable_data_c
+class EAP_CLASS_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H peap_tlv_variable_data_c
 : public eap_variable_data_c
 {
 private:
@@ -48,20 +69,20 @@ protected:
 public:
 	//--------------------------------------------------
 
-	EAP_FUNC_IMPORT virtual ~peap_tlv_variable_data_c();
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H virtual ~peap_tlv_variable_data_c();
 
-	EAP_FUNC_IMPORT peap_tlv_variable_data_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H peap_tlv_variable_data_c(abs_eap_am_tools_c * const tools);
 
-	EAP_FUNC_IMPORT const tls_peap_tlv_header_c * get_original_header() const;
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H const tls_peap_tlv_header_c * get_original_header() const;
 
-	EAP_FUNC_IMPORT eap_status_e set_buffer(
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H eap_status_e set_buffer(
 		const tls_peap_tlv_header_c * const original_header,
 		u8_t *data_buffer,
 		const u32_t data_buffer_length,
 		const bool free_buffer,
 		const bool is_writable);
 
-	EAP_FUNC_IMPORT eap_status_e set_copy_of_buffer(
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H eap_status_e set_copy_of_buffer(
 		const tls_peap_tlv_header_c * const original_header);
 
 	//--------------------------------------------------
@@ -72,7 +93,7 @@ public:
 
 
 // 
-class EAP_EXPORT peap_tlv_payloads_c
+class EAP_CLASS_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H peap_tlv_payloads_c
 {
 private:
 	//--------------------------------------------------
@@ -108,12 +129,12 @@ public:
 	};
 
 
-	EAP_FUNC_IMPORT virtual ~peap_tlv_payloads_c();
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H virtual ~peap_tlv_payloads_c();
 
-	EAP_FUNC_IMPORT peap_tlv_payloads_c(
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H peap_tlv_payloads_c(
 		abs_eap_am_tools_c * const tools);
 
-	EAP_FUNC_IMPORT bool check_one_payload(
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H bool check_one_payload(
 		const peap_tlv_payload_status_e status,
 		const peap_tlv_variable_data_c * const payload);
 
@@ -121,7 +142,7 @@ public:
 	 *  NOTE do not change the order of parameters.
 	 *  Add new payload type to the last of the parameter list.
 	 */
-	EAP_FUNC_IMPORT bool check_payloads(
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H bool check_payloads(
 		const peap_tlv_payload_status_e result_tlv,
 		const peap_tlv_payload_status_e nak_tlv,
 		const peap_tlv_payload_status_e crypto_binding_tlv,
@@ -129,19 +150,19 @@ public:
 		const peap_tlv_payload_status_e intermediate_result_tlv
 		);
 
-	EAP_FUNC_IMPORT peap_tlv_variable_data_c * get_result_tlv();
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H peap_tlv_variable_data_c * get_result_tlv();
 
-	EAP_FUNC_IMPORT peap_tlv_variable_data_c * get_nak_tlv();
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H peap_tlv_variable_data_c * get_nak_tlv();
 
-	EAP_FUNC_IMPORT peap_tlv_variable_data_c * get_crypto_binding_tlv();
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H peap_tlv_variable_data_c * get_crypto_binding_tlv();
 
-	EAP_FUNC_IMPORT peap_tlv_variable_data_c * get_eap_payload_tlv();
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H peap_tlv_variable_data_c * get_eap_payload_tlv();
 
-	EAP_FUNC_IMPORT peap_tlv_variable_data_c * get_intermediate_result_tlv();
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H peap_tlv_variable_data_c * get_intermediate_result_tlv();
 
-	EAP_FUNC_IMPORT void reset();
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H void reset();
 
-	EAP_FUNC_IMPORT bool get_is_valid() const;
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_PAYLOADS_H bool get_is_valid() const;
 
 	//--------------------------------------------------
 }; // class peap_tlv_payloads_c

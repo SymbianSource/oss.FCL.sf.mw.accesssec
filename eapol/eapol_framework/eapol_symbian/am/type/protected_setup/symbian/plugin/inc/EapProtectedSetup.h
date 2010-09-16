@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11 %
+* %version: 18 %
 */
 
 #ifndef _EAPPROTECTEDSETUP_H_
@@ -24,13 +24,37 @@
 
 // INCLUDES
 #include <EapTypePlugin.h>
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPPROTECTEDSETUP_H)
+	#define EAP_CLASS_VISIBILITY_EAPPROTECTEDSETUP_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPPROTECTEDSETUP_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPPROTECTEDSETUP_H 
+	#define EAP_FUNC_EXPORT_EAPPROTECTEDSETUP_H 
+	#define EAP_C_FUNC_EXPORT_EAPPROTECTEDSETUP_H 
+#elif defined(EAP_EXPORT_EAPPROTECTEDSETUP_H)
+	#define EAP_CLASS_VISIBILITY_EAPPROTECTEDSETUP_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPPROTECTEDSETUP_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPPROTECTEDSETUP_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPPROTECTEDSETUP_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPPROTECTEDSETUP_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPPROTECTEDSETUP_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPPROTECTEDSETUP_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPPROTECTEDSETUP_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPPROTECTEDSETUP_H 
+	#define EAP_C_FUNC_EXPORT_EAPPROTECTEDSETUP_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_header.h"
+
+class AbsPacStoreInitializer;
 
 // CLASS DECLARATION
 /**
 * Class that implements the generic EAP type interface for EAP protected setup (EAP-WSC).
 */
-class CEapProtectedSetup : public CEapTypePlugin
+class EAP_CLASS_VISIBILITY_EAPPROTECTEDSETUP_H CEapProtectedSetup : public CEapTypePlugin
 {
 public:		
 
@@ -39,7 +63,7 @@ public:
 	* @param aIapInfo Pointer to the class that contains information about bearer type and unique index.
 	* @return Pointer to the instance.
 	*/
-	static CEapProtectedSetup* NewL(SIapInfo *aIapInfo);
+	static CEapProtectedSetup* NewL(SPluginInfo *aIapInfo);
 
 	/**
 	* Destructor does nothing.
@@ -119,6 +143,8 @@ public:
 	* @param aDestinationIndex ID to where copy the settings.
 	*/
 	void CopySettingsL(const TIndexType aDestinationIndexType, const TInt aDestinationIndex);
+
+	TInt InitialisePacStore(AbsPacStoreInitializer * const initializer);
 
 protected:
 	

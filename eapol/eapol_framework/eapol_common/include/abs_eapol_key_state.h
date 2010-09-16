@@ -23,13 +23,34 @@
 #define _ABS_EAPOL_KEY_STATE_H_
 
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABS_EAPOL_KEY_STATE_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAPOL_KEY_STATE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABS_EAPOL_KEY_STATE_H 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAPOL_KEY_STATE_H 
+	#define EAP_FUNC_EXPORT_ABS_EAPOL_KEY_STATE_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAPOL_KEY_STATE_H 
+#elif defined(EAP_EXPORT_ABS_EAPOL_KEY_STATE_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAPOL_KEY_STATE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAPOL_KEY_STATE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAPOL_KEY_STATE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAPOL_KEY_STATE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABS_EAPOL_KEY_STATE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABS_EAPOL_KEY_STATE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAPOL_KEY_STATE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAPOL_KEY_STATE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAPOL_KEY_STATE_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAPOL_KEY_STATE_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 class eapol_session_key_c;
 
 
 /// This class defines the interface the eapol_key_state_c class
 /// will use with the partner class (lower layer).
-class EAP_EXPORT abs_eapol_key_state_c
+class EAP_CLASS_VISIBILITY_ABS_EAPOL_KEY_STATE_H abs_eapol_key_state_c
 {
 private:
 	//--------------------------------------------------

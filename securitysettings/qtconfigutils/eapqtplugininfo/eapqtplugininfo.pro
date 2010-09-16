@@ -15,7 +15,7 @@
 #   QT EAP plugin information handling component
 #
 
-# %version: 14 %
+# %version: 15 %
 
 
 TEMPLATE            = lib
@@ -45,10 +45,14 @@ SOURCES += \
     src/eapqtpluginhandle.cpp \
     src/eapqtpluginhandle_p.cpp
 
-symbian { 
-    # path to def files
-    defFilePath = .
+mmpRuleDeffile = \
+    "$${LITERAL_HASH}ifdef WINSCW" \
+    "DEFFILE ./bwins/eapqtplugininfo.def" \
+    "$${LITERAL_HASH}else" \
+    "DEFFILE ./eabi/eapqtplugininfo.def" \
+    "$${LITERAL_HASH}endif"
     
+symbian { 
     # symbian libs
     LIBS += \
         -leapsymbiantools \
@@ -56,7 +60,7 @@ symbian {
     
     TARGET.UID3 = 0x2002C2FD
     TARGET.EPOCALLOWDLLDATA = 1
-    
+    MMP_RULES += mmpRuleDeffile
     TARGET.CAPABILITY = CAP_GENERAL_DLL
             
     BLD_INF_RULES.prj_exports += \ 

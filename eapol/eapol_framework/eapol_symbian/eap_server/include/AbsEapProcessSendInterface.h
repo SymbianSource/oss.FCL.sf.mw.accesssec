@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 5 %
+* %version: 8 %
 */
 
 #ifndef ABSEAPPROCESSSENDINTERFACE_H_
@@ -24,10 +24,32 @@
 
 #include "eap_am_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABSEAPPROCESSSENDINTERFACE_H)
+	#define EAP_CLASS_VISIBILITY_ABSEAPPROCESSSENDINTERFACE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABSEAPPROCESSSENDINTERFACE_H 
+	#define EAP_C_FUNC_VISIBILITY_ABSEAPPROCESSSENDINTERFACE_H 
+	#define EAP_FUNC_EXPORT_ABSEAPPROCESSSENDINTERFACE_H 
+	#define EAP_C_FUNC_EXPORT_ABSEAPPROCESSSENDINTERFACE_H 
+#elif defined(EAP_EXPORT_ABSEAPPROCESSSENDINTERFACE_H)
+	#define EAP_CLASS_VISIBILITY_ABSEAPPROCESSSENDINTERFACE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABSEAPPROCESSSENDINTERFACE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABSEAPPROCESSSENDINTERFACE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABSEAPPROCESSSENDINTERFACE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABSEAPPROCESSSENDINTERFACE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABSEAPPROCESSSENDINTERFACE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABSEAPPROCESSSENDINTERFACE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABSEAPPROCESSSENDINTERFACE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABSEAPPROCESSSENDINTERFACE_H 
+	#define EAP_C_FUNC_EXPORT_ABSEAPPROCESSSENDINTERFACE_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 class EapMessageBuffer;
+class CEapServerProcessHandler;
 
-class EAP_EXPORT AbsEapProcessSendInterface
+class EAP_CLASS_VISIBILITY_ABSEAPPROCESSSENDINTERFACE_H AbsEapProcessSendInterface
     {
 
 private:
@@ -44,6 +66,12 @@ public:
     virtual eap_status_e SendData(EapMessageBuffer * const message) = 0;
 
 	virtual TBool GetReceiveActive() = 0;
+
+	virtual TInt AddReadyHandler(CEapServerProcessHandler * const handler) = 0;
+
+	virtual TInt CompleteReadyHandler(CEapServerProcessHandler * const handler) = 0;
+
+	virtual TInt CancelReadyHandler(CEapServerProcessHandler * const handler) = 0;
 
     };
 

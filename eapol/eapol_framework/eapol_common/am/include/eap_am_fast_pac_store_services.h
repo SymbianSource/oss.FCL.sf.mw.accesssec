@@ -25,6 +25,27 @@
 #if defined(USE_FAST_EAP_TYPE)
 
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_FAST_PAC_STORE_SERVICES_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_FAST_PAC_STORE_SERVICES_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_FAST_PAC_STORE_SERVICES_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_FAST_PAC_STORE_SERVICES_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_FAST_PAC_STORE_SERVICES_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_FAST_PAC_STORE_SERVICES_H 
+#elif defined(EAP_EXPORT_EAP_AM_FAST_PAC_STORE_SERVICES_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_FAST_PAC_STORE_SERVICES_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_FAST_PAC_STORE_SERVICES_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_FAST_PAC_STORE_SERVICES_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_FAST_PAC_STORE_SERVICES_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_FAST_PAC_STORE_SERVICES_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_FAST_PAC_STORE_SERVICES_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_FAST_PAC_STORE_SERVICES_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_FAST_PAC_STORE_SERVICES_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_FAST_PAC_STORE_SERVICES_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_FAST_PAC_STORE_SERVICES_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_tools.h"
 #include "eap_fast_pac_store_types.h"
 #include "eap_fast_tlv_header.h"
@@ -41,7 +62,7 @@ class abs_eap_state_notification_c;
 /**
  * PAC TLV is constructed with Attribute-Value Pairs.
  */
-class EAP_EXPORT eap_am_fast_pac_store_services_c
+class EAP_CLASS_VISIBILITY_EAP_AM_FAST_PAC_STORE_SERVICES_H eap_am_fast_pac_store_services_c
 {
 private:
 	//--------------------------------------------------

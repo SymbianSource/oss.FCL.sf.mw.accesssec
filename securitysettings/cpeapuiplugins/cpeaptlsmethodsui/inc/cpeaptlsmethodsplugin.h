@@ -17,7 +17,7 @@
  */
 
 /*
- * %version:  6 %
+ * %version:  7 %
  */
 
 #ifndef CPEAPTLSMETHODSPLUGIN_H
@@ -39,6 +39,7 @@
  * @addtogroup group_eap_ui_plugin_tlsmethods
  * @{
  */
+// Class declaration
 class CpEapTlsMethodsPlugin : public QObject, public CpEapPluginInterface
 {
     Q_OBJECT
@@ -52,9 +53,23 @@ public:
     QList<EapQtPluginInfo> pluginInfo();
     CpBaseSettingView* uiInstance(const EapQtPluginHandle& outerHandle,
         const EapQtPluginInfo &plugin);
-    
+
+signals:
+
+public slots:
+
+protected:
+
+protected slots:
+
 private:
+
+private slots:
+
+private:
+    //! Bearer type
     EapQtConfigInterface::EapBearerType mBearer;
+    //! IAP ID
     int mIapId;
 };
 

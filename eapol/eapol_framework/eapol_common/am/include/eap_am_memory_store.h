@@ -28,6 +28,29 @@
 #include "eap_am_memory_store_data.h"
 #include "eap_core_map.h"
 #include "eap_tlv_message_data.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_MEMORY_STORE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_MEMORY_STORE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_MEMORY_STORE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_MEMORY_STORE_H 
+#elif defined(EAP_EXPORT_EAP_AM_MEMORY_STORE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_MEMORY_STORE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_MEMORY_STORE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_MEMORY_STORE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_MEMORY_STORE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_MEMORY_STORE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_MEMORY_STORE_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 
 /// This class is base class for data stored to memory store.
@@ -56,19 +79,19 @@ private:
 	bool m_is_valid;
 
 	// This is documented in abs_eap_stack_interface_c::set_is_valid().
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H void set_is_valid();
 
 public:
 
-	EAP_FUNC_IMPORT virtual ~eap_am_memory_store_c();
+	EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H virtual ~eap_am_memory_store_c();
 
-	EAP_FUNC_IMPORT eap_am_memory_store_c(
+	EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H eap_am_memory_store_c(
 		abs_eap_am_tools_c * const tools);
 
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H eap_status_e shutdown();
 
 	// This is documented in abs_eap_stack_interface_c::get_is_valid().
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H bool get_is_valid();
 
 	/// Memory store is visible only during the eap_am_tools_c object is alive.
 	/// This function add flat data to memory store.
@@ -82,7 +105,7 @@ public:
 	/// Add the real data type as a string to the key and other identifiers
 	/// that separate data between the other users that store same data type
 	/// to the memory store.
-	EAP_FUNC_IMPORT virtual eap_status_e add_data(
+	EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H virtual eap_status_e add_data(
 		const eap_variable_data_c * const key,
 		const eap_tlv_message_data_c * const data,
 		const u32_t timeout);
@@ -97,7 +120,7 @@ public:
 	/// Add the real data type as a string to the key and other identifiers
 	/// that separate data between the other users that store same data type
 	/// to the memory store.
-	EAP_FUNC_IMPORT virtual eap_status_e get_data(
+	EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H virtual eap_status_e get_data(
 		const eap_variable_data_c * const key,
 		eap_tlv_message_data_c * const data);
 
@@ -110,7 +133,7 @@ public:
 	/// Add the real data type as a string to the key and other identifiers
 	/// that separate data between the other users that store same data type
 	/// to the memory store.
-	EAP_FUNC_IMPORT eap_status_e remove_data(
+	EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H eap_status_e remove_data(
 		const eap_variable_data_c * const key);
 
 
@@ -120,7 +143,7 @@ public:
 	 * @param id could be used to separate different timer events.
 	 * @param data could be pointer to any data that is needed in timer processing.
 	 */
-	EAP_FUNC_IMPORT eap_status_e timer_expired(
+	EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H eap_status_e timer_expired(
 		const u32_t id, void *data);
 
 	/**
@@ -130,7 +153,7 @@ public:
 	 * @param id could be used to separate different timer events.
 	 * @param data could be pointer to any data that is needed in timer processing.
 	 */
-	EAP_FUNC_IMPORT eap_status_e timer_delete_data(
+	EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_STORE_H eap_status_e timer_delete_data(
 		const u32_t id, void *data);
 };
 

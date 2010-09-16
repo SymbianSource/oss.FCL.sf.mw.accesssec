@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 29 %
+* %version: 34 %
 */
 
 #include "eap_tools.h"
@@ -32,6 +32,7 @@
 #include <EapTypeInfo.h>
 #include "EapConversion.h"
 #include "abs_eap_am_plugin.h"
+#include "AbsPacStoreInitializer.h"
 
 /** @file */
 
@@ -43,6 +44,8 @@ eap_am_plugin_symbian_c::eap_am_plugin_symbian_c(
 	: m_am_tools(tools)
 	, m_partner(partner)
 	, m_loaded_types(tools)
+	, m_internal_settings(0)
+	, m_completion_function(eap_tlv_message_type_function_none)
 	, m_is_valid(false)
 	, m_shutdown_was_called(false)
 {
@@ -75,6 +78,9 @@ eap_am_plugin_symbian_c::~eap_am_plugin_symbian_c()
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_am_plugin_symbian_c::~eap_am_plugin_symbian_c()");
 
 	EAP_ASSERT(m_shutdown_was_called == true);
+
+	delete m_internal_settings;
+	m_internal_settings = 0;
 }
 
 // ----------------------------------------------------------------------
@@ -123,6 +129,9 @@ eap_status_e eap_am_plugin_symbian_c::shutdown()
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_am_plugin_symbian_c::shutdown()");
 
 	m_shutdown_was_called = true;
+
+	delete m_internal_settings;
+	m_internal_settings = 0;
 
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
 }
@@ -292,7 +301,8 @@ CEapTypePlugin * eap_am_plugin_symbian_c::get_eap_type(
 		TRAP(error, (eap_plugin = CEapTypePlugin::NewL(
 			expanded_type.GetValue(),
 			IndexType,
-			Index)));
+			Index,
+			m_am_tools)));
 		if (error != KErrNone
 			|| eap_plugin == 0)
 		{
@@ -354,6 +364,75 @@ CEapTypePlugin * eap_am_plugin_symbian_c::get_eap_type(
 
 // ----------------------------------------------------------------------
 
+#if defined(USE_FAST_EAP_TYPE)
+
+eap_status_e eap_am_plugin_symbian_c::initialize_pac_store(
+	const eap_method_settings_c * const internal_settings,
+	const eap_tlv_message_type_function_e completion_function)
+{
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_plugin_symbian_c::initialize_pac_store(): this=0x%08x, completion_function=%d=%s.\n"),
+		this,
+		completion_function,
+		eap_process_tlv_message_data_c::get_function_string(completion_function)));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_am_plugin_symbian_c::initialize_pac_store()");
+
+	if (m_completion_function != eap_tlv_message_type_function_none)
+	{
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("ERROR: eap_am_plugin_symbian_c::initialize_pac_store(): this=0x%08x, m_completion_function=%d=%s\n"),
+			this,
+			m_completion_function,
+			eap_process_tlv_message_data_c::get_function_string(m_completion_function)));
+		EAP_ASSERT_ANYWAY_TOOLS(m_am_tools);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	delete m_internal_settings;
+
+	m_internal_settings = new eap_method_settings_c(
+		m_am_tools,
+		internal_settings);
+	if (m_internal_settings == 0)
+	{
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	CEapTypePlugin* const eapType = get_eap_type(internal_settings->m_EAPType, internal_settings->m_IndexType, internal_settings->m_Index);
+	if (eapType == 0)
+	{
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+	}
+
+	m_completion_function = completion_function;
+
+	TInt error = eapType->InitialisePacStore(this);
+	if (error == KErrCompletion)
+	{
+		// This is asynchronous call which will be completed by CompleteInitialisePacStore() function.
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_pending_request);
+	}
+	else if (error != KErrNone)
+	{
+		return EAP_STATUS_RETURN(
+			m_am_tools,
+			m_am_tools->convert_am_error_to_eapol_error(error));
+	}
+	else
+	{
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
+	}
+}
+
+#endif //#if defined(USE_FAST_EAP_TYPE)
+
+// ----------------------------------------------------------------------
+
 eap_status_e eap_am_plugin_symbian_c::get_configuration(const eap_method_settings_c * const internal_settings)
 {
 	EAP_TRACE_DEBUG(
@@ -364,7 +443,59 @@ eap_status_e eap_am_plugin_symbian_c::get_configuration(const eap_method_setting
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_am_plugin_symbian_c::get_configuration()");
 
+	eap_status_e status(eap_status_ok);
+
+	delete m_internal_settings;
+	m_internal_settings = 0;
+
+#if defined(USE_FAST_EAP_TYPE)
+
+	if (internal_settings->m_EAPType == eap_type_fast)
+	{
+		const eap_tlv_message_type_function_e error_completion_function(eap_tlv_message_type_function_plugin_complete_get_configuration);
+
+		status = initialize_pac_store(
+			internal_settings,
+			error_completion_function);
+		if (status == eap_status_pending_request)
+		{
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+		else if (status != eap_status_ok)
+		{
+			return EAP_STATUS_RETURN(
+				m_am_tools,
+				error_complete(
+					eap_status_illegal_parameter,
+					internal_settings,
+					error_completion_function));
+		}
+	}
+
+#endif //#if defined(USE_FAST_EAP_TYPE)
+
+
+	status = internal_complete_get_configuration(internal_settings);
+
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+// ----------------------------------------------------------------------
+
+eap_status_e eap_am_plugin_symbian_c::internal_complete_get_configuration(const eap_method_settings_c * const internal_settings)
+{
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_plugin_symbian_c::internal_complete_get_configuration(): this=0x%08x.\n"),
+		this));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_am_plugin_symbian_c::internal_complete_get_configuration()");
+
 	const eap_tlv_message_type_function_e error_completion_function(eap_tlv_message_type_function_plugin_complete_get_configuration);
+
+	eap_status_e status(eap_status_ok);
+	TInt error(KErrNone);
 
 	CEapTypePlugin* const eapType = get_eap_type(internal_settings->m_EAPType, internal_settings->m_IndexType, internal_settings->m_Index);
 	if (eapType == 0)
@@ -403,8 +534,6 @@ eap_status_e eap_am_plugin_symbian_c::get_configuration(const eap_method_setting
 				internal_settings,
 				error_completion_function));
 	}
-
-	TInt error(KErrNone);
 
 	TRAP(error, (eapType->GetConfigurationL(*local_settings)));
 	if (error != KErrNone)
@@ -463,7 +592,7 @@ eap_status_e eap_am_plugin_symbian_c::get_configuration(const eap_method_setting
 				error_completion_function));
 	}
 
-	eap_status_e status = m_partner->complete_get_configuration(complete_settings);
+	status = m_partner->complete_get_configuration(complete_settings);
 
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
@@ -471,6 +600,55 @@ eap_status_e eap_am_plugin_symbian_c::get_configuration(const eap_method_setting
 // ----------------------------------------------------------------------
 
 eap_status_e eap_am_plugin_symbian_c::set_configuration(const eap_method_settings_c * const internal_settings)
+{
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_plugin_symbian_c::set_configuration(): this=0x%08x.\n"),
+		this));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_am_plugin_symbian_c::set_configuration()");
+
+	eap_status_e status(eap_status_ok);
+
+	delete m_internal_settings;
+	m_internal_settings = 0;
+
+#if defined(USE_FAST_EAP_TYPE)
+
+	if (internal_settings->m_EAPType == eap_type_fast)
+	{
+		const eap_tlv_message_type_function_e error_completion_function(eap_tlv_message_type_function_plugin_complete_set_configuration);
+
+		status = initialize_pac_store(
+			internal_settings,
+			error_completion_function);
+		if (status == eap_status_pending_request)
+		{
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+		else if (status != eap_status_ok)
+		{
+			return EAP_STATUS_RETURN(
+				m_am_tools,
+				error_complete(
+					eap_status_illegal_parameter,
+					internal_settings,
+					error_completion_function));
+		}
+	}
+
+#endif //#if defined(USE_FAST_EAP_TYPE)
+
+
+	status = internal_complete_set_configuration(internal_settings);
+
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+// ----------------------------------------------------------------------
+
+eap_status_e eap_am_plugin_symbian_c::internal_complete_set_configuration(const eap_method_settings_c * const internal_settings)
 {
 	EAP_TRACE_DEBUG(
 		m_am_tools,
@@ -1102,9 +1280,54 @@ eap_status_e eap_am_plugin_symbian_c::get_type_info(const eap_method_settings_c 
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
-// ----------------------------------------------------------------------
+//--------------------------------------------------
 
+#if defined(USE_FAST_EAP_TYPE)
 
+TInt eap_am_plugin_symbian_c::CompleteInitialisePacStore()
+{
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("this = 0x%08x, message_function: starts: eap_am_plugin_symbian_c::CompleteInitialisePacStore(), completion_function=%d=%s\n"),
+		 this,
+		 m_completion_function,
+		 eap_process_tlv_message_data_c::get_function_string(m_completion_function)));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_am_plugin_symbian_c::CompleteInitialisePacStore()");
+
+	eap_status_e status(eap_status_process_general_error);
+
+	const eap_tlv_message_type_function_e completion_function = m_completion_function;
+	m_completion_function = eap_tlv_message_type_function_none;
+
+	switch (completion_function)
+	{
+	case eap_tlv_message_type_function_plugin_complete_get_configuration:
+		status = internal_complete_get_configuration(m_internal_settings);
+		break;
+	case eap_tlv_message_type_function_plugin_complete_set_configuration:
+		status = internal_complete_set_configuration(m_internal_settings);
+		break;
+	default:
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("ERROR: this = 0x%08x, message_function: starts: eap_am_plugin_symbian_c::CompleteInitialisePacStore(), Illegal completion_function=%d=%s\n"),
+			 this,
+			 completion_function,
+			 eap_process_tlv_message_data_c::get_function_string(completion_function)));
+		EAP_ASSERT_ANYWAY_TOOLS(m_am_tools);
+		break;
+	}
+
+	delete m_internal_settings;
+	m_internal_settings = 0;
+
+	return m_am_tools->convert_eapol_error_to_am_error(EAP_STATUS_RETURN(m_am_tools, status));
+}
+
+#endif //#if defined(USE_FAST_EAP_TYPE)
 
 // ----------------------------------------------------------------------
 // End

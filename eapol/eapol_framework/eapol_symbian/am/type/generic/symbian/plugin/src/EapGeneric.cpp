@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 57 %
+* %version: 62 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -195,7 +195,8 @@ void CEapGeneric::Activate()
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapGeneric::Activate(): iAsyncronousStatus=%u\n"),
+		(EAPL("CEapGeneric::Activate(): this=0x%08x, iAsyncronousStatus=%u\n"),
+		this,
 		iAsyncronousStatus.Int()));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapGeneric::Activate()");
@@ -210,7 +211,8 @@ void CEapGeneric::Complete()
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapGeneric::Complete(): iAsyncronousStatus=%u\n"),
+		(EAPL("CEapGeneric::Complete(): this=0x%08x, iAsyncronousStatus=%u\n"),
+		this,
 		iAsyncronousStatus.Int()));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapGeneric::Complete()");
@@ -228,7 +230,8 @@ void CEapGeneric::WaitCompletion()
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapGeneric::WaitCompletion(): iAsyncronousStatus=%u\n"),
+		(EAPL("CEapGeneric::WaitCompletion(): this=0x%08x, iAsyncronousStatus=%u\n"),
+		this,
 		iAsyncronousStatus.Int()));
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapGeneric::WaitCompletion()");
@@ -257,7 +260,8 @@ void CEapGeneric::SetCompletionStatusIfStillOk(const eap_status_e status)
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapGeneric::SetCompletionStatusIfStillOk(): iCompletionStatus=%u=%s, status=%d=%s\n"),
+		(EAPL("CEapGeneric::SetCompletionStatusIfStillOk(): this=0x%08x, iCompletionStatus=%u=%s, status=%d=%s\n"),
+		this,
 		iCompletionStatus,
 		eap_status_string_c::get_status_string(iCompletionStatus),
 		status,

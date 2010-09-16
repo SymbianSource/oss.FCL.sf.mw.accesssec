@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18.1.4 %
+* %version: 18.1.5 %
 */
 
 #if !defined(_EAP_AM_TYPE_AKA_SYMBIAN_H_)
@@ -29,6 +29,27 @@
 #include <d32dbms.h>
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_TYPE_AKA_SYMBIAN_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_AKA_SYMBIAN_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_AKA_SYMBIAN_H 
+#elif defined(EAP_EXPORT_EAP_AM_TYPE_AKA_SYMBIAN_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_AKA_SYMBIAN_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_AKA_SYMBIAN_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_AKA_SYMBIAN_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_AKA_SYMBIAN_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "abs_eap_base_type.h"
 
 #include "eap_am_type_aka.h"
@@ -51,13 +72,13 @@ const u32_t MAX_REAUTH_USE_COUNT = 3;
 */
 
 
-class EAP_EXPORT eap_am_type_aka_symbian_c
+class EAP_CLASS_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_am_type_aka_symbian_c
 : public CBase, public eap_am_type_aka_c
 {
 public:
 	//--------------------------------------------------
 	
-	EAP_FUNC_IMPORT static eap_am_type_aka_symbian_c* NewL(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H static eap_am_type_aka_symbian_c* NewL(
 		abs_eap_am_tools_c * const aTools,
 		abs_eap_base_type_c * const aPartner,
 		const TIndexType aIndexType,
@@ -67,14 +88,14 @@ public:
 		const eap_am_network_id_c * const receive_network_id);
 		
 	// 
-	EAP_FUNC_IMPORT virtual ~eap_am_type_aka_symbian_c();	
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H virtual ~eap_am_type_aka_symbian_c();	
 	
 	
 	/**  From the parent eap_am_type_aka_c **/
 
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e configure();
 
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e reset();
 
 	/**
 	 * The shutdown() function is called before the destructor of the 
@@ -82,13 +103,13 @@ public:
 	 * could shutdown the operations, for example cancel timers.
 	 * Each derived class must define this function.
 	 */
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e shutdown();
 
 	/** AKA client calls this function.
 	 *  AKA AM could store copy of pseudonym identity to favourite place for future use.
 	 *  If parameter pseudonym is NULL pointer, AM should reset the existing pseudonym.
 	 */
-	EAP_FUNC_IMPORT eap_status_e store_pseudonym_id(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e store_pseudonym_id(
 		const eap_am_network_id_c * const send_network_id,
 		const eap_variable_data_c * const pseudonym);
 
@@ -96,7 +117,7 @@ public:
 	 *  AKA AM could store copy of reauthentication identity to favourite place for future use.
 	 *  If parameter reauthentication_identity is NULL pointer, AM should reset the existing reauthentication identity.
 	 */
-	EAP_FUNC_IMPORT eap_status_e store_reauthentication_id(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e store_reauthentication_id(
 		const eap_am_network_id_c * const send_network_id,
 		const eap_variable_data_c * const reauthentication_identity);
 
@@ -107,7 +128,7 @@ public:
 	 * This function stores original XKEY, K_aut, K_encr and latest
 	 * counter value.
 	 */
-	EAP_FUNC_IMPORT eap_status_e store_reauth_parameters(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e store_reauth_parameters(
 		const eap_variable_data_c * const XKEY,
 		const eap_variable_data_c * const K_aut,
 		const eap_variable_data_c * const K_encr,
@@ -116,7 +137,7 @@ public:
 	/** AKA client calls this function.
 	 *  AKA AM could do finishing operations to databases etc. based on authentication status and type.
 	 */
-	EAP_FUNC_IMPORT eap_status_e authentication_finished(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e authentication_finished(
 		const bool true_when_successfull,
 		const eap_aka_authentication_type_e authentication_type,
 		const eap_type_aka_identity_type identity_type);
@@ -126,7 +147,7 @@ public:
 	 * store the following values: original XKEY, K_aut, K_encr, latest
 	 * counter value and the next re-authentication identity.
 	 */
-	EAP_FUNC_IMPORT eap_status_e query_reauth_parameters(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e query_reauth_parameters(
 		eap_variable_data_c * const XKEY,
 		eap_variable_data_c * const K_aut,
 		eap_variable_data_c * const K_encr,
@@ -135,14 +156,14 @@ public:
 	/** AKA server and client calls this function.
 	 *  This function increases re-authentication counter after a successfull re-authentication.
 	 */
-	EAP_FUNC_IMPORT eap_status_e increase_reauth_counter();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e increase_reauth_counter();
 
 	/** AKA client calls this function.
 	 *  AM could copy IMSI or pseudonym to output parameters.
 	 *  AM must copy IMSI or pseudonym to output parameters.
 	 *  This function could be completed asyncronously with abs_eap_am_type_aka_c::complete_AKA_IMSI_or_pseudonym_or_reauthentication_id_query() function call.
 	 */
-	EAP_FUNC_IMPORT eap_status_e query_AKA_IMSI_or_pseudonym_or_reauthentication_id(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e query_AKA_IMSI_or_pseudonym_or_reauthentication_id(
 		eap_variable_data_c * const IMSI,
 		eap_variable_data_c * const pseudonym_identity,
 		eap_variable_data_c * const reauthentication_identity,
@@ -159,7 +180,7 @@ public:
 	 *  with abs_eap_am_type_aka_c::complete_AKA_IMSI_or_pseudonym_or_reauthentication_id_query() after
 	 *  cancel_AKA_IMSI_or_pseudonym_or_reauthentication_id_query() call.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_AKA_IMSI_or_pseudonym_or_reauthentication_id_query();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e cancel_AKA_IMSI_or_pseudonym_or_reauthentication_id_query();
 
 
 	/** AKA client calls this function.
@@ -167,7 +188,7 @@ public:
 	 *  AM could copy CK, IK and RES to output parameters.
 	 *  This function could be completed asyncronously with abs_eap_am_type_aka_c::complete_AKA_RES_query() function call.
 	 */
-	EAP_FUNC_IMPORT eap_status_e query_AKA_RES(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e query_AKA_RES(
 		eap_type_aka_authentication_vector_c * const authentication_vector);
 
 	/** AKA client calls this function.
@@ -176,19 +197,19 @@ public:
 	 *  with abs_eap_am_type_aka_c::complete_AKA_RES_query() after
 	 *  cancel_AKA_RES_query() call.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_AKA_RES_query();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e cancel_AKA_RES_query();
 
 	/** AKA client calls this function.
 	 *  Received AT_NOTIFICATION is handled in AM of AKA.
 	 *  AM could show localized message to user.
 	 */
-	EAP_FUNC_IMPORT eap_status_e handle_aka_notification(eap_aka_notification_codes_e aka_notification_code);
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e handle_aka_notification(eap_aka_notification_codes_e aka_notification_code);
 
 	/** AKA server calls this function.
 	 *  AM could copy triplets to output parameters.
 	 *  This function could be completed asyncronously with abs_eap_am_type_aka_c::complete_AKA_authentication_vector_query() function call.
 	 */
-	EAP_FUNC_IMPORT eap_status_e query_AKA_authentication_vector(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e query_AKA_authentication_vector(
 		const eap_variable_data_c * const username, ///< // This is payload AT_IDENTITY. If this is uninitialized then imsi must be initialized.
 		const u8_t next_eap_identifier,
 		eap_variable_data_c * const imsi, ///< This is the real IMSI. If this is uninitialized then username must be initialized and imsi will be initialized after this call.
@@ -200,13 +221,13 @@ public:
 	 *  AM must not complete query_AKA_authentication_vector() with abs_eap_am_type_aka_c::complete_AKA_authentication_vector_query() after
 	 *  cancel_AKA_authentication_vector_query() call.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_AKA_authentication_vector_query();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e cancel_AKA_authentication_vector_query();
 
 	/** AKA server/client calls this function.
 	 *  This function call generates with a good source of
 	 *  randomness the initialization vector (AT_IV payload).
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_encryption_IV(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e generate_encryption_IV(
 		eap_variable_data_c * const encryption_IV,
 		const u32_t IV_length);
 
@@ -216,7 +237,7 @@ public:
 	 *  Pseudonym identity is copied to pseudonym_identity parameter.
 	 *  Maximum length of pseudonym is maximum_pseudonym_length bytes.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_pseudonym_id(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e generate_pseudonym_id(
 		const eap_am_network_id_c * const send_network_id,
 		const eap_variable_data_c * const imsi,
 		eap_variable_data_c * const pseudonym_identity,
@@ -228,7 +249,7 @@ public:
 	 *  Reauthentication identity is copied to pseudonym parameter.
 	 *  Maximum length of pseudonym is maximum_reauthentication_identity_length bytes.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_reauthentication_id(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e generate_reauthentication_id(
 		const eap_am_network_id_c * const send_network_id,
 		const eap_variable_data_c * const imsi,
 		eap_variable_data_c * const reauthentication_identity,
@@ -242,7 +263,7 @@ public:
 	 *  It can select any algorithm. Look at generate_pseudonym_id() and generate_reauthentication_id().
 	 *  Function must return IMSI and set the identity type of received username.
 	 */
-	EAP_FUNC_IMPORT eap_status_e query_imsi_from_username(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e query_imsi_from_username(
 		const u8_t next_eap_identifier,
 		const eap_am_network_id_c * const send_network_id,
 		const eap_variable_data_c * const username,
@@ -254,7 +275,7 @@ public:
 	 *  Server queries re-syncronization.
 	 *  This function call is completed by complete_re_syncronization_query() function.
 	 */
-	EAP_FUNC_IMPORT eap_status_e query_re_syncronization(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e query_re_syncronization(
 		const u8_t next_eap_identifier,
 		eap_type_aka_authentication_vector_c * const authentication_vector
 		);
@@ -265,7 +286,7 @@ public:
 	 *  with abs_eap_am_type_aka_c::complete_imsi_from_username() after
 	 *  cancel_imsi_from_username_query() call.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_imsi_from_username_query();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e cancel_imsi_from_username_query();
 
 	/**
 	 * The type_configure_read() function reads the configuration data identified
@@ -275,7 +296,7 @@ public:
 	 * @param field_length is length of the field string.
 	 * @param data is pointer to existing eap_variable_data object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e type_configure_read(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e type_configure_read(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
@@ -287,26 +308,26 @@ public:
 	 * @param field_length is length of the field string.
 	 * @param data is pointer to existing eap_variable_data object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e type_configure_write(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e type_configure_write(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);		
 
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H void set_is_valid();
 
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H bool get_is_valid();
 	
 #if defined(__WINS__)
 	
-	EAP_FUNC_IMPORT eap_status_e query_SIM_imsi(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e query_SIM_imsi(
 		u8_t * const imsi, const u32_t max_length, u32_t * const imsi_length);
 		
 #endif //#if defined(__WINS__)
 	
-	EAP_FUNC_IMPORT eap_status_e complete_AKA_imsi_L(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e complete_AKA_imsi_L(
 		const eap_variable_data_c * const IMSI,
 		const eap_status_e completion_status = eap_status_ok);
 		
-	EAP_FUNC_IMPORT eap_status_e complete_AKA_RES_L(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H eap_status_e complete_AKA_RES_L(
 		eap_variable_data_c * const aRES, 
 		eap_variable_data_c * const aCK,
 		eap_variable_data_c * const aIK,
@@ -322,7 +343,7 @@ public:
 	 * Otherwise returns false. 
 	 * Full authentication should be done if the session is not valid.
 	 */
-	EAP_FUNC_IMPORT bool is_session_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_AKA_SYMBIAN_H bool is_session_valid();
 
 	//--------------------------------------------------
 protected:

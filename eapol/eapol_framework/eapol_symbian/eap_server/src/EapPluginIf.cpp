@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 17 %
+* %version: 18 %
 */
 
 #include "eap_am_tools.h"
@@ -99,7 +99,7 @@ eap_status_e CEapPluginIf::configure(
 		TRACE_FLAGS_DEFAULT, 
 		(EAPL("CEapPluginIf::configure()\n")));
 
-	return m_server_if->configure(client_configuration);
+	return EAP_STATUS_RETURN(m_am_tools, m_server_if->configure(client_configuration));
 }
 
 //--------------------------------------------------

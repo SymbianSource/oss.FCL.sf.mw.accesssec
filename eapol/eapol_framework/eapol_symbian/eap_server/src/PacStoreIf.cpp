@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11 %
+* %version: 14 %
 */
 
 #include "eap_am_tools.h"
@@ -26,6 +26,7 @@
 #include "eap_config.h"
 #include "eap_file_config.h"
 #include "abs_eap_am_mutex.h"
+#include "eap_pac_store_server_message_if.h"
 
 
 /** @file */
@@ -77,9 +78,9 @@ EAP_FUNC_EXPORT CPacStoreIf::~CPacStoreIf()
 	if (m_server_if != 0)
 	{
 		m_server_if->shutdown();
+    	delete m_server_if;
+    	m_server_if = 0;
 	}
-    delete m_server_if;
-    m_server_if = 0;
 
     delete m_fileconfig;
     m_fileconfig = 0;
@@ -153,6 +154,8 @@ EAP_FUNC_EXPORT eap_pac_store_server_message_if_c * eap_pac_store_server_message
 
     EAP_TRACE_RETURN_STRING(tools, "returns: eap_pac_store_server_message_if_c::new_eap_pac_store_server_message_if_c()");
 
+#if !defined(EAP_PAC_STORE_DUMMY)
+
     eap_pac_store_server_message_if_c * const server = new eap_pac_store_server_message_if_c(
         tools);
 
@@ -186,6 +189,13 @@ EAP_FUNC_EXPORT eap_pac_store_server_message_if_c * eap_pac_store_server_message
     automatic_server.do_not_free_variable();
 
     return server;
+
+#else
+
+	return 0;
+
+#endif
+
 }
 
 //--------------------------------------------------
@@ -198,6 +208,9 @@ EAP_FUNC_EXPORT CPacStoreIf* CPacStoreIf::new_CPacStoreIf(
     {
     EAP_UNREFERENCED_PARAMETER(is_client_when_true);
     EAP_UNREFERENCED_PARAMETER(MTU);
+
+#if !defined(EAP_PAC_STORE_DUMMY)
+
     eap_pac_store_server_message_if_c *server =  eap_pac_store_server_message_if_c::new_eap_pac_store_server_message_if_c(
         tools);
     
@@ -257,6 +270,13 @@ EAP_FUNC_EXPORT CPacStoreIf* CPacStoreIf::new_CPacStoreIf(
     automatic_pacstore_if.do_not_free_variable();
     
     return pacstore_if;
+
+#else
+
+	return 0;
+
+#endif
+
     }
 
 //--------------------------------------------------

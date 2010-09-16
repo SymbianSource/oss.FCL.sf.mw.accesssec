@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16.1.14 %
+* %version: 16.1.18 %
 */
 
 #include <platform_paths.hrh>
@@ -30,6 +30,14 @@ TARGET        eapsecurid.dll
 UID	          0x10009d8d 0x101F8E74
 
 deffile eapsecurid.def
+
+MACRO EAP_NO_EXPORTS
+// Start: added by script change_mmp_export_macros.sh.
+MACRO EAP_NO_EXPORT_EAP_TYPE_SECURID_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_SECURID_STATE_H
+MACRO EAP_NO_EXPORT_EAP_AM_TYPE_SECURID_SYMBIAN_H
+MACRO EAP_NO_EXPORT_EAPSECURID_H
+// End: added by script change_mmp_export_macros.sh.
 
 SOURCEPATH    ../am/type/securid/symbian/plugin/src
 
@@ -66,6 +74,7 @@ USERINCLUDE   ../../eapol_common/am/include
 USERINCLUDE	  ../am/type/symbian/plugin/include
 USERINCLUDE   ../../eapol_common/type
 USERINCLUDE   ../am/eap_notifier/inc
+USERINCLUDE  	../eap_server/include
 
 MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
 
@@ -73,7 +82,6 @@ LIBRARY     euser.lib ecom.lib eaptools.lib eaptrace.lib eapsymbiantools.lib edb
 LIBRARY		bafl.lib
 LIBRARY     eikdlg.lib
 LIBRARY     eikcore.lib
-LIBRARY     hlplch.lib
 LIBRARY		featmgr.lib
 
 LIBRARY		HbCore.lib

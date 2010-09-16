@@ -28,9 +28,30 @@
 #include "eap_am_tools.h"
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_STATE_STORE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_STATE_STORE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_STATE_STORE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_STATE_STORE_H 
+	#define EAP_FUNC_EXPORT_EAP_STATE_STORE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_STATE_STORE_H 
+#elif defined(EAP_EXPORT_EAP_STATE_STORE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_STATE_STORE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_STATE_STORE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_STATE_STORE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_STATE_STORE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_STATE_STORE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_STATE_STORE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_STATE_STORE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_STATE_STORE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_STATE_STORE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_STATE_STORE_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 
-class EAP_EXPORT eap_base_type_state_c
+class EAP_CLASS_VISIBILITY_EAP_STATE_STORE_H eap_base_type_state_c
 {
 private:
 	//--------------------------------------------------
@@ -55,7 +76,7 @@ public:
 const u32_t EAP_STATE_SIZE = (u32_t)(((~0u) & 0xff)+1u);
 
 
-class EAP_EXPORT eap_state_store_c
+class EAP_CLASS_VISIBILITY_EAP_STATE_STORE_H eap_state_store_c
 {
 private:
 	//--------------------------------------------------

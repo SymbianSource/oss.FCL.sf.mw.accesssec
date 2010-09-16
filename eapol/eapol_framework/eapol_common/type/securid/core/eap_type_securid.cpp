@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 22.1.4 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -547,6 +547,13 @@ EAP_FUNC_EXPORT eap_status_e eap_type_securid_c::remove_username_store()
 						EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 						return EAP_STATUS_RETURN(m_am_tools, status);
 					}
+
+					EAP_TRACE_DATA_DEBUG(
+						m_am_tools,
+						TRACE_FLAGS_DEFAULT,
+						(EAPL("EAP_type_GTC: function: eap_type_securid_c::remove_username_store(): read m_identity:"),
+						 m_identity.get_data(),
+						 m_identity.get_data_length()));
 				}
 				else
 				{
@@ -612,6 +619,13 @@ EAP_FUNC_EXPORT eap_status_e eap_type_securid_c::configure()
 			&m_identity);
 		// Status does not matter.
 
+		EAP_TRACE_DATA_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("EAP_type_GTC: function: eap_type_securid_c::configure(): m_identity:"),
+			 m_identity.get_data(),
+			 m_identity.get_data_length()));
+
 		if (m_is_client == false)
 		{
 			(void) m_am_type_securid->type_configure_read(
@@ -625,6 +639,13 @@ EAP_FUNC_EXPORT eap_status_e eap_type_securid_c::configure()
 			cf_str_EAP_GTC_identity.get_field(),
 			&m_identity);
 		// Status does not matter.
+
+		EAP_TRACE_DATA_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("EAP_type_GTC: function: eap_type_securid_c::configure(): m_identity:"),
+			 m_identity.get_data(),
+			 m_identity.get_data_length()));
 
 		if (m_is_client == false)
 		{
@@ -785,6 +806,13 @@ EAP_FUNC_EXPORT eap_status_e eap_type_securid_c::reset()
 			&m_identity);
 		// Status does not matter.
 	}
+
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("EAP_type_GTC: function: eap_type_securid_c::reset(): m_identity:"),
+		 m_identity.get_data(),
+		 m_identity.get_data_length()));
 
 	m_state.set_state(eap_type_securid_state_none);
 	m_identity_asked = false;

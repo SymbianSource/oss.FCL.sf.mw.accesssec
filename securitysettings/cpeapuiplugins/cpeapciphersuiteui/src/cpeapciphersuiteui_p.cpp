@@ -17,7 +17,7 @@
 */
 
 /*
-* %version: 4 %
+* %version: 5 %
 */
 
 // System includes
@@ -94,11 +94,15 @@ CpSettingFormItemData* CpEapCiphersuiteUiPrivate::createGroupItem(
 {
     qDebug("CpEapCiphersuiteUiPrivate::createGroupItem - id: 0x%04x", id);
     QScopedPointer<CpSettingFormItemData> mItem;
-    mItem.reset(new CpSettingFormItemData(
+    mItem.reset(
+        new CpSettingFormItemData(
         HbDataFormModelItem::CheckBoxItem, QString("")));
+        
+    mItem->setContentWidgetData("objectName", name);
     mItem->setContentWidgetData("text", name);
-    mItem->setContentWidgetData("checkState", ciphersuiteSelected(
-        suites, id));
+    mItem->setContentWidgetData(
+        "checkState", 
+        ciphersuiteSelected(suites, id));
     mSuiteMapper[mItem.data()] = id;
     
     CpSettingFormItemData* tmp = mItem.data();

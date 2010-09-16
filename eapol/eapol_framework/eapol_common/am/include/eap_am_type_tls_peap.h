@@ -26,6 +26,27 @@
 #include "eap_variable_data.h"
 #include "eap_header.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_TYPE_TLS_PEAP_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_TLS_PEAP_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_TLS_PEAP_H 
+#elif defined(EAP_EXPORT_EAP_AM_TYPE_TLS_PEAP_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_TLS_PEAP_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_TLS_PEAP_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_TLS_PEAP_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_TLS_PEAP_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "abs_eap_am_type_tls_peap.h"
 #include "eap_am_network_id.h"
 #include "tls_am_services.h"
@@ -38,7 +59,7 @@ class abs_eap_base_type_c;
 class eap_base_type_c;
 
 /// This class is interface to adaptation module of EAP/TLS and PEAP.
-class EAP_EXPORT eap_am_type_tls_peap_c
+class EAP_CLASS_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_H eap_am_type_tls_peap_c
 : public tls_am_services_c
 #if defined(USE_FAST_EAP_TYPE)
 , public tls_am_application_eap_fast_c
@@ -195,7 +216,7 @@ public:
  * @param tools is pointer to the abs_eap_am_tools class created by the adaptation module.
  * EAP-TLS/PEAP EAP-type will callback caller using the partner pointer.
  */
-EAP_C_FUNC_IMPORT  eap_am_type_tls_peap_c *new_eap_am_type_tls_peap(
+EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_H  eap_am_type_tls_peap_c *new_eap_am_type_tls_peap(
 	abs_eap_am_tools_c * const tools,
 	abs_eap_base_type_c * const partner,
 	const eap_type_value_e eap_type,

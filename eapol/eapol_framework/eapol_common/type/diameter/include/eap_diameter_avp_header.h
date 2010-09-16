@@ -25,6 +25,29 @@
 #include "eap_tools.h"
 #include "eap_general_header_base.h"
 #include "eap_diameter_avp_code.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_DIAMETER_AVP_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAP_DIAMETER_AVP_HEADER_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_HEADER_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_DIAMETER_AVP_HEADER_H 
+	#define EAP_FUNC_EXPORT_EAP_DIAMETER_AVP_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAP_DIAMETER_AVP_HEADER_H 
+#elif defined(EAP_EXPORT_EAP_DIAMETER_AVP_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAP_DIAMETER_AVP_HEADER_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_DIAMETER_AVP_HEADER_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_DIAMETER_AVP_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_DIAMETER_AVP_HEADER_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_DIAMETER_AVP_HEADER_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_HEADER_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_DIAMETER_AVP_HEADER_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_DIAMETER_AVP_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAP_DIAMETER_AVP_HEADER_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 /** @file */
 
@@ -64,7 +87,7 @@ const u32_t TRACE_FLAGS_DIAMETER_ERROR = eap_am_tools_c::eap_trace_mask_error;
  * 
  * See <a href="../../documentation/RFCs/draft-funk-eap-ttls-v0-00.txt">draft-funk-eap-ttls-v0-00.txt</a>.
  */
-class EAP_EXPORT eap_diameter_avp_header_c
+class EAP_CLASS_VISIBILITY_EAP_DIAMETER_AVP_HEADER_H eap_diameter_avp_header_c
 : public eap_general_header_base_c
 {
 private:

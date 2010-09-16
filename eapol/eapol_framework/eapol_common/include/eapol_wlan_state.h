@@ -25,6 +25,29 @@
 #include "eap_type_selection.h"
 #include "eap_array.h"
 #include "eapol_key_state.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPOL_WLAN_STATE_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_WLAN_STATE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPOL_WLAN_STATE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_WLAN_STATE_H 
+	#define EAP_FUNC_EXPORT_EAPOL_WLAN_STATE_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_WLAN_STATE_H 
+#elif defined(EAP_EXPORT_EAPOL_WLAN_STATE_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_WLAN_STATE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_WLAN_STATE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_WLAN_STATE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_WLAN_STATE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPOL_WLAN_STATE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPOL_WLAN_STATE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_WLAN_STATE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_WLAN_STATE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_WLAN_STATE_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_WLAN_STATE_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 //--------------------------------------------------
 
@@ -32,7 +55,7 @@ class abs_eap_am_tools_c;
 
 
 /// wlan_state_c class stores information of one supported EAP-type.
-class EAP_EXPORT eapol_wlan_state_c
+class EAP_CLASS_VISIBILITY_EAPOL_WLAN_STATE_H eapol_wlan_state_c
 {
 private:
 	//--------------------------------------------------
@@ -51,19 +74,19 @@ public:
 	/**
 	 * The destructor of the eapol_wlan_state_c class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~eapol_wlan_state_c();
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_STATE_H virtual ~eapol_wlan_state_c();
 
 	/**
 	 * The constructor of the eapol_wlan_state_c class does nothing special.
 	 */
-	EAP_FUNC_IMPORT eapol_wlan_state_c(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_STATE_H eapol_wlan_state_c(
 		abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The get_is_valid() function returns the status of the object.
 	 * @return True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid() const;
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_STATE_H bool get_is_valid() const;
 
 }; // class eapol_wlan_state_c
 

@@ -17,13 +17,13 @@
  */
 
 /*
- * %version: tr1cfwln#25 %
+ * %version: tr1cfwln#28 %
  */
+
 
 //User Includes
 #include "cpwepui.h"
 #include "wepkeyvalidator.h"
-
 
 // System includes
 #include <QStringList>
@@ -31,7 +31,6 @@
 #include <cmconnectionmethod_shim.h>
 #include <cmmanagerdefines_shim.h>
 #include <HbLineEdit>
-#include <HbTranslator>
 #include <HbEditorInterface>
 
 //Trace Definition
@@ -40,10 +39,15 @@
 #include "cpwepuiTraces.h"
 #endif
 
-// Constants
-//The order in which WEP only mode appears in the list of available 
-//security mode
-static const int UI_ORDER_WEP = 10;
+/*!
+ \class CpWepUi
+ \brief CpWepUi implements the WEP Security Settings Control Panel Plugin
+ which will allow viewing/editing of WEP Security Settings.
+ */
+
+// External function prototypes
+
+// Local constants
 
 //! Index of first WEP key
 static const int KFirstKey = 0;
@@ -62,126 +66,67 @@ static const int KMaxKeyLength  = 26;
 
 
 
+// ======== LOCAL FUNCTIONS ========
+
+
+// ======== MEMBER FUNCTIONS ========
+
 /*!
- \class CpWepUi
- \brief CpWepUi implements the WEP Security Settings Control Panel Plugin
- which will allow viewing/editing of WEP Security Settings.
+ Contructs WEP object
  */
-//Contructs WEP object
-CpWepUi::CpWepUi() :
-    mUi(NULL),
+CpWepUi::CpWepUi(
+    CpItemDataHelper* dataHelper,
+    CmConnectionMethodShim* cmCM) :
+    CpSettingFormItemData(
+        HbDataFormModelItem::GroupItem,
+        hbTrId("txt_occ_subhead_security_settings")),
     mNewKeySelected(0), 
-    mTranslator(new HbTranslator("cpwlansecsettingsplugin")),
-    mCmCM(NULL), 
-    mCmId(0)    
+    mCmCM(cmCM),
+    mItemDataHelper(dataHelper)
 {
+    OstTraceExt1( TRACE_FLOW, CPWEPUI_CPWEPUI, "CpWepUi::CpWepUi - entry;cmCM=%p", cmCM );
+    
     //Initialize array members
-    for(int index=0;index<KMaxNumberofKeys;index++)
-    {
+    for(int index=0;index<KMaxNumberofKeys;index++) {
         mWepKey[index] = NULL;
         mWepKeyText[index] = NULL;   
         mkeyFormat[index] = EFormatHex;
     }
-      
+    
+    createUi();
+    
+    OstTraceExt1( TRACE_FLOW, DUP1_CPWEPUI_CPWEPUI, "CpWepUi::CpWepUi - exit;this=%p", this );
 }
 
-//Deletes all objects WEP owns
+/*!
+ Deletes all objects WEP owns
+ */
 CpWepUi::~CpWepUi()
 {
-    OstTraceFunctionEntry1(CPWEPUI_CPWEPUI_ENTRY,this);
-    //Elements like mUi and components that belong to it
-    //, are taken care by the parent
-    delete mTranslator;
-    OstTraceFunctionExit1(CPWEPUI_CPWEPUI_EXIT,this);
-}
-
-// ======== MEMBER FUNCTIONS ========
-
-
-/*!
- Getter for security mode.
-
- \return Security mode identifier
- */
-CMManagerShim::WlanSecMode CpWepUi::securityMode() const
-{
-    OstTraceFunctionEntry1(CPWEPUI_SECURITYMODE_ENTRY,this);
-    OstTraceFunctionExit1(CPWEPUI_SECURITYMODE_EXIT,this);
-    //return security mode
-    return CMManagerShim::WlanSecModeWep;
+    OstTraceExt1( TRACE_FLOW, DUP2_CPWEPUI_CPWEPUI, "CpWepUi::~CpWepUi - entry;this=%p", this );
+    OstTrace0( TRACE_FLOW, DUP3_CPWEPUI_CPWEPUI, "CpWepUi::~CpWepUi - exit" );
 }
 
 /*!
- Getter for localization text identifier for the security mode,
- f.ex. "txt_occ_setlabel_wlan_security_mode_val_wep". This localized
- text will be shown in the UI.
- 
- \return Localization text ID
+ Returns the fully constructed Ui Group , for WEP security plugin
  */
-QString CpWepUi::securityModeTextId() const
-{
-    OstTraceFunctionEntry1( CPWEPUI_SECURITYMODETEXTID_ENTRY, this );
-    OstTraceFunctionExit1( CPWEPUI_SECURITYMODETEXTID_EXIT, this );
-    return "txt_occ_setlabel_wlan_security_mode_val_wep";
-}
-
-/*! 
- Sets the database reference Iap id.
-
- \param id Database reference
- */
-void CpWepUi::setReference(CmConnectionMethodShim *cmCm, uint id)
-{
-    OstTraceFunctionEntry1(CPWEPUI_SETREFERENCE_ENTRY,this);
-    mCmId = id;
-
-    //mCmCM is not deleted assuming CmManager owns it.
-    mCmCM = cmCm;
-    OstTraceFunctionExit1(CPWEPUI_SETREFERENCE_EXIT,this);
-}
-
-/*!
- Getter for order number. This order number is used by the client of
- this interface to put the security modes in correct order in the list.
-
- \return An order number
- */
-int CpWepUi::orderNumber() const
-{
-    OstTraceFunctionEntry1(CPWEPUI_ORDERNUMBER_ENTRY,this);
-    OstTraceFunctionExit1(CPWEPUI_ORDERNUMBER_EXIT,this);
-    return UI_ORDER_WEP;
-}
-
-/*!
- * Returns the fully constructed Ui Group , for WEP security plugin
- * 
- * \param dataHelper to add Connections
- * 
- * \return The WEP UI
- */
-CpSettingFormItemData* CpWepUi::uiInstance(CpItemDataHelper &dataHelpper)
+void CpWepUi::createUi()
 {
     int err;
-    OstTraceFunctionEntry1(CPWEPUI_UIINSTANCE_ENTRY,this);
 
+    OstTrace0( TRACE_FLOW, DUP1_CPWEPUI_CREATEUI, "CpWepUi::createUi - entry" );   
+    
     //Read values From CommsDatbase
     QT_TRYCATCH_ERROR(err, loadFieldsFromDataBase());
     if (err != KErrNone) {
-        OstTrace1( TRACE_ERROR, CPWEPUI_UIINSTANCE, "LoadFromDataBase returned %d", err );
+        OstTrace1( TRACE_ERROR, CPWEPUI_CREATEUI, "CpWepUi::createUi - [ERROR]: loadFromDataBase failed;err=%d", err );   
     }
-    
-    //Store the address of the Data Helper
-    mItemDataHelper = &dataHelpper;
 
-    mUi = new CpSettingFormItemData(HbDataFormModelItem::GroupItem, hbTrId(
-            "txt_occ_subhead_security_settings"));
-
-    mUi->setContentWidgetData("objectName", "CpWepUi");
+    setContentWidgetData("objectName", "CpWepUi");
     
     CpSettingFormItemData *wepKeyInUse = new CpSettingFormItemData(
-            HbDataFormModelItem::ComboBoxItem, hbTrId(
-                    "txt_occ_setlabel_wep_key_in_use"));
+        HbDataFormModelItem::ComboBoxItem, hbTrId(
+            "txt_occ_setlabel_wep_key_in_use"));
     QStringList wepKeys;
     wepKeys.append(hbTrId("txt_occ_setlabel_wep_key_in_val_1"));
     wepKeys.append(hbTrId("txt_occ_setlabel_wep_key_in_val_2"));
@@ -192,9 +137,9 @@ CpSettingFormItemData* CpWepUi::uiInstance(CpItemDataHelper &dataHelpper)
     wepKeyInUse->setContentWidgetData("currentIndex", mNewKeySelected);
     wepKeyInUse->setContentWidgetData("objectName", "CpWepUiKeyInUse");
     
-    dataHelpper.addConnection(wepKeyInUse, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(wepKeyInUseChanged(int)));
-    mUi->appendChild(wepKeyInUse);
+    mItemDataHelper->addConnection(wepKeyInUse, SIGNAL(currentIndexChanged(int)),
+        this, SLOT(wepKeyInUseChanged(int)));
+    appendChild(wepKeyInUse);
 
     //Create Ui for all 4 WEP keys
     createWEPKeyGroup(KFirstKey);
@@ -206,12 +151,10 @@ CpSettingFormItemData* CpWepUi::uiInstance(CpItemDataHelper &dataHelpper)
     createWEPKeyGroup(KFourthKey);
     
     //Add Connections(signals)
-    addConnections(dataHelpper);
+    addConnections(mItemDataHelper);
 
-    OstTraceFunctionExit1(CPWEPUI_UIINSTANCE_EXIT,this);
-    return mUi;
+    OstTrace0( TRACE_FLOW, DUP2_CPWEPUI_CREATEUI, "CpWepUi::createUi - exit" );
 }
-
 
 /*!
    Validates current security settings. This function is called whenever
@@ -240,17 +183,17 @@ bool CpWepUi::validateSettings()
 }
 
 /*!
- * Create Ui element with text edit for WEP KEYS
- * 
- * \param index of the WEP key
- * */
+ Create Ui element with text edit for WEP KEYS
+  
+ \param index of the WEP key
+ */
 void CpWepUi::createWEPKeyGroup(int index)
-    {
-    OstTraceFunctionEntry1(CPWEPUI_CREATEWEPKEYGROUP_ENTRY,this);
+{
     QString textId;
     
-    switch(index)
-        {
+    OstTrace1( TRACE_FLOW, CPWEPUI_CREATEWEPKEYGROUP, "CpWepUi::createWEPKeyGroup - entry;index=%d", index );
+    
+    switch(index) {
         case KFirstKey:
             textId  = hbTrId("txt_occ_setlabel_wep_key_1");
             break;
@@ -266,7 +209,7 @@ void CpWepUi::createWEPKeyGroup(int index)
         case KFourthKey:
             textId  = hbTrId("txt_occ_setlabel_wep_key_4");
             break;
-        }
+    }
         
     mWepKeyText[index] = new CpSettingFormItemData(
         HbDataFormModelItem::TextItem,
@@ -283,137 +226,48 @@ void CpWepUi::createWEPKeyGroup(int index)
     objectName.prepend("CpWepUiKeyEditor");
     mWepKeyText[index]->setContentWidgetData("objectName", objectName);
     
-    mUi->appendChild(mWepKeyText[index]);
-    OstTraceFunctionExit1(CPWEPUI_CREATEWEPKEYGROUP_EXIT,this);
-    }
+    appendChild(mWepKeyText[index]);
+    
+    OstTrace0( TRACE_FLOW, DUP1_CPWEPUI_CREATEWEPKEYGROUP, "CpWepUi::createWEPKeyGroup - exit" );
+}
 
 
 /*!
- * Add signals to all the text Edit of WEP key groups.
- *  
- *  \param dataHelper ; to add Connections
+ Add signals to all the text Edit of WEP key groups.
+   
+ \param dataHelper ; to add Connections
  */
-void CpWepUi::addConnections(CpItemDataHelper &dataHelpper)
-    {
-    OstTraceFunctionEntry1( CPWEPUI_ADDCONNECTIONS_ENTRY, this );
-    
-    dataHelpper.addConnection(mWepKeyText[KFirstKey],
-                SIGNAL( editingFinished ()), this, SLOT(wepKeyOneChanged() ));
-    
-    dataHelpper.addConnection(mWepKeyText[KSecondKey],
-               SIGNAL( editingFinished ()), this, SLOT(wepKeyTwoChanged() ));
-    
-    dataHelpper.addConnection(mWepKeyText[KThirdKey],
-               SIGNAL( editingFinished ()), this, SLOT(wepKeyThreeChanged() ));
-    
-    dataHelpper.addConnection(mWepKeyText[KFourthKey],
-                SIGNAL( editingFinished ()), this, SLOT(wepKeyFourChanged() ));
-    
-    dataHelpper.connectToForm(SIGNAL(itemShown (const QModelIndex &) ), 
-            this, SLOT(setEditorPreferences(const QModelIndex &)));
- 
-    OstTraceFunctionExit1( CPWEPUI_ADDCONNECTIONS_EXIT, this );
-    }
-
-
-/*!
- * Slot to handle , if a different wep key (index) 
- * is made active
- * \param wepKeyInUse index of the chosen wep key
- */
-void CpWepUi::wepKeyInUseChanged(int wepKeyInUse)
+void CpWepUi::addConnections(CpItemDataHelper* dataHelper)
 {
-    OstTraceFunctionEntry1(CPWEPUI_WEPKEYINUSECHANGED_ENTRY,this);
-
-    int err;
-    //Update CommsDat
-    QT_TRYCATCH_ERROR(err, mCmCM->setIntAttribute(CMManagerShim::WlanWepKeyIndex, wepKeyInUse));
-    if (err != KErrNone) {
-        OstTrace1( TRACE_ERROR, CPWEPUI_WEPKEYINUSECHANGED, "Error wepKeyInUse returned %d", err );
-    }
-    tryUpdate();
+    OstTrace0( TRACE_FLOW, CPWEPUI_ADDCONNECTIONS, "CpWepUi::addConnections - entry" );
     
-    //Store the wep key in use
-    mNewKeySelected = wepKeyInUse;
-    OstTraceFunctionExit1(CPWEPUI_WEPKEYINUSECHANGED_EXIT,this);
+    dataHelper->addConnection(mWepKeyText[KFirstKey],
+        SIGNAL( editingFinished ()), this, SLOT(wepKeyOneChanged() ));
+    
+    dataHelper->addConnection(mWepKeyText[KSecondKey],
+        SIGNAL( editingFinished ()), this, SLOT(wepKeyTwoChanged() ));
+    
+    dataHelper->addConnection(mWepKeyText[KThirdKey],
+        SIGNAL( editingFinished ()), this, SLOT(wepKeyThreeChanged() ));
+    
+    dataHelper->addConnection(mWepKeyText[KFourthKey],
+        SIGNAL( editingFinished ()), this, SLOT(wepKeyFourChanged() ));
+    
+    dataHelper->connectToForm(SIGNAL(itemShown (const QModelIndex &) ), 
+        this, SLOT(setEditorPreferences(const QModelIndex &)));
+    
+    OstTrace0( TRACE_FLOW, DUP1_CPWEPUI_ADDCONNECTIONS, "CpWepUi::addConnections - exit" );   
 }
 
 /*!
- * Slot to handle ,when the  
- *   wep key one string gets changed
- * 
- * 
- */
-void CpWepUi::wepKeyOneChanged()
-{
-    int err;
-    OstTraceFunctionEntry1(CPWEPUI_WEPKEY1STRINGCHANGED_ENTRY,this);
-    QT_TRYCATCH_ERROR(err, wepKeyTextChanged(KFirstKey));
-    if (err != KErrNone) {
-        OstTrace1( TRACE_ERROR,CPWEPUI_WEPKEYONECHANGED, "Error wepKeyOneChanged returned %d", err );
-        }
-    OstTraceFunctionExit1(CPWEPUI_WEPKEY1STRINGCHANGED_EXIT,this);
-}
-
-/*!
- * Slot to handle ,when the  
- *   wep key two string gets changed
- * 
- * 
- */
-void CpWepUi::wepKeyTwoChanged()
-{
-    int err;
-    OstTraceFunctionEntry1(CPWEPUI_WEPKEY2STRINGCHANGED_ENTRY,this);
-    QT_TRYCATCH_ERROR(err, wepKeyTextChanged(KSecondKey));
-    if (err != KErrNone) {
-        OstTrace1( TRACE_ERROR, CPWEPUI_WEPKEYTWOCHANGED, "Error wepKeyTwoChanged returned %d", err );
-    }
-    OstTraceFunctionExit1(CPWEPUI_WEPKEY2STRINGCHANGED_EXIT,this);
-}
-
-/*!
- * Slot to handle ,when the  
- *   wep key three string gets changed
- * 
- * 
- */
-void CpWepUi::wepKeyThreeChanged()
-{
-    int err;
-    OstTraceFunctionEntry1(CPWEPUI_WEPKEY3STRINGCHANGED_ENTRY,this);
-    QT_TRYCATCH_ERROR(err, wepKeyTextChanged(KThirdKey));
-    if (err != KErrNone) {
-        OstTrace1( TRACE_ERROR,CPWEPUI_WEPKEYTHREECHANGED, "Error wepKeyThreeChanged returned %d", err );
-    }
-    OstTraceFunctionExit1(CPWEPUI_WEPKEY3STRINGCHANGED_EXIT,this);
-}
-
-/*!
- * Slot to handle ,when the  
- *   wep key four string gets changed
- * 
- * 
- */
-void CpWepUi::wepKeyFourChanged()
-{
-    int err;
-    OstTraceFunctionEntry1(CPWEPUI_WEPKEY4STRINGCHANGED_ENTRY,this);
-    QT_TRYCATCH_ERROR(err, wepKeyTextChanged(KFourthKey));
-    if (err != KErrNone) {
-        OstTrace1( TRACE_ERROR, CPWEPUI_WEPKEYFOURCHANGED, "Error wepKeyFourChanged returned %d", err );
-    }OstTraceFunctionExit1(CPWEPUI_WEPKEY4STRINGCHANGED_EXIT,this);
-}
-
-/*!
- * Slot to handle change in either of the 4 WEP key strings
- * 
- * \param index of the WEP key that changed
+ General method for handling WEP key string change
+  
+ \param index of the WEP key that changed
  */
 void CpWepUi::wepKeyTextChanged(int index)
 {
-    OstTraceFunctionEntry1(CPWEPUI_WEPKEYTEXTCHANGED_ENTRY,this);
-
+    OstTrace1( TRACE_FLOW, DUP1_CPWEPUI_WEPKEYTEXTCHANGED, "CpWepUi::wepKeyTextChanged - entry;index=%d", index );
+    
     QVariant value = mWepKeyText[index]->contentWidgetData("text");
     QString key = value.toString();
 
@@ -421,7 +275,6 @@ void CpWepUi::wepKeyTextChanged(int index)
 
     // allow storing an empty key to enable clearing WEP keys
     if (keystatus == WepKeyValidator::KeyStatusOk || key.length() == 0) {
-
         //If key is valid set the format of the key
         setKeyFormat(key, index);
 
@@ -438,23 +291,396 @@ void CpWepUi::wepKeyTextChanged(int index)
          * Commit All 4 WEP keys , anyways
          */
         commitWEPkeys(index);
-    }
-    else {
-        OstTrace0( TRACE_ERROR, CPWEPUI_WEPKEYTEXTCHANGED_ERROR, "CpWepUi::wepKeyTextChanged Invalid WEP Key Input" );        
+    } else {
+        OstTrace0( TRACE_ERROR, CPWEPUI_WEPKEYTEXTCHANGED, "CpWepUi::wepKeyTextChanged - [ERROR]: invalid WEP key input" );
+        
         showMessageBox(HbMessageBox::MessageTypeWarning, hbTrId(
                 "txt_occ_info_invalid_input"));
     }
-    OstTraceFunctionExit1(CPWEPUI_WEPKEYTEXTCHANGED_EXIT,this);
+    
+    OstTrace0( TRACE_FLOW, DUP2_CPWEPUI_WEPKEYTEXTCHANGED, "CpWepUi::wepKeyTextChanged - exit" ); 
 }
 
 /*!
- * Slot that configures the editor settings for all WEP key fields.
- * This slot is invoked whenever a new item(s) are shown in the current view 
- * 
- * \param modelIndex Index of the current item in the  model
+ Store the WEP key in Comms
+ 
+ \param enumValue the right field represented by the enum value
+ \param key the WEP key String to store
+ */
+void CpWepUi::storeWEPKey(CMManagerShim::ConnectionMethodAttribute enumValue,
+        QString& key)
+{
+    OstTrace1( TRACE_FLOW, CPWEPUI_STOREWEPKEY, "CpWepUi::storeWEPKey - entry;enumValue=%d", enumValue );
+    
+    mCmCM->setString8Attribute(enumValue, key);
+    tryUpdate();
+    
+    OstTrace0( TRACE_FLOW, DUP1_CPWEPUI_STOREWEPKEY, "CpWepUi::storeWEPKey - exit" );
+}
+
+/*!
+ Set the WEP key format
+ 
+ \param key string to identify format
+ \param index of the WEP key
+ */
+void CpWepUi::setKeyFormat(QString& key, int index)
+{
+    OstTrace1( TRACE_FLOW, CPWEPUI_SETKEYFORMAT, "CpWepUi::setKeyFormat - entry;index=%d", index );
+    
+    if (key.length() == WepKeyValidator::WepHex64BitMaxLength ||
+        key.length() == WepKeyValidator::WepHex128BitMaxLength) {
+        OstTrace0( TRACE_FLOW, DUP2_CPWEPUI_SETKEYFORMAT, "CpWepUi::setKeyFormat - format HEX" );
+        mkeyFormat[index] = EFormatHex;
+    } else if (key.length() == WepKeyValidator::WepAscii64BitMaxLength ||
+               key.length() == WepKeyValidator::WepAscii128BitMaxLength) {
+        OstTrace0( TRACE_FLOW, DUP3_CPWEPUI_SETKEYFORMAT, "CpWepUi::setKeyFormat - format ASCII" );
+        mkeyFormat[index] = EFormatAscii;
+    }
+    
+    OstTrace0( TRACE_FLOW, DUP1_CPWEPUI_SETKEYFORMAT, "CpWepUi::setKeyFormat - exit" );
+}
+
+/*!Get the right field in DB
+ 
+ \param index of the WEP key
+ */
+CMManagerShim::ConnectionMethodAttribute CpWepUi::getWEPKeyEnum(int index)
+{
+    OstTrace1( TRACE_FLOW, CPWEPUI_GETWEPKEYENUM, "CpWepUi::getWEPKeyEnum - entry;index=%d", index );
+    
+    CMManagerShim::ConnectionMethodAttribute keyenum(
+            CMManagerShim::WlanWepKey1InHex);
+
+    switch (index) {
+        case KFirstKey:
+        {
+            if (mkeyFormat[index] == EFormatHex) {
+                keyenum = CMManagerShim::WlanWepKey1InHex;
+            } else {
+                keyenum = CMManagerShim::WlanWepKey1InAscii;
+            }
+        }
+            break;
+
+        case KSecondKey:
+        {
+            if (mkeyFormat[index] == EFormatHex) {
+                keyenum = CMManagerShim::WlanWepKey2InHex;
+            } else {
+                keyenum = CMManagerShim::WlanWepKey2InAscii;
+            }
+        }
+            break;
+
+        case KThirdKey:
+        {
+            if (mkeyFormat[index] == EFormatHex) {
+                keyenum = CMManagerShim::WlanWepKey3InHex;
+            } else {
+                keyenum = CMManagerShim::WlanWepKey3InAscii;
+            }
+        }
+            break;
+
+        case KFourthKey:
+        {
+            if (mkeyFormat[index] == EFormatHex) {
+                keyenum = CMManagerShim::WlanWepKey4InHex;
+            } else {
+                keyenum = CMManagerShim::WlanWepKey4InAscii;
+            }
+        }
+            break;
+
+        default:
+            break;
+    }
+    
+    OstTrace1( TRACE_FLOW, DUP1_CPWEPUI_GETWEPKEYENUM, "CpWepUi::getWEPKeyEnum - exit;keyenum=%d", keyenum );
+    
+    return keyenum;
+}
+
+/*!
+ Read all security settings from the Comms 
+ */
+void CpWepUi::loadFieldsFromDataBase()
+{
+    OstTrace0( TRACE_FLOW, CPWEPUI_LOADFIELDSFROMDATABASE, "CpWepUi::loadFieldsFromDataBase - entry" );
+    
+    //Wep Key in Use 
+    mNewKeySelected = mCmCM->getIntAttribute(CMManagerShim::WlanWepKeyIndex);
+
+    //All data fetched in Hex Format
+    mKeyData.insert(KFirstKey, mCmCM->getString8Attribute(
+        CMManagerShim::WlanWepKey1InHex));
+
+    OstTrace0( TRACE_FLOW, DUP2_CPWEPUI_LOADFIELDSFROMDATABASE, "CpWepUi::loadFieldsFromDataBase - 1st key fetched" );
+     
+    mKeyData.insert(KSecondKey,mCmCM->getString8Attribute(
+        CMManagerShim::WlanWepKey2InHex));
+
+    OstTrace0( TRACE_FLOW, DUP3_CPWEPUI_LOADFIELDSFROMDATABASE, "CpWepUi::loadFieldsFromDataBase - 2nd key fetched" );
+    
+    mKeyData.insert(KThirdKey, mCmCM->getString8Attribute(
+        CMManagerShim::WlanWepKey3InHex));
+
+    OstTrace0( TRACE_FLOW, DUP4_CPWEPUI_LOADFIELDSFROMDATABASE, "CpWepUi::loadFieldsFromDataBase - 3rd key fetched" );
+    
+    mKeyData.insert(KFourthKey, mCmCM->getString8Attribute(
+        CMManagerShim::WlanWepKey4InHex));
+
+    OstTrace0( TRACE_FLOW, DUP5_CPWEPUI_LOADFIELDSFROMDATABASE, "CpWepUi::loadFieldsFromDataBase - 4th key fetched" );
+    
+    /*Set all key formats to Hex by default; because all keys are read in Hex from DB*/
+    for (int count = 0; count < KMaxNumberofKeys; count++) {
+        mkeyFormat[count] = EFormatHex;
+    }
+
+    OstTrace0( TRACE_FLOW, DUP1_CPWEPUI_LOADFIELDSFROMDATABASE, "CpWepUi::loadFieldsFromDataBase - exit" );
+}
+
+/*!
+ Tries to update connection method changes to CommsDat.
+ Returns "true" if success, "false" if some error happened. 
+ */
+bool CpWepUi::tryUpdate()
+{
+    OstTrace0( TRACE_FLOW, CPWEPUI_TRYUPDATE, "CpWepUi::tryUpdate - entry" );
+    
+    bool ret(true);
+    // Try update
+    try {
+        mCmCM->update();
+    }
+    catch (const std::exception&) {
+        OstTrace0( TRACE_ERROR, DUP2_CPWEPUI_TRYUPDATE, "CpWepUi::tryUpdate - [ERROR]: updating settings into database failed" );
+        
+        // Handle error
+        handleUpdateError();
+        ret = false;
+    }
+
+    OstTrace1( TRACE_FLOW, DUP1_CPWEPUI_TRYUPDATE, "CpWepUi::tryUpdate - exit;ret=%d", ret );
+    
+    return ret;
+}
+
+/*!
+ Handles failed CommsDat update.
+ */
+void CpWepUi::handleUpdateError()
+{
+    OstTrace0( TRACE_FLOW, DUP1_CPWEPUI_HANDLEUPDATEERROR, "CpWepUi::handleUpdateError - entry" );
+    
+    // Show error note to user
+    showMessageBox(HbMessageBox::MessageTypeWarning, hbTrId(
+        "txt_occ_info_unable_to_save_setting"));
+    
+    // Reload settings from CommsDat and update UI
+    try {
+        mCmCM->refresh();
+    }
+    catch (const std::exception&) {
+        // Ignore error from refresh. Most likely this will not happen, but
+        // if it does, there isn't very much we can do.
+        OstTrace0( TRACE_ERROR, CPWEPUI_HANDLEUPDATEERROR, "CpWepUi::handleUpdateError - [ERROR]: refreshing settings from database failed" );
+    }
+    
+    updateWepSettings();
+
+    OstTrace0( TRACE_FLOW, DUP2_CPWEPUI_HANDLEUPDATEERROR, "CpWepUi::handleUpdateError - exit" );
+}
+
+/*!
+ Shows message box with "OK" button using given text.
+ */
+void CpWepUi::showMessageBox(HbMessageBox::MessageBoxType type,
+        const QString &text)
+{
+    OstTrace0( TRACE_FLOW, CPWEPUI_SHOWMESSAGEBOX, "CpWepUi::showMessageBox - entry" );
+    
+    // Create a message box
+    mMessageBox = QSharedPointer<HbMessageBox> (new HbMessageBox(type));
+    mMessageBox->setObjectName("CpWepUiMessageBox");
+    mMessageBox->setText(text);
+    mMessageBox->open();
+
+    OstTrace0( TRACE_FLOW, DUP1_CPWEPUI_SHOWMESSAGEBOX, "CpWepUi::showMessageBox - exit" );
+}
+
+/*!
+ * Reset the Key Items on the Ui, by reading the previously set value from Comms
+ */
+void CpWepUi::updateWepSettings()
+{
+    OstTrace0( TRACE_FLOW, CPWEPUI_UPDATEWEPSETTINGS, "CpWepUi::updateWepSettings - entry" );
+    
+    //Read values from Comms and update the Ui items; 
+    loadFieldsFromDataBase();
+
+    mWepKeyText[KFirstKey]->setContentWidgetData("text", mKeyData[KFirstKey]);
+
+    mWepKeyText[KSecondKey]->setContentWidgetData("text",
+        mKeyData[KSecondKey]);
+
+    mWepKeyText[KThirdKey]->setContentWidgetData("text", mKeyData[KThirdKey]);
+
+    mWepKeyText[KFourthKey]->setContentWidgetData("text",
+        mKeyData[KFourthKey]);
+
+    OstTrace0( TRACE_FLOW, DUP1_CPWEPUI_UPDATEWEPSETTINGS, "CpWepUi::updateWepSettings - exit" );
+}
+
+/*!
+ Commit all WEP keys , except the one which was just set
+  
+ \param index ; the index of the key that was just set
+ */
+void CpWepUi::commitWEPkeys(int index)
+{
+    OstTrace0( TRACE_FLOW, CPWEPUI_COMMITWEPKEYS, "CpWepUi::commitWEPkeys - entry" );
+    
+    //We have all data in Hex, so setting all WEP keys in hex
+
+    if (index != KFirstKey) {
+        //Get the right field to store
+        CMManagerShim::ConnectionMethodAttribute keyEnumOne = getWEPKeyEnum(
+            KFirstKey);
+
+        //Store the WEP key
+        storeWEPKey(keyEnumOne, mKeyData[KFirstKey]);
+    }
+
+    if (index != KSecondKey) {
+        //Get the right field to store
+        CMManagerShim::ConnectionMethodAttribute keyEnumTwo = getWEPKeyEnum(
+            KSecondKey);
+
+        //Store the WEP key
+        storeWEPKey(keyEnumTwo, mKeyData[KSecondKey]);
+    }
+
+    if (index != KThirdKey) {
+        //Get the right field to store
+        CMManagerShim::ConnectionMethodAttribute keyEnumThree =
+            getWEPKeyEnum(KThirdKey);
+
+        //Store the WEP key
+        storeWEPKey(keyEnumThree, mKeyData[KThirdKey]);
+    }
+
+    if (index != KFourthKey) {
+        //Get the right field to store
+        CMManagerShim::ConnectionMethodAttribute keyEnumFour = getWEPKeyEnum(
+            KFourthKey);
+
+        //Store the WEP key
+        storeWEPKey(keyEnumFour, mKeyData[KFourthKey]);
+    }
+
+    OstTrace0( TRACE_FLOW, DUP1_CPWEPUI_COMMITWEPKEYS, "CpWepUi::commitWEPkeys - exit" );
+}
+
+/*!
+ Slot to handle , if a different wep key (index) 
+ is made active
+ 
+ \param wepKeyInUse index of the chosen wep key
+ */
+void CpWepUi::wepKeyInUseChanged(int wepKeyInUse)
+{
+    OstTrace1( TRACE_BORDER, CPWEPUI_WEPKEYINUSECHANGED, "CpWepUi::wepKeyInUseChanged - entry [SLOT];wepKeyInUse=%d", wepKeyInUse );
+    
+    int err;
+    //Update CommsDat
+    QT_TRYCATCH_ERROR(err, mCmCM->setIntAttribute(CMManagerShim::WlanWepKeyIndex, wepKeyInUse));
+    if (err != KErrNone) {
+        OstTrace1( TRACE_ERROR, DUP1_CPWEPUI_WEPKEYINUSECHANGED, "CpWepUi::wepKeyInUseChanged - [ERROR]: writing settings to database failed;err=%d", err );
+    }
+    tryUpdate();
+    
+    //Store the wep key in use
+    mNewKeySelected = wepKeyInUse;
+    
+    OstTrace0( TRACE_BORDER, DUP2_CPWEPUI_WEPKEYINUSECHANGED, "CpWepUi::wepKeyInUseChanged - exit [SLOT]" );
+}
+
+/*!
+ Slot for handling WEP key one string changes 
+ */
+void CpWepUi::wepKeyOneChanged()
+{
+    OstTrace0( TRACE_BORDER, CPWEPUI_WEPKEYONECHANGED, "CpWepUi::wepKeyOneChanged - entry [SLOT]" );
+    
+    int err;
+    QT_TRYCATCH_ERROR(err, wepKeyTextChanged(KFirstKey));
+    if (err != KErrNone) {
+        OstTrace1( TRACE_ERROR, DUP1_CPWEPUI_WEPKEYONECHANGED, "CpWepUi::wepKeyOneChanged - [ERROR]: wepKeyTextChanged failed;err=%d", err );        
+    }
+    
+    OstTrace0( TRACE_BORDER, DUP2_CPWEPUI_WEPKEYONECHANGED, "CpWepUi::wepKeyOneChanged - exit [SLOT]" );
+}
+
+/*!
+ Slot for handling WEP key two string changes 
+ */
+void CpWepUi::wepKeyTwoChanged()
+{
+    OstTrace0( TRACE_BORDER, CPWEPUI_WEPKEYTWOCHANGED, "CpWepUi::wepKeyTwoChanged - entry [SLOT]" );
+    
+    int err;
+    QT_TRYCATCH_ERROR(err, wepKeyTextChanged(KSecondKey));
+    if (err != KErrNone) {
+        OstTrace1( TRACE_ERROR, DUP1_CPWEPUI_WEPKEYTWOCHANGED, "CpWepUi::wepKeyTwoChanged - [ERROR]: wepKeyTextChanged failed;err=%d", err );
+    }
+    
+    OstTrace0( TRACE_BORDER, DUP2_CPWEPUI_WEPKEYTWOCHANGED, "CpWepUi::wepKeyTwoChanged - exit [SLOT]" );
+}
+
+/*!
+ Slot for handling WEP key three string changes 
+ */
+void CpWepUi::wepKeyThreeChanged()
+{
+    OstTrace0( TRACE_BORDER, CPWEPUI_WEPKEYTHREECHANGED, "CpWepUi::wepKeyThreeChanged - entry [SLOT]" );
+    
+    int err;
+    QT_TRYCATCH_ERROR(err, wepKeyTextChanged(KThirdKey));
+    if (err != KErrNone) {
+        OstTrace1( TRACE_ERROR, DUP1_CPWEPUI_WEPKEYTHREECHANGED, "CpWepUi::wepKeyThreeChanged - [ERROR]: wepKeyTextChanged failed;err=%d", err );
+    }
+    
+    OstTrace0( TRACE_BORDER, DUP2_CPWEPUI_WEPKEYTHREECHANGED, "CpWepUi::wepKeyThreeChanged - exit [SLOT]" );
+}
+
+/*!
+ Slot for handling WEP key four string changes 
+ */
+void CpWepUi::wepKeyFourChanged()
+{
+    OstTrace0( TRACE_BORDER, DUP1_CPWEPUI_WEPKEYFOURCHANGED, "CpWepUi::wepKeyFourChanged - entry [SLOT]" );
+    
+    int err;
+    QT_TRYCATCH_ERROR(err, wepKeyTextChanged(KFourthKey));
+    if (err != KErrNone) {
+        OstTrace1( TRACE_ERROR, CPWEPUI_WEPKEYFOURCHANGED, "CpWepUi::wepKeyFourChanged - [ERROR]: wepKeyTextChanged failed;err=%d", err );    
+    }
+    
+    OstTrace0( TRACE_BORDER, DUP2_CPWEPUI_WEPKEYFOURCHANGED, "CpWepUi::wepKeyFourChanged - exit [SLOT]" );
+}
+
+
+/*!
+ Slot that configures the editor settings for all WEP key fields.
+ This method is invoken whenever a new item(s) are shown in the current view 
+  
+ \param modelIndex Index of the current item in the  model
  */
 void CpWepUi::setEditorPreferences(const QModelIndex &modelIndex)
 {
+    OstTrace0( TRACE_BORDER, CPWEPUI_SETEDITORPREFERENCES, "CpWepUi::setEditorPreferences - entry [SLOT]" );
     
     HbDataFormModelItem *item = mItemDataHelper->modelItemFromModelIndex(modelIndex);
 
@@ -466,267 +692,8 @@ void CpWepUi::setEditorPreferences(const QModelIndex &modelIndex)
         editInterface.setInputConstraints(HbEditorConstraintLatinAlphabetOnly);
         edit->setInputMethodHints(Qt::ImhNoPredictiveText);    
         edit->setMaxLength(KMaxKeyLength);
-        }
+    }
+    
+    OstTrace0( TRACE_BORDER, DUP1_CPWEPUI_SETEDITORPREFERENCES, "CpWepUi::setEditorPreferences - exit [SLOT]" );
 }
 
-
-/*!
- * Store the WEP key in Comms
- * \enumValue the right field represented by the enum value
- * \key the WEP key String to store
- */
-void CpWepUi::storeWEPKey(CMManagerShim::ConnectionMethodAttribute enumValue,
-        QString& key)
-{
-    mCmCM->setString8Attribute(enumValue, key);
-    tryUpdate();
-}
-
-/*!
- * Set the WEP key format
- * \key string to identify format
- * \index of the WEP key
- */
-void CpWepUi::setKeyFormat(QString& key, int index)
-{
-    if (key.length() == WepKeyValidator::WepHex64BitMaxLength || key.length()
-            == WepKeyValidator::WepHex128BitMaxLength) {
-        mkeyFormat[index] = EFormatHex;
-    }
-
-    else if (key.length() == WepKeyValidator::WepAscii64BitMaxLength
-            || key.length() == WepKeyValidator::WepAscii128BitMaxLength) {
-        mkeyFormat[index] = EFormatAscii;
-    }
-}
-
-/*!Get the right field in DB
- * \index of the WEP key
- */
-CMManagerShim::ConnectionMethodAttribute CpWepUi::getWEPKeyEnum(int index)
-{
-    CMManagerShim::ConnectionMethodAttribute keyenum(
-            CMManagerShim::WlanWepKey1InHex);
-    switch (index)
-        {
-        case KFirstKey:
-            {
-                if (mkeyFormat[index] == EFormatHex) {
-                    keyenum = CMManagerShim::WlanWepKey1InHex;
-                }
-                else {
-                    keyenum = CMManagerShim::WlanWepKey1InAscii;
-                }
-            }
-            break;
-
-        case KSecondKey:
-            {
-                if (mkeyFormat[index] == EFormatHex) {
-                    keyenum = CMManagerShim::WlanWepKey2InHex;
-                }
-                else {
-                    keyenum = CMManagerShim::WlanWepKey2InAscii;
-                }
-            }
-            break;
-
-        case KThirdKey:
-            {
-                if (mkeyFormat[index] == EFormatHex) {
-                    keyenum = CMManagerShim::WlanWepKey3InHex;
-                }
-                else {
-                    keyenum = CMManagerShim::WlanWepKey3InAscii;
-                }
-            }
-            break;
-
-        case KFourthKey:
-            {
-                if (mkeyFormat[index] == EFormatHex) {
-                    keyenum = CMManagerShim::WlanWepKey4InHex;
-                }
-                else {
-                    keyenum = CMManagerShim::WlanWepKey4InAscii;
-                }
-            }
-            break;
-
-        default:
-            break;
-        }
-    return keyenum;
-}
-/*
- * Read all security settings from the Comms 
- */
-void CpWepUi::loadFieldsFromDataBase()
-{
-    OstTraceFunctionEntry1(CPWEPUI_LOADFIELDSFROMDATABASE_ENTRY,this);
-
-    //Wep Key in Use 
-    mNewKeySelected = mCmCM->getIntAttribute(CMManagerShim::WlanWepKeyIndex);
-
-    //All data fetched in Hex Format
-    mKeyData.insert(KFirstKey, mCmCM->getString8Attribute(
-            CMManagerShim::WlanWepKey1InHex));
-
-    mKeyData.insert(KSecondKey,mCmCM->getString8Attribute(
-            CMManagerShim::WlanWepKey2InHex));
-
-    mKeyData.insert(KThirdKey, mCmCM->getString8Attribute(
-            CMManagerShim::WlanWepKey3InHex));
-
-    mKeyData.insert(KFourthKey, mCmCM->getString8Attribute(
-            CMManagerShim::WlanWepKey4InHex));
-
-    /*Set all key formats to Hex by default; because all keys are read in Hex from DB*/
-    for (int count = 0; count < KMaxNumberofKeys; count++)
-        {
-        mkeyFormat[count] = EFormatHex;
-        }
-
-    OstTraceFunctionExit1(CPWEPUI_LOADFIELDSFROMDATABASE_EXIT,this);
-}
-
-/*!
- Tries to update connection method changes to CommsDat.
- Returns "true" if success, "false" if some error happened. 
- */
-bool CpWepUi::tryUpdate()
-{
-    OstTraceFunctionEntry1(CPWEPUI_TRYUPDATE_ENTRY,this);
-
-    bool ret(true);
-    // Try update
-    try {
-        mCmCM->update();
-    }
-    catch (const std::exception&) {
-        // Handle error
-        handleUpdateError();
-        ret = false;
-    }
-
-    OstTraceFunctionExit1(DUP1_CPWEPUI_TRYUPDATE_EXIT,this);
-    return ret;
-}
-
-/*!
- Handles failed CommsDat update.
- */
-void CpWepUi::handleUpdateError()
-{
-    OstTraceFunctionEntry1(CPWEPUI_HANDLEUPDATEERROR_ENTRY,this);
-
-    // Show error note to user
-    showMessageBox(HbMessageBox::MessageTypeWarning, hbTrId(
-            "txt_occ_info_unable_to_save_setting"));
-    // Reload settings from CommsDat and update UI
-    try {
-        mCmCM->refresh();
-    }
-    catch (const std::exception&) {
-        // Ignore error from refresh. Most likely this will not happen, but
-        // if it does, there isn't very much we can do.
-        OstTrace0(
-                TRACE_ERROR,
-                CPWEPPLUGIN_HANDLEUPDATEERROR,
-                "Refresh failed");
-    };
-    updateWepSettings();
-
-    OstTraceFunctionExit1(CPWEPUI_HANDLEUPDATEERROR_EXIT,this);
-}
-
-/*!
- Shows message box with "OK" button using given text.
- */
-void CpWepUi::showMessageBox(HbMessageBox::MessageBoxType type,
-        const QString &text)
-{
-    OstTraceFunctionEntry1(CPWEPUI_SHOWMESSAGEBOX_ENTRY,this);
-
-    // Create a message box
-    mMessageBox = QSharedPointer<HbMessageBox> (new HbMessageBox(type));
-    mMessageBox->setObjectName("CpWepUiMessageBox");
-    mMessageBox->setText(text);
-    mMessageBox->open();
-
-    OstTraceFunctionExit1(CPWEPUI_SHOWMESSAGEBOX_EXIT,this);
-}
-
-/*!
- * Reset the Key Items on the Ui, by reading the previously set value from Comms
- */
-void CpWepUi::updateWepSettings()
-    {
-    OstTraceFunctionEntry1(CPWEPUI_UPDATEWEPSETTINGS_ENTRY,this);
-    //Read values from Comms and update the Ui items; 
-    loadFieldsFromDataBase();
-
-    mWepKeyText[KFirstKey]->setContentWidgetData("text", mKeyData[KFirstKey]);
-
-    mWepKeyText[KSecondKey]->setContentWidgetData("text",
-            mKeyData[KSecondKey]);
-
-    mWepKeyText[KThirdKey]->setContentWidgetData("text", mKeyData[KThirdKey]);
-
-    mWepKeyText[KFourthKey]->setContentWidgetData("text",
-            mKeyData[KFourthKey]);
-
-    OstTraceFunctionExit1(CPWEPUI_UPDATEWEPSETTINGS_EXIT,this);
-    }
-
-/*!
- * Commit all WEP keys , except the one which was just set
- * 
- * \param index ; the index of the key that was just set
- */
-void CpWepUi::commitWEPkeys(int index)
-    {
-    OstTraceFunctionEntry1(CPWEPUI_COMMITWEPKEYS_ENTRY,this);
-    //We have all data in Hex, so setting all WEP keys in hex
-
-    if (index != KFirstKey) {
-        //Get the right field to store
-        CMManagerShim::ConnectionMethodAttribute keyEnumOne = getWEPKeyEnum(
-                KFirstKey);
-
-        //Store the WEP key
-        storeWEPKey(keyEnumOne, mKeyData[KFirstKey]);
-    }
-
-    if (index != KSecondKey) {
-        //Get the right field to store
-        CMManagerShim::ConnectionMethodAttribute keyEnumTwo = getWEPKeyEnum(
-                KSecondKey);
-
-        //Store the WEP key
-        storeWEPKey(keyEnumTwo, mKeyData[KSecondKey]);
-    }
-
-    if (index != KThirdKey) {
-        //Get the right field to store
-        CMManagerShim::ConnectionMethodAttribute keyEnumThree =
-                getWEPKeyEnum(KThirdKey);
-
-        //Store the WEP key
-        storeWEPKey(keyEnumThree, mKeyData[KThirdKey]);
-    }
-
-    if (index != KFourthKey) {
-        //Get the right field to store
-        CMManagerShim::ConnectionMethodAttribute keyEnumFour = getWEPKeyEnum(
-                KFourthKey);
-
-        //Store the WEP key
-        storeWEPKey(keyEnumFour, mKeyData[KFourthKey]);
-    }
-
-    OstTraceFunctionExit1(CPWEPUI_COMMITWEPKEYS_EXIT,this);
-}
-
-Q_EXPORT_PLUGIN2(CpWepUi, CpWepUi)
-;

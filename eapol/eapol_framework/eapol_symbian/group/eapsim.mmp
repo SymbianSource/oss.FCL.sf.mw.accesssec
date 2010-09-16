@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18.1.14 %
+* %version: 18.1.19 %
 */
 
 #include <platform_paths.hrh>
@@ -30,6 +30,22 @@ TARGET        eapsim.dll
 UID		0x10009d8d 0x101f8e49
 
 deffile eapsim.def
+
+MACRO EAP_NO_EXPORTS
+// Start: added by script change_mmp_export_macros.sh.
+MACRO EAP_NO_EXPORT_EAP_SIM_TRIPLETS_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_GSMSIM_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_GSMSIM_HEADER_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_GSMSIM_INITIALIZED_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_GSMSIM_MAC_ATTRIBUTES_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_GSMSIM_PAYLOADS_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_GSMSIM_STATE_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_GSMSIM_STATE_NOTIFICATION_H
+MACRO EAP_NO_EXPORT_EAP_AM_TYPE_GSMSIM_SYMBIAN_H
+MACRO EAP_NO_EXPORT_EAPSIM_H
+// End: added by script change_mmp_export_macros.sh.
+
+MACRO EAP_NO_EXPORT_EAPSIMINTERFACE_H
 
 SOURCEPATH    ../am/type/gsmsim/symbian/plugin/src
 
@@ -69,6 +85,7 @@ USERINCLUDE   ../am/include
 USERINCLUDE   ../../eapol_common/am/include
 USERINCLUDE   ../../eapol_common/type
 USERINCLUDE   ../am/type/symbian/plugin/include
+USERINCLUDE  	../eap_server/include
 
 MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
 
@@ -85,12 +102,11 @@ DOCUMENT		101f8e49.loc
 #if !defined(WINS) && defined(USE_EAP_GSMSIM_INTERFACE)
 	SOURCEPATH	../am/type/gsmsim/symbian
 	SOURCE 		EapSimInterface.cpp
-	LIBRARY		CustomAPI.lib etelmm.lib etel.lib	// For ETel connection	
+	LIBRARY		customapi.lib etelmm.lib etel.lib	// For ETel connection	
 #endif // End of #if !defined(WINS) && defined(USE_EAP_GSMSIM_INTERFACE)
 
 LIBRARY     eikdlg.lib
 LIBRARY     eikcore.lib
-LIBRARY     hlplch.lib
 LIBRARY		featmgr.lib
 
 

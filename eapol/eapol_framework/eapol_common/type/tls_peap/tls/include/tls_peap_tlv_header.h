@@ -24,6 +24,29 @@
 
 #include "eap_tools.h"
 #include "eap_general_header_base.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_TLS_PEAP_TLV_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_TLS_PEAP_TLV_HEADER_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_HEADER_H 
+	#define EAP_C_FUNC_VISIBILITY_TLS_PEAP_TLV_HEADER_H 
+	#define EAP_FUNC_EXPORT_TLS_PEAP_TLV_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_TLS_PEAP_TLV_HEADER_H 
+#elif defined(EAP_EXPORT_TLS_PEAP_TLV_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_TLS_PEAP_TLV_HEADER_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_PEAP_TLV_HEADER_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_TLS_PEAP_TLV_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_TLS_PEAP_TLV_HEADER_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_TLS_PEAP_TLV_HEADER_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_PEAP_TLV_HEADER_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_PEAP_TLV_HEADER_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_TLS_PEAP_TLV_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_TLS_PEAP_TLV_HEADER_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 /** @file */
 
@@ -96,7 +119,7 @@ enum tls_peap_tlv_status_e
  * See <a href="../../type/tls_peap/documentation/draft-puthenkulam-eap-binding-03.txt">draft-puthenkulam-eap-binding-03.txt</a>
  * and <a href="../../type/tls_peap/documentation/draft-josefsson-pppext-eap-tls-eap-07.txt">draft-josefsson-pppext-eap-tls-eap-07.txt</a>.
  */
-class EAP_EXPORT tls_peap_tlv_header_c
+class EAP_CLASS_VISIBILITY_TLS_PEAP_TLV_HEADER_H tls_peap_tlv_header_c
 : public eap_general_header_base_c
 {
 private:

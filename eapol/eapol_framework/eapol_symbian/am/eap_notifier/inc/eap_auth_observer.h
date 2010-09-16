@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11 %
+* %version: 12 %
 */
 
 #ifndef __EAPAUTHOBSERVER_H__
@@ -105,6 +105,14 @@ NONSHARABLE_CLASS ( CEapAuthObserver ) : public CBase, public MHbDeviceDialogObs
         * return -
         */
         void OldPwdQueryDataReceived( CHbSymbianVariantMap& aData );
+
+        /**
+        * Handles the Pac Store password query user input received from the dialog
+        *
+        * @param    aData CHbSymbianVariantMap&
+        * return -
+        */            
+        void PacStorePwdQueryDataReceived( CHbSymbianVariantMap& aData );
         
     private: // Data
         /** 

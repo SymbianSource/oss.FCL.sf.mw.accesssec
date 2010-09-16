@@ -29,6 +29,27 @@
 #include "eap_variable_data.h"
 #include "eap_status.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_TOOLS_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TOOLS_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_TOOLS_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H 
+	#define EAP_FUNC_EXPORT_EAP_TOOLS_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TOOLS_H 
+#elif defined(EAP_EXPORT_EAP_TOOLS_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TOOLS_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TOOLS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_TOOLS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_TOOLS_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_TOOLS_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TOOLS_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_TOOLS_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TOOLS_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 #if defined(USE_EAP_STACK_TRACE) || defined(USE_EAP_ASSERT_STACK_TRACE)
 	#include "eap_am_stack_trace.h"
@@ -40,17 +61,17 @@
 /**
  * This function changes 16-bit unsigned integer from host order to network order.
  */
-EAP_C_FUNC_IMPORT u16_t eap_htons(const u16_t value);
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H u16_t eap_htons(const u16_t value);
 
 /**
  * This function changes 32-bit unsigned integer from host order to network order.
  */
-EAP_C_FUNC_IMPORT u32_t eap_htonl(const u32_t value);
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H u32_t eap_htonl(const u32_t value);
 
 /**
  * This function changes 64-bit unsigned integer from host order to network order.
  */
-EAP_C_FUNC_IMPORT u64_t eap_htonll(const u64_t value);
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H u64_t eap_htonll(const u64_t value);
 
 
 /**
@@ -73,24 +94,24 @@ EAP_C_FUNC_IMPORT u64_t eap_htonll(const u64_t value);
  * This function changes 16-bit unsigned integer from host order to little endian order.
  * This is used in some crypto algorithms.
  */
-EAP_C_FUNC_IMPORT u16_t eap_host_to_little_endian_short(const u16_t value);
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H u16_t eap_host_to_little_endian_short(const u16_t value);
 
 /**
  * This function changes 32-bit unsigned integer from host order to little endian order.
  * This is used in some crypto algorithms.
  */
-EAP_C_FUNC_IMPORT u32_t eap_host_to_little_endian_long(const u32_t value);
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H u32_t eap_host_to_little_endian_long(const u32_t value);
 
 /**
  * This function changes 64-bit unsigned integer from host order to little endian order.
  * This is used in some crypto algorithms.
  */
-EAP_C_FUNC_IMPORT u64_t eap_host_to_little_endian_long(const u64_t value);
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H u64_t eap_host_to_little_endian_long(const u64_t value);
 
 /**
  * This function write 16-bit unsigned integer which is in little endian order to memory.
  */
-EAP_C_FUNC_IMPORT eap_status_e eap_write_u16_t_little_endian_order(
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H eap_status_e eap_write_u16_t_little_endian_order(
 	void * const p_data,
 	const u32_t data_length,
 	const u16_t value);
@@ -98,7 +119,7 @@ EAP_C_FUNC_IMPORT eap_status_e eap_write_u16_t_little_endian_order(
 /**
  * This function write 32-bit unsigned integer which is in little endian order to memory.
  */
-EAP_C_FUNC_IMPORT eap_status_e eap_write_u32_t_little_endian_order(
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H eap_status_e eap_write_u32_t_little_endian_order(
 	void * const p_data,
 	const u32_t data_length,
 	const u32_t value);
@@ -106,7 +127,7 @@ EAP_C_FUNC_IMPORT eap_status_e eap_write_u32_t_little_endian_order(
 /**
  * This function write 64-bit unsigned integer which is in little endian order to memory.
  */
-EAP_C_FUNC_IMPORT eap_status_e eap_write_u64_t_little_endian_order(
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H eap_status_e eap_write_u64_t_little_endian_order(
 	void * const p_data,
 	const u32_t data_length,
 	const u64_t value);
@@ -115,7 +136,7 @@ EAP_C_FUNC_IMPORT eap_status_e eap_write_u64_t_little_endian_order(
  * This function reads 16-bit unsigned integer which is in little endian order from memory
  * and returns value in host order.
  */
-EAP_C_FUNC_IMPORT u16_t eap_read_u16_t_little_endian_order(
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H u16_t eap_read_u16_t_little_endian_order(
 	const void * const data,
 	const u32_t data_length);
 
@@ -123,7 +144,7 @@ EAP_C_FUNC_IMPORT u16_t eap_read_u16_t_little_endian_order(
  * This function reads 32-bit unsigned integer which is in little endian order from memory
  * and returns value in host order.
  */
-EAP_C_FUNC_IMPORT u32_t eap_read_u32_t_little_endian_order(
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H u32_t eap_read_u32_t_little_endian_order(
 	const void * const p_data,
 	const u32_t data_length);
 
@@ -131,7 +152,7 @@ EAP_C_FUNC_IMPORT u32_t eap_read_u32_t_little_endian_order(
  * This function reads 64-bit unsigned integer which is in little endian order from memory
  * and returns value in host order.
  */
-EAP_C_FUNC_IMPORT u64_t eap_read_u64_t_little_endian_order(
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H u64_t eap_read_u64_t_little_endian_order(
 	const void * const p_data,
 	const u32_t data_length);
 
@@ -139,7 +160,7 @@ EAP_C_FUNC_IMPORT u64_t eap_read_u64_t_little_endian_order(
  * This function reads 16-bit unsigned integer which is in network order from memory
  * and returns value in host order.
  */
-EAP_C_FUNC_IMPORT u16_t eap_read_u16_t_network_order(
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H u16_t eap_read_u16_t_network_order(
 	const void * const data,
 	const u32_t data_length);
 
@@ -147,7 +168,7 @@ EAP_C_FUNC_IMPORT u16_t eap_read_u16_t_network_order(
  * This function reads 24-bit unsigned integer which is in network order from memory
  * and returns it in 32-bit value in host order.
  */
-EAP_C_FUNC_IMPORT u32_t eap_read_u24_t_network_order(
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H u32_t eap_read_u24_t_network_order(
 	const void * const data,
 	const u32_t data_length);
 
@@ -155,7 +176,7 @@ EAP_C_FUNC_IMPORT u32_t eap_read_u24_t_network_order(
  * This function reads 32-bit unsigned integer which is in network order from memory
  * and returns value in host order.
  */
-EAP_C_FUNC_IMPORT u32_t eap_read_u32_t_network_order(
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H u32_t eap_read_u32_t_network_order(
 	const void * const data,
 	const u32_t data_length);
 
@@ -163,7 +184,7 @@ EAP_C_FUNC_IMPORT u32_t eap_read_u32_t_network_order(
  * This function reads 64-bit unsigned integer which is in network order from memory
  * and returns value in host order.
  */
-EAP_C_FUNC_IMPORT u64_t eap_read_u64_t_network_order(
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H u64_t eap_read_u64_t_network_order(
 	const void * const data,
 	const u32_t data_length);
 
@@ -172,7 +193,7 @@ EAP_C_FUNC_IMPORT u64_t eap_read_u64_t_network_order(
  * This function writes 16-bit unsigned integer to network order to memory
  * and returns status eap_status_ok when successfull.
  */
-EAP_C_FUNC_IMPORT eap_status_e eap_write_u16_t_network_order(
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H eap_status_e eap_write_u16_t_network_order(
 	void * const data,
 	const u32_t data_length,
 	const u16_t value);
@@ -182,7 +203,7 @@ EAP_C_FUNC_IMPORT eap_status_e eap_write_u16_t_network_order(
  * and returns status eap_status_ok when successfull.
  * Note only 24-bit least significant bits are written from 32-bit value.
  */
-EAP_C_FUNC_IMPORT eap_status_e eap_write_u24_t_network_order(
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H eap_status_e eap_write_u24_t_network_order(
 	void * const data,
 	const u32_t data_length,
 	const u32_t value);
@@ -191,7 +212,7 @@ EAP_C_FUNC_IMPORT eap_status_e eap_write_u24_t_network_order(
  * This function writes 32-bit unsigned integer to network order to memory
  * and returns status eap_status_ok when successfull.
  */
-EAP_C_FUNC_IMPORT eap_status_e eap_write_u32_t_network_order(
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H eap_status_e eap_write_u32_t_network_order(
 	void * const data,
 	const u32_t data_length,
 	const u32_t value);
@@ -200,16 +221,16 @@ EAP_C_FUNC_IMPORT eap_status_e eap_write_u32_t_network_order(
  * This function writes 64-bit unsigned integer to network order to memory
  * and returns status eap_status_ok when successfull.
  */
-EAP_C_FUNC_IMPORT eap_status_e eap_write_u64_t_network_order(
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H eap_status_e eap_write_u64_t_network_order(
 	void * const data,
 	const u32_t data_length,
 	const u64_t value);
 
 
 
-EAP_C_FUNC_IMPORT u64_t eap_shift_left_64_bit(u64_t value, u32_t shift);
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H u64_t eap_shift_left_64_bit(u64_t value, u32_t shift);
 
-EAP_C_FUNC_IMPORT u64_t eap_shift_right_64_bit(u64_t value, u32_t shift);
+EAP_C_FUNC_VISIBILITY_EAP_TOOLS_H u64_t eap_shift_right_64_bit(u64_t value, u32_t shift);
 
 
 inline u64_t eap_read_u64_t_host_order(

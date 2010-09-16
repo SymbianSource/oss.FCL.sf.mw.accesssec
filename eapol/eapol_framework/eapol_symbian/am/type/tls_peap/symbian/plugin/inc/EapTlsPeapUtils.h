@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 37 %
+* %version: 39 %
 */
 
 #ifndef _EAPTLSPEAPUTILS_H_
@@ -206,6 +206,18 @@ public:
 		const TDesC& aDbColumnName,
 		const eap_variable_data_c * const aDbColumnValue);		
 
+#if defined(USE_FAST_EAP_TYPE)
+
+	// CPacStoreDatabase uses this too.
+	static void OpenFastDatabaseL(
+		RDbNamedDatabase& aDatabase,
+		RFs& aFileServerSession,
+		const TIndexType aIndexType,
+		const TInt aIndex,
+		const eap_type_value_e aTunnelingType);
+
+#endif // #if defined(USE_FAST_EAP_TYPE)
+
 private:
 
 	static void OpenTlsDatabaseL(
@@ -232,17 +244,6 @@ private:
 		const eap_type_value_e aTunnelingType);
 
 #endif // #if defined(USE_TTLS_EAP_TYPE)
-
-#if defined(USE_FAST_EAP_TYPE)
-
-	static void OpenFastDatabaseL(
-		RDbNamedDatabase& aDatabase,
-		RFs& aFileServerSession,
-		const TIndexType aIndexType,
-		const TInt aIndex,
-		const eap_type_value_e aTunnelingType);
-
-#endif // #if defined(USE_FAST_EAP_TYPE)
 
 	static void AddExtraCertColumnsL(
 		RDbNamedDatabase& aDatabase, 

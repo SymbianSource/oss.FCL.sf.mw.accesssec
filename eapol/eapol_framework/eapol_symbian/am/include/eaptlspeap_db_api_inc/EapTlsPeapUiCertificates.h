@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 30 %
 */
 
 #ifndef _EAPTLSPEAPUICERTIFICATES_H_

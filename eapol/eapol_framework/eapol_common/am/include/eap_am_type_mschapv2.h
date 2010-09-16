@@ -23,6 +23,29 @@
 #define _EAP_AM_TYPE_MSCHAPV2_H_
 
 #include "abs_eap_am_type_mschapv2.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_TYPE_MSCHAPV2_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_MSCHAPV2_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_MSCHAPV2_H 
+#elif defined(EAP_EXPORT_EAP_AM_TYPE_MSCHAPV2_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_MSCHAPV2_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_MSCHAPV2_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_MSCHAPV2_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_MSCHAPV2_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 enum eap_mschapv2_error_e {
 	EAP_MSCHAPV2_ERROR_RESTRICTED_LOGON_HOURS = 646,
@@ -34,7 +57,7 @@ enum eap_mschapv2_error_e {
 };
 
 /// This class is interface to adaptation module of Ms-Chap-v2.
-class EAP_EXPORT eap_am_type_mschapv2_c
+class EAP_CLASS_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_H eap_am_type_mschapv2_c
 {
 private:
 	//--------------------------------------------------
@@ -151,7 +174,7 @@ public:
 	
 };
 
-EAP_C_FUNC_IMPORT  eap_am_type_mschapv2_c *new_eap_am_type_mschapv2(
+EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_H  eap_am_type_mschapv2_c *new_eap_am_type_mschapv2(
 	abs_eap_am_tools_c * const tools,
 	abs_eap_base_type_c * const partner,
 	const eap_am_network_id_c * const receive_network_id);

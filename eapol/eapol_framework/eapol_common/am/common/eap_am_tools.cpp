@@ -445,7 +445,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::timer_thread_function()
 
 EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::timer_thread_function()
 {
-	EAP_TRACE_TIMER(this, TRACE_FLAGS_TIMER, (EAPL("TIMER: Timer thread starts.\n")));
+	EAP_TRACE_DEBUG(this, TRACE_FLAGS_ALWAYS, (EAPL("TIMER: Timer thread starts.\n")));
 
 	u32_t static_sleep_time = get_timer_resolution_ms();
 	u64_t start_time = get_clock_ticks();
@@ -635,7 +635,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::timer_thread_function()
 
 	delete mutex;
 
-	EAP_TRACE_TIMER(this, TRACE_FLAGS_TIMER, (EAPL("TIMER: Timer thread stops.\n")));
+	EAP_TRACE_DEBUG(this, TRACE_FLAGS_ALWAYS, (EAPL("TIMER: Timer thread stops.\n")));
 
 	m_thread_stopped =true;
 
@@ -1650,7 +1650,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_c::shutdown_am_tools()
 	EAP_TRACE_DEBUG(
 		this,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_tools_c::shutdown_am_tools(); this = 0x%08x\n"),
+		(EAPL("eap_am_tools_c::shutdown_am_tools(): this = 0x%08x\n"),
 		 this));
 
 	if (m_shutdown_was_called == false)

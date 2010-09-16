@@ -25,6 +25,29 @@
 #include "eap_core_map.h"
 #include "eap_configuration_field.h"
 #include "abs_eap_am_file_input.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_FILE_CONFIG_H)
+	#define EAP_CLASS_VISIBILITY_EAP_FILE_CONFIG_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_FILE_CONFIG_H 
+	#define EAP_FUNC_EXPORT_EAP_FILE_CONFIG_H 
+	#define EAP_C_FUNC_EXPORT_EAP_FILE_CONFIG_H 
+#elif defined(EAP_EXPORT_EAP_FILE_CONFIG_H)
+	#define EAP_CLASS_VISIBILITY_EAP_FILE_CONFIG_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_FILE_CONFIG_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_FILE_CONFIG_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_FILE_CONFIG_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_FILE_CONFIG_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_FILE_CONFIG_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_FILE_CONFIG_H 
+	#define EAP_C_FUNC_EXPORT_EAP_FILE_CONFIG_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 class eap_tlv_header_c;
 
@@ -36,7 +59,7 @@ Type minimum( Type a, Type b )
 }
 
 
-class EAP_EXPORT eap_config_value_c
+class EAP_CLASS_VISIBILITY_EAP_FILE_CONFIG_H eap_config_value_c
 {
 private:
 
@@ -52,29 +75,29 @@ private:
 
 public:
 
-	EAP_FUNC_IMPORT virtual ~eap_config_value_c();
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H virtual ~eap_config_value_c();
 
-	EAP_FUNC_IMPORT eap_config_value_c(
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H eap_config_value_c(
 		abs_eap_am_tools_c* const tools);
 
-	EAP_FUNC_IMPORT void set_subsection(
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H void set_subsection(
 		eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * const subsection_map);
 
-	EAP_FUNC_IMPORT eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * get_subsection();
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H eap_core_map_c<eap_config_value_c, abs_eap_core_map_c, eap_variable_data_c> * get_subsection();
 
-	EAP_FUNC_IMPORT eap_variable_data_c * get_data();
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H eap_variable_data_c * get_data();
 
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_const_data() const;
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H const eap_variable_data_c * get_const_data() const;
 
-	EAP_FUNC_IMPORT void set_type(const eap_configure_type_e type);
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H void set_type(const eap_configure_type_e type);
 
-	EAP_FUNC_IMPORT eap_configure_type_e get_type();
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H eap_configure_type_e get_type();
 
-	EAP_FUNC_IMPORT eap_configure_type_e get_const_type() const;
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H eap_configure_type_e get_const_type() const;
 
-	EAP_FUNC_IMPORT void object_increase_reference_count();
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H void object_increase_reference_count();
 
-	EAP_FUNC_IMPORT bool get_is_valid() const;
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H bool get_is_valid() const;
 
 };
 
@@ -140,7 +163,7 @@ const eap_configure_type eap_configure_type_id[] =
 };
 
 
-class EAP_EXPORT eap_file_config_c
+class EAP_CLASS_VISIBILITY_EAP_FILE_CONFIG_H eap_file_config_c
 : public abs_eap_core_map_c
 {
   
@@ -245,18 +268,18 @@ class EAP_EXPORT eap_file_config_c
 
  public:
 
-	EAP_FUNC_IMPORT eap_file_config_c(
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H eap_file_config_c(
 		abs_eap_am_tools_c* const tools);
 
-	EAP_FUNC_IMPORT virtual ~eap_file_config_c();
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H virtual ~eap_file_config_c();
 
-	EAP_FUNC_IMPORT eap_status_e configure(
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H eap_status_e configure(
 		abs_eap_am_file_input_c * const file);
 
-	EAP_FUNC_IMPORT eap_status_e read_configuration_message(
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H eap_status_e read_configuration_message(
 		const eap_variable_data_c * const configuration_message);
 
-	EAP_FUNC_IMPORT eap_status_e read_configure(
+	EAP_FUNC_VISIBILITY_EAP_FILE_CONFIG_H eap_status_e read_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c* const data);
 

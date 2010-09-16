@@ -24,6 +24,27 @@
 
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_SESSION_CORE_BASE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_SESSION_CORE_BASE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_SESSION_CORE_BASE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_SESSION_CORE_BASE_H 
+	#define EAP_FUNC_EXPORT_EAP_SESSION_CORE_BASE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_SESSION_CORE_BASE_H 
+#elif defined(EAP_EXPORT_EAP_SESSION_CORE_BASE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_SESSION_CORE_BASE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_SESSION_CORE_BASE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_SESSION_CORE_BASE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_SESSION_CORE_BASE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_SESSION_CORE_BASE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_SESSION_CORE_BASE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_SESSION_CORE_BASE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_SESSION_CORE_BASE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_SESSION_CORE_BASE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_SESSION_CORE_BASE_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "abs_eap_core.h"
 #include "eap_core_map.h"
 #include "eap_database_reference_if.h"
@@ -33,7 +54,7 @@ class abs_eap_session_core_c;
 
 /// A eap_session_core_base_c class implements mapping of EAP authentication sessions.
 /// Network identity separates parallel EAP authentication sessions.
-class EAP_EXPORT eap_session_core_base_c
+class EAP_CLASS_VISIBILITY_EAP_SESSION_CORE_BASE_H eap_session_core_base_c
 : public eap_database_reference_if_c
 {
 private:
@@ -51,7 +72,7 @@ public:
 	/**
 	 * The destructor of the eap_core class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~eap_session_core_base_c();
+	EAP_FUNC_VISIBILITY_EAP_SESSION_CORE_BASE_H virtual ~eap_session_core_base_c();
 
 	/**
 	 * The constructor initializes member attributes using parameters passed to it.
@@ -61,7 +82,7 @@ public:
 	 * as a client (true) or server (false), in terms of EAP-protocol
 	 * whether this network entity is EAP-supplicant (true) or EAP-authenticator (false).
 	 */
-	EAP_FUNC_IMPORT eap_session_core_base_c();
+	EAP_FUNC_VISIBILITY_EAP_SESSION_CORE_BASE_H eap_session_core_base_c();
 
 	/**
 	 * This function must reset the state of object to same as 
@@ -140,7 +161,7 @@ public:
 
 	//--------------------------------------------------
 
-	EAP_FUNC_IMPORT static eap_session_core_base_c * new_eap_session_core_c(
+	EAP_FUNC_VISIBILITY_EAP_SESSION_CORE_BASE_H static eap_session_core_base_c * new_eap_session_core_c(
 		abs_eap_am_tools_c * const tools,
 		abs_eap_session_core_c * const partner,
 		const bool is_client_when_true,

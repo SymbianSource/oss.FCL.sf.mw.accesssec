@@ -25,6 +25,27 @@
 #include "eap_am_types.h"
 #include "eap_variable_data.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_CRYPTO_API_H)
+	#define EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_CRYPTO_API_H 
+	#define EAP_FUNC_EXPORT_EAP_CRYPTO_API_H 
+	#define EAP_C_FUNC_EXPORT_EAP_CRYPTO_API_H 
+#elif defined(EAP_EXPORT_EAP_CRYPTO_API_H)
+	#define EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_CRYPTO_API_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_CRYPTO_API_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_CRYPTO_API_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_CRYPTO_API_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_CRYPTO_API_H 
+	#define EAP_C_FUNC_EXPORT_EAP_CRYPTO_API_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "abs_eap_am_crypto.h"
 #include "eap_array.h"
 
@@ -42,7 +63,7 @@ const u32_t HMAC_MD5_128_SIZE = 16u; // bytes = 128 bits
 const u32_t WPA_PSK_LENGTH = 32;
 
 /// The abs_crypto_block_algorithm_c class describes interface of CBC block encryption algorithm.
-class EAP_EXPORT abs_crypto_cbc_block_algorithm_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H abs_crypto_cbc_block_algorithm_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -54,7 +75,7 @@ private:
 public:
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 
-	EAP_FUNC_IMPORT virtual ~abs_crypto_cbc_block_algorithm_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~abs_crypto_cbc_block_algorithm_c();
 
 	/**
 	 * The set_is_valid() function sets the state of the
@@ -217,7 +238,7 @@ public:
 
 
 /// The abs_crypto_block_algorithm_c class describes interface of block encryption algorithm.
-class EAP_EXPORT abs_crypto_block_algorithm_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H abs_crypto_block_algorithm_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -229,7 +250,7 @@ private:
 public:
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 
-	EAP_FUNC_IMPORT virtual ~abs_crypto_block_algorithm_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~abs_crypto_block_algorithm_c();
 
 	/**
 	 * The set_is_valid() function sets the state of the
@@ -302,7 +323,7 @@ public:
 
 
 /// The abs_crypto_stream_algorithm_c class describes interface of stream encryption algorithm.
-class EAP_EXPORT abs_crypto_stream_algorithm_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H abs_crypto_stream_algorithm_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -314,7 +335,7 @@ private:
 public:
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 
-	EAP_FUNC_IMPORT virtual ~abs_crypto_stream_algorithm_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~abs_crypto_stream_algorithm_c();
 
 	/**
 	 * The set_is_valid() function sets the state of the
@@ -378,7 +399,7 @@ public:
 
 
 /// The abs_crypto_hash_algorithm_c class describes interface the MAC algorithm.
-class EAP_EXPORT abs_crypto_hash_algorithm_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H abs_crypto_hash_algorithm_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -390,7 +411,7 @@ private:
 public:
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 
-	EAP_FUNC_IMPORT virtual ~abs_crypto_hash_algorithm_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~abs_crypto_hash_algorithm_c();
 
 	/**
 	 * The set_is_valid() function sets the state of the
@@ -457,7 +478,7 @@ public:
 
 
 /// The abs_crypto_mac_algorithm_c class describes interface the HMAC algorithm.
-class EAP_EXPORT abs_crypto_hmac_algorithm_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H abs_crypto_hmac_algorithm_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -469,7 +490,7 @@ private:
 public:
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 
-	EAP_FUNC_IMPORT virtual ~abs_crypto_hmac_algorithm_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~abs_crypto_hmac_algorithm_c();
 
 	/**
 	 * The set_is_valid() function sets the state of the
@@ -526,7 +547,7 @@ public:
 
 
 /// The crypto_hmac_c class describes HMAC algorithm.
-class EAP_EXPORT crypto_hmac_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_hmac_c
 : public abs_crypto_hmac_algorithm_c
 {
 
@@ -556,7 +577,7 @@ private:
 	bool m_free_crypto_hash_algorithm;
 
 
-	EAP_FUNC_IMPORT eap_status_e initialize_pad(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e initialize_pad(
 		eap_variable_data_c * const p_pad,
 		const u8_t pad_value);
 
@@ -567,12 +588,12 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_hmac_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_hmac_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_hmac_c(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_hmac_c(
 		abs_eap_am_tools_c * const tools,
 		abs_crypto_hash_algorithm_c * const crypto_hash_algorithm,
 		const bool free_crypto_hash_algorithm);
@@ -582,32 +603,32 @@ public:
 	 * abs_crypto_mac_algorithm_c object valid. The abs_crypto_mac_algorithm_c object 
 	 * calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	/**
 	 * The get_is_valid() function returns the status of the abs_crypto_mac_algorithm_c object.
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/**
 	 * This function returns the size of message digest of HMAC-algorithm.
 	 */
-	EAP_FUNC_IMPORT u32_t get_digest_length();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_digest_length();
 
 	/**
 	 * This function sets the mode to encryption, 
 	 * sets the initialization vector and the encryption key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hmac_set_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hmac_set_key(
 		const eap_variable_data_c * const hmac_key);
 
 	/**
 	 * This function updates the context of HMAC-algorithm with data.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hmac_update(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hmac_update(
 		const void * const data,
 		const u32_t data_length);
 
@@ -615,7 +636,7 @@ public:
 	 * This function writes the message digest to buffer. 
 	 * Length is set if md_length_or_null is non-NULL.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hmac_final(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hmac_final(
 		void * const message_digest,
 		u32_t *md_length_or_null);
 
@@ -623,14 +644,14 @@ public:
 	 * This function writes the message digest of HMAC of 128 bits in length to buffer. 
 	 * Length is set if md_length_or_null is non-NULL.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hmac_128_final(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hmac_128_final(
 		void * const message_digest,
 		u32_t *md_length_or_null);
 
 	/**
 	 * This function cleans up the HMAC context.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hmac_cleanup();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hmac_cleanup();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 };
@@ -640,7 +661,7 @@ public:
 
 /// The crypto_cbc_c class includes the state of 
 /// one instance of CBC block encryption algorithm.
-class EAP_EXPORT crypto_cbc_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_cbc_c
 : public abs_crypto_cbc_block_algorithm_c
 {
 
@@ -683,12 +704,12 @@ private:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 
-	EAP_FUNC_IMPORT void reset();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void reset();
 
 	/**
 	 * Run xor to data and IV block.
 	 */
-	EAP_FUNC_IMPORT void cbc_xor_block(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void cbc_xor_block(
 		const void * const encryption_IV,
 		void * const data_block,
 		const u32_t block_size,
@@ -697,7 +718,7 @@ private:
 	/**
 	 * Copies source to target.
 	 */
-	EAP_FUNC_IMPORT void cbc_copy_block(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void cbc_copy_block(
 		void * const target,
 		const void * const source,
 		const u32_t block_size,
@@ -707,7 +728,7 @@ private:
 	 * This function encrypts continuous data bytes from data_in to data_out buffer. 
 	 * Note the length of the data must be aligned to block size of the cipher.
 	 */
-	EAP_FUNC_IMPORT eap_status_e internal_encrypt_data(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e internal_encrypt_data(
 		const void * const data_in,
 		void * const data_out,
 		const u32_t data_length);
@@ -716,7 +737,7 @@ private:
 	 * This function decrypts continuous data bytes from data_in to data_out buffer. 
 	 * Note the length of the data must be aligned to block size of the cipher.
 	 */
-	EAP_FUNC_IMPORT eap_status_e internal_decrypt_data(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e internal_decrypt_data(
 		const void * const data_in,
 		void * const data_out,
 		const u32_t data_length);
@@ -729,12 +750,12 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_cbc_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_cbc_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_cbc_c(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_cbc_c(
 		abs_eap_am_tools_c * const tools,
 		abs_crypto_block_algorithm_c * const crypto_block_algorithm,
 		const bool free_crypto_block_algorithm);
@@ -743,30 +764,30 @@ public:
 	 * The get_encrypts() function returns true when encryption is initialized.
 	 * It returns false when decryption is initialized.
 	 */
-	EAP_FUNC_IMPORT virtual bool get_encrypts();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual bool get_encrypts();
 
 	/**
 	 * This function returns the length of CBC key in bytes.
 	 */
-	EAP_FUNC_IMPORT virtual u32_t get_key_length();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual u32_t get_key_length();
 
 	/**
 	 * This function returns the length of CBC block size in bytes.
 	 */
-	EAP_FUNC_IMPORT virtual u32_t get_block_size();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual u32_t get_block_size();
 
 	/**
 	 * The set_is_valid() function sets the state of the
 	 * crypto_cbc_c object valid. The crypto_cbc_c object 
 	 * calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_cbc_c object.
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function returns the internally stored initialization vector.
@@ -774,20 +795,20 @@ public:
 	 * between subsequent encryption and decryption calls. 
 	 * User of crypto_cbc_c object could get the last stored block calling this function.
 	 */
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_tmp_IV();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H const eap_variable_data_c * get_tmp_IV();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/**
 	 * Calculates the data length aligned to block size.
 	 */
-	EAP_FUNC_IMPORT u32_t aligned_data_length(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t aligned_data_length(
 		u32_t data_length);
 
 	/**
 	 * This function adds count padding bytes to buffer. All padding bytes are zero (0x00).
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_padding_bytes(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e add_padding_bytes(
 		void * const buffer,
 		const u32_t buffer_length,
 		const u8_t padding_byte);
@@ -795,7 +816,7 @@ public:
 	/**
 	 * This function checks the count padding bytes of buffer are zero (0x00).
 	 */
-	EAP_FUNC_IMPORT eap_status_e check_padding_bytes(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e check_padding_bytes(
 		const void * const buffer,
 		const u32_t buffer_length,
 		const u8_t padding_byte);
@@ -804,7 +825,7 @@ public:
 	 * This function sets the mode to encryption, 
 	 * sets the initialization vector and the encryption key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_encryption_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e set_encryption_key(
 		const void * const encryption_IV,
 		const u32_t encryption_IV_length,
 		const void * const key,
@@ -814,7 +835,7 @@ public:
 	 * This function sets the mode to decryption, 
 	 * sets the initialization vector and the decryption key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_decryption_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e set_decryption_key(
 		const void * const encryption_IV,
 		const u32_t encryption_IV_length,
 		const void * const key,
@@ -824,7 +845,7 @@ public:
 	 * This function encrypts continuous data bytes from data_in to data_out buffer. 
 	 * Note the length of the data must be aligned to block size of the cipher.
 	 */
-	EAP_FUNC_IMPORT eap_status_e encrypt_data(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e encrypt_data(
 		const void * const data_in,
 		void * const data_out,
 		const u32_t data_length);
@@ -833,7 +854,7 @@ public:
 	 * This function encrypts continuous data bytes in data_in_out buffer. 
 	 * Note the length of the data must be aligned to block size of the cipher.
 	 */
-	EAP_FUNC_IMPORT eap_status_e encrypt_data(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e encrypt_data(
 		void * const data_in_out,
 		const u32_t data_length);
 
@@ -841,7 +862,7 @@ public:
 	 * This function decrypts continuous data bytes from data_in to data_out buffer. 
 	 * Note the length of the data must be aligned to block size of the cipher.
 	 */
-	EAP_FUNC_IMPORT eap_status_e decrypt_data(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e decrypt_data(
 		const void * const data_in,
 		void * const data_out,
 		const u32_t data_length);
@@ -850,7 +871,7 @@ public:
 	 * This function decrypts continuous data bytes in data_in_out buffer. 
 	 * Note the length of the data must be aligned to block size of the cipher.
 	 */
-	EAP_FUNC_IMPORT eap_status_e decrypt_data(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e decrypt_data(
 		void * const data_in_out,
 		const u32_t data_length);
 
@@ -866,7 +887,7 @@ public:
 	 * Those buffers must be fully separated. Some optimizations are used 
 	 * taking advance from separate buffers. 
 	 */
-	EAP_FUNC_IMPORT eap_status_e update_non_aligned(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e update_non_aligned(
 		const void * const msg_in,
 		void * const msg_out,
 		const u32_t msg_size);
@@ -881,7 +902,7 @@ public:
 	 * aligned to CBC-block size. Only the sum of whole data must be aligned to CBC-block size.
 	 * This version takes one pointer to buffer. The buffer is used for input and output data. 
 	 */
-	EAP_FUNC_IMPORT eap_status_e update_non_aligned(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e update_non_aligned(
 		void * const msg_in_out,
 		const u32_t msg_size);
 
@@ -892,7 +913,7 @@ public:
 	 * The sum of length of feed data must be aligned to CBC-block size 
 	 * before this function is called.
 	 */
-	EAP_FUNC_IMPORT eap_status_e finalize_non_aligned();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e finalize_non_aligned();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 };
@@ -902,7 +923,7 @@ public:
 
 /// The crypto_aes_c class includes the state of 
 /// one instance of AES block encryption algorithm.
-class EAP_EXPORT crypto_aes_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_aes_c
 : public abs_crypto_block_algorithm_c
 {
 
@@ -937,44 +958,44 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_aes_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_aes_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_aes_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_aes_c(abs_eap_am_tools_c * const tools);
 
-	EAP_FUNC_IMPORT bool get_encrypts();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_encrypts();
 
 	/**
 	 * The set_is_valid() function sets the state of the
 	 * crypto_aes_c object valid. The crypto_aes_c object 
 	 * calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_aes_c object.
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function returns the length of AES key in bytes.
 	 */
-	EAP_FUNC_IMPORT u32_t get_key_length();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_key_length();
 
 	/**
 	 * This function returns the length of AES block size in bytes.
 	 */
-	EAP_FUNC_IMPORT u32_t get_block_size();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_block_size();
 
 
 	/**
 	 * This function sets the mode to encryption, 
 	 * sets the initialization vector and the encryption key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_encryption_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e set_encryption_key(
 		const void * const key,
 		const u32_t key_length);
 
@@ -982,7 +1003,7 @@ public:
 	 * This function sets the mode to decryption, 
 	 * sets the initialization vector and the decryption key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_decryption_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e set_decryption_key(
 		const void * const key,
 		const u32_t key_length);
 
@@ -992,7 +1013,7 @@ public:
 	 * This function encrypts continuous data bytes from data_in to data_out buffer. 
 	 * Note the length of the data must be aligned to block size of the cipher.
 	 */
-	EAP_FUNC_IMPORT eap_status_e encrypt_block(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e encrypt_block(
 		const void * const data_in,
 		void * const data_out,
 		const u32_t data_length);
@@ -1001,7 +1022,7 @@ public:
 	 * This function decrypts continuous data bytes from data_in to data_out buffer. 
 	 * Note the length of the data must be aligned to block size of the cipher.
 	 */
-	EAP_FUNC_IMPORT eap_status_e decrypt_block(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e decrypt_block(
 		const void * const data_in,
 		void * const data_out,
 		const u32_t data_length);
@@ -1014,7 +1035,7 @@ public:
 
 /// The crypto_3des_ede_c class includes the state of 
 /// one instance of 3DES-EDE block encryption algorithm.
-class EAP_EXPORT crypto_3des_ede_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_3des_ede_c
 : public abs_crypto_block_algorithm_c
 {
 
@@ -1049,44 +1070,44 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_3des_ede_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_3des_ede_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_3des_ede_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_3des_ede_c(abs_eap_am_tools_c * const tools);
 
-	EAP_FUNC_IMPORT bool get_encrypts();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_encrypts();
 
 	/**
 	 * The set_is_valid() function sets the state of the
 	 * crypto_3des_ede_c object valid. The crypto_3des_ede_c object 
 	 * calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_3des_ede_c object.
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function returns the length of 3DES-EDE key in bytes.
 	 */
-	EAP_FUNC_IMPORT u32_t get_key_length();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_key_length();
 
 	/**
 	 * This function returns the length of 3DES-EDE block size in bytes.
 	 */
-	EAP_FUNC_IMPORT u32_t get_block_size();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_block_size();
 
 
 	/**
 	 * This function sets the mode to encryption, 
 	 * sets the initialization vector and the encryption key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_encryption_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e set_encryption_key(
 		const void * const key,
 		const u32_t key_length);
 
@@ -1094,7 +1115,7 @@ public:
 	 * This function sets the mode to decryption, 
 	 * sets the initialization vector and the decryption key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_decryption_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e set_decryption_key(
 		const void * const key,
 		const u32_t key_length);
 
@@ -1102,7 +1123,7 @@ public:
 	 * This function encrypts continuous data bytes from data_in to data_out buffer. 
 	 * Note the length of the data must be aligned to block size of the cipher.
 	 */
-	EAP_FUNC_IMPORT eap_status_e encrypt_block(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e encrypt_block(
 		const void * const data_in,
 		void * const data_out,
 		const u32_t data_length);
@@ -1111,7 +1132,7 @@ public:
 	 * This function decrypts continuous data bytes from data_in to data_out buffer. 
 	 * Note the length of the data must be aligned to block size of the cipher.
 	 */
-	EAP_FUNC_IMPORT eap_status_e decrypt_block(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e decrypt_block(
 		const void * const data_in,
 		void * const data_out,
 		const u32_t data_length);
@@ -1131,7 +1152,7 @@ const u64_t EAP_CRYPTO_AES_WRAP_BLOCK_SIZE = sizeof(u64_t);
 
 
 /// The crypto_aes_wrap_c class describes interface of block encryption algorithm.
-class EAP_EXPORT crypto_aes_wrap_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_aes_wrap_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1157,25 +1178,25 @@ private:
 public:
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 
-	EAP_FUNC_IMPORT virtual ~crypto_aes_wrap_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_aes_wrap_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_aes_wrap_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_aes_wrap_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The set_is_valid() function sets the state of the
 	 * crypto_aes_wrap_c object valid. The crypto_aes_wrap_c object 
 	 * calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_aes_wrap_c object.
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -1183,23 +1204,23 @@ public:
 	 * The get_encrypts() function returns true when encryption is initialized.
 	 * It returns false when decryption is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_encrypts();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_encrypts();
 
 	/**
 	 * This function returns the length of key in bytes.
 	 */
-	EAP_FUNC_IMPORT u32_t get_key_length();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_key_length();
 
 	/**
 	 * This function returns the length of block size in bytes.
 	 */
-	EAP_FUNC_IMPORT u32_t get_block_size();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_block_size();
 
 	/**
 	 * This function sets the mode to encryption, 
 	 * sets the initialization vector and the encryption key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_encryption_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e set_encryption_key(
 		const void * const key,
 		const u32_t key_length);
 
@@ -1207,14 +1228,14 @@ public:
 	 * This function sets the mode to decryption, 
 	 * sets the initialization vector and the decryption key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_decryption_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e set_decryption_key(
 		const void * const key,
 		const u32_t key_length);
 
 	/**
 	 * This function adds buffer_length padding bytes to buffer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_padding_bytes(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e add_padding_bytes(
 		void * const buffer,
 		const u32_t buffer_length);
 
@@ -1222,7 +1243,7 @@ public:
 	 * This function encrypts continuous data bytes from data_in to data_out buffer. 
 	 * Note the length of the data must be aligned to block size of the cipher.
 	 */
-	EAP_FUNC_IMPORT eap_status_e encrypt_block(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e encrypt_block(
 		const void * const data_in,
 		const u32_t data_in_length,
 		void * const data_out,
@@ -1232,7 +1253,7 @@ public:
 	 * This function decrypts continuous data bytes from data_in to data_out buffer. 
 	 * Note the length of the data must be aligned to block size of the cipher.
 	 */
-	EAP_FUNC_IMPORT eap_status_e decrypt_block(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e decrypt_block(
 		const void * const data_in,
 		const u32_t data_in_length,
 		void * const data_out,
@@ -1247,7 +1268,7 @@ public:
 
 /// The crypto_random_c class includes the state of 
 /// one instance of random generator.
-class EAP_EXPORT crypto_random_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_random_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1267,43 +1288,43 @@ public:
 	/**
 	 * Destructor does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_random_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_random_c();
 
 	/**
 	 * Constructor initializes the object.
 	 */
-	EAP_FUNC_IMPORT crypto_random_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_random_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The set_is_valid() function sets the state of the crypto_random_c object valid. 
 	 * The crypto_random_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_random_c object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function copies count random bytes to buffer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e get_rand_bytes(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e get_rand_bytes(
 		void * const buffer,
 		const u32_t count);
 
 	/**
 	 * This function copies count random bytes to buffer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e get_rand_bytes(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e get_rand_bytes(
 		eap_variable_data_c * const buffer,
 		const u32_t count);
 
 	/**
 	 * This function creates random integer value between minimum and maximum inclusively.
 	 */
-	EAP_FUNC_IMPORT u32_t get_rand_integer(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_rand_integer(
 		const u32_t minimum,
 		const u32_t maximum);
 
@@ -1311,7 +1332,7 @@ public:
 	 * This function seeds the random generator with count bytes from buffer. 
 	 * User could call this function as many times as is needed and at any time.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_rand_seed(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e add_rand_seed(
 		const void * const buffer,
 		const u32_t count);
 
@@ -1319,7 +1340,7 @@ public:
 	 * This function seeds random generator with the hardware ticks. 
 	 * User could call this function as many times as is needed and at any time.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_rand_seed_hw_ticks();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e add_rand_seed_hw_ticks();
 
 };
 
@@ -1328,7 +1349,7 @@ public:
 
 /// The crypto_sha_256_c class includes the state of 
 /// one instance of SHA-256 algorithm.
-class EAP_EXPORT crypto_sha_256_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_sha_256_c
 : public abs_crypto_hash_algorithm_c
 {
 
@@ -1352,13 +1373,13 @@ private:
 	 * The set_is_invalid() function sets the state of the crypto_sha_256_c object invalid. 
 	 * The crypto_sha_256_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_invalid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_invalid();
 
 	/**
 	 * The set_is_valid() function sets the state of the crypto_sha_256_c object valid. 
 	 * The crypto_sha_256_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 public:
@@ -1367,43 +1388,43 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_sha_256_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_sha_256_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_sha_256_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_sha_256_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * This function copies the context from parameter sha_256_context to this object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e copy_context(const eap_variable_data_c * const sha_256_context);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e copy_context(const eap_variable_data_c * const sha_256_context);
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_sha_256_c object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function returns the size of message digest of SHA-256-algorithm.
 	 */
-	EAP_FUNC_IMPORT u32_t get_digest_length();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_digest_length();
 
 	/**
 	 * This function returns the block size of SHA-256-algorithm.
 	 */
-	EAP_FUNC_IMPORT u32_t get_block_size();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_block_size();
 
 	/**
 	 * This function initializes the context of SHA-256-algorithm.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_init();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_init();
 
 	/**
 	 * This function updates the context of SHA-256-algorithm with data.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_update(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_update(
 		const void * const data,
 		const u32_t data_length);
 
@@ -1411,20 +1432,20 @@ public:
 	 * This function writes the message digest to buffer.
 	 * @param Length is set if md_length_or_null is non-NULL.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_final(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_final(
 		void * const message_digest,
 		u32_t *md_length_or_null);
 
 	/**
 	 * This function cleans up the SHA-256 context.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_cleanup();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_cleanup();
 
 	/**
 	 * This function returns a copy of the context of SHA-256-algorithm.
 	 * Caller must free the copy.
 	 */
-	EAP_FUNC_IMPORT abs_crypto_hash_algorithm_c * copy();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H abs_crypto_hash_algorithm_c * copy();
 };
 
 
@@ -1432,7 +1453,7 @@ public:
 
 /// The crypto_sha1_c class includes the state of 
 /// one instance of SHA1 algorithm.
-class EAP_EXPORT crypto_sha1_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_sha1_c
 : public abs_crypto_hash_algorithm_c
 {
 
@@ -1456,13 +1477,13 @@ private:
 	 * The set_is_invalid() function sets the state of the crypto_sha1_c object invalid. 
 	 * The crypto_sha1_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_invalid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_invalid();
 
 	/**
 	 * The set_is_valid() function sets the state of the crypto_sha1_c object valid. 
 	 * The crypto_sha1_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 public:
@@ -1471,43 +1492,43 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_sha1_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_sha1_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_sha1_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_sha1_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * This function copies the context from parameter sha1_context to this object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e copy_context(const eap_variable_data_c * const sha1_context);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e copy_context(const eap_variable_data_c * const sha1_context);
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_sha1_c object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function returns the size of message digest of SHA1-algorithm.
 	 */
-	EAP_FUNC_IMPORT u32_t get_digest_length();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_digest_length();
 
 	/**
 	 * This function returns the block size of SHA1-algorithm.
 	 */
-	EAP_FUNC_IMPORT u32_t get_block_size();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_block_size();
 
 	/**
 	 * This function initializes the context of SHA1-algorithm.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_init();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_init();
 
 	/**
 	 * This function updates the context of SHA1-algorithm with data.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_update(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_update(
 		const void * const data,
 		const u32_t data_length);
 
@@ -1515,20 +1536,20 @@ public:
 	 * This function writes the message digest to buffer.
 	 * @param Length is set if md_length_or_null is non-NULL.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_final(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_final(
 		void * const message_digest,
 		u32_t *md_length_or_null);
 
 	/**
 	 * This function cleans up the SHA1 context.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_cleanup();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_cleanup();
 
 	/**
 	 * This function returns a copy of the context of SHA1-algorithm.
 	 * Caller must free the copy.
 	 */
-	EAP_FUNC_IMPORT abs_crypto_hash_algorithm_c * copy();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H abs_crypto_hash_algorithm_c * copy();
 };
 
 
@@ -1536,7 +1557,7 @@ public:
 
 /// The crypto_ephemeral_diffie_hellman_c class includes
 /// the state of one instance of ephemeral Diffie-Hellman key exchange algorithm.
-class EAP_EXPORT crypto_ephemeral_diffie_hellman_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_ephemeral_diffie_hellman_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1556,32 +1577,32 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_ephemeral_diffie_hellman_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_ephemeral_diffie_hellman_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_ephemeral_diffie_hellman_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_ephemeral_diffie_hellman_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The set_is_valid() function sets the state of the crypto_ephemeral_diffie_hellman_c
 	 * object valid. The crypto_ephemeral_diffie_hellman_c object calls this function
 	 * after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_ephemeral_diffie_hellman_c object.
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function creates the private and public keys using the prime and generator.
 	 * Returns context in dh_context. It must be given to generate_g_power_to_xy and
 	 * dh_cleanup.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_diffie_hellman_keys(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e generate_diffie_hellman_keys(
 		eap_variable_data_c * const dh_context,
 		eap_variable_data_c * const own_public_dh_key,
 		const void * const prime,
@@ -1593,7 +1614,7 @@ public:
 	 * This function creates the shared Diffie-Hellman key using own private key,
 	 * peer public key, prime and group generator.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_g_power_to_xy(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e generate_g_power_to_xy(
 		const eap_variable_data_c * const dh_context,
 		const eap_variable_data_c * const peer_public_dh_key,
 		eap_variable_data_c * const shared_dh_key,
@@ -1602,7 +1623,7 @@ public:
 		const void * const group_generator,
 		const u32_t group_generator_length);
 
-	EAP_FUNC_IMPORT eap_status_e dh_cleanup(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e dh_cleanup(
 		const eap_variable_data_c * const dh_context);
 
 };
@@ -1611,7 +1632,7 @@ public:
 
 /// The crypto_sha1_c class includes the state of 
 /// one instance of MD5 algorithm.
-class EAP_EXPORT crypto_md5_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_md5_c
 : public abs_crypto_hash_algorithm_c
 {
 
@@ -1635,13 +1656,13 @@ private:
 	 * The set_is_invalid() function sets the state of the crypto_md5_c object invalid. 
 	 * The crypto_md5_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_invalid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_invalid();
 
 	/**
 	 * The set_is_valid() function sets the state of the crypto_md5_c object valid. 
 	 * The crypto_md5_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 public:
@@ -1650,43 +1671,43 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_md5_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_md5_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_md5_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_md5_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * This function copies the context from parameter sha1_context to this object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e copy_context(const eap_variable_data_c * const sha1_context);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e copy_context(const eap_variable_data_c * const sha1_context);
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_md5_c object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function returns the size of message digest of MD5-algorithm.
 	 */
-	EAP_FUNC_IMPORT u32_t get_digest_length();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_digest_length();
 
 	/**
 	 * This function returns the block size of MD5-algorithm.
 	 */
-	EAP_FUNC_IMPORT u32_t get_block_size();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_block_size();
 
 	/**
 	 * This function initializes the context of MD5-algorithm.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_init();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_init();
 
 	/**
 	 * This function updates the context of MD5-algorithm with data.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_update(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_update(
 		const void * const data,
 		const u32_t data_length);
 
@@ -1694,20 +1715,20 @@ public:
 	 * This function writes the message digest to buffer.
 	 * @param Length is set if md_length_or_null is non-NULL.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_final(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_final(
 		void * const message_digest,
 		u32_t *md_length_or_null);
 
 	/**
 	 * This function cleans up the MD5 context.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_cleanup();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_cleanup();
 
 	/**
 	 * This function returns a copy of the context of MD5-algorithm.
 	 * Caller must free the copy.
 	 */
-	EAP_FUNC_IMPORT abs_crypto_hash_algorithm_c * copy();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H abs_crypto_hash_algorithm_c * copy();
 };
 
 
@@ -1715,7 +1736,7 @@ public:
 
 /// The crypto_sha1_c class includes the state of 
 /// one instance of MD4 algorithm.
-class EAP_EXPORT crypto_md4_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_md4_c
 : public abs_crypto_hash_algorithm_c
 {
 
@@ -1739,13 +1760,13 @@ private:
 	 * The set_is_invalid() function sets the state of the crypto_md4_c object invalid. 
 	 * The crypto_md4_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_invalid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_invalid();
 
 	/**
 	 * The set_is_valid() function sets the state of the crypto_md4_c object valid. 
 	 * The crypto_md4_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 public:
@@ -1754,43 +1775,43 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_md4_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_md4_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_md4_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_md4_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * This function copies the context from parameter sha1_context to this object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e copy_context(const eap_variable_data_c * const sha1_context);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e copy_context(const eap_variable_data_c * const sha1_context);
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_md4_c object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function returns the size of message digest of MD4-algorithm.
 	 */
-	EAP_FUNC_IMPORT u32_t get_digest_length();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_digest_length();
 
 	/**
 	 * This function returns the block size of MD4-algorithm.
 	 */
-	EAP_FUNC_IMPORT u32_t get_block_size();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H u32_t get_block_size();
 
 	/**
 	 * This function initializes the context of MD4-algorithm.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_init();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_init();
 
 	/**
 	 * This function updates the context of MD4-algorithm with data.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_update(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_update(
 		const void * const data,
 		const u32_t data_length);
 
@@ -1798,27 +1819,27 @@ public:
 	 * This function writes the message digest to buffer.
 	 * @param Length is set if md_length_or_null is non-NULL.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_final(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_final(
 		void * const message_digest,
 		u32_t *md_length_or_null);
 
 	/**
 	 * This function cleans up the MD4 context.
 	 */
-	EAP_FUNC_IMPORT eap_status_e hash_cleanup();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_cleanup();
 
 	/**
 	 * This function returns a copy of the context of MD4-algorithm.
 	 * Caller must free the copy.
 	 */
-	EAP_FUNC_IMPORT abs_crypto_hash_algorithm_c * copy();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H abs_crypto_hash_algorithm_c * copy();
 };
 
 
 //------------------------------------------------------------
 /// The crypto_rc4_c class includes the state of 
 /// one instance of RC4 algorithm.
-class EAP_EXPORT crypto_rc4_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_rc4_c
 : public abs_crypto_stream_algorithm_c
 {
 
@@ -1842,13 +1863,13 @@ private:
 	 * The set_is_invalid() function sets the state of the crypto_rc4_c object invalid. 
 	 * The crypto_rc4_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_invalid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_invalid();
 
 	/**
 	 * The set_is_valid() function sets the state of the crypto_rc4_c object valid. 
 	 * The crypto_rc4_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 public:
@@ -1857,40 +1878,40 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_rc4_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_rc4_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_rc4_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_rc4_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_rc4_c object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function sets the RC4 key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_key(const eap_variable_data_c * const key);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e set_key(const eap_variable_data_c * const key);
 
 	/**
 	 * This function discards desired count of RC4 stream.
 	 */
-	EAP_FUNC_IMPORT eap_status_e discard_stream(const u32_t count_of_discarded_octets);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e discard_stream(const u32_t count_of_discarded_octets);
 
 	/**
 	 * This function encrypts continuous data bytes in data_in_out buffer. 
 	 */
-	EAP_FUNC_IMPORT eap_status_e encrypt_data(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e encrypt_data(
 		void * const data_in_out,
 		const u32_t data_length);
 
 	/**
 	 * This function does RC4 encryption.
 	 */
-	EAP_FUNC_IMPORT eap_status_e encrypt_data(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e encrypt_data(
 		const void * const data_in, 
 		void * const data_out,
 		const u32_t data_length);
@@ -1898,14 +1919,14 @@ public:
 	/**
 	 * This function decrypts continuous data bytes in data_in_out buffer. 
 	 */
-	EAP_FUNC_IMPORT eap_status_e decrypt_data(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e decrypt_data(
 		void * const data_in_out,
 		const u32_t data_length);
 
 	/**
 	 * This function does RC4 decryption.
 	 */
-	EAP_FUNC_IMPORT eap_status_e decrypt_data(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e decrypt_data(
 		const void * const data_in, 
 		void * const data_out,
 		const u32_t data_length);
@@ -1916,7 +1937,7 @@ public:
 
 /// The crypto_tls_base_prf_c class includes the state of 
 /// one instance of TLS-PRF base algorithms.
-class EAP_EXPORT crypto_tls_base_prf_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_tls_base_prf_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1933,13 +1954,13 @@ private:
 	 * The set_is_invalid() function sets the state of the crypto_tls_base_prf_c object invalid. 
 	 * The crypto_tls_base_prf_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_invalid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_invalid();
 
 	/**
 	 * The set_is_valid() function sets the state of the crypto_tls_base_prf_c object valid. 
 	 * The crypto_tls_base_prf_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 public:
@@ -1948,26 +1969,26 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_tls_base_prf_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_tls_base_prf_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_tls_base_prf_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_tls_base_prf_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_tls_base_prf_c object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
-	EAP_FUNC_IMPORT eap_status_e tls_prf_A_value(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e tls_prf_A_value(
 		abs_crypto_hmac_algorithm_c * const hash,
 		eap_variable_data_c * const key,
 		eap_variable_data_c * const seed,
 		eap_variable_data_c * const A_md5_output);
 
-	EAP_FUNC_IMPORT eap_status_e tls_prf_one_round(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e tls_prf_one_round(
 		abs_crypto_hmac_algorithm_c * const hash,
 		const eap_variable_data_c * const key,
 		eap_variable_data_c * const A_input,
@@ -1978,7 +1999,7 @@ public:
 	/**
 	 * This function cleans up the TLS-PRF context.
 	 */
-	EAP_FUNC_IMPORT eap_status_e tls_prf_cleanup();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e tls_prf_cleanup();
 
 };
 
@@ -1989,7 +2010,7 @@ public:
 /// This is needed because compound authentication
 /// binding of PEAP does use only P_SHA-1 for generating
 /// compound keyed MACs and the compound session keys.
-class EAP_EXPORT crypto_tls_sha1_prf_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_tls_sha1_prf_c
 : public crypto_tls_base_prf_c
 {
 
@@ -2014,13 +2035,13 @@ private:
 	 * The set_is_invalid() function sets the state of the crypto_tls_sha1_prf_c object invalid. 
 	 * The crypto_tls_sha1_prf_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_invalid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_invalid();
 
 	/**
 	 * The set_is_valid() function sets the state of the crypto_tls_sha1_prf_c object valid. 
 	 * The crypto_tls_sha1_prf_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 public:
@@ -2029,23 +2050,23 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_tls_sha1_prf_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_tls_sha1_prf_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_tls_sha1_prf_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_tls_sha1_prf_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_tls_sha1_prf_c object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function initializes the context of TLS-PRF algorithm using the key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e tls_prf_init(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e tls_prf_init(
 		const eap_variable_data_c * const secret,
 		const eap_variable_data_c * const label,
 		const eap_variable_data_c * const seed);
@@ -2054,14 +2075,14 @@ public:
 	 * This function writes the message digest to buffer. 
 	 * Length is set if md_length_or_null is non-NULL.
 	 */
-	EAP_FUNC_IMPORT eap_status_e tls_prf_output(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e tls_prf_output(
 		void * const pseudo_random_data,
 		const u32_t pseudo_random_data_length);
 
 	/**
 	 * This function cleans up the TLS-PRF context.
 	 */
-	EAP_FUNC_IMPORT eap_status_e tls_prf_cleanup();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e tls_prf_cleanup();
 
 };
 
@@ -2069,7 +2090,7 @@ public:
 
 /// The crypto_tls_md5_prf_c class includes the state of 
 /// one instance of TLS-PRF MD5 algorithm.
-class EAP_EXPORT crypto_tls_md5_prf_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_tls_md5_prf_c
 : public crypto_tls_base_prf_c
 {
 
@@ -2094,13 +2115,13 @@ private:
 	 * The set_is_invalid() function sets the state of the crypto_tls_md5_prf_c object invalid. 
 	 * The crypto_tls_md5_prf_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_invalid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_invalid();
 
 	/**
 	 * The set_is_valid() function sets the state of the crypto_tls_md5_prf_c object valid. 
 	 * The crypto_tls_md5_prf_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 public:
@@ -2109,23 +2130,23 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_tls_md5_prf_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_tls_md5_prf_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_tls_md5_prf_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_tls_md5_prf_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_tls_md5_prf_c object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function initializes the context of TLS-PRF algorithm using the key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e tls_prf_init(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e tls_prf_init(
 		const eap_variable_data_c * const secret,
 		const eap_variable_data_c * const label,
 		const eap_variable_data_c * const seed);
@@ -2134,14 +2155,14 @@ public:
 	 * This function writes the message digest to buffer. 
 	 * Length is set if md_length_or_null is non-NULL.
 	 */
-	EAP_FUNC_IMPORT eap_status_e tls_prf_output(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e tls_prf_output(
 		void * const pseudo_random_data,
 		const u32_t pseudo_random_data_length);
 
 	/**
 	 * This function cleans up the TLS-PRF context.
 	 */
-	EAP_FUNC_IMPORT eap_status_e tls_prf_cleanup();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e tls_prf_cleanup();
 
 };
 
@@ -2149,7 +2170,7 @@ public:
 
 /// The crypto_tls_prf_c class includes the state of 
 /// one instance of TLS-PRF algorithm.
-class EAP_EXPORT crypto_tls_prf_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_tls_prf_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2169,13 +2190,13 @@ private:
 	 * The set_is_invalid() function sets the state of the crypto_tls_prf_c object invalid. 
 	 * The crypto_tls_prf_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_invalid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_invalid();
 
 	/**
 	 * The set_is_valid() function sets the state of the crypto_tls_prf_c object valid. 
 	 * The crypto_tls_prf_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 public:
@@ -2184,23 +2205,23 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_tls_prf_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_tls_prf_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_tls_prf_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_tls_prf_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_tls_prf_c object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function initializes the context of TLS-PRF algorithm using the key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e tls_prf_init(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e tls_prf_init(
 		const eap_variable_data_c * const secret,
 		const eap_variable_data_c * const label,
 		const eap_variable_data_c * const seed);
@@ -2209,14 +2230,14 @@ public:
 	 * This function writes the message digest to buffer. 
 	 * Length is set if md_length_or_null is non-NULL.
 	 */
-	EAP_FUNC_IMPORT eap_status_e tls_prf_output(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e tls_prf_output(
 		void * const pseudo_random_data,
 		const u32_t pseudo_random_data_length);
 
 	/**
 	 * This function cleans up the TLS-PRF context.
 	 */
-	EAP_FUNC_IMPORT eap_status_e tls_prf_cleanup();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e tls_prf_cleanup();
 
 };
 
@@ -2225,7 +2246,7 @@ public:
 
 /// The crypto_eap_fast_hmac_sha1_prf_c class includes the state of 
 /// one instance of T-PRF algorithm used in EAP-FAST.
-class EAP_EXPORT crypto_eap_fast_hmac_sha1_prf_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_eap_fast_hmac_sha1_prf_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2248,13 +2269,13 @@ private:
 	 * The set_is_invalid() function sets the state of the crypto_eap_fast_hmac_sha1_prf_c object invalid. 
 	 * The crypto_eap_fast_hmac_sha1_prf_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_invalid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_invalid();
 
 	/**
 	 * The set_is_valid() function sets the state of the crypto_eap_fast_hmac_sha1_prf_c object valid. 
 	 * The crypto_eap_fast_hmac_sha1_prf_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 public:
@@ -2263,23 +2284,23 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_eap_fast_hmac_sha1_prf_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_eap_fast_hmac_sha1_prf_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_eap_fast_hmac_sha1_prf_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_eap_fast_hmac_sha1_prf_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_eap_fast_hmac_sha1_prf_c object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function initializes the context of T-PRF algorithm using the key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e t_prf_init(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e t_prf_init(
 		const eap_variable_data_c * const key,
 		const eap_variable_data_c * const label,
 		const eap_variable_data_c * const seed);
@@ -2287,14 +2308,14 @@ public:
 	/**
 	 * This function writes the message digest to buffer. 
 	 */
-	EAP_FUNC_IMPORT eap_status_e t_prf_output(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e t_prf_output(
 		void * const pseudo_random_data,
 		const u16_t pseudo_random_data_length);
 
 	/**
 	 * This function cleans up the T-PRF context.
 	 */
-	EAP_FUNC_IMPORT eap_status_e t_prf_cleanup();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e t_prf_cleanup();
 
 };
 
@@ -2303,7 +2324,7 @@ public:
 
 /// The crypto_tls_prf_c class includes the state of 
 /// one instance of RSA algorithm.
-class EAP_EXPORT crypto_rsa_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_rsa_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2326,13 +2347,13 @@ private:
 	 * The set_is_invalid() function sets the state of the crypto_rsa_c object invalid. 
 	 * The crypto_rsa_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_invalid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_invalid();
 
 	/**
 	 * The set_is_valid() function sets the state of the crypto_rsa_c object valid. 
 	 * The crypto_rsa_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 public:
@@ -2341,50 +2362,50 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_rsa_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_rsa_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_rsa_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_rsa_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_rsa_c object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function initializes the context of RSA algorithm using the key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e init();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e init();
 
-	EAP_FUNC_IMPORT eap_status_e encrypt_with_public_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e encrypt_with_public_key(
 		const eap_variable_data_c * const public_rsa_key,
 		const eap_variable_data_c * const input_data,
 		eap_variable_data_c * const output_data);
 
-	EAP_FUNC_IMPORT eap_status_e decrypt_with_public_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e decrypt_with_public_key(
 		const eap_variable_data_c * const public_rsa_key,
 		const eap_variable_data_c * const input_data,
 		eap_variable_data_c * const output_data);
 
-	EAP_FUNC_IMPORT eap_status_e encrypt_with_private_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e encrypt_with_private_key(
 		const eap_variable_data_c * const private_rsa_key,
 		const eap_variable_data_c * const input_data,
 		eap_variable_data_c * const output_data);
 
-	EAP_FUNC_IMPORT eap_status_e decrypt_with_private_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e decrypt_with_private_key(
 		const eap_variable_data_c * const private_rsa_key,
 		const eap_variable_data_c * const input_data,
 		eap_variable_data_c * const output_data);
 
-	EAP_FUNC_IMPORT eap_status_e sign(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e sign(
 		const eap_variable_data_c * const private_dsa_key,
 		const eap_variable_data_c * const hash,
 		eap_variable_data_c * const signed_hash);
 
-	EAP_FUNC_IMPORT eap_status_e verify(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e verify(
 		const eap_variable_data_c * const public_rsa_key,
 		const eap_variable_data_c * const hash,
 		const eap_variable_data_c * const signed_hash);
@@ -2392,7 +2413,7 @@ public:
 	/**
 	 * This function cleans up the RSA context.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cleanup();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e cleanup();
 
 };
 
@@ -2400,7 +2421,7 @@ public:
 
 /// The crypto_tls_prf_c class includes the state of 
 /// one instance of DSA algorithm.
-class EAP_EXPORT crypto_dsa_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_dsa_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2423,13 +2444,13 @@ private:
 	 * The set_is_invalid() function sets the state of the crypto_dsa_c object invalid. 
 	 * The crypto_dsa_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_invalid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_invalid();
 
 	/**
 	 * The set_is_valid() function sets the state of the crypto_dsa_c object valid. 
 	 * The crypto_dsa_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H void set_is_valid();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
 public:
@@ -2438,30 +2459,30 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_dsa_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_dsa_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_dsa_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_dsa_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_dsa_c object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 
 	/**
 	 * This function initializes the context of DSA algorithm using the key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e init();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e init();
 
-	EAP_FUNC_IMPORT eap_status_e sign(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e sign(
 		const eap_variable_data_c * const private_dsa_key,
 		const eap_variable_data_c * const hash,
 		eap_variable_data_c * const signed_hash);
 
-	EAP_FUNC_IMPORT eap_status_e verify(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e verify(
 		const eap_variable_data_c * const public_dsa_key,
 		const eap_variable_data_c * const dsa_param_p,
 		const eap_variable_data_c * const dsa_param_q,
@@ -2472,7 +2493,7 @@ public:
 	/**
 	 * This function cleans up the DSA context.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cleanup();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e cleanup();
 
 };
 
@@ -2480,7 +2501,7 @@ public:
 
 /// The crypto_wpa_psk_password_hash_c class includes the functions for
 /// generating WPA PSK from an ASCII password
-class EAP_EXPORT crypto_wpa_psk_password_hash_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_wpa_psk_password_hash_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2525,23 +2546,23 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_wpa_psk_password_hash_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_wpa_psk_password_hash_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_wpa_psk_password_hash_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_wpa_psk_password_hash_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_wpa_psk_password_hash object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 	
 	/**
 	* Calculates the PSK hash from an ASCII password
 	*/
-	EAP_FUNC_IMPORT eap_status_e password_hash(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e password_hash(
 		const eap_variable_data_c * const password,
 		const eap_variable_data_c * const ssid,	
 		eap_variable_data_c * const output,
@@ -2554,7 +2575,7 @@ public:
 
 /// The crypto_wpa_psk_password_hash_c class includes the functions for
 /// generating WPA PSK from an ASCII password
-class EAP_EXPORT crypto_nt_hash_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_nt_hash_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2586,45 +2607,45 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_nt_hash_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_nt_hash_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_nt_hash_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_nt_hash_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_wpa_psk_password_hash object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 	
-	EAP_FUNC_IMPORT eap_status_e nt_password_hash(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e nt_password_hash(
 		const eap_variable_data_c * const password_utf8,
 		eap_variable_data_c * const password_hash,
 		const u32_t digest_size);
 
-	EAP_FUNC_IMPORT eap_status_e hash_nt_password_hash(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e hash_nt_password_hash(
 		const eap_variable_data_c * const password_hash,
 		eap_variable_data_c * const password_hash_hash,
 		const u32_t digest_size);
 
 	/* RFC 3079 */
 
-	EAP_FUNC_IMPORT eap_status_e get_master_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e get_master_key(
 		const eap_variable_data_c * const password_hash_hash,
 		const eap_variable_data_c * const nt_response,
 		eap_variable_data_c * const master_key,
 		const u32_t in_master_key_length);
 
-	EAP_FUNC_IMPORT eap_status_e get_asymmetric_start_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e get_asymmetric_start_key(
 		const eap_variable_data_c * const in_master_key,
 		eap_variable_data_c * const out_session_key,
 		const u32_t in_session_key_length,
 		const bool in_is_send,
 		const bool in_is_server);
 
-	EAP_FUNC_IMPORT eap_status_e get_new_key_from_sha(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e get_new_key_from_sha(
 		const eap_variable_data_c * const in_start_key,
 		const eap_variable_data_c * const in_session_key,
 		eap_variable_data_c * const out_interim_key,
@@ -2636,7 +2657,7 @@ public:
 
 /// The crypto_kd_hmac_sha256_c class includes the functions for
 /// KD-HMAC-SHA256.
-class EAP_EXPORT crypto_kd_hmac_sha256_c
+class EAP_CLASS_VISIBILITY_EAP_CRYPTO_API_H crypto_kd_hmac_sha256_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2668,20 +2689,20 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~crypto_kd_hmac_sha256_c();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H virtual ~crypto_kd_hmac_sha256_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT crypto_kd_hmac_sha256_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H crypto_kd_hmac_sha256_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The get_is_valid() function returns the status of the crypto_kd_hmac_sha256_c object. 
 	 * True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H bool get_is_valid();
 	
-	EAP_FUNC_IMPORT eap_status_e expand_key(
+	EAP_FUNC_VISIBILITY_EAP_CRYPTO_API_H eap_status_e expand_key(
 		eap_variable_data_c * const output,
 		const u32_t required_output_size,
 		const eap_variable_data_c * const key,

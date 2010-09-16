@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 73 %
 */
 
 #if !defined(_TLS_RECORD_H_)
@@ -37,6 +37,32 @@
 #include "eap_am_network_id.h"
 #include "eap_automatic_variable.h"
 #include "eap_master_session_key.h"
+#if defined(USE_FAST_EAP_TYPE)
+	#include "abs_pac_store_initializer.h"
+#endif //#if defined(USE_FAST_EAP_TYPE)
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_TLS_RECORD_H)
+	#define EAP_CLASS_VISIBILITY_TLS_RECORD_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_TLS_RECORD_H 
+	#define EAP_C_FUNC_VISIBILITY_TLS_RECORD_H 
+	#define EAP_FUNC_EXPORT_TLS_RECORD_H 
+	#define EAP_C_FUNC_EXPORT_TLS_RECORD_H 
+#elif defined(EAP_EXPORT_TLS_RECORD_H)
+	#define EAP_CLASS_VISIBILITY_TLS_RECORD_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_RECORD_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_RECORD_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_TLS_RECORD_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_TLS_RECORD_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_TLS_RECORD_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_RECORD_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_RECORD_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_TLS_RECORD_H 
+	#define EAP_C_FUNC_EXPORT_TLS_RECORD_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 
 class abs_tls_base_record_c;
@@ -52,9 +78,9 @@ class abs_crypto_block_algorithm_c;
 class abs_crypto_stream_algorithm_c;
 
 #if defined(USE_FAST_EAP_TYPE)
-#if !defined(USE_EAP_TLS_SESSION_TICKET)
-#error ERROR: With USE_FAST_EAP_TYPE you must use USE_EAP_TLS_SESSION_TICKET flag too.
-#endif //#if !defined(USE_EAP_TLS_SESSION_TICKET)
+	#if !defined(USE_EAP_TLS_SESSION_TICKET)
+		#error ERROR: With USE_FAST_EAP_TYPE you must use USE_EAP_TLS_SESSION_TICKET flag too.
+	#endif //#if !defined(USE_EAP_TLS_SESSION_TICKET)
 #endif //#if defined(USE_FAST_EAP_TYPE)
 
 //--------------------------------------------------------------------
@@ -64,13 +90,16 @@ class abs_crypto_stream_algorithm_c;
  * See more detailed design and architecture document <a href="../../type/tls_peap/documentation/EAP_TLS_PEAP.doc">EAP_TLS_PEAP.doc</a>
  * and <a href="../../type/tls_peap/documentation/rfc2246.txt">RFC 2246</a>.
  */
-class EAP_EXPORT tls_record_c
+class EAP_CLASS_VISIBILITY_TLS_RECORD_H tls_record_c
 : public tls_base_record_c
 , public abs_tls_am_services_c
 , public abs_tls_message_hash_c
 , public abs_tls_change_cipher_spec_c
 , public abs_tls_apply_cipher_spec_c
 , public abs_tls_base_application_c
+#if defined(USE_FAST_EAP_TYPE)
+, public abs_pac_store_initializer_c
+#endif //#if defined(USE_FAST_EAP_TYPE)
 {
 private:
 	//--------------------------------------------------
@@ -538,14 +567,14 @@ private:
 	 * The set_is_valid() function sets the state of the object valid.
 	 * The creator of this object calls this function after it is initialized. 
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H void set_is_valid();
 
-	EAP_FUNC_IMPORT eap_status_e allocate_handshake_message(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e allocate_handshake_message(
 		tls_handshake_message_c ** const tls_handshake_message,
 		eap_automatic_variable_c<tls_handshake_message_c> * const automatic_tls_handshake_message,
 		const tls_handshake_type_e handshake_type);
 
-	EAP_FUNC_IMPORT eap_status_e allocate_handshake_message_copy(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e allocate_handshake_message_copy(
 		tls_handshake_message_c ** const tls_handshake_message,
 		eap_automatic_variable_c<tls_handshake_message_c> * const automatic_tls_handshake_message,
 		tls_handshake_header_c * const tls_handshake_header);
@@ -553,97 +582,97 @@ private:
 	/**
 	 * This function creates TLS Handshake/HelloRequest message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_handshake_type_hello_request();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_handshake_type_hello_request();
 
 	/**
 	 * This function creates TLS Handshake/ClientHello message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_handshake_type_client_hello();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_handshake_type_client_hello();
 
 	/**
 	 * This function creates TLS Handshake/ServerHello message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_handshake_type_server_hello(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_handshake_type_server_hello(
 		const u16_t selected_cipher_suite,
 		const u8_t selected_compression_method);
 
 	/**
 	 * This function creates TLS Handshake/Certificate message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_handshake_type_certificate(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_handshake_type_certificate(
 		EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * const certificate_chain);
 
 	/**
 	 * This function creates TLS Handshake/CertificateRequest message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_handshake_type_certificate_request(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_handshake_type_certificate_request(
 		EAP_TEMPLATE_CONST eap_array_c<u8_t> * const certificate_types,
 		EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * const certificate_authorities);
 
 	/**
 	 * This function creates TLS Handshake/ServerHelloDone message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_handshake_type_server_hello_done();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_handshake_type_server_hello_done();
 
 	/**
 	 * This function completes creation of TLS Handshake/ServerKeyExchange message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e complete_create_handshake_type_server_key_exchange();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_create_handshake_type_server_key_exchange();
 
 	/**
 	 * This function creates TLS Handshake/ServerKeyExchange message.
 	 * NOTE: this function is asyncronous. complete_create_handshake_type_server_key_exchange()
 	 * completes this operation.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_handshake_type_server_key_exchange();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_handshake_type_server_key_exchange();
 
 	/**
 	 * This function completes creation of TLS Handshake/ClientKeyExchange message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e complete_create_handshake_type_client_key_exchange();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_create_handshake_type_client_key_exchange();
 
 	/**
 	 * This function creates TLS Handshake/ClientKeyExchange message.
 	 * NOTE: this function is asyncronous. complete_create_handshake_type_client_key_exchange()
 	 * completes this operation.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_handshake_type_client_key_exchange();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_handshake_type_client_key_exchange();
 
 	/**
 	 * This function completes creation of TLS Handshake/CertificateVerify message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e complete_create_handshake_type_certificate_verify();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_create_handshake_type_certificate_verify();
 
 	/**
 	 * This function creates TLS Handshake/CertificateVerify message.
 	 * NOTE: this function is asyncronous.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_handshake_type_certificate_verify();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_handshake_type_certificate_verify();
 
 	/**
 	 * This function creates TLS Handshake/Finished message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_handshake_type_finished();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_handshake_type_finished();
 
 	/**
 	 * This function creates TLS Handshake/NewSessionTicket message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_handshake_type_new_session_ticket();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_handshake_type_new_session_ticket();
 
 	/**
 	 * This function creates TLS ChangeCipherSpec/ChangeCipherSpec message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_change_cipher_spec_type_change_cipher_spec();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_change_cipher_spec_type_change_cipher_spec();
 
 	/**
 	 * This function finish TLS handshake.
 	 */
-	EAP_FUNC_IMPORT eap_status_e finish_handshake();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e finish_handshake();
 
 	/**
 	 * This function creates TLS Alert/Alert message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_tls_protocol_alert(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_tls_protocol_alert(
 		const tls_alert_description_e alert_description,
 		const tls_alert_level_e alert_level,
 		const eap_status_e result);
@@ -651,14 +680,14 @@ private:
 	/**
 	 * This function creates TLS ApplicationData message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_tls_application_data(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_tls_application_data(
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t header_offset);
 
 	/**
 	 * This function starts tunneled authentication.
 	 */
-	EAP_FUNC_IMPORT eap_status_e start_peap_tunneled_authentication(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e start_peap_tunneled_authentication(
 		const eap_am_network_id_c * const receive_network_id,
 		const u8_t received_eap_identifier,
 		const tls_session_type_e tls_session_type);
@@ -666,7 +695,7 @@ private:
 	/**
 	 * This function parses TLS extension list, see RFC 4366.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_tls_extension_list(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_tls_extension_list(
 		const u32_t handshake_data_length,
 		u32_t * const data_offset,
 		const tls_handshake_header_c * const tls_handshake_header,
@@ -675,7 +704,7 @@ private:
 	/**
 	 * This function parses TLS Handshake/HelloRequest message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_handshake_type_hello_request(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_handshake_type_hello_request(
 		tls_record_message_c * const received_tls_record_message,
 		tls_handshake_header_c * const tls_handshake_header,
 		const u32_t handshake_data_length);
@@ -684,7 +713,7 @@ private:
 	/**
 	 * This function parses TLS Handshake/ClientHello message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_handshake_type_client_hello(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_handshake_type_client_hello(
 		tls_record_message_c * const received_tls_record_message,
 		tls_handshake_header_c * const tls_handshake_header,
 		const u32_t handshake_data_length);
@@ -692,7 +721,7 @@ private:
 	/**
 	 * This function parses TLS Handshake/ServerHello message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_handshake_type_server_hello(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_handshake_type_server_hello(
 		tls_record_message_c * const received_tls_record_message,
 		tls_handshake_header_c * const tls_handshake_header,
 		const u32_t handshake_data_length);
@@ -700,7 +729,7 @@ private:
 	/**
 	 * This function parses TLS Handshake/Certificate message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_handshake_type_certificate(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_handshake_type_certificate(
 		tls_record_message_c * const received_tls_record_message,
 		tls_handshake_header_c * const tls_handshake_header,
 		const u32_t handshake_data_length);
@@ -708,7 +737,7 @@ private:
 	/**
 	 * This function parses TLS Handshake/CertificateRequest message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_handshake_type_certificate_request(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_handshake_type_certificate_request(
 		tls_record_message_c * const received_tls_record_message,
 		tls_handshake_header_c * const tls_handshake_header,
 		const u32_t handshake_data_length);
@@ -716,7 +745,7 @@ private:
 	/**
 	 * This function parses TLS Handshake/ServerHelloDone message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_handshake_type_server_hello_done(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_handshake_type_server_hello_done(
 		tls_record_message_c * const received_tls_record_message,
 		tls_handshake_header_c * const tls_handshake_header,
 		const u32_t handshake_data_length);
@@ -724,7 +753,7 @@ private:
 	/**
 	 * This function parses TLS Handshake/ServerKeyExchange message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_handshake_type_server_key_exchange(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_handshake_type_server_key_exchange(
 		tls_record_message_c * const received_tls_record_message,
 		tls_handshake_header_c * const tls_handshake_header,
 		const u32_t handshake_data_length);
@@ -732,7 +761,7 @@ private:
 	/**
 	 * This function parses TLS Handshake/ClientKeyExchange message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_handshake_type_client_key_exchange(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_handshake_type_client_key_exchange(
 		tls_record_message_c * const received_tls_record_message,
 		tls_handshake_header_c * const tls_handshake_header,
 		const u32_t handshake_data_length);
@@ -740,7 +769,7 @@ private:
 	/**
 	 * This function parses TLS Handshake/CertificateVerify message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_handshake_type_certificate_verify(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_handshake_type_certificate_verify(
 		tls_record_message_c * const received_tls_record_message,
 		tls_handshake_header_c * const tls_handshake_header,
 		const u32_t handshake_data_length);
@@ -748,7 +777,7 @@ private:
 	/**
 	 * This function parses TLS Handshake/Finished message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_handshake_type_finished(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_handshake_type_finished(
 		tls_record_message_c * const received_tls_record_message,
 		tls_handshake_header_c * const tls_handshake_header,
 		const u32_t handshake_data_length);
@@ -759,7 +788,7 @@ private:
 	/**
 	 * This function parses TLS Handshake/NewSessionTicket message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_handshake_type_new_session_ticket(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_handshake_type_new_session_ticket(
 		tls_record_message_c * const received_tls_record_message,
 		tls_handshake_header_c * const tls_handshake_header,
 		const u32_t handshake_data_length);
@@ -770,110 +799,110 @@ private:
 	/**
 	 * This function parses TLS ChangeCipherSpec protocol.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_tls_protocol_change_cipher_spec(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_tls_protocol_change_cipher_spec(
 		tls_record_message_c * const tls_record_message,
 		eap_variable_data_c * const tls_protocols_messages_buffer);
 
 	/**
 	 * This function parses TLS Alert protocol.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_tls_protocol_alert(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_tls_protocol_alert(
 		tls_record_message_c * const tls_record_message,
 		eap_variable_data_c * const tls_protocols_messages_buffer);
 
 	/**
 	 * This function parses TLS Handshake protocol.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_tls_protocol_handshake(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_tls_protocol_handshake(
 		tls_record_message_c * const tls_record_message,
 		eap_variable_data_c * const tls_protocols_messages_buffer);
 
 	/**
 	 * This function parses TLS ApplicationData protocol.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_tls_protocol_application_data(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e parse_tls_protocol_application_data(
 		tls_record_message_c * const tls_record_message,
 		eap_variable_data_c * const tls_protocols_messages_buffer);
 
 	/**
 	 * This function reassembles data of received consecutive TLS-records with same protocol to tls_record_message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reassemble_tls_records(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e reassemble_tls_records(
 		tls_record_message_c * const tls_record_message,
 		tls_record_header_c * const next_tls_record_header);
 
 	/**
 	 * This function processes received TLS records.
 	 */
-	EAP_FUNC_IMPORT eap_status_e process_tls_records();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e process_tls_records();
 
 	/**
 	 * This function processes received TLS message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e process_tls_message();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e process_tls_message();
 
-	EAP_FUNC_IMPORT tls_record_protocol_e get_next_tls_record_message_protocol();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H tls_record_protocol_e get_next_tls_record_message_protocol();
 
-	EAP_FUNC_IMPORT tls_handshake_type_e get_next_tls_handshake_message_type();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H tls_handshake_type_e get_next_tls_handshake_message_type();
 
 	/**
 	 * This function analyses TLS Handshake/HelloRequest message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_handshake_type_hello_request(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e analyse_handshake_type_hello_request(
 		EAP_TEMPLATE_CONST tls_handshake_message_c * const handshake_message);
 
 	/**
 	 * This function analyses TLS Handshake/ClientHello message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_handshake_type_client_hello(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e analyse_handshake_type_client_hello(
 		EAP_TEMPLATE_CONST tls_handshake_message_c * const handshake_message);
 
 	/**
 	 * This function analyses TLS Handshake/ServerHello message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_handshake_type_server_hello(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e analyse_handshake_type_server_hello(
 		EAP_TEMPLATE_CONST tls_handshake_message_c * const handshake_message);
 
 	/**
 	 * This function analyses TLS Handshake/Certificate message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_handshake_type_certificate(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e analyse_handshake_type_certificate(
 		EAP_TEMPLATE_CONST tls_handshake_message_c * const handshake_message);
 
 	/**
 	 * This function analyses TLS Handshake/CertificateRequest message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_handshake_type_certificate_request(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e analyse_handshake_type_certificate_request(
 		EAP_TEMPLATE_CONST tls_handshake_message_c * const handshake_message);
 
 	/**
 	 * This function analyses TLS Handshake/ServerHelloDone message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_handshake_type_server_hello_done(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e analyse_handshake_type_server_hello_done(
 		EAP_TEMPLATE_CONST tls_handshake_message_c * const handshake_message);
 
 	/**
 	 * This function analyses TLS Handshake/ServerKeyExchange message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_handshake_type_server_key_exchange(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e analyse_handshake_type_server_key_exchange(
 		EAP_TEMPLATE_CONST tls_handshake_message_c * const handshake_message);
 
 	/**
 	 * This function analyses TLS Handshake/ClientKeyExchange message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_handshake_type_client_key_exchange(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e analyse_handshake_type_client_key_exchange(
 		EAP_TEMPLATE_CONST tls_handshake_message_c * const handshake_message);
 
 	/**
 	 * This function analyses TLS Handshake/CertificateVerify message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_handshake_type_certificate_verify(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e analyse_handshake_type_certificate_verify(
 		EAP_TEMPLATE_CONST tls_handshake_message_c * const handshake_message);
 
 	/**
 	 * This function analyses TLS Handshake/Finished message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_handshake_type_finished(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e analyse_handshake_type_finished(
 		EAP_TEMPLATE_CONST tls_handshake_message_c * const handshake_message,
 		const u8_t received_eap_identifier);
 
@@ -882,7 +911,7 @@ private:
 	/**
 	 * This function analyses TLS Handshake/NewSessionTicket message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_handshake_type_new_session_ticket(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e analyse_handshake_type_new_session_ticket(
 		EAP_TEMPLATE_CONST tls_handshake_message_c * const handshake_message,
 		const u8_t received_eap_identifier);
 
@@ -891,93 +920,93 @@ private:
 	/**
 	 * This function analyses TLS ChangeCipherSpec protocol.
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_tls_protocol_change_cipher_spec(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e analyse_tls_protocol_change_cipher_spec(
 		const tls_record_message_c * const record);
 
 	/**
 	 * This function analyses TLS Alert protocol.
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_tls_protocol_alert(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e analyse_tls_protocol_alert(
 		const tls_record_message_c * const record);
 
 	/**
 	 * This function analyses TLS Handshake protocol.
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_tls_protocol_handshake(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e analyse_tls_protocol_handshake(
 		tls_record_message_c * const record,
 		const u8_t received_eap_identifier);
 
 	/**
 	 * This function analyses TLS ApplicationData protocol.
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_tls_protocol_application_data(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e analyse_tls_protocol_application_data(
 		const tls_record_message_c * const record,
 		const u8_t received_eap_identifier);
 
 	/**
 	 * This function checks whether all pending queries are completed.
 	 */
-	EAP_FUNC_IMPORT eap_status_e are_pending_queries_completed();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e are_pending_queries_completed();
 
 	/**
 	 * This function indicates state to lower layer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e indicate_state_to_lower_layer(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e indicate_state_to_lower_layer(
 		const tls_peap_state_e indicated_state);
 
 	/**
 	 * This function indicates all message processed to lower layer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e indicate_messages_processed();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e indicate_messages_processed();
 
 	/**
 	 * This function combines TLS-protocols data to a buffer and sends TLS-message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_tls_message();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e send_tls_message();
 
 	/**
 	 * This function checks all queries are completed.
 	 * If all queries are completed this function send the pending LS-messages.
 	 */
-	EAP_FUNC_IMPORT eap_status_e check_sent_tls_message();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e check_sent_tls_message();
 
 	/**
 	 * This function check the selected cipher suite is one of the proposed cipher suites.
 	 */
-	EAP_FUNC_IMPORT eap_status_e check_selected_cipher_suite(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e check_selected_cipher_suite(
 		const tls_cipher_suites_e selected_cipher_suite);
 
 	/**
 	 * This function check the selected compression method is one of the proposed compression method.
 	 */
-	EAP_FUNC_IMPORT eap_status_e check_selected_compression_method(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e check_selected_compression_method(
 		const tls_compression_method_e selected_compression_method);
 
 	/**
 	 * This function changes one 16-bit value pointed by parameter value from network order to host order.
 	 */
-	EAP_FUNC_IMPORT static eap_status_e u16_t_to_host_order(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H static eap_status_e u16_t_to_host_order(
 		u16_t * const value,
 		abs_eap_am_tools_c * const m_am_tools);
 
 	/**
 	 * This function changes one 16-bit value pointed by parameter value from host order to network order.
 	 */
-	EAP_FUNC_IMPORT static eap_status_e u16_t_to_network_order(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H static eap_status_e u16_t_to_network_order(
 		u16_t * const value,
 		abs_eap_am_tools_c * const m_am_tools);
 
 	/**
 	 * This function initializes MD5 and SHA hashes.
 	 */
-	EAP_FUNC_IMPORT eap_status_e message_hash_init();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e message_hash_init();
 
 	/**
 	 * This function adds the send and received TLS-handshake message to MD5 and SHA hashes.
 	 * @param eap includes the buffer of the whole reassembled TLS-packet.
 	 * @param packet_length is length in bytes of the TLS-packet.
 	 */
-	EAP_FUNC_IMPORT eap_status_e message_hash_update(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e message_hash_update(
 		const bool true_when_parse_message,
 		const tls_handshake_type_e type,
 		u8_t * const tls_packet,
@@ -989,13 +1018,13 @@ private:
 	 * @param message_hash includes the buffer of the message digest. The message_hash_create() function initializes the buffer.
 	 * @param client_originated is boolean flag. When client calls this function value is true, when server calls this function value is false.
 	 */
-	EAP_FUNC_IMPORT eap_status_e message_hash_create(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e message_hash_create(
 		const bool true_when_parse_message,
 		const tls_handshake_type_e type,
 		eap_variable_data_c * const message_hash,
 		const bool client_originated);
 
-	EAP_FUNC_IMPORT eap_status_e message_hash_final(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e message_hash_final(
 		eap_variable_data_c * const md5_digest,
 		eap_variable_data_c * const sha1_digest);
 
@@ -1003,26 +1032,26 @@ private:
 	 * This function saves MD5 and SHA hashes for certificate verify message to
 	 * member attributes m_message_hash_md5_certificate_verify and m_message_hash_sha1_certificate_verify.
 	 */
-	EAP_FUNC_IMPORT eap_status_e message_hash_save_certificate_verify();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e message_hash_save_certificate_verify();
 
 	/**
 	 * This function saves MD5 and SHA hashes for finished message to
 	 * member attributes message_hash_md5_finished and message_hash_sha1_finished.
 	 */
-	EAP_FUNC_IMPORT eap_status_e message_hash_save_finished(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e message_hash_save_finished(
 		const bool client_originated);
 
 	/**
 	 * This function creates certificate verfy message hash.
 	 */
-	EAP_FUNC_IMPORT eap_status_e message_hash_create_certificate_verify(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e message_hash_create_certificate_verify(
 		const bool client_originated);
 
 	/**
 	 * This function creates finished message hash.
 	 * @param signed_message_hash is pointer to buffer of the message hash.
 	 */
-	EAP_FUNC_IMPORT eap_status_e message_hash_create_finished(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e message_hash_create_finished(
 		const bool client_originated_message,
 		eap_variable_data_c * const signed_message_hash);
 
@@ -1030,7 +1059,7 @@ private:
 	/**
 	 * This function creates SHA1 HASH of server key exchange message when DHE cipher suite is used.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_server_key_exchange_sha1_hash(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_server_key_exchange_sha1_hash(
 		const eap_variable_data_c * const dhe_prime,
 		const eap_variable_data_c * const dhe_group_generator,
 		const eap_variable_data_c * const public_dhe_key,
@@ -1039,7 +1068,7 @@ private:
 	/**
 	 * This function creates MD5 HASH of server key exchange message when DHE cipher suite is used.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_server_key_exchange_md5_hash(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e create_server_key_exchange_md5_hash(
 		const eap_variable_data_c * const dhe_prime,
 		const eap_variable_data_c * const dhe_group_generator,
 		const eap_variable_data_c * const public_dhe_key,
@@ -1048,7 +1077,7 @@ private:
 	/**
 	 * This function verifies the HASH of server key exchange message is valid.
 	 */
-	EAP_FUNC_IMPORT eap_status_e verify_signature_of_server_key_exchange(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e verify_signature_of_server_key_exchange(
 		const eap_variable_data_c * const signed_server_key_exchange_hash);
 
 
@@ -1056,51 +1085,51 @@ private:
 	/**
 	 * This function verifies the cipher suite is one of using 3DES_EDE_CBC_SHA.
 	 */
-	EAP_FUNC_IMPORT bool cipher_suite_is_3DES_EDE_CBC_SHA(tls_cipher_suites_e cipher_suite) const;
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H bool cipher_suite_is_3DES_EDE_CBC_SHA(tls_cipher_suites_e cipher_suite) const;
 
 	/**
 	 * This function verifies the cipher suite is one of using AES_128_CBC_SHA.
 	 */
-	EAP_FUNC_IMPORT bool cipher_suite_is_AES_128_CBC_SHA(tls_cipher_suites_e cipher_suite) const;
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H bool cipher_suite_is_AES_128_CBC_SHA(tls_cipher_suites_e cipher_suite) const;
 
 	/**
 	 * This function verifies the cipher suite is one of using RC4_128_MD5.
 	 */
-	EAP_FUNC_IMPORT bool cipher_suite_is_RC4_128_MD5(tls_cipher_suites_e cipher_suite) const;
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H bool cipher_suite_is_RC4_128_MD5(tls_cipher_suites_e cipher_suite) const;
 
 	/**
 	 * This function verifies the cipher suite is one of using RC4_128_SHA.
 	 */
-	EAP_FUNC_IMPORT bool cipher_suite_is_RC4_128_SHA(tls_cipher_suites_e cipher_suite) const;
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H bool cipher_suite_is_RC4_128_SHA(tls_cipher_suites_e cipher_suite) const;
 
 
 
 	/**
 	 * This function verifies the current cipher suite is one of using TLS_RSA.
 	 */
-	EAP_FUNC_IMPORT bool cipher_suite_is_TLS_RSA() const;
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H bool cipher_suite_is_TLS_RSA() const;
 
 	/**
 	 * This function verifies the current cipher suite is one of using TLS_DHE_RSA.
 	 */
-	EAP_FUNC_IMPORT bool cipher_suite_is_TLS_DHE_RSA() const;
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H bool cipher_suite_is_TLS_DHE_RSA() const;
 
 	/**
 	 * This function verifies the current cipher suite is one of using TLS_DHE_DSS.
 	 */
-	EAP_FUNC_IMPORT bool cipher_suite_is_TLS_DHE_DSS() const;
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H bool cipher_suite_is_TLS_DHE_DSS() const;
 
 #if defined(USE_FAST_EAP_TYPE)
 	/**
 	 * This function verifies the current cipher suite is one of using TLS_DH_anon.
 	 */
-	EAP_FUNC_IMPORT bool cipher_suite_is_TLS_DH_anon() const;
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H bool cipher_suite_is_TLS_DH_anon() const;
 #endif //#if defined(USE_FAST_EAP_TYPE)
 
 
 #if EAP_TLS_NOT_SUPPORTED_CIPHER_SUITE
 	This is not implemented yet
-	EAP_FUNC_IMPORT bool cipher_suite_is_TLS_DH_DSS() const;
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H bool cipher_suite_is_TLS_DH_DSS() const;
 #endif
 
 
@@ -1109,46 +1138,46 @@ private:
 	 * This function generates ephemeral Diffie-Hellman keys.
 	 * Keys are stored to m_own_private_dhe_key and m_own_public_dhe_key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_dhe_keys();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e generate_dhe_keys();
 
 	/**
 	 * This function generates master secret.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_master_secret();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e generate_master_secret();
 
 	/**
 	 * This function generates premaster secret.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_premaster_secret();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e generate_premaster_secret();
 
 #if defined(USE_FAST_EAP_TYPE)
 	/**
 	 * This function generates master secret from EAP-FAST PAC-Key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_eap_fast_master_secret_from_pac_key(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e generate_eap_fast_master_secret_from_pac_key(
 		const eap_variable_data_c * const pac_key);
 #endif //#if defined(USE_FAST_EAP_TYPE)
 
 
-	EAP_FUNC_IMPORT void send_error_notification(const eap_status_e error);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H void send_error_notification(const eap_status_e error);
 
 	/**
 	 * This function adds new completion action to the end of the m_completion_queue.
 	 */
-	EAP_FUNC_IMPORT eap_status_e completion_action_add(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e completion_action_add(
 		tls_completion_action_e action);
 
 	/**
 	 * This function verifies all completion actions are completed.
 	 */
-	EAP_FUNC_IMPORT eap_status_e completion_action_clenup();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e completion_action_clenup();
 
 	/**
 	 * This function checks and completes completion actions.
 	 * This function could return eap_status_pending_request if the
 	 * first completion action cannot be completed yet.
 	 */
-	EAP_FUNC_IMPORT eap_status_e completion_action_check();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e completion_action_check();
 
 
 
@@ -1156,12 +1185,12 @@ private:
 	/**
 	 * This function generates random padding length. See chapter "6.2.3.2. CBC block cipher" in <a href="../../type/tls_peap/documentation/rfc2246.txt">RFC 2246</a>.
 	 */
-	EAP_FUNC_IMPORT u8_t get_extra_padding_length(const u8_t padding_length, const u32_t block_size);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H u8_t get_extra_padding_length(const u8_t padding_length, const u32_t block_size);
 
 	/**
 	 * This function applies the current block cipher suite to send TLS-record.
 	 */
-	EAP_FUNC_IMPORT eap_status_e apply_send_block_cipher_suite(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e apply_send_block_cipher_suite(
 		eap_variable_data_c * const tls_record_message_buffer,
 		abs_crypto_cbc_block_algorithm_c * const encrypt,
 		abs_crypto_hmac_algorithm_c * const mac);
@@ -1169,7 +1198,7 @@ private:
 	/**
 	 * This function applies the current block cipher suite to received TLS-record.
 	 */
-	EAP_FUNC_IMPORT eap_status_e apply_receive_block_cipher_suite(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e apply_receive_block_cipher_suite(
 		eap_variable_data_c * const tls_record_message_buffer,
 		abs_crypto_cbc_block_algorithm_c * const decrypt,
 		abs_crypto_hmac_algorithm_c * const mac);
@@ -1177,7 +1206,7 @@ private:
 	/**
 	 * This function applies the current stream cipher suite to send TLS-record.
 	 */
-	EAP_FUNC_IMPORT eap_status_e apply_send_stream_cipher_suite(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e apply_send_stream_cipher_suite(
 		eap_variable_data_c * const tls_record_message_buffer,
 		abs_crypto_stream_algorithm_c * const encrypt,
 		abs_crypto_hmac_algorithm_c * const mac);
@@ -1185,7 +1214,7 @@ private:
 	/**
 	 * This function applies the current stream cipher suite to received TLS-record.
 	 */
-	EAP_FUNC_IMPORT eap_status_e apply_receive_stream_cipher_suite(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e apply_receive_stream_cipher_suite(
 		eap_variable_data_c * const tls_record_message_buffer,
 		abs_crypto_stream_algorithm_c * const decrypt,
 		abs_crypto_hmac_algorithm_c * const mac);
@@ -1193,42 +1222,42 @@ private:
 	/**
 	 * This function applies the current cipher suite to send TLS-record.
 	 */
-	EAP_FUNC_IMPORT eap_status_e apply_send_cipher_suite(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e apply_send_cipher_suite(
 		eap_variable_data_c * const tls_record_message_buffer);
 
 	/**
 	 * This function applies the current cipher suite to received TLS-record.
 	 */
-	EAP_FUNC_IMPORT eap_status_e apply_receive_cipher_suite(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e apply_receive_cipher_suite(
 		eap_variable_data_c * const tls_record_message_buffer);
 
 	/** This function hides create_tls_protocol_alert() call.
 	 */
-	EAP_FUNC_IMPORT eap_status_e eap_status_return_and_create_tls_protocol_alert(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e eap_status_return_and_create_tls_protocol_alert(
 		const eap_status_e status);
 
 
 	/**
 	 * This function sets the state of TLS.
 	 */
-	EAP_FUNC_IMPORT tls_peap_state_e get_state() const;
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H tls_peap_state_e get_state() const;
 
 	/**
 	 * This function gets the state of TLS.
 	 */
-	EAP_FUNC_IMPORT void set_state(const tls_peap_state_e state);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H void set_state(const tls_peap_state_e state);
 
 	/**
 	 * This function verified the current state of TLS and parameter state are equal.
 	 */
-	EAP_FUNC_IMPORT bool verify_state(const tls_peap_state_e state);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H bool verify_state(const tls_peap_state_e state);
 
 
 
 	/**
 	 * This function initializes encryption and decryption objects for block cipher suite.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cipher_suite_initialization_cbc(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e cipher_suite_initialization_cbc(
 		abs_crypto_cbc_block_algorithm_c ** const cbc_crypto_block_algorithm,
 		abs_crypto_block_algorithm_c * const crypto_block_algorithm,
 		const eap_variable_data_c * const iv,
@@ -1238,14 +1267,14 @@ private:
 	/**
 	 * This function initializes HMAC algorithm objects.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cipher_suite_initialization_hmac(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e cipher_suite_initialization_hmac(
 		abs_crypto_hmac_algorithm_c * const hmac_algorithm,
 		const eap_variable_data_c * const key);
 
 	/**
 	 * This function initializes encryption and decryption objects for stream cipher suite.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cipher_suite_initialization_stream(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e cipher_suite_initialization_stream(
 		abs_crypto_stream_algorithm_c * const crypto_stream_algorithm,
 		const eap_variable_data_c * const key,
 		const bool true_when_encrypt);
@@ -1253,17 +1282,17 @@ private:
 	/**
 	 * This function initializes HMAC-SHA1 objects for current cipher suite.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cipher_suite_initialization_hmac_sha1(const bool send_when_true);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e cipher_suite_initialization_hmac_sha1(const bool send_when_true);
 
 	/**
 	 * This function initializes HMAC-MD5 objects for current cipher suite.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cipher_suite_initialization_hmac_md5(const bool send_when_true);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e cipher_suite_initialization_hmac_md5(const bool send_when_true);
 
 	/**
 	 * This function initializes encryption and decryption objects for current cipher suite.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cipher_suite_initialization(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e cipher_suite_initialization(
 		const bool send_when_true);
 
 
@@ -1272,41 +1301,41 @@ private:
 	 * This function creates a new TLS-record message or returns tha last one if
 	 * parameter protocol and ther last TLS-record message match.
 	 */
-	EAP_FUNC_IMPORT eap_status_e new_record_message(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e new_record_message(
 		tls_record_message_c ** const tls_record_message,
 		const tls_record_protocol_e protocol);
 
 	/**
 	 * This function creates a new TLS-record including handshake protocol message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_record_message(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e add_record_message(
 		tls_handshake_message_c * const tls_handshake_message);
 
 	/**
 	 * This function creates a new TLS-record including change cipher spec protocol message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_record_message(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e add_record_message(
 		tls_change_cipher_spec_message_c * const change_cipher_spec_message);
 
 	/**
 	 * This function creates a new TLS-record including alert protocol message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_record_message(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e add_record_message(
 		tls_alert_message_c * const alert_message);
 
 	/**
 	 * This function creates a new TLS-record including application data protocol message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_record_message(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e add_record_message(
 		tls_application_data_message_c * const application_data_message);
 
-	EAP_FUNC_IMPORT void reset_block_ciphers(const bool send_when_true);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H void reset_block_ciphers(const bool send_when_true);
 
-	EAP_FUNC_IMPORT void reset_stream_ciphers(const bool send_when_true);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H void reset_stream_ciphers(const bool send_when_true);
 
-	EAP_FUNC_IMPORT void reset_hmac_algorithms(const bool send_when_true);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H void reset_hmac_algorithms(const bool send_when_true);
 
-	EAP_FUNC_IMPORT eap_status_e get_tls_prf_data(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e get_tls_prf_data(
 		const eap_variable_data_c * const master_secret,
 		const eap_variable_data_c * const client_random,
 		const eap_variable_data_c * const server_random,
@@ -1314,17 +1343,17 @@ private:
 		eap_variable_data_c * const prf_data,
 		const u32_t required_prf_data_length);
 
-	EAP_FUNC_IMPORT eap_status_e set_tls_session_type(const tls_session_type_e tls_session_type);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e set_tls_session_type(const tls_session_type_e tls_session_type);
 
-	EAP_FUNC_IMPORT tls_session_type_e get_tls_session_type();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H tls_session_type_e get_tls_session_type();
 
-	EAP_FUNC_IMPORT void set_tls_identity_privacy_handshake_state(const tls_identity_privacy_handshake_state_e state);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H void set_tls_identity_privacy_handshake_state(const tls_identity_privacy_handshake_state_e state);
 
-	EAP_FUNC_IMPORT void set_selected_cipher_suite(const tls_cipher_suites_e cipher_suite);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H void set_selected_cipher_suite(const tls_cipher_suites_e cipher_suite);
 
-	EAP_FUNC_IMPORT eap_status_e set_receive_cipher_suite(const tls_cipher_suites_e cipher_suite);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e set_receive_cipher_suite(const tls_cipher_suites_e cipher_suite);
 
-	EAP_FUNC_IMPORT eap_status_e set_send_cipher_suite(const tls_cipher_suites_e cipher_suite);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e set_send_cipher_suite(const tls_cipher_suites_e cipher_suite);
 
 	//--------------------------------------------------
 protected:
@@ -1337,13 +1366,13 @@ public:
 	/**
 	 * The destructor of the tls_record_c class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~tls_record_c();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H virtual ~tls_record_c();
 
 	/**
 	 * The constructor of the tls_record_c class simply initializes the attributes.
 	 * The tls_record_c object sends packets to the network using tls_base_record_c::get_type_partner() object.
 	 */
-	EAP_FUNC_IMPORT tls_record_c(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H tls_record_c(
 		abs_eap_am_tools_c * const tools, ///< tools is pointer to the tools class. @see abs_eap_am_tools_c.
 		tls_am_services_c * const am_tls_services, ///< This is pointer to adaoptation module of TLS.
 		const bool free_am_tls_services,
@@ -1356,7 +1385,7 @@ public:
 	/**
 	 * This function returns true when EAP-type is TTLS or PEAP.
 	 */
-	EAP_FUNC_IMPORT bool get_is_tunneled_tls();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H bool get_is_tunneled_tls();
 
 	/**
 	 * This function sets the tunnel type.
@@ -1371,7 +1400,7 @@ public:
 	 * object is successfully executed. During the function call the object 
 	 * could query the configuration. Each derived class must define this function.
 	 */
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e configure();
 
 	/**
 	 * The shutdown() function is called before the destructor of the 
@@ -1379,59 +1408,59 @@ public:
 	 * could shutdown the operations, for example cancel timers.
 	 * Each derived class must define this function.
 	 */
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e shutdown();
 
-	EAP_FUNC_IMPORT eap_status_e get_ttls_implicit_challenge(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e get_ttls_implicit_challenge(
 		eap_variable_data_c * const ttls_implicit_challenge,
 		const u32_t required_ttls_implicit_challenge_length);
 
 	/**
 	 * This function sets the NAI realm.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_nai_realm(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e set_nai_realm(
 		const eap_variable_data_c * const NAI_realm ///< This is the full NAI realm.
 		);
 
 	// This is commented in abs_tls_base_application_c.
-	EAP_FUNC_IMPORT eap_status_e packet_send(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e packet_send(
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t header_offset,
 		const u32_t data_length,
 		const u32_t buffer_length);
 
 	// This is commented in abs_tls_base_application_c.
-	EAP_FUNC_IMPORT u32_t get_header_offset(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H u32_t get_header_offset(
 		u32_t * const MTU_length,
 		u32_t * const trailer_length);
 
 	// This is commented in abs_tls_base_application_c.
-	EAP_FUNC_IMPORT eap_status_e read_configure(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e read_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
 	// This is commented in abs_tls_base_application_c.
-	EAP_FUNC_IMPORT eap_status_e write_configure(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e write_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
 	// This is commented in abs_tls_base_application_c.
-	EAP_FUNC_IMPORT void state_notification(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H void state_notification(
 		const abs_eap_state_notification_c * const state);
 
 	// This is commented in abs_tls_base_application_c.
-	EAP_FUNC_IMPORT eap_status_e set_timer(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e set_timer(
 		abs_eap_base_timer_c * const initializer, 
 		const u32_t id, 
 		void * const data,
 		const u32_t p_time_ms);
 
 	// This is commented in abs_tls_base_application_c.
-	EAP_FUNC_IMPORT eap_status_e cancel_timer(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e cancel_timer(
 		abs_eap_base_timer_c * const initializer, 
 		const u32_t id);
 
 	// This is commented in abs_tls_base_application_c.
-	EAP_FUNC_IMPORT eap_status_e load_module(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e load_module(
 		const eap_type_value_e type,
 		const eap_type_value_e /* tunneling_type */,
 		abs_eap_base_type_c * const partner,
@@ -1440,31 +1469,31 @@ public:
 		const eap_am_network_id_c * const receive_network_id);
 
 	// This is commented in abs_tls_base_application_c.
-	EAP_FUNC_IMPORT eap_status_e unload_module(const eap_type_value_e type);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e unload_module(const eap_type_value_e type);
 
 	// This is commented in abs_tls_base_application_c.
-	EAP_FUNC_IMPORT eap_status_e restart_authentication(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e restart_authentication(
 		const eap_am_network_id_c * const receive_network_id,
 		const bool is_client_when_true,
 		const bool force_clean_restart,
 		const bool from_timer);
 
 	// This is commented in abs_tls_base_application_c.
-	EAP_FUNC_IMPORT eap_status_e packet_data_crypto_keys(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e packet_data_crypto_keys(
 		const eap_am_network_id_c * const send_network_id,
 		const eap_master_session_key_c * const master_session_key);
 
 	// This is commented in abs_tls_base_application_c.
-	EAP_FUNC_IMPORT eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);
 
 	// This is commented in abs_tls_base_application_c::get_eap_type_list().
-	EAP_FUNC_IMPORT eap_status_e get_eap_type_list(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e get_eap_type_list(
 		eap_array_c<eap_type_value_e> * const eap_type_list);
 
 	/**
 	 * This function sends starts EAP-TLS/PEAP after a start message is received.
 	 */
-	EAP_FUNC_IMPORT eap_status_e start_tls_peap_authentication(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e start_tls_peap_authentication(
 		const eap_variable_data_c * const received_authority_identity
 		);
 
@@ -1472,7 +1501,7 @@ public:
 	 * This function processes the received packet.
 	 * @param tls_packet includes the buffer of the whole reassembled TLS-packet.
 	 */
-	EAP_FUNC_IMPORT eap_status_e packet_process(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e packet_process(
 		eap_variable_data_c * const tls_packet,
 		const u8_t received_eap_identifier);
 
@@ -1481,7 +1510,7 @@ public:
 	 * @param receive_network_id includes the addresses (network identity) and packet type.
 	 * @param received_eap_identifier is the EAP-Identifier of the received EAP-Success packet.
 	 */
-	EAP_FUNC_IMPORT eap_status_e plain_eap_success_failure_packet_received(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e plain_eap_success_failure_packet_received(
 		const eap_am_network_id_c * const receive_network_id,
 		const eap_code_value_e received_eap_code,
 		const u8_t received_eap_identifier);
@@ -1492,7 +1521,7 @@ public:
 	 * @param receive_network_id includes the addresses (network identity) and packet type.
 	 * @param received_eap_identifier is the EAP-Identifier of the received EAP-Success packet.
 	 */
-	EAP_FUNC_IMPORT eap_status_e empty_ack_packet_received(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e empty_ack_packet_received(
 		const eap_am_network_id_c * const receive_network_id,
 		const u8_t received_eap_identifier);
 
@@ -1501,7 +1530,7 @@ public:
 	 * If object initialization fails this function must return false.
 	 * @return This function returns the validity of this object.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H bool get_is_valid();
 
 	/**
 	 * This function must reset the state of object to same as 
@@ -1510,12 +1539,12 @@ public:
 	 * If object reset fails this function must return corresponding error status.
 	 * @return This function returns the status of reset operation.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e reset();
 
 	/**
 	 * This function calculates the required key lengths. This function consults current cipher suite.
 	 */
-	EAP_FUNC_IMPORT u32_t get_key_expansion_size(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H u32_t get_key_expansion_size(
 		u32_t * const mac_key_length,
 		u32_t * const encryption_key_length,
 		u32_t * const iv_length,
@@ -1525,9 +1554,9 @@ public:
 	/**
 	 * This function generates the key material for the current cipher suite.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_key_material();
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e generate_key_material();
 
-	EAP_FUNC_IMPORT eap_status_e set_tls_master_secret(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e set_tls_master_secret(
 		const eap_variable_data_c * const master_secret,
 		const eap_variable_data_c * const client_random,
 		const eap_variable_data_c * const server_random);
@@ -1537,15 +1566,15 @@ public:
 	 * Parameter send_when_true tells whether the send cipher suite (true) or receive cipher suite (false)
 	 * is acquired to be changed.
 	 */
-	EAP_FUNC_IMPORT eap_status_e change_cipher_spec(const bool send_when_true);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e change_cipher_spec(const bool send_when_true);
 
 
 	// This is commented in tls_base_record_c::read_authority_identity().
-	EAP_FUNC_IMPORT eap_status_e read_authority_identity(eap_variable_data_c * const authority_identity_payload);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e read_authority_identity(eap_variable_data_c * const authority_identity_payload);
 
 	
 	// This is commented in abs_tls_am_services_c::complete_query_cipher_suites_and_previous_session().
-	EAP_FUNC_IMPORT eap_status_e complete_query_cipher_suites_and_previous_session(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_query_cipher_suites_and_previous_session(
 		const tls_session_type_e session_type,
 		EAP_TEMPLATE_CONST eap_array_c<u16_t> * const cipher_suites,
 		EAP_TEMPLATE_CONST eap_array_c<u8_t> * const compression_methods,
@@ -1558,7 +1587,7 @@ public:
 		const eap_status_e completion_status);
 
 	// This is commented in abs_tls_am_services_c::complete_select_cipher_suite_and_check_session_id().
-	EAP_FUNC_IMPORT eap_status_e complete_select_cipher_suite_and_check_session_id(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_select_cipher_suite_and_check_session_id(
 		const tls_session_type_e session_type,
 		const u16_t selected_cipher_suite,
 		const eap_variable_data_c * const session_id,
@@ -1570,90 +1599,94 @@ public:
 
 #if defined(USE_EAP_TLS_SESSION_TICKET)
 	// This is commented in abs_tls_am_services_c::complete_query_new_session_ticket().
-	EAP_FUNC_IMPORT eap_status_e complete_query_new_session_ticket(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_query_new_session_ticket(
 		const tls_extension_c * const new_session_ticket_or_null);
 #endif //#if defined(USE_EAP_TLS_SESSION_TICKET)
 
 	// This is commented in abs_tls_am_services_c::complete_verify_certificate_chain().
-	EAP_FUNC_IMPORT eap_status_e complete_verify_certificate_chain(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_verify_certificate_chain(
 		const eap_status_e result);
 
 	// This is commented in abs_tls_am_services_c::complete_query_certificate_chain().
-	EAP_FUNC_IMPORT eap_status_e complete_query_certificate_chain(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_query_certificate_chain(
 		EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * const certificate_chain,
 		const eap_status_e completion_status);
 
 	// This is commented in abs_tls_am_services_c::complete_query_certificate_authorities_and_types().
-	EAP_FUNC_IMPORT eap_status_e complete_query_certificate_authorities_and_types(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_query_certificate_authorities_and_types(
 		EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * const authorities,
 		EAP_TEMPLATE_CONST eap_array_c<u8_t> * const types,
 		const eap_status_e completion_status);
 
 	// This is commented in abs_tls_am_services_c::complete_query_dh_parameters().
-	EAP_FUNC_IMPORT eap_status_e complete_query_dh_parameters(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_query_dh_parameters(
 		const eap_variable_data_c * const dhe_prime,
 		const eap_variable_data_c * const dhe_group_generator,
 		const eap_status_e completion_status);
 
 	// This is commented in abs_tls_am_services_c::complete_query_realm().
-	EAP_FUNC_IMPORT eap_status_e complete_query_realm(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_query_realm(
 		const eap_variable_data_c * const realm,
 		const eap_status_e completion_status);
 
 	// This is commented in abs_tls_am_services_c::complete_rsa_encrypt_with_public_key().
-	EAP_FUNC_IMPORT eap_status_e complete_rsa_encrypt_with_public_key(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_rsa_encrypt_with_public_key(
 		const eap_variable_data_c * const encrypted_premaster_secret,
 		const eap_status_e completion_status);
 
 	// This is commented in abs_tls_am_services_c::complete_rsa_decrypt_with_private_key().
-	EAP_FUNC_IMPORT eap_status_e complete_rsa_decrypt_with_private_key(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_rsa_decrypt_with_private_key(
 		const eap_variable_data_c * const premaster_secret,
 		const eap_status_e completion_status);
 
 	// This is commented in abs_tls_am_services_c::complete_sign_with_private_key().
-	EAP_FUNC_IMPORT eap_status_e complete_sign_with_private_key(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_sign_with_private_key(
 		const eap_variable_data_c * const message_hash,
 		const eap_status_e completion_status);
 
 	// This is commented in abs_tls_am_services_c::complete_verify_with_public_key().
-	EAP_FUNC_IMPORT eap_status_e complete_verify_with_public_key(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_verify_with_public_key(
 		const eap_status_e verify_status);
 
 	// See abs_tls_base_application_c::get_eap_tls_master_session_key().
-	EAP_FUNC_IMPORT eap_status_e get_eap_tls_master_session_key(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e get_eap_tls_master_session_key(
 		eap_variable_data_c * const eap_tls_master_session_key,
 		eap_variable_data_c * const mschapv2_challenges
 		);
 
-	EAP_FUNC_IMPORT eap_status_e add_rogue_ap(eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list);
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e add_rogue_ap(eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list);
 
 	// This is documented in abs_tls_base_application_c::set_session_timeout().
-	EAP_FUNC_IMPORT eap_status_e set_session_timeout(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e set_session_timeout(
 		const u32_t session_timeout_ms);
 
 #if defined(USE_FAST_EAP_TYPE)
 
-	EAP_FUNC_IMPORT eap_status_e complete_query_tunnel_PAC(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_query_tunnel_PAC(
 		const eap_status_e in_completion_status,
 		const eap_fast_pac_type_e in_pac_type,
 		const eap_fast_variable_data_c * const in_tunnel_PAC_key_tlv,
 		const eap_fast_variable_data_c * const in_tunnel_PAC_opaque_tlv);
 
+	eap_status_e complete_start_initialize_PAC_store(
+		const eap_fast_completion_operation_e completion_operation,
+		const eap_fast_initialize_pac_store_completion_e completion);
+
 #endif //#if defined(USE_FAST_EAP_TYPE)
 
-	EAP_FUNC_IMPORT eap_status_e query_ttls_pap_username_and_password(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e query_ttls_pap_username_and_password(
 		const eap_variable_data_c * const reply_message);
 
-	EAP_FUNC_IMPORT eap_status_e complete_query_ttls_pap_username_and_password(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_query_ttls_pap_username_and_password(
 		const eap_variable_data_c * const ttls_pap_username,
 		const eap_variable_data_c * const ttls_pap_password,
 		const eap_status_e query_result);
 
-	EAP_FUNC_IMPORT eap_status_e verify_ttls_pap_username_and_password(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e verify_ttls_pap_username_and_password(
 		const eap_variable_data_c * const user_name,
 		const eap_variable_data_c * const user_password);
 
-	EAP_FUNC_IMPORT eap_status_e complete_verify_ttls_pap_username_and_password(
+	EAP_FUNC_VISIBILITY_TLS_RECORD_H eap_status_e complete_verify_ttls_pap_username_and_password(
 		const eap_status_e authentication_result,
 		const eap_variable_data_c * const ttls_pap_reply_message);
 

@@ -15,7 +15,7 @@
 #	Control Panel QT UI for TLS ciphersuite configuration in EAP methods
 #
 
-# %version: 9 %
+# %version: 10 %
 
 
 TEMPLATE = lib
@@ -39,14 +39,21 @@ HEADERS += \
 SOURCES += \
 	src/cpeapciphersuiteui.cpp \
 	src/cpeapciphersuiteui_p.cpp
-    
+
+mmpRuleDeffile = \
+    "$${LITERAL_HASH}ifdef WINSCW" \
+    "DEFFILE ./bwins/cpeapciphersuiteui.def" \
+    "$${LITERAL_HASH}else" \
+    "DEFFILE ./eabi/cpeapciphersuiteui.def" \
+    "$${LITERAL_HASH}endif"
+
 symbian: {
 	TARGET.UID3 = 0x2002C2F8
 	TARGET.CAPABILITY = CAP_GENERAL_DLL
 	TARGET.EPOCALLOWDLLDATA = 1
 
-	defFilePath = .
-  	
+    MMP_RULES += mmpRuleDeffile
+
   	BLD_INF_RULES.prj_exports += \ 
   		"rom/cpeapciphersuiteui.iby CORE_MW_LAYER_IBY_EXPORT_PATH(cpeapciphersuiteui.iby)" \
   		"inc/cpeapciphersuiteui.h    |../inc/cpeapciphersuiteui.h"

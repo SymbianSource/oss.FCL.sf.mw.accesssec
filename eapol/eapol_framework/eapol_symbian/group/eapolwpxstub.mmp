@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12.1.5 %
+* %version: 12.1.6 %
 */
 
 //-------------------------------------------------------------------
@@ -34,6 +34,9 @@ UID			0x1000008d  0x101f8e48
 ///////////////////////////////////////////////////////////////////
 
 LANG	SC
+
+MACRO EAP_NO_EXPORT_EAPOL_WPXM_REASSOCIATION_DATA_H
+MACRO EAP_NO_EXPORT_EAPOL_WPXM_REASSOCIATION_REQUEST_DATA_H
 
 SOURCEPATH ../../eapol_common/wpxstub
 SOURCE eapol_core_wpxm_stub.cpp

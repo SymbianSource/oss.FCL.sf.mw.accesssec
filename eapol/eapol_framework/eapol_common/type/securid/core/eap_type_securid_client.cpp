@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 14.1.3 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -110,9 +110,16 @@ EAP_FUNC_EXPORT eap_status_e eap_type_securid_c::complete_eap_identity_query(
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("EAP_type_GTC: function: complete_eap_identity_query, identity:"),
-		 m_identity.get_data(m_identity.get_data_length()),
+		(EAPL("EAP_type_GTC: function: complete_eap_identity_query, m_identity:"),
+		 m_identity.get_data(),
 		 m_identity.get_data_length()));
+
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("EAP_type_GTC: function: complete_eap_identity_query, identity_utf8:"),
+		 identity_utf8->get_data(),
+		 identity_utf8->get_data_length()));
 
 	eap_status_e status = get_type_partner()->complete_eap_identity_query(
 		&m_send_network_id,
@@ -324,7 +331,7 @@ eap_status_e eap_type_securid_c::client_gtc_packet_process(
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("WARNING: EAP-GTC: eap_type_securid_c::client_gtc_packet_process(): skips user interactions\n")));
 
-			status = client_gtc_complete_user_input_query(&m_passcode);
+			status = client_gtc_complete_user_input_query(&m_identity, &m_passcode);
 		}
 		else
 #endif //#if defined(USE_EAP_CONFIGURATION_TO_SKIP_USER_INTERACTIONS)
@@ -493,9 +500,21 @@ EAP_FUNC_EXPORT eap_status_e eap_type_securid_c::client_securid_complete_pincode
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e eap_type_securid_c::client_gtc_complete_user_input_query(
+	const eap_variable_data_c * const identity_utf8,
 	const eap_variable_data_c * const response_utf8)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+
+	eap_status_e status(eap_status_ok);
+
+	if (identity_utf8->get_is_valid_data() == true)
+	{
+		status = m_identity.set_copy_of_buffer(identity_utf8);
+		if (status != eap_status_ok)
+		{
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+	}
 
 	// Send response
 	u32_t packet_length = eap_header_base_c::get_type_data_start_offset(m_use_eap_expanded_type)
@@ -555,12 +574,19 @@ EAP_FUNC_EXPORT eap_status_e eap_type_securid_c::client_gtc_complete_user_input_
 				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 			}
 
-			eap_status_e status = eap_fast_response.set_copy_of_buffer(EAP_FAST_EAP_GTC_RESPONSE_PREFIX, EAP_FAST_EAP_GTC_RESPONSE_PREFIX_LENGTH);
+			status = eap_fast_response.set_copy_of_buffer(EAP_FAST_EAP_GTC_RESPONSE_PREFIX, EAP_FAST_EAP_GTC_RESPONSE_PREFIX_LENGTH);
 			if (status != eap_status_ok)
 			{
 				delete packet;
 				return EAP_STATUS_RETURN(m_am_tools, status);
 			}
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("EAP_type_GTC: function: eap_type_securid_c::client_gtc_complete_user_input_query(): m_identity:"),
+				 m_identity.get_data(),
+				 m_identity.get_data_length()));
 
 			status = eap_fast_response.add_data(&m_identity);
 			if (status != eap_status_ok)
@@ -575,6 +601,13 @@ EAP_FUNC_EXPORT eap_status_e eap_type_securid_c::client_gtc_complete_user_input_
 				delete packet;
 				return EAP_STATUS_RETURN(m_am_tools, status);
 			}
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("EAP_type_GTC: function: eap_type_securid_c::client_gtc_complete_user_input_query(): response_utf8:"),
+				 response_utf8->get_data(),
+				 response_utf8->get_data_length()));
 
 			status = eap_fast_response.add_data(response_utf8);
 			if (status != eap_status_ok)
@@ -598,7 +631,7 @@ EAP_FUNC_EXPORT eap_status_e eap_type_securid_c::client_gtc_complete_user_input_
 		}
 	}
 
-	eap_status_e status = packet_send(packet, packet_length);
+	status = packet_send(packet, packet_length);
 	delete packet;
 
 	m_is_pending = false;

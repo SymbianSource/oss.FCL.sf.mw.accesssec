@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 5 %
+ * %version: 6 %
  */
 
 #ifndef EAPQTVALIDATORPACSTOREPASSWORDCONFIRM_H
@@ -29,6 +29,7 @@
 // User includes
 
 // Forward declarations
+class CEapFastPacStore;
 
 // External data types
 
@@ -51,6 +52,10 @@ public:
 private:
 
     Q_DISABLE_COPY(EapQtValidatorPacStorePasswordConfirm)
+
+private: // data
+
+    QScopedPointer<CEapFastPacStore> mPacStoreIf;
 
 };
 

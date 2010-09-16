@@ -26,6 +26,27 @@
 #include "abs_eap_am_tools.h"
 #include "eap_am_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_NETWORK_ID_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_NETWORK_ID_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_NETWORK_ID_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_NETWORK_ID_H 
+#elif defined(EAP_EXPORT_EAP_AM_NETWORK_ID_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_NETWORK_ID_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_NETWORK_ID_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_NETWORK_ID_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_NETWORK_ID_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_NETWORK_ID_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_NETWORK_ID_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 /// This class stores the protocol layer network identity.
 /**
@@ -35,7 +56,7 @@
  * Addresses are mostly Ethernet addresses. Packet type is the type of Ethernet packet.
  * The eap_am_network_id class stores the addresses using the eap_variable_data objects.
  */
-class EAP_EXPORT eap_am_network_id_c
+class EAP_CLASS_VISIBILITY_EAP_AM_NETWORK_ID_H eap_am_network_id_c
 {
 
 private:
@@ -76,7 +97,7 @@ private:
 	 * The set_is_valid() function sets the state of the eap_core object valid.
 	 * The eap_core object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H void set_is_valid();
 
 public:
 
@@ -84,13 +105,13 @@ public:
 	 * The destructor does nothing extra. The buffers of each address are 
 	 * freed in the destructor of the eap_variable_data class.
 	 */
-	EAP_FUNC_IMPORT virtual ~eap_am_network_id_c();
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H virtual ~eap_am_network_id_c();
 
 	/**
 	 * This version initializes the object.
 	 * @param tools parameter is pointer to the tools class.
 	 */
-	EAP_FUNC_IMPORT eap_am_network_id_c(
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H eap_am_network_id_c(
 		abs_eap_am_tools_c * const tools);
 
 	/**
@@ -107,7 +128,7 @@ public:
 	 *
 	 * NOTE the data buffers are NOT copied.
 	 */
-	EAP_FUNC_IMPORT eap_am_network_id_c(
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H eap_am_network_id_c(
 		abs_eap_am_tools_c * const tools,
 		const void * const source,
 		const u32_t source_length,
@@ -127,7 +148,7 @@ public:
 	 * NOTE the data buffers are NOT copied. This is used to swap addresses of existing
 	 * eap_am_network_id_c object and create a new object using existing addresses.
 	 */
-	EAP_FUNC_IMPORT eap_am_network_id_c(
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H eap_am_network_id_c(
 		abs_eap_am_tools_c * const tools,
 		const eap_variable_data_c * const source,
 		const eap_variable_data_c * const destination,
@@ -140,7 +161,7 @@ public:
 	 *
 	 * NOTE this copies the addresses.
 	 */
-	EAP_FUNC_IMPORT eap_am_network_id_c(
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H eap_am_network_id_c(
 		abs_eap_am_tools_c * const tools,
 		const eap_am_network_id_c * const network_id);
 
@@ -150,10 +171,10 @@ public:
 	 *
 	 * NOTE this copies the addresses.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_copy_of_network_id(
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H eap_status_e set_copy_of_network_id(
 		const eap_am_network_id_c * const network_id);
 
-	EAP_FUNC_IMPORT eap_status_e set_copy_of_am_network_id(
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H eap_status_e set_copy_of_am_network_id(
 		const void * const source,
 		const u32_t source_length,
 		const void * const destination,
@@ -164,78 +185,78 @@ public:
 	 * The get_is_valid() function returns the status of the eap_core object.
 	 * True indicates the object is initialized succesfully.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid() const;
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H bool get_is_valid() const;
 
 	/**
 	 * The get_is_valid_data() function returns the status of the eap_core object.
 	 * True indicates the object does include valid addresses.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid_data() const;
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H bool get_is_valid_data() const;
 
 	/**
 	 * The get_source_id() function returns pointer to the source address.
 	 */
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_source_id() const;
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H const eap_variable_data_c * get_source_id() const;
 
 	/**
 	 * The get_destination_id() function returns pointer to the destination address.
 	 */
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_destination_id() const;
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H const eap_variable_data_c * get_destination_id() const;
 
 
 	/**
 	 * The get_source() function returns pointer to the source data.
 	 */
-	EAP_FUNC_IMPORT const u8_t * get_source() const;
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H const u8_t * get_source() const;
 
 	/**
 	 * The get_destination() function returns pointer to the destination data.
 	 */
-	EAP_FUNC_IMPORT const u8_t * get_destination() const;
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H const u8_t * get_destination() const;
 
 
 	/**
 	 * The get_source_length() function returns length of the source address.
 	 */
-	EAP_FUNC_IMPORT u32_t get_source_length() const;
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H u32_t get_source_length() const;
 
 	/**
 	 * The get_destination_length() function returns length of the destination address.
 	 */
-	EAP_FUNC_IMPORT u32_t get_destination_length() const;
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H u32_t get_destination_length() const;
 
 	/**
 	 * The get_type() function returns type of the packet.
 	 */
-	EAP_FUNC_IMPORT u16_t get_type() const;
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H u16_t get_type() const;
 
 	/**
 	 * The get_network_id() function returns pointer to this.
 	 */
-	EAP_FUNC_IMPORT const eap_am_network_id_c * get_network_id() const;
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H const eap_am_network_id_c * get_network_id() const;
 
 	/**
 	 * The copy() function copies the eap_am_network_id object.
 	 * The data of addresses are copied to new buffers.
 	 */
-	EAP_FUNC_IMPORT eap_am_network_id_c * copy() const;
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H eap_am_network_id_c * copy() const;
 
 	/**
 	 * Compare the objects are identical.
 	 * @return false if data of objects differs.
 	 * @return true if data of objects are the same.
 	 */
-	EAP_FUNC_IMPORT bool compare_network_id(const eap_am_network_id_c * const network_id) const;
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H bool compare_network_id(const eap_am_network_id_c * const network_id) const;
 
 	/**
 	 * The get_type() function sets type of the packet.
 	 */
-	EAP_FUNC_IMPORT void set_type(const u16_t type);
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H void set_type(const u16_t type);
 
 	/**
 	 * Resets the object.
 	 */
-	EAP_FUNC_IMPORT void reset();
+	EAP_FUNC_VISIBILITY_EAP_AM_NETWORK_ID_H void reset();
 };
 
 

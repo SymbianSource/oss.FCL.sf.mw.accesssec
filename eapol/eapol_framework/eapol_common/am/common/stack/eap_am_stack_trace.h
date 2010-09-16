@@ -23,6 +23,27 @@
 #define _STACK_OUTPUT_H_
 
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_STACK_TRACE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_STACK_TRACE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_STACK_TRACE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_STACK_TRACE_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_STACK_TRACE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_STACK_TRACE_H 
+#elif defined(EAP_EXPORT_EAP_AM_STACK_TRACE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_STACK_TRACE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_STACK_TRACE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_STACK_TRACE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_STACK_TRACE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_STACK_TRACE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_STACK_TRACE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_STACK_TRACE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_STACK_TRACE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_STACK_TRACE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_STACK_TRACE_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 class abs_eap_am_tools_c;
 
@@ -30,7 +51,7 @@ class abs_eap_am_tools_c;
  * This class implemets a stack trace. This code is highly processor dependent.
  * Only Intel processor with gcc or MSVC is supported.
  */
-class EAP_EXPORT stack_trace
+class EAP_CLASS_VISIBILITY_EAP_AM_STACK_TRACE_H stack_trace
 {
 private:
 
@@ -41,7 +62,7 @@ private:
 	 * This function traces stack frames starting from bp.
 	 * The bp is pointer to base of the starting stack frame.
 	 */
-	EAP_FUNC_IMPORT void trace_frames(
+	EAP_FUNC_VISIBILITY_EAP_AM_STACK_TRACE_H void trace_frames(
 		unsigned long *bp
 		);
 
@@ -50,18 +71,18 @@ public:
 	/**
 	 * Destructor does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~stack_trace();
+	EAP_FUNC_VISIBILITY_EAP_AM_STACK_TRACE_H virtual ~stack_trace();
 
 	/**
 	 * Constructor does nothing special.
 	 */
-	EAP_FUNC_IMPORT stack_trace(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_AM_STACK_TRACE_H stack_trace(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * This function traces stack frames starting from current frame.
 	 * Value of parameter memory_address is traced in the begin.
 	 */
-	EAP_FUNC_IMPORT void trace(const void * const memory_address);
+	EAP_FUNC_VISIBILITY_EAP_AM_STACK_TRACE_H void trace(const void * const memory_address);
 
 };
 

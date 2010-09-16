@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 31 %
+* %version: 35 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -65,7 +65,7 @@ CEapMsChapV2::CEapMsChapV2(
 
 // ----------------------------------------------------------
 
-CEapMsChapV2* CEapMsChapV2::NewL(SIapInfo *aIapInfo)
+CEapMsChapV2* CEapMsChapV2::NewL(SPluginInfo *aIapInfo)
 {
 	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::NewL()\n")));
 	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapMsChapV2::NewL()\n"));
@@ -75,7 +75,7 @@ CEapMsChapV2* CEapMsChapV2::NewL(SIapInfo *aIapInfo)
 
 // ----------------------------------------------------------
 
-CEapMsChapV2* CEapMsChapV2::NewPlainMSCHAPv2L(SIapInfo *aIapInfo)
+CEapMsChapV2* CEapMsChapV2::NewPlainMSCHAPv2L(SPluginInfo *aIapInfo)
 {
 	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::NewPlainMSCHAPv2L()\n")));
 	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapMsChapV2::NewPlainMSCHAPv2L()\n"));
@@ -273,6 +273,8 @@ void CEapMsChapV2::SetIndexL(
 	CleanupStack::PopAndDestroy(&session);
 }
 
+// ----------------------------------------------------------
+
 void CEapMsChapV2::SetConfigurationL(const EAPSettings& aSettings)
 {
 	EAP_TRACE_DEBUG_SYMBIAN((_L("CEapMsChapV2::SetConfigurationL()\n")));
@@ -304,6 +306,8 @@ void CEapMsChapV2::SetConfigurationL(const EAPSettings& aSettings)
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 }
+
+// ----------------------------------------------------------
 
 void CEapMsChapV2::GetConfigurationL(EAPSettings& aSettings)
 {
@@ -346,6 +350,8 @@ void CEapMsChapV2::GetConfigurationL(EAPSettings& aSettings)
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 }
+
+// ----------------------------------------------------------
 
 void CEapMsChapV2::CopySettingsL(
 	const TIndexType aDestinationIndexType,
@@ -397,5 +403,14 @@ void CEapMsChapV2::CopySettingsL(
 	CleanupStack::PopAndDestroy(&session);
 	
 }
+
+// ----------------------------------------------------------
+
+TInt CEapMsChapV2::InitialisePacStore(AbsPacStoreInitializer * const /* initializer */)
+{
+	return KErrNone;
+}
+
+// ----------------------------------------------------------
 
 // End of file

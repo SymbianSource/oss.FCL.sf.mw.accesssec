@@ -27,12 +27,33 @@
 #include "eap_tools.h"
 #include "eap_am_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AUTOMATIC_VARIABLE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AUTOMATIC_VARIABLE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AUTOMATIC_VARIABLE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AUTOMATIC_VARIABLE_H 
+	#define EAP_FUNC_EXPORT_EAP_AUTOMATIC_VARIABLE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AUTOMATIC_VARIABLE_H 
+#elif defined(EAP_EXPORT_EAP_AUTOMATIC_VARIABLE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AUTOMATIC_VARIABLE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AUTOMATIC_VARIABLE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AUTOMATIC_VARIABLE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AUTOMATIC_VARIABLE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AUTOMATIC_VARIABLE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AUTOMATIC_VARIABLE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AUTOMATIC_VARIABLE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AUTOMATIC_VARIABLE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AUTOMATIC_VARIABLE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AUTOMATIC_VARIABLE_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 /**
  * @{ Add some comments. }
  */
 template <class Type>
-class EAP_EXPORT eap_automatic_variable_c
+class EAP_CLASS_VISIBILITY_EAP_AUTOMATIC_VARIABLE_H eap_automatic_variable_c
 {
 private:
 	abs_eap_am_tools_c * const m_am_tools;
@@ -110,7 +131,7 @@ public:
  * @{ Add some comments. }
  */
 template <class Type>
-class EAP_EXPORT eap_automatic_array_variable_c
+class EAP_CLASS_VISIBILITY_EAP_AUTOMATIC_VARIABLE_H eap_automatic_array_variable_c
 {
 private:
 	abs_eap_am_tools_c * const m_am_tools;
@@ -176,7 +197,7 @@ public:
  * @{ Add some comments. }
  */
 template <class Type>
-class EAP_EXPORT eap_automatic_simple_value_c
+class EAP_CLASS_VISIBILITY_EAP_AUTOMATIC_VARIABLE_H eap_automatic_simple_value_c
 {
 private:
 	abs_eap_am_tools_c * const m_am_tools;
@@ -236,7 +257,7 @@ public:
 /**
  * @{ Add some comments. }
  */
-class EAP_EXPORT eap_automatic_trace_string_c
+class EAP_CLASS_VISIBILITY_EAP_AUTOMATIC_VARIABLE_H eap_automatic_trace_string_c
 {
 private:
 	abs_eap_am_tools_c * const m_am_tools;

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 42 %
+* %version: 49 %
 */
 
 #if !defined(_EAP_PROCESS_TLV_MESSAGE_DATA_H_)
@@ -36,6 +36,29 @@
 #include "simple_config_credential.h"
 #include "simple_config_payloads.h"
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
+
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_PROCESS_TLV_MESSAGE_DATA_H)
+	#define EAP_CLASS_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H 
+	#define EAP_FUNC_EXPORT_EAP_PROCESS_TLV_MESSAGE_DATA_H 
+	#define EAP_C_FUNC_EXPORT_EAP_PROCESS_TLV_MESSAGE_DATA_H 
+#elif defined(EAP_EXPORT_EAP_PROCESS_TLV_MESSAGE_DATA_H)
+	#define EAP_CLASS_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_PROCESS_TLV_MESSAGE_DATA_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_PROCESS_TLV_MESSAGE_DATA_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_PROCESS_TLV_MESSAGE_DATA_H 
+	#define EAP_C_FUNC_EXPORT_EAP_PROCESS_TLV_MESSAGE_DATA_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 enum eap_tlv_message_type_e
 {
@@ -205,7 +228,7 @@ class network_key_and_index_c;
 
 /// This class defines functions to add and parse message data composed
 /// of Attribute-Value Pairs (See eap_tlv_header_c) to/from eap_tlv_message_data_c object.
-class EAP_EXPORT eap_process_tlv_message_data_c
+class EAP_CLASS_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_process_tlv_message_data_c
 : public eap_tlv_message_data_c
 {
 private:
@@ -226,268 +249,269 @@ public:
 	/**
 	 * The destructor of the eap_process_tlv_message_data_c class does nothing.
 	 */
-	EAP_FUNC_IMPORT virtual ~eap_process_tlv_message_data_c();
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H virtual ~eap_process_tlv_message_data_c();
 
 	/**
 	 * The constructor of the eap_process_tlv_message_data_c class simply initializes the attributes.
 	 */
-	EAP_FUNC_IMPORT eap_process_tlv_message_data_c(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_process_tlv_message_data_c(
 		abs_eap_am_tools_c * const tools);
 
 	/**
 	 * This function should increase reference count.
 	 */
-	EAP_FUNC_IMPORT void object_increase_reference_count();
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H void object_increase_reference_count();
 
 	/**
 	 * This function should first decrease reference count
 	 * and second return the remaining reference count.
 	 * Reference count must not be decreased when it is zero.
 	 */
-	EAP_FUNC_IMPORT u32_t object_decrease_reference_count();
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H u32_t object_decrease_reference_count();
 
 	/**
 	 * Object must indicate it's validity.
 	 * If object initialization fails this function must return false.
 	 * @return This function returns the validity of this object.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H bool get_is_valid();
 
 	//- - - - - - - - - - - - - - - - - - - - - - - - - 
 
-	EAP_FUNC_IMPORT u32_t get_payload_size(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H u32_t get_payload_size(
 		const eap_variable_data_c * const data) const;
 
-	EAP_FUNC_IMPORT u32_t get_payload_size(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H u32_t get_payload_size(
 		const eap_am_network_id_c * const network_id) const;
 
-	EAP_FUNC_IMPORT u32_t get_payload_size(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H u32_t get_payload_size(
 		const abs_eap_state_notification_c * const state) const;
 
-	EAP_FUNC_IMPORT u32_t get_payload_size(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H u32_t get_payload_size(
 		const eapol_session_key_c * const session_key) const;
 
-	EAP_FUNC_IMPORT u32_t get_payload_size(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H u32_t get_payload_size(
 		EAP_TEMPLATE_CONST eap_array_c<u16_t> * const ushort_array) const;
 
-	EAP_FUNC_IMPORT u32_t get_payload_size(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H u32_t get_payload_size(
 		const eap_certificate_entry_c * const cert) const;
 
-	EAP_FUNC_IMPORT u32_t get_payload_size(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H u32_t get_payload_size(
 		EAP_TEMPLATE_CONST eap_array_c<eap_certificate_entry_c> * const cert_array) const;
 
-	EAP_FUNC_IMPORT u32_t get_payload_size(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H u32_t get_payload_size(
 		const eap_method_settings_c * const internal_settings) const;
 
-	EAP_FUNC_IMPORT u32_t get_payload_size(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H u32_t get_payload_size(
 		EAP_TEMPLATE_CONST eap_array_c<eap_type_value_e> * const eap_type_array) const;
 
 #if defined(USE_EAP_SIMPLE_CONFIG)
 
-	EAP_FUNC_IMPORT u32_t get_payload_size(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H u32_t get_payload_size(
 		const network_key_and_index_c * const key) const;
 
-	EAP_FUNC_IMPORT u32_t get_payload_size(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H u32_t get_payload_size(
 		const eap_array_c<network_key_and_index_c> * const network_keys) const;
 
-	EAP_FUNC_IMPORT u32_t get_payload_size(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H u32_t get_payload_size(
 		const simple_config_credential_c * const credential) const;
 
-	EAP_FUNC_IMPORT u32_t get_payload_size(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H u32_t get_payload_size(
 		EAP_TEMPLATE_CONST eap_array_c<simple_config_credential_c> * const credential_array) const;
 
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
 
-	EAP_FUNC_IMPORT u32_t get_payload_size(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H u32_t get_payload_size(
 		const eap_variable_data_c * const selector,
 		const eap_config_value_c * const configuration_option) const;
 
 	//- - - - - - - - - - - - - - - - - - - - - - - - - 
 
-	EAP_FUNC_IMPORT eap_status_e add_structured_parameter_header(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_structured_parameter_header(
 		const eap_tlv_message_type_e type,
 		const u32_t length);
 
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const eap_tlv_message_type_e type,
 		const u32_t integer);
 
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const u64_t long_integer);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const u32_t integer);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const u16_t integer);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const u8_t byte_integer);
 
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const i32_t integer);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const i16_t integer);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const i8_t byte_integer);
 
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const bool boolean);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const eap_status_e status);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const eapol_key_authentication_type_e authentication_type);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const eapol_key_802_11_authentication_mode_e mode);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const eap_tlv_message_type_function_e function);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const eap_variable_data_c * const variable_data);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const eap_am_network_id_c * const network_id);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const eap_buf_chain_wr_c * const packet_buffer);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const eapol_session_key_c * const session_key);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const abs_eap_state_notification_c * const state);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const eap_type_value_e eap_type);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
-		const eap_general_header_base_c * const packet_data);
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
+		const eap_general_header_base_c * const packet_data,
+		const u32_t packet_length);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const eap_method_settings_c * const internal_settings);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const eap_certificate_entry_c * const internal_settings);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<u16_t> * const ushort_array);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_certificate_entry_c> * const cert_array);
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_type_value_e> * const eap_type_array);
 
 #if defined(USE_EAP_SIMPLE_CONFIG)
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<simple_config_credential_c> * const credential_array);
 	
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
 
-	EAP_FUNC_IMPORT eap_status_e add_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e add_parameter_data(
 		const eap_variable_data_c * const selector,
 		const eap_config_value_c * const configuration_option);
 
 	//- - - - - - - - - - - - - - - - - - - - - - - - - 
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const integer_header,
 		u64_t * const value);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const integer_header,
 		u32_t * const value);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const integer_header,
 		u16_t * const value);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const integer_header,
 		u8_t * const value);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const integer_header,
 		i32_t * const value);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const integer_header,
 		i16_t * const value);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const integer_header,
 		i8_t * const value);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const function_header,
 		eap_tlv_message_type_function_e * const function);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const network_id_header,
 		eap_am_network_id_c * const new_network_id);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const variable_data_header,
 		eap_variable_data_c * const variable_data);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const session_key_header,
 		eapol_session_key_c * const session_key);
 	
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const state_header,
 		eap_state_notification_c * * const state);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const eap_type_header,
 		eap_type_value_e * const eap_type);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const settings_header,
 		eap_method_settings_c * const settings);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const settings_header,
 		eap_certificate_entry_c * const settings);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const settings_header,
 		eap_array_c<u16_t> * const settings);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const settings_header,
 		eap_array_c<eap_type_value_e> * const settings);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const settings_header,
 		eap_array_c<eap_certificate_entry_c> * const settings);
 
 #if defined(USE_EAP_SIMPLE_CONFIG)
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const network_key_header,
 		network_key_and_index_c * const network_key);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const network_keys_array_header,
 		eap_array_c<network_key_and_index_c> * const network_keys_array);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const credential_array_header,
 		eap_array_c<simple_config_credential_c> * const credential_array);
 
-	EAP_FUNC_IMPORT eap_status_e get_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e get_parameter_data(
 		const eap_tlv_header_c * const credential_header,
 		simple_config_credential_c * const credential);
 
@@ -495,155 +519,155 @@ public:
 
 	//- - - - - - - - - - - - - - - - - - - - - - - - - 
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eap_am_network_id_c * const network_id);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eap_variable_data_c * const variable_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		const eap_tlv_message_type_e type,
 		eap_status_e * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eap_array_c<eap_am_network_id_c> * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eap_state_notification_c * * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eapol_RSNA_key_header_c::eapol_RSNA_cipher_e * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		bool * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eap_type_value_e * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eapol_key_authentication_type_e * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eapol_session_key_c * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eap_tlv_message_type_function_e * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eapol_key_802_11_authentication_mode_e * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eapol_RSNA_key_header_c::eapol_tkip_mic_failure_type_e * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eapol_wlan_authentication_state_e * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		u64_t * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		u32_t * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		u16_t * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		u8_t * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		i32_t * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		i16_t * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		i8_t * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eap_method_settings_c * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eap_array_c<u16_t> * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eap_array_c<eap_certificate_entry_c> * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eap_array_c<eap_type_value_e> * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eap_certificate_entry_c::eap_certificate_type_e * const out_data);
 
 #if defined(USE_EAP_SIMPLE_CONFIG)
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		simple_config_Authentication_Type_e * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		simple_config_Encryption_Type_e * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eap_array_c<simple_config_credential_c> * const out_data);
 
-	EAP_FUNC_IMPORT eap_status_e read_parameter_data(
+	EAP_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H eap_status_e read_parameter_data(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters,
 		const u32_t parameter_index,
 		eap_array_c<network_key_and_index_c> * const out_data);
@@ -652,9 +676,9 @@ public:
 
 	//- - - - - - - - - - - - - - - - - - - - - - - - - 
 
-	EAP_FUNC_IMPORT eap_const_string get_type_string(const eap_tlv_message_type_e type);
+	EAP_C_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H static eap_const_string get_type_string(const eap_tlv_message_type_e type);
 
-	EAP_FUNC_IMPORT eap_const_string get_function_string(const eap_tlv_message_type_function_e function);
+	EAP_C_FUNC_VISIBILITY_EAP_PROCESS_TLV_MESSAGE_DATA_H static eap_const_string get_function_string(const eap_tlv_message_type_function_e function);
 
 	// 
 	//--------------------------------------------------

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 34 %
+* %version: 35 %
 */
 
 #include "REapSession.h"
@@ -277,13 +277,6 @@ EAP_FUNC_EXPORT bool REapSession::get_is_valid()
 /// Look at eap_tlv_header_c and eap_tlv_message_data_c.
 EAP_FUNC_EXPORT eap_status_e REapSession::process_data(const TEapRequests aMessageType, const void * const data, const u32_t length)
     {
-	EAP_TRACE_DATA_DEBUG(
-		iTools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("REapSession::process_data()"),
-		data,
-		length));
-
 	EAP_TRACE_DEBUG(
 		iTools,
 		TRACE_FLAGS_DEFAULT,
@@ -291,6 +284,13 @@ EAP_FUNC_EXPORT eap_status_e REapSession::process_data(const TEapRequests aMessa
 		iEapMessageQueue));
 
 	EAP_TRACE_RETURN_STRING(iTools, "returns: REapSession::process_data()");
+
+	EAP_TRACE_DATA_DEBUG(
+		iTools,
+		EAP_TRACE_FLAGS_NEVER,
+		(EAPL("REapSession::process_data()"),
+		data,
+		length));
 
 	TInt error = iEapMessageQueue->AddMessage(aMessageType, data, length);
 

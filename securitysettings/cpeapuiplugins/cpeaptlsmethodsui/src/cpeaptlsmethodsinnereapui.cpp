@@ -18,7 +18,7 @@
  */
 
 /*
- * %version: 2 %
+ * %version: 3 %
  */
 
 // System includes
@@ -53,11 +53,13 @@
 EapInnerMethodEntryItemData::EapInnerMethodEntryItemData(
     CpEapTlsMethodsUi* tlsUi, 
     CpItemDataHelper &itemDataHelper,
-    const QString &text) :
+    const QString &text,
+    bool secondInnerEap) :
         CpSettingFormEntryItemData(CpSettingFormEntryItemData::ButtonEntryItem,
             itemDataHelper, text), 
         mTlsUi(tlsUi),
-        mItemDataHelper(itemDataHelper)
+        mItemDataHelper(itemDataHelper),
+        mSecondInnerEap(secondInnerEap)
 {
 }
 
@@ -75,5 +77,10 @@ EapInnerMethodEntryItemData::~EapInnerMethodEntryItemData()
 CpBaseSettingView* EapInnerMethodEntryItemData::createSettingView() const
 {
     qDebug("EapInnerMethodEntryItemData::createSettingView()");
-    return mTlsUi->innerUiInstance();
+    if (mSecondInnerEap) {
+        return mTlsUi->secondInnerUiInstance();
+    }
+    else {
+        return mTlsUi->innerUiInstance();
+    }
 }

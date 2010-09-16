@@ -24,11 +24,32 @@
 
 #include "eap_variable_data.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_TYPE_GSMSIM_PAYLOADS_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_GSMSIM_PAYLOADS_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_GSMSIM_PAYLOADS_H 
+#elif defined(EAP_EXPORT_EAP_TYPE_GSMSIM_PAYLOADS_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_GSMSIM_PAYLOADS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_GSMSIM_PAYLOADS_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_GSMSIM_PAYLOADS_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_GSMSIM_PAYLOADS_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_type_gsmsim_header.h"
 
 
 
-class EAP_EXPORT gsmsim_fixed_data_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_fixed_data_c
 {
 private:
 	//--------------------------------------------------
@@ -46,20 +67,20 @@ protected:
 public:
 	//--------------------------------------------------
 
-	EAP_FUNC_IMPORT virtual ~gsmsim_fixed_data_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H virtual ~gsmsim_fixed_data_c();
 
-	EAP_FUNC_IMPORT gsmsim_fixed_data_c(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_fixed_data_c(
 		abs_eap_am_tools_c * const tools);
 
-	EAP_FUNC_IMPORT bool get_is_valid() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H bool get_is_valid() const;
 
-	EAP_FUNC_IMPORT const gsmsim_payload_AT_header_c * get_original_header();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H const gsmsim_payload_AT_header_c * get_original_header();
 
-	EAP_FUNC_IMPORT u16_t get_type(abs_eap_am_tools_c * const m_am_tools) const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H u16_t get_type(abs_eap_am_tools_c * const m_am_tools) const;
 
-	EAP_FUNC_IMPORT u16_t get_data(abs_eap_am_tools_c * const m_am_tools) const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H u16_t get_data(abs_eap_am_tools_c * const m_am_tools) const;
 
-	EAP_FUNC_IMPORT void set_data(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H void set_data(
 		const gsmsim_payload_AT_header_c * const original_header,
 		const u16_t type, const u16_t data);
 
@@ -67,7 +88,7 @@ public:
 }; // class gsmsim_fixed_data_c
 
 
-class EAP_EXPORT gsmsim_variable_data_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c
 {
 private:
 	//--------------------------------------------------
@@ -88,28 +109,28 @@ protected:
 public:
 	//--------------------------------------------------
 
-	EAP_FUNC_IMPORT virtual ~gsmsim_variable_data_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H virtual ~gsmsim_variable_data_c();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c(abs_eap_am_tools_c * const tools);
 
-	EAP_FUNC_IMPORT const gsmsim_payload_AT_header_c * get_original_header() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H const gsmsim_payload_AT_header_c * get_original_header() const;
 
-	EAP_FUNC_IMPORT eap_status_e set_buffer(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H eap_status_e set_buffer(
 		const gsmsim_payload_AT_header_c * const original_header,
 		u8_t *buffer,
 		const u32_t buffer_length,
 		const bool free_buffer,
 		const bool is_writable);
 
-	EAP_FUNC_IMPORT bool get_payload_included() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H bool get_payload_included() const;
 
-	EAP_FUNC_IMPORT u32_t get_data_length() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H u32_t get_data_length() const;
 
-	EAP_FUNC_IMPORT u8_t * get_data(const u32_t data_length) const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H u8_t * get_data(const u32_t data_length) const;
 
-	EAP_FUNC_IMPORT eap_variable_data_c * get_payload_buffer();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H eap_variable_data_c * get_payload_buffer();
 
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H eap_status_e reset();
 
 	//--------------------------------------------------
 }; // class gsmsim_variable_data_c
@@ -119,7 +140,7 @@ public:
 
 
 // 
-class EAP_EXPORT gsmsim_payloads_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_payloads_c
 {
 private:
 	//--------------------------------------------------
@@ -189,12 +210,12 @@ public:
 	};
 
 
-	EAP_FUNC_IMPORT virtual ~gsmsim_payloads_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H virtual ~gsmsim_payloads_c();
 
-	EAP_FUNC_IMPORT gsmsim_payloads_c(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_payloads_c(
 		abs_eap_am_tools_c * const tools);
 
-	EAP_FUNC_IMPORT bool check_one_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H bool check_one_payload(
 		const eap_gsmsim_payload_status_e status,
 		const gsmsim_variable_data_c * const payload);
 
@@ -202,7 +223,7 @@ public:
 	 *  NOTE do not change the order of parameters.
 	 *  Add new payload type to the last of the parameter list.
 	 */
-	EAP_FUNC_IMPORT bool check_payloads(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H bool check_payloads(
 		const eap_gsmsim_payload_status_e nonce_mt,
 		const eap_gsmsim_payload_status_e nonce_s,
 		const eap_gsmsim_payload_status_e MAC,
@@ -225,58 +246,58 @@ public:
 		const eap_gsmsim_payload_status_e RESULT_IND
 		);
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_NONCE_MT();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_NONCE_MT();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_NONCE_S();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_NONCE_S();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_MAC();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_MAC();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_ENCR_DATA();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_ENCR_DATA();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_IDENTITY_payload();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_IDENTITY_payload();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_padding_payload();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_padding_payload();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_n_RANDs();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_n_RANDs();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_PERMANENT_ID_REQ();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_PERMANENT_ID_REQ();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_FULLAUTH_ID_REQ();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_FULLAUTH_ID_REQ();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_ANY_ID_REQ();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_ANY_ID_REQ();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_IV();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_IV();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_NEXT_PSEUDONYM();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_NEXT_PSEUDONYM();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_NEXT_REAUTH_ID();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_NEXT_REAUTH_ID();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_NOTIFICATION();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_NOTIFICATION();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_RESULT_IND();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_RESULT_IND();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_VERSION_LIST();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_VERSION_LIST();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_SELECTED_VERSION();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_SELECTED_VERSION();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_CLIENT_ERROR_CODE();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_CLIENT_ERROR_CODE();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_COUNTER();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_COUNTER();
 
-	EAP_FUNC_IMPORT gsmsim_variable_data_c * get_counter_too_small();
-
-
-	EAP_FUNC_IMPORT void set_includes_unknown_attribute(const gsmsim_payload_AT_type_e unknown_payload);
-
-	EAP_FUNC_IMPORT gsmsim_payload_AT_type_e get_includes_unknown_attribute();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_variable_data_c * get_counter_too_small();
 
 
-	EAP_FUNC_IMPORT void set_includes_other_version_than_1(const bool includes_other_version_than_1);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H void set_includes_unknown_attribute(const gsmsim_payload_AT_type_e unknown_payload);
 
-	EAP_FUNC_IMPORT bool get_includes_other_version_than_1();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H gsmsim_payload_AT_type_e get_includes_unknown_attribute();
 
 
-	EAP_FUNC_IMPORT bool get_is_valid() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H void set_includes_other_version_than_1(const bool includes_other_version_than_1);
+
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H bool get_includes_other_version_than_1();
+
+
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_PAYLOADS_H bool get_is_valid() const;
 
 	//--------------------------------------------------
 }; // class gsmsim_payloads_c

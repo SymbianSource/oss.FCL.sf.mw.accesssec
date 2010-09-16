@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 3 %
+ * %version: 5 %
  */
 
 #ifndef CPEAPTLSMETHODSINNEREAPUI_H
@@ -39,22 +39,39 @@ class CpEapTlsMethodsUi;
  * @addtogroup group_eap_ui_plugin_eap_tlsmethods
  * @{
  */
-
+// Class declaration
 class EapInnerMethodEntryItemData : public CpSettingFormEntryItemData
 {
 public:
     EapInnerMethodEntryItemData(
         CpEapTlsMethodsUi* tlsUi, 
         CpItemDataHelper &itemDataHelper,
-        const QString &text);
+        const QString &text,
+        bool secondInnerEap);
     
     virtual ~EapInnerMethodEntryItemData();
 
     virtual CpBaseSettingView *createSettingView() const;
 
+signals:
+
+public slots:
+
+protected:
+
+protected slots:
+
 private:
+
+private slots:
+
+private:
+    //! Pointer to TLS methods UI (parent view)
     CpEapTlsMethodsUi* mTlsUi;
+    //! Item data helper
     CpItemDataHelper& mItemDataHelper;
+    //! TRUE if second inner EAP type (only FAST), otherwise FALSE
+    bool mSecondInnerEap;
 };
 
 /*! @} */

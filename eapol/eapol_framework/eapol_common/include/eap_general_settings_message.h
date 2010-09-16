@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 7 %
+* %version: 8 %
 */
 
 #if !defined(_EAP_GENERAL_SETTINGS_MESSAGE_BASE_H_)
@@ -24,12 +24,33 @@
 
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_GENERAL_SETTINGS_MESSAGE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_GENERAL_SETTINGS_MESSAGE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_GENERAL_SETTINGS_MESSAGE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_GENERAL_SETTINGS_MESSAGE_H 
+	#define EAP_FUNC_EXPORT_EAP_GENERAL_SETTINGS_MESSAGE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_GENERAL_SETTINGS_MESSAGE_H 
+#elif defined(EAP_EXPORT_EAP_GENERAL_SETTINGS_MESSAGE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_GENERAL_SETTINGS_MESSAGE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_GENERAL_SETTINGS_MESSAGE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_GENERAL_SETTINGS_MESSAGE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_GENERAL_SETTINGS_MESSAGE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_GENERAL_SETTINGS_MESSAGE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_GENERAL_SETTINGS_MESSAGE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_GENERAL_SETTINGS_MESSAGE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_GENERAL_SETTINGS_MESSAGE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_GENERAL_SETTINGS_MESSAGE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_GENERAL_SETTINGS_MESSAGE_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 class abs_eap_general_settings_message_c;
 class eap_method_settings_c;
 
 /// Class is interface from user of EAP-general settings to eap_general_settings_client_message_if_c.
-class EAP_EXPORT eap_general_settings_message_c
+class EAP_CLASS_VISIBILITY_EAP_GENERAL_SETTINGS_MESSAGE_H eap_general_settings_message_c
 {
 private:
 	//--------------------------------------------------
@@ -46,12 +67,12 @@ public:
 	/**
 	 * The destructor of the eap_core class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~eap_general_settings_message_c();
+	EAP_FUNC_VISIBILITY_EAP_GENERAL_SETTINGS_MESSAGE_H virtual ~eap_general_settings_message_c();
 
 	/**
 	 * The constructor initializes member attributes.
 	 */
-	EAP_FUNC_IMPORT eap_general_settings_message_c();
+	EAP_FUNC_VISIBILITY_EAP_GENERAL_SETTINGS_MESSAGE_H eap_general_settings_message_c();
 
 	/**
 	 * This function must reset the state of object to same as 

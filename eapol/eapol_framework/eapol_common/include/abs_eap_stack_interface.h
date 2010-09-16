@@ -23,6 +23,27 @@
 #define _ABS_EAP_STACK_INTERFACE_H_
 
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABS_EAP_STACK_INTERFACE_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_STACK_INTERFACE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_STACK_INTERFACE_H 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_STACK_INTERFACE_H 
+	#define EAP_FUNC_EXPORT_ABS_EAP_STACK_INTERFACE_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_STACK_INTERFACE_H 
+#elif defined(EAP_EXPORT_ABS_EAP_STACK_INTERFACE_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_STACK_INTERFACE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_STACK_INTERFACE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_STACK_INTERFACE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_STACK_INTERFACE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_STACK_INTERFACE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_STACK_INTERFACE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_STACK_INTERFACE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_STACK_INTERFACE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_STACK_INTERFACE_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_STACK_INTERFACE_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 class eap_am_network_id_c;
 class eap_general_header_base_c;
@@ -33,7 +54,7 @@ class eap_general_header_base_c;
 /// Main purpose of this interface is documenting those functions.
 /// Note the each interface could include other functions too.
 /// Those are defined in each individual interface.
-class EAP_EXPORT abs_eap_stack_interface_c
+class EAP_CLASS_VISIBILITY_ABS_EAP_STACK_INTERFACE_H abs_eap_stack_interface_c
 {
 private:
 	//--------------------------------------------------

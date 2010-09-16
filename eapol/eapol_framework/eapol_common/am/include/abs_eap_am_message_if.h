@@ -24,13 +24,34 @@
 
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABS_EAP_AM_MESSAGE_IF_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_AM_MESSAGE_IF_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_AM_MESSAGE_IF_H 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_AM_MESSAGE_IF_H 
+	#define EAP_FUNC_EXPORT_ABS_EAP_AM_MESSAGE_IF_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_AM_MESSAGE_IF_H 
+#elif defined(EAP_EXPORT_ABS_EAP_AM_MESSAGE_IF_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_AM_MESSAGE_IF_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_AM_MESSAGE_IF_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_AM_MESSAGE_IF_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_AM_MESSAGE_IF_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_AM_MESSAGE_IF_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_AM_MESSAGE_IF_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_AM_MESSAGE_IF_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_AM_MESSAGE_IF_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_AM_MESSAGE_IF_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_AM_MESSAGE_IF_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 //--------------------------------------------------
 
 /** @file */
 
 /// This class is abstract interface to send data messages through abstract interface.
-class EAP_EXPORT abs_eap_am_message_if_c
+class EAP_CLASS_VISIBILITY_ABS_EAP_AM_MESSAGE_IF_H abs_eap_am_message_if_c
 {
 
 private:

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 27 %
+* %version: 38 %
 */
 
 #ifndef _EAPTLSPEAP_H_
@@ -24,15 +24,48 @@
 
 // INCLUDES
 #include <EapTypePlugin.h>
-#include "eap_header.h"
-#if defined(USE_FAST_EAP_TYPE)
-#include "tls_application_eap_fast.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPTLSPEAP_H)
+	#define EAP_CLASS_VISIBILITY_EAPTLSPEAP_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPTLSPEAP_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPTLSPEAP_H 
+	#define EAP_FUNC_EXPORT_EAPTLSPEAP_H 
+	#define EAP_C_FUNC_EXPORT_EAPTLSPEAP_H 
+#elif defined(EAP_EXPORT_EAPTLSPEAP_H)
+	#define EAP_CLASS_VISIBILITY_EAPTLSPEAP_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPTLSPEAP_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPTLSPEAP_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPTLSPEAP_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPTLSPEAP_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPTLSPEAP_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPTLSPEAP_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPTLSPEAP_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPTLSPEAP_H 
+	#define EAP_C_FUNC_EXPORT_EAPTLSPEAP_H 
 #endif
+// End: added by script change_export_macros.sh.
+#if defined(USE_FAST_EAP_TYPE)
+	#include "tls_application_eap_fast.h"
+	#include "PacStoreInitialization.h"
+	#include "AbsPacStoreInitializer.h"
+#else
+	class AbsPacStoreInitializer;
+#endif
+#include "eap_header.h"
+#include "abs_eap_base_timer.h"
+
 // CLASS DECLARATION
 /**
 * Class that implements the generic EAP type interface. Implements EAP TLS protocol.
 */
-class CEapTlsPeap : public CEapTypePlugin
+class EAP_CLASS_VISIBILITY_EAPTLSPEAP_H CEapTlsPeap
+: public CEapTypePlugin
+#if defined(USE_FAST_EAP_TYPE)
+, public abs_pac_store_initializer_c
+#endif //#if defined(USE_FAST_EAP_TYPE)
+, public abs_eap_base_timer_c
 {
 public:		
 
@@ -41,14 +74,14 @@ public:
 	* @param aIapInfo Pointer to the class that contains information about bearer type and unique index.
 	* @return Pointer to the instance.
 	*/
-	static CEapTlsPeap* NewTlsL(SIapInfo *aIapInfo);
+	static CEapTlsPeap* NewTlsL(SPluginInfo *aIapInfo);
 
 	/**
 	* Construction function for PEAP. Called by ECom after the DLL has been loaded.
 	* @param aIapInfo Pointer to the class that contains information about bearer type and unique index.
 	* @return Pointer to the instance.
 	*/
-	static CEapTlsPeap* NewPeapL(SIapInfo *aIapInfo);
+	static CEapTlsPeap* NewPeapL(SPluginInfo *aIapInfo);
 
 	/**
 	* Construction function for TTLS. Called by ECom after the DLL has been loaded.
@@ -56,7 +89,7 @@ public:
 	* @return Pointer to the instance.
 	*/
 #if defined(USE_TTLS_EAP_TYPE)
-	static CEapTlsPeap* NewTtlsL(SIapInfo *aIapInfo);
+	static CEapTlsPeap* NewTtlsL(SPluginInfo *aIapInfo);
 #endif // #if defined(USE_TTLS_EAP_TYPE)
 
 	/**
@@ -68,7 +101,7 @@ public:
 	* @return Pointer to the instance.
 	*/
 	
-	static CEapTlsPeap* NewTtlsPapL( SIapInfo* aIapInfo );
+	static CEapTlsPeap* NewTtlsPapL( SPluginInfo* aIapInfo );
 	
 	/**
 	* Construction function for FAST. Called by ECom after the DLL has been loaded.
@@ -76,7 +109,7 @@ public:
 	* @return Pointer to the instance.
 	*/
 #if defined(USE_FAST_EAP_TYPE)
-	static CEapTlsPeap* NewFastL(SIapInfo *aIapInfo);
+	static CEapTlsPeap* NewFastL(SPluginInfo *aIapInfo);
 #endif
 
 	/**
@@ -179,18 +212,29 @@ public:
 	*/
 	void CopySettingsL(const TIndexType aDestinationIndexType, const TInt aDestinationIndex);
 
+	TInt InitialisePacStore(AbsPacStoreInitializer * const initializer);
+
+#if defined(USE_FAST_EAP_TYPE)
+
+	eap_status_e complete_start_initialize_PAC_store(
+		const eap_fast_completion_operation_e completion_operation,
+		const eap_fast_initialize_pac_store_completion_e completion);
+
+#endif //#if defined(USE_FAST_EAP_TYPE)
+
+	eap_status_e timer_expired(
+		const u32_t id, void *data);
+
+	eap_status_e timer_delete_data(
+		const u32_t id, void *data);
+
 protected:
 	
 	/**
 	* Constructor initialises member variables.
 	*/
-	CEapTlsPeap(const TIndexType aIndexType, const TInt aIndex, const eap_type_value_e aEapType);
+	CEapTlsPeap(const TIndexType aIndexType, const TInt aIndex, const eap_type_value_e aEapType, abs_eap_am_tools_c * const aTools);
 
-#if defined(USE_FAST_EAP_TYPE)
-	tls_application_eap_fast_c* GetTlsInterfaceL(abs_eap_am_tools_c* const aTools, 
-											   const bool is_client_when_true,
-											   const eap_am_network_id_c * const receive_network_id);	
-#endif
 private:
 
 #ifdef USE_PAC_STORE
@@ -200,6 +244,8 @@ private:
 		const eap_type_value_e aTunnelingType);
 	
 #endif // #ifdef USE_PAC_STORE	
+
+	void ConstructL();
 
 private:
 
@@ -217,15 +263,17 @@ private:
 	
 	// EAP array for deleting and changing index
 	RImplInfoPtrArray iEapArray;
+
+	/// This is pointer to the tools class.
+	abs_eap_am_tools_c * m_am_tools;
 	
 #if defined(USE_FAST_EAP_TYPE)
-	tls_application_eap_fast_c* iApplication;
-#endif	
-		/// This is pointer to the tools class.
-	abs_eap_am_tools_c * const m_am_tools;
-	
-	eap_base_type_c* iType;
 
+	CPacStoreInitialization * iPacStoreInitialization;
+
+	AbsPacStoreInitializer * iInitializer;
+
+#endif //#if defined(USE_FAST_EAP_TYPE)
 
 };
 

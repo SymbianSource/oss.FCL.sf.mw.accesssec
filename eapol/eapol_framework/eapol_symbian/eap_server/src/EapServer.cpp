@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 35 %
+* %version: 41 %
 */
 
 #include "EapServer.h"
@@ -70,40 +70,51 @@ void CEapServer::ConstructL()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	eap_status_e status(eap_status_ok);
+
 	{
 		const u8_t DEFAULT_PREFIX[] = "EAP-SERVER";
 		eap_variable_data_c tmp_prefix(iTools);
 
 		if (tmp_prefix.get_is_valid() == false)
 		{
-			iTools->am_cancel_all_timers();
-			abs_eap_am_tools_c::delete_abs_eap_am_tools_c(iTools);
-			User::Leave(KErrNoMemory);
+			status = eap_status_allocation_error;
+			(void) EAP_STATUS_RETURN(iTools, status);
 		}
 
-		eap_status_e status = tmp_prefix.set_copy_of_buffer(DEFAULT_PREFIX, sizeof(DEFAULT_PREFIX)-1ul);;
-		if (status != eap_status_ok)
+		if (status == eap_status_ok)
 		{
-			iTools->am_cancel_all_timers();
-			abs_eap_am_tools_c::delete_abs_eap_am_tools_c(iTools);
-			User::Leave(KErrNoMemory);
+			status = tmp_prefix.set_copy_of_buffer(DEFAULT_PREFIX, sizeof(DEFAULT_PREFIX)-1ul);;
+			if (status != eap_status_ok)
+			{
+				(void) EAP_STATUS_RETURN(iTools, status);
+			}
 		}
 
-		status = tmp_prefix.add_end_null();
-		if (status != eap_status_ok)
+		if (status == eap_status_ok)
 		{
-			iTools->am_cancel_all_timers();
-			abs_eap_am_tools_c::delete_abs_eap_am_tools_c(iTools);
-			User::Leave(KErrNoMemory);
+			status = tmp_prefix.add_end_null();
+			if (status != eap_status_ok)
+			{
+				(void) EAP_STATUS_RETURN(iTools, status);
+			}
 		}
 
-		status = iTools->set_trace_prefix(&tmp_prefix);
-		if (status != eap_status_ok)
+		if (status == eap_status_ok)
 		{
-			iTools->am_cancel_all_timers();
-			abs_eap_am_tools_c::delete_abs_eap_am_tools_c(iTools);
-			User::Leave(KErrNoMemory);
+			status = iTools->set_trace_prefix(&tmp_prefix);
+			if (status != eap_status_ok)
+			{
+				(void) EAP_STATUS_RETURN(iTools, status);
+			}
 		}
+	}
+
+	if (status != eap_status_ok)
+	{
+		iTools->am_cancel_all_timers();
+		abs_eap_am_tools_c::delete_abs_eap_am_tools_c(iTools);
+		User::Leave(KErrGeneral);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -228,6 +239,27 @@ CEapServer::~CEapServer()
 
 	// Do not use iTools, because it will be destroyed before return.
 	EAP_TRACE_RETURN_STRING_SYMBIAN(_L("returns: CEapServer::~CEapServer()"));
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	TInt aCount = iReadyHandlers.Count();
+
+	while (aCount > 0)
+	{
+		EAP_TRACE_DEBUG(
+			iTools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("CEapServer::~CEapServer(): Removes iReadyHandlers[0]=0x%08x\n"),
+			iReadyHandlers[0]));
+
+		iReadyHandlers.Remove(0);
+
+		aCount = iReadyHandlers.Count();
+	}
+
+	iReadyHandlers.Close();
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	delete iShutdown;
 	delete iBackupRestore;
@@ -430,6 +462,158 @@ void CEapServer::BackupOrRestoreStartingL()
     StopL();
 }
 
+// -----------------------------------------------------------------------------------------
+
+TInt CEapServer::AddReadyHandler(CEapServerProcessHandler * const handler)
+{
+	EAP_TRACE_DEBUG(
+		iTools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapServer::AddReadyHandler(): this=0x%08x: handler=0x%08x\n"),
+		this,
+		handler));
+	EAP_TRACE_RETURN_STRING(iTools, "returns: CEapServer::AddReadyHandler()");
+
+	TInt aCount = iReadyHandlers.Count();
+
+	if (aCount > 0)
+	{
+		EAP_TRACE_DEBUG(
+			iTools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("CEapServer::AddReadyHandler(): this=0x%08x: iReadyHandlers[0]=0x%08x\n"),
+			this,
+			iReadyHandlers[0]));
+	}
+
+	TInt error = iReadyHandlers.Append(handler);
+	if (error != KErrNone)
+	{
+		EAP_TRACE_DEBUG(
+			iTools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("ERROR: CEapServer::AddReadyHandler(): Cannot append handler, error = %d\n"),
+			error));
+	}
+
+	if (aCount == 0
+		&& error == KErrNone)
+	{
+			EAP_TRACE_DEBUG(
+				iTools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("CEapServer::AddReadyHandler(): this=0x%08x: Activates handler=0x%08x\n"),
+				this,
+				handler));
+
+		// Acticate the first handler.
+		handler->Activate(EapServerProcessHandlerState_All);
+	}
+
+	return error;
+}
+
+// -----------------------------------------------------------------------------------------
+
+TInt CEapServer::CompleteReadyHandler(CEapServerProcessHandler * const handler)
+{
+	EAP_TRACE_DEBUG(
+		iTools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapServer::CompleteReadyHandler(): this=0x%08x: handler=0x%08x\n"),
+		this,
+		handler));
+	EAP_TRACE_RETURN_STRING(iTools, "returns: CEapServer::CompleteReadyHandler()");
+
+	TInt aCount = iReadyHandlers.Count();
+
+	TInt error(KErrNone);
+
+	if (aCount == 0)
+	{
+		EAP_TRACE_DEBUG(
+			iTools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("CEapServer::CompleteReadyHandler(): this=0x%08x, no handlers ready.\n"),
+			this,
+			handler));
+	}
+	else if (iReadyHandlers[0] != handler)
+	{
+		EAP_TRACE_DEBUG(
+			iTools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("ERROR: CEapServer::CompleteReadyHandler(): this=0x%08x, handler=0x%08x is not the first one 0x%08x\n"),
+			this,
+			handler,
+			iReadyHandlers[0]));
+
+		error = KErrGeneral;
+	}
+	else
+	{
+		iReadyHandlers.Remove(0);
+
+		aCount = iReadyHandlers.Count();
+
+		if (aCount > 0)
+		{
+			EAP_TRACE_DEBUG(
+				iTools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("CEapServer::CompleteReadyHandler(): this=0x%08x, Activates handler=0x%08x\n"),
+				this,
+				iReadyHandlers[0]));
+
+			// Activate the next handler.
+			iReadyHandlers[0]->Activate(EapServerProcessHandlerState_All);
+		}
+	}
+
+	return error;
+}
+
+// -----------------------------------------------------------------------------------------
+
+TInt CEapServer::CancelReadyHandler(CEapServerProcessHandler * const handler)
+{
+	EAP_TRACE_DEBUG(
+		iTools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapServer::CancelReadyHandler(): this=0x%08x: handler=0x%08x\n"),
+		this,
+		handler));
+	EAP_TRACE_RETURN_STRING(iTools, "returns: CEapServer::CancelReadyHandler()");
+
+	TInt index(0);
+	TInt aCount = iReadyHandlers.Count();
+
+	while (index < aCount)
+	{
+		if (iReadyHandlers[index] != handler)
+		{
+			EAP_TRACE_DEBUG(
+				iTools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("CEapServer::CancelReadyHandler(): Removes iReadyHandlers[%d]=0x%08x\n"),
+				index,
+				iReadyHandlers[index]));
+
+			iReadyHandlers.Remove(index);
+
+			aCount = iReadyHandlers.Count();
+		}
+		else
+		{
+			++index;
+		}
+	} // while()
+
+	return KErrNone;
+}
+
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 
 /*

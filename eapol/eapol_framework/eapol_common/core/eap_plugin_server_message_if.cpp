@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 14 %
+* %version: 16 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -47,7 +47,7 @@ EAP_FUNC_EXPORT eap_plugin_server_message_if_c::~eap_plugin_server_message_if_c(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_plugin_server_message_if_c::~eap_plugin_server_message_if_c(): this = 0x%08x\n"),
 		this));
 
@@ -80,7 +80,7 @@ EAP_FUNC_EXPORT eap_plugin_server_message_if_c::eap_plugin_server_message_if_c(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_plugin_server_message_if_c::eap_plugin_server_message_if_c(): %s, this = 0x%08x => 0x%08x, compiled %s %s.\n"),
 		(m_is_client == true) ? "client": "server",
 		this,
@@ -107,11 +107,11 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::configure(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools,
-		EAP_TRACE_FLAGS_MESSAGE_DATA,
+		TRACE_FLAGS_DEFAULT,
 		(EAPL("%s: eap_plugin_server_message_if_c::configure()\n"),
 		(m_is_client == true) ? "client": "server"));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_plugin_server_message_if_c::configure()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_plugin_server_message_if_c::configure()");
 
 	eap_status_e status(eap_status_process_general_error);
 
@@ -135,12 +135,12 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::shutdown()
 {
 	EAP_TRACE_DEBUG(
 		m_am_tools,
-		EAP_TRACE_FLAGS_MESSAGE_DATA,
+		TRACE_FLAGS_DEFAULT,
 		(EAPL("%s: eap_plugin_server_message_if_c::shutdown(), m_shutdown_was_called=%d\n"),
 		(m_is_client == true) ? "client": "server",
 		m_shutdown_was_called));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_plugin_server_message_if_c::shutdown()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_plugin_server_message_if_c::shutdown()");
 
 	EAP_ASSERT(m_am_tools->get_global_mutex()->get_is_reserved() == true);
 
@@ -221,7 +221,7 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::send_message(eap_pr
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_plugin_server_message_if_c::send_message(): this = 0x%08x => 0x%08x.\n"),
 		this,
 		dynamic_cast<abs_eap_base_timer_c *>(this)));
@@ -233,7 +233,7 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::send_message(eap_pr
 		message->get_message_data(),
 		message->get_message_data_length()));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_core_client_message_if_c::send_message()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_core_client_message_if_c::send_message()");
 
 	eap_status_e send_status = m_partner->send_data(
 		message->get_message_data(),
@@ -286,7 +286,7 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::process_message(eap
 		message->get_message_data(),
 		message->get_message_data_length()));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_plugin_server_message_if_c::process_message()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_plugin_server_message_if_c::process_message()");
 
 	eap_array_c<eap_tlv_header_c> parameters(m_am_tools);
 
@@ -350,6 +350,14 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::process_message(eap
 
 			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
+
+		EAP_TRACE_DEBUG(
+			m_am_tools, 
+			TRACE_FLAGS_DEFAULT, 
+			(EAPL("eap_plugin_server_message_if_c::process_message(): this = 0x%08x, message=%d=%s\n"),
+			this,
+			function,
+			eap_process_tlv_message_data_c::get_function_string(function)));
 
 		switch(function)
 		{
@@ -416,7 +424,7 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::process_data(const 
 		data,
 		length));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_plugin_server_message_if_c::process_message()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_plugin_server_message_if_c::process_message()");
 
 	eap_status_e status(eap_status_process_general_error);
 
@@ -483,14 +491,14 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::timer_expired(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools,
-		EAP_TRACE_FLAGS_MESSAGE_DATA,
+		TRACE_FLAGS_DEFAULT,
 		(EAPL("TIMER: %s: [0x%08x]->eap_plugin_server_message_if_c::timer_expired(id 0x%02x, data 0x%08x).\n"),
 		 (m_is_client == true) ? "client": "server",
 		 this,
 		 id,
 		 data));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_plugin_server_message_if_c::timer_expired()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_plugin_server_message_if_c::timer_expired()");
 
 
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
@@ -508,12 +516,12 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::timer_delete_data(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools,
-		EAP_TRACE_FLAGS_MESSAGE_DATA,
+		TRACE_FLAGS_DEFAULT,
 		(EAPL("TIMER: %s: [0x%08x]->eap_plugin_server_message_if_c::timer_delete_data(id 0x%02x, data 0x%08x).\n"),
 		(m_is_client == true) ? "client": "server",
 		this, id, data));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_plugin_server_message_if_c::timer_delete_data()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_plugin_server_message_if_c::timer_delete_data()");
 
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
 }
@@ -527,13 +535,13 @@ eap_status_e eap_plugin_server_message_if_c::get_configuration(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("%s: eap_plugin_server_message_if_c::get_configuration(): parameters=0x%08x, count=%d\n"),
 		 (m_is_client == true) ? "client": "server",
 		 parameters,
 		 (parameters != 0) ? parameters->get_object_count(): 0));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_plugin_server_message_if_c::get_configuration()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_plugin_server_message_if_c::get_configuration()");
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -589,11 +597,11 @@ eap_status_e eap_plugin_server_message_if_c::set_configuration(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("%s: eap_plugin_server_message_if_c::set_configuration()\n"),
 		 (m_is_client == true) ? "client": "server"));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_plugin_server_message_if_c::set_configuration()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_plugin_server_message_if_c::set_configuration()");
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -649,11 +657,11 @@ eap_status_e eap_plugin_server_message_if_c::copy_configuration(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("%s: eap_plugin_server_message_if_c::copy_configuration()\n"),
 		 (m_is_client == true) ? "client": "server"));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_plugin_server_message_if_c::copy_configuration()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_plugin_server_message_if_c::copy_configuration()");
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -709,11 +717,11 @@ eap_status_e eap_plugin_server_message_if_c::delete_configuration(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("%s: eap_plugin_server_message_if_c::delete_configuration()\n"),
 		 (m_is_client == true) ? "client": "server"));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_plugin_server_message_if_c::delete_configuration()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_plugin_server_message_if_c::delete_configuration()");
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -769,11 +777,11 @@ eap_status_e eap_plugin_server_message_if_c::set_index(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("%s: eap_plugin_server_message_if_c::set_index()\n"),
 		 (m_is_client == true) ? "client": "server"));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_plugin_server_message_if_c::set_index()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_plugin_server_message_if_c::set_index()");
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -829,11 +837,11 @@ eap_status_e eap_plugin_server_message_if_c::get_type_info(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("%s: eap_plugin_server_message_if_c::get_type_info()\n"),
 		 (m_is_client == true) ? "client": "server"));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_plugin_server_message_if_c::get_type_info()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_plugin_server_message_if_c::get_type_info()");
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -889,11 +897,11 @@ eap_status_e eap_plugin_server_message_if_c::invoke_ui(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("%s: eap_plugin_server_message_if_c::invoke_ui()\n"),
 		 (m_is_client == true) ? "client": "server"));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_plugin_server_message_if_c::invoke_ui()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_plugin_server_message_if_c::invoke_ui()");
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -946,11 +954,11 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::complete_get_config
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("%s: eap_core_server_message_if_c::complete_get_configuration()\n"),
 		 (m_is_client == true) ? "client": "server"));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_core_server_message_if_c::complete_get_configuration()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_core_server_message_if_c::complete_get_configuration()");
 
 	{
 		// Creates message data composed of Attribute-Value Pairs.
@@ -996,11 +1004,11 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::complete_set_config
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("%s: eap_core_server_message_if_c::complete_set_configuration()\n"),
 		 (m_is_client == true) ? "client": "server"));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_core_server_message_if_c::complete_set_configuration()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_core_server_message_if_c::complete_set_configuration()");
 
 	{
 		// Creates message data composed of Attribute-Value Pairs.
@@ -1046,11 +1054,11 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::complete_delete_con
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("%s: eap_core_server_message_if_c::complete_delete_configuration()\n"),
 		 (m_is_client == true) ? "client": "server"));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_core_server_message_if_c::complete_delete_configuration()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_core_server_message_if_c::complete_delete_configuration()");
 
 	{
 		// Creates message data composed of Attribute-Value Pairs.
@@ -1096,11 +1104,11 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::complete_copy_confi
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("%s: eap_core_server_message_if_c::complete_copy_configuration()\n"),
 		 (m_is_client == true) ? "client": "server"));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_core_server_message_if_c::complete_copy_configuration()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_core_server_message_if_c::complete_copy_configuration()");
 
 	{
 		// Creates message data composed of Attribute-Value Pairs.
@@ -1146,11 +1154,11 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::complete_set_index(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("%s: eap_core_server_message_if_c::complete_set_index()\n"),
 		 (m_is_client == true) ? "client": "server"));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_core_server_message_if_c::complete_set_index()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_core_server_message_if_c::complete_set_index()");
 
 	{
 		// Creates message data composed of Attribute-Value Pairs.
@@ -1196,11 +1204,11 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::complete_get_type_i
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("%s: eap_core_server_message_if_c::complete_get_type_info()\n"),
 		 (m_is_client == true) ? "client": "server"));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_core_server_message_if_c::complete_get_type_info()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_core_server_message_if_c::complete_get_type_info()");
 
 	{
 		// Creates message data composed of Attribute-Value Pairs.
@@ -1246,11 +1254,11 @@ EAP_FUNC_EXPORT eap_status_e eap_plugin_server_message_if_c::complete_invoke_ui(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("%s: eap_core_server_message_if_c::complete_invoke_ui()\n"),
 		 (m_is_client == true) ? "client": "server"));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_core_server_message_if_c::complete_invoke_ui()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_core_server_message_if_c::complete_invoke_ui()");
 
 	{
 		// Creates message data composed of Attribute-Value Pairs.

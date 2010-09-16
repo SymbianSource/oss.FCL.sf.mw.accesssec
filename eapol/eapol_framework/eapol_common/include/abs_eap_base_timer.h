@@ -24,11 +24,32 @@
 
 #include "eap_status.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABS_EAP_BASE_TIMER_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_BASE_TIMER_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_BASE_TIMER_H 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_BASE_TIMER_H 
+	#define EAP_FUNC_EXPORT_ABS_EAP_BASE_TIMER_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_BASE_TIMER_H 
+#elif defined(EAP_EXPORT_ABS_EAP_BASE_TIMER_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_BASE_TIMER_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_BASE_TIMER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_BASE_TIMER_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_BASE_TIMER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_BASE_TIMER_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_BASE_TIMER_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_BASE_TIMER_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_BASE_TIMER_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_BASE_TIMER_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_BASE_TIMER_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 
 /// An interface class of timer events.
 /// Each class whishing to use timer must be derived from class abs_eap_base_timer_c.
-class EAP_EXPORT abs_eap_base_timer_c
+class EAP_CLASS_VISIBILITY_ABS_EAP_BASE_TIMER_H abs_eap_base_timer_c
 {
 private:
 	//--------------------------------------------------

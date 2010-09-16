@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 19 %
+* %version: 26 %
 */
 
 #ifndef _EAPSIM_H_
@@ -24,16 +24,39 @@
 
 // INCLUDES
 #include <EapTypePlugin.h>
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPSIM_H)
+	#define EAP_CLASS_VISIBILITY_EAPSIM_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPSIM_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPSIM_H 
+	#define EAP_FUNC_EXPORT_EAPSIM_H 
+	#define EAP_C_FUNC_EXPORT_EAPSIM_H 
+#elif defined(EAP_EXPORT_EAPSIM_H)
+	#define EAP_CLASS_VISIBILITY_EAPSIM_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPSIM_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPSIM_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPSIM_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPSIM_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPSIM_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPSIM_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPSIM_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPSIM_H 
+	#define EAP_C_FUNC_EXPORT_EAPSIM_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_header.h"
 
 // FORWARD DECLARATIONS
 class eap_am_network_id_c;
+class AbsPacStoreInitializer;
 
 // CLASS DECLARATION
 /**
 * Class that implements the generic EAP type interface. Implements EAP SIM protocol.
 */
-class CEapSim : public CEapTypePlugin
+class EAP_CLASS_VISIBILITY_EAPSIM_H CEapSim : public CEapTypePlugin
 {
 public:		
 
@@ -42,7 +65,7 @@ public:
 	* @param aIapInfo Pointer to the class that contains information about bearer type and unique index.
 	* @return Pointer to the instance.
 	*/
-	static CEapSim* NewL(const SIapInfo* aIapInfo);	
+	static CEapSim* NewL(const SPluginInfo* aIapInfo);	
 
 	/**
 	* Destructor does nothing.
@@ -144,8 +167,8 @@ public:
 	*/
 	void CopySettingsL(const TIndexType aDestinationIndexType, const TInt aDestinationIndex);
 
-	
-		
+	TInt InitialisePacStore(AbsPacStoreInitializer * const initializer);
+
 protected:
 
 	/**

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 60 %
+* %version: 61 %
 */
 
 #include "eap_tools.h"
@@ -2084,7 +2084,8 @@ eap_status_e eap_am_general_settings_symbian_c::delete_all_eap_settings(const ea
 				TRAP(error, (eapType = CEapTypePlugin::NewL(
 					tunneled_plugins[ind_inner]->GetValue(),
 					static_cast<TIndexType>(internal_settings->m_IndexType),
-					internal_settings->m_Index)));
+					internal_settings->m_Index,
+					m_am_tools)));
 
 				// This will automatically delete eapType.
 				eap_automatic_variable_c<CEapTypePlugin> automatic_eap_type(
@@ -2167,7 +2168,8 @@ eap_status_e eap_am_general_settings_symbian_c::delete_all_eap_settings(const ea
 				TRAP(error, (eapType = CEapTypePlugin::NewL(
 					plugins_array[ind_outer]->GetValue(),
 					static_cast<TIndexType>(internal_settings->m_IndexType),
-					internal_settings->m_Index)));
+					internal_settings->m_Index,
+					m_am_tools)));
 
 				// This will automatically delete eapType.
 				eap_automatic_variable_c<CEapTypePlugin> automatic_eap_type(
@@ -2471,7 +2473,8 @@ eap_status_e eap_am_general_settings_symbian_c::copy_all_eap_settings(const eap_
 				TRAP(error, (eapType = CEapTypePlugin::NewL(
 					tunneled_plugins[ind_inner]->GetValue(),
 					static_cast<TIndexType>(internal_settings->m_IndexType),
-					internal_settings->m_Index)));
+					internal_settings->m_Index,
+					m_am_tools)));
 
 				// This will automatically delete eapType.
 				eap_automatic_variable_c<CEapTypePlugin> automatic_eap_type(
@@ -2564,7 +2567,8 @@ eap_status_e eap_am_general_settings_symbian_c::copy_all_eap_settings(const eap_
 				TRAP(error, (eapType = CEapTypePlugin::NewL(
 					plugins[ind_outer]->GetValue(),
 					static_cast<TIndexType>(internal_settings->m_IndexType),
-					internal_settings->m_Index)));
+					internal_settings->m_Index,
+					m_am_tools)));
 
 				// This will automatically delete eapType.
 				eap_automatic_variable_c<CEapTypePlugin> automatic_eap_type(

@@ -24,6 +24,27 @@
 
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_TYPE_AKA_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_AKA_H 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_AKA_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_AKA_H 
+#elif defined(EAP_EXPORT_EAP_TYPE_AKA_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_AKA_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_AKA_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_AKA_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_AKA_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_AKA_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_AKA_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_base_type.h"
 #include "eap_variable_data.h"
 #include "eap_type_aka_header.h"
@@ -42,7 +63,7 @@
 
 
 /// This class is implementation of AKA EAP-type.
-class EAP_EXPORT eap_type_aka_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_H eap_type_aka_c
 : public abs_eap_am_type_aka_c
 , public abs_eap_base_timer_c
 , public eap_base_type_c
@@ -309,7 +330,7 @@ private:
 	/**
 	 * This function initializes the allowed messages within one specific state.
 	 */
-	EAP_FUNC_IMPORT void initialize_state(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H void initialize_state(
 				const eap_type_aka_state_variable_e state,
 				const bool must_be_initiator,
 				const bool must_be_responder,
@@ -324,7 +345,7 @@ private:
 	 *  expansion_0 = prf(key, seed | 0)
 	 *  expansion_i = prf(key, expansion_i-1 | seed | i), where i = 1, 2...
 	 */
-	EAP_FUNC_IMPORT eap_status_e data_exp(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e data_exp(
 		const u32_t key_length,
 		eap_variable_data_c * const expansion,
 		const eap_variable_data_c * const key,
@@ -333,7 +354,7 @@ private:
 	/**
 	 * This function returns the eap_type_aka_state_variable_parameters_c object of current state.
 	 */
-	EAP_FUNC_IMPORT const eap_type_aka_state_variable_parameters_c * get_state_variable();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H const eap_type_aka_state_variable_parameters_c * get_state_variable();
 
 
 	//--------------------------------------------------
@@ -342,7 +363,7 @@ private:
 	/**
 	 * This function generates a new NAI from domain and IMSI.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_nai(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e generate_nai(
 		eap_variable_data_c * const new_nai, ///< This is the new generated NAI.
 		const bool use_manual_default_realm, ///< When true uses realm parameter, when false generates automatic realm.
 		const eap_variable_data_c * const realm, ///< This is the domain part of the NAI.
@@ -379,7 +400,7 @@ private:
 	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	 * @endcode
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_variable_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e add_variable_payload(
 		aka_header_c * const aka,
 		const u32_t maximum_buffer_size,
 		const u32_t eap_header_size,
@@ -416,7 +437,7 @@ private:
 	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	 * @endcode
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_AUTS_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e add_AUTS_payload(
 		aka_header_c * const aka,
 		const u32_t aka_buffer_length,
 		const u32_t eap_header_size,
@@ -453,7 +474,7 @@ private:
 	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	 * @endcode
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_RES_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e add_RES_payload(
 		aka_header_c * const aka,
 		const u32_t aka_buffer_length,
 		const u32_t eap_header_size,
@@ -493,7 +514,7 @@ private:
 	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	 * @endcode
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_pseudonym_or_imsi_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e add_pseudonym_or_imsi_payload(
 		aka_header_c * const aka,
 		const u32_t maximum_buffer_size,
 		const u32_t eap_header_size,
@@ -528,7 +549,7 @@ private:
 	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	 * @endcode
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_counter_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e add_counter_payload(
 		aka_header_c * const aka,
 		const u32_t aka_buffer_length,
 		const u32_t eap_header_size,
@@ -562,7 +583,7 @@ private:
 	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	 * @endcode
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_simple_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e add_simple_payload(
 		aka_header_c * const aka,
 		const u32_t aka_buffer_length,
 		const u32_t eap_header_size,
@@ -594,7 +615,7 @@ private:
 	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	 * @endcode
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_notification_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e add_notification_payload(
 		aka_header_c * const aka,
 		const u32_t aka_buffer_length,
 		const u32_t eap_header_size,
@@ -627,7 +648,7 @@ private:
 	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	 * @endcode
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_client_error_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e add_client_error_payload(
 		aka_header_c * const aka,
 		const u32_t aka_buffer_length,
 		const u32_t eap_header_size,
@@ -665,7 +686,7 @@ private:
 	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	 * @endcode
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_mac_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e add_mac_payload(
 		aka_header_c * const aka,
 		const u32_t maximum_buffer_size,
 		const u32_t eap_header_size,
@@ -702,7 +723,7 @@ private:
 	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	 * @endcode
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_padding_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e add_padding_payload(
 		aka_header_c * const aka_packet,
 		const u32_t maximum_buffer_size,
 		const u32_t eap_header_size,
@@ -716,7 +737,7 @@ private:
 	 * This function verifies the message authentication code (MAC) is correct.
 	 * @see add_mac_payload().
 	 */
-	EAP_FUNC_IMPORT eap_status_e check_message_authentication_code(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e check_message_authentication_code(
 		const eap_variable_data_c * const authentication_key,
 		aka_payloads_c * const p_aka_payloads, ///< This is pointer to all payloads of the received EAP packet.
 		const aka_header_c * const aka_packet,
@@ -734,7 +755,7 @@ private:
 	 * Third is analysed the AKA EAP packet. This includes the payload and values of each payload.
 	 * See also analyse_aka_packet().
 	 */
-	EAP_FUNC_IMPORT eap_status_e handle_aka_packet(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_aka_packet(
 		const eap_am_network_id_c * const receive_network_id, ///< This is the network identity of the received EAP packet.
 		aka_header_c * const aka, ///< This is pointer to EAP header including AKA fields.
 		const u32_t aka_length, ///< This is length of received AKA EAP packet.
@@ -747,7 +768,7 @@ private:
 	 * @see Client messages are handled in handle_aka_identity_request_message() and handle_challenge_request_message(). 
 	 * @see Server messages are handled in handle_aka_identity_response_message() and handle_challenge_response_message(). 
 	 */
-	EAP_FUNC_IMPORT eap_status_e analyse_aka_packet(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e analyse_aka_packet(
 		const eap_am_network_id_c * const receive_network_id, ///< This is the network identity of the received EAP packet.
 		aka_header_c * const received_aka, ///< This is pointer to EAP header including AKA fields.
 		const u32_t aka_packet_length, ///< This is length of received AKA EAP packet.
@@ -762,7 +783,7 @@ private:
 	 * function returns eap_status_header_corrupted.
 	 * Also error is returned when illegal payload attribute is recognised.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_aka_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e parse_aka_payload(
 		const aka_payload_AT_header_c * const p_payload, ///< This is the start of the buffer and the first parsed payload.
 		u32_t * const buffer_length, ///< This is the length of the buffer. This must match with the length of all payloads.
 		aka_payloads_c * const p_aka_payloads, ///< This is pointer to all payloads of the received EAP packet.
@@ -774,7 +795,7 @@ private:
 	 * Payloads are stored to p_aka_payloads.
 	 * @see parse_aka_payload().
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_aka_packet(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e parse_aka_packet(
 		aka_header_c * const aka, ///< This is pointer to EAP header including AKA fields.
 		const u32_t aka_packet_length, ///< This is length of received AKA EAP packet.
 		aka_payloads_c * const p_aka_payloads ///< This is pointer to all payloads of the received EAP packet.
@@ -785,7 +806,7 @@ private:
 	 * @return If payload attribute is illegal function returns eap_status_header_corrupted.
 	 * If payload attribute is unknown function returns eap_status_unsupported_aka_payload.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_generic_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e parse_generic_payload(
 		const aka_payload_AT_type_e current_payload, ///< This is the type of current payload attribute.
 		const aka_payload_AT_header_c * const payload, ///< This is the current parsed payload.
 		aka_payloads_c * const p_aka_payloads, ///< This is pointer to all payloads of the received EAP packet.
@@ -794,7 +815,7 @@ private:
 	/**
 	 * This function sends the EAP-Request/AKA/Re-authentication message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_reauthentication_request_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e send_reauthentication_request_message(
 		const eap_variable_data_c * const username,
 		const bool pseudonym_decode_failed,
 		const u8_t eap_identifier);
@@ -802,7 +823,7 @@ private:
 	/**
 	 * This function sends the EAP-Request/AKA/Start message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_aka_identity_request_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e send_aka_identity_request_message(
 		const bool pseudonym_decode_failed, ///< This identifies whether the pseudonym decode was failed (true). We must send a IMSI request.
 		const u8_t eap_identifier ///< This is the EAP-Identifier used with this message.
 		);
@@ -810,7 +831,7 @@ private:
 	/**
 	 * This function sends the EAP-Response/AKA/Start message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_aka_identity_response_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e send_aka_identity_response_message(
 		const eap_am_network_id_c * const receive_network_id, ///< This is the network identity of the received EAP packet. NOTE received.
 		const u8_t received_eap_identifier, ///< This is the EAP-identifier of the received EAP-request message.
 		const aka_payload_AT_type_e include_identity_to_aka_identity_response, ///< This is the queried identity type.
@@ -820,7 +841,7 @@ private:
 	/**
 	 * This function sends the EAP-Response/AKA/Notification message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_aka_notification_response(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e send_aka_notification_response(
 		const eap_aka_notification_codes_e notification_code,
 		const bool add_at_counter_attribute
 		);
@@ -828,22 +849,22 @@ private:
 	/**
 	 * This function sends the EAP-Response/AKA/Client-Error message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_aka_client_error_response();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e send_aka_client_error_response();
 
 	/**
 	 * This function sends the EAP-Request/AKA/Challenge message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_challenge_request_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e send_challenge_request_message(
 		const u8_t eap_identifier ///< This is the EAP-Identifier used with this message.
 		);
 
 	/**
 	 * This function sends the EAP-Response/AKA/Challenge message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_challenge_response_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e send_challenge_response_message(
 		eap_variable_data_c * const K_aut);
 
-	EAP_FUNC_IMPORT eap_status_e send_reauthentication_response_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e send_reauthentication_response_message(
 		const eap_variable_data_c * const orig_XKEY,
 		const eap_variable_data_c * const orig_K_aut,
 		const eap_variable_data_c * const orig_K_encr,
@@ -857,23 +878,23 @@ private:
 	 * This function sends the EAP-Request/AKA/Notification message.
 	 * Message includes the localizable notification string.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_aka_notification_request(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e send_aka_notification_request(
 		const eap_aka_notification_codes_e notification_code,
 		const bool add_at_counter_attribute
 		);
 
-	EAP_FUNC_IMPORT eap_status_e send_aka_synchronization_failure_response_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e send_aka_synchronization_failure_response_message(
 		const eap_type_aka_authentication_vector_c * const authentication_vector
 		);
 
-	EAP_FUNC_IMPORT eap_status_e send_aka_authentication_reject_response_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e send_aka_authentication_reject_response_message(
 		const eap_type_aka_authentication_vector_c * const authentication_vector
 		);
 
 	/**
 	 * This function encrypts the payload.
 	 */
-	EAP_FUNC_IMPORT eap_status_e encrypt_DATA_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e encrypt_DATA_payload(
 		u8_t * const EAP_data, ///< This is pointer to the begin of the encrypted payload.
 		const u32_t cbc_aes_data_length, ///< This is the length of the encrypted payload. This must be aligned to AES block length.
 		const eap_variable_data_c * const IV,
@@ -884,7 +905,7 @@ private:
 	 * This function decrypts the payload.
 	 * p_aka_payloads->get_ENCR_DATA() points to the decrypted payload.
 	 */
-	EAP_FUNC_IMPORT eap_status_e decrypt_DATA_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e decrypt_DATA_payload(
 		aka_payloads_c * const p_aka_payloads, ///< This is pointer to all payloads of the received EAP packet.
 		const eap_variable_data_c * const encryption_key
 		);
@@ -894,7 +915,7 @@ private:
 	 * The received encrypte payload have been decrypted before thiscall.
 	 * p_aka_payloads->get_ENCR_DATA() includes decrypted DATA payload.
 	 */
-	EAP_FUNC_IMPORT eap_status_e handle_DATA_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_DATA_payload(
 		const aka_subtype_e subtype,
 		aka_payloads_c * const p_aka_payloads ///< This is pointer to all payloads of the received EAP packet.
 		);
@@ -904,14 +925,14 @@ private:
 	/**
 	 * This function generate a new NONCE of nonce_size octets length.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_nonce(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e generate_nonce(
 		const u32_t nonce_size,
 		eap_variable_data_c * const nonce);
 
 	/**
 	 * This function returns the domain name.
 	 */
-	EAP_FUNC_IMPORT eap_variable_data_c * get_nai_realm();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_variable_data_c * get_nai_realm();
 
 	/**
 	 * This is the situation before the update_buffer_indexes() call.
@@ -946,7 +967,7 @@ private:
 	 *
 	 * Note maximum_buffer_size could be larger than (m_aka_header_offset + m_MTU + m_trailer_length).
 	 */
-	EAP_FUNC_IMPORT void update_buffer_indexes(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H void update_buffer_indexes(
 		const u32_t maximum_buffer_size,
 		const u32_t payload_size,
 		u32_t * const buffer_offset,
@@ -993,7 +1014,7 @@ private:
 	 *
 	 * Note maximum_buffer_size could be larger than (m_aka_header_offset + m_MTU + m_trailer_length).
 	 */
-	EAP_FUNC_IMPORT void update_payload_indexes(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H void update_payload_indexes(
 		const u32_t maximum_buffer_size,
 		const u32_t eap_header_size,
 		const u32_t payload_size,
@@ -1023,7 +1044,7 @@ private:
 	 *
 	 * @return Other return values are errors.
 	 */
-	EAP_FUNC_IMPORT eap_status_e query_AKA_IMSI_or_pseudonym_or_reauthentication_id(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e query_AKA_IMSI_or_pseudonym_or_reauthentication_id(
 		eap_variable_data_c * const IMSI, ///< Pointer to IMSI. Buffer for IMSI is allocated during the call.
 		eap_variable_data_c * const pseudonym_identity, ///< Pointer to pseudonym. Buffer for pseudonym is allocated during the call.
 		eap_variable_data_c * const reauthentication_identity, ///< Pointer to reauthentication_identity. Buffer for reauthentication_identity is allocated during the call.
@@ -1051,7 +1072,7 @@ private:
 	 *
 	 * @return Other return values are errors.
 	 */
-	EAP_FUNC_IMPORT eap_status_e query_AKA_RES(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e query_AKA_RES(
 		eap_type_aka_authentication_vector_c * const authentication_vector
 		);
 
@@ -1071,7 +1092,7 @@ private:
 	 *
 	 * @return Other return values are errors.
 	 */
-	EAP_FUNC_IMPORT eap_status_e query_AKA_authentication_vector(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e query_AKA_authentication_vector(
 		const u8_t next_eap_identifier,
 		eap_type_aka_identity_type * const identity_type
 		);
@@ -1086,7 +1107,7 @@ private:
 	 * The decrpted DATA payload is handled immediately in handle_DATA_payload() function.
 	 * Then function calculates MAC_SRES and sends EAP-Response/AKA/Challenge.
 	 */
-	EAP_FUNC_IMPORT eap_status_e process_AKA_kc_sres(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e process_AKA_kc_sres(
 		const eap_type_aka_authentication_vector_c * const authentication_vector
 		);
 
@@ -1095,7 +1116,7 @@ private:
 	 * Function creates NAI and EAP-Response/Identity message.
 	 * Message is sent immediately.
 	 */
-	EAP_FUNC_IMPORT eap_status_e process_AKA_IMSI(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e process_AKA_IMSI(
 		const eap_variable_data_c * const IMSI, ///< This is the IMSI.
 		const eap_variable_data_c * const pseudonym ///< This is the pseudonym.
 		);
@@ -1104,7 +1125,7 @@ private:
 	/**
 	 * This function calculates the MAC_SRES.
 	 */
-	EAP_FUNC_IMPORT eap_status_e calculate_MAC_SRES(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e calculate_MAC_SRES(
 		eap_variable_data_c * const MAC_SRES, ///< This is the calculated MAC_SRES.
 		const eap_variable_data_c * const n_kc, ///< This includes concatenated n KC.
 		const eap_variable_data_c * const n_sres ///< This includes concatenated n SRES.
@@ -1113,13 +1134,13 @@ private:
 	/**
 	 * This function reads the identity payload. Identity is stored to get_identity().
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_identity(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e parse_identity(
 		const u8_t * const identity, ///< This is pointer to received EAP-Identity buffer.
 		const u32_t identity_length ///< This is length of received EAP-Identity buffer.
 		);
 
 
-	EAP_FUNC_IMPORT eap_status_e handle_eap_identity_query(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_eap_identity_query(
 		const eap_am_network_id_c * const send_network_id,
 		eap_variable_data_c * const identity,
 		const u8_t eap_identifier,
@@ -1139,7 +1160,7 @@ private:
 	 * Currently the query_imsi_from_username() is synchronous call.
 	 * The send_aka_identity_request_message() function will send the EAP-Request/AKA/Start message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e handle_identity_response_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_identity_response_message(
 		eap_header_rd_c * const eap_header, ///< This is the received EAP-Identity packet, pointer points to the header.
 		const u32_t aka_packet_length ///< This is length of received AKA EAP packet.
 		);
@@ -1148,20 +1169,20 @@ private:
 	 * This function handles the received EAP-Request/AKA/Start message.
 	 * Function checks the valid payloads and calls send_aka_identity_response_message() that sends EAP-Response/AKA/Start message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e handle_aka_identity_request_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_aka_identity_request_message(
 		const eap_am_network_id_c * const receive_network_id, ///< This is the network identity of the received EAP packet.
 		aka_header_c * const received_aka, ///< This is pointer to EAP header including AKA fields.
 		const u32_t aka_packet_length, ///< This is length of received AKA EAP packet.
 		aka_payloads_c * const p_aka_payloads ///< This is pointer to all payloads of the received EAP packet.
 		);
 
-	EAP_FUNC_IMPORT eap_status_e handle_aka_notification_request_message_reauthentication(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_aka_notification_request_message_reauthentication(
 		const eap_am_network_id_c * const receive_network_id,
 		aka_header_c * const received_aka,
 		const u32_t aka_packet_length,
 		aka_payloads_c * const p_aka_payloads);
 
-	EAP_FUNC_IMPORT eap_status_e handle_aka_notification_request_message_full_authentication(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_aka_notification_request_message_full_authentication(
 		const eap_am_network_id_c * const receive_network_id,
 		aka_header_c * const received_aka,
 		const u32_t aka_packet_length,
@@ -1171,7 +1192,7 @@ private:
 	 * This function handles the received EAP-Request/AKA/Notification message.
 	 * Function checks the valid payloads and calls send_notification_response_message() that sends EAP-Response/AKA/Notification message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e handle_aka_notification_request_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_aka_notification_request_message(
 		const eap_am_network_id_c * const receive_network_id,
 		aka_header_c * const received_aka,
 		const u32_t aka_packet_length,
@@ -1187,7 +1208,7 @@ private:
 	 * is completed using complete_AKA_RES_query() function. The complete_AKA_RES_query()
 	 * function will call process_AKA_kc_sres().
 	 */
-	EAP_FUNC_IMPORT eap_status_e handle_challenge_request_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_challenge_request_message(
 		const eap_am_network_id_c * const receive_network_id, ///< This is the network identity of the received EAP packet.
 		aka_header_c * const received_aka, ///< This is pointer to EAP header including AKA fields.
 		const u32_t aka_packet_length, ///< This is length of received AKA EAP packet.
@@ -1204,13 +1225,13 @@ private:
 	 * is completed using complete_AKA_RES_query() function. The complete_AKA_RES_query()
 	 * function will call process_AKA_kc_sres().
 	 */
-	EAP_FUNC_IMPORT eap_status_e handle_reauthentication_request_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_reauthentication_request_message(
 		const eap_am_network_id_c * const receive_network_id,
 		aka_header_c * const received_aka,
 		const u32_t aka_packet_length,
 		aka_payloads_c * const p_aka_payloads);
 
-	EAP_FUNC_IMPORT eap_status_e check_challenge_response_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e check_challenge_response_message(
 		const eap_am_network_id_c * const receive_network_id,
 		aka_header_c * const received_aka,
 		const u32_t aka_packet_length,
@@ -1223,19 +1244,19 @@ private:
 	 * Function calls the query_AKA_authentication_vector() of AM to get fresh authentication_vector.
 	 * The query_AKA_authentication_vector() function is completed by AM using complete_AKA_authentication_vector_query() function.
 	 */
-	EAP_FUNC_IMPORT eap_status_e handle_aka_identity_response_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_aka_identity_response_message(
 		aka_header_c * const received_aka, ///< This is pointer to EAP header including AKA fields.
 		const u32_t aka_packet_length, ///< This is length of received AKA EAP packet.
 		aka_payloads_c * const p_aka_payloads ///< This is pointer to all payloads of the received EAP packet.
 		);
 
-	EAP_FUNC_IMPORT eap_status_e handle_notification_response_message_reauthentication(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_notification_response_message_reauthentication(
 		const eap_am_network_id_c * const receive_network_id,
 		aka_header_c * const received_aka,
 		const u32_t aka_packet_length,
 		aka_payloads_c * const p_aka_payloads);
 
-	EAP_FUNC_IMPORT eap_status_e handle_notification_response_message_full_authentication(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_notification_response_message_full_authentication(
 		const eap_am_network_id_c * const receive_network_id,
 		aka_header_c * const received_aka,
 		const u32_t aka_packet_length,
@@ -1245,7 +1266,7 @@ private:
 	 * This function handles the received EAP-Response/AKA/Notification message.
 	 * Function checks the valid payloads.
 	 */
-	EAP_FUNC_IMPORT eap_status_e handle_notification_response_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_notification_response_message(
 		const eap_am_network_id_c * const receive_network_id,
 		aka_header_c * const received_aka,
 		const u32_t aka_packet_length,
@@ -1257,20 +1278,20 @@ private:
 	 * called to check MAC_SRES. If it returns eap_status_success the authentication was succesfull
 	 * and this function calls the send_eap_success() to send EAP-Success message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e handle_challenge_response_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_challenge_response_message(
 		const eap_am_network_id_c * const receive_network_id, ///< This is the network identity of the received EAP packet.
 		aka_header_c * const received_aka, ///< This is pointer to EAP header including AKA fields.
 		const u32_t aka_packet_length, ///< This is length of received AKA EAP packet.
 		aka_payloads_c * const p_aka_payloads ///< This is pointer to all payloads of the received EAP packet.
 		);
 
-	EAP_FUNC_IMPORT eap_status_e handle_reauthentication_response_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_reauthentication_response_message(
 		const eap_am_network_id_c * const /* receive_network_id */,
 		aka_header_c * const received_aka,
 		const u32_t aka_packet_length,
 		aka_payloads_c * const p_aka_payloads);
 
-	EAP_FUNC_IMPORT eap_status_e handle_client_error_response_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_client_error_response_message(
 		const eap_am_network_id_c * const /* receive_network_id */,
 		aka_header_c * const received_aka,
 		const u32_t aka_packet_length,
@@ -1279,7 +1300,7 @@ private:
 	/**
 	 * This function sends and traces all messages.
 	 */
-	EAP_FUNC_IMPORT eap_status_e packet_send(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e packet_send(
 		const eap_am_network_id_c * const network_id,
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t header_offset,
@@ -1289,7 +1310,7 @@ private:
 	/**
 	 * This function chechs NAI.
 	 */
-	EAP_FUNC_IMPORT eap_status_e check_NAI(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e check_NAI(
 		const u8_t * const identity,
 		const u32_t identity_length,
 		const u8_t * const at_character);
@@ -1297,7 +1318,7 @@ private:
 	/**
 	 * This function traces the EAP packet.
 	 */
-	EAP_FUNC_IMPORT void packet_trace(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H void packet_trace(
 		eap_const_string prefix,
 		const eap_am_network_id_c * const receive_network_id,
 		eap_header_wr_c * const received_eap,
@@ -1320,120 +1341,120 @@ private:
 	 * Generated keys are offered to lower layer.
 	 * Connection handle is initialised.
 	 */
-	EAP_FUNC_IMPORT eap_status_e finish_successful_authentication(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e finish_successful_authentication(
 		const eap_am_network_id_c * const receive_network_id);
 
 	/**
 	 * This function sends a notification of possible failed authentication
 	 * to lower layer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_final_notification();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e send_final_notification();
 
-	EAP_FUNC_IMPORT eap_status_e new_handler(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e new_handler(
 		const eap_am_network_id_c * const receive_network_id,
 		const bool is_client_when_true);
 
-	EAP_FUNC_IMPORT bool randomly_refuse_eap_identity();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H bool randomly_refuse_eap_identity();
 
 	/**
 	 * This function processes the AKA packets.
 	 */
-	EAP_FUNC_IMPORT eap_status_e aka_packet_process(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e aka_packet_process(
 		const eap_am_network_id_c * const receive_network_id, ///< This is the network identity of the received EAP packet.
 		aka_header_c * const received_aka, ///< This is pointer to EAP header including AKA fields.
 		const u32_t aka_packet_length, ///< This is length of received AKA EAP packet.
 		const bool is_client_when_true ///< Indicates whether this is client (true) or server (false).
 		);
 
-	EAP_FUNC_IMPORT eap_status_e cancel_error_message_delay_timer();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e cancel_error_message_delay_timer();
 
-	EAP_FUNC_IMPORT eap_status_e set_error_message_delay_timer();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e set_error_message_delay_timer();
 
-	EAP_FUNC_IMPORT eap_status_e handle_error_packet();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_error_packet();
 
 	/**
 	 * This function initializes the error message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e initialize_error_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e initialize_error_message(
 		const eap_status_e error_status
 		);
 
-	EAP_FUNC_IMPORT eap_status_e check_synchronization_failure_response_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e check_synchronization_failure_response_message(
 		const eap_am_network_id_c * const /* receive_network_id */,
 		aka_header_c * const received_aka,
 		const u32_t aka_packet_length,
 		aka_payloads_c * const p_aka_payloads);
 
-	EAP_FUNC_IMPORT eap_status_e complete_re_syncronization_query(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e complete_re_syncronization_query(
 		const u8_t next_eap_identifier,
 		const eap_type_aka_authentication_vector_c * const authentication_vector);
 
-	EAP_FUNC_IMPORT eap_status_e process_re_syncronization(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e process_re_syncronization(
 		const u8_t next_eap_identifier,
 		const eap_type_aka_authentication_vector_c * const authentication_vector);
 
-	EAP_FUNC_IMPORT eap_status_e handle_synchronization_failure_response_message(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_synchronization_failure_response_message(
 		const eap_am_network_id_c * const /* receive_network_id */,
 		aka_header_c * const received_aka,
 		const u32_t aka_packet_length,
 		aka_payloads_c * const p_aka_payloads);
 
-	EAP_FUNC_IMPORT eap_status_e handle_aka_identity_response_message_completion(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_aka_identity_response_message_completion(
 		const u8_t next_eap_identifier,
 		const eap_status_e identity_status,
 		const eap_type_aka_identity_type identity_type,
 		const bool identity_payload_was_included);
 
-	EAP_FUNC_IMPORT eap_status_e initialize_notification_message();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e initialize_notification_message();
 
-	EAP_FUNC_IMPORT eap_status_e cancel_notification_message_delay_timer();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e cancel_notification_message_delay_timer();
 
-	EAP_FUNC_IMPORT eap_status_e set_notification_message_delay_timer();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e set_notification_message_delay_timer();
 
-	EAP_FUNC_IMPORT eap_status_e handle_notification_packet();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_notification_packet();
 
 	bool get_aka_notification_code_F_bit(const eap_aka_notification_codes_e notification_code);
 
 	bool get_aka_notification_code_P_bit(const eap_aka_notification_codes_e notification_code);
 
-	EAP_FUNC_IMPORT bool random_selection();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H bool random_selection();
 
 
-	EAP_FUNC_IMPORT eap_status_e checkcode_init();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e checkcode_init();
 
-	EAP_FUNC_IMPORT static bool compare_payload_first_is_less(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H static bool compare_payload_first_is_less(
 		const aka_payload_AT_type_e * const first,
 		const aka_payload_AT_type_e * const second,
 		abs_eap_am_tools_c * const m_am_tools);
 
-	EAP_FUNC_IMPORT eap_status_e checkcode_verify_payloads(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e checkcode_verify_payloads(
 		aka_payloads_c * const p_aka_payloads);
 
-	EAP_FUNC_IMPORT eap_status_e checkcode_save_message_client(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e checkcode_save_message_client(
 		const void * const data,
 		const u32_t data_length,
 		aka_payloads_c * const p_aka_payloads);
 
-	EAP_FUNC_IMPORT eap_status_e checkcode_save_message_server(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e checkcode_save_message_server(
 		const void * const data,
 		const u32_t data_length);
 
-	EAP_FUNC_IMPORT eap_status_e checkcode_update_saved_message();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e checkcode_update_saved_message();
 
-	EAP_FUNC_IMPORT eap_status_e checkcode_update(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e checkcode_update(
 		const void * const data,
 		const u32_t data_length);
 
-	EAP_FUNC_IMPORT eap_status_e checkcode_final(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e checkcode_final(
 		eap_variable_data_c * const digest);
 
-	EAP_FUNC_IMPORT eap_status_e checkcode_verify(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e checkcode_verify(
 		const eap_variable_data_c * const received_digest);
 
 	/**
 	 * This function stores identity.
 	 */
-	EAP_FUNC_IMPORT eap_status_e store_identity(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e store_identity(
 		const eap_variable_data_c * const IMSI_or_pseudonym,
 		const bool IMSI_is_used);
 
@@ -1538,7 +1559,7 @@ private:
 	 * This function checks the received AKA subtype is valid in current state.
 	 * This is used for quick check.
 	 */
-	EAP_FUNC_IMPORT eap_status_e check_valid_state(aka_subtype_e type);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e check_valid_state(aka_subtype_e type);
 
 	/**
 	 * This function sets the m_authentication_finished_successfully flag true.
@@ -1560,7 +1581,7 @@ private:
 	/**
 	 * This function generates K_encr, K_aut and master_session_key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_shared_secred_keys(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e generate_shared_secred_keys(
 		const u32_t key_length,
 		const eap_variable_data_c * const CK,
 		const eap_variable_data_c * const IK,
@@ -1575,7 +1596,7 @@ private:
 	/**
 	 * This function generates K_encr, K_aut and master_session_key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_reauth_shared_secred_keys(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e generate_reauth_shared_secred_keys(
 		const u32_t key_length,
 		const eap_variable_data_c * const orig_XKEY,
 		const u32_t reauth_counter,
@@ -1675,48 +1696,48 @@ private:
 	/**
 	 * Currently this does nothing and this is not called anywhere.
 	 */
-	EAP_FUNC_IMPORT void delete_unused_keys();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H void delete_unused_keys();
 
 
 	/**
 	 * This function returns string of the current state. This is for trace purposes.
 	 */
-	EAP_FUNC_IMPORT eap_const_string get_state_string() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_const_string get_state_string() const;
 
 	/**
 	 * This function returns string of the current state. This is for trace purposes.
 	 */
-	EAP_FUNC_IMPORT eap_const_string get_saved_previous_state_string() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_const_string get_saved_previous_state_string() const;
 
 	/**
 	 * This function initializes a timer to sends the EAP-Request/Failure message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e initialize_eap_failure_timer();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e initialize_eap_failure_timer();
 
 	/**
 	 * This function cancels a timer to sends the EAP-Request/Failure message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_eap_failure_timer();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e cancel_eap_failure_timer();
 
 	/**
 	 * This function initializes a timer to sends the EAP-Response/Notification message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e initialize_eap_notification_timer();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e initialize_eap_notification_timer();
 
 	/**
 	 * This function cancels a timer to sends the EAP-Response/Notification message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_eap_notification_timer();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e cancel_eap_notification_timer();
 
 	/**
 	 * This function initializes a timer to sends the EAP-Response/Failure message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e initialize_failure_message_received_timer();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e initialize_failure_message_received_timer();
 
 	/**
 	 * This function cancels a timer to sends the EAP-Response/Failure message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_failure_message_received_timer();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e cancel_failure_message_received_timer();
 
 	u32_t get_mnc_length(const u32_t mcc);
 
@@ -1738,12 +1759,12 @@ public:
 	/**
 	 * Destructor cancels all timers and deletes member attributes.
 	 */
-	EAP_FUNC_IMPORT virtual ~eap_type_aka_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H virtual ~eap_type_aka_c();
 
 	/**
 	 * Constructor initializes all member attributes.
 	 */
-	EAP_FUNC_IMPORT eap_type_aka_c(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_type_aka_c(
 		abs_eap_am_tools_c * const tools, ///< This is pointer to the tools AM of current platform.
 		abs_eap_base_type_c * const partner, ///< This is back pointer to object which created this object.
 		eap_am_type_aka_c * const am_type_aka, ///< This is pointer to adaptation module of AKA EAP type.
@@ -1754,10 +1775,10 @@ public:
 	/**
 	 * This function tells if the object is a client or a server..
 	 */
-	EAP_FUNC_IMPORT bool get_is_client();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H bool get_is_client();
 
 	// This is commented in abs_eap_am_type_aka_c::complete_AKA_IMSI_or_pseudonym_or_reauthentication_id_query().
-	EAP_FUNC_IMPORT eap_status_e complete_AKA_IMSI_or_pseudonym_or_reauthentication_id_query(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e complete_AKA_IMSI_or_pseudonym_or_reauthentication_id_query(
 		const eap_variable_data_c * const IMSI, ///< This is the IMSI.
 		const eap_variable_data_c * const pseudonym, ///< This is the pseudonym.
 		const eap_variable_data_c * const reauthentication_identity, ///< This is the re-authentication identity.
@@ -1769,7 +1790,7 @@ public:
 		);
 
 	// This is commented in abs_eap_am_type_aka_c::complete_AKA_authentication_vector_query().
-	EAP_FUNC_IMPORT eap_status_e complete_AKA_authentication_vector_query(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e complete_AKA_authentication_vector_query(
 		eap_type_aka_authentication_vector_c * const authentication_vector, ///< authentication_vector includes all AKA parametrs used in this authentication session.
 		const eap_variable_data_c * const IMSI, ///< IMSI may be queried during query_AKA_authentication_vector() function call. It must be copied to state.
 		const eap_aka_authentication_vector_status_e authentication_vector_status,  ///< This is the status of the failed authentication_vector query.
@@ -1779,7 +1800,7 @@ public:
 		);
 
 	// This is commented in abs_eap_am_type_aka_c::complete_AKA_RES_query().
-	EAP_FUNC_IMPORT eap_status_e complete_AKA_RES_query(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e complete_AKA_RES_query(
 		const eap_type_aka_authentication_vector_c * const authentication_vector,
 		const eap_status_e completion_status
 		);
@@ -1787,7 +1808,7 @@ public:
 	/** Client calls this function.
 	 *  This function IMSI and username to AKA EAP type.
 	 */
-	EAP_FUNC_IMPORT eap_status_e handle_imsi_from_username(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e handle_imsi_from_username(
 		const u8_t next_eap_identifier,
 		const eap_am_network_id_c * const network_id,
 		const eap_variable_data_c * const username,
@@ -1795,7 +1816,7 @@ public:
 		const eap_type_aka_identity_type identity_type);
 
 	// This is commented in abs_eap_am_type_aka_c::complete_imsi_from_username().
-	EAP_FUNC_IMPORT eap_status_e complete_imsi_from_username(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e complete_imsi_from_username(
 		const u8_t next_eap_identifier,
 		const eap_am_network_id_c * const network_id,
 		const eap_variable_data_c * const username,
@@ -1808,7 +1829,7 @@ public:
 	 * The partner class calls this function when EAP/AKA packet is received.
 	 * see also eap_base_type_c::packet_process().
 	 */
-	EAP_FUNC_IMPORT eap_status_e packet_process(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e packet_process(
 		const eap_am_network_id_c * const receive_network_id, ///< This is the network identity of the received EAP packet.
 		eap_header_wr_c * const eap, ///< This is pointer to EAP header and data.
 		const u32_t eap_packet_length ///< This is length of received EAP packet.
@@ -1818,7 +1839,7 @@ public:
 	 * This function obtains header offset, MTU and trailer length.
 	 * See also abs_eap_base_type_c::get_header_offset().
 	 */
-	EAP_FUNC_IMPORT u32_t get_header_offset(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H u32_t get_header_offset(
 		u32_t * const MTU,
 		u32_t * const trailer_length
 		);
@@ -1826,7 +1847,7 @@ public:
 	/**
 	 * This function creates a message authentication code (MAC)
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_message_authentication_code(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e create_message_authentication_code(
 		eap_type_aka_MAC_attributes_c *MAC_attributes, ///< This includes required parameters.
 		const aka_subtype_e subtype,
 		const eap_code_value_e code,
@@ -1836,32 +1857,32 @@ public:
 	/**
 	 * This function adds addiditional data to MAC calculation.
 	 */
-	EAP_FUNC_IMPORT eap_status_e extra_message_authentication_code_bytes(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e extra_message_authentication_code_bytes(
 		const aka_subtype_e subtype,
 		const eap_code_value_e code,
 		crypto_hmac_c *hmac_sha1);
 
 	// This is commented in abs_eap_base_timer_c::timer_delete_data().
-	EAP_FUNC_IMPORT eap_status_e timer_expired(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e timer_expired(
 		const u32_t id, void *data
 		);
 
 	// This is commented in abs_eap_base_timer_c::timer_delete_data().
-	EAP_FUNC_IMPORT eap_status_e timer_delete_data(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e timer_delete_data(
 		const u32_t id, void *data
 		);
 
 	// This is commented in eap_base_type_c::set_is_valid().
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H void set_is_valid();
 
 	// This is commented in eap_base_type_c::get_is_valid().
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H bool get_is_valid();
 
 	// This is commented in eap_base_type_c::configure().
 	/**
 	 * EAP-type AKA reads configuration.
 	 */
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e configure();
 
 	// This is commented in eap_base_type_c::shutdown().
 	/**
@@ -1870,7 +1891,7 @@ public:
 	 * could shutdown the operations, for example cancel timers.
 	 * Each derived class must define this function.
 	 */
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e shutdown();
 
 	/**
 	 * The read_configure() function reads the configuration data identified
@@ -1879,7 +1900,7 @@ public:
 	 * @param field is generic configure string idenfying the required configure data.
 	 * @param data is pointer to existing eap_variable_data object.
 	 */
-	EAP_FUNC_IMPORT virtual eap_status_e read_configure(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H virtual eap_status_e read_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data
 		);
@@ -1891,30 +1912,30 @@ public:
 	 * @param field is generic configure string idenfying the required configure data.
 	 * @param data is pointer to existing eap_variable_data object.
 	 */
-	EAP_FUNC_IMPORT virtual eap_status_e write_configure(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H virtual eap_status_e write_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data
 		);
 
 	// See abs_eap_base_type_c::state_notification().
-	EAP_FUNC_IMPORT void state_notification(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H void state_notification(
 		const abs_eap_state_notification_c * const state
 		);
 
 	// This is commented in eap_base_type_c::query_eap_identity().
-	EAP_FUNC_IMPORT eap_status_e query_eap_identity(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e query_eap_identity(
 		const bool must_be_synchronous,
 		eap_variable_data_c * const identity,
 		const eap_am_network_id_c * const receive_network_id,
 		const u8_t eap_identifier);
 
 	// This is commented in eap_base_type_c::set_initial_eap_identifier().
-	EAP_FUNC_IMPORT eap_status_e set_initial_eap_identifier(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e set_initial_eap_identifier(
 		const eap_am_network_id_c * const receive_network_id,
 		const u8_t initial_identifier);
 
 	// This is commented in eap_base_type_c::eap_acknowledge().
-	EAP_FUNC_IMPORT eap_status_e eap_acknowledge(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e eap_acknowledge(
 		const eap_am_network_id_c * const receive_network_id);
 
 	/**
@@ -1924,26 +1945,26 @@ public:
 	 * If object reset fails this function must return corresponding error status.
 	 * @return This function returns the status of reset operation.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e reset();
 
 	//
-	EAP_FUNC_IMPORT eap_status_e set_timer(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e set_timer(
 		abs_eap_base_timer_c * const p_initializer, 
 		const u32_t p_id, 
 		void * const p_data,
 		const u32_t p_time_ms);
 
-	EAP_FUNC_IMPORT eap_status_e cancel_timer(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H eap_status_e cancel_timer(
 		abs_eap_base_timer_c * const p_initializer, 
 		const u32_t p_id);
 
-	EAP_FUNC_IMPORT static eap_const_string get_identity_string(const eap_type_aka_identity_type identity_type);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H static eap_const_string get_identity_string(const eap_type_aka_identity_type identity_type);
 
 	/**
 	 * This function returns string of the state. This is for trace purposes.
 	 * NOTE this is static member function.
 	 */
-	EAP_FUNC_IMPORT static eap_const_string get_state_string(eap_type_aka_state_variable_e state);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_H static eap_const_string get_state_string(eap_type_aka_state_variable_e state);
 
 	//--------------------------------------------------
 

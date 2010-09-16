@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16 %
+* %version: 19 %
 */
 
 #include <platform_paths.hrh>
@@ -30,6 +30,24 @@ TARGET        eapprotectedsetup.dll
 UID	      0x10009d8d 0x2000b003
 
 deffile eapprotectedsetup.def
+
+MACRO EAP_NO_EXPORTS
+// Start: added by script change_mmp_export_macros.sh.
+MACRO EAP_NO_EXPORT_EAP_TYPE_SIMPLE_CONFIG_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_SIMPLE_CONFIG_HEADER_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_SIMPLE_CONFIG_STATE_NOTIFICATION_H
+MACRO EAP_NO_EXPORT_SIMPLE_CONFIG_BASE_RECORD_H
+MACRO EAP_NO_EXPORT_SIMPLE_CONFIG_COMPLETION_H
+MACRO EAP_NO_EXPORT_SIMPLE_CONFIG_CREDENTIAL_H
+MACRO EAP_NO_EXPORT_SIMPLE_CONFIG_MESSAGE_H
+MACRO EAP_NO_EXPORT_SIMPLE_CONFIG_PAYLOADS_H
+MACRO EAP_NO_EXPORT_SIMPLE_CONFIG_RECORD_H
+MACRO EAP_NO_EXPORT_SIMPLE_CONFIG_TLV_HEADER_H
+MACRO EAP_NO_EXPORT_SIMPLE_CONFIG_TYPES_H
+MACRO EAP_NO_EXPORT_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H
+MACRO EAP_NO_EXPORT_EAPPROTECTEDSETUPINTERFACE_H
+MACRO EAP_NO_EXPORT_EAPPROTECTEDSETUP_H
+// End: added by script change_mmp_export_macros.sh.
 
 SOURCEPATH    ../am/type/protected_setup/symbian/plugin/src
 
@@ -74,6 +92,7 @@ USERINCLUDE   ../../eapol_common/type/simple_config/simple_config/include
 // For Symbian Side
 USERINCLUDE   ../am/include
 USERINCLUDE   ../am/type/protected_setup/symbian/plugin/inc
+USERINCLUDE  	../eap_server/include
 
 LANG		  SC
 

@@ -27,6 +27,27 @@
 #include "eap_am_types.h"
 #include "eap_variable_data.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_CRYPTO_RC4_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_CRYPTO_RC4_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_CRYPTO_RC4_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_CRYPTO_RC4_H 
+#elif defined(EAP_EXPORT_EAP_AM_CRYPTO_RC4_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_CRYPTO_RC4_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_CRYPTO_RC4_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_CRYPTO_RC4_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_CRYPTO_RC4_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_CRYPTO_RC4_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_CRYPTO_RC4_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_am_tools.h"
 
 #undef set_key
@@ -35,7 +56,7 @@
 
 /// The eap_am_crypto_rc4_c class includes the state of 
 /// one instance of RC4 algorithm.
-class EAP_EXPORT eap_am_crypto_rc4_c
+class EAP_CLASS_VISIBILITY_EAP_AM_CRYPTO_RC4_H eap_am_crypto_rc4_c
 {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - -
@@ -67,7 +88,7 @@ private:
 	/**
 	 * Function cleanups the state and variables.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cleanup();
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H eap_status_e cleanup();
 
 	/**
 	 * The set_is_invalid() function sets the state of the eap_am_crypto_rc4_c
@@ -75,7 +96,7 @@ private:
 	 * The eap_am_crypto_rc4_c object calls this function after it is
 	 * initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_invalid();
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H void set_is_invalid();
 
 	/**
 	 * The set_is_valid() function sets the state of the eap_am_crypto_rc4_c
@@ -83,12 +104,12 @@ private:
 	 * The eap_am_crypto_rc4_c object calls this function after it is
 	 * initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H void set_is_valid();
 
 	/**
 	 * Function swaps the values.
 	 */
-	EAP_FUNC_IMPORT inline void swap(
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H inline void swap(
 		u8_t * const s_i,
 		u8_t * const s_j);
 
@@ -113,30 +134,30 @@ public:
 	/**
 	 * Destructor resets the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT virtual ~eap_am_crypto_rc4_c();
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H virtual ~eap_am_crypto_rc4_c();
 
 	/**
 	 * Constructor initializes the used internal buffers.
 	 */
-	EAP_FUNC_IMPORT eap_am_crypto_rc4_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H eap_am_crypto_rc4_c(abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The get_is_valid() function returns the status of the
 	 * eap_am_crypto_rc4_c object. 
 	 * True indicates the object is allocated successfully.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H bool get_is_valid();
 
 	/**
 	 * This function sets the RC4 key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_key(
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H eap_status_e set_key(
 		const eap_variable_data_c * const key);
 
 	/**
 	 * This function does RC4 encryption.
 	 */
-	EAP_FUNC_IMPORT eap_status_e encrypt_data(
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H eap_status_e encrypt_data(
 		const void * const data_in, 
 		void * const data_out,
 		const u32_t data_length);
@@ -144,7 +165,7 @@ public:
 	/**
 	 * This function does RC4 decryption.
 	 */
-	EAP_FUNC_IMPORT eap_status_e decrypt_data(
+	EAP_FUNC_VISIBILITY_EAP_AM_CRYPTO_RC4_H eap_status_e decrypt_data(
 		const void * const data_in, 
 		void * const data_out,
 		const u32_t data_length);

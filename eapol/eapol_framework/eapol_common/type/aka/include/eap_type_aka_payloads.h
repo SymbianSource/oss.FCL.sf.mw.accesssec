@@ -24,11 +24,32 @@
 
 #include "eap_variable_data.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_TYPE_AKA_PAYLOADS_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_AKA_PAYLOADS_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_AKA_PAYLOADS_H 
+#elif defined(EAP_EXPORT_EAP_TYPE_AKA_PAYLOADS_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_AKA_PAYLOADS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_AKA_PAYLOADS_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_AKA_PAYLOADS_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_AKA_PAYLOADS_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_type_aka_header.h"
 
 
 
-class EAP_EXPORT aka_fixed_data_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H aka_fixed_data_c
 {
 private:
 	//--------------------------------------------------
@@ -46,20 +67,20 @@ protected:
 public:
 	//--------------------------------------------------
 
-	EAP_FUNC_IMPORT virtual ~aka_fixed_data_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H virtual ~aka_fixed_data_c();
 
-	EAP_FUNC_IMPORT aka_fixed_data_c(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H aka_fixed_data_c(
 		abs_eap_am_tools_c * const tools);
 
-	EAP_FUNC_IMPORT bool get_is_valid() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H bool get_is_valid() const;
 
-	EAP_FUNC_IMPORT const aka_payload_AT_header_c * get_original_header();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H const aka_payload_AT_header_c * get_original_header();
 
-	EAP_FUNC_IMPORT u16_t get_type(abs_eap_am_tools_c * const m_am_tools) const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H u16_t get_type(abs_eap_am_tools_c * const m_am_tools) const;
 
-	EAP_FUNC_IMPORT u16_t get_data(abs_eap_am_tools_c * const m_am_tools) const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H u16_t get_data(abs_eap_am_tools_c * const m_am_tools) const;
 
-	EAP_FUNC_IMPORT void set_data(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H void set_data(
 		const aka_payload_AT_header_c * const original_header,
 		const u16_t type, const u16_t data);
 
@@ -67,7 +88,7 @@ public:
 }; // class aka_fixed_data_c
 
 
-class EAP_EXPORT aka_variable_data_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H aka_variable_data_c
 {
 private:
 	//--------------------------------------------------
@@ -88,30 +109,30 @@ protected:
 public:
 	//--------------------------------------------------
 
-	EAP_FUNC_IMPORT virtual ~aka_variable_data_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H virtual ~aka_variable_data_c();
 
-	EAP_FUNC_IMPORT aka_variable_data_c(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H aka_variable_data_c(abs_eap_am_tools_c * const tools);
 
-	EAP_FUNC_IMPORT const aka_payload_AT_header_c * get_original_header() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H const aka_payload_AT_header_c * get_original_header() const;
 
-	EAP_FUNC_IMPORT eap_status_e set_buffer(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H eap_status_e set_buffer(
 		const aka_payload_AT_header_c * const original_header,
 		u8_t *buffer,
 		const u32_t buffer_length,
 		const bool free_buffer,
 		const bool is_writable);
 
-	EAP_FUNC_IMPORT bool get_payload_included() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H bool get_payload_included() const;
 
-	EAP_FUNC_IMPORT u32_t get_data_length() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H u32_t get_data_length() const;
 
-	EAP_FUNC_IMPORT u8_t * get_data(const u32_t data_length) const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H u8_t * get_data(const u32_t data_length) const;
 
-	EAP_FUNC_IMPORT eap_variable_data_c * get_payload_buffer();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H eap_variable_data_c * get_payload_buffer();
 
-	EAP_FUNC_IMPORT bool get_is_valid() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H bool get_is_valid() const;
 
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H eap_status_e reset();
 
 	//--------------------------------------------------
 }; // class aka_variable_data_c
@@ -121,7 +142,7 @@ public:
 
 
 // 
-class EAP_EXPORT aka_payloads_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H aka_payloads_c
 {
 private:
 	//--------------------------------------------------
@@ -195,12 +216,12 @@ public:
 	};
 
 
-	EAP_FUNC_IMPORT virtual ~aka_payloads_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H virtual ~aka_payloads_c();
 
-	EAP_FUNC_IMPORT aka_payloads_c(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H aka_payloads_c(
 		abs_eap_am_tools_c * const tools);
 
-	EAP_FUNC_IMPORT bool check_one_payload(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H bool check_one_payload(
 		const eap_aka_payload_status_e status,
 		const aka_variable_data_c * const payload);
 
@@ -208,7 +229,7 @@ public:
 	 *  NOTE do not change the order of parameters.
 	 *  Add new payload type to the last of the parameter list.
 	 */
-	EAP_FUNC_IMPORT bool check_payloads(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H bool check_payloads(
 		const eap_aka_payload_status_e nonce_s,
 		const eap_aka_payload_status_e MAC,
 		const eap_aka_payload_status_e ENCR_DATA,
@@ -353,7 +374,7 @@ public:
 	bool get_includes_other_version_than_1();
 
 
-	EAP_FUNC_IMPORT bool get_is_valid() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_PAYLOADS_H bool get_is_valid() const;
 
 	//--------------------------------------------------
 }; // class aka_payloads_c

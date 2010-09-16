@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 112 %
+* %version: 120 %
 */
 
 #if !defined(_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H_)
@@ -25,6 +25,27 @@
 #include "eap_tools.h"
 #include "eap_variable_data.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H 
+#elif defined(EAP_EXPORT_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "abs_eap_am_type_tls_peap.h"
 #include "eap_am_type_tls_peap.h"
 #include "eap_am_network_id.h"
@@ -71,7 +92,7 @@ const u32_t KEapFastPacProvisResultDefaultTimeout = 10000; // in milliseconds = 
 #endif
 
 /// This class is interface to adaptation module of EAP/TLS and PEAP.
-class EAP_EXPORT eap_am_type_tls_peap_symbian_c
+class EAP_CLASS_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_am_type_tls_peap_symbian_c
 : public CActive
 , public eap_am_type_tls_peap_c
 , public abs_eap_base_timer_c
@@ -258,17 +279,11 @@ private: // data
 	
 	bool m_serv_unauth_prov_mode;
 	bool m_serv_auth_prov_mode;
-#endif
-	
 
-
-	CEapAuthNotifier::TEapDialogInfo * m_notifier_data_to_user;
-
-	TPckg<CEapAuthNotifier::TEapDialogInfo> * m_notifier_data_pckg_to_user;
+	// This flag indicates object is used only for PAC-store initialization.
+	bool m_is_pac_store_initialization;
 
     /* For MMETEL */
-#if defined(USE_FAST_EAP_TYPE)
-    
 	// ETel connection.
     RTelServer iServer;
     RMobilePhone iPhone;
@@ -308,7 +323,10 @@ private: // data
 	eap_fast_initialize_pac_store_completion_e iCompletion;
 
 #endif //#if defined(USE_FAST_EAP_TYPE)
-	TBool m_notifier_complete;
+
+	CEapAuthNotifier::TEapDialogInfo * m_notifier_data_to_user;
+
+	TPckg<CEapAuthNotifier::TEapDialogInfo> * m_notifier_data_pckg_to_user;
 
 #ifdef USE_PAC_STORE
 	CPacStoreDatabase * iPacStoreDb;
@@ -336,9 +354,6 @@ private: // data
     
     eap_variable_data_c* iPacStoreDeviceSeed;
 
-#ifdef USE_PAC_STORE
-#endif
-
 	CEapAuthNotifier* iEapAuthNotifier;
 
 
@@ -348,7 +363,7 @@ private: // methods
 //--------------------------------------------------
 
 
-	EAP_FUNC_IMPORT abs_tls_am_services_c * get_tls_am_partner();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H abs_tls_am_services_c * get_tls_am_partner();
 
 	abs_eap_am_type_tls_peap_c * get_am_partner();
 	
@@ -476,52 +491,6 @@ private: // methods
 
 	void ConvertUnicodeToAsciiL(const TDesC16& aFromUnicode, TDes8& aToAscii);
 	
-	void UpdatePasswordTimeL();
-	
-	void CheckPasswordTimeValidityL();
-	
-	/**
-	* Alter table: remove/add columns.
-	* 
-	* @param aDb Reference to database.
-	* @param aCmd Action type: remove/add column.
-	* @param aTableName Name of table to be altered.
-	* @param aColumnName Name of column.
-	* @param aColumnDef Drop-column-set.
-	*/  
-	void AlterTableL( RDbNamedDatabase& aDb,
-			          TAlterTableCmd aCmd,
-			          const TDesC& aTableName,
-			          const TDesC& aColumnName,
-			          const TDesC& aColumnDef = KNullDesC );
-	
-	/**
-	* Fix old tables for password identity time. 
-	* 
-	* Remove password identity time from fast table;
-	* add password identity time to PAC store table;
-	* update password identity time.
-	*/
-	void FixOldTablesForPwdIdentityTimeL();
-		
-	/**
-	* Add PAC_store_initialized to PAC store
-	* if it does not exists.
-	*/
-	void FixOldTableForPacStoreInitL();
-	
-	/**
-	* Read integer column value.
-	* 
-	* @param aDb Reference to database.
-	* @param aColumnName Name of the target column.
-	* @param aSqlStatement SQL statement to be used.
-	* @return Column value.  
-	**/
-	TInt64 ReadIntDbValueL( RDbNamedDatabase& aDb,
-			                const TDesC& aColumnName,
-			                const TDesC& aSqlStatement );
-	
 	eap_status_e ConfigureL();
 	
 	eap_status_e CreateMasterkeyL();
@@ -611,19 +580,19 @@ public: // methods
 		const bool aIsClient,
 		const eap_am_network_id_c * const receive_network_id);
 
-	EAP_FUNC_IMPORT virtual ~eap_am_type_tls_peap_symbian_c();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H virtual ~eap_am_type_tls_peap_symbian_c();
 
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e shutdown();
 
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H void set_is_valid();
 
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H bool get_is_valid();
 
-	EAP_FUNC_IMPORT void set_tls_am_partner(abs_tls_am_services_c * const tls_am_partner);
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H void set_tls_am_partner(abs_tls_am_services_c * const tls_am_partner);
 
 #if defined(USE_FAST_EAP_TYPE)
 	/// This function sets pointer to application of TLS. See abs_tls_am_application_eap_fast_c.
-	EAP_FUNC_IMPORT void set_tls_application(abs_tls_am_application_eap_fast_c * const tls_application);
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H void set_tls_application(abs_tls_am_application_eap_fast_c * const tls_application);
 	
  	
     /**
@@ -647,6 +616,8 @@ public: // methods
 	
 	void ContinueInitializePacStore();
 
+
+	void set_is_pac_store_initialization();
 	
 #endif //#if defined(USE_FAST_EAP_TYPE)
 
@@ -657,22 +628,22 @@ public: // methods
     */
 	void SendErrorNotification( const eap_status_e aError );
 
-	EAP_FUNC_IMPORT void notify_configuration_error(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H void notify_configuration_error(
 		const eap_status_e configuration_status);
 
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e configure();
 
 	void set_am_partner(abs_eap_am_type_tls_peap_c * const partner);
 	
 	/** Client calls this function.
 	 *  EAP-TLS/PEAP AM could do finishing operations to databases etc. based on authentication status and type.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e reset();
 
 	/** Client calls this function.
 	 *  EAP-TLS/PEAP AM could make some fast operations here, heavy operations should be done in the reset() function.
 	 */
-	EAP_FUNC_IMPORT eap_status_e authentication_finished(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e authentication_finished(
 		const bool true_when_successfull,
 		const tls_session_type_e tls_session_type);
 
@@ -680,7 +651,7 @@ public: // methods
 	 *  AM must copy identity to output parameters if call is syncronous.
 	 *  This function could be completed asyncronously with abs_eap_am_type_tls_peap_c::complete_query_eap_identity_query() function call.
 	 */
-	EAP_FUNC_IMPORT eap_status_e query_eap_identity(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e query_eap_identity(
 		eap_variable_data_c * const identity,
 		const eap_am_network_id_c * const receive_network_id,
 		const u8_t eap_identifier,
@@ -695,14 +666,14 @@ public: // methods
 	 *  with abs_eap_am_type_gsmsim_c::complete_SIM_IMSI_or_pseudonym_or_reauthentication_id_query() after
 	 *  cancel_SIM_IMSI_or_pseudonym_or_reauthentication_id_query() call.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_identity_query();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e cancel_identity_query();
 
 	//
-	EAP_FUNC_IMPORT eap_status_e timer_expired(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e timer_expired(
 		const u32_t id, void *data);
 
 	//
-	EAP_FUNC_IMPORT eap_status_e timer_delete_data(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e timer_delete_data(
 		const u32_t id, void *data);
 
 	/**
@@ -712,7 +683,7 @@ public: // methods
 	 * @param field is generic configure string idenfying the required configure data.
 	 * @param data is pointer to existing eap_variable_data object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e type_configure_read(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e type_configure_read(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
@@ -723,21 +694,21 @@ public: // methods
 	 * @param field is generic configure string idenfying the required configure data.
 	 * @param data is pointer to existing eap_variable_data object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e type_configure_write(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e type_configure_write(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
-	EAP_FUNC_IMPORT eap_status_e alert_received(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e alert_received(
 		const tls_alert_level_e alert_level,
 		const tls_alert_description_e alert_description);
 
-	EAP_FUNC_IMPORT eap_status_e query_cipher_suites_and_previous_session();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e query_cipher_suites_and_previous_session();
 
 #if defined(USE_EAP_TLS_SESSION_TICKET)
-	EAP_FUNC_IMPORT eap_status_e query_new_session_ticket();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e query_new_session_ticket();
 #endif //#if defined(USE_EAP_TLS_SESSION_TICKET)
 
-	EAP_FUNC_IMPORT eap_status_e select_cipher_suite_and_check_session_id(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e select_cipher_suite_and_check_session_id(
 		EAP_TEMPLATE_CONST eap_array_c<u16_t> * const cipher_suite_proposal,
 		const eap_variable_data_c * const session_id
 #if defined(USE_EAP_TLS_SESSION_TICKET)
@@ -746,26 +717,26 @@ public: // methods
 		); 
 
 
-	EAP_FUNC_IMPORT eap_status_e verify_certificate_chain(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e verify_certificate_chain(
 		EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * const certificate_chain,
 		const tls_cipher_suites_e required_cipher_suite);
 
-	EAP_FUNC_IMPORT eap_status_e query_certificate_chain(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e query_certificate_chain(
 		EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * const certificate_authorities,
 		EAP_TEMPLATE_CONST eap_array_c<u8_t> * const certificate_types,
 		const tls_cipher_suites_e required_cipher_suite);
 
-	EAP_FUNC_IMPORT eap_status_e query_certificate_authorities_and_types();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e query_certificate_authorities_and_types();
 
-	EAP_FUNC_IMPORT eap_status_e query_dh_parameters(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e query_dh_parameters(
 		EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * const certificate_chain,
 		const tls_cipher_suites_e required_cipher_suite);
 
-	EAP_FUNC_IMPORT eap_status_e query_realm(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e query_realm(
 		EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * const certificate_chain);
 
 	// This is always syncronous call.
-	EAP_FUNC_IMPORT eap_status_e save_tls_session(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e save_tls_session(
 		const eap_variable_data_c * const session_id,
 		const eap_variable_data_c * const master_secret,
 		const tls_cipher_suites_e used_cipher_suite
@@ -776,49 +747,49 @@ public: // methods
 
 		/// This is always syncronous call.
 	/// Function encrypts data with own RSA private key.
-	EAP_FUNC_IMPORT eap_status_e rsa_encrypt_with_public_key(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e rsa_encrypt_with_public_key(
 		const eap_variable_data_c * const premaster_secret);
 
 	/// This is always syncronous call.
 	/// Function decrypts data with own RSA private key.
-	EAP_FUNC_IMPORT eap_status_e rsa_decrypt_with_private_key(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e rsa_decrypt_with_private_key(
 		const eap_variable_data_c * const encrypted_premaster_secret);
 
 	/// Function signs data with own PKI private key.
 	/// NOTE this is syncronous at moment. Asyncronous completion needs many changes.
-	EAP_FUNC_IMPORT eap_status_e sign_with_private_key(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e sign_with_private_key(
 		const eap_variable_data_c * const message_hash);
 
 	/// Function verifies signed data with peer PKI public key.
 	/// NOTE this is syncronous at moment. Asyncronous completion needs many changes.
-	EAP_FUNC_IMPORT eap_status_e verify_with_public_key(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e verify_with_public_key(
 		const eap_variable_data_c * const message_hash,
 		const eap_variable_data_c * const signed_message_hash);
 
 
-	EAP_FUNC_IMPORT eap_status_e cancel_query_cipher_suites_and_previous_session();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e cancel_query_cipher_suites_and_previous_session();
 
-	EAP_FUNC_IMPORT eap_status_e cancel_select_cipher_suite_and_check_session_id();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e cancel_select_cipher_suite_and_check_session_id();
 
-	EAP_FUNC_IMPORT eap_status_e cancel_verify_certificate_chain();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e cancel_verify_certificate_chain();
 
-	EAP_FUNC_IMPORT eap_status_e cancel_query_certificate_chain();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e cancel_query_certificate_chain();
 
-	EAP_FUNC_IMPORT eap_status_e cancel_query_certificate_authorities_and_types();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e cancel_query_certificate_authorities_and_types();
 
-	EAP_FUNC_IMPORT eap_status_e cancel_query_dh_parameters();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e cancel_query_dh_parameters();
 
-	EAP_FUNC_IMPORT eap_status_e cancel_query_realm();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e cancel_query_realm();
 
-	EAP_FUNC_IMPORT eap_status_e cancel_query_dsa_parameters();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e cancel_query_dsa_parameters();
 
-	EAP_FUNC_IMPORT eap_status_e cancel_rsa_encrypt_with_public_key();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e cancel_rsa_encrypt_with_public_key();
 
-	EAP_FUNC_IMPORT eap_status_e cancel_rsa_decrypt_with_private_key();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e cancel_rsa_decrypt_with_private_key();
 
-	EAP_FUNC_IMPORT eap_status_e cancel_sign_with_private_key();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e cancel_sign_with_private_key();
 
-	EAP_FUNC_IMPORT eap_status_e cancel_verify_with_public_key();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e cancel_verify_with_public_key();
 
 
 	eap_status_e complete_read_own_certificate(
@@ -845,7 +816,7 @@ public: // methods
 	 */
 	bool is_session_valid();
 	
-	EAP_FUNC_IMPORT void set_peap_version(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H void set_peap_version(
 		const peap_version_e peap_version,
 		const bool use_tppd_tls_peap,
 		const bool use_tppd_peapv1_acknowledge_hack);
@@ -854,10 +825,10 @@ public: // methods
 
 	// This is commented in tls_am_application_eap_fast_c::read_authority_identity().
 	// Parameter is the authority identity (A-ID).
-	EAP_FUNC_IMPORT eap_status_e read_authority_identity(eap_variable_data_c * const authority_identity);
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e read_authority_identity(eap_variable_data_c * const authority_identity);
 
 	// This is commented in tls_am_application_eap_fast_c::query_pac_of_type().
-	EAP_FUNC_IMPORT eap_status_e query_pac_of_type(const eap_fast_pac_type_e pac_type);
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e query_pac_of_type(const eap_fast_pac_type_e pac_type);
 	
 #if defined(USE_EAP_CORE_SERVER)
 	/**
@@ -865,43 +836,43 @@ public: // methods
 	 * It will be completed always with complete_verify_pac() function call.
 	 * Function verifies the received PAC is valid.
 	 */
-	EAP_FUNC_IMPORT eap_status_e verify_pac(const eap_fast_variable_data_c * const tlv_pac);
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e verify_pac(const eap_fast_variable_data_c * const tlv_pac);
 #endif //#if defined(USE_EAP_CORE_SERVER)
 
 	// This is commented in eap_am_fast_pac_store_services_c::query_user_permission_for_A_ID().
-	EAP_FUNC_IMPORT eap_status_e query_user_permission_for_A_ID(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e query_user_permission_for_A_ID(
 		const eap_fast_pac_store_pending_operation_e in_pending_operation,
 		const eap_fast_variable_data_c * const in_pac_attribute_A_ID_info,
 		const eap_fast_variable_data_c * const in_pac_attribute_A_ID);
 
 	// This is commented in eap_am_fast_pac_store_services_c::read_PAC_store_data().
-	EAP_FUNC_IMPORT eap_status_e read_PAC_store_data(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e read_PAC_store_data(
 		const eap_fast_pac_store_pending_operation_e in_pending_operation,
 		EAP_TEMPLATE_CONST eap_array_c<eap_fast_pac_store_data_c> * const in_references);
 
 	// This is commented in eap_am_fast_pac_store_services_c::write_PAC_store_data().
-	EAP_FUNC_IMPORT eap_status_e write_PAC_store_data(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e write_PAC_store_data(
 		const bool when_true_must_be_synchronous_operation,
 		const eap_fast_pac_store_pending_operation_e in_pending_operation,
 		EAP_TEMPLATE_CONST eap_array_c<eap_fast_pac_store_data_c> * const in_references_and_data_blocks);
 
 	// This is commented in eap_am_fast_pac_store_services_c::complete_add_imported_PAC_file().
-	EAP_FUNC_IMPORT eap_status_e complete_add_imported_PAC_file(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e complete_add_imported_PAC_file(
 		const eap_status_e in_completion_status,
 		const eap_variable_data_c * const in_imported_PAC_filename,
 		const eap_variable_data_c * const out_used_group_reference);
 		
 	// This is commented in eap_am_fast_pac_store_services_c::complete_remove_PAC().
-	EAP_FUNC_IMPORT eap_status_e complete_remove_PAC(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e complete_remove_PAC(
 		const eap_status_e completion_status,
 		const eap_variable_data_c * const out_used_group_reference);
 
 	// This is commented in eap_am_fast_pac_store_services_c::complete_remove_IAP_reference().
-	EAP_FUNC_IMPORT eap_status_e complete_remove_IAP_reference(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e complete_remove_IAP_reference(
 		const eap_status_e completion_status);
 
 	// This is commented in eap_am_fast_pac_store_services_c::cancel_PAC_store_operations().
-	EAP_FUNC_IMPORT eap_status_e cancel_PAC_store_operations();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e cancel_PAC_store_operations();
 	
 	/**
 	 * This function initializes PAC store.
@@ -909,7 +880,7 @@ public: // methods
 	 * If asyncronous operations are needed the operations must be completed
 	 * by complete_initialize_PAC_store() function call.
 	 */
-	EAP_FUNC_IMPORT eap_status_e initialize_PAC_store(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e initialize_PAC_store(
 	    const eap_fast_completion_operation_e aCompletionOperation,
 	    const eap_fast_initialize_pac_store_completion_e aCompletion );
 
@@ -923,7 +894,7 @@ public: // methods
     * @param provisioning_mode Authenticated or unauthenticated provisioning mode.
     * @param pac_type PAC type provisioned by server.
     */
-	EAP_FUNC_IMPORT eap_status_e indicates_eap_fast_provisioning_starts(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e indicates_eap_fast_provisioning_starts(
 		const eap_fast_completion_operation_e provisioning_mode,
 		const eap_fast_pac_type_e pac_type );
 
@@ -938,7 +909,7 @@ public: // methods
 	* @param provisioning_mode Authenticated or unauthenticated provisioning mode.
 	* @param pac_type PAC type provisioned by server.
 	*/
-	EAP_FUNC_IMPORT eap_status_e indicates_eap_fast_provisioning_ends(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e indicates_eap_fast_provisioning_ends(
 		const bool provisioning_successfull,
 		const eap_fast_completion_operation_e provisioning_mode,
 		const eap_fast_pac_type_e pac_type );
@@ -953,7 +924,7 @@ public: // methods
 	* should we prompt user again to enter the password.
 	* @return True - password is valid, false - otherwise.
 	*/ 
-	EAP_FUNC_IMPORT bool is_ttls_pap_session_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H bool is_ttls_pap_session_valid();
 
 	/**
 	* From interface tls_am_services_c.
@@ -966,7 +937,7 @@ public: // methods
 	* @param aInSrvChallenge Server challenge. It could be empty.
     * @return EAP status.
 	*/
-	EAP_FUNC_IMPORT eap_status_e query_ttls_pap_username_and_password(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H eap_status_e query_ttls_pap_username_and_password(
 		const eap_variable_data_c * const aInSrvChallenge );
 	
 	/**
@@ -1030,9 +1001,13 @@ public: // methods
 
 #endif 
 
-	EAP_FUNC_IMPORT void DlgComplete( TInt aStatus );
-
+	/** These two are documented in MNotificationCallback class **/
 	
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H void DlgComplete( TInt aStatus );
+
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H TBool IsMasterKeyAndPasswordMatchingL(
+	      const TDesC16 & aPassword);
+	      
 }; // class eap_am_type_tls_peap_symbian_c
 
 

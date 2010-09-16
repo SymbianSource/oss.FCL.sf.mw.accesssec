@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 24 %
+ * %version: 38 %
  */
 
 // System includes
@@ -25,7 +25,8 @@
 #include <HbDataFormModel>
 #include <HbDataFormViewItem>
 #include <HbParameterLengthLimiter>
-#include <HbMessageBox> 
+#include <HbMessageBox>
+#include <HbInputDialog>
 #include <HbAction>
 #include <HbLineEdit>
 #include <cpsettingformitemdata.h>
@@ -33,11 +34,13 @@
 #include <eapqtvalidator.h>
 #include <eapqtexpandedeaptype.h>
 #include <eapqtcertificateinfo.h>
+#include <eapqtpacstoreconfig.h>
 #include <cppluginutility.h>
 
 // User includes
 #include "cpeapciphersuiteui.h"
 #include "cpeaptlsmethodsui.h"
+#include "cpeappacstoreui.h"
 #include "cpeaptlsmethodsinnereapui.h"
 
 /*!
@@ -61,6 +64,18 @@ static const int DefaultIndex = 0;
  * Index of 'Not in use'in certificate selection lists.
  */
 static const int NotInUseIndex = 0;
+/*!
+ * First item of the list
+ */
+static const int FirstItem = 0;
+/*
+ * Second item of the list
+ */
+static const int SecondItem = 1;
+/*!
+ * Shift by reason of 'Not in use'
+ */
+static const int NotInUseShift = 1;
 
 // ======== LOCAL FUNCTIONS ========
 
@@ -69,10 +84,10 @@ static const int NotInUseIndex = 0;
 /*!
  * Constructor.
  * 
- * @param bearer        Bearer type of the accessed configuration.
- * @param iapId         IAP ID of the accessed configuration.
- * @param plugin        Plugin.
- * @param outerHandle   Outer handle.
+ * @param [in] bearer        Bearer type of the accessed configuration.
+ * @param [in] iapId         IAP ID of the accessed configuration.
+ * @param [in] plugin        Plugin.
+ * @param [in] outerHandle   Outer handle.
  */
 
 CpEapTlsMethodsUi::CpEapTlsMethodsUi(
@@ -91,18 +106,28 @@ CpEapTlsMethodsUi::CpEapTlsMethodsUi(
         mUsername(NULL),
         mRealmAutomatic(NULL),
         mRealm(NULL),
+        mUserCertificate(NULL),
         mCaCertAutomatic(NULL),
         mCaCert(NULL),
         mPeapVersion(NULL),
+        mAuthProvisioning(NULL),
+        mUnauthProvisioning(NULL),
+        mTlsPrivacy(NULL),
         mInnerEapType(NULL),
+        mSecondInnerEapType(NULL),
+        mSecondEapEntry(NULL),
+        mGroupItemPacStore(NULL),
         mGroupItemCs(NULL),
         mCurrentUserCert(0),
         mCurrentAuthorityCert(0),
         mCurrentPeapVersion(0),
         mCurrentInnerPlugin(0),
-        mInnerEapMschapv2(0),
-        mInnerEapGtc(0),
-        mDefaultPluginInUse(false)
+        mCurrentSecondInnerPlugin(0),
+        mInnerEapMschapv2(-1),
+        mInnerEapGtc(-1),
+        mSecondInnerEapGtc(0),
+        mDefaultPluginInUse(false),
+        mInnerEapMschapv2Only(false)
 {
     qDebug("CpEapTlsMethodsUi::CpEapTlsMethodsUi()");
 
@@ -112,6 +137,7 @@ CpEapTlsMethodsUi::CpEapTlsMethodsUi(
         QT_THROW(std::bad_alloc());
         // scoped pointer gets deleted automaticaly on exception
     }
+    setObjectName("CpEapTlsMethodsUi");
 
     // Get EAP config interface
     mConfigIf.reset(new EapQtConfigInterface(bearer, iapId));
@@ -142,8 +168,27 @@ CpEapTlsMethodsUi::~CpEapTlsMethodsUi()
  */
 CpBaseSettingView *CpEapTlsMethodsUi::innerUiInstance()
 {
+    if (mInnerEapMschapv2Only) {
+        // Only EAP-MSCHAPv2 in Inner EAP type list
+        return mConfigIf->uiInstance(mPluginInfo.pluginHandle(),
+            mPlugins.at(mInnerEapMschapv2).pluginHandle());       
+    } else {
+        return mConfigIf->uiInstance(mPluginInfo.pluginHandle(),
+            mPlugins.at(mCurrentInnerPlugin).pluginHandle());        
+    }
+}
+
+/*!
+ * Calls inner UI instance
+ * 
+ * @return pointer to inner UI instance
+ */
+CpBaseSettingView *CpEapTlsMethodsUi::secondInnerUiInstance()
+{
+    // Second inner EAP type can be only EAP-GTC
+    Q_ASSERT(mCurrentSecondInnerPlugin == mSecondInnerEapGtc);
     return mConfigIf->uiInstance(mPluginInfo.pluginHandle(),
-        mPlugins.at(mCurrentInnerPlugin).pluginHandle());
+        mPlugins.at(mInnerEapGtc).pluginHandle());
 }
 
 /*!
@@ -163,15 +208,22 @@ void CpEapTlsMethodsUi::createUi()
     
     // Construct TLS based methods settings UI
     mForm = new HbDataForm();
+    mForm->setObjectName("CpEapTlsMethodsUiForm");
     this->setWidget(mForm);
+    
     CpPluginUtility::addCpItemPrototype(mForm);
+    
     mModel = new HbDataFormModel(mForm);
+    mModel->setObjectName("CpEapTlsMethodsUiModel");
     
     // Create settings group
-    mGroupItem = new HbDataFormModelItem(HbDataFormModelItem::GroupItem,
+    mGroupItem = new HbDataFormModelItem(
+        HbDataFormModelItem::GroupItem,
         HbParameterLengthLimiter(
-            hbTrId("txt_occ_subhead_eap_module_settings")).arg(
-            mPluginInfo.localizationId()));
+            "txt_occ_subhead_eap_module_settings").arg(
+                mPluginInfo.localizationId()));
+    
+    mGroupItem->setContentWidgetData("objectName", "CpEapTlsMethodsUiGroupItem");
     mModel->appendDataFormItem(mGroupItem);
 
     // The parameter given as 0 is a HbDataForm pointer, not parent
@@ -181,14 +233,13 @@ void CpEapTlsMethodsUi::createUi()
     // Create method specific UI
     if (mPluginInfo.pluginHandle() == EapQtPluginHandle::PluginEapTls) {
         createTlsUi();
-    }
-    else if (mPluginInfo.pluginHandle() == EapQtPluginHandle::PluginEapTtls) {
+    } else if (mPluginInfo.pluginHandle() == EapQtPluginHandle::PluginEapTtls) {
         createTtlsUi();
-    }
-    else if (mPluginInfo.pluginHandle() == EapQtPluginHandle::PluginPeap) {
+    } else if (mPluginInfo.pluginHandle() == EapQtPluginHandle::PluginPeap) {
         createPeapUi();
-    }
-    else {
+    } else if (mPluginInfo.pluginHandle() == EapQtPluginHandle::PluginEapFast) {
+        createFastUi();
+    } else {
         qDebug("CpEapTlsMethodsUi::createUi() - unknown EAP method");
     }
     
@@ -202,12 +253,20 @@ void CpEapTlsMethodsUi::createUi()
     mForm->setModel(mModel);
 
     // Connect signal to add validators
-    bool connected = connect(mForm, SIGNAL( itemShown(const QModelIndex&) ), this,
+    bool connected = connect(
+        mForm, 
+        SIGNAL( itemShown(const QModelIndex&) ), 
+        this,
         SLOT( setValidator(const QModelIndex) ));
     Q_ASSERT(connected); 
     
     // Expand TLS based method settings group
     mForm->setExpanded(mModel->indexFromItem(mGroupItem), true);
+    
+    // If EAP-FAST expand also PAC store group
+    if (mPluginInfo.pluginHandle() == EapQtPluginHandle::PluginEapFast) {
+        mForm->setExpanded(mModel->indexFromItem(mGroupItemPacStore), true);    
+    }
 }
 
 /*!
@@ -263,6 +322,41 @@ void CpEapTlsMethodsUi::createPeapUi()
         defaultInnerPlugin();
     }
 }
+
+/*!
+ * Creates EAP-FAST settings UI
+ */
+void CpEapTlsMethodsUi::createFastUi()
+{
+    qDebug("CpEapTlsMethodsUi::createFastUi()");
+    
+    // Create provisioning selection
+    createProvisioning();
+    
+    // Create common TLS settings componenets
+    createAuthorityCerts();
+    createUserCerts();
+    createUsername();
+    createRealm();
+    
+    // Create TLS privacy
+    createTlsPrivacy();
+    
+    // Create Inner Eap type selection comboBox and configuration button
+    createInnerMethod();
+  
+    // Create second Inner EAP type
+    createSecondInnerMethod();
+    
+    // Create PAC store group
+    createPacStoreGroup();
+    
+    // Dim fields according the provisioning mode (parameter not used)
+    provisioningModeChanged(Qt::Checked);
+    // Dim Second inner EAP type configure button if 'Not in use' selected
+    secondInnerEapTypeChanged(mCurrentSecondInnerPlugin);
+}
+
 /*!
  * Creates Username group:
  * Generate automatically checkBox and username lineEdit
@@ -271,26 +365,41 @@ void CpEapTlsMethodsUi::createUsername()
 {
     qDebug("CpEapTlsMethodsUi::createUsername()");
     // UsernameAutomatic
-    mUsernameAutomatic = new CpSettingFormItemData(HbDataFormModelItem::CheckBoxItem, hbTrId(
-        "txt_occ_setlabel_user_name"));
-    mUsernameAutomatic->setContentWidgetData("text", hbTrId(
-        "txt_occ_setlabel_user_name_val_generate_automatica"));
+    mUsernameAutomatic = new CpSettingFormItemData(
+        HbDataFormModelItem::CheckBoxItem, 
+        hbTrId("txt_occ_setlabel_user_name"));
+    mGroupItem->appendChild(mUsernameAutomatic);
+    
+    mUsernameAutomatic->setContentWidgetData(
+        "objectName", 
+        "CpEapTlsMethodsUiUsernameAutomatic"); 
+    mUsernameAutomatic->setContentWidgetData(
+        "text", 
+        hbTrId("txt_occ_setlabel_user_name_val_generate_automatica"));
+    
     // Initialize the value from EapQtConfig
     // Generate username automatically is selected by default
-    mUsernameAutomatic->setContentWidgetData("checkState", boolToCheckState(mEapConfig.value(
-        EapQtConfig::UsernameAutomatic).toBool()));
+    mUsernameAutomatic->setContentWidgetData(
+        "checkState", 
+        boolToCheckState(mEapConfig.value(EapQtConfig::UsernameAutomatic).toBool()));
+    
     // Connect signal to disable/enable username when usernameAutomatic changed   
-    mForm->addConnection(mUsernameAutomatic, SIGNAL(stateChanged(int)), this,
+    mForm->addConnection(
+        mUsernameAutomatic, 
+        SIGNAL(stateChanged(int)), 
+        this,
         SLOT(usernameAutomaticChanged(int)));
-    mGroupItem->appendChild(mUsernameAutomatic);
 
     //Username
-    mUsername = new CpSettingFormItemData(HbDataFormModelItem::TextItem, hbTrId(
-        "txt_occ_setlabel_user_name"));
+    mUsername = new CpSettingFormItemData(
+        HbDataFormModelItem::TextItem, 
+        hbTrId("txt_occ_setlabel_user_name"));
+    mGroupItem->appendChild(mUsername);    
+    mUsername->setContentWidgetData("objectName", "CpEapTlsMethodsUiUsername");
     mUsername->setContentWidgetData("text", mEapConfig.value(EapQtConfig::Username));
+    
     // Dim username if usernameAutomatic selected
     usernameAutomaticChanged(mUsernameAutomatic->contentWidgetData("checkState") == Qt::Checked);
-    mGroupItem->appendChild(mUsername);
 }
 
 /*!
@@ -301,26 +410,40 @@ void CpEapTlsMethodsUi::createRealm()
 {
     qDebug("CpEapTlsMethodsUi::createRealm()");
     // RealmAutomatic
-    mRealmAutomatic = new CpSettingFormItemData(HbDataFormModelItem::CheckBoxItem, hbTrId(
-        "txt_occ_setlabel_realm"));
-    mRealmAutomatic->setContentWidgetData("text", hbTrId(
-        "txt_occ_setlabel_realm_val_generate_automatically"));
+    mRealmAutomatic = new CpSettingFormItemData(
+        HbDataFormModelItem::CheckBoxItem, 
+        hbTrId("txt_occ_setlabel_realm"));
+    mGroupItem->appendChild(mRealmAutomatic);
+    
+    mRealmAutomatic->setContentWidgetData("objectName", "CpEapTlsMethodsUiRealmAutomatic");
+    mRealmAutomatic->setContentWidgetData(
+        "text", 
+        hbTrId("txt_occ_setlabel_realm_val_generate_automatically"));
+    
     // Initialize the value from EapQtConfig
     // Generate realm automatically is selected by default
-    mRealmAutomatic->setContentWidgetData("checkState", boolToCheckState(mEapConfig.value(
-        EapQtConfig::RealmAutomatic).toBool()));
+    mRealmAutomatic->setContentWidgetData(
+        "checkState", 
+        boolToCheckState(mEapConfig.value(EapQtConfig::RealmAutomatic).toBool()));
+    
     // connect signal to disable/enable realm when realmAutomatic changed 
-    mForm->addConnection(mRealmAutomatic, SIGNAL(stateChanged(int)), this,
+    mForm->addConnection(
+        mRealmAutomatic, 
+        SIGNAL(stateChanged(int)), 
+        this,
         SLOT(realmAutomaticChanged(int)));
-    mGroupItem->appendChild(mRealmAutomatic);
 
     //Realm
-    mRealm = new CpSettingFormItemData(HbDataFormModelItem::TextItem, hbTrId(
-        "txt_occ_setlabel_realm"));
+    mRealm = new CpSettingFormItemData(
+        HbDataFormModelItem::TextItem, 
+        hbTrId("txt_occ_setlabel_realm"));
+    mGroupItem->appendChild(mRealm); 
+    
+    mRealm->setContentWidgetData("objectName", "CpEapTlsMethodsUiRealm");
     mRealm->setContentWidgetData("text", mEapConfig.value(EapQtConfig::Realm));
+    
     // Dim realm if realmAutomatic selected
     realmAutomaticChanged(mRealmAutomatic->contentWidgetData("checkState") == Qt::Checked);
-    mGroupItem->appendChild(mRealm); 
 }
 
 /*!
@@ -330,19 +453,21 @@ void CpEapTlsMethodsUi::createUserCerts()
 {
     qDebug("CpEapTlsMethodsUi::createUserCerts()");
     // Create User certificate comboBox
-    CpSettingFormItemData *userCertList = new CpSettingFormItemData(
+    mUserCertificate = new CpSettingFormItemData(
         HbDataFormModelItem::ComboBoxItem, 
         hbTrId("txt_occ_setlabel_user_certificate"));
+    mGroupItem->appendChild(mUserCertificate);
+    
+    mUserCertificate->setContentWidgetData("objectName", "CpEapTlsMethodsUiUserCertSelector");
     
     // Stored certificate
     QList<QVariant> storedCertsList = mEapConfig.value(EapQtConfig::UserCertificate).toList();
     EapQtCertificateInfo storedCert;
-    if (!storedCertsList.empty() && storedCertsList[0].canConvert<EapQtCertificateInfo> ()) {
+    if (!storedCertsList.empty() && storedCertsList[FirstItem].canConvert<EapQtCertificateInfo> ()) {
         // Stored certificate found, index is still unknown 
-        storedCert = storedCertsList[0].value<EapQtCertificateInfo> ();
+        storedCert = storedCertsList[FirstItem].value<EapQtCertificateInfo> ();
         mCurrentUserCert = UnknownIndex;
-    }
-    else {
+    } else {
         // no stored certificate, use 'not in use'
         mCurrentUserCert = DefaultIndex;
     }
@@ -360,7 +485,7 @@ void CpEapTlsMethodsUi::createUserCerts()
         if (mCurrentUserCert == UnknownIndex 
             && storedCert.value(EapQtCertificateInfo::SubjectKeyId)
             == mUserCerts.at(i).value(EapQtCertificateInfo::SubjectKeyId)) {
-            mCurrentUserCert = i + 1;
+            mCurrentUserCert = i + NotInUseShift;
         }
     }
     if (mCurrentUserCert == UnknownIndex) {
@@ -370,13 +495,12 @@ void CpEapTlsMethodsUi::createUserCerts()
     }
     
     // Initialize comboBox
-    userCertList->setContentWidgetData("items", items);
-    userCertList->setContentWidgetData("currentIndex", mCurrentUserCert);
+    mUserCertificate->setContentWidgetData("items", items);
+    mUserCertificate->setContentWidgetData("currentIndex", mCurrentUserCert);
     
     // Get info when user certificate selection has been changed
-    mForm->addConnection(userCertList, SIGNAL(currentIndexChanged(int)), this,
+    mForm->addConnection(mUserCertificate, SIGNAL(currentIndexChanged(int)), this,
         SLOT(userCertChanged(int)));
-    mGroupItem->appendChild(userCertList);
 }
 
 /*!
@@ -387,32 +511,45 @@ void CpEapTlsMethodsUi::createAuthorityCerts()
 {
     qDebug("CpEapTlsMethodsUi::createAuthorityCerts()");
     // Select Authority Certificate Automatically
-    mCaCertAutomatic = new CpSettingFormItemData(HbDataFormModelItem::CheckBoxItem, hbTrId(
-        "txt_occ_setlabel_authority_certificate"));
-    mCaCertAutomatic->setContentWidgetData("text", hbTrId(
-        "txt_occ_setlabel_authority_certificate_val_select"));
-    // Initialize the value from EapQtConfig
-    // Select CA Cert automatically is selected by default
-    mCaCertAutomatic->setContentWidgetData("checkState", boolToCheckState(mEapConfig.value(
-        EapQtConfig::AuthorityCertificateAutomatic).toBool()));
-    // connect signal to disable/enable CA cert when CaCertAutomatic changed 
-    mForm->addConnection(mCaCertAutomatic, SIGNAL(stateChanged(int)), this,
-        SLOT(authorityCertAutomaticChanged(int)));
+    mCaCertAutomatic = new CpSettingFormItemData(
+        HbDataFormModelItem::CheckBoxItem, 
+        hbTrId("txt_occ_setlabel_authority_certificate"));
     mGroupItem->appendChild(mCaCertAutomatic);
     
+    mCaCertAutomatic->setContentWidgetData("objectName", "CpEapTlsMethodsUiCaCertAutomatic");
+    mCaCertAutomatic->setContentWidgetData(
+        "text", 
+        hbTrId("txt_occ_setlabel_authority_certificate_val_select"));
+    
+    // Initialize the value from EapQtConfig
+    // Select CA Cert automatically is selected by default
+    mCaCertAutomatic->setContentWidgetData(
+        "checkState", 
+        boolToCheckState(mEapConfig.value(EapQtConfig::AuthorityCertificateAutomatic).toBool()));
+    
+    // connect signal to disable/enable CA cert when CaCertAutomatic changed 
+    mForm->addConnection(
+        mCaCertAutomatic, 
+        SIGNAL(stateChanged(int)), 
+        this,
+        SLOT(authorityCertAutomaticChanged(int)));
+    
     // Authority certificate comboBox
-    mCaCert = new CpSettingFormItemData(HbDataFormModelItem::ComboBoxItem, 
+    mCaCert = new CpSettingFormItemData(
+        HbDataFormModelItem::ComboBoxItem, 
         hbTrId("txt_occ_setlabel_authority_certificate"));
+    mGroupItem->appendChild(mCaCert);
+    
+    mCaCert->setContentWidgetData("objectName", "CpEapTlsMethodsUiCaCertSelector");
     
     // Stored certificate from EAP configuration
     QList<QVariant> storedCertsList = mEapConfig.value(EapQtConfig::AuthorityCertificate).toList();
     EapQtCertificateInfo storedCert;
-    if (!storedCertsList.empty() && storedCertsList[0].canConvert<EapQtCertificateInfo> ()) {
+    if (!storedCertsList.empty() && storedCertsList[FirstItem].canConvert<EapQtCertificateInfo> ()) {
         // Stored certificate found, index is still unknown 
-        storedCert = storedCertsList[0].value<EapQtCertificateInfo> ();
+        storedCert = storedCertsList[FirstItem].value<EapQtCertificateInfo> ();
         mCurrentAuthorityCert = UnknownIndex;
-    }
-    else {
+    } else {
         // no selected certificate, use 'not in use'
         mCurrentAuthorityCert = DefaultIndex;
     }
@@ -430,7 +567,7 @@ void CpEapTlsMethodsUi::createAuthorityCerts()
         if (mCurrentAuthorityCert == UnknownIndex 
             && storedCert.value(EapQtCertificateInfo::SubjectKeyId)
             == mAuthorityCerts.at(i).value(EapQtCertificateInfo::SubjectKeyId)) {
-            mCurrentAuthorityCert = i + 1;
+            mCurrentAuthorityCert = i + NotInUseShift;
         }
     }
     if (mCurrentAuthorityCert == UnknownIndex) {
@@ -443,11 +580,14 @@ void CpEapTlsMethodsUi::createAuthorityCerts()
     mCaCert->setContentWidgetData("currentIndex", mCurrentAuthorityCert);
     
     // Get info when authority certificate selection has been changed
-    mForm->addConnection(mCaCert, SIGNAL(currentIndexChanged(int)), this,
+    mForm->addConnection(
+        mCaCert, 
+        SIGNAL(currentIndexChanged(int)), 
+        this,
         SLOT(authorityCertChanged(int)));
+    
     // Dim authority certificate if select automatically checked
     authorityCertAutomaticChanged(mCaCertAutomatic->contentWidgetData("checkState") == Qt::Checked);
-    mGroupItem->appendChild(mCaCert);
 }
 
 /*!
@@ -460,6 +600,9 @@ void CpEapTlsMethodsUi::createPeapVersion()
     mPeapVersion = new CpSettingFormItemData(
         HbDataFormModelItem::ComboBoxItem, 
         hbTrId("txt_occ_setlabel_peap_version"));
+    mGroupItem->appendChild(mPeapVersion);
+    
+    mPeapVersion->setContentWidgetData("objectName", "CpEapTlsMethodsUiPeapVersionSelector");
     
     // Add items to comboBox List
     QStringList items;
@@ -473,16 +616,13 @@ void CpEapTlsMethodsUi::createPeapVersion()
         && mEapConfig.value(EapQtConfig::PeapVersion1Allowed).toBool()) {
         // PEAPv0 or PEAPv1
         mCurrentPeapVersion = PeapVersionBoth;
-    }
-    else if (mEapConfig.value(EapQtConfig::PeapVersion1Allowed).toBool()) {
+    } else if (mEapConfig.value(EapQtConfig::PeapVersion1Allowed).toBool()) {
         // PEAPv1
         mCurrentPeapVersion = PeapVersion1;
-    }
-    else if (mEapConfig.value(EapQtConfig::PeapVersion0Allowed).toBool()) {
+    } else if (mEapConfig.value(EapQtConfig::PeapVersion0Allowed).toBool()) {
         // PEAPv0
         mCurrentPeapVersion = PeapVersion0;
-    }
-    else {
+    } else {
         qDebug("CpEapTlsMethodsUi::createPeapVersion() - unknown version");    
         // Set default (PEAPv0 or PEAPv1)
         mCurrentPeapVersion = PeapVersionBoth;
@@ -490,9 +630,92 @@ void CpEapTlsMethodsUi::createPeapVersion()
     mPeapVersion->setContentWidgetData("currentIndex", mCurrentPeapVersion);
 
     // Get info when PEAP version selection has been changed
-    mForm->addConnection(mPeapVersion, SIGNAL(currentIndexChanged(int)), this,
+    mForm->addConnection(
+        mPeapVersion, 
+        SIGNAL(currentIndexChanged(int)), 
+        this,
         SLOT(peapVersionChanged(int)));
-    mGroupItem->appendChild(mPeapVersion);
+}
+
+/*!
+ * Creates authenticated and unauthenticated provisioning checkBoxes.
+ */
+void CpEapTlsMethodsUi::createProvisioning()
+{
+    qDebug("CpEapTlsMethodsUi::createProvisioning()");
+    // Authenticated provisioning
+    mAuthProvisioning = new CpSettingFormItemData(
+        HbDataFormModelItem::CheckBoxItem, 
+        hbTrId("txt_occ_setlabel_authenticated_provisioning"));
+    mGroupItem->appendChild(mAuthProvisioning);
+    
+    mAuthProvisioning->setContentWidgetData(
+        "objectName", 
+        "CpEapTlsMethodsUiAuthProvisioning");
+    mAuthProvisioning->setContentWidgetData(
+        "text", 
+        hbTrId("txt_occ_setlabel_val_provisioning_enabled"));
+    
+    // Initialize the value from EapQtConfig
+    mAuthProvisioning->setContentWidgetData(
+        "checkState", 
+        boolToCheckState(mEapConfig.value(
+        EapQtConfig::ProvisioningModeAuthenticated).toBool()));
+    // Connect signal to disable/enable username when usernameAutomatic changed   
+    mForm->addConnection(mAuthProvisioning, SIGNAL(stateChanged(int)), this,
+        SLOT(provisioningModeChanged(int)));
+    
+    // Unauthenticated provisioning
+    mUnauthProvisioning = new CpSettingFormItemData(
+        HbDataFormModelItem::CheckBoxItem, 
+        hbTrId("txt_occ_setlabel_unauthenticated_provisioning"));
+    mGroupItem->appendChild(mUnauthProvisioning); 
+    
+    mUnauthProvisioning->setContentWidgetData(
+        "objectName", 
+        "CpEapTlsMethodsUiUnauthProvisioning");
+    mUnauthProvisioning->setContentWidgetData(
+        "text", 
+        hbTrId("txt_occ_setlabel_val_provisioning_enabled"));
+    
+    // Initialize the value from EapQtConfig
+    mUnauthProvisioning->setContentWidgetData(
+        "checkState", 
+        boolToCheckState(mEapConfig.value(
+        EapQtConfig::ProvisioningModeUnauthenticated).toBool()));
+    // Connect signal to disable/enable username when usernameAutomatic changed   
+    mForm->addConnection(mUnauthProvisioning, SIGNAL(stateChanged(int)), this,
+        SLOT(provisioningModeChanged(int)));
+}
+
+/*!
+ * Creates TLS privacy selection comboBox
+ */
+void CpEapTlsMethodsUi::createTlsPrivacy()
+{
+    qDebug("CpEapTlsMethodsUi::createTlsPrivacy()");
+    // Create TLS privacy comboBox
+    mTlsPrivacy = new CpSettingFormItemData(
+        HbDataFormModelItem::ComboBoxItem, 
+        hbTrId("txt_occ_setlabel_tls_privacy"));
+    mGroupItem->appendChild(mTlsPrivacy);
+    
+    mTlsPrivacy->setContentWidgetData(
+        "objectName", 
+        "CpEapTlsMethodsUiTlsPrivacy");
+    
+    // Add items to comboBox List
+    QStringList items;
+    items << hbTrId("txt_occ_setlabel_tls_privacy_val_off")
+        << hbTrId("txt_occ_setlabel_tls_privacy_val_on");
+    mTlsPrivacy->setContentWidgetData("items", items);
+    
+    // Initialize TLS privacy from EAP configuration
+    if (mEapConfig.value(EapQtConfig::UseIdentityPrivacy).toBool()) {
+        mTlsPrivacy->setContentWidgetData("currentIndex", TlsPrivacyOn);
+    } else {
+        mTlsPrivacy->setContentWidgetData("currentIndex", TlsPrivacyOff);
+    }
 }
 
 /*!
@@ -505,8 +728,14 @@ void CpEapTlsMethodsUi::createInnerMethod()
     createEapSelector();
     // Create 'configure inner EAP type' button
     EapInnerMethodEntryItemData *eapEntry = NULL;
-    eapEntry = new EapInnerMethodEntryItemData(this, *mItemDataHelper,
-        hbTrId("txt_occ_button_inner_eap_type"));
+    eapEntry = new EapInnerMethodEntryItemData(
+        this, 
+        *mItemDataHelper,
+        hbTrId("txt_occ_button_inner_eap_type"),
+        false);
+    
+    eapEntry->setContentWidgetData("objectName", "CpEapTlsMethodsUiInnerTypeItem");
+    
     mGroupItem->appendChild(eapEntry);    
 }
 
@@ -518,24 +747,25 @@ void CpEapTlsMethodsUi::createEapSelector()
     mInnerEapType = new CpSettingFormItemData(
         HbDataFormModelItem::ComboBoxItem, 
         hbTrId("txt_occ_setlabel_inner_eap_type"));
-
+    mGroupItem->appendChild(mInnerEapType);
+    
+    mInnerEapType->setContentWidgetData("objectName", "CpEapTlsMethodsUiInnerTypeSelector");
+    
     // Selected inner EAP type stored into the database
     QList<QVariant> currentEapList = mEapConfig.value(EapQtConfig::InnerType).toList();
     EapQtPluginHandle readInnerEap;
-    if (!currentEapList.empty() && currentEapList[0].canConvert<EapQtPluginHandle> ()) {
-        readInnerEap = currentEapList[0].value<EapQtPluginHandle> ();
+    if (!currentEapList.empty() && currentEapList[FirstItem].canConvert<EapQtPluginHandle> ()) {
+        readInnerEap = currentEapList[FirstItem].value<EapQtPluginHandle> ();
         mCurrentInnerPlugin = UnknownIndex;
-    }
-    else {
+    } else {
         // no selected inner EAP type, use the first one
         mCurrentInnerPlugin = DefaultIndex;
         mDefaultPluginInUse = true;
     }
     
-    QStringList items;
     for (int i = 0; i < mPlugins.count(); ++i) {
         // Add certificate to comboBox list
-        items << mPlugins.at(i).localizationId();
+        mInnerEapItems << mPlugins.at(i).localizationId();
         if (mCurrentInnerPlugin == UnknownIndex && readInnerEap.pluginId() 
             == mPlugins.at(i).pluginHandle().pluginId()) {
             // Store index of selected certificate
@@ -544,8 +774,8 @@ void CpEapTlsMethodsUi::createEapSelector()
         if (mPlugins.at(i).pluginHandle().pluginId() == EapQtPluginHandle::PluginEapMschapv2) {
             // Store index of EAP-MSCHAPv2 (used as default with PEAP and unauthenticated FAST)
             mInnerEapMschapv2 = i;
-        }
-        else if (mPlugins.at(i).pluginHandle().pluginId() == EapQtPluginHandle::PluginEapGtc) {
+            mMschapv2Items << mPlugins.at(i).localizationId();
+        } else if (mPlugins.at(i).pluginHandle().pluginId() == EapQtPluginHandle::PluginEapGtc) {
             // Store index of EAP-GTC (Used as default with PEAPv1)
             mInnerEapGtc = i;
         }
@@ -556,19 +786,100 @@ void CpEapTlsMethodsUi::createEapSelector()
         mDefaultPluginInUse = true;      
     }
     
-    mInnerEapType->setContentWidgetData("items", items);
+    mInnerEapType->setContentWidgetData("items", mInnerEapItems);
     mInnerEapType->setContentWidgetData("currentIndex", mCurrentInnerPlugin);
     
     mForm->addConnection(mInnerEapType, SIGNAL(currentIndexChanged(int)), this,
         SLOT(innerEapTypeChanged(int)));
+}
+
+/*!
+ * Creates second inner EAP type selection comboBox and configure button
+ */
+void CpEapTlsMethodsUi::createSecondInnerMethod()
+{
+    qDebug("CpEapTlsMethodsUi::createSecondInnerMethod()");
+    // Create second inner EAP type selection combo box
+    createSecondEapSelector();
+    // Create 'configure inner EAP type' button
+    mSecondEapEntry = new EapInnerMethodEntryItemData(
+        this, 
+        *mItemDataHelper,
+        hbTrId("txt_occ_button_inner_eap_type"),
+        true);
     
-    mGroupItem->appendChild(mInnerEapType);
+    mSecondEapEntry->setContentWidgetData("objectName", "CpEapTlsMethodsUiSecondInnerTypeItem");
+    
+    mGroupItem->appendChild(mSecondEapEntry);    
+}
+
+/*!
+ * Creates Combo box for second inner EAP type selection
+ */
+void CpEapTlsMethodsUi::createSecondEapSelector()
+{
+    mSecondInnerEapType = new CpSettingFormItemData(
+        HbDataFormModelItem::ComboBoxItem, 
+        hbTrId("txt_occ_setlabel_second_inner_eap_type"));
+    mGroupItem->appendChild(mSecondInnerEapType);
+    
+    mSecondInnerEapType->setContentWidgetData("objectName", "CpEapTlsMethodsUiSecondInnerTypeSelector");
+
+    // Selected inner EAP type stored into the database
+    QList<QVariant> currentEapList = mEapConfig.value(EapQtConfig::InnerType).toList();
+    EapQtPluginHandle readInnerEap;
+    if (currentEapList.count() > SecondItem && currentEapList[SecondItem].canConvert<EapQtPluginHandle> ()) {
+        readInnerEap = currentEapList[SecondItem].value<EapQtPluginHandle> ();
+        mCurrentSecondInnerPlugin = UnknownIndex;
+    } else {
+        // no selected inner EAP type, use the 'Not in use'
+        mCurrentSecondInnerPlugin = NotInUseIndex;
+    }
+ 
+    // Add 'Not in use' and EAP-GTC into the combobox list
+    QStringList items;
+    items << hbTrId("txt_occ_setlabel_second_inner_eap_val_not_in_use");
+    if (mInnerEapGtc >= 0) {
+        // EAP-GTC plugin is found, add it as the second item of the list
+        mSecondInnerEapGtc = SecondItem;
+        items << mPlugins.at(mInnerEapGtc).localizationId();
+        if (readInnerEap.pluginId() 
+            == mPlugins.at(mInnerEapGtc).pluginHandle().pluginId()) {
+            mCurrentSecondInnerPlugin = mSecondInnerEapGtc;
+        }
+    }
+
+    if (mCurrentSecondInnerPlugin == UnknownIndex) {
+        // Selected inner EAP type not found
+        mCurrentSecondInnerPlugin = NotInUseIndex;     
+    }
+    
+    mSecondInnerEapType->setContentWidgetData("items", items);
+    mSecondInnerEapType->setContentWidgetData("currentIndex", mCurrentSecondInnerPlugin);
+    
+    mForm->addConnection(mSecondInnerEapType, SIGNAL(currentIndexChanged(int)), this,
+        SLOT(secondInnerEapTypeChanged(int)));
+}
+
+/*!
+ * Creates PAC store group
+ */
+void CpEapTlsMethodsUi::createPacStoreGroup()
+{
+    qDebug("CpEapTlsMethodsUi::createPacStoreGroup()");
+    
+    mPacStoreUi = new CpEapPacStoreUi(mConfigIf.data());
+    mGroupItemPacStore = mPacStoreUi->uiInstance(
+        *mItemDataHelper);
+ 
+    mGroupItemPacStore->setContentWidgetData("objectName", "CpEapTlsMethodsUiPacStoreGroupItem");
+    mModel->appendDataFormItem(mGroupItemPacStore);
 }
 
 /*!
  * Adds validators.
  * 
- * @param modelIndex Model index
+ * @param [in] modelIndex   Model index
  */
 void CpEapTlsMethodsUi::setValidator(const QModelIndex modelIndex)
 {
@@ -580,15 +891,20 @@ void CpEapTlsMethodsUi::setValidator(const QModelIndex modelIndex)
     
     if (modelItem == mUsername) {
         // When username lineEdit is activated (shown) first time, validator is added
-        mValidatorUsername.reset(mConfigIf->validatorEap(mPluginInfo.pluginHandle().type(),
-            EapQtConfig::Username));
+        mValidatorUsername.reset(
+            mConfigIf->validatorEap(
+                mPluginInfo.pluginHandle().type(),
+                EapQtConfig::Username));
+        
         HbLineEdit *edit = qobject_cast<HbLineEdit *> (viewItem->dataItemContentWidget());
         mValidatorUsername->updateEditor(edit);
-    }
-    else if (modelItem == mRealm) {
+    } else if (modelItem == mRealm) {
         // When realm lineEdit is activated (shown) first time, validator is added
-        mValidatorRealm.reset(mConfigIf->validatorEap(mPluginInfo.pluginHandle().type(),
+        mValidatorRealm.reset(
+            mConfigIf->validatorEap(
+                mPluginInfo.pluginHandle().type(),
                 EapQtConfig::Realm));
+        
         HbLineEdit *edit = qobject_cast<HbLineEdit *> (viewItem->dataItemContentWidget());
         mValidatorRealm->updateEditor(edit);
     }
@@ -600,20 +916,23 @@ void CpEapTlsMethodsUi::setValidator(const QModelIndex modelIndex)
 void CpEapTlsMethodsUi::defaultInnerPlugin()
 {
     qDebug("CpEapTlsMethodsUi::defaultInnerPlugin()");
-    if (mCurrentPeapVersion == PeapVersion1) {
+    if (mCurrentPeapVersion == PeapVersion1 && mInnerEapGtc >= 0) {
         mInnerEapType->setContentWidgetData("currentIndex", mInnerEapGtc);
         mCurrentInnerPlugin = mInnerEapGtc;
-    }
-    else {
+    } else if (mInnerEapMschapv2 >= 0){
         mInnerEapType->setContentWidgetData("currentIndex", mInnerEapMschapv2);
         mCurrentInnerPlugin = mInnerEapMschapv2;
-    }  
+    } else {
+        // Both EAP-GTC and EAP-MSCHAPv2 should always be supported
+        // so here should never come
+        qDebug("CpEapTlsMethodsUi::defaultInnerPlugin(): No suitable inner EAP type");
+    }
 }
 
 /*!
  * Stores the index of selected user certificate
  * 
- * @param value Index of selected certificate.
+ * @param [in] value  Index of selected certificate.
  */
 void CpEapTlsMethodsUi::userCertChanged(int value)
 {
@@ -624,7 +943,7 @@ void CpEapTlsMethodsUi::userCertChanged(int value)
 /*!
  * Stores the index of selected authority certificate
  * 
- * @param value Index of selected certificate.
+ * @param [in] value  Index of selected certificate.
  */
 void CpEapTlsMethodsUi::authorityCertChanged(int value)
 {
@@ -635,7 +954,7 @@ void CpEapTlsMethodsUi::authorityCertChanged(int value)
 /*!
  * Stores the index of selected PEAP version
  * 
- * @param value Index of selected PEAP version.
+ * @param [in] value  Index of selected PEAP version.
  */
 void CpEapTlsMethodsUi::peapVersionChanged(int value)
 {
@@ -647,18 +966,55 @@ void CpEapTlsMethodsUi::peapVersionChanged(int value)
 /*!
  * Stores the index of selected inner EAP type
  * 
- * @param value Index of selected ineer EAP type.
+ * @param [in] value  Index of selected inner EAP type.
  */
 void CpEapTlsMethodsUi::innerEapTypeChanged(int value)
 {
     qDebug("CpEapTlsMethodsUi::innerEapTypeChanged()");
-    mCurrentInnerPlugin = value;
+    if (!mInnerEapMschapv2Only) {
+        mCurrentInnerPlugin = value; 
+    }
+    if (mPluginInfo.pluginHandle() == EapQtPluginHandle::PluginEapFast) {
+        // If Inner EAP typ is EAP-MSCHAPv2 the second inner EAP type
+        // is EAP-GTC by default otherwise 'Not in use'
+        if (mInnerEapMschapv2Only || mCurrentInnerPlugin == mInnerEapMschapv2) {
+            mSecondInnerEapType->setContentWidgetData(
+                "currentIndex", mSecondInnerEapGtc);
+        } else {
+            mSecondInnerEapType->setContentWidgetData(
+                "currentIndex", NotInUseIndex);                
+        }
+        if (mInnerEapMschapv2Only) {
+            mSecondInnerEapType->setContentWidgetData("enabled", true);
+        } else {
+            mSecondInnerEapType->setContentWidgetData("enabled", false);
+        }
+    }
+}
+
+/*!
+ * Stores the index of selected second inner EAP type and
+ * dims the 'Configure inner EAP type' button if 'Not in use' has been selected
+ * 
+ * @param [in] value  Index of selected second inner EAP type.
+ */
+void CpEapTlsMethodsUi::secondInnerEapTypeChanged(int value)
+{
+    qDebug("CpEapTlsMethodsUi::secondInerEapTypeChanged()");
+    mCurrentSecondInnerPlugin = value;
+    if (value == NotInUseIndex || !mSecondInnerEapType->contentWidgetData("enabled").toBool()) {
+        // If 'Not in use' selected 'Configure inner EAP type' button is dimmed
+        mSecondEapEntry->setContentWidgetData("enabled", false);
+    } else {
+        // If EAP-GTC selected 'Configure inner EAP type' button is available
+        mSecondEapEntry->setContentWidgetData("enabled", true);
+    }
 }
 
 /*!
  * Dims the username if generate username automatically has been selected.
  * 
- * @param state Tells is generate automatically checked.
+ * @param [in] state  Tells is username generate automatically checked.
  */
 void CpEapTlsMethodsUi::usernameAutomaticChanged(int state)
 {
@@ -670,7 +1026,7 @@ void CpEapTlsMethodsUi::usernameAutomaticChanged(int state)
 /*!
  * Dims the realm if generate realm automatically has been selected.
  * 
- * @param state Tells is generate automatically checked.
+ * @param [in] state  Tells is realm generate automatically checked.
  */
 void CpEapTlsMethodsUi::realmAutomaticChanged(int state)
 {
@@ -682,7 +1038,7 @@ void CpEapTlsMethodsUi::realmAutomaticChanged(int state)
 /*!
  * Dims the authority certificate if select caCert automatically has been selected.
  * 
- * @param state Tells is select automatically checked.
+ * @param [in] state  Tells is authority certificate select automatically checked.
  */
 void CpEapTlsMethodsUi::authorityCertAutomaticChanged(int state)
 {
@@ -692,9 +1048,117 @@ void CpEapTlsMethodsUi::authorityCertAutomaticChanged(int state)
 }
 
 /*!
+ * Dims all fields except inner EAP types and provisionig modes 
+ * if Unauthenticated provisioning mode is selected
+ * and Authenticated provisioning is not selceted
+ *
+ *  @param [in] state  Obsolete parameter, not needed
+ */
+void CpEapTlsMethodsUi::provisioningModeChanged(int state)
+{
+    qDebug("CpEapTlsMethodsUi::provisioningModeChanged");
+    
+    Q_UNUSED(state);
+    
+    // If only unauthenticated provisioning is selected all fields are dimmed 
+    // except the first (EAP-MSCHAPv2) and the second (EAP-GTC) inner EAP type 
+    // settings and authenticated provisioning can be selected
+    // Else all fields are available
+    if (mUnauthProvisioning->contentWidgetData(
+            "checkState") == Qt::Checked
+        && mAuthProvisioning->contentWidgetData(
+            "checkState") == Qt::Unchecked) {
+        mCaCertAutomatic->setContentWidgetData("enabled", false);
+        mCaCert->setContentWidgetData("enabled", false);
+        mUserCertificate->setContentWidgetData("enabled", false);
+        mUsernameAutomatic->setContentWidgetData("enabled", false);
+        mUsername->setContentWidgetData("enabled", false);
+        mRealmAutomatic->setContentWidgetData("enabled", false);
+        mRealm->setContentWidgetData("enabled", false);
+        mTlsPrivacy->setContentWidgetData("enabled", false);
+        mInnerEapMschapv2Only = true;
+        mSecondInnerEapType->setContentWidgetData("enabled", true);
+        mSecondEapEntry->setContentWidgetData("enabled", true);
+        mInnerEapType->setContentWidgetData("items", mMschapv2Items);
+    } else {
+        mCaCertAutomatic->setContentWidgetData("enabled", true);
+        mCaCert->setContentWidgetData("enabled", !checkStateToBool(
+            mCaCertAutomatic->contentWidgetData("checkState").toInt()));
+        mUserCertificate->setContentWidgetData("enabled", true);
+        mUsernameAutomatic->setContentWidgetData("enabled", true);
+        mUsername->setContentWidgetData("enabled", !checkStateToBool(
+            mUsernameAutomatic->contentWidgetData("checkState").toInt()));
+        mRealmAutomatic->setContentWidgetData("enabled", true);
+        mRealm->setContentWidgetData("enabled", !checkStateToBool(
+            mRealmAutomatic->contentWidgetData("checkState").toInt()));
+        mTlsPrivacy->setContentWidgetData("enabled", true);
+        if (mUnauthProvisioning->contentWidgetData(
+            "checkState") == Qt::Checked) {
+            // When Unauthenticated provisioning is selected only EAP-MSCHAPv2 is
+            // supported as first inner EAP type. Second inner EAP type is available
+            mInnerEapMschapv2Only = true;
+            mSecondInnerEapType->setContentWidgetData("enabled", true);
+            mSecondEapEntry->setContentWidgetData("enabled", true);
+            mInnerEapType->setContentWidgetData("items", mMschapv2Items);
+
+        } else {
+            // When Unauthenticated provisioning is not selected all inner EAP
+            // types are shown in the first inner EAP type list and 
+            // the second inner EAP type is dimmed
+            mInnerEapMschapv2Only = false;
+            mForm->removeConnection(mInnerEapType, SIGNAL(currentIndexChanged(int)), this,
+                SLOT(innerEapTypeChanged(int)));
+            mInnerEapType->setContentWidgetData("items", mInnerEapItems);
+            mForm->addConnection(mInnerEapType, SIGNAL(currentIndexChanged(int)), this,
+                SLOT(innerEapTypeChanged(int)));
+            mInnerEapType->setContentWidgetData("currentIndex", mCurrentInnerPlugin);
+            mSecondInnerEapType->setContentWidgetData("enabled", false);
+            mSecondEapEntry->setContentWidgetData("enabled", false);
+        }
+    }
+}
+
+/*!
+ * Slot for close the view after confirmed.
+ * 
+ * @param [in] action  User action
+ */
+void CpEapTlsMethodsUi::incompletedSettingsConfirmed(int action)
+{
+    qDebug("CpEapTlsMethodsUi::incompletedSettingsConfirmed()");
+    if (action == HbMessageBox::Yes) {
+        // User Clicked Yes
+        // Close view
+        qDebug("CpEapTlsMethodsUi::incompletedSettingsConfirmed(): YES");
+        emit aboutToClose();
+    } else{
+        // User Clicked No
+        // Don't close the view
+        Q_ASSERT(action == HbMessageBox::No);
+        qDebug("CpEapTlsMethodsUi::incompletedSettingsConfirmed(): NO");  
+    }
+}
+
+/*!
+ * Slot for close the view after user has been informed.
+ * 
+ * @param [in] action  User action
+ */
+void CpEapTlsMethodsUi::unableToSaveSettingsClosed(int action)
+{
+    qDebug("CpEapTlsMethodsUi::unableToSaveSettingsClosed()");
+    if (action == HbMessageBox::Ok) {
+        // User Clicked Ok
+        // Close view
+        qDebug("CpEapTlsMethodsUi::unableToSaveSettingsClosed(): OK");
+        emit aboutToClose();
+    }    
+}
+
+/*!
  * Converts check box state to boolean.
  * 
- * @param state Check box state
+ * @param [in] state  Check box state
  * 
  * @return true if Check box is checked, false otherwise.
  */
@@ -706,7 +1170,7 @@ bool CpEapTlsMethodsUi::checkStateToBool(const int state)
 /*!
  * Converts boolean to check box state.
  * 
- * @param state Tells is check box checked.
+ * @param [in] state  Tells is check box checked.
  * 
  * @return Qt check state
  */
@@ -735,53 +1199,26 @@ void CpEapTlsMethodsUi::close()
             qDebug("CpEapTlsMethodsUi::close - Settings stored, close view");
             // Close view
             CpBaseSettingView::close();   
-        }
-        else {
+        } else {
             qDebug("CpEapTlsMethodsUi::close - Store settings failed, prompt warning");
             // Store failed. Show error note to user
-            QScopedPointer<HbMessageBox> infoBox;
-            infoBox.reset(new HbMessageBox(
-                HbMessageBox::MessageTypeWarning));
-            infoBox->setText(hbTrId("txt_occ_info_unable_to_save_setting"));
-            infoBox->clearActions();
-            // Connect 'OK'-button to CpBaseSettingView 'aboutToClose'-signal
-            HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
-            infoBox->addAction(okAction);
-            bool connected = connect(
-                okAction,
-                SIGNAL(triggered()),
-                this,
-                SIGNAL(aboutToClose()));
-            Q_ASSERT(connected);
-            infoBox->open();
-            infoBox.take();
+            HbMessageBox *warningBox = new HbMessageBox(HbMessageBox::MessageTypeWarning);
+            warningBox->setObjectName("CpEapTlsMethodsUiStoreFailedWarning");
+            warningBox->setText(hbTrId("txt_occ_info_unable_to_save_setting"));
+            warningBox->setAttribute(Qt::WA_DeleteOnClose);
+            warningBox->setStandardButtons(HbMessageBox::Ok);
+            warningBox->open(this,SLOT(unableToSaveSettingsClosed(int)));
         }
-    }
-    else {
+    } else {
         qDebug("CpEapTlsMethodsUi::close - validation failed. Prompt question.");
 
         // Validate failed. Request user to exit anyway
-        QScopedPointer<HbMessageBox> messageBox;
-        messageBox.reset(new HbMessageBox(
-            HbMessageBox::MessageTypeQuestion));
-        messageBox->setAttribute(Qt::WA_DeleteOnClose);
-        messageBox->setText(hbTrId("txt_occ_info_incomplete_details_return_without_sa"));
-        messageBox->clearActions();
-        // Connect 'YES'-button to CpBaseSettingView 'aboutToClose'-signal
-        HbAction *okAction = new HbAction(hbTrId("txt_common_button_yes"));
-        messageBox->addAction(okAction);
-        bool connected = connect(
-            okAction,
-            SIGNAL(triggered()),
-            this,
-            SIGNAL(aboutToClose()));
-        Q_ASSERT(connected);
-        // Clicking 'NO'-button does nothing
-        HbAction *cancelAction = new HbAction(hbTrId("txt_common_button_no"));
-        messageBox->addAction(cancelAction);
-        messageBox->setTimeout(HbPopup::NoTimeout);
-        messageBox->open();
-        messageBox.take();
+        HbMessageBox *questionBox = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
+        questionBox->setObjectName("CpEapTlsMethodsUiExitWithoutSavingQuestion");
+        questionBox->setText(hbTrId("txt_occ_info_incomplete_details_return_without_sa"));
+        questionBox->setAttribute(Qt::WA_DeleteOnClose);
+        questionBox->setStandardButtons(HbMessageBox::Yes | HbMessageBox::No);
+        questionBox->open(this,SLOT(incompletedSettingsConfirmed(int)));
     }
 }
 
@@ -850,10 +1287,15 @@ bool CpEapTlsMethodsUi::validateRealmGroup()
 bool CpEapTlsMethodsUi::validateAuthorityCertificate()
 {
     bool status = false;
-    //true if select automatically is checked or certificate is selected
-    if (mCaCertAutomatic->contentWidgetData("checkState") == Qt::Checked
-        || mCurrentAuthorityCert > NotInUseIndex) {
+    if (mPluginInfo.pluginHandle() == EapQtPluginHandle::PluginEapFast) {
+        // Always true for EAP-FAST
         status = true;
+    } else {    
+        //true if select automatically is checked or certificate is selected
+        if (mCaCertAutomatic->contentWidgetData("checkState") == Qt::Checked
+            || mCurrentAuthorityCert > NotInUseIndex) {
+            status = true;
+        }
     }
     qDebug("CpEapTlsMethodsUi::validateAuthorityCertificate()- status: %d", status);
     return status;
@@ -896,7 +1338,7 @@ bool CpEapTlsMethodsUi::validateCiphersuites()
 /*!
  * Write PEAP specific values into the EAP configuration
  * 
- * @param eapConfig
+ * @param [out] eapConfig  EAP configuration settings
  */
 void CpEapTlsMethodsUi::setPeapVersion(EapQtConfig &eapConfig)
 {
@@ -904,16 +1346,40 @@ void CpEapTlsMethodsUi::setPeapVersion(EapQtConfig &eapConfig)
     if (mCurrentPeapVersion == PeapVersion0) {
         eapConfig.setValue(EapQtConfig::PeapVersion0Allowed, true);
         eapConfig.setValue(EapQtConfig::PeapVersion1Allowed, false);
-    }
-    else if (mCurrentPeapVersion == PeapVersion1) {
+    } else if (mCurrentPeapVersion == PeapVersion1) {
         eapConfig.setValue(EapQtConfig::PeapVersion0Allowed, false);
         eapConfig.setValue(EapQtConfig::PeapVersion1Allowed, true);            
-    }
-    else {
+    } else {
         Q_ASSERT(mCurrentPeapVersion == PeapVersionBoth);
         eapConfig.setValue(EapQtConfig::PeapVersion0Allowed, true);
         eapConfig.setValue(EapQtConfig::PeapVersion1Allowed, true);            
     }    
+}
+
+/*!
+ * Write FAST specific values into the EAP configuration
+ * 
+ * @param [out] eapConfig  EAP configuration settings
+ */
+void CpEapTlsMethodsUi::setFastSettings(EapQtConfig &eapConfig)
+{
+    qDebug("CpEapTlsMethodsUi::setFastSettings()");
+    // Provisioning Mode
+    eapConfig.setValue(
+        EapQtConfig::ProvisioningModeAuthenticated,
+        checkStateToBool(mAuthProvisioning->contentWidgetData(
+            "checkState").toInt()));
+    eapConfig.setValue(
+        EapQtConfig::ProvisioningModeUnauthenticated,
+        checkStateToBool(mUnauthProvisioning->contentWidgetData(
+            "checkState").toInt()));
+    
+    // TLS privacy
+    if (mTlsPrivacy->contentWidgetData("currentIndex") == TlsPrivacyOn) {
+        eapConfig.setValue(EapQtConfig::UseIdentityPrivacy, true);
+    } else {
+        eapConfig.setValue(EapQtConfig::UseIdentityPrivacy, false);
+    }
 }
 
 /*!
@@ -929,13 +1395,25 @@ bool CpEapTlsMethodsUi::storeSettings()
 
     // Store common settings
     qDebug("CpEapTlsMethodsUi::storeSettings - Common settings");
-    eapConfig.setValue(EapQtConfig::OuterType, qVariantFromValue(mOuterHandle));
-    eapConfig.setValue(EapQtConfig::UsernameAutomatic, checkStateToBool(
-        mUsernameAutomatic->contentWidgetData("checkState").toInt()));
-    eapConfig.setValue(EapQtConfig::Username, mUsername->contentWidgetData("text"));
-    eapConfig.setValue(EapQtConfig::RealmAutomatic, checkStateToBool(
-        mRealmAutomatic->contentWidgetData("checkState").toInt()));
-    eapConfig.setValue(EapQtConfig::Realm, mRealm->contentWidgetData("text"));
+    eapConfig.setValue(
+        EapQtConfig::OuterType, 
+        qVariantFromValue(mOuterHandle));
+    
+    eapConfig.setValue(
+        EapQtConfig::UsernameAutomatic, 
+        checkStateToBool(mUsernameAutomatic->contentWidgetData("checkState").toInt()));
+    
+    eapConfig.setValue(
+        EapQtConfig::Username, 
+        mUsername->contentWidgetData("text"));
+    
+    eapConfig.setValue(
+        EapQtConfig::RealmAutomatic, 
+        checkStateToBool(mRealmAutomatic->contentWidgetData("checkState").toInt()));
+    
+    eapConfig.setValue(
+        EapQtConfig::Realm, 
+        mRealm->contentWidgetData("text"));
 
     // User certificate
     qDebug("CpEapTlsMethodsUi::storeSettings - User certificate");
@@ -961,18 +1439,35 @@ bool CpEapTlsMethodsUi::storeSettings()
     // Inner EAP method (Not valid for EAP-TLS)
     if (!(mPluginInfo.pluginHandle() == EapQtPluginHandle::PluginEapTls)) {
         qDebug("CpEapTlsMethodsUi::storeSettings - Inner EAP method");
-        QList<QVariant> innerEaps;
-        innerEaps.append(qVariantFromValue(mPlugins.at(mCurrentInnerPlugin).pluginHandle()));
-        eapConfig.setValue(EapQtConfig::InnerType, innerEaps);
+        if (!mPlugins.isEmpty()) {
+            QList<QVariant> innerEaps;
+            if (mInnerEapMschapv2Only) {
+                innerEaps.append(qVariantFromValue(mPlugins.at(mInnerEapMschapv2).pluginHandle()));
+            } else {
+                innerEaps.append(qVariantFromValue(mPlugins.at(mCurrentInnerPlugin).pluginHandle()));
+            }
+            if (mPluginInfo.pluginHandle() == EapQtPluginHandle::PluginEapFast){
+                // Second inner eap can be 'Not in use' or EAP-GTC
+                if (mCurrentSecondInnerPlugin != NotInUseIndex){
+                    innerEaps.append(qVariantFromValue(
+                        mPlugins.at(mInnerEapGtc).pluginHandle()));
+                }
+            }
+            eapConfig.setValue(EapQtConfig::InnerType, innerEaps);
+        }
     }
 
     // Cipher suites
     qDebug("CpEapTlsMethodsUi::storeSettings - Cipher suites");
     eapConfig.setValue(EapQtConfig::CipherSuites, mGroupItemCs->ciphersuites());
     
-    // PEAP version (valid only for PEAP)
+
     if (mPluginInfo.pluginHandle() == EapQtPluginHandle::PluginPeap) {
+        // PEAP version (valid only for PEAP)
         setPeapVersion(eapConfig);
+    } else if (mPluginInfo.pluginHandle() == EapQtPluginHandle::PluginEapFast) {
+        // FAST specific settings
+        setFastSettings(eapConfig);
     }
     
     // Save configuration

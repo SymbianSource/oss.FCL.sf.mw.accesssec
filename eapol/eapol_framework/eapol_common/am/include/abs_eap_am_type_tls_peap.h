@@ -23,13 +23,34 @@
 #define _ABS_EAP_AM_TYPE_TLS_PEAP_H_
 
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABS_EAP_AM_TYPE_TLS_PEAP_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_AM_TYPE_TLS_PEAP_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_AM_TYPE_TLS_PEAP_H 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_AM_TYPE_TLS_PEAP_H 
+	#define EAP_FUNC_EXPORT_ABS_EAP_AM_TYPE_TLS_PEAP_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_AM_TYPE_TLS_PEAP_H 
+#elif defined(EAP_EXPORT_ABS_EAP_AM_TYPE_TLS_PEAP_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_AM_TYPE_TLS_PEAP_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_AM_TYPE_TLS_PEAP_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_AM_TYPE_TLS_PEAP_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_AM_TYPE_TLS_PEAP_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_AM_TYPE_TLS_PEAP_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_AM_TYPE_TLS_PEAP_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_AM_TYPE_TLS_PEAP_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_AM_TYPE_TLS_PEAP_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_AM_TYPE_TLS_PEAP_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_AM_TYPE_TLS_PEAP_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 class eap_am_network_id_c;
 
 
 /// This class declares the functions adaptation module of EAP-TLS/PEAP EAP type
 /// requires from the EAP-TLS/PEAP EAP type.
-class EAP_EXPORT abs_eap_am_type_tls_peap_c
+class EAP_CLASS_VISIBILITY_ABS_EAP_AM_TYPE_TLS_PEAP_H abs_eap_am_type_tls_peap_c
 {
 private:
 	//--------------------------------------------------

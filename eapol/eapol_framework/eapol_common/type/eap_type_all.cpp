@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 14.2.8 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -634,7 +634,8 @@ EAP_C_FUNC_EXPORT eap_base_type_c * const new_eap_type(
 				is_client_when_true,
 				eap_type,
 				receive_network_id,
-				am_type_tls_peap);
+				am_type_tls_peap,
+				0);
 		if (application == 0
 			|| application->get_is_valid() == false)
 		{

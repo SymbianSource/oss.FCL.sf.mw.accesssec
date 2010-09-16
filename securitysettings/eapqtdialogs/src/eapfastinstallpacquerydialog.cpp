@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 5 %
+* %version: 6 %
 */
 
 // System includes
@@ -114,15 +114,11 @@ void EapFastInstallPacQueryDialog::createDialog(const QVariantMap &parameters )
     HbAction* actionNo = new HbAction(hbTrId("txt_common_button_no"),this);
     this->addAction(actionNo);    
     
-    //Disconnect action Yes from the default SLOT and connect to 
-    //a SLOT owned by this class    
-    disconnect(actionYes, SIGNAL(triggered()),this, SLOT(close()));
+    //Connect to a SLOT owned by this class
     bool connected = connect(actionYes, SIGNAL(triggered()), this, SLOT(yesPressed()));
     Q_ASSERT(connected == true);
     
-    //Disconnect action No from the default SLOT and connect to 
-    //a SLOT owned by this class  
-    disconnect(actionNo, SIGNAL(triggered()),this, SLOT(close()));
+    //Connect to a SLOT owned by this class  
     connected = connect(actionNo, SIGNAL(triggered()), this, SLOT(noPressed()));
     Q_ASSERT(connected == true);
         

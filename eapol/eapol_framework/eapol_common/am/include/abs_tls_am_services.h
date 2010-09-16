@@ -23,6 +23,27 @@
 #define _ABS_TLS_AM_SERVICES_H_
 
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABS_TLS_AM_SERVICES_H)
+	#define EAP_CLASS_VISIBILITY_ABS_TLS_AM_SERVICES_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABS_TLS_AM_SERVICES_H 
+	#define EAP_C_FUNC_VISIBILITY_ABS_TLS_AM_SERVICES_H 
+	#define EAP_FUNC_EXPORT_ABS_TLS_AM_SERVICES_H 
+	#define EAP_C_FUNC_EXPORT_ABS_TLS_AM_SERVICES_H 
+#elif defined(EAP_EXPORT_ABS_TLS_AM_SERVICES_H)
+	#define EAP_CLASS_VISIBILITY_ABS_TLS_AM_SERVICES_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_TLS_AM_SERVICES_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_TLS_AM_SERVICES_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABS_TLS_AM_SERVICES_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABS_TLS_AM_SERVICES_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABS_TLS_AM_SERVICES_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_TLS_AM_SERVICES_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_TLS_AM_SERVICES_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABS_TLS_AM_SERVICES_H 
+	#define EAP_C_FUNC_EXPORT_ABS_TLS_AM_SERVICES_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_array.h"
 
 #if defined(USE_EAP_TLS_SESSION_TICKET)
@@ -31,7 +52,7 @@ class tls_extension_c;
 
 /// This class declares the functions adaptation module of TLS
 /// requires from the TLS.
-class EAP_EXPORT abs_tls_am_services_c
+class EAP_CLASS_VISIBILITY_ABS_TLS_AM_SERVICES_H abs_tls_am_services_c
 {
 private:
 	//--------------------------------------------------

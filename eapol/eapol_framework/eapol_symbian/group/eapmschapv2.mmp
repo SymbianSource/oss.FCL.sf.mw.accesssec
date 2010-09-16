@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 15.1.14 %
+* %version: 15.1.18 %
 */
 
 #include <platform_paths.hrh>
@@ -30,6 +30,15 @@ TARGET        eapmschapv2.dll
 UID	          0x10009d8d 0x101F8E66
 
 deffile eapmschapv2.def
+
+MACRO EAP_NO_EXPORTS
+// Start: added by script change_mmp_export_macros.sh.
+MACRO EAP_NO_EXPORT_EAP_TYPE_MSCHAPV2_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_MSCHAPV2_HEADER_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_MSCHAPV2_STATE_H
+MACRO EAP_NO_EXPORT_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H
+MACRO EAP_NO_EXPORT_EAPMSCHAPV2_H
+// End: added by script change_mmp_export_macros.sh.
 
 SOURCEPATH    ../am/type/mschapv2/symbian/plugin/src
 
@@ -68,6 +77,7 @@ USERINCLUDE   ../../eapol_common/am/include
 USERINCLUDE	  ../am/type/symbian/plugin/include
 USERINCLUDE   ../../eapol_common/type
 USERINCLUDE   ../am/eap_notifier/inc
+USERINCLUDE  	../eap_server/include
 
 MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
 
@@ -83,7 +93,6 @@ LIBRARY		eikctl.lib
 LIBRARY     bafl.lib
 LIBRARY     eikdlg.lib
 LIBRARY     eikcore.lib
-LIBRARY     hlplch.lib
 LIBRARY		featmgr.lib
 
 LIBRARY		HbCore.lib

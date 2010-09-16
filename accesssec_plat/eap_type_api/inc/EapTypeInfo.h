@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 5.1.4 %
 */
 
 #ifndef _EAPTYPEINFO_H_
@@ -33,7 +33,7 @@ const TUint KMaxInfoStringLength = 32;
 /**
 * Class for storing and transferring the EAP type informational parameters. 
 */
-class CEapTypeInfo : public CBase
+NONSHARABLE_CLASS(CEapTypeInfo) : public CBase
 {
 public:
 

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 19 %
+* %version: 21 %
 */
 
 #include <EapTraceSymbian.h>
@@ -85,7 +85,7 @@ EXPORT_C void EapPluginTools::ListAllEapPluginsL(const TIndexType aIndexType, co
 			plugin_type.GetVendorId(),
 			plugin_type.GetVendorType()));
 
-		TBool aNotAllowed(EFalse);
+		TBool aAllowed(ETrue);
 
 		if (aIndexType == ELan
 			&& aTunnelingEapType == (*EapExpandedTypeNone.GetType()))
@@ -98,7 +98,7 @@ EXPORT_C void EapPluginTools::ListAllEapPluginsL(const TIndexType aIndexType, co
 					plugin_type.GetVendorId(),
 					plugin_type.GetVendorType()));
 
-				aNotAllowed = ETrue;
+				aAllowed = EFalse;
 			}
 		}
 		else if (aTunnelingEapType == (*EapExpandedTypePeap.GetType())
@@ -112,7 +112,7 @@ EXPORT_C void EapPluginTools::ListAllEapPluginsL(const TIndexType aIndexType, co
 					plugin_type.GetVendorId(),
 					plugin_type.GetVendorType()));
 
-				aNotAllowed = ETrue;
+				aAllowed = EFalse;
 			}
 		}
 		else if (aTunnelingEapType == (*EapExpandedTypeTtls.GetType()))
@@ -125,11 +125,22 @@ EXPORT_C void EapPluginTools::ListAllEapPluginsL(const TIndexType aIndexType, co
 					plugin_type.GetVendorId(),
 					plugin_type.GetVendorType()));
 
-				aNotAllowed = ETrue;
+				aAllowed = EFalse;
 			}
 		}
+		else if (aTunnelingEapType != (*EapExpandedTypeNone.GetType()))
+		{
+			EAP_TRACE_DEBUG_SYMBIAN((_L("EapPluginTools::ListAllEapPluginsL(): aEapArray[%d] EAP-type=0xfe%06x%08x is NOT allowed inside EAP-type=0xfe%06x%08x\n"),
+				counter,
+				plugin_type.GetVendorId(),
+				plugin_type.GetVendorType(),
+				aTunnelingEapType.GetVendorId(),
+				aTunnelingEapType.GetVendorType()));
 
-		if (aNotAllowed)
+			aAllowed = EFalse;
+		}
+
+		if (!aAllowed)
 		{
 			EAP_TRACE_DEBUG_SYMBIAN((_L("EapPluginTools::ListAllEapPluginsL(): Removes EAP-plugin aEapArray[%d] EAP-type=0xfe%06x%08x\n"),
 				counter,
@@ -254,10 +265,11 @@ EXPORT_C void EapPluginTools::CreateDatabaseLC(
 
 	error = aDatabase.Create(aFileServerSession, aPrivateDatabasePathName);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapPluginTools::CreateDatabaseLC(): - Created private DB for %S. error=%d, (%d is KErrAlreadyExists)\n"),
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapPluginTools::CreateDatabaseLC(): - Created private DB for %S. error=%d, (%d is KErrAlreadyExists, %d is KErrInUse)\n"),
 		&aDatabaseName,
 		error,
-		KErrAlreadyExists));
+		KErrAlreadyExists,
+		KErrInUse));
 }
 
 // ----------------------------------------------------------------------

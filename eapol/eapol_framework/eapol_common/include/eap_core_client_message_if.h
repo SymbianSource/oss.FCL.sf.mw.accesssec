@@ -24,6 +24,27 @@
 
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_CORE_CLIENT_MESSAGE_IF_H)
+	#define EAP_CLASS_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H 
+	#define EAP_FUNC_EXPORT_EAP_CORE_CLIENT_MESSAGE_IF_H 
+	#define EAP_C_FUNC_EXPORT_EAP_CORE_CLIENT_MESSAGE_IF_H 
+#elif defined(EAP_EXPORT_EAP_CORE_CLIENT_MESSAGE_IF_H)
+	#define EAP_CLASS_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_CORE_CLIENT_MESSAGE_IF_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_CORE_CLIENT_MESSAGE_IF_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_CORE_CLIENT_MESSAGE_IF_H 
+	#define EAP_C_FUNC_EXPORT_EAP_CORE_CLIENT_MESSAGE_IF_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_session_core_base.h"
 #include "abs_eap_session_core.h"
 #include "eap_core_map.h"
@@ -38,7 +59,7 @@ class eap_tlv_header_c;
 
 /// A eap_core_client_message_if_c class implements mapping of EAP authentication sessions.
 /// Network identity separates parallel EAP authentication sessions.
-class EAP_EXPORT eap_core_client_message_if_c
+class EAP_CLASS_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_core_client_message_if_c
 : public abs_eap_am_message_if_c
 , public eap_session_core_base_c
 , public abs_eap_base_timer_c
@@ -126,7 +147,7 @@ public:
 	/**
 	 * The destructor of the eap_core class does nothing special.
 	 */
-	EAP_FUNC_IMPORT EAP_FUNC_IMPORT virtual ~eap_core_client_message_if_c();
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H virtual ~eap_core_client_message_if_c();
 
 	/**
 	 * The constructor initializes member attributes using parameters passed to it.
@@ -136,7 +157,7 @@ public:
 	 * as a client (true) or server (false), in terms of EAP-protocol
 	 * whether this network entity is EAP-supplicant (true) or EAP-authenticator (false).
 	 */
-	EAP_FUNC_IMPORT eap_core_client_message_if_c(
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_core_client_message_if_c(
 		abs_eap_am_tools_c * const tools,
 		eap_am_message_if_c * const server,
 		abs_eap_session_core_c * const partner,
@@ -151,7 +172,7 @@ public:
 	 * If object reset fails this function must return corresponding error status.
 	 * @return This function returns the status of reset operation.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_status_e reset();
 
 	/**
 	 * This function cancels all EAP-sessions.
@@ -159,10 +180,10 @@ public:
 	 * If this fails this function must return corresponding error status.
 	 * @return This function returns the status of operation.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_all_eap_sessions();
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_status_e cancel_all_eap_sessions();
 
 	// This is documented in abs_eap_stack_interface_c::packet_process().
-	EAP_FUNC_IMPORT eap_status_e packet_process(
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_status_e packet_process(
 		const eap_am_network_id_c * const receive_network_id,
 		eap_general_header_base_c * const packet_data,
 		const u32_t packet_length); 
@@ -176,7 +197,7 @@ public:
 	 * The server does not need eap_acknowledge() function because
 	 * server (EAP-authenticator) sends the EAP-success message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e eap_acknowledge(
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_status_e eap_acknowledge(
 		const eap_am_network_id_c * const receive_network_id); 
 
 #if defined(USE_EAP_CORE_SERVER)
@@ -185,56 +206,56 @@ public:
 	 * when EAP-authentication is needed with another peer.
 	 * @param network_id includes the addresses (network identity) and packet type.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_eap_identity_request(
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_status_e send_eap_identity_request(
 		const eap_am_network_id_c * const network_id);
 #endif //#if defined(USE_EAP_CORE_SERVER)
 
 	// This is documented in abs_eap_stack_interface_c::configure().
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_status_e configure();
 
 	// This is documented in abs_eap_stack_interface_c::shutdown().
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_status_e shutdown();
 
 	// This is documented in abs_eap_stack_interface_c::get_is_valid().
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H bool get_is_valid();
 
 	/**
 	 * This function creates EAP session object synchronously.
 	 * @param receive_network_id identifies the removed EAP session.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_eap_session(
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_status_e create_eap_session(
 		const eap_am_network_id_c * const receive_network_id);
 
 	/**
 	 * This function removes EAP session object synchronously.
 	 * @param receive_network_id identifies the removed EAP session.
 	 */
-	EAP_FUNC_IMPORT eap_status_e remove_eap_session(
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_status_e remove_eap_session(
 		const bool complete_to_lower_layer,
 		const eap_am_network_id_c * const receive_network_id);
 
 	// See abs_eap_base_timer_c::timer_expired().
-	EAP_FUNC_IMPORT eap_status_e timer_expired(
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_status_e timer_expired(
 		const u32_t id, void *data);
 
 	// See abs_eap_base_timer_c::timer_delete_data().
-	EAP_FUNC_IMPORT eap_status_e timer_delete_data(
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_status_e timer_delete_data(
 		const u32_t id, void *data);
 
 	// See abs_eap_am_message_if_c::send_data().
-	EAP_FUNC_IMPORT eap_status_e send_data(const void * const data, const u32_t length);
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_status_e send_data(const void * const data, const u32_t length);
 
 
-	EAP_FUNC_IMPORT eap_status_e set_eap_database_reference_values(
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_status_e set_eap_database_reference_values(
 		const eap_variable_data_c * const reference);
 
-	EAP_FUNC_IMPORT eap_status_e get_802_11_authentication_mode(
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_status_e get_802_11_authentication_mode(
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type,
 		const eap_variable_data_c * const SSID,
 		const eap_variable_data_c * const preshared_key);
 
-	EAP_FUNC_IMPORT eap_status_e complete_get_802_11_authentication_mode(
+	EAP_FUNC_VISIBILITY_EAP_CORE_CLIENT_MESSAGE_IF_H eap_status_e complete_get_802_11_authentication_mode(
 		const eap_status_e completion_status,
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_802_11_authentication_mode_e mode);

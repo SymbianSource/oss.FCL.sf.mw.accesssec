@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 17 %
+* %version: 18 %
 */
 
 
@@ -100,21 +100,21 @@ bool CEapCoreIf::get_is_valid()
 eap_status_e CEapCoreIf::configure(
 	const eap_variable_data_c * const client_configuration)
 {
-	return m_server_if->configure(client_configuration);
+	return EAP_STATUS_RETURN(m_am_tools, m_server_if->configure(client_configuration));
 }
 
 // ----------------------------------------------------------------
 
 eap_status_e CEapCoreIf::send_data(const void * const data, const u32_t length)
 {
-	return m_client_if->SendData(data, length, EEapCoreSendData);
+	return EAP_STATUS_RETURN(m_am_tools, m_client_if->SendData(data, length, EEapCoreSendData));
 }
 
 // ----------------------------------------------------------------
 
 eap_status_e CEapCoreIf::process_data(const void * const data, const u32_t length)
 {
-	return m_server_if->process_data(data, length);
+	return EAP_STATUS_RETURN(m_am_tools, m_server_if->process_data(data, length));
 }
 
 //--------------------------------------------------

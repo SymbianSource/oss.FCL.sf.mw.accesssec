@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 16 %
+ * %version: 17 %
  */
 
 // System includes
@@ -104,9 +104,17 @@ EapQtPluginHandle::EapQtPluginHandle(const EapQtExpandedEapType& type, const int
 {
 }
 
-EapQtPluginHandle::EapQtPluginHandle(const EapQtExpandedEapType& type) :
-    d_ptr(new EapQtPluginHandlePrivate(type, handleMapper[typeMapper[type.type()]].mUid))
+EapQtPluginHandle::EapQtPluginHandle(const EapQtExpandedEapType& type)
 {
+	if (( type.type() < EapQtExpandedEapType::TypeLast) &&
+		( typeMapper[type.type()] < EapQtPluginHandle::PluginLast) )
+		{
+		d_ptr.reset(new EapQtPluginHandlePrivate(type, handleMapper[typeMapper[type.type()]].mUid));
+		}
+	else
+		{
+		d_ptr.reset(NULL);	
+		}
 }
 
 EapQtPluginHandle::EapQtPluginHandle(const EapQtPluginHandle& handle) :

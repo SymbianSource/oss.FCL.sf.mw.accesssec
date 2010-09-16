@@ -128,6 +128,27 @@
 #define _DUMMY_EAP_CORE_H_
 
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_DUMMY_EAP_CORE_H)
+	#define EAP_CLASS_VISIBILITY_DUMMY_EAP_CORE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H 
+	#define EAP_C_FUNC_VISIBILITY_DUMMY_EAP_CORE_H 
+	#define EAP_FUNC_EXPORT_DUMMY_EAP_CORE_H 
+	#define EAP_C_FUNC_EXPORT_DUMMY_EAP_CORE_H 
+#elif defined(EAP_EXPORT_DUMMY_EAP_CORE_H)
+	#define EAP_CLASS_VISIBILITY_DUMMY_EAP_CORE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_DUMMY_EAP_CORE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_DUMMY_EAP_CORE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_DUMMY_EAP_CORE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_DUMMY_EAP_CORE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_DUMMY_EAP_CORE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_DUMMY_EAP_CORE_H 
+	#define EAP_C_FUNC_EXPORT_DUMMY_EAP_CORE_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "abs_eap_base_type.h"
 #include "eap_core_map.h"
 #include "eap_am_network_id.h"
@@ -157,7 +178,7 @@ class eap_variable_data_c;
 
 
 /// A eap_core_c class implements the basic functionality of EAP-type.
-class EAP_EXPORT dummy_eap_core_c
+class EAP_CLASS_VISIBILITY_DUMMY_EAP_CORE_H dummy_eap_core_c
 : public abs_eap_core_map_c
 , public abs_eap_base_type_c
 , public abs_eap_base_timer_c
@@ -307,7 +328,7 @@ private:
 	 * Re-transmission is used to test protocols.
 	 * This function resends the packet.
 	 */
-	EAP_FUNC_IMPORT eap_status_e resend_packet(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e resend_packet(
 		const eap_am_network_id_c * const send_network_id,
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t header_offset,
@@ -320,13 +341,13 @@ private:
 	 * Re-transmission is used to test protocols.
 	 * This function cancels retransmissions.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_retransmission();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e cancel_retransmission();
 
 	/**
 	 * Re-transmission is used to test protocols.
 	 * This function inits retransmission of sent packet.
 	 */
-	EAP_FUNC_IMPORT eap_status_e init_retransmission(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e init_retransmission(
 		const eap_am_network_id_c * const send_network_id,
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t header_offset,
@@ -339,36 +360,36 @@ private:
 	/**
 	 * This function cancels previous session timeout and initializes new timeout for the session.
 	 */
-	EAP_FUNC_IMPORT eap_status_e initialize_session_timeout(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e initialize_session_timeout(
 		const u32_t session_timeout_ms);
 
 	/**
 	 * This function cancels timeout for a session.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_session_timeout();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e cancel_session_timeout();
 
 	/**
 	 * This function calls shutdown() for one eap_base_type_c object.
 	 */
-	EAP_FUNC_IMPORT static eap_status_e shutdown_operation(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H static eap_status_e shutdown_operation(
 		eap_base_type_c * const value,
 		abs_eap_am_tools_c * const m_am_tools);
 
 	/**
 	 * This function calls reset() for one eap_base_type_c object.
 	 */
-	EAP_FUNC_IMPORT static eap_status_e reset_operation(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H static eap_status_e reset_operation(
 		eap_base_type_c * const handler,
 		abs_eap_am_tools_c * const m_am_tools);
 
-	EAP_FUNC_IMPORT eap_status_e client_proposes_eap_types(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e client_proposes_eap_types(
 		const eap_am_network_id_c * const receive_network_id,
 		const u8_t eap_identifier);
 
 	/**
 	 * This function processes EAP-packet with known EAP-type.
 	 */
-	EAP_FUNC_IMPORT eap_status_e packet_process_type(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e packet_process_type(
 		const eap_type_value_e used_eap_type,
 		const eap_am_network_id_c * const receive_network_id,
 		eap_general_header_base_c * const packet_data,
@@ -379,14 +400,14 @@ private:
 	 * This function re-starts authentication with new EAP-type.
 	 * Only server calls this function.
 	 */
-	EAP_FUNC_IMPORT eap_status_e restart_with_new_type(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e restart_with_new_type(
 		const eap_type_value_e used_eap_type,
 		const eap_am_network_id_c * const receive_network_id,
 		const u8_t eap_identifier);
 #endif //#if defined(USE_EAP_CORE_SERVER)
 
 #if defined(USE_EAP_CORE_SERVER)
-	EAP_FUNC_IMPORT eap_status_e handle_eap_identity_response(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e handle_eap_identity_response(
 		eap_base_type_c * const handler,
 		const eap_type_value_e used_eap_type,
 		const eap_am_network_id_c * const receive_network_id,
@@ -397,7 +418,7 @@ private:
 	/**
 	 * This function handles EAP-Request/Identity.
 	 */
-	EAP_FUNC_IMPORT eap_status_e handle_eap_identity_request(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e handle_eap_identity_request(
 		const eap_type_value_e used_eap_type,
 		const u8_t eap_identifier,
 		const eap_am_network_id_c * const receive_network_id);
@@ -405,7 +426,7 @@ private:
 	/**
 	 * This function creates EAP-Response/Identity.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_eap_identity_response(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e create_eap_identity_response(
 		eap_buf_chain_wr_c * const response_packet,
 		const eap_variable_data_c * const identity,
 		const u8_t eap_identifier
@@ -414,7 +435,7 @@ private:
 	/**
 	 * This function sends EAP-Response/Identity.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_eap_identity_response(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e send_eap_identity_response(
 		const eap_am_network_id_c * const send_network_id,
 		const eap_variable_data_c * const identity,
 		const u8_t eap_identifier);
@@ -422,19 +443,19 @@ private:
 	/**
 	 * This function sends EAP-Response/Notification.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_eap_notification_response(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e send_eap_notification_response(
 		const eap_am_network_id_c * const send_network_id,
 		const u8_t eap_identifier);
 
 	/**
 	 * This function initializes timeout for received EAP-Failure.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_eap_failure_timeout();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e set_eap_failure_timeout();
 
 	/**
 	 * This function cancels timeout for received EAP-Failure.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_eap_failure_timeout();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e cancel_eap_failure_timeout();
 
 #if defined(USE_EAP_CORE_WAIT_REQUEST_TYPE_TIMER)
 	eap_status_e set_wait_eap_request_type_timeout();
@@ -442,12 +463,12 @@ private:
 	eap_status_e cancel_wait_eap_request_type_timeout();
 #endif //#if defined(USE_EAP_CORE_WAIT_REQUEST_TYPE_TIMER)
 
-	EAP_FUNC_IMPORT eap_status_e asynchronous_init_remove_eap_session();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e asynchronous_init_remove_eap_session();
 
-	EAP_FUNC_IMPORT eap_status_e initialize_asynchronous_init_remove_eap_session(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e initialize_asynchronous_init_remove_eap_session(
 		const u32_t remove_session_timeout);
 
-	EAP_FUNC_IMPORT eap_status_e cancel_asynchronous_init_remove_eap_session();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e cancel_asynchronous_init_remove_eap_session();
 
 	eap_status_e init_end_of_session(
 		const abs_eap_state_notification_c * const state);
@@ -466,7 +487,7 @@ public:
 	/**
 	 * The destructor of the eap_core class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~dummy_eap_core_c();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H virtual ~dummy_eap_core_c();
 
 	/**
 	 * The constructor initializes member attributes using parameters passed to it.
@@ -477,7 +498,7 @@ public:
 	 * as a client (true) or server (false), in terms of EAP-protocol
 	 * whether this network entity is EAP-supplicant (true) or EAP-authenticator (false).
 	 */
-	EAP_FUNC_IMPORT dummy_eap_core_c(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H dummy_eap_core_c(
 		abs_eap_am_tools_c * const tools,
 		abs_eap_core_c * const partner,
 		const bool is_client_when_true,
@@ -490,23 +511,23 @@ public:
 	 * @param type is the identifier of the required EAP type.
 	 * @return Function returns pointer to the EAP type object.
 	 */
-	EAP_FUNC_IMPORT eap_base_type_c * load_type(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_base_type_c * load_type(
 		const eap_type_value_e type,
 		const eap_type_value_e tunneling_type,
 		const eap_am_network_id_c * const receive_network_id);
 
-	EAP_FUNC_IMPORT void trace_eap_packet(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H void trace_eap_packet(
 		eap_const_string prefix,
 		const eap_header_wr_c * const eap_header);
 
 	// This is documented in abs_eap_stack_interface_c::packet_process().
-	EAP_FUNC_IMPORT eap_status_e packet_process(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e packet_process(
 		const eap_am_network_id_c * const receive_network_id,
 		eap_general_header_base_c * const packet_data,
 		const u32_t packet_length); 
 
 	// This is documented in abs_eap_base_type_c::packet_send().
-	EAP_FUNC_IMPORT eap_status_e packet_send(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e packet_send(
 		const eap_am_network_id_c * const send_network_id,
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t header_offset,
@@ -516,20 +537,20 @@ public:
 	/**
 	 * The get_partner() function returns pointer to partner class.
 	 */
-	EAP_FUNC_IMPORT abs_eap_core_c * get_partner();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H abs_eap_core_c * get_partner();
 
 	/**
 	 * The set_partner() function sets pointer to partner class.
 	 */
-	EAP_FUNC_IMPORT void set_partner(abs_eap_core_c * const partner);
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H void set_partner(abs_eap_core_c * const partner);
 
 	// This is documented in abs_eap_base_type_c::get_header_offset().
-	EAP_FUNC_IMPORT u32_t get_header_offset(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H u32_t get_header_offset(
 		u32_t * const MTU,
 		u32_t * const trailer_length);
 
 	// This is documented in abs_eap_base_type_c::load_module().
-	EAP_FUNC_IMPORT eap_status_e load_module(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e load_module(
 		const eap_type_value_e type,
 		const eap_type_value_e /* tunneling_type */,
 		abs_eap_base_type_c * const partner,
@@ -538,7 +559,7 @@ public:
 		const eap_am_network_id_c * const receive_network_id);
 
 	// This is documented in abs_eap_base_type_c::unload_module().
-	EAP_FUNC_IMPORT eap_status_e unload_module(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e unload_module(
 		const eap_type_value_e type); 
 
 	/**
@@ -549,11 +570,11 @@ public:
 	 * The server does not need eap_acknowledge() function because
 	 * server (EAP-authenticator) sends the EAP-success message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e eap_acknowledge(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e eap_acknowledge(
 		const eap_am_network_id_c * const receive_network_id); 
 
 	// This is documented in abs_eap_base_type_c::restart_authentication().
-	EAP_FUNC_IMPORT eap_status_e restart_authentication(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e restart_authentication(
 		const eap_am_network_id_c * const send_network_id,
 		const bool is_client_when_true);
 
@@ -564,7 +585,7 @@ public:
 	 * @param eap_identifier is the EAP-Identifier to be used with EAP-Nak message.
 	 * @param preferred_eap_type is the acceptable EAP-Type to be informed with an other peer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_eap_nak_response(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e send_eap_nak_response(
 		const eap_am_network_id_c * const receive_network_id,
 		const u8_t eap_identifier,
 		const eap_array_c<eap_type_value_e> * const eap_type_list);
@@ -577,20 +598,20 @@ public:
 	 * when EAP-authentication is needed with another peer.
 	 * @param network_id includes the addresses (network identity) and packet type.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_eap_identity_request(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e send_eap_identity_request(
 		const eap_am_network_id_c * const network_id);
 
 	/**
 	 * This function sends EAP-Success.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_eap_success(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e send_eap_success(
 		const eap_am_network_id_c * const send_network_id,
 		const u8_t eap_identifier);
 
 	/**
 	 * This function sends EAP-Failure.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_eap_failure(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e send_eap_failure(
 		const eap_am_network_id_c * const send_network_id,
 		const u8_t eap_identifier);
 
@@ -598,89 +619,89 @@ public:
 
 
 	// This is documented in abs_eap_base_type_c::packet_data_crypto_keys().
-	EAP_FUNC_IMPORT eap_status_e packet_data_crypto_keys(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e packet_data_crypto_keys(
 		const eap_am_network_id_c * const send_network_id,
 		const eap_master_session_key_c * const master_session_key
 		);
 
 	// This is documented in abs_eap_stack_interface_c::configure().
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e configure();
 
 	// This is documented in abs_eap_stack_interface_c::shutdown().
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e shutdown();
 
 	// This is documented in abs_eap_base_type_c::read_configure().
-	EAP_FUNC_IMPORT virtual eap_status_e read_configure(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H virtual eap_status_e read_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
 	// This is documented in abs_eap_base_type_c::write_configure().
-	EAP_FUNC_IMPORT virtual eap_status_e write_configure(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H virtual eap_status_e write_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
 	// This is documented in abs_eap_stack_interface_c::set_is_valid().
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H void set_is_valid();
 
 	// This is documented in abs_eap_stack_interface_c::get_is_valid().
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H bool get_is_valid();
 
 	// This is documented in abs_eap_base_type_c::state_notification().
-	EAP_FUNC_IMPORT void state_notification(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H void state_notification(
 		const abs_eap_state_notification_c * const state);
 
 	// See abs_eap_base_timer_c::timer_expired().
-	EAP_FUNC_IMPORT eap_status_e timer_expired(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e timer_expired(
 		const u32_t id, void *data);
 
 	// See abs_eap_base_timer_c::timer_delete_data().
-	EAP_FUNC_IMPORT eap_status_e timer_delete_data(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e timer_delete_data(
 		const u32_t id, void *data);
 
 	/**
 	 * eap_core_map_c class increases reference count each time reference to stored object is get.
 	 * Here is always just one state for one session so no references are used.
 	 */
-	EAP_FUNC_IMPORT void object_increase_reference_count();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H void object_increase_reference_count();
 
 	/**
 	 * eap_core_map_c class increases reference count each time reference to stored object is get.
 	 *  Here is always just one state for one session so no references are used.
 	 */
-	EAP_FUNC_IMPORT u32_t object_decrease_reference_count();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H u32_t object_decrease_reference_count();
 
 	/**
 	 * @{ Add configuration of accepted EAP-types. }
 	 */
 	// This is documented in abs_eap_base_type_c::check_is_valid_eap_type().
-	EAP_FUNC_IMPORT eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);
 
 	// This is commented in abs_eap_base_type_c::get_eap_type_list().
-	EAP_FUNC_IMPORT eap_status_e get_eap_type_list(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e get_eap_type_list(
 		eap_array_c<eap_type_value_e> * const eap_type_list);
 
 	/**
 	 * Gets flag whether this session is marked removed.
 	 * Session is removed later if it is not reused.
 	 */
-	EAP_FUNC_IMPORT bool get_marked_removed();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H bool get_marked_removed();
 
 	/**
 	 * Marks this session removed.
 	 * Session is removed later if it is not reused.
 	 */
-	EAP_FUNC_IMPORT void set_marked_removed();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H void set_marked_removed();
 
 	/**
 	 * Marks this session not removed.
 	 * Session is not removed it is reused.
 	 */
-	EAP_FUNC_IMPORT void unset_marked_removed();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H void unset_marked_removed();
 
 	/**
 	 * Prevents all notifications.
 	 */
-	EAP_FUNC_IMPORT void ignore_notifications();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H void ignore_notifications();
 
 	/**
 	 * This function must reset the state of object to same as 
@@ -689,41 +710,41 @@ public:
 	 * If object reset fails this function must return corresponding error status.
 	 * @return This function returns the status of reset operation.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e reset();
 
 	// This is documented in abs_eap_base_type_c::complete_eap_identity_query().
-	EAP_FUNC_IMPORT eap_status_e complete_eap_identity_query(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e complete_eap_identity_query(
 		const eap_am_network_id_c * const send_network_id,
 		const eap_variable_data_c * const identity,
 		const u8_t eap_identifier);
 
 	// This is documented in abs_eap_base_type_c::get_saved_eap_identity().
-	EAP_FUNC_IMPORT eap_status_e get_saved_eap_identity(eap_variable_data_c * const identity);
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e get_saved_eap_identity(eap_variable_data_c * const identity);
 
 	// This is documented in abs_eap_base_type_c::set_session_timeout().
-	EAP_FUNC_IMPORT eap_status_e set_session_timeout(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e set_session_timeout(
 		const u32_t session_timeout_ms);
 
 	// This is documented in abs_eap_base_type_c::set_timer().
-	EAP_FUNC_IMPORT eap_status_e set_timer(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e set_timer(
 		abs_eap_base_timer_c * const p_initializer, 
 		const u32_t p_id, 
 		void * const p_data,
 		const u32_t p_time_ms);
 
 	// This is documented in abs_eap_base_type_c::cancel_timer().
-	EAP_FUNC_IMPORT eap_status_e cancel_timer(
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e cancel_timer(
 		abs_eap_base_timer_c * const p_initializer, 
 		const u32_t p_id);
 
 	// This is documented in abs_eap_base_type_c::set_authentication_role().
-	EAP_FUNC_IMPORT eap_status_e set_authentication_role(const bool when_true_set_client);
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e set_authentication_role(const bool when_true_set_client);
 
 	// This is documented in abs_eap_base_type_c::add_rogue_ap().
-	EAP_FUNC_IMPORT eap_status_e add_rogue_ap(eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list);
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H eap_status_e add_rogue_ap(eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list);
 
 	// This is documented in abs_eap_base_type_c::get_is_tunneled().
-	EAP_FUNC_IMPORT bool get_is_tunneled_eap() const;
+	EAP_FUNC_VISIBILITY_DUMMY_EAP_CORE_H bool get_is_tunneled_eap() const;
 
 	//--------------------------------------------------
 }; // class dummy_eap_core_c

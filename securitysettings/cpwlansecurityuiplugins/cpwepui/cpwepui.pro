@@ -14,7 +14,7 @@
 # Description:
 #   Control Panel plugin for WEP WLAN security mode
 
-# %version: tr1cfwln#16 %
+# %version: tr1cfwln#17 %
 
 
 TEMPLATE = lib
@@ -40,10 +40,12 @@ OBJECTS_DIR = _build
 HEADERS += \
     traces/OstTraceDefinitions.h \
     inc/wepkeyvalidator.h \
+    inc/cpwepplugin.h \
     inc/cpwepui.h
     
 SOURCES += \
     src/wepkeyvalidator.cpp \
+    src/cpwepplugin.cpp \
     src/cpwepui.cpp
     
 symbian: 

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 9 %
 */
 
 #if !defined(_EAP_PAC_STORE_MESSAGE_BASE_H_)
@@ -24,13 +24,34 @@
 
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_PAC_STORE_MESSAGE_BASE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_PAC_STORE_MESSAGE_BASE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_PAC_STORE_MESSAGE_BASE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_PAC_STORE_MESSAGE_BASE_H 
+	#define EAP_FUNC_EXPORT_EAP_PAC_STORE_MESSAGE_BASE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_PAC_STORE_MESSAGE_BASE_H 
+#elif defined(EAP_EXPORT_EAP_PAC_STORE_MESSAGE_BASE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_PAC_STORE_MESSAGE_BASE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_PAC_STORE_MESSAGE_BASE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_PAC_STORE_MESSAGE_BASE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_PAC_STORE_MESSAGE_BASE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_PAC_STORE_MESSAGE_BASE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_PAC_STORE_MESSAGE_BASE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_PAC_STORE_MESSAGE_BASE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_PAC_STORE_MESSAGE_BASE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_PAC_STORE_MESSAGE_BASE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_PAC_STORE_MESSAGE_BASE_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 class eap_method_settings_c;
 class abs_eap_pac_store_message_c;
 
 /// A eap_pac_store_message_base_c class implements mapping of EAP authentication sessions.
 /// Network identity separates parallel EAP authentication sessions.
-class EAP_EXPORT eap_pac_store_message_base_c
+class EAP_CLASS_VISIBILITY_EAP_PAC_STORE_MESSAGE_BASE_H eap_pac_store_message_base_c
 {
 private:
 	//--------------------------------------------------
@@ -47,7 +68,7 @@ public:
 	/**
 	 * The destructor of the eap_core class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~eap_pac_store_message_base_c();
+	EAP_FUNC_VISIBILITY_EAP_PAC_STORE_MESSAGE_BASE_H virtual ~eap_pac_store_message_base_c();
 
 	/**
 	 * The constructor initializes member attributes using parameters passed to it.
@@ -57,7 +78,7 @@ public:
 	 * as a client (true) or server (false), in terms of EAP-protocol
 	 * whether this network entity is EAP-supplicant (true) or EAP-authenticator (false).
 	 */
-	EAP_FUNC_IMPORT eap_pac_store_message_base_c();
+	EAP_FUNC_VISIBILITY_EAP_PAC_STORE_MESSAGE_BASE_H eap_pac_store_message_base_c();
 
 	/**
 	 * This function must reset the state of object to same as 
@@ -76,12 +97,6 @@ public:
 
 	// This is documented in abs_eap_stack_interface_c::get_is_valid().
 	virtual bool get_is_valid() = 0;
-
-	virtual eap_status_e open_pac_store(
-		const eap_status_e completion_status) = 0;
-
-	virtual eap_status_e create_device_seed(
-		const eap_status_e completion_status) = 0;
 
 	virtual eap_status_e is_master_key_present(
 		const eap_status_e completion_status) = 0;

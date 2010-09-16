@@ -23,12 +23,33 @@
 #define _ABS_EAP_AM_TYPE_RADIUS_H_
 
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABS_EAP_AM_RADIUS_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_AM_RADIUS_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_AM_RADIUS_H 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_AM_RADIUS_H 
+	#define EAP_FUNC_EXPORT_ABS_EAP_AM_RADIUS_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_AM_RADIUS_H 
+#elif defined(EAP_EXPORT_ABS_EAP_AM_RADIUS_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_AM_RADIUS_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_AM_RADIUS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_AM_RADIUS_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_AM_RADIUS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_AM_RADIUS_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_AM_RADIUS_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_AM_RADIUS_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_AM_RADIUS_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_AM_RADIUS_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_AM_RADIUS_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_sim_triplets.h"
 #include "eap_radius_types.h"
 
 /// This class declares the functions adaptation module of RADIUS EAP type
 /// requires from the RADIUS EAP type.
-class EAP_EXPORT abs_eap_am_radius_c
+class EAP_CLASS_VISIBILITY_ABS_EAP_AM_RADIUS_H abs_eap_am_radius_c
 {
 private:
 	//--------------------------------------------------

@@ -26,6 +26,29 @@
 #include "eap_am_tools.h"
 #include "eap_tools.h"
 #include "abs_eap_am_mutex.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_TIMER_QUEUE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TIMER_QUEUE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_TIMER_QUEUE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TIMER_QUEUE_H 
+	#define EAP_FUNC_EXPORT_EAP_TIMER_QUEUE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TIMER_QUEUE_H 
+#elif defined(EAP_EXPORT_EAP_TIMER_QUEUE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TIMER_QUEUE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TIMER_QUEUE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TIMER_QUEUE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_TIMER_QUEUE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_TIMER_QUEUE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_TIMER_QUEUE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TIMER_QUEUE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TIMER_QUEUE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_TIMER_QUEUE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TIMER_QUEUE_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 
 /** @file */
@@ -39,7 +62,7 @@ class eap_timer_queue_hash_c;
 // ---------------------------------------------------------------------
 
 /// This class is one timer event stored to timer queue.
-class EAP_EXPORT eap_timer_queue_event_c
+class EAP_CLASS_VISIBILITY_EAP_TIMER_QUEUE_H eap_timer_queue_event_c
 {
 private:
 	//--------------------------------------------------
@@ -191,7 +214,7 @@ public:
  * Each timer event is stored to the timer queue (eap_timer_queue_c) with events (eap_timer_queue_event_c)
  * and to the hash array of the timer events (eap_timer_queue_c::m_map).
  */
-class EAP_EXPORT eap_timer_queue_hash_c
+class EAP_CLASS_VISIBILITY_EAP_TIMER_QUEUE_H eap_timer_queue_hash_c
 {
 private:
 	//--------------------------------------------------
@@ -311,7 +334,7 @@ const u32_t EAP_TIMER_QUEUE_HASH_SIZE = 1024;
  *   // Each vertical list includes the timer events that have the same time.
  * @endcode
  */
-class EAP_EXPORT eap_timer_queue_c
+class EAP_CLASS_VISIBILITY_EAP_TIMER_QUEUE_H eap_timer_queue_c
 {
 private:
 	//--------------------------------------------------

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 36 %
+* %version: 37 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -1353,6 +1353,14 @@ EAP_FUNC_EXPORT eap_status_e eap_session_core_c::asynchronous_init_remove_eap_se
 EAP_FUNC_EXPORT void eap_session_core_c::state_notification(
 	const abs_eap_state_notification_c * const state)
 {
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eap_session_core_c::state_notification(), %s.\n"),
+		(m_is_client == true) ? "client": "server"));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_session_core_c::state_notification()");
+
 	m_partner->state_notification(state);
 }
 

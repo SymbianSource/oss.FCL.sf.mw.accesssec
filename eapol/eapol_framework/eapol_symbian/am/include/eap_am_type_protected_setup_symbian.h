@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 13.1.9 %
+* %version: 13.1.12 %
 */
 
 #if !defined(_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H_)
@@ -28,6 +28,27 @@
 #include <EapType.h>
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H 
+#elif defined(EAP_EXPORT_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "abs_eap_base_type.h"
 
 #include "abs_eap_am_type_simple_config.h"
@@ -37,6 +58,8 @@
 #include "simple_config_payloads.h"
 #include "eapol_key_types.h"
 #include "eapol_rsna_key_header.h"
+#include "eap_config.h"
+#include "eap_variable_data.h"
 
 #include "EapProtectedSetupInterface.h"
 #include <etelmm.h>
@@ -52,7 +75,7 @@ class abs_eap_configuration_if_c;
 */
 
 
-class EAP_EXPORT CEapAmProtectedSetupSymbian
+class EAP_CLASS_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H CEapAmProtectedSetupSymbian
 : public CBase
 , public eap_am_type_simple_config_c
 {
@@ -60,7 +83,7 @@ public:
 
 	//--------------------------------------------------	
 	
-	EAP_FUNC_IMPORT static CEapAmProtectedSetupSymbian* NewL(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H static CEapAmProtectedSetupSymbian* NewL(
 		abs_eap_am_tools_c * const tools,
 		abs_eap_base_type_c * const partner,
 		const TIndexType aIndexType,
@@ -72,18 +95,18 @@ public:
 		abs_eap_configuration_if_c * const configuration_if);
 		
 	// 
-	EAP_FUNC_IMPORT virtual ~CEapAmProtectedSetupSymbian();	
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H virtual ~CEapAmProtectedSetupSymbian();	
 	
-	EAP_FUNC_IMPORT void set_is_valid();	
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H void set_is_valid();	
 		
 	/**  From the parent eap_am_type_simple_config_c **/
 
 	/** Function sets partner object of adaptation module of EAP-SIMPLE_CONFIG.
 	 *  Partner object is the EAP-SIMPLE_CONFIG object.
 	 */
-	EAP_FUNC_IMPORT void set_am_partner(abs_eap_am_type_simple_config_c * const partner);
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H void set_am_partner(abs_eap_am_type_simple_config_c * const partner);
 
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e configure();
 
 	/**
 	 * The shutdown() function is called before the destructor of the 
@@ -91,19 +114,19 @@ public:
 	 * could shutdown the operations, for example cancel timers.
 	 * Each derived class must define this function.
 	 */
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e shutdown();
 
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H bool get_is_valid();
 
 	/** Client calls this function.
 	 *  EAP-SIMPLE_CONFIG AM could do finishing operations to databases etc. based on authentication status and type.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e reset();
 
 	/** Client calls this function.
 	 *  EAP-SIMPLE_CONFIG AM could make some fast operations here, heavy operations should be done in the reset() function.
 	 */
-	EAP_FUNC_IMPORT eap_status_e authentication_finished(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e authentication_finished(
 		const bool true_when_successfull,
 		const bool true_when_session_resumed);
 
@@ -111,7 +134,7 @@ public:
 	 *  AM must copy identity to output parameters if call is syncronous.
 	 *  This function could be completed asyncronously with abs_eap_am_type_simple_config_c::complete_query_eap_identity_query() function call.
 	 */
-	EAP_FUNC_IMPORT eap_status_e query_eap_identity(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e query_eap_identity(
 		const eap_am_network_id_c * const receive_network_id,
 		const u8_t eap_identifier,
 		bool * const use_manual_username,
@@ -123,7 +146,7 @@ public:
 	/** 
 	 * Cancels the outstanding indentity query.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_identity_query();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e cancel_identity_query();
 
 	/**
 	 * The type_configure_read() function reads the configuration data identified
@@ -133,7 +156,7 @@ public:
 	 * @param field_length is length of the field string.
 	 * @param data is pointer to existing eap_variable_data object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e type_configure_read(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e type_configure_read(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
@@ -145,7 +168,7 @@ public:
 	 * @param field_length is length of the field string.
 	 * @param data is pointer to existing eap_variable_data object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e type_configure_write(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e type_configure_write(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
@@ -161,7 +184,7 @@ public:
 	 * act as a client (true) or server (false), in terms of EAP-protocol whether
 	 * this network entity is EAP-supplicant (true) or EAP-authenticator (false).
 	 */
-	EAP_FUNC_IMPORT eap_status_e load_module(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e load_module(
 		const eap_type_value_e type,
 		const eap_type_value_e /* tunneling_type */,
 		abs_eap_base_type_c * const partner,
@@ -174,7 +197,7 @@ public:
 	 * This function queries the validity of EAP-type.
 	 * Lower layer should return eap_status_ok if this EAP-type is supported.
 	 */
-	EAP_FUNC_IMPORT eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);
 
 	/**
 	 * This function queries the list of supported EAP-types.
@@ -182,7 +205,7 @@ public:
 	 * @param eap_type_list will include the list of supported EAP-types. Each value in list
 	 * is type of u32_t and represent one supported EAP-type. List consists of subsequent u32_t type values.
 	 */
-	EAP_FUNC_IMPORT eap_status_e get_eap_type_list(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e get_eap_type_list(
 		eap_array_c<eap_type_value_e> * const eap_type_list);
 
 	/**
@@ -190,26 +213,26 @@ public:
 	 * The unload_module() function unloads the module of a EAP-type. 
 	 * @param type is the requested EAP-type.
 	 */
-	EAP_FUNC_IMPORT eap_status_e unload_module(const eap_type_value_e type);
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e unload_module(const eap_type_value_e type);
 	
 	
 	/**  From simple_config_am_services_c through the parent eap_am_type_simple_config_c **/
 
 	/// This function sets pointer to adaptation module of SIMPLE_CONFIG. See abs_simple_config_am_services_c.	
-	EAP_FUNC_IMPORT void set_simple_config_am_partner(abs_simple_config_am_services_c * const simple_config_am_partner);
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H void set_simple_config_am_partner(abs_simple_config_am_services_c * const simple_config_am_partner);
 	
 	/**
 	 * This function queries all network and device parameters.
 	 * abs_simple_config_am_services_c::complete_query_network_and_device_parameters() completes this query.
 	 */
-	EAP_FUNC_IMPORT eap_status_e query_network_and_device_parameters(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e query_network_and_device_parameters(
 		const simple_config_state_e state);
 
 	/**
 	 * This function tells AM to save SIMPLE_CONFIG configuration parameters.
 	 * This is always syncronous call.
 	 */
-	EAP_FUNC_IMPORT eap_status_e save_simple_config_session(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e save_simple_config_session(
 		const simple_config_state_e state,
 		EAP_TEMPLATE_CONST eap_array_c<simple_config_credential_c> * const credential_array,
 		const eap_variable_data_c * const new_password,
@@ -222,19 +245,19 @@ public:
 	 * Adaptation layer could show this information to user.
 	 * This is always syncronous call.
 	 */
-	EAP_FUNC_IMPORT eap_status_e received_registrar_information(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e received_registrar_information(
 		EAP_TEMPLATE_CONST eap_array_c<simple_config_payloads_c> * const M2D_payloads);
 
 	/**
 	 * This function cancels query_network_and_device_parameters() query.
 	 * After this call AM MUST NOT complete related query.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_query_network_and_device_parameters();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e cancel_query_network_and_device_parameters();
 
 
 	/** Own Public functions **/
 	
-	EAP_FUNC_IMPORT eap_status_e complete_protected_setup_device_paramsL(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_PROTECTED_SETUP_SYMBIAN_H eap_status_e complete_protected_setup_device_paramsL(
 		const RMobilePhone::TMobilePhoneIdentityV1 &phone_identity,
 		const eap_status_e completion_status);
 			
@@ -266,14 +289,13 @@ private:
 	abs_eap_am_type_simple_config_c * get_am_partner();
 
 	void send_error_notification(const eap_status_e error);
-	
-	void read_device_passwordL(
-		eap_config_string field,
-		const u32_t field_length,
-		eap_variable_data_c * const data);	
+
+	eap_status_e read_memory_store(
+		const eap_type_protected_setup_stored_e data_type,
+		eap_variable_data_c * const data);
 
 	void ConvertUnicodeToAsciiL(const TDesC16& aFromUnicode, TDes8& aToAscii);
-	
+
 	//--------------------------------------------------
 
 private:

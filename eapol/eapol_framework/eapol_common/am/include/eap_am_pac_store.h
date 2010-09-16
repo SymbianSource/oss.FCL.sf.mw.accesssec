@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 9 %
 */
 
 #if !defined(_EAP_AM_PAC_STORE_H_)
@@ -25,6 +25,27 @@
 #include "eap_tools.h"
 #include "eap_status.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_PAC_STORE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_PAC_STORE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_PAC_STORE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_PAC_STORE_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_PAC_STORE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_PAC_STORE_H 
+#elif defined(EAP_EXPORT_EAP_AM_PAC_STORE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_PAC_STORE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_PAC_STORE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_PAC_STORE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_PAC_STORE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_PAC_STORE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_PAC_STORE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_PAC_STORE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_PAC_STORE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_PAC_STORE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_PAC_STORE_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_expanded_type.h"
 #include "eap_array.h"
 #include "eap_database_reference_if.h"
@@ -36,7 +57,7 @@ class abs_eap_am_pac_store_c;
 
 /// This class is the common part of EAP message interface.
 /// This class is interface to the message creation and parsing function.
-class EAP_EXPORT eap_am_pac_store_c
+class EAP_CLASS_VISIBILITY_EAP_AM_PAC_STORE_H eap_am_pac_store_c
 {
 
 private:
@@ -56,10 +77,6 @@ public:
 
 	// This is documented in abs_eap_stack_interface_c::shutdown().
 	virtual eap_status_e shutdown() = 0;
-
-	virtual eap_status_e open_pac_store() = 0;
-
-	virtual eap_status_e create_device_seed() = 0;
 
 	virtual eap_status_e is_master_key_present() = 0;
 

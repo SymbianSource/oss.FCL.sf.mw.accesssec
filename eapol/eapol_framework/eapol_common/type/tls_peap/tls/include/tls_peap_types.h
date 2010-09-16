@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 45.1.2 %
+* %version: 45.1.4 %
 */
 
 #if !defined(_TLS_PEAP_TYPES_H_)
@@ -31,6 +31,29 @@
 #if defined(USE_FAST_EAP_TYPE)
 	#include "eap_fast_types.h"
 #endif //#if defined(USE_FAST_EAP_TYPE)
+
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_TLS_PEAP_TYPES_H)
+	#define EAP_CLASS_VISIBILITY_TLS_PEAP_TYPES_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H 
+	#define EAP_C_FUNC_VISIBILITY_TLS_PEAP_TYPES_H 
+	#define EAP_FUNC_EXPORT_TLS_PEAP_TYPES_H 
+	#define EAP_C_FUNC_EXPORT_TLS_PEAP_TYPES_H 
+#elif defined(EAP_EXPORT_TLS_PEAP_TYPES_H)
+	#define EAP_CLASS_VISIBILITY_TLS_PEAP_TYPES_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_PEAP_TYPES_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_TLS_PEAP_TYPES_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_TLS_PEAP_TYPES_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_TLS_PEAP_TYPES_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_PEAP_TYPES_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_TLS_PEAP_TYPES_H 
+	#define EAP_C_FUNC_EXPORT_TLS_PEAP_TYPES_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 
 /** @file tls_peap_types.h 
@@ -750,81 +773,81 @@ EAP_CONFIGURATION_FIELD(
 
 
 /// This class includes the debug strings of the tls_cipher_suites_e, tls_certificate_type_e and tls_compression_method_e.
-class EAP_EXPORT eap_tls_trace_string_c
+class EAP_CLASS_VISIBILITY_TLS_PEAP_TYPES_H eap_tls_trace_string_c
 {
 public:
 
-	EAP_FUNC_IMPORT virtual ~eap_tls_trace_string_c();
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H virtual ~eap_tls_trace_string_c();
 
-	EAP_FUNC_IMPORT eap_tls_trace_string_c();
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H eap_tls_trace_string_c();
 
 #if defined(USE_FAST_EAP_TYPE)
 	/**
 	 * Function returns string of eap_fast_state_e.
 	 * @param state is the queried string.
 	 */
-	EAP_FUNC_IMPORT static eap_const_string get_eap_fast_state_string(const eap_fast_state_e state);
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H static eap_const_string get_eap_fast_state_string(const eap_fast_state_e state);
 #endif //#if defined(USE_FAST_EAP_TYPE)
 
 	/**
 	 * Function returns string of tls_cipher_suites_e.
 	 * @param suite is the queried string.
 	 */
-	EAP_FUNC_IMPORT static eap_const_string get_cipher_suite_string(const tls_cipher_suites_e suite);
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H static eap_const_string get_cipher_suite_string(const tls_cipher_suites_e suite);
 
 	/**
 	 * Function returns string of tls_certificate_type_e.
 	 * @param suite is the queried string.
 	 */
-	EAP_FUNC_IMPORT static eap_const_string get_certificate_type_string(const tls_certificate_type_e certificate_type);
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H static eap_const_string get_certificate_type_string(const tls_certificate_type_e certificate_type);
 
 	/**
 	 * Function returns string of tls_compression_method_e.
 	 * @param suite is the queried string.
 	 */
-	EAP_FUNC_IMPORT static eap_const_string get_compression_method_string(const tls_compression_method_e compression_method);
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H static eap_const_string get_compression_method_string(const tls_compression_method_e compression_method);
 
 	/**
 	 * Function returns string of tls_peap_state_e.
 	 * @param state is the queried string.
 	 */
-	EAP_FUNC_IMPORT static eap_const_string get_state_string(const tls_peap_state_e state);
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H static eap_const_string get_state_string(const tls_peap_state_e state);
 
 	/**
 	 * Function returns string of peap_version_e.
 	 * @param peap_version is the queried string.
 	 */
-	EAP_FUNC_IMPORT static eap_const_string get_peap_version_string(const peap_version_e peap_version);
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H static eap_const_string get_peap_version_string(const peap_version_e peap_version);
 
 	/**
 	 * Function returns string of tls_alert_level_e.
 	 * @param alert_level is the queried string.
 	 */
-	EAP_FUNC_IMPORT static eap_const_string get_alert_level_string(const tls_alert_level_e alert_level);
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H static eap_const_string get_alert_level_string(const tls_alert_level_e alert_level);
 
 	/**
 	 * Function returns string of tls_alert_description_e.
 	 * @param alert_level is the queried string.
 	 */
-	EAP_FUNC_IMPORT static eap_const_string get_alert_description_string(const tls_alert_description_e alert_description);
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H static eap_const_string get_alert_description_string(const tls_alert_description_e alert_description);
 
 	/**
 	 * Function returns string of tls_session_type_e.
 	 * @param tls_session_type is the queried string.
 	 */
-	EAP_FUNC_IMPORT static eap_const_string get_tls_session_type_string(const tls_session_type_e tls_session_type);
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H static eap_const_string get_tls_session_type_string(const tls_session_type_e tls_session_type);
 
 	/**
 	 * Function returns string of eap_ttls_tunneled_message_state_e.
 	 * @param ttls_state is the queried string.
 	 */
-	EAP_FUNC_IMPORT static eap_const_string get_ttls_state_string(const eap_ttls_tunneled_message_state_e ttls_state);
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H static eap_const_string get_ttls_state_string(const eap_ttls_tunneled_message_state_e ttls_state);
 
 	/**
 	 * Function returns string of tls_identity_privacy_handshake_state_e.
 	 * @param ttls_state is the queried string.
 	 */
-	EAP_FUNC_IMPORT static eap_const_string get_tls_identity_privacy_handshake_state_string(const tls_identity_privacy_handshake_state_e privacy_state);
+	EAP_FUNC_VISIBILITY_TLS_PEAP_TYPES_H static eap_const_string get_tls_identity_privacy_handshake_state_string(const tls_identity_privacy_handshake_state_e privacy_state);
 };
 
 

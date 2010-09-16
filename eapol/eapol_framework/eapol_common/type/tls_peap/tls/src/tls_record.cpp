@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 197 %
+* %version: 200 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -20158,6 +20158,29 @@ EAP_FUNC_EXPORT eap_status_e tls_record_c::complete_query_tunnel_PAC(
 
 //--------------------------------------------------
 
+#if defined(USE_FAST_EAP_TYPE)
+
+eap_status_e tls_record_c::complete_start_initialize_PAC_store(
+	const eap_fast_completion_operation_e /* completion_operation */,
+	const eap_fast_initialize_pac_store_completion_e /* completion */)
+{
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("TLS: this = 0x%08x, %s: message_function: starts: tls_record_c::complete_start_initialize_PAC_store(): m_tls_session_type=%d=%s\n"),
+		 this,
+		 (m_is_client == true ? "client": "server"),
+		 m_tls_session_type,
+		 eap_tls_trace_string_c::get_tls_session_type_string(m_tls_session_type)));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: tls_record_c::complete_start_initialize_PAC_store()");
+
+	return EAP_STATUS_RETURN(m_am_tools, eap_status_not_supported);
+}
+
+#endif //#if defined(USE_FAST_EAP_TYPE)
+
+//--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e tls_record_c::query_ttls_pap_username_and_password(
 	const eap_variable_data_c * const reply_message)

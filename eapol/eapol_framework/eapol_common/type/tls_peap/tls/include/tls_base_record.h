@@ -26,6 +26,29 @@
 #include "tls_peap_types.h"
 #include "eap_array.h"
 #include "eap_header.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_TLS_BASE_RECORD_H)
+	#define EAP_CLASS_VISIBILITY_TLS_BASE_RECORD_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_TLS_BASE_RECORD_H 
+	#define EAP_C_FUNC_VISIBILITY_TLS_BASE_RECORD_H 
+	#define EAP_FUNC_EXPORT_TLS_BASE_RECORD_H 
+	#define EAP_C_FUNC_EXPORT_TLS_BASE_RECORD_H 
+#elif defined(EAP_EXPORT_TLS_BASE_RECORD_H)
+	#define EAP_CLASS_VISIBILITY_TLS_BASE_RECORD_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_BASE_RECORD_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_BASE_RECORD_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_TLS_BASE_RECORD_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_TLS_BASE_RECORD_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_TLS_BASE_RECORD_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_BASE_RECORD_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_BASE_RECORD_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_TLS_BASE_RECORD_H 
+	#define EAP_C_FUNC_EXPORT_TLS_BASE_RECORD_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 class abs_tls_base_record_c;
 class abs_eap_am_tools_c;
@@ -36,7 +59,7 @@ class eap_rogue_ap_entry_c;
 
 /// The tls_base_record_c class declares pure virtual functions 
 /// a user class of TLS-record class could call.
-class EAP_EXPORT tls_base_record_c
+class EAP_CLASS_VISIBILITY_TLS_BASE_RECORD_H tls_base_record_c
 {
 private:
 	//--------------------------------------------------
@@ -66,7 +89,7 @@ public:
 	/**
 	 * The destructor of the tls_base_record_c class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~tls_base_record_c();
+	EAP_FUNC_VISIBILITY_TLS_BASE_RECORD_H virtual ~tls_base_record_c();
 
 	/**
 	 * The constructor of the tls_base_record_c class simply initializes the attributes.
@@ -74,7 +97,7 @@ public:
 	 * @param partner is back pointer to object which created this object.
 	 * The tls_base_record_c object sends packets to the network using m_type_partner object.
 	 */
-	EAP_FUNC_IMPORT tls_base_record_c(
+	EAP_FUNC_VISIBILITY_TLS_BASE_RECORD_H tls_base_record_c(
 		abs_eap_am_tools_c * const tools /*,
 		abs_tls_base_record_c * const partner */);
 
@@ -82,9 +105,9 @@ public:
 	 * Type partner is object below the tls_base_record_c object.
 	 * @return The get_type_partner() function returns the pointer to the partner class.
 	 */
-	EAP_FUNC_IMPORT abs_tls_base_record_c * get_type_partner();
+	EAP_FUNC_VISIBILITY_TLS_BASE_RECORD_H abs_tls_base_record_c * get_type_partner();
 
-	EAP_FUNC_IMPORT void set_type_partner(abs_tls_base_record_c * const partner);
+	EAP_FUNC_VISIBILITY_TLS_BASE_RECORD_H void set_type_partner(abs_tls_base_record_c * const partner);
 
 	virtual void set_peap_version(
 		const peap_version_e peap_version, ///< This is the PEAP version (PEAPv2, PEAPv1, XP PEAPv0), yes very nice to have many different versions.

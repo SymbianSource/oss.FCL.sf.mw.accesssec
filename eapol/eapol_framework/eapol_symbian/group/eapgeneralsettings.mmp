@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 22 %
+* %version: 26 %
 */
 
 #include <platform_paths.hrh>
@@ -30,6 +30,16 @@ TARGET	eapgeneralsettings.dll
 UID		0x10009d8d 0x20026FD6
 
 deffile eapgeneralsettings.def
+
+MACRO EAP_NO_EXPORTS
+// Start: added by script change_mmp_export_macros.sh.
+MACRO EAP_NO_EXPORT_EAP_GENERAL_SETTINGS_CLIENT_MESSAGE_IF_H
+MACRO EAP_NO_EXPORT_EAP_GENERAL_SETTINGS_MESSAGE_H
+MACRO EAP_NO_EXPORT_EAP_METHOD_SETTINGS_H
+MACRO EAP_NO_EXPORT_EAP_AM_MESSAGE_IF_SYMBIAN_H
+MACRO EAP_NO_EXPORT_EAPCLIENTIF_H
+MACRO EAP_NO_EXPORT_EAPGENERALSETTINGSIMPL_H
+// End: added by script change_mmp_export_macros.sh.
 
 SOURCEPATH  ../eap_if/data
 START RESOURCE 20026fd6.rss
@@ -74,7 +84,6 @@ LANG		SC
 
 LIBRARY	eikdlg.lib
 LIBRARY	eikcore.lib
-LIBRARY	hlplch.lib
 LIBRARY		featmgr.lib
 
 

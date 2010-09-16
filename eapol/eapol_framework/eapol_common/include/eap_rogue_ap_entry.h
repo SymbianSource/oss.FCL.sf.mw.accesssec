@@ -25,6 +25,29 @@
 // INCLUDES
 #include "eap_am_tools.h"
 #include "eapol_ethernet_address.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_ROGUE_AP_ENTRY_H)
+	#define EAP_CLASS_VISIBILITY_EAP_ROGUE_AP_ENTRY_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_ROGUE_AP_ENTRY_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_ROGUE_AP_ENTRY_H 
+	#define EAP_FUNC_EXPORT_EAP_ROGUE_AP_ENTRY_H 
+	#define EAP_C_FUNC_EXPORT_EAP_ROGUE_AP_ENTRY_H 
+#elif defined(EAP_EXPORT_EAP_ROGUE_AP_ENTRY_H)
+	#define EAP_CLASS_VISIBILITY_EAP_ROGUE_AP_ENTRY_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_ROGUE_AP_ENTRY_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_ROGUE_AP_ENTRY_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_ROGUE_AP_ENTRY_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_ROGUE_AP_ENTRY_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_ROGUE_AP_ENTRY_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_ROGUE_AP_ENTRY_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_ROGUE_AP_ENTRY_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_ROGUE_AP_ENTRY_H 
+	#define EAP_C_FUNC_EXPORT_EAP_ROGUE_AP_ENTRY_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 enum eap_rogue_ap_reason_e
 {
@@ -37,7 +60,7 @@ enum eap_rogue_ap_reason_e
 
 // CLASS DECLARATION
 
-class EAP_EXPORT eap_rogue_ap_entry_c
+class EAP_CLASS_VISIBILITY_EAP_ROGUE_AP_ENTRY_H eap_rogue_ap_entry_c
 {
 	public:
 
@@ -47,49 +70,49 @@ class EAP_EXPORT eap_rogue_ap_entry_c
 		* Constructor
 		* @param tools Pointer to EAP tools class
 		*/        
-		EAP_FUNC_IMPORT eap_rogue_ap_entry_c(
+		EAP_FUNC_VISIBILITY_EAP_ROGUE_AP_ENTRY_H eap_rogue_ap_entry_c(
 			abs_eap_am_tools_c * const tools);
 
 		/**
 		* Destructor
 		*/
-		EAP_FUNC_IMPORT virtual ~eap_rogue_ap_entry_c();
+		EAP_FUNC_VISIBILITY_EAP_ROGUE_AP_ENTRY_H virtual ~eap_rogue_ap_entry_c();
 
 		/**
 		* Returns a copy of this object.
 		*/
-		EAP_FUNC_IMPORT eap_rogue_ap_entry_c * copy() const;
+		EAP_FUNC_VISIBILITY_EAP_ROGUE_AP_ENTRY_H eap_rogue_ap_entry_c * copy() const;
 
 		/**
 		* Returns pointer to MAC address
 		* @return Pointer to MAC address
 		*/
-		EAP_FUNC_IMPORT u8_t * get_mac_address() const;
+		EAP_FUNC_VISIBILITY_EAP_ROGUE_AP_ENTRY_H u8_t * get_mac_address() const;
 
 		/**
 		* Returns pointer to MAC address and copies MAC address into given pointer
 		* @param mac_address Copies MAC address into this
 		* @return Pointer to MAC address
 		*/
-		EAP_FUNC_IMPORT u8_t * get_mac_address(u8_t * const mac_address) const;
+		EAP_FUNC_VISIBILITY_EAP_ROGUE_AP_ENTRY_H u8_t * get_mac_address(u8_t * const mac_address) const;
 
 		/**
 		* Sets MAC address
 		* @param mac_address pointer to MAC address
 		*/
-		EAP_FUNC_IMPORT void set_mac_address(const u8_t * const mac_address);
+		EAP_FUNC_VISIBILITY_EAP_ROGUE_AP_ENTRY_H void set_mac_address(const u8_t * const mac_address);
 
 		/**
 		* Sets Rogue reason code
 		* @param reason Rogue reson code
 		*/
-		EAP_FUNC_IMPORT void set_rogue_reason(const eap_rogue_ap_reason_e reason);
+		EAP_FUNC_VISIBILITY_EAP_ROGUE_AP_ENTRY_H void set_rogue_reason(const eap_rogue_ap_reason_e reason);
 
 		/**
 		* Returns reson code of Rogue AP entry
 		* @return Rogue reson code
 		*/
-		EAP_FUNC_IMPORT eap_rogue_ap_reason_e get_rogue_reason() const;
+		EAP_FUNC_VISIBILITY_EAP_ROGUE_AP_ENTRY_H eap_rogue_ap_reason_e get_rogue_reason() const;
 
 	private: // Data
 

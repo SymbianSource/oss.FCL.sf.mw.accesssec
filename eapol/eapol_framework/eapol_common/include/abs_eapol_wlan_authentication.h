@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 6 %
+* %version: 9 %
 */
 
 #if !defined(_ABS_WLAN_AUTHENTICATION_H_)
@@ -32,6 +32,28 @@
 #include "simple_config_payloads.h"
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
 
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABS_EAPOL_WLAN_AUTHENTICATION_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAPOL_WLAN_AUTHENTICATION_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABS_EAPOL_WLAN_AUTHENTICATION_H 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAPOL_WLAN_AUTHENTICATION_H 
+	#define EAP_FUNC_EXPORT_ABS_EAPOL_WLAN_AUTHENTICATION_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAPOL_WLAN_AUTHENTICATION_H 
+#elif defined(EAP_EXPORT_ABS_EAPOL_WLAN_AUTHENTICATION_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAPOL_WLAN_AUTHENTICATION_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAPOL_WLAN_AUTHENTICATION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAPOL_WLAN_AUTHENTICATION_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAPOL_WLAN_AUTHENTICATION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABS_EAPOL_WLAN_AUTHENTICATION_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABS_EAPOL_WLAN_AUTHENTICATION_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAPOL_WLAN_AUTHENTICATION_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAPOL_WLAN_AUTHENTICATION_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAPOL_WLAN_AUTHENTICATION_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAPOL_WLAN_AUTHENTICATION_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 class abs_eapol_core_c;
 class eap_am_network_id_c;
@@ -45,7 +67,7 @@ class eapol_wlan_state_c;
 
 /// The abs_eapol_wlan_authentication_c class defines the interface the eapol_wlan_authentication_c class
 /// will use with the partner class.
-class EAP_EXPORT abs_eapol_wlan_authentication_c
+class EAP_CLASS_VISIBILITY_ABS_EAPOL_WLAN_AUTHENTICATION_H abs_eapol_wlan_authentication_c
 {
 private:
 	//--------------------------------------------------

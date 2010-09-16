@@ -25,6 +25,29 @@
 #include "eap_tools.h"
 #include "eap_array.h"
 #include "abs_simple_config_apply_cipher_spec.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_SIMPLE_CONFIG_MESSAGE_H)
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_MESSAGE_H 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_MESSAGE_H 
+#elif defined(EAP_EXPORT_SIMPLE_CONFIG_MESSAGE_H)
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_MESSAGE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_MESSAGE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_MESSAGE_H 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_MESSAGE_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 /** @file */
 
@@ -37,7 +60,7 @@
  * This class defined one SIMPLE_CONFIG-message.
  * Parse and analyse of SIMPLE_CONFIG-message is asyncronous.
  */
-class EAP_EXPORT simple_config_message_c
+class EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H simple_config_message_c
 {
 private:
 	//--------------------------------------------------
@@ -65,50 +88,50 @@ public:
 	/**
 	 * The destructor of the simple_config_message_c class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~simple_config_message_c();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H virtual ~simple_config_message_c();
 
 	/**
 	 * The constructor of the simple_config_message_c class simply initializes the attributes.
 	 */
-	EAP_FUNC_IMPORT simple_config_message_c(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H simple_config_message_c(
 		abs_eap_am_tools_c * const tools,
 		const bool is_client);
 
 	/**
 	 * This function resets this object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H eap_status_e reset();
 
 	/**
 	 * This function copies the received SIMPLE_CONFIG-message data and EAP-identifier.
 	 * EAP-identifier is needed in PEAPv0. That PEAP version uses
 	 * same EAP-identifier with PEAP header and tunneled EAP-header.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_simple_config_message_data(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H eap_status_e set_simple_config_message_data(
 		eap_variable_data_c * const simple_config_message_data,
 		const u8_t received_eap_identifier);
 
 	/**
 	 * This function returns the SIMPLE_CONFIG-message data.
 	 */
-	EAP_FUNC_IMPORT eap_variable_data_c * get_simple_config_message_data();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H eap_variable_data_c * get_simple_config_message_data();
 
 	/**
 	 * This function returns the EAP-identifier.
 	 */
-	EAP_FUNC_IMPORT u8_t get_received_eap_identifier();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H u8_t get_received_eap_identifier();
 
 	/**
 	 * Function adds padding for block size if it is needed.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_padding(const u32_t block_size);
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H eap_status_e add_padding(const u32_t block_size);
 
 	/**
 	 * Object must indicate it's validity.
 	 * If object initialization fails this function must return false.
 	 * @return This function returns the validity of this object.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_MESSAGE_H bool get_is_valid();
 	// 
 	//--------------------------------------------------
 }; // class simple_config_message_c

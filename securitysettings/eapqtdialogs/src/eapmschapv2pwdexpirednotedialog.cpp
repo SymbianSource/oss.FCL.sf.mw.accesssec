@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 4 %
+* %version: 5 %
 */
 
 // System includes
@@ -96,9 +96,7 @@ void EapMschapv2PwdExpNoteDialog::createDialog()
     HbAction* actionOk = new HbAction(hbTrId("txt_common_button_ok_single_dialog"),this); 
     this->addAction(actionOk);
     
-    //Disconnect action Ok from the default SLOT and connect to 
-    //a SLOT owned by this class  
-    disconnect(actionOk, SIGNAL(triggered()),this, SLOT(close()));
+    //Connect to a SLOT owned by this class  
     bool connected = connect(actionOk, SIGNAL(triggered()), this, SLOT(okPressed()));
     Q_ASSERT(connected == true);
         

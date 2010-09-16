@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 58.1.12 %
+* %version: 58.1.15 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -388,7 +388,7 @@ eap_status_e eap_core_c::init_end_of_session(
 			EAP_TRACE_DEBUG(
 				m_am_tools,
 				TRACE_FLAGS_DEFAULT,
-				(EAPL("eap_core_c::state_notification(): %s, %s, Ignored notification: ")
+				(EAPL("eap_core_c::init_end_of_session(): %s, %s, Ignored notification: ")
 				 EAPL("Protocol layer %d, EAP-type 0x%02x, State transition from ")
 				 EAPL("%d=%s to %d=%s, client %d.\n"),
 				 (m_is_client == true) ? "client": "server",
@@ -416,7 +416,7 @@ eap_status_e eap_core_c::init_end_of_session(
 		EAP_TRACE_DEBUG(
 			m_am_tools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("eap_core_c::state_notification(): %s, %s, Ignored notification: ")
+			(EAPL("eap_core_c::init_end_of_session(): %s, %s, Ignored notification: ")
 			 EAPL("Protocol layer %d, EAP-type 0x%02x, State transition from ")
 			 EAPL("%d=%s to %d=%s, client %d when shutdown was called.\n"),
 			 (m_is_client == true) ? "client": "server",
@@ -471,6 +471,17 @@ EAP_FUNC_EXPORT void eap_core_c::state_notification(
 		state->get_authentication_error(),
 		status_string.get_status_string(state->get_authentication_error())));
 
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("eap_core_c::state_notification(), %s, %s, m_eap_identity_request_send=%d, m_eap_identity_response_received=%d.\n"),
+		(m_is_client == true) ? "client": "server",
+		(m_is_tunneled_eap == true) ? "tunneled": "outer most",
+		m_eap_identity_request_send,
+		m_eap_identity_response_received));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_core_c::state_notification()");
+
 	if (m_ignore_notifications == true
 		|| m_partner == 0)
 	{
@@ -483,7 +494,8 @@ EAP_FUNC_EXPORT void eap_core_c::state_notification(
 		 // These notications are allowed always.
 	}
 	else if (state->get_protocol_layer() == eap_protocol_layer_eap
-		&& state->get_eap_type() != m_current_eap_type)
+		&& state->get_eap_type() != m_current_eap_type
+		&& m_is_client == false)
 	{
 		EAP_TRACE_DEBUG(
 			m_am_tools,
@@ -3237,6 +3249,7 @@ EAP_FUNC_EXPORT eap_status_e eap_core_c::shutdown()
 
 	eap_status_e status = m_type_map.for_each(shutdown_operation, true);
 
+	m_type_map.reset();
 
 	cancel_retransmission();
 

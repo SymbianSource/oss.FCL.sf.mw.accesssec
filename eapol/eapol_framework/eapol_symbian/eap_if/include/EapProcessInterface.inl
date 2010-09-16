@@ -16,14 +16,14 @@
 */
 
 /*
-* %version: 6 %
+* %version: 7 %
 */
 
+// SYSTEM INCLUDES
 #include <ecom/ecom.h>
-#include "EapTraceSymbian.h"
+#include <EapTraceSymbian.h>
+
 // -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
-//
 
 inline CEapProcessInterface* CEapProcessInterface::NewL(
     TInt aUid,

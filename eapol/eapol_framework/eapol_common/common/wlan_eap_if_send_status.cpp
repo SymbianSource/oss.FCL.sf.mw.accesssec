@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 7.1.3 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -34,7 +34,7 @@
 
 /** @file */
 
-EAP_FUNC_EXPORT_INTERFACE wlan_eap_if_send_status_e wlan_eap_if_send_status_conversion_c::convert(const eap_status_e status)
+EAP_FUNC_EXPORT wlan_eap_if_send_status_e wlan_eap_if_send_status_conversion_c::convert(const eap_status_e status)
 {
 	switch(status)
 	{
@@ -57,7 +57,7 @@ EAP_FUNC_EXPORT_INTERFACE wlan_eap_if_send_status_e wlan_eap_if_send_status_conv
 	}
 }
 
-EAP_FUNC_EXPORT_INTERFACE eap_status_e wlan_eap_if_send_status_conversion_c::convert(const wlan_eap_if_send_status_e status)
+EAP_FUNC_EXPORT eap_status_e wlan_eap_if_send_status_conversion_c::convert(const wlan_eap_if_send_status_e status)
 {
 	switch(status)
 	{

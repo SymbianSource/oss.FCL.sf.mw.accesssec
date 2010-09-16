@@ -26,6 +26,29 @@
 #include "eap_tools.h"
 #include "eap_array.h"
 #include "eap_tlv_header.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_TLV_MESSAGE_DATA_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TLV_MESSAGE_DATA_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H 
+	#define EAP_FUNC_EXPORT_EAP_TLV_MESSAGE_DATA_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TLV_MESSAGE_DATA_H 
+#elif defined(EAP_EXPORT_EAP_TLV_MESSAGE_DATA_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TLV_MESSAGE_DATA_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_TLV_MESSAGE_DATA_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_TLV_MESSAGE_DATA_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_TLV_MESSAGE_DATA_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_TLV_MESSAGE_DATA_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TLV_MESSAGE_DATA_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 /** @file */
 
@@ -75,7 +98,7 @@
  * @endcode
  * 
  */
-class EAP_EXPORT eap_tlv_message_data_c
+class EAP_CLASS_VISIBILITY_EAP_TLV_MESSAGE_DATA_H eap_tlv_message_data_c
 {
 private:
 	//--------------------------------------------------
@@ -95,46 +118,46 @@ public:
 	/**
 	 * The destructor of the eap_tlv_message_data_c class does nothing.
 	 */
-	EAP_FUNC_IMPORT virtual ~eap_tlv_message_data_c();
+	EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H virtual ~eap_tlv_message_data_c();
 
 	/**
 	 * The constructor of the eap_tlv_message_data_c class simply initializes the attributes.
 	 */
-	EAP_FUNC_IMPORT eap_tlv_message_data_c(
+	EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H eap_tlv_message_data_c(
 		abs_eap_am_tools_c * const tools);
 
 	/**
 	 * This function should increase reference count.
 	 */
-	EAP_FUNC_IMPORT void object_increase_reference_count();
+	EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H void object_increase_reference_count();
 
 	/**
 	 * This function should first decrease reference count
 	 * and second return the remaining reference count.
 	 * Reference count must not be decreased when it is zero.
 	 */
-	EAP_FUNC_IMPORT u32_t object_decrease_reference_count();
+	EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H u32_t object_decrease_reference_count();
 
 	/**
 	 * This function returns the pointer to the data.
 	 * Empty message return NULL pointer.
 	 */
-	EAP_FUNC_IMPORT void * get_message_data() const;
+	EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H void * get_message_data() const;
 
 	/**
 	 * This function returns the length of the data.
 	 * Empty message return zero.
 	 */
-	EAP_FUNC_IMPORT u32_t get_message_data_length() const;
+	EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H u32_t get_message_data_length() const;
 
-	EAP_FUNC_IMPORT eap_status_e allocate_message_data_buffer(
+	EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H eap_status_e allocate_message_data_buffer(
 		const u32_t approximate_buffer_requirement);
 
 	/**
 	 * This function copies message data.
 	 * Data must be formatted as EAP-TLV-message data.
 	 */
-	EAP_FUNC_IMPORT eap_status_e copy_message_data(
+	EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H eap_status_e copy_message_data(
 		const u32_t length,
 		const void * const value);
 
@@ -143,14 +166,14 @@ public:
 	 * Note the data is referenced not copied.
 	 * Data must be formatted as EAP-TLV-message data.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_message_data(
+	EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H eap_status_e set_message_data(
 		const u32_t length,
 		const void * const value);
 
 	/**
 	 * This function adds data to message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_message_data(
+	EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H eap_status_e add_message_data(
 		const eap_tlv_type_t type,
 		const u32_t length,
 		const void * const data);
@@ -158,7 +181,7 @@ public:
 	/**
 	 * This function adds array of data to message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_message_data_array(
+	EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H eap_status_e add_message_data_array(
 		const eap_tlv_type_t type,
 		const u32_t length_of_each_data_block,
 		eap_array_c<eap_variable_data_c> * const data_array);
@@ -166,14 +189,14 @@ public:
 	/**
 	 * This function adds header of structured data to message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_message_header(
+	EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H eap_status_e add_message_header(
 		const eap_tlv_type_t type,
 		const u32_t length);
 
 	/**
 	 * This function parses eap_tlv_header_c blocks from message to tlv_blocks.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_message_data(
+	EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H eap_status_e parse_message_data(
 		eap_array_c<eap_tlv_header_c> * const tlv_blocks);
 
 	/**
@@ -181,13 +204,13 @@ public:
 	 * If object initialization fails this function must return false.
 	 * @return This function returns the validity of this object.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H bool get_is_valid();
 
 	/**
 	 * This function allocates buffer to message of specified type.
 	 * Function returns pointer to the value field of specified length.
 	 */
-	EAP_FUNC_IMPORT eap_status_e allocate_message_buffer(
+	EAP_FUNC_VISIBILITY_EAP_TLV_MESSAGE_DATA_H eap_status_e allocate_message_buffer(
 		const eap_tlv_type_t type,
 		const u32_t length,
 		void * * const buffer);

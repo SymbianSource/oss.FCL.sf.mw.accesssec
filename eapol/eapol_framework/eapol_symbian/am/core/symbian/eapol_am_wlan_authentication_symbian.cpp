@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 94 %
+* %version: 95 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -588,6 +588,39 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::set_wlan_pa
 		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
 
+	if (m_selected_eapol_key_authentication_type == eapol_key_authentication_type_WPS)
+	{
+		// Normally here is HASH of WPA pre-shared key, but when connection is Wi-fi Protected setup here is PIN or push button (00000000) key.
+		status = m_wpa_preshared_key_hash.set_copy_of_buffer(wpa_preshared_key);
+		if (status != eap_status_ok)
+		{
+			send_error_notification(eap_status_key_error);
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+
+		EAP_TRACE_DATA_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("new m_wpa_preshared_key_hash for WPS"),
+			m_wpa_preshared_key_hash.get_data(),
+			m_wpa_preshared_key_hash.get_data_length()));
+	}
+
+    EAP_TRACE_DATA_DEBUG(
+        m_am_tools,
+        TRACE_FLAGS_DEFAULT,
+        (EAPL("new m_SSID"),
+        m_SSID.get_data(),
+        m_SSID.get_data_length()));
+
+    EAP_TRACE_DATA_DEBUG(
+        m_am_tools,
+        TRACE_FLAGS_DEFAULT,
+        (EAPL("new m_wpa_preshared_key"),
+        m_wpa_preshared_key.get_data(),
+        m_wpa_preshared_key.get_data_length()));
+
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, eap_status_ok);
 }
@@ -672,6 +705,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_am_wlan_authentication_symbian_c::get_wlan_co
 		 dynamic_cast<abs_eap_base_timer_c *>(this)));
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eapol_am_wlan_authentication_symbian_c::get_wlan_configuration()");
 
+	// Normally here is HASH of WPA pre-shared key, but when connection is Wi-fi Protected setup here is PIN or push button (00000000) key.
 	eap_status_e status = wpa_preshared_key_hash->set_copy_of_buffer(&m_wpa_preshared_key_hash);
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);

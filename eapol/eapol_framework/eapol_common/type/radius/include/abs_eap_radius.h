@@ -23,6 +23,27 @@
 #define _ABS_EAP_RADIUS_H_
 
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABS_EAP_RADIUS_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_RADIUS_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_RADIUS_H 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_RADIUS_H 
+	#define EAP_FUNC_EXPORT_ABS_EAP_RADIUS_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_RADIUS_H 
+#elif defined(EAP_EXPORT_ABS_EAP_RADIUS_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_RADIUS_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_RADIUS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_RADIUS_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_RADIUS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_RADIUS_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_RADIUS_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_RADIUS_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_RADIUS_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_RADIUS_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_RADIUS_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_header.h"
 #include "eap_array.h"
 
@@ -36,7 +57,7 @@ class eap_rogue_ap_entry_c;
 
 /// The class is the interface to partner class of the eap_base_type class.
 /// This declares the pure virtual member functions EAP-type class could call.
-class EAP_EXPORT abs_eap_radius_c
+class EAP_CLASS_VISIBILITY_ABS_EAP_RADIUS_H abs_eap_radius_c
 {
 private:
 	//--------------------------------------------------

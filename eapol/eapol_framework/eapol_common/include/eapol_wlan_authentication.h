@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18 %
+* %version: 23 %
 */
 
 #if !defined(_EAPOL_WLAN_AUTHENTICATION_H_)
@@ -39,6 +39,29 @@
 #include "abs_eap_configuration_if.h"
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
 
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPOL_WLAN_AUTHENTICATION_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H 
+	#define EAP_FUNC_EXPORT_EAPOL_WLAN_AUTHENTICATION_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_WLAN_AUTHENTICATION_H 
+#elif defined(EAP_EXPORT_EAPOL_WLAN_AUTHENTICATION_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_WLAN_AUTHENTICATION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPOL_WLAN_AUTHENTICATION_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_WLAN_AUTHENTICATION_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_WLAN_AUTHENTICATION_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 // FORWARD DECLARATIONS
 class ethernet_core_c;
 class eap_am_tools_symbian_c;
@@ -46,7 +69,7 @@ class eap_file_config_c;
 
 
 // CLASS DECLARATION
-class EAP_EXPORT eapol_wlan_authentication_c
+class EAP_CLASS_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eapol_wlan_authentication_c
 : public abs_eapol_am_wlan_authentication_c
 , public abs_ethernet_core_c
 , public abs_eap_base_timer_c
@@ -60,24 +83,20 @@ class EAP_EXPORT eapol_wlan_authentication_c
 {
 public:
 
-	EAP_FUNC_IMPORT static eapol_wlan_authentication_c * new_eapol_wlan_authentication(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H static eapol_wlan_authentication_c * new_eapol_wlan_authentication(
 		abs_eap_am_tools_c * const tools,
 		abs_eapol_wlan_authentication_c * const partner,
 		const bool is_client_when_true);
 
-	EAP_FUNC_IMPORT eapol_wlan_authentication_c(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eapol_wlan_authentication_c(
 		abs_eap_am_tools_c * const tools,
 		abs_eapol_wlan_authentication_c * const partner,
 		eapol_am_wlan_authentication_c * const am_wauth, ///< eapol_wlan_authentication_c must always delete the am_wauth object.
 		const bool is_client_when_true);
 
-#if defined(EXPORT_DESTRUCTORS)
-	EAP_FUNC_IMPORT virtual ~eapol_wlan_authentication_c();	 // For GCC compilation
-#else
-	virtual ~eapol_wlan_authentication_c();	 // For RVCT compilation
-#endif
-	
-	
+	// Something in RVCT 2 forces this function cannot be exported.
+	virtual ~eapol_wlan_authentication_c();
+
 	///////////////////////////////////////////////////////////////
 	/* These are called from WLM */
 
@@ -89,13 +108,13 @@ public:
 	 * after function returns have PMKSA cached and read_reassociation_parameters() can be called
 	 * with those eap_am_network_id_c objects.
 	 */
-	EAP_FUNC_IMPORT eap_status_e check_pmksa_cache(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e check_pmksa_cache(
 		eap_array_c<eap_am_network_id_c> * const bssid_sta_receive_network_ids,
 		const eapol_key_authentication_type_e selected_eapol_key_authentication_type,
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e pairwise_key_cipher_suite,
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e group_key_cipher_suite);
 
-	EAP_FUNC_IMPORT eap_status_e start_authentication(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e start_authentication(
 		const eap_variable_data_c * const SSID,
 		const eapol_key_authentication_type_e selected_eapol_key_authentication_type,
 		const eap_variable_data_c * const wpa_preshared_key,
@@ -103,7 +122,7 @@ public:
 		const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
 		);
 
-	EAP_FUNC_IMPORT eap_status_e complete_association(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e complete_association(
 		const eapol_wlan_authentication_state_e association_result,
 		const eap_am_network_id_c * const receive_network_id, ///< source includes remote address, destination includes local address.
 		const eap_variable_data_c * const received_WPA_IE, // WLM must give only the WPA IE to EAPOL
@@ -112,21 +131,21 @@ public:
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e group_key_cipher_suite
 		);
 	
-	EAP_FUNC_IMPORT eap_status_e disassociation(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e disassociation(
 		const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
 		);
 		
-	EAP_FUNC_IMPORT eap_status_e start_preauthentication(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e start_preauthentication(
 		const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
 		);
 
-	EAP_FUNC_IMPORT eap_status_e start_reassociation(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e start_reassociation(
 		const eap_am_network_id_c * const old_receive_network_id, ///< source includes remote address, destination includes local address.
 		const eap_am_network_id_c * const new_receive_network_id, ///< source includes remote address, destination includes local address.
 		const eapol_key_authentication_type_e selected_eapol_key_authentication_type ///< In WPXM this must be the same in old and new APs, other connections can change authentication type.
 		);
 
-	EAP_FUNC_IMPORT eap_status_e complete_reassociation(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e complete_reassociation(
 		const eapol_wlan_authentication_state_e reassociation_result,
 		const eap_am_network_id_c * const receive_network_id,
 		const eap_variable_data_c * const received_WPA_IE, // WLM must give only the WPA IE to EAPOL
@@ -134,35 +153,35 @@ public:
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e pairwise_key_cipher_suite,
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e group_key_cipher_suite);
 
-	EAP_FUNC_IMPORT eap_status_e start_WPXM_reassociation(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e start_WPXM_reassociation(
 		const eap_am_network_id_c * const old_receive_network_id, ///< source includes remote address, destination includes local address.
 		const eap_am_network_id_c * const new_receive_network_id, ///< source includes remote address, destination includes local address.
 		eap_variable_data_c * const send_reassociation_request_ie,
 		const eap_variable_data_c * const received_WPA_ie,
 		const eap_variable_data_c * const sent_WPA_ie);
 
-	EAP_FUNC_IMPORT eap_status_e complete_WPXM_reassociation(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e complete_WPXM_reassociation(
 		const eapol_wlan_authentication_state_e reassociation_result,
 		const eap_am_network_id_c * const receive_network_id,
 		const eap_variable_data_c * const received_reassociation_ie);
 
-	EAP_FUNC_IMPORT eap_status_e packet_process(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e packet_process(
 		const eap_am_network_id_c * const receive_network_id, ///< source includes remote address, destination includes local address.
 		eap_general_header_base_c * const packet_data,
 		const u32_t packet_length
 		);
 
-	EAP_FUNC_IMPORT eap_status_e tkip_mic_failure(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e tkip_mic_failure(
 		const eap_am_network_id_c * const receive_network_id, ///< source includes remote address, destination includes local address.
 		const bool fatal_failure_when_true,
 		const eapol_RSNA_key_header_c::eapol_tkip_mic_failure_type_e tkip_mic_failure_type
 		);
 
-	EAP_FUNC_IMPORT eap_status_e eap_acknowledge(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e eap_acknowledge(
 		const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
 		); 
 
-	EAP_FUNC_IMPORT eap_status_e set_eap_database_reference_values(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e set_eap_database_reference_values(
 		const eap_variable_data_c * const reference);
 
 	/////////////////////////////////////////
@@ -171,14 +190,14 @@ public:
 	/**
 	* Sends packet to lower layers
 	*/
-	EAP_FUNC_IMPORT eap_status_e packet_send(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e packet_send(
 		const eap_am_network_id_c * const send_network_id, ///< source includes local address, destination includes remote address.
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t header_offset,
 		const u32_t data_length,
 		const u32_t buffer_length); 
 
-	EAP_FUNC_IMPORT u32_t get_header_offset(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H u32_t get_header_offset(
 		u32_t * const MTU,
 		u32_t * const trailer_length);
 
@@ -190,7 +209,7 @@ public:
 	* @param is_client_when_true Indicates whether the loaded EAP type should be client or server.
 	* @param receive_network_id Network address.
 	*/
-	EAP_FUNC_IMPORT eap_status_e load_module(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e load_module(
 		const eap_type_value_e type,
 		const eap_type_value_e /* tunneling_type */,
 		abs_eap_base_type_c * const partner,
@@ -199,93 +218,93 @@ public:
 		const eap_am_network_id_c * const receive_network_id ///< source includes remote address, destination includes local address.
 		);
 
-	EAP_FUNC_IMPORT eap_status_e unload_module(const eap_type_value_e type); 	
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e unload_module(const eap_type_value_e type); 	
 
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H void set_is_valid();
 
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H bool get_is_valid();
 
-	EAP_FUNC_IMPORT void increment_authentication_counter();
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H void increment_authentication_counter();
 
-	EAP_FUNC_IMPORT u32_t get_authentication_counter();
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H u32_t get_authentication_counter();
 
-	EAP_FUNC_IMPORT bool get_is_client();
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H bool get_is_client();
 
 	/**
 	* This does the initial configuration of the class.
 	*/
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e configure();
 
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e shutdown();
 
 	/**
 	* Reads a configuration parameter value from the database. 
 	* In Symbian this function is only a TRAP wrapper for read_configure_L.
 	*/
-	EAP_FUNC_IMPORT eap_status_e read_configure(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e read_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
-	EAP_FUNC_IMPORT eap_status_e write_configure(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e write_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
 	// See abs_eap_base_type_c::state_notification().
-	EAP_FUNC_IMPORT void state_notification(const abs_eap_state_notification_c * const state);
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H void state_notification(const abs_eap_state_notification_c * const state);
 	
-	EAP_FUNC_IMPORT eap_status_e set_timer(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e set_timer(
 		abs_eap_base_timer_c * const p_initializer, 
 		const u32_t p_id, 
 		void * const p_data,
 		const u32_t p_time_ms);
 
-	EAP_FUNC_IMPORT eap_status_e cancel_timer(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e cancel_timer(
 		abs_eap_base_timer_c * const p_initializer, 
 		const u32_t p_id);
 
-	EAP_FUNC_IMPORT eap_status_e cancel_all_timers();
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e cancel_all_timers();
 
-	EAP_FUNC_IMPORT eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);
 
 	/**
 	* Forwards the keys to lower layer (= WLM).
 	*/
-	EAP_FUNC_IMPORT eap_status_e packet_data_session_key(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e packet_data_session_key(
 		const eap_am_network_id_c * const send_network_id, ///< source includes local address, destination includes remote address.
 		const eapol_session_key_c * const key);
 
-	EAP_FUNC_IMPORT eap_status_e timer_expired(const u32_t id, void *data);
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e timer_expired(const u32_t id, void *data);
 
-	EAP_FUNC_IMPORT eap_status_e timer_delete_data(const u32_t id, void *data);
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e timer_delete_data(const u32_t id, void *data);
 
-	EAP_FUNC_IMPORT eap_status_e get_eap_type_list(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e get_eap_type_list(
 		eap_array_c<eap_type_value_e> * const eap_type_list);
 
-	EAP_FUNC_IMPORT eap_status_e add_rogue_ap(eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list);
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e add_rogue_ap(eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list);
 
-	EAP_FUNC_IMPORT u32_t get_current_eap_index();
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H u32_t get_current_eap_index();
 
-	EAP_FUNC_IMPORT void set_current_eap_index(u32_t eap_index);
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H void set_current_eap_index(u32_t eap_index);
 
 
 #if defined(USE_TEST_EAPOL_WLAN_AUTHENTICATION)
 	/// These are called by testing application.
-	EAP_FUNC_IMPORT u32_t get_wrong_send_packet_index();
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H u32_t get_wrong_send_packet_index();
 
-	EAP_FUNC_IMPORT void reset_authentication_can_succeed();
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H void reset_authentication_can_succeed();
 
-	EAP_FUNC_IMPORT void set_authentication_can_succeed();
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H void set_authentication_can_succeed();
 
-	EAP_FUNC_IMPORT void restore_authentication_can_succeed();
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H void restore_authentication_can_succeed();
 
-	EAP_FUNC_IMPORT void set_authentication_must_not_succeed(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H void set_authentication_must_not_succeed(
         const u32_t wrong_packet_index,
         const u32_t packet_index,
         const void * const wrong_packet_stack);
 #endif //#if defined(USE_TEST_EAPOL_WLAN_AUTHENTICATION)
 
 #if defined(USE_EAP_SIMPLE_CONFIG)
-	EAP_FUNC_IMPORT eap_status_e save_simple_config_session(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e save_simple_config_session(
 		const simple_config_state_e state,
 		EAP_TEMPLATE_CONST eap_array_c<simple_config_credential_c> * const credential_array,
 		const eap_variable_data_c * const new_password,
@@ -293,12 +312,12 @@ public:
 		const simple_config_payloads_c * const other_configuration);
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
 
-	EAP_FUNC_IMPORT eap_status_e complete_get_802_11_authentication_mode(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e complete_get_802_11_authentication_mode(
 		const eap_status_e completion_status,
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_802_11_authentication_mode_e mode);
 
-	EAP_FUNC_IMPORT eap_status_e complete_disassociation(
+	EAP_FUNC_VISIBILITY_EAPOL_WLAN_AUTHENTICATION_H eap_status_e complete_disassociation(
 		const bool complete_to_lower_layer,
 		const eap_am_network_id_c * const receive_network_id);
 

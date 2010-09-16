@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10 %
+* %version: 13 %
 */
 
 
@@ -27,7 +27,30 @@
 #include "eap_am_message_if.h"
 #include "eap_tools.h"
 #include "AbsEapSendInterface.h"
-#include "eap_pac_store_server_message_if.h"
+//#include "eap_pac_store_server_message_if.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_PACSTOREIF_H)
+	#define EAP_CLASS_VISIBILITY_PACSTOREIF_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_PACSTOREIF_H 
+	#define EAP_C_FUNC_VISIBILITY_PACSTOREIF_H 
+	#define EAP_FUNC_EXPORT_PACSTOREIF_H 
+	#define EAP_C_FUNC_EXPORT_PACSTOREIF_H 
+#elif defined(EAP_EXPORT_PACSTOREIF_H)
+	#define EAP_CLASS_VISIBILITY_PACSTOREIF_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_PACSTOREIF_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_PACSTOREIF_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_PACSTOREIF_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_PACSTOREIF_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_PACSTOREIF_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_PACSTOREIF_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_PACSTOREIF_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_PACSTOREIF_H 
+	#define EAP_C_FUNC_EXPORT_PACSTOREIF_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 class eap_file_config_c;
 
@@ -36,7 +59,7 @@ class eap_file_config_c;
 /** @file */
 
 /// This class is the PAC-store interface inside the EAP-server.
-class CPacStoreIf
+class EAP_CLASS_VISIBILITY_PACSTOREIF_H CPacStoreIf
 : public CBase
 , public abs_eap_am_message_if_c
 {
@@ -45,27 +68,27 @@ public:
 
     // ----------------------------------------------------------------------
 
-    EAP_FUNC_IMPORT CPacStoreIf(
+    EAP_FUNC_VISIBILITY_PACSTOREIF_H CPacStoreIf(
         abs_eap_am_tools_c * const tools,
         eap_am_message_if_c * const server,
         AbsEapSendInterface * client);
 
-    EAP_FUNC_IMPORT virtual ~CPacStoreIf();
+    EAP_FUNC_VISIBILITY_PACSTOREIF_H virtual ~CPacStoreIf();
 
-    EAP_FUNC_IMPORT bool get_is_valid();
+    EAP_FUNC_VISIBILITY_PACSTOREIF_H bool get_is_valid();
 
-    EAP_FUNC_IMPORT eap_status_e configure(
+    EAP_FUNC_VISIBILITY_PACSTOREIF_H eap_status_e configure(
 		const eap_variable_data_c * const client_configuration);
 
-    EAP_FUNC_IMPORT eap_status_e send_data(const void * const data, const u32_t length);
+    EAP_FUNC_VISIBILITY_PACSTOREIF_H eap_status_e send_data(const void * const data, const u32_t length);
 
-    EAP_FUNC_IMPORT eap_status_e process_data(const void * const data, const u32_t length);
+    EAP_FUNC_VISIBILITY_PACSTOREIF_H eap_status_e process_data(const void * const data, const u32_t length);
 
-    EAP_FUNC_IMPORT eap_status_e shutdown();
+    EAP_FUNC_VISIBILITY_PACSTOREIF_H eap_status_e shutdown();
 
     // ------------------------------------------------------
 
-    EAP_FUNC_IMPORT static CPacStoreIf * new_CPacStoreIf(
+    EAP_FUNC_VISIBILITY_PACSTOREIF_H static CPacStoreIf * new_CPacStoreIf(
         abs_eap_am_tools_c * const tools,
         const bool is_client_when_true,
         const u32_t MTU,

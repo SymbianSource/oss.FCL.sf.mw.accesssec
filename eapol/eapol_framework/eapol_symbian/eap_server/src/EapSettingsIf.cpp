@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18 %
+* %version: 19 %
 */
 
 
@@ -82,7 +82,7 @@ bool CEapSettingsIf::get_is_valid()
 eap_status_e CEapSettingsIf::configure(
 	const eap_variable_data_c * const client_configuration)
 {
-	return m_server_if->configure(client_configuration);
+	return EAP_STATUS_RETURN(m_am_tools, m_server_if->configure(client_configuration));
 }
 
 //--------------------------------------------------

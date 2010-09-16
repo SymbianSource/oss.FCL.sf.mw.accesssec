@@ -16,12 +16,34 @@
 */
 
 /*
-* %version: 23 %
+* %version: 24 %
 */
 
 #ifndef _EAP_METHOD_SETTINGS_H_
 #define _EAP_METHOD_SETTINGS_H_
 
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_METHOD_SETTINGS_H)
+	#define EAP_CLASS_VISIBILITY_EAP_METHOD_SETTINGS_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_METHOD_SETTINGS_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_METHOD_SETTINGS_H 
+	#define EAP_FUNC_EXPORT_EAP_METHOD_SETTINGS_H 
+	#define EAP_C_FUNC_EXPORT_EAP_METHOD_SETTINGS_H 
+#elif defined(EAP_EXPORT_EAP_METHOD_SETTINGS_H)
+	#define EAP_CLASS_VISIBILITY_EAP_METHOD_SETTINGS_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_METHOD_SETTINGS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_METHOD_SETTINGS_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_METHOD_SETTINGS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_METHOD_SETTINGS_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_METHOD_SETTINGS_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_METHOD_SETTINGS_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_METHOD_SETTINGS_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_METHOD_SETTINGS_H 
+	#define EAP_C_FUNC_EXPORT_EAP_METHOD_SETTINGS_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_am_tools.h"
 #include "eap_expanded_type.h"
 #include "eap_variable_data.h"
@@ -29,7 +51,7 @@
 
 //-------------------------------------------------------------------------------
 
-class eap_certificate_entry_c
+class EAP_CLASS_VISIBILITY_EAP_METHOD_SETTINGS_H eap_certificate_entry_c
 {
 
 private:
@@ -109,7 +131,7 @@ public:
 
 //-------------------------------------------------------------------------------
 
-class eap_method_values_c
+class EAP_CLASS_VISIBILITY_EAP_METHOD_SETTINGS_H eap_method_values_c
 {
 
 private:
@@ -274,7 +296,7 @@ public:
 
 //-------------------------------------------------------------------------------
 
-class eap_method_settings_c
+class EAP_CLASS_VISIBILITY_EAP_METHOD_SETTINGS_H eap_method_settings_c
 : public eap_method_values_c
 {
 public:

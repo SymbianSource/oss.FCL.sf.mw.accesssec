@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 32.1.5 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -750,6 +750,7 @@ eap_status_e asn1_der_type_c::initialize(
 	const u32_t index,
 	eap_variable_data_c * const debug_buffer)
 {
+	EAP_UNREFERENCED_PARAMETER(debug_buffer);
 	if (index > 0xffff)
 	{
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);

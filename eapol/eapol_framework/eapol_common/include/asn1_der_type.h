@@ -24,6 +24,27 @@
 
 #include "eap_variable_data.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ASN1_DER_TYPE_H)
+	#define EAP_CLASS_VISIBILITY_ASN1_DER_TYPE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H 
+	#define EAP_C_FUNC_VISIBILITY_ASN1_DER_TYPE_H 
+	#define EAP_FUNC_EXPORT_ASN1_DER_TYPE_H 
+	#define EAP_C_FUNC_EXPORT_ASN1_DER_TYPE_H 
+#elif defined(EAP_EXPORT_ASN1_DER_TYPE_H)
+	#define EAP_CLASS_VISIBILITY_ASN1_DER_TYPE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ASN1_DER_TYPE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ASN1_DER_TYPE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ASN1_DER_TYPE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ASN1_DER_TYPE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ASN1_DER_TYPE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ASN1_DER_TYPE_H 
+	#define EAP_C_FUNC_EXPORT_ASN1_DER_TYPE_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_array.h"
 
 //--------------------------------------------------
@@ -32,7 +53,7 @@ class asn1_type_const_c;
 
 //--------------------------------------------------
 
-class EAP_EXPORT asn1_der_type_c
+class EAP_CLASS_VISIBILITY_ASN1_DER_TYPE_H asn1_der_type_c
 {
 	//--------------------------------------------------
 public:
@@ -111,87 +132,87 @@ public:
 	};
 
 
-	EAP_FUNC_IMPORT virtual ~asn1_der_type_c();
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H virtual ~asn1_der_type_c();
 
-	EAP_FUNC_IMPORT asn1_der_type_c(
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H asn1_der_type_c(
 		abs_eap_am_tools_c * const tools);
 
 	/**
 	 * The get_is_valid() function returns the status of the asn1_der_type_c object.
 	 * @return True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H bool get_is_valid() const;
 
-	EAP_FUNC_IMPORT u32_t get_index() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H u32_t get_index() const;
 
 	/**
 	 * The decode() function decodes ASN.1/DER data.
 	 * @return eap_status_ok indicates successfull operation.
 	 */
-	EAP_FUNC_IMPORT eap_status_e decode(const eap_variable_data_c * const asn1_der_data);
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H eap_status_e decode(const eap_variable_data_c * const asn1_der_data);
 
 	/**
 	 * The get_class() returns Class of ASN.1/DER type.
 	 */
-	EAP_FUNC_IMPORT asn1_class_e get_class() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H asn1_class_e get_class() const;
 
 	/**
 	 * The get_pc() returns Primitiva/Constructed flag of ASN.1/DER type.
 	 */
-	EAP_FUNC_IMPORT asn1_pc_e get_pc() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H asn1_pc_e get_pc() const;
 
 	/**
 	 * The get_pc() returns Tag of ASN.1/DER type.
 	 */
-	EAP_FUNC_IMPORT asn1_tag_e get_tag() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H asn1_tag_e get_tag() const;
 
 	/**
 	 * The get_pc() returns pointer to extented Tag of ASN.1/DER type.
 	 */
-	EAP_FUNC_IMPORT eap_status_e get_extented_tag(const u8_t ** const extented_tag, u32_t * const extented_tag_size) const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H eap_status_e get_extented_tag(const u8_t ** const extented_tag, u32_t * const extented_tag_size) const;
 
 	// Function returns count of octets in header of ASN.1/DER type.
 	// This includes Identifier and Length octets.
-	EAP_FUNC_IMPORT u32_t get_header_length() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H u32_t get_header_length() const;
 
 
 	// Function returns count of octets in Contents of ASN.1/DER type.
-	EAP_FUNC_IMPORT u32_t get_content_length() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H u32_t get_content_length() const;
 
 	// Function returns pointer to Contents of ASN.1/DER type.
-	EAP_FUNC_IMPORT const u8_t * get_content() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H const u8_t * get_content() const;
 
 
 	// Function returns count of octets in full data of ASN.1/DER type, including Identifier, Length and Content.
-	EAP_FUNC_IMPORT u32_t get_full_data_length() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H u32_t get_full_data_length() const;
 
 	// Function returns pointer to full data of ASN.1/DER type, including Identifier, Length and Content.
-	EAP_FUNC_IMPORT const u8_t * get_full_data() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H const u8_t * get_full_data() const;
 
 
 	// Function returns pointer to array of ASN.1/DER sub types.
-	EAP_FUNC_IMPORT const eap_array_c<asn1_der_type_c> * get_sub_types() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H const eap_array_c<asn1_der_type_c> * get_sub_types() const;
 
 	// Function returns pointer to ASN.1/DER sub type.
-	EAP_FUNC_IMPORT const asn1_der_type_c * get_sub_type(const asn1_type_const_c * const asn1_type) const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H const asn1_der_type_c * get_sub_type(const asn1_type_const_c * const asn1_type) const;
 
-	EAP_FUNC_IMPORT const asn1_der_type_c * get_previous_type() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H const asn1_der_type_c * get_previous_type() const;
 
-	EAP_FUNC_IMPORT const asn1_der_type_c * get_next_type() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H const asn1_der_type_c * get_next_type() const;
 
-	EAP_FUNC_IMPORT u16_t get_count_of_sub_types() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H u16_t get_count_of_sub_types() const;
 
-	EAP_FUNC_IMPORT void increase_count_of_sub_types();
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H void increase_count_of_sub_types();
 
-	EAP_FUNC_IMPORT eap_const_string get_class_string() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H eap_const_string get_class_string() const;
 
-	EAP_FUNC_IMPORT eap_const_string get_pc_string() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H eap_const_string get_pc_string() const;
 
-	EAP_FUNC_IMPORT eap_const_string get_tag_string() const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H eap_const_string get_tag_string() const;
 
-	EAP_FUNC_IMPORT eap_status_e compare_object_identifier(const u8_t * const der_encoded_oid, const u32_t oid_length) const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H eap_status_e compare_object_identifier(const u8_t * const der_encoded_oid, const u32_t oid_length) const;
 
-	EAP_FUNC_IMPORT eap_status_e compare_object_identifier(eap_const_string oid, const u32_t oid_length) const;
+	EAP_FUNC_VISIBILITY_ASN1_DER_TYPE_H eap_status_e compare_object_identifier(eap_const_string oid, const u32_t oid_length) const;
 
 	//--------------------------------------------------
 private:

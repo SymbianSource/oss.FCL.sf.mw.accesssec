@@ -16,7 +16,7 @@
 */
 
 /*
-* %version:  5 %
+* %version:  8 %
 */
 
 #ifndef EAPMESSAGEQUEU_H_
@@ -25,20 +25,41 @@
 #include "EapServerClientDef.h"
 #include "abs_eap_am_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPMESSAGEQUEUE_H)
+	#define EAP_CLASS_VISIBILITY_EAPMESSAGEQUEUE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H 
+	#define EAP_FUNC_EXPORT_EAPMESSAGEQUEUE_H 
+	#define EAP_C_FUNC_EXPORT_EAPMESSAGEQUEUE_H 
+#elif defined(EAP_EXPORT_EAPMESSAGEQUEUE_H)
+	#define EAP_CLASS_VISIBILITY_EAPMESSAGEQUEUE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPMESSAGEQUEUE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPMESSAGEQUEUE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPMESSAGEQUEUE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPMESSAGEQUEUE_H 
+	#define EAP_C_FUNC_EXPORT_EAPMESSAGEQUEUE_H 
+#endif
+// End: added by script change_export_macros.sh.
 
-class EAP_EXPORT EapMessageBuffer
+class EAP_CLASS_VISIBILITY_EAPMESSAGEQUEUE_H EapMessageBuffer
 {
 public:
 
-	EAP_FUNC_IMPORT EapMessageBuffer(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H EapMessageBuffer(abs_eap_am_tools_c * const tools);
 
-	EAP_FUNC_IMPORT virtual ~EapMessageBuffer();
+	EAP_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H virtual ~EapMessageBuffer();
 
-	EAP_FUNC_IMPORT TInt CopyData(TEapRequests type, const void * const data, const TUint length);
+	EAP_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H TInt CopyData(TEapRequests type, const void * const data, const TUint length);
 
-	EAP_FUNC_IMPORT HBufC8 * GetData() const;
+	EAP_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H HBufC8 * GetData() const;
 
-	EAP_FUNC_IMPORT TEapRequests GetRequestType() const;
+	EAP_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H TEapRequests GetRequestType() const;
 
 private:
 
@@ -51,19 +72,21 @@ private:
 };
 
     
-class EAP_EXPORT EapMessageQueue
+class EAP_CLASS_VISIBILITY_EAPMESSAGEQUEUE_H EapMessageQueue
 {
 public:
 
-	EAP_FUNC_IMPORT EapMessageQueue(abs_eap_am_tools_c * const tools);
+	EAP_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H EapMessageQueue(abs_eap_am_tools_c * const tools);
 
-	EAP_FUNC_IMPORT virtual ~EapMessageQueue();
+	EAP_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H virtual ~EapMessageQueue();
 
-	EAP_FUNC_IMPORT TInt AddMessage(TEapRequests type, const void * const data, const TUint length);
+	EAP_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H TInt AddMessage(TEapRequests type, const void * const data, const TUint length);
 
-	EAP_FUNC_IMPORT EapMessageBuffer * GetFirstMessage();
+	EAP_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H EapMessageBuffer * GetFirstMessage();
 
-	EAP_FUNC_IMPORT TInt DeleteFirstMessage();
+	EAP_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H TInt DeleteFirstMessage();
+
+	EAP_FUNC_VISIBILITY_EAPMESSAGEQUEUE_H TInt DeleteFirstMessage(const EapMessageBuffer * const verify_message);
 
 private:
 

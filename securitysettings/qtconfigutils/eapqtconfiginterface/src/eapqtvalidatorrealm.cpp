@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 8 %
+ * %version: 9 %
  */
 
 // System includes
@@ -79,7 +79,7 @@ EapQtValidator::Status EapQtValidatorRealm::validate(const QVariant& value)
 EapQtValidator::Status EapQtValidatorRealm::validateGeneral(const QVariant& value)
 {
     Status status(StatusOk);
-    QString str = value.toString();
+    const QString str = value.toString();
 
     // input must be of correct type
     if (value.type() != QVariant::String) {

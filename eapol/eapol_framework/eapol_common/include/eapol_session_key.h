@@ -25,11 +25,32 @@
 #include "eap_variable_data.h"
 #include "eapol_key_types.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPOL_SESSION_KEY_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_SESSION_KEY_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H 
+	#define EAP_FUNC_EXPORT_EAPOL_SESSION_KEY_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_SESSION_KEY_H 
+#elif defined(EAP_EXPORT_EAPOL_SESSION_KEY_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_SESSION_KEY_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_SESSION_KEY_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPOL_SESSION_KEY_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPOL_SESSION_KEY_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_SESSION_KEY_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_SESSION_KEY_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 
 /// A eapol_session_key_c class.
 /// This is used for session key encapsulation.
-class EAP_EXPORT eapol_session_key_c
+class EAP_CLASS_VISIBILITY_EAPOL_SESSION_KEY_H eapol_session_key_c
 {
 private:
 	//--------------------------------------------------
@@ -59,12 +80,12 @@ public:
 	/**
 	 * The destructor of the eapol_session_key_c class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~eapol_session_key_c();
+	EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H virtual ~eapol_session_key_c();
 
 	/**
 	 * The constructor of the eapol_session_key_c class does nothing special.
 	 */
-	EAP_FUNC_IMPORT eapol_session_key_c(
+	EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H eapol_session_key_c(
 		abs_eap_am_tools_c * const tools,
 		eap_variable_data_c * const key, ///< Here is the key.
 		const eapol_key_type_e key_type, ///< This the type of the key.
@@ -77,34 +98,34 @@ public:
 	/**
 	 * The constructor of the eapol_session_key_c class does nothing special.
 	 */
-	EAP_FUNC_IMPORT eapol_session_key_c(
+	EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H eapol_session_key_c(
 		abs_eap_am_tools_c * const tools
 		);
 
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_key() const;
+	EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H const eap_variable_data_c * get_key() const;
 
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_sequence_number() const;
+	EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H const eap_variable_data_c * get_sequence_number() const;
 
-	EAP_FUNC_IMPORT eapol_key_type_e get_key_type() const;
+	EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H eapol_key_type_e get_key_type() const;
 
-	EAP_FUNC_IMPORT u32_t get_key_index() const;
+	EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H u32_t get_key_index() const;
 
-	EAP_FUNC_IMPORT bool get_key_tx_bit() const;
+	EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H bool get_key_tx_bit() const;
 
-	EAP_FUNC_IMPORT bool get_is_valid() const;
+	EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H bool get_is_valid() const;
 
 
-	EAP_FUNC_IMPORT eap_status_e set_key(const eap_variable_data_c * const key);
+	EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H eap_status_e set_key(const eap_variable_data_c * const key);
 
-	EAP_FUNC_IMPORT eap_status_e set_sequence_number(eap_variable_data_c * const sequence_number);
+	EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H eap_status_e set_sequence_number(eap_variable_data_c * const sequence_number);
 
-	EAP_FUNC_IMPORT void set_key_type(const eapol_key_type_e key_type);
+	EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H void set_key_type(const eapol_key_type_e key_type);
 
-	EAP_FUNC_IMPORT void set_key_index(const u32_t key_index);
+	EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H void set_key_index(const u32_t key_index);
 
-	EAP_FUNC_IMPORT void set_key_tx_bit(const bool key_tx_bit);
+	EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H void set_key_tx_bit(const bool key_tx_bit);
 
-	EAP_FUNC_IMPORT static eap_const_string get_eapol_key_type_string(
+	EAP_FUNC_VISIBILITY_EAPOL_SESSION_KEY_H static eap_const_string get_eapol_key_type_string(
 		const eapol_key_type_e key_type);
 
 	//--------------------------------------------------

@@ -29,23 +29,44 @@
 #include "eap_variable_data.h"
 #include "eap_status.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_STATUS_STRING_H)
+	#define EAP_CLASS_VISIBILITY_EAP_STATUS_STRING_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_STATUS_STRING_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_STATUS_STRING_H 
+	#define EAP_FUNC_EXPORT_EAP_STATUS_STRING_H 
+	#define EAP_C_FUNC_EXPORT_EAP_STATUS_STRING_H 
+#elif defined(EAP_EXPORT_EAP_STATUS_STRING_H)
+	#define EAP_CLASS_VISIBILITY_EAP_STATUS_STRING_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_STATUS_STRING_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_STATUS_STRING_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_STATUS_STRING_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_STATUS_STRING_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_STATUS_STRING_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_STATUS_STRING_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_STATUS_STRING_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_STATUS_STRING_H 
+	#define EAP_C_FUNC_EXPORT_EAP_STATUS_STRING_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 //----------------------------------------------------------------------------------
 
 /// This class includes the debug strings of the eap_status_e.
-class EAP_EXPORT eap_status_string_c
+class EAP_CLASS_VISIBILITY_EAP_STATUS_STRING_H eap_status_string_c
 {
 public:
 
-	EAP_FUNC_IMPORT virtual ~eap_status_string_c();
+	EAP_FUNC_VISIBILITY_EAP_STATUS_STRING_H virtual ~eap_status_string_c();
 
-	EAP_FUNC_IMPORT eap_status_string_c();
+	EAP_FUNC_VISIBILITY_EAP_STATUS_STRING_H eap_status_string_c();
 
 	/**
 	 * Function returns string of eap_status_e.
 	 * @param status is the queried string.
 	 */
-	EAP_FUNC_IMPORT static eap_const_string get_status_string(const eap_status_e status);
+	EAP_FUNC_VISIBILITY_EAP_STATUS_STRING_H static eap_const_string get_status_string(const eap_status_e status);
 
 };
 

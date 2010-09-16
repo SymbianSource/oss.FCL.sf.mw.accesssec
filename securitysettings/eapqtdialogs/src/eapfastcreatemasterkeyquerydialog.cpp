@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 6 %
+* %version: 8 %
 */
 
 // System includes
@@ -91,7 +91,8 @@ void EapFastCreateMasterKeyQueryDialog::createDialog(const QVariantMap &paramete
     //by pressing any of the Action buttons
     this->setModal(true);
     this->setTimeout(HbPopup::NoTimeout);
-    this->setDismissPolicy(HbPopup::NoDismiss);    
+    this->setDismissPolicy(HbPopup::NoDismiss);   
+    this->setDismissOnAction(false);     
     this->setAdditionalRowVisible(true);
     
     this->setPromptText(labelText1, 0);   
@@ -109,7 +110,7 @@ void EapFastCreateMasterKeyQueryDialog::createDialog(const QVariantMap &paramete
     Q_ASSERT( mPwdValidator.isNull() == false );                
                      
     mPwdValidator->updateEditor(mEdit1);
-    
+    mPwdValidator->updateEditor(mEdit2);
    
     //Remove all default actions from the dialog  
     QList<QAction*> action_list = this->actions();        
@@ -125,15 +126,11 @@ void EapFastCreateMasterKeyQueryDialog::createDialog(const QVariantMap &paramete
     HbAction* actionCancel = new HbAction(hbTrId("txt_common_button_cancel"),this);
     this->addAction(actionCancel);    
     
-    //Disconnect action Ok from the default SLOT and connect to 
-    //a SLOT owned by this class    
-    disconnect(actionOk, SIGNAL(triggered()),this, SLOT(close()));
+    //Connect to a SLOT owned by this class    
     bool connected = connect(actionOk, SIGNAL(triggered()), this, SLOT(okPressed()));
     Q_ASSERT(connected == true);
     
-    //Disconnect action Cancel from the default SLOT and connect to 
-    //a SLOT owned by this class  
-    disconnect(actionCancel, SIGNAL(triggered()),this, SLOT(close()));
+    //Connect to a SLOT owned by this class  
     connected = connect(actionCancel, SIGNAL(triggered()), this, SLOT(cancelPressed()));
     Q_ASSERT(connected == true);
     

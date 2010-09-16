@@ -25,6 +25,27 @@
 //#include "eap_am_memory.h"
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_TYPE_ALL_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_ALL_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_ALL_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_ALL_H 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_ALL_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_ALL_H 
+#elif defined(EAP_EXPORT_EAP_TYPE_ALL_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_ALL_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_ALL_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_ALL_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_ALL_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_ALL_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_ALL_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_ALL_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_ALL_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_ALL_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_ALL_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_base_type.h"
 #include "abs_eap_base_type.h"
 #include "eap_variable_data.h"
@@ -44,7 +65,7 @@ class abs_eap_configuration_if_c;
  * NOTE one module could include many EAP-types.
  * EAP-type will callback caller using the partner pointer.
  */
-EAP_C_FUNC_IMPORT eap_base_type_c * const new_eap_type(
+EAP_C_FUNC_VISIBILITY_EAP_TYPE_ALL_H eap_base_type_c * const new_eap_type(
 	abs_eap_am_tools_c * const tools,
 	abs_eap_base_type_c * const partner,
 	const eap_type_value_e eap_type,

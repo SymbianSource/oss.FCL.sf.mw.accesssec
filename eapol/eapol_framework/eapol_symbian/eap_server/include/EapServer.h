@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 12 %
+* %version: 14 %
 */
 
 
@@ -33,6 +33,7 @@
 #include "abs_eap_am_tools.h"
 #include "EapClientIf.h"
 #include "EapServerBackup.h"
+#include "EapServerProcessHandler.h"
 
 class CEapDelayedShutdown;
 
@@ -63,11 +64,19 @@ public:
 
 	void BackupOrRestoreStartingL();
 
+	TInt AddReadyHandler(CEapServerProcessHandler * const handler);
+
+	TInt CompleteReadyHandler(CEapServerProcessHandler * const handler);
+
+	TInt CancelReadyHandler(CEapServerProcessHandler * const handler);
+
 private:
 
     TInt RunError(TInt aErr);
     CEapDelayedShutdown* iShutdown;
 	CEapserverBackup * iBackupRestore;
+
+	RArray<CEapServerProcessHandler *> iReadyHandlers;
 
     TInt iSessionCount;
     abs_eap_am_tools_c * iTools;

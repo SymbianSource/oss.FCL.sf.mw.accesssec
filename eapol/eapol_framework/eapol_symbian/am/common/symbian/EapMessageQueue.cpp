@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 14 %
+* %version: 16 %
 */
 
 
@@ -208,9 +208,10 @@ EAP_FUNC_EXPORT TInt EapMessageQueue::AddMessage(TEapRequests message, const voi
 	EAP_TRACE_DEBUG(
 		iTools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("EapMessageQueue::AddMessage(): this=0x%08x, message=%d, data=0x%08x, length=%d, iEapMessageQueue.Count()=%d\n"),
+		(EAPL("EapMessageQueue::AddMessage(): this=0x%08x, message=%d=%s, data=0x%08x, length=%d, iEapMessageQueue.Count()=%d\n"),
 		this,
 		message,
+		EapServerStrings::GetEapRequestsString(message),
 		data,
 		length,
 		iEapMessageQueue.Count()));
@@ -318,6 +319,58 @@ EAP_FUNC_EXPORT TInt EapMessageQueue::DeleteFirstMessage()
 
 		delete iEapMessageQueue[0];
 		iEapMessageQueue.Remove(0);
+	}
+	else
+	{
+		EAP_TRACE_DEBUG(
+			iTools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("EapMessageQueue::DeleteFirstMessage(): Empty array\n")));
+	}
+
+	return KErrNone;
+}
+
+//----------------------------------------------------------------------------
+
+EAP_FUNC_EXPORT TInt EapMessageQueue::DeleteFirstMessage(const EapMessageBuffer * const verify_message)
+{
+	EAP_TRACE_DEBUG(
+		iTools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("EapMessageQueue::DeleteFirstMessage(0x%08x): this=0x%08x\n"),
+		verify_message,
+		this));
+
+	EAP_TRACE_RETURN_STRING(iTools, "returns: EapMessageQueue::DeleteFirstMessage(verify_message)");
+
+	TInt aCount = iEapMessageQueue.Count();
+	if (aCount > 0)
+	{
+		EAP_TRACE_DEBUG(
+			iTools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("EapMessageQueue::DeleteFirstMessage(): iEapMessageQueue[0].iRequestType=%d=%s, iEapMessageQueue.Count()=%d, iEapMessageQueue[0]=0x%08x, verify_message=0x%08x\n"),
+			iEapMessageQueue[0]->GetRequestType(),
+			EapServerStrings::GetEapRequestsString(iEapMessageQueue[0]->GetRequestType()),
+			iEapMessageQueue.Count(),
+			iEapMessageQueue[0],
+			verify_message));
+
+		if (iEapMessageQueue[0] == verify_message)
+		{
+			delete iEapMessageQueue[0];
+			iEapMessageQueue.Remove(0);
+		}
+		else
+		{
+			EAP_TRACE_DEBUG(
+				iTools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("WARNING: EapMessageQueue::DeleteFirstMessage(0x%08x): this=0x%08x, does not delete other message\n"),
+				verify_message,
+				this));
+		}
 	}
 	else
 	{

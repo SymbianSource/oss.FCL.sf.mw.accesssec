@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 38.1.26 %
+* %version: 38.1.28 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -226,29 +226,118 @@ CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface()
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete rest\n")));
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete iCertFilter\n")));
 
 	delete iCertFilter;
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete iCertStore\n")));
+
 	delete iCertStore;
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete iCertChain\n")));
+
 	delete iCertChain;
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete iValidationResult\n")));
+
 	delete iValidationResult;
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete iInputCertChain\n")));
+
 	delete iInputCertChain;	
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete iEncodedCertificate\n")));
+
 	delete iEncodedCertificate;	
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete iDataIn\n")));
+
 	delete iDataIn;
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete iDataOut\n")));
+
 	delete iDataOut;
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete iSignature\n")));
+
 	delete iSignature;
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete iPtrOut\n")));
+
 	delete iPtrOut;
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete iSignaturePtr\n")));
+
 	delete iSignaturePtr;
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete iRSASignature\n")));
+
 	delete iRSASignature;
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete iDSASignature\n")));
+
 	delete iDSASignature;
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete iKeyFilter\n")));
+
 	delete iKeyFilter;
 
 #if !defined(USE_EAP_TLS_PEAP_UNIFIED_KEY_STORE_CACHE)
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): delete iKeyStore\n")));
 
 	delete iKeyStore;
 
 #endif //#if !defined(USE_EAP_TLS_PEAP_UNIFIED_KEY_STORE_CACHE)
 	
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::~CEapTlsPeapCertInterface(): iFs.Close()\n")));
+
 	iFs.Close();
 
 	EAP_TRACE_DEBUG(
@@ -1042,7 +1131,7 @@ void CEapTlsPeapCertInterface::RunL()
 
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_get_matching_certificates(tmp, eap_status_allocation_error); //Failure
+				iParent->complete_get_matching_certificates(tmp, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
@@ -1128,7 +1217,7 @@ void CEapTlsPeapCertInterface::RunL()
 
 				m_am_tools->enter_global_mutex();
 
-				iParent->complete_get_matching_certificates(empty, eap_status_illegal_certificate); //Failure
+				iParent->complete_get_matching_certificates(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_certificate)); //Failure
 
 				m_am_tools->leave_global_mutex();
 
@@ -1154,7 +1243,7 @@ void CEapTlsPeapCertInterface::RunL()
 
 				m_am_tools->enter_global_mutex();
 
-				iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
+				iParent->complete_get_matching_certificates(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 
 				m_am_tools->leave_global_mutex();
 
@@ -1191,7 +1280,7 @@ void CEapTlsPeapCertInterface::RunL()
 											
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
+				iParent->complete_get_matching_certificates(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 
@@ -1207,7 +1296,7 @@ void CEapTlsPeapCertInterface::RunL()
 
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
+				iParent->complete_get_matching_certificates(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 							
@@ -1227,7 +1316,7 @@ void CEapTlsPeapCertInterface::RunL()
 
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
+				iParent->complete_get_matching_certificates(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 
@@ -1248,7 +1337,7 @@ void CEapTlsPeapCertInterface::RunL()
 
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
+				iParent->complete_get_matching_certificates(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 							
@@ -1406,7 +1495,7 @@ void CEapTlsPeapCertInterface::RunL()
 
 					m_am_tools->enter_global_mutex();
 					
-					iParent->complete_get_matching_certificates(empty, eap_status_allocation_error); //Failure
+					iParent->complete_get_matching_certificates(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 					
 					m_am_tools->leave_global_mutex();
 					
@@ -1453,7 +1542,7 @@ void CEapTlsPeapCertInterface::RunL()
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1496,7 +1585,7 @@ void CEapTlsPeapCertInterface::RunL()
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_illegal_certificate); //Failure
+				iParent->complete_read_own_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_certificate)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 
@@ -1521,7 +1610,7 @@ void CEapTlsPeapCertInterface::RunL()
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1557,7 +1646,7 @@ void CEapTlsPeapCertInterface::RunL()
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1574,7 +1663,7 @@ void CEapTlsPeapCertInterface::RunL()
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1635,7 +1724,7 @@ void CEapTlsPeapCertInterface::RunL()
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1686,7 +1775,7 @@ void CEapTlsPeapCertInterface::RunL()
 				m_am_tools->enter_global_mutex();
 				
 				// Note that parent handles cert deletion from now on.
-				iParent->complete_read_own_certificate(iUserCertChain, eap_status_illegal_certificate);
+				iParent->complete_read_own_certificate(iUserCertChain, EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_certificate));
 
 				m_am_tools->leave_global_mutex();
 
@@ -1711,7 +1800,7 @@ void CEapTlsPeapCertInterface::RunL()
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1748,7 +1837,7 @@ void CEapTlsPeapCertInterface::RunL()
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1833,7 +1922,7 @@ void CEapTlsPeapCertInterface::RunL()
 								
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_own_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				
@@ -1851,7 +1940,7 @@ void CEapTlsPeapCertInterface::RunL()
 			{
 				if(iUserCertChain.Count() == 0)
 				{
-					iParent->complete_read_own_certificate(iUserCertChain, eap_status_ca_certificate_unknown);
+					iParent->complete_read_own_certificate(iUserCertChain, EAP_STATUS_RETURN(m_am_tools, eap_status_ca_certificate_unknown));
 					break;
 				}
 			
@@ -1894,7 +1983,7 @@ void CEapTlsPeapCertInterface::RunL()
 								RPointerArray<CX509Certificate> empty;
 								m_am_tools->enter_global_mutex();
 								
-								iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+								iParent->complete_read_own_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 								
 								m_am_tools->leave_global_mutex();
 				
@@ -1908,7 +1997,7 @@ void CEapTlsPeapCertInterface::RunL()
 				
 								m_am_tools->enter_global_mutex();
 								
-								iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+								iParent->complete_read_own_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 								
 								m_am_tools->leave_global_mutex();				
 
@@ -1922,7 +2011,7 @@ void CEapTlsPeapCertInterface::RunL()
 								
 								m_am_tools->enter_global_mutex();
 								
-								iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+								iParent->complete_read_own_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 								
 								m_am_tools->leave_global_mutex();
 				
@@ -1937,7 +2026,7 @@ void CEapTlsPeapCertInterface::RunL()
 								RPointerArray<CX509Certificate> empty;
 								m_am_tools->enter_global_mutex();
 								
-								iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+								iParent->complete_read_own_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 								
 								m_am_tools->leave_global_mutex();				
 							
@@ -1960,7 +2049,7 @@ void CEapTlsPeapCertInterface::RunL()
 								
 								m_am_tools->enter_global_mutex();
 								
-								iParent->complete_read_own_certificate(empty, eap_status_allocation_error); //Failure
+								iParent->complete_read_own_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 								
 								m_am_tools->leave_global_mutex();
 				
@@ -2013,7 +2102,7 @@ void CEapTlsPeapCertInterface::RunL()
 					
 					m_am_tools->enter_global_mutex();
 					
-					iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
+					iParent->complete_read_ca_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 					
 					m_am_tools->leave_global_mutex();
 				
@@ -2060,7 +2149,7 @@ void CEapTlsPeapCertInterface::RunL()
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_ca_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2102,7 +2191,7 @@ void CEapTlsPeapCertInterface::RunL()
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_ca_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2126,7 +2215,7 @@ void CEapTlsPeapCertInterface::RunL()
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_ca_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2168,7 +2257,7 @@ void CEapTlsPeapCertInterface::RunL()
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_ca_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2185,7 +2274,7 @@ void CEapTlsPeapCertInterface::RunL()
 				
 				m_am_tools->enter_global_mutex();
 				
-				iParent->complete_read_ca_certificate(empty, eap_status_allocation_error); //Failure
+				iParent->complete_read_ca_certificate(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error)); //Failure
 				
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2221,7 +2310,7 @@ void CEapTlsPeapCertInterface::RunL()
 				
 				m_am_tools->enter_global_mutex();
 
-				iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
+				iParent->complete_validate_chain(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_ca_certificate_unknown)); //Failure.
 
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2289,7 +2378,7 @@ void CEapTlsPeapCertInterface::RunL()
 
 				m_am_tools->enter_global_mutex();
 
-				iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
+				iParent->complete_validate_chain(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_ca_certificate_unknown)); //Failure.
 
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2314,7 +2403,7 @@ void CEapTlsPeapCertInterface::RunL()
 					
 					m_am_tools->enter_global_mutex();
 
-					iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
+					iParent->complete_validate_chain(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_ca_certificate_unknown)); //Failure.
 
 					m_am_tools->leave_global_mutex();
 					break;
@@ -2351,7 +2440,7 @@ void CEapTlsPeapCertInterface::RunL()
 				
 				m_am_tools->enter_global_mutex();
 
-				iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
+				iParent->complete_validate_chain(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_ca_certificate_unknown)); //Failure.
 
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2367,7 +2456,7 @@ void CEapTlsPeapCertInterface::RunL()
 				
 				m_am_tools->enter_global_mutex();
 
-				iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
+				iParent->complete_validate_chain(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_ca_certificate_unknown)); //Failure.
 
 				m_am_tools->leave_global_mutex();
 				break;
@@ -2388,7 +2477,7 @@ void CEapTlsPeapCertInterface::RunL()
 					
 					m_am_tools->enter_global_mutex();
 
-					iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
+					iParent->complete_validate_chain(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_ca_certificate_unknown)); //Failure.
 
 					m_am_tools->leave_global_mutex();
 					break;
@@ -2414,7 +2503,7 @@ void CEapTlsPeapCertInterface::RunL()
 					
 					m_am_tools->enter_global_mutex();
 
-					iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
+					iParent->complete_validate_chain(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_ca_certificate_unknown)); //Failure.
 
 					m_am_tools->leave_global_mutex();
 					break;
@@ -2440,7 +2529,7 @@ void CEapTlsPeapCertInterface::RunL()
 					
 					m_am_tools->enter_global_mutex();
 
-					iParent->complete_validate_chain(empty, eap_status_ca_certificate_unknown); //Failure.
+					iParent->complete_validate_chain(empty, EAP_STATUS_RETURN(m_am_tools, eap_status_ca_certificate_unknown)); //Failure.
 
 					m_am_tools->leave_global_mutex();
 					break;
@@ -2505,9 +2594,16 @@ void CEapTlsPeapCertInterface::RunL()
 			{ 
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				RInteger tmp;
-				iParent->complete_sign(tmp, tmp, eap_status_key_error);
+				iParent->complete_sign(tmp, tmp, EAP_STATUS_RETURN(m_am_tools, eap_status_key_error));
 				break;
 			}
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("SignL: iKeyIdentifier"),
+				iKeyIdentifier.Ptr(),
+				iKeyIdentifier.Length()));
 			
 			iKeyFilter->iKeyId = iKeyIdentifier;
 			iKeyFilter->iPolicyFilter = TCTKeyAttributeFilter::EUsableKeys;			
@@ -2528,11 +2624,11 @@ void CEapTlsPeapCertInterface::RunL()
 				TRACE_FLAGS_DEFAULT,
 				(EAPL("CEapTlsPeapCertInterface::RunL(): ESignList, iKeyInfos.Count=%d\n"),
 				iKeyInfos.Count()));
-				
+
 			if(iKeyInfos.Count() <= 0)				
 			{
 				RInteger tmp;
-				iParent->complete_sign(tmp, tmp, eap_status_key_error);
+				iParent->complete_sign(tmp, tmp, EAP_STATUS_RETURN(m_am_tools, eap_status_user_certificate_unknown)); // Failure
 				break;
 			}
 
@@ -2571,7 +2667,7 @@ void CEapTlsPeapCertInterface::RunL()
 			if(iKeyInfos.Count() <= 0)				
 			{
 				RInteger tmp;
-				iParent->complete_sign(tmp, tmp, eap_status_key_error);
+				iParent->complete_sign(tmp, tmp, EAP_STATUS_RETURN(m_am_tools, eap_status_user_certificate_unknown)); // Failure
 				break;
 			}
 
@@ -2609,7 +2705,7 @@ void CEapTlsPeapCertInterface::RunL()
 			if(iKeyInfos.Count() <= 0)				
 			{
 				RInteger tmp;
-				iParent->complete_sign(tmp, tmp, eap_status_key_error);
+				iParent->complete_sign(tmp, tmp, EAP_STATUS_RETURN(m_am_tools, eap_status_user_certificate_unknown)); // Failure
 				break;
 			}
 
@@ -2660,7 +2756,7 @@ void CEapTlsPeapCertInterface::RunL()
 			{ 
 				EAP_TRACE_ERROR(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("ERROR: Out of memory in EAP-TLS.\n")));
 				TBuf8<1> tmp;
-				iParent->complete_decrypt(tmp, eap_status_key_error);
+				iParent->complete_decrypt(tmp, EAP_STATUS_RETURN(m_am_tools, eap_status_key_error));
 				break;
 			}
 			
@@ -2687,7 +2783,7 @@ void CEapTlsPeapCertInterface::RunL()
 			if(iKeyInfos.Count() <= 0)				
 			{
 				TBuf8<1> tmp;
-				iParent->complete_decrypt(tmp, eap_status_key_error);
+				iParent->complete_decrypt(tmp, EAP_STATUS_RETURN(m_am_tools, eap_status_key_error));
 				break;
 			}
 

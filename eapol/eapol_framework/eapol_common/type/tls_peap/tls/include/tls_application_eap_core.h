@@ -29,6 +29,29 @@
 #include "tls_peap_tlv_payloads.h"
 #include "eap_master_session_key.h"
 #include "eap_diameter_payloads.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_TLS_APPLICATION_EAP_CORE_H)
+	#define EAP_CLASS_VISIBILITY_TLS_APPLICATION_EAP_CORE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H 
+	#define EAP_C_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H 
+	#define EAP_FUNC_EXPORT_TLS_APPLICATION_EAP_CORE_H 
+	#define EAP_C_FUNC_EXPORT_TLS_APPLICATION_EAP_CORE_H 
+#elif defined(EAP_EXPORT_TLS_APPLICATION_EAP_CORE_H)
+	#define EAP_CLASS_VISIBILITY_TLS_APPLICATION_EAP_CORE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_TLS_APPLICATION_EAP_CORE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_TLS_APPLICATION_EAP_CORE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_TLS_APPLICATION_EAP_CORE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_TLS_APPLICATION_EAP_CORE_H 
+	#define EAP_C_FUNC_EXPORT_TLS_APPLICATION_EAP_CORE_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 class abs_tls_base_application_c;
 class abs_eap_am_tools_c;
@@ -40,7 +63,7 @@ class eap_diameter_payloads_c;
 
 
 /// The tls_application_eap_core_c class is a implementation of tls_base_application_c.
-class EAP_EXPORT tls_application_eap_core_c
+class EAP_CLASS_VISIBILITY_TLS_APPLICATION_EAP_CORE_H tls_application_eap_core_c
 : public tls_base_application_c
 , public abs_eap_core_c
 {
@@ -174,31 +197,31 @@ private:
 	 * The set_is_valid() function sets the state of the object valid.
 	 * The creator of this object calls this function after it is initialized. 
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H void set_is_valid();
 
-	EAP_FUNC_IMPORT eap_status_e create_eap_success_failure_in_forward_to_tunnel(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e create_eap_success_failure_in_forward_to_tunnel(
 		const eap_am_network_id_c * const receive_network_id,
 		const eap_code_value_e forwarded_eap_code,
 		const u8_t received_eap_identifier);
 
-	EAP_FUNC_IMPORT eap_status_e check_ttls_eap_payloads(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e check_ttls_eap_payloads(
 		eap_diameter_payloads_c * const payloads,
 		eap_ttls_tunneled_message_type_e * const message_type);
 
 
-	EAP_FUNC_IMPORT eap_status_e ttls_server_handles_pap_response(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e ttls_server_handles_pap_response(
 		eap_diameter_payloads_c * const payloads,
 		const u8_t received_eap_identifier);
 
-	EAP_FUNC_IMPORT eap_status_e ttls_server_handles_pap_reply_message(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e ttls_server_handles_pap_reply_message(
 		eap_diameter_payloads_c * const payloads,
 		const u8_t received_eap_identifier);
 
-	EAP_FUNC_IMPORT eap_status_e check_ttls_plain_pap_payloads(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e check_ttls_plain_pap_payloads(
 		eap_diameter_payloads_c * const payloads,
 		eap_ttls_tunneled_message_type_e * const message_type);
 
-	EAP_FUNC_IMPORT eap_status_e handle_ttls_plain_pap_payloads(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e handle_ttls_plain_pap_payloads(
 		eap_diameter_payloads_c * const payloads,
 		const eap_ttls_tunneled_message_type_e message_type,
 		const u8_t received_eap_identifier);
@@ -206,69 +229,69 @@ private:
 
 #if defined(EAP_USE_TTLS_PLAIN_MS_CHAP_V2_HACK)
 
-	EAP_FUNC_IMPORT eap_status_e create_ttls_diameter_avp(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e create_ttls_diameter_avp(
 		eap_variable_data_c * const avp,
 		const eap_variable_data_c * const data,
 		eap_diameter_avp_code_c code,
 		const bool include_vendor_id);
 
 
-	EAP_FUNC_IMPORT eap_status_e check_ttls_plain_mschapv2_payloads(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e check_ttls_plain_mschapv2_payloads(
 		eap_diameter_payloads_c * const payloads,
 		eap_ttls_tunneled_message_type_e * const message_type);
 
-	EAP_FUNC_IMPORT eap_status_e handle_ttls_plain_mschapv2_payloads(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e handle_ttls_plain_mschapv2_payloads(
 		eap_diameter_payloads_c * const payloads,
 		const eap_ttls_tunneled_message_type_e message_type,
 		const u8_t received_eap_identifier);
 
 
-	EAP_FUNC_IMPORT eap_status_e ttls_server_handles_ms_chapv2_response(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e ttls_server_handles_ms_chapv2_response(
 		eap_diameter_payloads_c * const payloads,
 		const u8_t received_eap_identifier);
 
-	EAP_FUNC_IMPORT eap_status_e ttls_server_handles_ms_chapv2_change_password(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e ttls_server_handles_ms_chapv2_change_password(
 		eap_diameter_payloads_c * const payloads,
 		const u8_t received_eap_identifier);
 
-	EAP_FUNC_IMPORT eap_status_e ttls_client_handles_ms_chapv2_success(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e ttls_client_handles_ms_chapv2_success(
 		eap_diameter_payloads_c * const payloads,
 		const u8_t received_eap_identifier);
 
-	EAP_FUNC_IMPORT eap_status_e ttls_client_handles_ms_chapv2_error(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e ttls_client_handles_ms_chapv2_error(
 		eap_diameter_payloads_c * const payloads,
 		const u8_t received_eap_identifier);
 
 
-	EAP_FUNC_IMPORT eap_status_e send_ttls_ms_chapv2_packet(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e send_ttls_ms_chapv2_packet(
 		eap_header_wr_c * const sent_eap_packet);
 
 
-	EAP_FUNC_IMPORT eap_status_e ttls_tunneled_message_state_process_identity_response(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e ttls_tunneled_message_state_process_identity_response(
 		eap_header_wr_c * const sent_eap_packet);
 
-	EAP_FUNC_IMPORT eap_status_e ttls_tunneled_message_state_process_response(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e ttls_tunneled_message_state_process_response(
 		eap_header_wr_c * const sent_eap_packet);
 
-	EAP_FUNC_IMPORT eap_status_e ttls_tunneled_message_state_process_change_password_response(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e ttls_tunneled_message_state_process_change_password_response(
 		eap_header_wr_c * const sent_eap_packet);
 
-	EAP_FUNC_IMPORT eap_status_e ttls_tunneled_message_state_process_identity_request(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e ttls_tunneled_message_state_process_identity_request(
 		eap_header_wr_c * const sent_eap_packet);
 
-	EAP_FUNC_IMPORT eap_status_e ttls_tunneled_message_state_process_challenge_request(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e ttls_tunneled_message_state_process_challenge_request(
 		eap_header_wr_c * const sent_eap_packet);
 
-	EAP_FUNC_IMPORT eap_status_e ttls_tunneled_message_state_process_success_request(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e ttls_tunneled_message_state_process_success_request(
 		eap_header_wr_c * const sent_eap_packet);
 
-	EAP_FUNC_IMPORT eap_status_e ttls_tunneled_message_state_complete_success_request(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e ttls_tunneled_message_state_complete_success_request(
 		eap_header_wr_c * const sent_eap_packet);
 
-	EAP_FUNC_IMPORT eap_status_e ttls_tunneled_message_state_process_error_request(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e ttls_tunneled_message_state_process_error_request(
 		eap_header_wr_c * const sent_eap_packet);
 
-	EAP_FUNC_IMPORT eap_status_e ttls_tunneled_message_state_complete_error_request(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e ttls_tunneled_message_state_complete_error_request(
 		eap_header_wr_c * const sent_eap_packet);
 
 
@@ -281,7 +304,7 @@ private:
 	 * @param received_eap_identifier is the EAP-identifier field of the PEAP packet.
 	 * @param forwarded_eap_packet includes created EAP-packet that is forwarded to eap_core_c object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e packet_process_ttls(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e packet_process_ttls(
 		eap_variable_data_c * const received_eap_message,
 		const u8_t received_eap_identifier,
 		u32_t * const eap_packet_length);
@@ -292,7 +315,7 @@ private:
 	 * @param received_eap_identifier is the EAP-identifier field of the PEAP packet.
 	 * @param forwarded_eap_packet includes created EAP-packet that is forwarded to eap_core_c object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e packet_process_xp_peap_v0(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e packet_process_xp_peap_v0(
 		eap_variable_data_c * const packet,
 		const u8_t received_eap_identifier,
 		u32_t * const eap_packet_length);
@@ -300,15 +323,15 @@ private:
 	/**
 	 * This function processes the received packet of PEAPv1.
 	 */
-	EAP_FUNC_IMPORT eap_status_e packet_process_peap_v1(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e packet_process_peap_v1(
 		eap_variable_data_c * const received_eap_message,
 		const u8_t received_eap_identifier,
 		u32_t * const eap_packet_length);
 
-	EAP_FUNC_IMPORT eap_status_e finish_successfull_authentication_peap_v2(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e finish_successfull_authentication_peap_v2(
 		const u8_t received_eap_identifier);
 
-	EAP_FUNC_IMPORT eap_status_e store_nonce_peap_v2(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e store_nonce_peap_v2(
 		const bool is_client_when_true,
 		peap_tlv_payloads_c * const peapv2_tlv_payloads);
 
@@ -318,7 +341,7 @@ private:
 	 * @param received_eap_identifier is the EAP-identifier field of the PEAP packet.
 	 * @param forwarded_eap_packet includes created EAP-packet that is forwarded to eap_core_c object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e packet_process_peap_v2(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e packet_process_peap_v2(
 		eap_variable_data_c * const packet,
 		const u8_t received_eap_identifier,
 		u32_t * const eap_packet_length);
@@ -326,85 +349,85 @@ private:
 	/**
 	 * This function verifies the previously received and parsed packet of PEAPv2.
 	 */
-	EAP_FUNC_IMPORT eap_status_e verify_tunneled_acknowledge_peap_v2();
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e verify_tunneled_acknowledge_peap_v2();
 
 
 	/**
 	 * This function sends XP-PEAPv0 protected EAP-Success or EAP-Failure messages.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_tunneled_acknowledge_xp_peap_v0(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e send_tunneled_acknowledge_xp_peap_v0(
 		const eap_code_value_e result_eap_code,
 		const u8_t eap_identifier);
 
 	/**
 	 * This function sends PEAPv2 protected EAP-Success or EAP-Failure messages.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_tunneled_acknowledge_peap_v2(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e send_tunneled_acknowledge_peap_v2(
 		const eap_code_value_e result_eap_code,
 		const u8_t eap_identifier);
 
 
-	EAP_FUNC_IMPORT eap_status_e create_nonce(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e create_nonce(
 		eap_variable_data_c * const nonce);
 
-	EAP_FUNC_IMPORT eap_status_e create_nonce_peap_v2(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e create_nonce_peap_v2(
 		const bool create_client_nonce_when_true);
 
-	EAP_FUNC_IMPORT eap_status_e create_compound_mac_key_peap_v2(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e create_compound_mac_key_peap_v2(
 		const bool create_client_CMK_when_true);
 
-	EAP_FUNC_IMPORT eap_status_e create_compound_session_key_peap_v2();
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e create_compound_session_key_peap_v2();
 
 
-	EAP_FUNC_IMPORT eap_status_e create_crypto_binding_compound_mac(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e create_crypto_binding_compound_mac(
 		const eap_variable_data_c * const peap_v2_CMK,
 		const tls_peap_tlv_header_c * const crypto_binding_tlv,
 		eap_variable_data_c * const mac_data);
 
 
-	EAP_FUNC_IMPORT eap_status_e create_result_tlv_message(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e create_result_tlv_message(
 		eap_buf_chain_wr_c * const packet,
 		const eap_code_value_e result_eap_code,
 		const u8_t eap_identifier,
 		const tls_peap_tlv_type_e tlv_type);
 
-	EAP_FUNC_IMPORT eap_status_e create_intermediate_result_tlv_message(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e create_intermediate_result_tlv_message(
 		eap_buf_chain_wr_c * const packet,
 		const eap_code_value_e result_eap_code,
 		const u8_t eap_identifier);
 
-	EAP_FUNC_IMPORT eap_status_e create_eap_payload_tlv_message(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e create_eap_payload_tlv_message(
 		eap_buf_chain_wr_c * const packet,
 		const eap_header_wr_c * const sent_eap_packet,
 		const u8_t eap_identifier);
 
-	EAP_FUNC_IMPORT eap_status_e create_crypto_binding_tlv_message(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e create_crypto_binding_tlv_message(
 		eap_buf_chain_wr_c * const packet,
 		const eap_code_value_e result_eap_code,
 		const u8_t eap_identifier,
 		const eap_variable_data_c * const nonce,
 		const u8_t received_version);
 
-	EAP_FUNC_IMPORT eap_status_e create_eap_diameter_avp_message(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e create_eap_diameter_avp_message(
 		eap_buf_chain_wr_c * const packet,
 		const eap_header_wr_c * const sent_eap_packet,
 		const u8_t eap_identifier);
 
-	EAP_FUNC_IMPORT eap_status_e parse_generic_payload(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e parse_generic_payload(
 		const tls_peap_tlv_type_e current_payload,
 		const tls_peap_tlv_header_c * const payload,
 		peap_tlv_payloads_c * const p_peap_tlv_payloads);
 
-	EAP_FUNC_IMPORT eap_status_e parse_peap_tlv_payload(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e parse_peap_tlv_payload(
 		u8_t * const buffer,
 		u32_t * const buffer_length,
 		peap_tlv_payloads_c * const peap_tlv_payloads);
 
-	EAP_FUNC_IMPORT void trace_tunneled_packet(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H void trace_tunneled_packet(
 		eap_const_string prefix,
 		const eap_header_wr_c * const eap_packet);
 
-	EAP_FUNC_IMPORT eap_status_e packet_forward_to_tunnel(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e packet_forward_to_tunnel(
 		const eap_am_network_id_c * const receive_network_id,
 		eap_header_wr_c * const forwarded_eap_packet,
 		const u32_t eap_packet_length);
@@ -428,7 +451,7 @@ public:
 	/**
 	 * The destructor of the tls_application_eap_core_c class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~tls_application_eap_core_c();
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H virtual ~tls_application_eap_core_c();
 
 	/**
 	 * The constructor of the tls_application_eap_core_c class simply initializes the attributes.
@@ -437,7 +460,7 @@ public:
 	 * @param eap_core is pointer to EAP-core object.
 	 * The tls_application_eap_core_c object sends packets to the network using m_type_partner object.
 	 */
-	EAP_FUNC_IMPORT tls_application_eap_core_c(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H tls_application_eap_core_c(
 		abs_eap_am_tools_c * const tools,
 		eap_core_c * const eap_core,
 		const bool free_eap_core,
@@ -448,7 +471,7 @@ public:
 	/**
 	 * This function sets the PEAP version.
 	 */
-	EAP_FUNC_IMPORT void set_peap_version(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H void set_peap_version(
 		const peap_version_e peap_version,
 		const bool use_tppd_tls_peap,
 		const bool use_tppd_peapv1_acknowledge_hack);
@@ -458,7 +481,7 @@ public:
 	 * object is successfully executed. During the function call the object 
 	 * could query the configuration. Each derived class must define this function.
 	 */
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e configure();
 
 	/**
 	 * The shutdown() function is called before the destructor of the 
@@ -466,14 +489,14 @@ public:
 	 * could shutdown the operations, for example cancel timers.
 	 * Each derived class must define this function.
 	 */
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e shutdown();
 
 	/**
 	 * This function processes the received packet.
 	 * @param packet includes the received packet.
 	 * @param received_eap_identifier is the EAP-identifier field of the PEAP packet.
 	 */
-	EAP_FUNC_IMPORT eap_status_e packet_process(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e packet_process(
 		eap_variable_data_c * const packet,
 		const u8_t received_eap_identifier);
 
@@ -482,7 +505,7 @@ public:
 	 * @param receive_network_id includes the addresses (network identity) and packet type.
 	 * @param received_eap_identifier is the EAP-Identifier of the received EAP-Success packet.
 	 */
-	EAP_FUNC_IMPORT eap_status_e plain_eap_success_failure_packet_received(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e plain_eap_success_failure_packet_received(
 		const eap_am_network_id_c * const receive_network_id,
 		const eap_code_value_e received_eap_code,
 		const u8_t received_eap_identifier);
@@ -493,14 +516,14 @@ public:
 	 * @param receive_network_id includes the addresses (network identity) and packet type.
 	 * @param received_eap_identifier is the EAP-Identifier of the received EAP-Success packet.
 	 */
-	EAP_FUNC_IMPORT eap_status_e empty_ack_packet_received(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e empty_ack_packet_received(
 		const eap_am_network_id_c * const receive_network_id,
 		const u8_t received_eap_identifier);
 
 	/**
 	 * This function starts TTLS tunneled authentication.
 	 */
-	EAP_FUNC_IMPORT eap_status_e start_ttls_tunneled_authentication(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e start_ttls_tunneled_authentication(
 		const eap_am_network_id_c * const receive_network_id,
 		const u8_t received_eap_identifier);
 
@@ -509,7 +532,7 @@ public:
 	 * If object initialization fails this function must return false.
 	 * @return This function returns the validity of this object.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H bool get_is_valid();
 
 	/**
 	 * This function must reset the state of object to same as 
@@ -518,13 +541,13 @@ public:
 	 * If object reset fails this function must return corresponding error status.
 	 * @return This function returns the status of reset operation.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e reset();
 
 
 	/**
 	 * This function starts the tunneled EAP-type within PEAP.
 	 */
-	EAP_FUNC_IMPORT eap_status_e start_peap_tunneled_authentication(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e start_peap_tunneled_authentication(
 		const eap_am_network_id_c * const receive_network_id,
 		const bool is_client_when_true,
 		const u8_t received_eap_identifier,
@@ -532,7 +555,7 @@ public:
 		const bool tls_peap_server_authenticates_client_action);
 
 	/// @see abs_eap_core_c::packet_send().
-	EAP_FUNC_IMPORT eap_status_e packet_send(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e packet_send(
 		const eap_am_network_id_c * const network_id,
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t header_offset,
@@ -540,12 +563,12 @@ public:
 		const u32_t buffer_length);
 
 	/// @see abs_eap_core_c::get_header_offset().
-	EAP_FUNC_IMPORT u32_t get_header_offset(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H u32_t get_header_offset(
 		u32_t * const MTU,
 		u32_t * const trailer_length);
 
 	/// @see abs_eap_core_c::load_module().
-	EAP_FUNC_IMPORT eap_status_e load_module(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e load_module(
 		const eap_type_value_e type,
 		const eap_type_value_e /* tunneling_type */,
 		abs_eap_base_type_c * const partner,
@@ -554,95 +577,95 @@ public:
 		const eap_am_network_id_c * const receive_network_id);
 
 	/// @see abs_eap_core_c::unload_module().
-	EAP_FUNC_IMPORT eap_status_e unload_module(const eap_type_value_e type);
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e unload_module(const eap_type_value_e type);
 
 	/// @see abs_eap_core_c::restart_authentication().
-	EAP_FUNC_IMPORT eap_status_e restart_authentication(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e restart_authentication(
 		const eap_am_network_id_c * const receive_network_id,
 		const bool is_client_when_true,
 		const bool force_clean_restart,
 		const bool from_timer = false);
 
 	/// @see abs_eap_core_c::packet_data_crypto_keys().
-	EAP_FUNC_IMPORT eap_status_e packet_data_crypto_keys(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e packet_data_crypto_keys(
 		const eap_am_network_id_c * const send_network_id,
 		const eap_master_session_key_c * const master_session_key
 		);
 
 	/// @see abs_eap_core_c::read_configure().
-	EAP_FUNC_IMPORT eap_status_e read_configure(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e read_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
 	/// @see abs_eap_core_c::write_configure().
-	EAP_FUNC_IMPORT eap_status_e write_configure(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e write_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
 	/// @see abs_eap_core_c::state_notification().
-	EAP_FUNC_IMPORT void state_notification(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H void state_notification(
 		const abs_eap_state_notification_c * const state);
 
 	/// @see abs_eap_core_c::asynchronous_init_remove_eap_session().
-	EAP_FUNC_IMPORT eap_status_e asynchronous_init_remove_eap_session(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e asynchronous_init_remove_eap_session(
 		const eap_am_network_id_c * const send_network_id);
 
 	/// @see abs_eap_core_c::set_timer().
-	EAP_FUNC_IMPORT eap_status_e set_timer(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e set_timer(
 		abs_eap_base_timer_c * const initializer, 
 		const u32_t id, 
 		void * const data,
 		const u32_t p_time_ms);
 
 	/// @see abs_eap_core_c::cancel_timer().
-	EAP_FUNC_IMPORT eap_status_e cancel_timer(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e cancel_timer(
 		abs_eap_base_timer_c * const initializer, 
 		const u32_t id);
 
 	/// @see abs_eap_core_c::check_is_valid_eap_type().
-	EAP_FUNC_IMPORT eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);
 
 	/// @see abs_eap_core_c::get_eap_type_list().
-	EAP_FUNC_IMPORT eap_status_e get_eap_type_list(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e get_eap_type_list(
 		eap_array_c<eap_type_value_e> * const eap_type_list);
 
 	/// @see tls_base_application_c::get_application_partner().
-	EAP_FUNC_IMPORT abs_tls_base_application_c * get_application_partner();
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H abs_tls_base_application_c * get_application_partner();
 
 	/// @see tls_base_application_c::set_application_partner().
-	EAP_FUNC_IMPORT eap_status_e set_application_partner(abs_tls_base_application_c * const partner);
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e set_application_partner(abs_tls_base_application_c * const partner);
 
 	/// @see tls_base_application_c::peap_tunnel_ready().
-	EAP_FUNC_IMPORT eap_status_e peap_tunnel_ready();
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e peap_tunnel_ready();
 
-	EAP_FUNC_IMPORT eap_status_e add_rogue_ap(eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list);
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e add_rogue_ap(eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list);
 
 	// This is documented in tls_base_application_c::set_session_timeout().
-	EAP_FUNC_IMPORT eap_status_e set_session_timeout(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e set_session_timeout(
 		const u32_t session_timeout_ms);
 
-	EAP_FUNC_IMPORT void set_tunneled_state(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H void set_tunneled_state(
 		const tls_session_type_e tls_session_type);
 
 	// This is commented in tls_base_record_c::read_authority_identity().
-	EAP_FUNC_IMPORT eap_status_e read_authority_identity(eap_variable_data_c * const authority_identity_payload);
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e read_authority_identity(eap_variable_data_c * const authority_identity_payload);
 
 	// This is commented in tls_base_record_c::save_user_authorization_pac_opaque().
-	EAP_FUNC_IMPORT eap_status_e save_user_authorization_pac_opaque(const tls_extension_c * const extension);
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e save_user_authorization_pac_opaque(const tls_extension_c * const extension);
 
 	// This is commented in tls_base_record_c::query_tunnel_PAC().
-	EAP_FUNC_IMPORT eap_status_e query_tunnel_PAC(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e query_tunnel_PAC(
 		const eap_fast_variable_data_c * const in_A_ID_TLV);
 
 	// This is commented in tls_base_record_c::cancel_query_tunnel_PAC().
-	EAP_FUNC_IMPORT eap_status_e cancel_query_tunnel_PAC();
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e cancel_query_tunnel_PAC();
 
-	EAP_FUNC_IMPORT eap_status_e complete_query_ttls_pap_username_and_password(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e complete_query_ttls_pap_username_and_password(
 		const eap_variable_data_c * const ttls_pap_username,
 		const eap_variable_data_c * const ttls_pap_password,
 		const eap_status_e query_result);
 
-	EAP_FUNC_IMPORT eap_status_e complete_verify_ttls_pap_username_and_password(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e complete_verify_ttls_pap_username_and_password(
 		const eap_status_e authentication_result,
 		const eap_variable_data_c * const ttls_pap_reply_message);
 
@@ -650,7 +673,7 @@ public:
 	 * This function is called when TLS-Alert message is received.
 	 * Adaptation module could record this event.
 	 */
-	EAP_FUNC_IMPORT eap_status_e alert_received(
+	EAP_FUNC_VISIBILITY_TLS_APPLICATION_EAP_CORE_H eap_status_e alert_received(
 		const tls_alert_level_e alert_level,
 		const tls_alert_description_e alert_description);
 
