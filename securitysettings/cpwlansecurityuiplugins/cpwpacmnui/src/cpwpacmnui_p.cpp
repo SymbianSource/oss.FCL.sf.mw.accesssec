@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: tr1cfwln#13 %
+ * %version: tr1cfwln#14 %
  */
  
 // User Includes
@@ -121,6 +121,8 @@ CpSettingFormItemData* CpWpaCmnUiPrivate::createUi(
     mCmnUi = new CpSettingFormItemData(HbDataFormModelItem::GroupItem,
             hbTrId("txt_occ_subhead_security_settings"));
 
+    mCmnUi->setContentWidgetData("objectName", "CpWpaCmUi");
+    
     //LoadUi based on the security mode
     loadUi();
 
@@ -155,18 +157,19 @@ CpSettingFormItemData* CpWpaCmnUiPrivate::createWpaTypeSelector()
     // In case of the object exists just update the data
     if (!mWpaEapItem) {
         mWpaEapItem = new CpSettingFormItemData(
-                HbDataFormModelItem::ComboBoxItem, hbTrId(
-                        "txt_occ_setlabel_wpawpa2"), mCmnUi);
+            HbDataFormModelItem::ComboBoxItem, 
+            hbTrId("txt_occ_setlabel_wpawpa2"));
 
         QStringList wpatype;
         wpatype.append(hbTrId("txt_occ_setlabel_wpawpa2_val_eap"));
         wpatype.append(hbTrId("txt_occ_setlabel_wpawpa2_val_preshared_key"));
 
+        mWpaEapItem->setContentWidgetData("objectName", "CpWpaCmnUiTypeSelector");
         mWpaEapItem->setContentWidgetData("items", wpatype);
 
         mDataHelper.addConnection(mWpaEapItem,
-                SIGNAL(currentIndexChanged(int)), this,
-                SLOT(wpaTypeChanged(int)));
+            SIGNAL(currentIndexChanged(int)), this,
+            SLOT(wpaTypeChanged(int)));
 
         mCmnUi->appendChild(mWpaEapItem);
     }
@@ -188,16 +191,19 @@ CpSettingFormItemData* CpWpaCmnUiPrivate::createPskEditor()
 
     if (!mPskKeyText) {
         mPskKeyText = new CpSettingFormItemData(
-                HbDataFormModelItem::TextItem, hbTrId(
-                        "txt_occ_setlabel_preshared_key"), mCmnUi);
+            HbDataFormModelItem::TextItem, 
+            hbTrId("txt_occ_setlabel_preshared_key"));
 
+        mPskKeyText->setContentWidgetData("objectName", "CpWpaCmnUiPskEditor");
         mPskKeyText->setContentWidgetData("echoMode", HbLineEdit::PasswordEchoOnEdit);
         mPskKeyText->setContentWidgetData("smileysEnabled", "false");
-        mDataHelper.addConnection(mPskKeyText, SIGNAL( editingFinished ()),
-                this, SLOT(pskKeyChanged() ));
+        mDataHelper.addConnection(
+            mPskKeyText, SIGNAL( editingFinished ()),
+            this, SLOT(pskKeyChanged() ));
         
-        mDataHelper.connectToForm(SIGNAL(itemShown (const QModelIndex &) ), 
-                   this, SLOT(setEditorPreferences(const QModelIndex &)));
+        mDataHelper.connectToForm(
+            SIGNAL(itemShown (const QModelIndex &) ), 
+            this, SLOT(setEditorPreferences(const QModelIndex &)));
 
         mCmnUi->appendChild(mPskKeyText);
     }
@@ -228,6 +234,7 @@ CpSettingFormItemData* CpWpaCmnUiPrivate::createEapSelector()
             list << i->localizationId();
         }
         
+        mEapPlugins->setContentWidgetData("objectName", "CpWpaCmnUiEapTypeSelector");   
         mEapPlugins->setContentWidgetData("items", list);
 
         mDataHelper.addConnection(mEapPlugins,
@@ -253,9 +260,12 @@ EapEntryItemData* CpWpaCmnUiPrivate::createEapEntryItem()
     OstTraceFunctionEntry1( CPWPACMNUIPRIVATE_CREATEEAPENTRYITEM_ENTRY, this );
 
     if (!mEapEntry) {
-        mEapEntry = new EapEntryItemData(this, mDataHelper, hbTrId(
-                "txt_occ_button_eap_type_settings"));
+        mEapEntry = new EapEntryItemData(
+            this, 
+            mDataHelper, 
+            hbTrId("txt_occ_button_eap_type_settings"));
 
+        mEapEntry->setContentWidgetData("objectName", "CpWpaCmnUiEapEntryItem");
         mCmnUi->appendChild(mEapEntry);
     }
 
@@ -274,9 +284,12 @@ CpSettingFormItemData* CpWpaCmnUiPrivate::createUnencryptedBox()
 
     if (!mUnencryptedConnection) {
         mUnencryptedConnection = new CpSettingFormItemData(
-                HbDataFormModelItem::CheckBoxItem, hbTrId(
-                        "txt_occ_setlabel_unencrypted_connection"), mCmnUi);
+            HbDataFormModelItem::CheckBoxItem, 
+            hbTrId("txt_occ_setlabel_unencrypted_connection"));
 
+        mUnencryptedConnection->setContentWidgetData(
+            "objectName", 
+            "CpWpaCmnUiUnencryptedConnection");
         mUnencryptedConnection->setContentWidgetData("text", hbTrId(
                 "txt_occ_setlabel_unencrypted_connection_val_allowe"));
 
@@ -532,6 +545,7 @@ void CpWpaCmnUiPrivate::showMessageBox(HbMessageBox::MessageBoxType type,
     OstTraceFunctionEntry1( CPWPACMNUIPRIVATE_SHOWMESSAGEBOX_ENTRY, this );
     // Create a message box
     mMessageBox = QSharedPointer<HbMessageBox> (new HbMessageBox(type));
+    mMessageBox->setObjectName("CpWpaCmnUiMessageBox");
     mMessageBox->setText(text);
     mMessageBox->open();
     OstTraceFunctionExit1( CPWPACMNUIPRIVATE_SHOWMESSAGEBOX_EXIT, this );
