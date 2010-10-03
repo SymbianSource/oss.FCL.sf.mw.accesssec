@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 9.1.2 %
+* %version: 9.1.4 %
 */
 
 #ifndef _EAPSIMINTERFACE_H_
@@ -24,6 +24,28 @@
 
 // INCLUDES
 #include <e32base.h>
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPSIMINTERFACE_H)
+	#define EAP_CLASS_VISIBILITY_EAPSIMINTERFACE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPSIMINTERFACE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPSIMINTERFACE_H 
+	#define EAP_FUNC_EXPORT_EAPSIMINTERFACE_H 
+	#define EAP_C_FUNC_EXPORT_EAPSIMINTERFACE_H 
+#elif defined(EAP_EXPORT_EAPSIMINTERFACE_H)
+	#define EAP_CLASS_VISIBILITY_EAPSIMINTERFACE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPSIMINTERFACE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPSIMINTERFACE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPSIMINTERFACE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPSIMINTERFACE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPSIMINTERFACE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPSIMINTERFACE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPSIMINTERFACE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPSIMINTERFACE_H 
+	#define EAP_C_FUNC_EXPORT_EAPSIMINTERFACE_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_tools.h"
 #include "eap_am_type_gsmsim_symbian.h"
 
@@ -34,7 +56,7 @@
 /**
 * Class (active object) that handles the communications with the SIM.
 */
-class CEapSimIsaInterface 
+class EAP_CLASS_VISIBILITY_EAPSIMINTERFACE_H CEapSimIsaInterface 
 : public CActive
 {
 public:
@@ -87,6 +109,8 @@ private:
 	
 	// Creates the MMETel connection and loads the phone module.
 	TInt CreateMMETelConnectionL();
+
+	void DisconnectMMETel();
 
 private:
 

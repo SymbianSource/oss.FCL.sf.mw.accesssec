@@ -26,6 +26,29 @@
 #include "eap_header.h"
 #include "eap_radius_types.h"
 #include "eap_diameter_avp_code.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_RADIUS_ATTRIBUTE_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H 
+	#define EAP_FUNC_EXPORT_EAP_RADIUS_ATTRIBUTE_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAP_RADIUS_ATTRIBUTE_HEADER_H 
+#elif defined(EAP_EXPORT_EAP_RADIUS_ATTRIBUTE_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_RADIUS_ATTRIBUTE_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_RADIUS_ATTRIBUTE_HEADER_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_RADIUS_ATTRIBUTE_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAP_RADIUS_ATTRIBUTE_HEADER_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 /** @file */
 
@@ -56,7 +79,7 @@ const u32_t EAP_RADIUS_MS_MPPE_KEY_DATA_LENGTH = 50ul;
  * @endcode
  *
  */
-class EAP_EXPORT eap_radius_attribute_header_c
+class EAP_CLASS_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H eap_radius_attribute_header_c
 : public eap_general_header_base_c
 {
 private:
@@ -81,38 +104,38 @@ public:
 	//--------------------------------------------------
 
 	// 
-	EAP_FUNC_IMPORT virtual ~eap_radius_attribute_header_c();
+	EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H virtual ~eap_radius_attribute_header_c();
 
 	// 
-	EAP_FUNC_IMPORT eap_radius_attribute_header_c(
+	EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H eap_radius_attribute_header_c(
 		abs_eap_am_tools_c * const tools,
 		void * const header_buffer,
 		const u32_t header_buffer_length);
 
-	EAP_FUNC_IMPORT eap_diameter_avp_code_c get_current_payload() const;
+	EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H eap_diameter_avp_code_c get_current_payload() const;
 
-	EAP_FUNC_IMPORT u16_t get_length() const;
+	EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H u16_t get_length() const;
 
-	EAP_FUNC_IMPORT u32_t get_data_length() const;
+	EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H u32_t get_data_length() const;
 
-	EAP_FUNC_IMPORT static u16_t get_header_length();
+	EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H static u16_t get_header_length();
 
-	EAP_FUNC_IMPORT static u16_t get_max_attribute_data_length();
+	EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H static u16_t get_max_attribute_data_length();
 
-	EAP_FUNC_IMPORT u8_t * get_data_offset(const u32_t offset, const u32_t contignuous_bytes) const;
+	EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H u8_t * get_data_offset(const u32_t offset, const u32_t contignuous_bytes) const;
 
-	EAP_FUNC_IMPORT u8_t * get_next_header() const;
+	EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H u8_t * get_next_header() const;
 
 
-	EAP_FUNC_IMPORT void set_current_payload(const eap_diameter_avp_code_c p_current_payload);
+	EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H void set_current_payload(const eap_diameter_avp_code_c p_current_payload);
 
-	EAP_FUNC_IMPORT void set_data_length(const u16_t p_data_length);
+	EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H void set_data_length(const u16_t p_data_length);
 
-	EAP_FUNC_IMPORT void reset_header(const u16_t data_length);
+	EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H void reset_header(const u16_t data_length);
 
-	EAP_FUNC_IMPORT eap_const_string get_payload_type_string() const;
+	EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H eap_const_string get_payload_type_string() const;
 
-	EAP_FUNC_IMPORT eap_status_e check_header() const;
+	EAP_FUNC_VISIBILITY_EAP_RADIUS_ATTRIBUTE_HEADER_H eap_status_e check_header() const;
 
 	// 
 	//--------------------------------------------------

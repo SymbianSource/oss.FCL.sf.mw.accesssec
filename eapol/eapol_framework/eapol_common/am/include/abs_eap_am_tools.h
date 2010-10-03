@@ -24,6 +24,27 @@
 
 #include "eap_am_types.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABS_EAP_AM_TOOLS_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_AM_TOOLS_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_AM_TOOLS_H 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_AM_TOOLS_H 
+	#define EAP_FUNC_EXPORT_ABS_EAP_AM_TOOLS_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_AM_TOOLS_H 
+#elif defined(EAP_EXPORT_ABS_EAP_AM_TOOLS_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_AM_TOOLS_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_AM_TOOLS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_AM_TOOLS_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_AM_TOOLS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_AM_TOOLS_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_AM_TOOLS_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_AM_TOOLS_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_AM_TOOLS_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_AM_TOOLS_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_AM_TOOLS_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_status.h"
 #include "abs_eap_base_timer.h"
 //#include "eap_am_memory_store_data.h"
@@ -53,7 +74,7 @@ class eap_tlv_message_data_c;
  * Adaptation module creates the eap_am_tools_Y class before it initializes the stack.
  * This prevents the need of global objects.
  */
-class EAP_EXPORT abs_eap_am_tools_c
+class EAP_CLASS_VISIBILITY_ABS_EAP_AM_TOOLS_H abs_eap_am_tools_c
 {
 
 public:
@@ -77,14 +98,14 @@ public:
 	 * Note this function calls also configure() of the allocated tools object.
 	 * The platform specific module must implement this function.
 	 */
-	EAP_FUNC_IMPORT_INTERFACE static abs_eap_am_tools_c * new_abs_eap_am_tools_c();
+	EAP_FUNC_VISIBILITY_ABS_EAP_AM_TOOLS_H static abs_eap_am_tools_c * new_abs_eap_am_tools_c();
 
 	/**
 	 * This function deletes platform specific tools object.
 	 * Note this function calls also shutdown() of the allocated tools object.
 	 * The platform specific module must implement this function.
 	 */
-	EAP_FUNC_IMPORT_INTERFACE static void delete_abs_eap_am_tools_c(abs_eap_am_tools_c * const am_tools);
+	EAP_FUNC_VISIBILITY_ABS_EAP_AM_TOOLS_H static void delete_abs_eap_am_tools_c(abs_eap_am_tools_c * const am_tools);
 
 	/**
 	 * The configure() function is called after the constructor of the 

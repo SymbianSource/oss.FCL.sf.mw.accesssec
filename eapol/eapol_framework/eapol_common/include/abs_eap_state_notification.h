@@ -23,6 +23,27 @@
 #define _ABS_EAP_STATE_NOTIFICATION_H_
 
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABS_EAP_STATE_NOTIFICATION_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_STATE_NOTIFICATION_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_STATE_NOTIFICATION_H 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_STATE_NOTIFICATION_H 
+	#define EAP_FUNC_EXPORT_ABS_EAP_STATE_NOTIFICATION_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_STATE_NOTIFICATION_H 
+#elif defined(EAP_EXPORT_ABS_EAP_STATE_NOTIFICATION_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_STATE_NOTIFICATION_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_STATE_NOTIFICATION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_STATE_NOTIFICATION_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_STATE_NOTIFICATION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_STATE_NOTIFICATION_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_STATE_NOTIFICATION_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_STATE_NOTIFICATION_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_STATE_NOTIFICATION_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_STATE_NOTIFICATION_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_STATE_NOTIFICATION_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_protocol_layer.h"
 #include "eap_header.h"
 
@@ -42,7 +63,7 @@ enum eap_state_notification_generic_e
 /// This class is the interface to state notification class.
 /// This is mostly used for state indications, debugging and protocol testing.
 /// The lower level could get information of the authentication states.
-class EAP_EXPORT abs_eap_state_notification_c
+class EAP_CLASS_VISIBILITY_ABS_EAP_STATE_NOTIFICATION_H abs_eap_state_notification_c
 {
 private:
 	//--------------------------------------------------

@@ -27,6 +27,29 @@
 #include "abs_eap_am_tools.h"
 #include "EapClientIf.h"
 #include <e32math.h>
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPSCHEDULER_H)
+	#define EAP_CLASS_VISIBILITY_EAPSCHEDULER_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPSCHEDULER_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPSCHEDULER_H 
+	#define EAP_FUNC_EXPORT_EAPSCHEDULER_H 
+	#define EAP_C_FUNC_EXPORT_EAPSCHEDULER_H 
+#elif defined(EAP_EXPORT_EAPSCHEDULER_H)
+	#define EAP_CLASS_VISIBILITY_EAPSCHEDULER_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPSCHEDULER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPSCHEDULER_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPSCHEDULER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPSCHEDULER_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPSCHEDULER_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPSCHEDULER_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPSCHEDULER_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPSCHEDULER_H 
+	#define EAP_C_FUNC_EXPORT_EAPSCHEDULER_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 class CEapServer;
 
@@ -39,9 +62,9 @@ class CEapScheduler
 
 public:
 
-	EAP_FUNC_IMPORT static CEapScheduler* NewL();
+	EAP_FUNC_VISIBILITY_EAPSCHEDULER_H static CEapScheduler* NewL();
 
-	EAP_FUNC_IMPORT static TInt LaunchFromClient(const TBuf<KMaxServerExe> Server);
+	EAP_FUNC_VISIBILITY_EAPSCHEDULER_H static TInt LaunchFromClient(const TBuf<KMaxServerExe> Server);
 
 	class TServerStart
 	{
@@ -70,7 +93,7 @@ public:
     static TInt ThreadFunction(TAny* aThreadParms);
 #endif
 
-    EAP_FUNC_IMPORT static TInt ThreadStart(TServerStart& aSignal);
+    EAP_FUNC_VISIBILITY_EAPSCHEDULER_H static TInt ThreadStart(TServerStart& aSignal);
 
     static void ConstructL(TServerStart& aStart);
 

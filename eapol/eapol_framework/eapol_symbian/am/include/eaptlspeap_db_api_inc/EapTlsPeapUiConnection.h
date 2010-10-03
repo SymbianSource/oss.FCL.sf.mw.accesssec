@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 21 %
 */
 
 #ifndef _EAPTLSPEAPUICONNECTION_H_

@@ -26,6 +26,29 @@
 
 #include "eap_tools.h"
 #include "eap_general_header_base.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_TYPE_MSCHAPV2_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_HEADER_H 
+#elif defined(EAP_EXPORT_EAP_TYPE_MSCHAPV2_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_HEADER_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_HEADER_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 enum eap_mschapv2_version
 {
@@ -60,7 +83,7 @@ enum mschapv2_opcode_e
  *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  * @endcode
  */
-class EAP_EXPORT mschapv2_header_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H mschapv2_header_c
 : public eap_general_header_base_c
 {
 private:
@@ -81,30 +104,30 @@ protected:
 
 public:
 
-	EAP_FUNC_IMPORT virtual ~mschapv2_header_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H virtual ~mschapv2_header_c();
 
-	EAP_FUNC_IMPORT mschapv2_header_c(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H mschapv2_header_c(
 		abs_eap_am_tools_c * const tools,
 		void * const header_buffer,
 		const u32_t header_buffer_length);
 
-	EAP_FUNC_IMPORT mschapv2_opcode_e get_opcode() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H mschapv2_opcode_e get_opcode() const;
 
-	EAP_FUNC_IMPORT void set_opcode(const mschapv2_opcode_e p_opcode);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H void set_opcode(const mschapv2_opcode_e p_opcode);
 
-	EAP_FUNC_IMPORT u8_t get_mschapv2_id() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H u8_t get_mschapv2_id() const;
 
-	EAP_FUNC_IMPORT void set_mschapv2_id(u8_t p_id);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H void set_mschapv2_id(u8_t p_id);
 
-	EAP_FUNC_IMPORT u16_t get_ms_length() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H u16_t get_ms_length() const;
 
-	EAP_FUNC_IMPORT void set_ms_length(u16_t p_length);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H void set_ms_length(u16_t p_length);
 
-	EAP_FUNC_IMPORT u8_t * get_data() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H u8_t * get_data() const;
 
-	EAP_FUNC_IMPORT u32_t get_data_length() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H u32_t get_data_length() const;
 
-	EAP_FUNC_IMPORT eap_status_e check_header() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H eap_status_e check_header() const;
 
 }; // class mschapv2_header_c
 
@@ -129,7 +152,7 @@ public:
  *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  * @endcode
  */
-class EAP_EXPORT mschapv2_challenge_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H mschapv2_challenge_c
 : public eap_general_header_base_c
 {
 private:
@@ -149,28 +172,28 @@ protected:
 
 public:
 
-	EAP_FUNC_IMPORT virtual ~mschapv2_challenge_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H virtual ~mschapv2_challenge_c();
 
-	EAP_FUNC_IMPORT mschapv2_challenge_c(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H mschapv2_challenge_c(
 		abs_eap_am_tools_c * const tools,
 		void * const header_buffer,
 		const u32_t header_buffer_length);
 
-	EAP_FUNC_IMPORT static u32_t get_header_minimum_size();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H static u32_t get_header_minimum_size();
 
-	EAP_FUNC_IMPORT eap_status_e check_header() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H eap_status_e check_header() const;
 
-	EAP_FUNC_IMPORT void set_value_size();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H void set_value_size();
 
-	EAP_FUNC_IMPORT const u8_t * get_challenge() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H const u8_t * get_challenge() const;
 
-	EAP_FUNC_IMPORT void set_challenge(const u8_t * const p_challenge);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H void set_challenge(const u8_t * const p_challenge);
 
-	EAP_FUNC_IMPORT const u8_t * get_name() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H const u8_t * get_name() const;
 
-	EAP_FUNC_IMPORT u32_t get_name_length() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H u32_t get_name_length() const;
 
-	EAP_FUNC_IMPORT void set_name(const u8_t * const p_name);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H void set_name(const u8_t * const p_name);
 }; // class mschapv2_challenge_c
 
 //--------------------------------------------------
@@ -228,7 +251,7 @@ public:
  *  +-+-+-+-+-+-+-+-+
  * @endcode
  */
-class EAP_EXPORT mschapv2_change_password_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H mschapv2_change_password_c
 : public eap_general_header_base_c
 {
 private:
@@ -251,34 +274,34 @@ protected:
 
 public:
 
-	EAP_FUNC_IMPORT virtual ~mschapv2_change_password_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H virtual ~mschapv2_change_password_c();
 
-	EAP_FUNC_IMPORT mschapv2_change_password_c(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H mschapv2_change_password_c(
 		abs_eap_am_tools_c * const tools,
 		void * const header_buffer,
 		const u32_t header_buffer_length);
 
-	EAP_FUNC_IMPORT static u32_t get_header_minimum_size();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H static u32_t get_header_minimum_size();
 
-	EAP_FUNC_IMPORT eap_status_e check_header() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H eap_status_e check_header() const;
 
-	EAP_FUNC_IMPORT const u8_t * get_encrypted_pw_block() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H const u8_t * get_encrypted_pw_block() const;
 
-	EAP_FUNC_IMPORT void set_encrypted_pw_block(const u8_t * const p_encrypted_pw_block);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H void set_encrypted_pw_block(const u8_t * const p_encrypted_pw_block);
 
-	EAP_FUNC_IMPORT const u8_t * get_encrypted_hash() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H const u8_t * get_encrypted_hash() const;
 
-	EAP_FUNC_IMPORT void set_encrypted_hash(const u8_t * const p_encrypted_hash);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H void set_encrypted_hash(const u8_t * const p_encrypted_hash);
 
-	EAP_FUNC_IMPORT const u8_t * get_peer_challenge() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H const u8_t * get_peer_challenge() const;
 
-	EAP_FUNC_IMPORT void set_peer_challenge(const u8_t * const p_peer_challenge);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H void set_peer_challenge(const u8_t * const p_peer_challenge);
 
-	EAP_FUNC_IMPORT const u8_t * get_nt_response() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H const u8_t * get_nt_response() const;
 
-	EAP_FUNC_IMPORT void set_nt_response(const u8_t * const p_nt_response);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H void set_nt_response(const u8_t * const p_nt_response);
 
-	EAP_FUNC_IMPORT eap_status_e set_constants();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H eap_status_e set_constants();
 }; // class mschapv2_change_password_c
 
 //--------------------------------------------------
@@ -318,7 +341,7 @@ public:
  *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
  * @endcode
  */
-class EAP_EXPORT mschapv2_response_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H mschapv2_response_c
 : public eap_general_header_base_c
 {
 private:
@@ -341,32 +364,32 @@ protected:
 
 public:
 
-	EAP_FUNC_IMPORT virtual ~mschapv2_response_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H virtual ~mschapv2_response_c();
 
-	EAP_FUNC_IMPORT mschapv2_response_c(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H mschapv2_response_c(
 		abs_eap_am_tools_c * const tools,
 		void * const header_buffer,
 		const u32_t header_buffer_length);
 
-	EAP_FUNC_IMPORT static u32_t get_header_minimum_size();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H static u32_t get_header_minimum_size();
 
-	EAP_FUNC_IMPORT eap_status_e check_header() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H eap_status_e check_header() const;
 
-	EAP_FUNC_IMPORT const u8_t * get_peer_challenge() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H const u8_t * get_peer_challenge() const;
 
-	EAP_FUNC_IMPORT void set_peer_challenge(const u8_t * const p_challenge);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H void set_peer_challenge(const u8_t * const p_challenge);
 
-	EAP_FUNC_IMPORT const u8_t * get_nt_response() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H const u8_t * get_nt_response() const;
 
-	EAP_FUNC_IMPORT void set_nt_response(const u8_t * const p_challenge);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H void set_nt_response(const u8_t * const p_challenge);
 
-	EAP_FUNC_IMPORT const u8_t * get_name() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H const u8_t * get_name() const;
 
-	EAP_FUNC_IMPORT u32_t get_name_length() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H u32_t get_name_length() const;
 
-	EAP_FUNC_IMPORT void set_name(const u8_t * const p_name);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H void set_name(const u8_t * const p_name);
 
-	EAP_FUNC_IMPORT eap_status_e set_constants();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_HEADER_H eap_status_e set_constants();
 }; // class mschapv2_response_c
 
 //--------------------------------------------------

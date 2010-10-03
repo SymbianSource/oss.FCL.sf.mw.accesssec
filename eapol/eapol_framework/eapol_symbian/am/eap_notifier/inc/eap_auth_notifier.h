@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 15 %
+* %version: 19 %
 */
 
 #ifndef __EAPAUTHNOTIFIER_H__
@@ -55,7 +55,17 @@ class MNotificationCallback
         * return  -
         */
         virtual void DlgComplete( TInt aStatus ) = 0;
-    };
+
+       /**
+        * Check if masterkey and password match
+        *
+        * @param  aPassword8 user entered password
+        * return  true/false
+        */
+
+	    virtual TBool IsMasterKeyAndPasswordMatchingL(
+	      const TDesC16 & aPassword) = 0;
+	};
 
 /**
  * EAP Notifier
@@ -165,6 +175,22 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
         */
         void SetSelectedOldPassword(
                 TEapDialogInfo& aPasswordInfo );
+                
+        /**
+        * Checks the selected password of the presented dialog
+        *
+        * @param  aPasswordInfo password 
+        * return  TRUE or FALSE
+        */       
+        TBool CheckPasswordMatchingL( TEapDialogInfo& aPasswordInfo );  
+        
+        /**
+        * Updates the parameters of the presented dialog
+        *
+        * @param  aIsPwdCorrect indicates if pwd data was correct
+        * return  -
+        */       
+        void UpdateDialogL( TBool aIsPwdCorrect ); 
        
     private:
         /**
@@ -251,7 +277,8 @@ NONSHARABLE_CLASS ( CEapAuthNotifier ): public CBase
             TEapExpandedType& aEapType,
             CHbSymbianVariantMap* aMap,
             const TDesC& aAuthMethod );
-        
+            
+                
     private: // Data
         
         /** 

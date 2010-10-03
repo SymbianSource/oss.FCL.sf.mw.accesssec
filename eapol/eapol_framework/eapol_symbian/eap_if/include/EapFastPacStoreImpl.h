@@ -16,9 +16,31 @@
 */
 
 /*
-* %version: %
+* %version: 14 %
 */
 
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPFASTPACSTOREIMPL_H)
+	#define EAP_CLASS_VISIBILITY_EAPFASTPACSTOREIMPL_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPFASTPACSTOREIMPL_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPFASTPACSTOREIMPL_H 
+	#define EAP_FUNC_EXPORT_EAPFASTPACSTOREIMPL_H 
+	#define EAP_C_FUNC_EXPORT_EAPFASTPACSTOREIMPL_H 
+#elif defined(EAP_EXPORT_EAPFASTPACSTOREIMPL_H)
+	#define EAP_CLASS_VISIBILITY_EAPFASTPACSTOREIMPL_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPFASTPACSTOREIMPL_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPFASTPACSTOREIMPL_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPFASTPACSTOREIMPL_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPFASTPACSTOREIMPL_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPFASTPACSTOREIMPL_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPFASTPACSTOREIMPL_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPFASTPACSTOREIMPL_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPFASTPACSTOREIMPL_H 
+	#define EAP_C_FUNC_EXPORT_EAPFASTPACSTOREIMPL_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "EapFastPacStore.h"
 #include "abs_eap_pac_store_message.h"
 #include "eap_pac_store_message_base.h"
@@ -41,45 +63,35 @@ enum eap_fast_pac_store_impl_wait_state_e
 	eap_fast_pac_store_impl_wait_state_complete_destroy_pac_store,
 };
 
-class CEapFastPacStoreImpl
+class EAP_CLASS_VISIBILITY_EAPFASTPACSTOREIMPL_H CEapFastPacStoreImpl
 : public CEapFastPacStore
 	,public abs_eap_pac_store_message_c
 {
 public:
 	
 	static CEapFastPacStore* NewL();
-	
+
 	CEapFastPacStoreImpl();
-	
+
 	virtual ~CEapFastPacStoreImpl();
 
-	void OpenPacStoreL();
-    
-  void CreateDeviceSeedL();
+	TBool IsMasterKeyPresentL();
 
-  TBool IsMasterKeyPresentL();
-
-  TBool IsMasterKeyAndPasswordMatchingL(
+	TBool IsMasterKeyAndPasswordMatchingL(
 		const TDesC8 & aPassword8);
 
-  TInt CreateAndSaveMasterKeyL(
+	TInt CreateAndSaveMasterKeyL(
 		const TDesC8 & aPassword8);
 
-  TBool ComparePacStorePasswordL(
+	TBool ComparePacStorePasswordL(
 		TDes8 & aPassword8);
 
-  TBool IsPacStorePasswordPresentL();
+	TBool IsPacStorePasswordPresentL();
 
-  TInt SetPacStorePasswordL(
+	TInt SetPacStorePasswordL(
 		const TDesC8 & aPassword8);
 
-  TInt DestroyPacStore();
-  
-  eap_status_e complete_open_pac_store(
-		const eap_status_e completion_status);
-
-	eap_status_e complete_create_device_seed(
-		const eap_status_e completion_status);
+	TInt DestroyPacStore();
 
 	eap_status_e complete_is_master_key_present(
 		bool is_present
@@ -105,14 +117,14 @@ public:
 		const eap_status_e completion_status);
 
 	void ConstructL();
-	
+
 protected:
-	
+
 
 private:
-	
+
 	void Activate();
-	
+
 	void Complete();
 
 	void WaitCompletion();

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 4 %
+* %version: 5 %
 */
 
 #ifndef __EAPFASTPACSTOREPWQUERYDIALOG_H__
@@ -30,7 +30,7 @@
 
 // Forward declarations
 class HbTranslator;
-class EapQtValidator;
+
 
 // External data types
 
@@ -89,9 +89,7 @@ class EapFastPacStorePwQueryDialog: public HbInputDialog, public HbDeviceDialogI
         void closingDialog();
                
     private:
-        
-        bool validate() const;
-        
+         
         Q_DISABLE_COPY(EapFastPacStorePwQueryDialog)
    
     private: // data
@@ -100,8 +98,6 @@ class EapFastPacStorePwQueryDialog: public HbInputDialog, public HbDeviceDialogI
         HbLineEdit *mEdit;
                 
         // OWNED        
-        //! Pointer to the password validator object
-        QScopedPointer<EapQtValidator> mPwdValidator;
                 
         //! Pointer to the HbTranslator
         QScopedPointer<HbTranslator> mTranslator;

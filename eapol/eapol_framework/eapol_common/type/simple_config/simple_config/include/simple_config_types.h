@@ -28,6 +28,29 @@
 #include "eap_type_all_types.h"
 #include "eap_configuration_field.h"
 #include "simple_config_attribute_type.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_SIMPLE_CONFIG_TYPES_H)
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_TYPES_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_TYPES_H 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_TYPES_H 
+#elif defined(EAP_EXPORT_SIMPLE_CONFIG_TYPES_H)
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_TYPES_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_TYPES_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_TYPES_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_TYPES_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_TYPES_H 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_TYPES_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 /** @file simple_config_types.h 
  *  @brief This file defines the constants of the protected setup protocol.
@@ -304,7 +327,7 @@ enum simple_config_state_e
 
 //----------------------------------------------------------------------------
 
-class EAP_EXPORT network_key_and_index_c
+class EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_TYPES_H network_key_and_index_c
 {
 
 private:
@@ -320,24 +343,24 @@ private:
 
 public:
 
-	EAP_FUNC_IMPORT virtual ~network_key_and_index_c();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H virtual ~network_key_and_index_c();
 
-	EAP_FUNC_IMPORT network_key_and_index_c(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H network_key_and_index_c(
 		abs_eap_am_tools_c * const m_am_tools);
 
-	EAP_FUNC_IMPORT u8_t get_network_key_index() const;
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H u8_t get_network_key_index() const;
 
-	EAP_FUNC_IMPORT void set_network_key_index(u8_t index);
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H void set_network_key_index(u8_t index);
 
-	EAP_FUNC_IMPORT eap_variable_data_c * get_network_key();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H eap_variable_data_c * get_network_key();
 
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_network_key_const() const;
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H const eap_variable_data_c * get_network_key_const() const;
 
-	EAP_FUNC_IMPORT network_key_and_index_c * copy();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H network_key_and_index_c * copy();
 
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H bool get_is_valid();
 
-	EAP_FUNC_IMPORT bool get_is_valid_data();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H bool get_is_valid_data();
 };
 
 //----------------------------------------------------------------------------
@@ -402,31 +425,31 @@ EAP_CONFIGURATION_FIELD(
 
 
 /// This class includes the debug strings of the simple_config_cipher_suites_e, simple_config_certificate_type_e and simple_config_compression_method_e.
-class EAP_EXPORT eap_simple_config_trace_string_c
+class EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_TYPES_H eap_simple_config_trace_string_c
 {
 public:
 
-	EAP_FUNC_IMPORT virtual ~eap_simple_config_trace_string_c();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H virtual ~eap_simple_config_trace_string_c();
 
-	EAP_FUNC_IMPORT eap_simple_config_trace_string_c();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H eap_simple_config_trace_string_c();
 
 	/**
 	 * Function returns string of simple_config_state_e.
 	 * @param state is the queried string.
 	 */
-	EAP_FUNC_IMPORT eap_const_string get_state_string(const simple_config_state_e state) const;
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H eap_const_string get_state_string(const simple_config_state_e state) const;
 
 	/**
 	 * Function returns string of simple_config_Message_Type_e.
 	 * @param type is the queried string.
 	 */
-	EAP_FUNC_IMPORT eap_const_string get_message_type_string(const simple_config_Message_Type_e type) const;
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H eap_const_string get_message_type_string(const simple_config_Message_Type_e type) const;
 
 	/**
 	 * Function returns string of simple_config_Attribute_Type_e.
 	 * @param type is the queried string.
 	 */
-	EAP_FUNC_IMPORT eap_const_string get_attribute_type_string(const simple_config_Attribute_Type_e type) const;
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TYPES_H eap_const_string get_attribute_type_string(const simple_config_Attribute_Type_e type) const;
 
 };
 

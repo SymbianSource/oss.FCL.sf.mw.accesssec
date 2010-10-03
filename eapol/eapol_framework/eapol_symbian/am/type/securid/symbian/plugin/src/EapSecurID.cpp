@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 25 %
+* %version: 29 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -61,14 +61,14 @@ CEapSecurID::CEapSecurID(
 
 // ----------------------------------------------------------
 
-CEapSecurID* CEapSecurID::NewSecurIdL(SIapInfo *aIapInfo)
+CEapSecurID* CEapSecurID::NewSecurIdL(SPluginInfo *aIapInfo)
 {
 	return new(ELeave) CEapSecurID(aIapInfo->indexType, aIapInfo->index, eap_type_securid);
 }
 
 // ----------------------------------------------------------
 
-CEapSecurID* CEapSecurID::NewGtcL(SIapInfo *aIapInfo)
+CEapSecurID* CEapSecurID::NewGtcL(SPluginInfo *aIapInfo)
 {
 	return new(ELeave) CEapSecurID(aIapInfo->indexType, aIapInfo->index, eap_type_generic_token_card);
 }
@@ -186,6 +186,7 @@ void CEapSecurID::SetTunnelingType(const TEapExpandedType aTunnelingType)
     }
 
 // ----------------------------------------------------------
+
 void CEapSecurID::SetIndexL(
 		const TIndexType aIndexType, 
 		const TInt aIndex)
@@ -236,6 +237,8 @@ void CEapSecurID::SetIndexL(
 	CleanupStack::PopAndDestroy(&session);
 }
 
+// ----------------------------------------------------------
+
 void CEapSecurID::SetConfigurationL(const EAPSettings& aSettings)
 {
 	RDbNamedDatabase db;
@@ -265,6 +268,8 @@ void CEapSecurID::SetConfigurationL(const EAPSettings& aSettings)
 	CleanupStack::PopAndDestroy(&session);
 }
 
+// ----------------------------------------------------------
+
 void CEapSecurID::GetConfigurationL(EAPSettings& aSettings)
 {
 	RDbNamedDatabase db;
@@ -293,6 +298,8 @@ void CEapSecurID::GetConfigurationL(EAPSettings& aSettings)
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 }
+
+// ----------------------------------------------------------
 
 void CEapSecurID::CopySettingsL(
 	const TIndexType aDestinationIndexType,
@@ -341,5 +348,13 @@ void CEapSecurID::CopySettingsL(
 	CleanupStack::PopAndDestroy(&session);
 }
 
+// ----------------------------------------------------------
+
+TInt CEapSecurID::InitialisePacStore(AbsPacStoreInitializer * const /* initializer */)
+{
+	return KErrNone;
+}
+
+// ----------------------------------------------------------
 
 // End of File

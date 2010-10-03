@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 91 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -1146,6 +1146,8 @@ EAP_FUNC_EXPORT eap_status_e eap_type_tls_peap_c::finish_successful_authenticati
 		 eap_tls_trace_string_c::get_tls_session_type_string(get_tls_session_type()),
 		 eap_tls_trace_string_c::get_peap_version_string(m_current_peap_version)));
 
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_type_tls_peap_c::finish_successful_authentication()");
+
 	eap_status_e status(eap_status_process_general_error);
 
 	if (do_quiet_finish == false)
@@ -1241,6 +1243,8 @@ EAP_FUNC_EXPORT eap_status_e eap_type_tls_peap_c::send_final_notification()
 		(m_is_client == true ? "client": "server"),
 		m_is_valid,
 		m_authentication_finished_successfully));
+
+	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: eap_type_tls_peap_c::send_final_notification()");
 
 	if (m_is_valid == true 
 		&& m_authentication_finished_successfully == false)

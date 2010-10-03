@@ -24,11 +24,34 @@
 
 //  INCLUDES
 #include "abs_eap_am_type_leap.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_TYPE_LEAP_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_LEAP_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_LEAP_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_LEAP_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_LEAP_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_LEAP_H 
+#elif defined(EAP_EXPORT_EAP_AM_TYPE_LEAP_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_LEAP_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_LEAP_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_LEAP_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_LEAP_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_LEAP_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_LEAP_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_LEAP_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_LEAP_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_LEAP_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_LEAP_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 // CLASS DECLARATION
 
 /// This class is interface to adaptation module of LEAP.
-class EAP_EXPORT eap_am_type_leap_c
+class EAP_CLASS_VISIBILITY_EAP_AM_TYPE_LEAP_H eap_am_type_leap_c
 {
 	public: // Methods
 
@@ -125,7 +148,7 @@ protected:
 };
 
 
-EAP_C_FUNC_IMPORT  eap_am_type_leap_c *new_eap_am_type_leap(
+EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_LEAP_H  eap_am_type_leap_c *new_eap_am_type_leap(
 	abs_eap_am_tools_c * const tools,
 	abs_eap_base_type_c * const partner,
 	const bool is_client_when_true,

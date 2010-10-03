@@ -16,7 +16,7 @@
 */
 
 /*
-* %version:  33 %
+* %version:  35 %
 */
 
 //-------------------------------------------------------------------
@@ -114,9 +114,9 @@ LIBRARY	    x509.lib crypto.lib certstore.lib ctframework.lib pkixcert.lib
 LIBRARY		x500.lib eikctl.lib egul.lib fbscli.lib
 
 #if defined(USE_FAST_EAP_TYPE)
+//#warning pacstoreif.lib
 LIBRARY		pacstoreif.lib
 #endif
-
 
 //-------------------------------------------------------------------
 // End of File

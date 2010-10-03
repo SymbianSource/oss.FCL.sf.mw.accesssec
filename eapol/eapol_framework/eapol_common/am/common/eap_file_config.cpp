@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 33 %
+* %version: 35 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -2227,7 +2227,7 @@ eap_status_e eap_file_config_c::read_all_configurations(
 			}
 			else
 			{
-				// Some konfiguration objects are not included to message yet.
+				// Some configuration objects are not included to message yet.
 			}
 
 			atom = atom->get_next_atom();
@@ -2513,6 +2513,32 @@ eap_status_e eap_file_config_c::add_option(
 	}
 	else //if (status != eap_status_ok)
 	{
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("\n")));
+
+		EAP_TRACE_DATA_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("ERROR: CONFIG MESSAGE: option failed"),
+			 selector.get_data(),
+			 selector.get_data_length()));
+		
+		EAP_TRACE_DATA_DEBUG(
+			m_am_tools, 
+			TRACE_FLAGS_DEFAULT, 
+			(EAPL("ERROR: CONFIG MESSAGE: data"), 
+			 config->get_data()->get_data(), 
+			 config->get_data()->get_data_length()));
+
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("ERROR: CONFIG MESSAGE: option type %d=%s\n"),
+			 config->get_type(),
+			 eap_configuration_field_c::get_configure_type_string(config->get_type())));
+
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 		return EAP_STATUS_RETURN(m_am_tools, status);
 	}
@@ -2600,11 +2626,15 @@ EAP_FUNC_EXPORT eap_status_e eap_file_config_c::read_configuration_message(
 		}
 
 		status = add_option(option_header);
-		if (status != eap_status_ok)
+		if (status != eap_status_ok
+			&& status != eap_status_handler_exists_error // Here we skip duplicate configuration values.
+			)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
+
+		status = eap_status_ok;
 	}
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);

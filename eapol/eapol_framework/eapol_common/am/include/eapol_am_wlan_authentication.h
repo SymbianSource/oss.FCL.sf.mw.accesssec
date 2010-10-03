@@ -23,6 +23,27 @@
 #define _EAPOL_AM_WLAN_AUTHENTICATION_H_
 
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPOL_AM_WLAN_AUTHENTICATION_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_AM_WLAN_AUTHENTICATION_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPOL_AM_WLAN_AUTHENTICATION_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_AM_WLAN_AUTHENTICATION_H 
+	#define EAP_FUNC_EXPORT_EAPOL_AM_WLAN_AUTHENTICATION_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_AM_WLAN_AUTHENTICATION_H 
+#elif defined(EAP_EXPORT_EAPOL_AM_WLAN_AUTHENTICATION_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_AM_WLAN_AUTHENTICATION_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_AM_WLAN_AUTHENTICATION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_AM_WLAN_AUTHENTICATION_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_AM_WLAN_AUTHENTICATION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPOL_AM_WLAN_AUTHENTICATION_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPOL_AM_WLAN_AUTHENTICATION_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_AM_WLAN_AUTHENTICATION_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_AM_WLAN_AUTHENTICATION_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_AM_WLAN_AUTHENTICATION_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_AM_WLAN_AUTHENTICATION_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_status.h"
 #include "eap_header.h"
 #include "eap_array.h"
@@ -43,7 +64,7 @@ class abs_eap_configuration_if_c;
 
 
 /// This is interface to adaptation module of class eapol_wlan_authentication_c.
-class EAP_EXPORT eapol_am_wlan_authentication_c
+class EAP_CLASS_VISIBILITY_EAPOL_AM_WLAN_AUTHENTICATION_H eapol_am_wlan_authentication_c
 : public eap_database_reference_if_c
 {
 private:
@@ -58,12 +79,12 @@ public:
 	//--------------------------------------------------
 
 	// 
-	EAP_FUNC_IMPORT virtual ~eapol_am_wlan_authentication_c();
+	EAP_FUNC_VISIBILITY_EAPOL_AM_WLAN_AUTHENTICATION_H virtual ~eapol_am_wlan_authentication_c();
 
 	/// @param tools: Constructor takes parameter tools that is pointer to adaptation of the platform.
 	/// @param is_client_when_true: Second parameter is true when object is client and false when object is server.
 	/// @param wlan_database_reference: third parameter is pointer to interface to read the current database reference.
-	EAP_FUNC_IMPORT static eapol_am_wlan_authentication_c * new_eapol_am_wlan_authentication(
+	EAP_FUNC_VISIBILITY_EAPOL_AM_WLAN_AUTHENTICATION_H static eapol_am_wlan_authentication_c * new_eapol_am_wlan_authentication(
 		abs_eap_am_tools_c * const tools,
 		const bool is_client_when_true
 		);

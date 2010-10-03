@@ -17,7 +17,7 @@
 */
 
 /*
-* %version: 8 %
+* %version: 9 %
 */
 
 // System includes
@@ -54,28 +54,46 @@ CpEapCiphersuiteUi::CpEapCiphersuiteUi( QVariant &suites ) :
     qDebug("CpEapCiphersuiteUi::CpEapCiphersuiteUi()");
     d_ptr.reset(new CpEapCiphersuiteUiPrivate());
 
-    appendChild(d_ptr->createGroupItem(suites, EapQtUiConstants::EapCipher_RSA_AES_SHA,
+    setContentWidgetData("objectName", "CpEapCipherSuiteUi");
+    
+    appendChild(d_ptr->createGroupItem(
+        suites, 
+        EapQtUiConstants::EapCipher_RSA_AES_SHA,
         EapQtConfig::TLS_RSA_WITH_AES_128_CBC_SHA));
 
-    appendChild(d_ptr->createGroupItem(suites, EapQtUiConstants::EapCipher_DHE_RSA_AES_SHA,
+    appendChild(d_ptr->createGroupItem(
+        suites, 
+        EapQtUiConstants::EapCipher_DHE_RSA_AES_SHA,
         EapQtConfig::TLS_DHE_RSA_WITH_AES_128_CBC_SHA));
 
-    appendChild(d_ptr->createGroupItem(suites, EapQtUiConstants::EapCipher_DHE_DSS_AES_SHA,
+    appendChild(d_ptr->createGroupItem(
+        suites, 
+        EapQtUiConstants::EapCipher_DHE_DSS_AES_SHA,
         EapQtConfig::TLS_DHE_DSS_WITH_AES_128_CBC_SHA));
 
-    appendChild(d_ptr->createGroupItem(suites, EapQtUiConstants::EapCipher_RSA_3DES_SHA,
+    appendChild(d_ptr->createGroupItem(
+        suites, 
+        EapQtUiConstants::EapCipher_RSA_3DES_SHA,
         EapQtConfig::TLS_RSA_WITH_3DES_EDE_CBC_SHA));
 
-    appendChild(d_ptr->createGroupItem(suites, EapQtUiConstants::EapCipher_DHE_RSA_3DES_SHA,
+    appendChild(d_ptr->createGroupItem(
+        suites, 
+        EapQtUiConstants::EapCipher_DHE_RSA_3DES_SHA,
         EapQtConfig::TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA));
 
-    appendChild(d_ptr->createGroupItem(suites, EapQtUiConstants::EapCipher_DHE_DSS_3DES_SHA,
+    appendChild(d_ptr->createGroupItem(
+        suites, 
+        EapQtUiConstants::EapCipher_DHE_DSS_3DES_SHA,
         EapQtConfig::TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA));
 
-    appendChild(d_ptr->createGroupItem(suites, EapQtUiConstants::EapCipher_RSA_RC4_MD5,
+    appendChild(d_ptr->createGroupItem(
+        suites, 
+        EapQtUiConstants::EapCipher_RSA_RC4_MD5,
         EapQtConfig::TLS_RSA_WITH_RC4_128_MD5));
 
-    appendChild(d_ptr->createGroupItem(suites, EapQtUiConstants::EapCipher_RSA_RC4_SHA,
+    appendChild(d_ptr->createGroupItem(
+        suites, 
+        EapQtUiConstants::EapCipher_RSA_RC4_SHA,
         EapQtConfig::TLS_RSA_WITH_RC4_128_SHA));
     
     qDebug("CpEapCiphersuiteUi::CpEapCiphersuiteUi() - complete");

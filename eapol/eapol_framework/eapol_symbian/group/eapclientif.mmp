@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 9 %
+* %version: 10 %
 */
 
 #include <platform_paths.hrh>
@@ -50,7 +50,8 @@ SOURCEPATH  ../eap_if/src
 SOURCE REapSession.cpp
 SOURCE EapClientIf.cpp
 
-LIBRARY		euser.lib ecom.lib eapauthserver.lib eaptools.lib eaptrace.lib
+LIBRARY		euser.lib ecom.lib eaptools.lib eaptrace.lib
 
+//eapauthserver.lib 
 
 // end

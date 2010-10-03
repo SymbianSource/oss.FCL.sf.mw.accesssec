@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 17 %
+* %version: 19 %
 */
 
 #include <platform_paths.hrh>
@@ -51,6 +51,5 @@ SOURCE EapCoreInterface.cpp
 
 LIBRARY eapclientif.lib eaptools.lib eapsymbiantools.lib eaptrace.lib
 LIBRARY	euser.lib edbms.lib efsrv.lib ecom.lib
-
 
 // end

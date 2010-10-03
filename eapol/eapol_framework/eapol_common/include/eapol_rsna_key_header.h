@@ -27,6 +27,27 @@
 #include "eapol_key_header.h"
 #include "eapol_key_types.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPOL_RSNA_KEY_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H 
+	#define EAP_FUNC_EXPORT_EAPOL_RSNA_KEY_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_RSNA_KEY_HEADER_H 
+#elif defined(EAP_EXPORT_EAPOL_RSNA_KEY_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_RSNA_KEY_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPOL_RSNA_KEY_HEADER_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_RSNA_KEY_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_RSNA_KEY_HEADER_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 
 //------------------------------------------------------
@@ -83,7 +104,7 @@
  * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  * @endcode
  */
-class EAP_EXPORT eapol_RSNA_key_header_c
+class EAP_CLASS_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eapol_RSNA_key_header_c
 : public eap_general_header_base_c
 {
 private:
@@ -139,7 +160,7 @@ private:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// This function sets the Key Information field.
-	EAP_FUNC_IMPORT eap_status_e set_key_information(const u16_t info);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_key_information(const u16_t info);
 	
 	//--------------------------------------------------
 public:
@@ -247,142 +268,142 @@ public:
 	//--------------------------------------------------
 
 	// 
-	EAP_FUNC_IMPORT virtual ~eapol_RSNA_key_header_c();
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H virtual ~eapol_RSNA_key_header_c();
 
 	// 
-	EAP_FUNC_IMPORT eapol_RSNA_key_header_c(
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eapol_RSNA_key_header_c(
 		abs_eap_am_tools_c * const tools,
 		const bool is_RSNA_when_true,
 		const bool is_WPXM_when_true,
 		void * const header_begin,
 		const u32_t header_buffer_length);
 
-	EAP_FUNC_IMPORT eapol_protocol_version_e get_eapol_protocol_version() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eapol_protocol_version_e get_eapol_protocol_version() const;
 
-	EAP_FUNC_IMPORT eapol_packet_type_e get_eapol_packet_type() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eapol_packet_type_e get_eapol_packet_type() const;
 
 	/// Function returns pcket body field of EAPOL packet. This field is two octets in length,
 	/// taken to represent an unsigned binary number. The value of this field defines the length
 	/// in octets of the Packet Body field. Value of 0 indicates that there is no Packet Body field present.
-	EAP_FUNC_IMPORT u16_t get_eapol_packet_body_length() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u16_t get_eapol_packet_body_length() const;
 
 	/// This function returns whole length of the EAPOL packet.
 	/// This includes EAPOL header and packet body.
-	EAP_FUNC_IMPORT u16_t get_eapol_packet_length() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u16_t get_eapol_packet_length() const;
 
-	EAP_FUNC_IMPORT eapol_key_descriptor_type_e get_key_descriptor_type() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eapol_key_descriptor_type_e get_key_descriptor_type() const;
 
 	/// Gets the Key Information field.
-	EAP_FUNC_IMPORT u16_t get_key_information() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u16_t get_key_information() const;
 	
 	/**
 	 * This function returns the Key Descriptor Version bits of Key Information field.
 	 */
-	EAP_FUNC_IMPORT eapol_RSNA_key_header_c::key_descriptor_version_e get_key_information_key_descriptor_version() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eapol_RSNA_key_header_c::key_descriptor_version_e get_key_information_key_descriptor_version() const;
 
 	/**
 	 * This function returns the Key Type bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT bool get_key_information_key_type() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H bool get_key_information_key_type() const;
 
 	/**
 	 * This function returns the Reserved A bits (higher ones) of Key Information field.
 	 * This is RSNA specific.
 	 */
-	EAP_FUNC_IMPORT u8_t get_key_information_reserved_a() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u8_t get_key_information_reserved_a() const;
 
 	/**
 	 * This function returns the key index bits (higher ones) of Key Information field.
 	 * This is WPA specific.
 	 */
-	EAP_FUNC_IMPORT u8_t get_key_information_key_index() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u8_t get_key_information_key_index() const;
 
 	/**
 	 * This function returns the Install bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT bool get_key_information_install() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H bool get_key_information_install() const;
 
 	/**
 	 * This function returns the Key Ack bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT bool get_key_information_key_ack() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H bool get_key_information_key_ack() const;
 
 	/**
 	 * This function returns the Key MIC bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT bool get_key_information_key_MIC() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H bool get_key_information_key_MIC() const;
 
 	/**
 	 * This function returns the Secure bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT bool get_key_information_secure() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H bool get_key_information_secure() const;
 
 	/**
 	 * This function returns the Error bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT bool get_key_information_error() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H bool get_key_information_error() const;
 
 	/**
 	 * This function returns the Request bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT bool get_key_information_request() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H bool get_key_information_request() const;
 
 	/**
 	 * This function returns the Encrypted Key Data bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT bool get_key_information_encrypted_key_data() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H bool get_key_information_encrypted_key_data() const;
 
 
 	/**
 	 * This function returns the Reserved B bits (lower ones) of Key Information field.
 	 */
-	EAP_FUNC_IMPORT u8_t get_key_information_reserved_b() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u8_t get_key_information_reserved_b() const;
 
 	/**
 	 * This function returns the Key Length field of the EAPOL-Key descriptor.
 	 */
-	EAP_FUNC_IMPORT u16_t get_key_length() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u16_t get_key_length() const;
 	
 	/**
 	 * This function returns the Key Reply Counter field of the EAPOL-Key descriptor.
 	 */
-	EAP_FUNC_IMPORT u64_t get_key_replay_counter() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u64_t get_key_replay_counter() const;
 	
-	EAP_FUNC_IMPORT u8_t * get_key_NONCE() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u8_t * get_key_NONCE() const;
 	
-	EAP_FUNC_IMPORT u8_t * get_EAPOL_key_IV() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u8_t * get_EAPOL_key_IV() const;
 
-	EAP_FUNC_IMPORT u8_t * get_key_RSC() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u8_t * get_key_RSC() const;
 	
-	EAP_FUNC_IMPORT u8_t * get_key_STA_MAC_address() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u8_t * get_key_STA_MAC_address() const;
 	
-	EAP_FUNC_IMPORT u8_t * get_key_reserved() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u8_t * get_key_reserved() const;
 	
-	EAP_FUNC_IMPORT u8_t * get_key_MIC() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u8_t * get_key_MIC() const;
 	
 	/**
 	 * This function returns the Key Data Length field of the EAPOL-Key descriptor.
 	 */
-	EAP_FUNC_IMPORT u16_t get_key_data_length() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u16_t get_key_data_length() const;
 
-	EAP_FUNC_IMPORT u8_t * get_key_data(const u32_t key_length) const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u8_t * get_key_data(const u32_t key_length) const;
 
-	EAP_FUNC_IMPORT u8_t * get_key_data_offset(const u32_t offset, const u32_t key_length) const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u8_t * get_key_data_offset(const u32_t offset, const u32_t key_length) const;
 
-	EAP_FUNC_IMPORT static u16_t get_header_length();
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H static u16_t get_header_length();
 
-	EAP_FUNC_IMPORT eap_status_e set_eapol_protocol_version(const eapol_protocol_version_e version);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_eapol_protocol_version(const eapol_protocol_version_e version);
 
-	EAP_FUNC_IMPORT eap_status_e set_eapol_packet_type(const eapol_packet_type_e type);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_eapol_packet_type(const eapol_packet_type_e type);
 
-	EAP_FUNC_IMPORT eap_status_e set_eapol_packet_body_length(const u32_t eapol_length);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_eapol_packet_body_length(const u32_t eapol_length);
 
-	EAP_FUNC_IMPORT eap_status_e set_key_descriptor_type(const eapol_key_descriptor_type_e eapol_key_descriptor_type);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_key_descriptor_type(const eapol_key_descriptor_type_e eapol_key_descriptor_type);
 
 	/**
 	 * This function sets the selected bits on.
 	 */
-	EAP_FUNC_IMPORT u16_t set_bits_on(
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H u16_t set_bits_on(
 		u16_t key_information,
 		const u16_t set_bits,
 		const u32_t mask,
@@ -391,103 +412,103 @@ public:
 	/**
 	 * This function sets the Key Descriptor Version bits of Key Information field.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_key_information_key_descriptor_version(const u8_t version);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_key_information_key_descriptor_version(const u8_t version);
 
 	/**
 	 * This function sets the Key Type bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_key_information_key_type(const bool key_type_bit_on_when_true);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_key_information_key_type(const bool key_type_bit_on_when_true);
 
 	/**
 	 * This function returns the key index bits (higher ones) of Key Information field.
 	 * This is WPA specific.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_key_information_key_index(const u8_t key_index);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_key_information_key_index(const u8_t key_index);
 
 	/**
 	 * This function sets the Install bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_key_information_install(const bool install_bit_on_when_true);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_key_information_install(const bool install_bit_on_when_true);
 
 	/**
 	 * This function sets the Key Ack bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_key_information_key_ack(const bool key_ack_bit_on_when_true);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_key_information_key_ack(const bool key_ack_bit_on_when_true);
 
 	/**
 	 * This function sets the Key MIC bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_key_information_key_MIC(const bool key_MIC_bit_on_when_true);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_key_information_key_MIC(const bool key_MIC_bit_on_when_true);
 
 	/**
 	 * This function sets the Secure bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_key_information_secure(const bool secure_bit_on_when_true);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_key_information_secure(const bool secure_bit_on_when_true);
 
 	/**
 	 * This function sets the Error bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_key_information_error(const bool error_bit_on_when_true);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_key_information_error(const bool error_bit_on_when_true);
 
 	/**
 	 * This function sets the Request bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_key_information_request(const bool request_bit_is_on_when_true);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_key_information_request(const bool request_bit_is_on_when_true);
 
 	/**
 	 * This function sets the Encrypted Key Data bit of Key Information field.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_key_information_encrypted_key_data(const bool encrypted_key_data_bit_is_on_when_true);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_key_information_encrypted_key_data(const bool encrypted_key_data_bit_is_on_when_true);
 
 	/**
 	 * This function sets the Key Length field of the EAPOL-Key descriptor.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_key_length(const u16_t length);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_key_length(const u16_t length);
 	
 	/**
 	 * This function sets the Key Reply Counter field of the EAPOL-Key descriptor.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_key_replay_counter(const u64_t reply_counter);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_key_replay_counter(const u64_t reply_counter);
 
 	/**
 	 * This function sets the Key Data Length field of the EAPOL-Key descriptor.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_key_data_length(const u16_t key_data_length);
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e set_key_data_length(const u16_t key_data_length);
 
 	/**
 	 * This function zeroes the EAPOL header and EAPOL-Key descriptor header.
 	 */
-	EAP_FUNC_IMPORT eap_status_e zero_EAPOL_header_and_Key_descriptor(
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e zero_EAPOL_header_and_Key_descriptor(
 		abs_eap_am_tools_c * const tools
 		);
 
-	EAP_FUNC_IMPORT eap_status_e zero_key_MIC(
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e zero_key_MIC(
 		abs_eap_am_tools_c * const tools
 		);
 
-	EAP_FUNC_IMPORT eap_status_e zero_key_NONCE(
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e zero_key_NONCE(
 		abs_eap_am_tools_c * const tools
 		);
 
-	EAP_FUNC_IMPORT eap_status_e zero_EAPOL_key_IV(
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e zero_EAPOL_key_IV(
 		abs_eap_am_tools_c * const tools
 		);
 
-	EAP_FUNC_IMPORT eap_status_e zero_key_RSC(
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e zero_key_RSC(
 		abs_eap_am_tools_c * const tools
 		);
 
-	EAP_FUNC_IMPORT eap_status_e zero_key_STA_MAC_address(
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e zero_key_STA_MAC_address(
 		abs_eap_am_tools_c * const tools
 		);
 
-	EAP_FUNC_IMPORT eap_status_e zero_key_reserved(
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e zero_key_reserved(
 		abs_eap_am_tools_c * const tools
 		);
 
-	EAP_FUNC_IMPORT eap_status_e check_header() const;
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e check_header() const;
 	
-	EAP_FUNC_IMPORT eap_status_e reset_header(
+	EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_HEADER_H eap_status_e reset_header(
 		const u8_t key_index,
 		const eapol_key_authentication_type_e authentication_type,
 		const eapol_RSNA_cipher_e eapol_pairwise_cipher,

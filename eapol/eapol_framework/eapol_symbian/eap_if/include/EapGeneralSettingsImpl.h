@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 28 %
+* %version: 29 %
 */
 
 #ifndef _EAP_GENERAL_SETTINGS_IMPL_H_
@@ -25,6 +25,28 @@
 // INCLUDES
 #include <EapType.h>
 #include <EapGeneralSettings.h>
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPGENERALSETTINGSIMPL_H)
+	#define EAP_CLASS_VISIBILITY_EAPGENERALSETTINGSIMPL_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPGENERALSETTINGSIMPL_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPGENERALSETTINGSIMPL_H 
+	#define EAP_FUNC_EXPORT_EAPGENERALSETTINGSIMPL_H 
+	#define EAP_C_FUNC_EXPORT_EAPGENERALSETTINGSIMPL_H 
+#elif defined(EAP_EXPORT_EAPGENERALSETTINGSIMPL_H)
+	#define EAP_CLASS_VISIBILITY_EAPGENERALSETTINGSIMPL_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPGENERALSETTINGSIMPL_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPGENERALSETTINGSIMPL_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPGENERALSETTINGSIMPL_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPGENERALSETTINGSIMPL_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPGENERALSETTINGSIMPL_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPGENERALSETTINGSIMPL_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPGENERALSETTINGSIMPL_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPGENERALSETTINGSIMPL_H 
+	#define EAP_C_FUNC_EXPORT_EAPGENERALSETTINGSIMPL_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_header.h"
 #include "eap_array.h"
 #include "abs_eap_general_settings_message.h"
@@ -54,7 +76,7 @@ enum eap_general_settings_wait_state_e
 /**
 * This is implementation of CEapGeneralSettings interface.
 */
-class CEapGeneralSettingsImpl
+class EAP_CLASS_VISIBILITY_EAPGENERALSETTINGSIMPL_H CEapGeneralSettingsImpl
 : public CEapGeneralSettings
 , public abs_eap_general_settings_message_c
 , public EapClientIf

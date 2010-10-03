@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 6.1.3 %
 */
 
 #ifndef _EAPSIMISAINTERFACE_H_
@@ -24,6 +24,28 @@
 
 // INCLUDES
 #include <e32base.h>
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPSIMISAINTERFACE_H)
+	#define EAP_CLASS_VISIBILITY_EAPSIMISAINTERFACE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPSIMISAINTERFACE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPSIMISAINTERFACE_H 
+	#define EAP_FUNC_EXPORT_EAPSIMISAINTERFACE_H 
+	#define EAP_C_FUNC_EXPORT_EAPSIMISAINTERFACE_H 
+#elif defined(EAP_EXPORT_EAPSIMISAINTERFACE_H)
+	#define EAP_CLASS_VISIBILITY_EAPSIMISAINTERFACE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPSIMISAINTERFACE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPSIMISAINTERFACE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPSIMISAINTERFACE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPSIMISAINTERFACE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPSIMISAINTERFACE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPSIMISAINTERFACE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPSIMISAINTERFACE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPSIMISAINTERFACE_H 
+	#define EAP_C_FUNC_EXPORT_EAPSIMISAINTERFACE_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_tools.h"
 #include "eap_am_type_gsmsim_symbian.h"
 #include "isaapi.h"
@@ -32,7 +54,7 @@
 /**
 * Class (active object) that handles the communications with the SIM.
 */
-class CEapSimIsaInterface 
+class EAP_CLASS_VISIBILITY_EAPSIMISAINTERFACE_H CEapSimIsaInterface 
 : public CActive
 {
 public:

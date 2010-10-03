@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16.1.8 %
+* %version: 16.1.12 %
 */
 
 #ifndef _EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H_
@@ -31,6 +31,29 @@
 
 #include <EapType.h>
 #include <d32dbms.h>
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H 
+#elif defined(EAP_EXPORT_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 const TUint KDefaultTimeoutEAPMsChapV2 = 120000;
 
@@ -38,7 +61,7 @@ const TUint KDefaultTimeoutEAPMsChapV2 = 120000;
 * Class that implements the operating system dependent portion of EAP Ms-Chap-v2 protocol.
 * For Symbian OS.
 */
-class EAP_EXPORT eap_am_type_mschapv2_symbian_c
+class EAP_CLASS_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H eap_am_type_mschapv2_symbian_c
 : public CActive, public eap_am_type_mschapv2_c
 	, public MNotificationCallback
 
@@ -143,7 +166,7 @@ public:
 		const eap_am_network_id_c * const receive_network_id);
 
 	// 
-	EAP_FUNC_IMPORT virtual ~eap_am_type_mschapv2_symbian_c();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H virtual ~eap_am_type_mschapv2_symbian_c();
 
 	eap_status_e show_username_password_dialog(
 		eap_variable_data_c & username,
@@ -158,17 +181,17 @@ public:
 		bool & password_prompt_enabled);
 
 	// 
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H eap_status_e configure();
 
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H eap_status_e reset();
 
-	EAP_FUNC_IMPORT eap_status_e update_username_password();	
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H eap_status_e update_username_password();	
 
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H void set_is_valid();
 
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H bool get_is_valid();
 
-	EAP_FUNC_IMPORT eap_status_e type_configure_read(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H eap_status_e type_configure_read(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
@@ -177,15 +200,15 @@ public:
 		const u32_t field_length,
 		eap_variable_data_c * const data);
 
-	EAP_FUNC_IMPORT eap_status_e type_configure_write(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H eap_status_e type_configure_write(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H eap_status_e shutdown();
 
-	EAP_FUNC_IMPORT eap_status_e read_auth_failure_string(eap_mschapv2_error_e error_code, eap_variable_data_c &string);
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H eap_status_e read_auth_failure_string(eap_mschapv2_error_e error_code, eap_variable_data_c &string);
 
-	EAP_FUNC_IMPORT eap_status_e get_memory_store_key(eap_variable_data_c * const memory_store_key);
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H eap_status_e get_memory_store_key(eap_variable_data_c * const memory_store_key);
 	
 	/**
 	 * Returns true if the full authenticated session is valid.
@@ -204,7 +227,10 @@ public:
 	 */
 	eap_status_e store_authentication_time();	
 
-	EAP_FUNC_IMPORT void DlgComplete( TInt aStatus );
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H void DlgComplete( TInt aStatus );
+
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_MSCHAPV2_SYMBIAN_H TBool IsMasterKeyAndPasswordMatchingL(
+	      const TDesC16 & aPassword8);
 
 	TInt IsDlgReadyToCompleteL();
 

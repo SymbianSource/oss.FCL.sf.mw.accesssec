@@ -25,6 +25,27 @@
 
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPOL_KEY_STATE_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_KEY_STATE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_KEY_STATE_H 
+	#define EAP_FUNC_EXPORT_EAPOL_KEY_STATE_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_KEY_STATE_H 
+#elif defined(EAP_EXPORT_EAPOL_KEY_STATE_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_KEY_STATE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_KEY_STATE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_KEY_STATE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPOL_KEY_STATE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPOL_KEY_STATE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_KEY_STATE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_KEY_STATE_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_KEY_STATE_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eapol_rsna_key_data_header.h"
 #include "eapol_rsna_key_header.h"
 #include "eap_am_network_id.h"
@@ -94,7 +115,7 @@ enum eapol_key_wpxm_constant_e
 /**
  * This class stores the EAPOL-Key state.
  */
-class EAP_EXPORT eapol_key_state_c
+class EAP_CLASS_VISIBILITY_EAPOL_KEY_STATE_H eapol_key_state_c
 : public abs_eap_base_timer_c
 {
 
@@ -315,7 +336,7 @@ private:
 	};
 
 
-	EAP_FUNC_IMPORT eap_status_e trace_eapol_key_message(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e trace_eapol_key_message(
 		const i8_t * const prefix,
 		eapol_RSNA_key_header_c * const eapol_key_message);
 
@@ -349,7 +370,7 @@ private:
 	eap_status_e set_mac_addresses(
 		const eap_am_network_id_c * const receive_network_id);
 
-	EAP_FUNC_IMPORT eap_status_e save_parameters(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e save_parameters(
 		const eapol_key_authentication_type_e authentication_type,
 		const eap_variable_data_c * const authenticator_RSNA_IE,
 		const eap_variable_data_c * const supplicant_RSNA_IE,
@@ -365,13 +386,13 @@ private:
 		const u32_t key_RSC_size ///< This is the size of RSC counter
 		);
 
-	EAP_FUNC_IMPORT eap_status_e check_is_aes_key_wrap_padding(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e check_is_aes_key_wrap_padding(
 		const eapol_RSNA_key_descriptor_type_e current_key_data_type,
 		eapol_rsna_key_data_header_c * const key_data_payload,
 		const u32_t key_data_max_length
 		);
 
-	EAP_FUNC_IMPORT eap_status_e parse_generic_key_data_payload(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e parse_generic_key_data_payload(
 		const eapol_key_descriptor_type_e key_descriptor_type,
 		const eapol_RSNA_key_descriptor_type_e current_key_data_payload,
 		eapol_rsna_key_data_header_c * const key_data_payload,
@@ -379,7 +400,7 @@ private:
 		eapol_rsna_key_data_payloads_c * const p_rsna_key_data_payloads,
 		const eapol_key_state_e expected_key_message);
 
-	EAP_FUNC_IMPORT eap_status_e parse_key_data(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e parse_key_data(
 		const eapol_key_descriptor_type_e key_descriptor_type,
 		const eapol_rsna_key_data_header_c * const p_payload,
 		u32_t * const buffer_length,
@@ -387,7 +408,7 @@ private:
 		const eapol_key_state_e expected_key_message,
 		const eapol_RSNA_key_header_c::key_descriptor_version_e key_descriptor_version);
 
-	EAP_FUNC_IMPORT eap_status_e rsna_prf(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e rsna_prf(
 		const eap_variable_data_c * const key_K,
 		const eap_variable_data_c * const label_A,
 		const eap_variable_data_c * const input_B,
@@ -395,14 +416,14 @@ private:
 		eap_variable_data_c * const output
 		);
 
-	EAP_FUNC_IMPORT eap_status_e select_minimum(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e select_minimum(
 		const eap_variable_data_c * const input_a,
 		const eap_variable_data_c * const input_b,
 		const eap_variable_data_c ** const minimum,
 		const eap_variable_data_c ** const maximum);
 
 
-	EAP_FUNC_IMPORT eap_status_e create_PMKID();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e create_PMKID();
 
 	eap_status_e set_reassociation_parameters(
 		const eap_variable_data_c * const pairwise_PMK_WPXK3,
@@ -432,7 +453,7 @@ private:
 EAP_KEY_TEST_PUBLIC_FUNCTION
 
 
-	EAP_FUNC_IMPORT eap_status_e derive_PTK();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e derive_PTK();
 
 
 EAP_KEY_TEST_PRIVATE_FUNCTION
@@ -442,39 +463,39 @@ EAP_KEY_TEST_PRIVATE_FUNCTION
 
 	eap_status_e derive_WPXM_PTK(const u32_t WPXM_WPXC);
 
-	EAP_FUNC_IMPORT eap_status_e verify_field_is_zero(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e verify_field_is_zero(
 		const u8_t * const field,
 		const u32_t field_length);
 
-	EAP_FUNC_IMPORT eap_status_e check_padding(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e check_padding(
 		const u8_t * const field,
 		const u32_t field_length);
 
-	EAP_FUNC_IMPORT eap_status_e encrypt_key_data(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e encrypt_key_data(
 		eapol_RSNA_key_header_c * const eapol_key_message);
 
-	EAP_FUNC_IMPORT eap_status_e decrypt_key_data(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e decrypt_key_data(
 		eapol_RSNA_key_header_c * const eapol_key_message);
 
 
-	EAP_FUNC_IMPORT eap_status_e create_key_mic(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e create_key_mic(
 		eapol_RSNA_key_header_c * const eapol_key_message,
 		const eap_variable_data_c * const confirmation_key);
 
-	EAP_FUNC_IMPORT eap_status_e verify_key_mic(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e verify_key_mic(
 		eapol_RSNA_key_header_c * const eapol_key_message,
 		const eap_variable_data_c * const confirmation_key);
 
 
-	EAP_FUNC_IMPORT eap_status_e create_nonce(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e create_nonce(
 		eap_variable_data_c * const nonce,
 		const u32_t nonce_length);
 
-	EAP_FUNC_IMPORT eap_status_e initialize_4_way_handshake(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e initialize_4_way_handshake(
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_protocol_version_e received_eapol_version);
 
-	EAP_FUNC_IMPORT eap_status_e create_4_way_handshake_message_1(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e create_4_way_handshake_message_1(
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t eapol_header_offset,
 		u32_t * const data_length,
@@ -482,7 +503,7 @@ EAP_KEY_TEST_PRIVATE_FUNCTION
 		const eapol_protocol_version_e received_eapol_version,
 		const eapol_key_descriptor_type_e received_key_descriptor_type);
 
-	EAP_FUNC_IMPORT eap_status_e create_4_way_handshake_message_2(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e create_4_way_handshake_message_2(
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t eapol_header_offset,
 		u32_t * const data_length,
@@ -491,7 +512,7 @@ EAP_KEY_TEST_PRIVATE_FUNCTION
 		const eapol_protocol_version_e received_eapol_version,
 		const eapol_key_descriptor_type_e received_key_descriptor_type);
 
-	EAP_FUNC_IMPORT eap_status_e create_4_way_handshake_message_3(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e create_4_way_handshake_message_3(
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t eapol_header_offset,
 		u32_t * const data_length,
@@ -499,7 +520,7 @@ EAP_KEY_TEST_PRIVATE_FUNCTION
 		const eapol_protocol_version_e received_eapol_version,
 		const eapol_key_descriptor_type_e received_key_descriptor_type);
 
-	EAP_FUNC_IMPORT eap_status_e create_4_way_handshake_message_4(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e create_4_way_handshake_message_4(
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t eapol_header_offset,
 		u32_t * const data_length,
@@ -509,71 +530,71 @@ EAP_KEY_TEST_PRIVATE_FUNCTION
 		const eapol_protocol_version_e received_eapol_version,
 		const eapol_key_descriptor_type_e received_key_descriptor_type);
 
-	EAP_FUNC_IMPORT eap_status_e process_4_way_handshake_message_2_payloads(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_4_way_handshake_message_2_payloads(
 		const eap_am_network_id_c * const receive_network_id,
 		eapol_RSNA_key_header_c * const eapol_key_message,
 		const u32_t packet_length);
 
-	EAP_FUNC_IMPORT eap_status_e process_4_way_handshake_message_3_payloads_a(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_4_way_handshake_message_3_payloads_a(
 		const eap_am_network_id_c * const receive_network_id,
 		eapol_RSNA_key_header_c * const eapol_key_message,
 		const u32_t packet_length,
 		bool * const group_key_received);
 
-	EAP_FUNC_IMPORT eap_status_e process_4_way_handshake_message_3_payloads_b(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_4_way_handshake_message_3_payloads_b(
 		const eap_am_network_id_c * const receive_network_id,
 		eapol_RSNA_key_header_c * const eapol_key_message,
 		const u32_t packet_length,
 		const bool group_key_received);
 
-	EAP_FUNC_IMPORT eap_status_e process_4_way_handshake_message_0(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_4_way_handshake_message_0(
 		const eap_am_network_id_c * const receive_network_id,
 		eapol_RSNA_key_header_c * const eapol_key_message,
 		const u32_t packet_length);
 
-	EAP_FUNC_IMPORT eap_status_e process_4_way_handshake_message_1(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_4_way_handshake_message_1(
 		const eap_am_network_id_c * const receive_network_id,
 		eapol_RSNA_key_header_c * const eapol_key_message,
 		const u32_t packet_length);
 
-	EAP_FUNC_IMPORT eap_status_e process_4_way_handshake_message_2(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_4_way_handshake_message_2(
 		const eap_am_network_id_c * const receive_network_id,
 		eapol_RSNA_key_header_c * const eapol_key_message,
 		const u32_t packet_length);
 
-	EAP_FUNC_IMPORT eap_status_e process_4_way_handshake_message_3(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_4_way_handshake_message_3(
 		const eap_am_network_id_c * const receive_network_id,
 		eapol_RSNA_key_header_c * const eapol_key_message,
 		const u32_t packet_length);
 
-	EAP_FUNC_IMPORT eap_status_e process_4_way_handshake_message_4(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_4_way_handshake_message_4(
 		const eap_am_network_id_c * const receive_network_id,
 		eapol_RSNA_key_header_c * const eapol_key_message,
 		const u32_t packet_length);
 
 
-	EAP_FUNC_IMPORT eap_status_e start_group_key_handshake(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e start_group_key_handshake(
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_protocol_version_e received_eapol_version,
 		const eapol_key_descriptor_type_e received_key_descriptor_type);
 
-	EAP_FUNC_IMPORT eap_status_e process_group_key_handshake_message_0(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_group_key_handshake_message_0(
 		const eap_am_network_id_c * const receive_network_id,
 		eapol_RSNA_key_header_c * const eapol_key_message,
 		const u32_t packet_length);
 
-	EAP_FUNC_IMPORT eap_status_e process_group_key_handshake_message_1(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_group_key_handshake_message_1(
 		const eap_am_network_id_c * const receive_network_id,
 		eapol_RSNA_key_header_c * const eapol_key_message,
 		const u32_t packet_length);
 
-	EAP_FUNC_IMPORT eap_status_e process_group_key_handshake_message_2(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_group_key_handshake_message_2(
 		const eap_am_network_id_c * const receive_network_id,
 		eapol_RSNA_key_header_c * const eapol_key_message,
 		const u32_t packet_length);
 
 
-	EAP_FUNC_IMPORT eap_status_e create_eapol_key_handshake_message_0(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e create_eapol_key_handshake_message_0(
 		const bool true_when_4_way_handshake, ///< With false initiates Group Key Handshake.
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t eapol_header_offset,
@@ -582,7 +603,7 @@ EAP_KEY_TEST_PRIVATE_FUNCTION
 		const u64_t received_key_replay_counter,
 		const eapol_protocol_version_e received_eapol_version);
 
-	EAP_FUNC_IMPORT eap_status_e create_group_key_handshake_message_1(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e create_group_key_handshake_message_1(
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t eapol_header_offset,
 		u32_t * const data_length,
@@ -590,7 +611,7 @@ EAP_KEY_TEST_PRIVATE_FUNCTION
 		const eapol_protocol_version_e received_eapol_version,
 		const eapol_key_descriptor_type_e received_key_descriptor_type);
 
-	EAP_FUNC_IMPORT eap_status_e create_group_key_handshake_message_2(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e create_group_key_handshake_message_2(
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t eapol_header_offset,
 		u32_t * const data_length,
@@ -600,89 +621,89 @@ EAP_KEY_TEST_PRIVATE_FUNCTION
 		const eapol_key_descriptor_type_e received_key_descriptor_type);
 
 
-	EAP_FUNC_IMPORT eap_status_e process_4_way_handshake_message(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_4_way_handshake_message(
 		const eap_am_network_id_c * const receive_network_id,
 		eapol_RSNA_key_header_c * const eapol_key_message,
 		const u32_t packet_length);
 
-	EAP_FUNC_IMPORT eap_status_e process_group_key_handshake_message(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_group_key_handshake_message(
 		const eap_am_network_id_c * const receive_network_id,
 		eapol_RSNA_key_header_c * const eapol_key_message,
 		const u32_t packet_length);
 
-	EAP_FUNC_IMPORT eap_status_e process_RSNA_key_descriptor(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_RSNA_key_descriptor(
 		const eap_am_network_id_c * const receive_network_id,
 		eap_general_header_base_c * const packet_data,
 		const u32_t packet_length);
 
-	EAP_FUNC_IMPORT eap_status_e process_RC4_key_descriptor(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_RC4_key_descriptor(
 		const eap_am_network_id_c * const receive_network_id,
 		eap_general_header_base_c * const packet_data,
 		const u32_t packet_length);
 
 	// This is documented in abs_eap_stack_interface_c::set_is_valid().
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H void set_is_valid();
 
 	// 
-	EAP_FUNC_IMPORT eap_variable_data_c * get_authenticator_RSNA_IE();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_variable_data_c * get_authenticator_RSNA_IE();
 
 	// 
-	EAP_FUNC_IMPORT eap_variable_data_c * get_unicast_cipher_suite_RSNA_IE();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_variable_data_c * get_unicast_cipher_suite_RSNA_IE();
 
 	// 
-	EAP_FUNC_IMPORT eap_variable_data_c * get_supplicant_RSNA_IE();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_variable_data_c * get_supplicant_RSNA_IE();
 
 	// 
-	EAP_FUNC_IMPORT eap_variable_data_c * get_received_PMKID();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_variable_data_c * get_received_PMKID();
 
 	// 
-	EAP_FUNC_IMPORT eap_variable_data_c * get_supplicant_MAC_address();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_variable_data_c * get_supplicant_MAC_address();
 
 	// 
-	EAP_FUNC_IMPORT eap_variable_data_c * get_authenticator_MAC_address();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_variable_data_c * get_authenticator_MAC_address();
 
 	// 
-	EAP_FUNC_IMPORT u64_t get_key_reply_counter();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H u64_t get_key_reply_counter();
 
 	// 
-	EAP_FUNC_IMPORT void increase_key_reply_counter();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H void increase_key_reply_counter();
 
 	//
-	EAP_FUNC_IMPORT void set_key_reply_counter(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H void set_key_reply_counter(
 		const u64_t reply_counter);
 
 	//
-	EAP_FUNC_IMPORT u64_t get_client_send_key_reply_counter();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H u64_t get_client_send_key_reply_counter();
 
 	//
-	EAP_FUNC_IMPORT void increase_client_send_key_reply_counter();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H void increase_client_send_key_reply_counter();
 
 	//
-	EAP_FUNC_IMPORT void set_client_send_key_reply_counter(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H void set_client_send_key_reply_counter(
 		const u64_t reply_counter);
 
 	// 
-	EAP_FUNC_IMPORT eap_variable_data_c * get_ANonce();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_variable_data_c * get_ANonce();
 
 	// 
-	EAP_FUNC_IMPORT eap_variable_data_c * get_SNonce();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_variable_data_c * get_SNonce();
 
 	// 
-	EAP_FUNC_IMPORT eap_variable_data_c * get_confirmation_KCK();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_variable_data_c * get_confirmation_KCK();
 
 	// 
-	EAP_FUNC_IMPORT eap_variable_data_c * get_encryption_KEK();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_variable_data_c * get_encryption_KEK();
 
 	//
-	EAP_FUNC_IMPORT void set_eapol_key_state(const eapol_key_state_e state);
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H void set_eapol_key_state(const eapol_key_state_e state);
 
 	//
-	EAP_FUNC_IMPORT eapol_key_state_e get_eapol_key_state() const;
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eapol_key_state_e get_eapol_key_state() const;
 
-	EAP_FUNC_IMPORT eap_status_e asynchronous_init_remove_eapol_key_state();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e asynchronous_init_remove_eapol_key_state();
 
 	//
-	EAP_FUNC_IMPORT eap_status_e packet_send(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e packet_send(
 		const eap_am_network_id_c * const send_network_id,
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t header_offset,
@@ -690,7 +711,7 @@ EAP_KEY_TEST_PRIVATE_FUNCTION
 		const u32_t buffer_length);
 
 	//
-	EAP_FUNC_IMPORT eap_status_e resend_packet(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e resend_packet(
 		const eap_am_network_id_c * const send_network_id,
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t header_offset,
@@ -698,14 +719,14 @@ EAP_KEY_TEST_PRIVATE_FUNCTION
 		const u32_t buffer_length);
 
 	//
-	EAP_FUNC_IMPORT eap_status_e cancel_retransmission();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e cancel_retransmission();
 
 
 	//
-	EAP_FUNC_IMPORT eap_status_e cancel_handshake_timeout();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e cancel_handshake_timeout();
 
 	//
-	EAP_FUNC_IMPORT eap_status_e init_handshake_timeout(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e init_handshake_timeout(
 		const u32_t timeout);
 
 
@@ -722,10 +743,10 @@ EAP_KEY_TEST_PRIVATE_FUNCTION
 	eap_status_e init_4_way_handshake_start_timeout();
 
 	//
-	EAP_FUNC_IMPORT eap_status_e cancel_pmksa_caching_timeout();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e cancel_pmksa_caching_timeout();
 
 	//
-	EAP_FUNC_IMPORT eap_status_e init_retransmission(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e init_retransmission(
 		const eap_am_network_id_c * const send_network_id,
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t header_offset,
@@ -735,13 +756,13 @@ EAP_KEY_TEST_PRIVATE_FUNCTION
 		const eap_type_value_e eap_type
 		);
 
-	EAP_FUNC_IMPORT eap_status_e cancel_group_key_update_timeout();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e cancel_group_key_update_timeout();
 
-	EAP_FUNC_IMPORT eap_status_e init_group_key_update_timeout(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e init_group_key_update_timeout(
 		const u32_t timeout);
 
 	//
-	EAP_FUNC_IMPORT eap_status_e create_tkip_mic_failure_message(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e create_tkip_mic_failure_message(
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t eapol_header_offset,
 		u32_t * const data_length,
@@ -750,28 +771,28 @@ EAP_KEY_TEST_PRIVATE_FUNCTION
 		const eapol_protocol_version_e received_eapol_version);
 
 
-	EAP_FUNC_IMPORT bool get_is_RSNA();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H bool get_is_RSNA();
 
-	EAP_FUNC_IMPORT bool get_is_WPA();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H bool get_is_WPA();
 
-	EAP_FUNC_IMPORT bool get_is_WPXM();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H bool get_is_WPXM();
 
 
-	EAP_FUNC_IMPORT eap_status_e add_RSN_GTK_payload(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e add_RSN_GTK_payload(
 		const eapol_RSNA_key_header_c * const eapol_key_message,
 		eap_variable_data_c * const group_GTK,
 		u32_t * const eapol_data_length);
 
-	EAP_FUNC_IMPORT eap_status_e add_RSN_IE_payload(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e add_RSN_IE_payload(
 		const eapol_RSNA_key_header_c * const eapol_key_message,
 		eap_variable_data_c * const RSNA_IE,
 		u32_t * const eapol_data_length);
 
-	EAP_FUNC_IMPORT eap_status_e get_key_length(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e get_key_length(
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e cipher,
 		u16_t * const key_length);
 
-	EAP_FUNC_IMPORT eap_status_e send_RC4_eapol_key_messages();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e send_RC4_eapol_key_messages();
 
 	//--------------------------------------------------
 protected:
@@ -782,10 +803,10 @@ public:
 	//--------------------------------------------------
 
 	// 
-	EAP_FUNC_IMPORT virtual ~eapol_key_state_c();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H virtual ~eapol_key_state_c();
 
 	// 
-	EAP_FUNC_IMPORT eapol_key_state_c(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eapol_key_state_c(
 		abs_eap_am_tools_c * const tools,
 		abs_eapol_key_state_c * const key_state_partner,
 		abs_eapol_core_c * const eapol_partner,
@@ -799,7 +820,7 @@ public:
 		const eap_variable_data_c * const pre_shared_key);
 
 	// 
-	EAP_FUNC_IMPORT eapol_key_state_c(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eapol_key_state_c(
 		abs_eap_am_tools_c * const tools,
 		abs_eapol_key_state_c * const key_state_partner,
 		abs_eapol_core_c * const eapol_partner,
@@ -808,7 +829,7 @@ public:
 		const eapol_key_authentication_type_e authentication_type);
 
 
-	EAP_FUNC_IMPORT eap_status_e initialize(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e initialize(
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type,
 		const eap_variable_data_c * const authenticator_RSNA_IE,
@@ -817,38 +838,38 @@ public:
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e eapol_group_cipher,
 		const eap_variable_data_c * const pre_shared_key);
 
-	EAP_FUNC_IMPORT eap_status_e initialize(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e initialize(
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type);
 
-	EAP_FUNC_IMPORT eapol_key_state_c *copy(const eap_am_network_id_c * const receive_network_id);
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eapol_key_state_c *copy(const eap_am_network_id_c * const receive_network_id);
 
-	EAP_FUNC_IMPORT bool get_is_encryption_on();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H bool get_is_encryption_on();
 
-	EAP_FUNC_IMPORT bool get_is_associated();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H bool get_is_associated();
 
-	EAP_FUNC_IMPORT eap_status_e started_eap_authentication();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e started_eap_authentication();
 
 	/**
 	 * This function checks whether cached PMKSA have correct cipher suite.
 	 */
-	EAP_FUNC_IMPORT eap_status_e check_pmksa_cache(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e check_pmksa_cache(
 		const eapol_key_authentication_type_e selected_eapol_key_authentication_type,
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e pairwise_key_cipher_suite,
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e group_key_cipher_suite);
 
-	EAP_FUNC_IMPORT eap_status_e initialize_preauthentication(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e initialize_preauthentication(
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type);
 
-	EAP_FUNC_IMPORT eap_status_e read_reassociation_parameters(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e read_reassociation_parameters(
 		const eap_am_network_id_c * const receive_network_id, ///< source includes remote address, destination includes local address.
 		const eapol_key_authentication_type_e authentication_type,
 		eap_variable_data_c * const PMKID,
 		const eap_variable_data_c * const received_WPA_ie,
 		const eap_variable_data_c * const sent_WPA_ie);
 
-	EAP_FUNC_IMPORT eap_status_e complete_reassociation(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e complete_reassociation(
 		const eapol_wlan_authentication_state_e reassociation_result,
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type,
@@ -857,88 +878,88 @@ public:
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e pairwise_key_cipher_suite,
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e group_key_cipher_suite);
 
-	EAP_FUNC_IMPORT eap_status_e start_WPXM_reassociation(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e start_WPXM_reassociation(
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type,
 		eap_variable_data_c * const send_reassociation_request_ie);
 
-	EAP_FUNC_IMPORT eap_status_e complete_WPXM_reassociation(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e complete_WPXM_reassociation(
 		const eapol_wlan_authentication_state_e reassociation_result,
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type,
 		const eap_variable_data_c * const received_reassociation_ie);
 
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e configure();
 
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e shutdown();
 
-	EAP_FUNC_IMPORT eap_status_e set_WPXM_parameters(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e set_WPXM_parameters(
 		const eap_am_network_id_c * const receive_network_id);
 
-	EAP_FUNC_IMPORT eap_status_e set_s_nonce(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e set_s_nonce(
 		const eap_variable_data_c * const s_nonce);
 
-	EAP_FUNC_IMPORT eap_status_e set_pairwise_PMK(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e set_pairwise_PMK(
 		const eap_variable_data_c * const key,
 		const eap_am_network_id_c * const send_network_id);
 
-	EAP_FUNC_IMPORT eap_status_e allow_4_way_handshake();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e allow_4_way_handshake();
 
-	EAP_FUNC_IMPORT eap_status_e start_4_way_handshake(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e start_4_way_handshake(
 		const eap_am_network_id_c * const receive_network_id);
 
 	// 
-	EAP_FUNC_IMPORT eap_status_e process_eapol_key_frame(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e process_eapol_key_frame(
 		const eap_am_network_id_c * const receive_network_id,
 		eap_general_header_base_c * const packet_data,
 		const u32_t packet_length);
 
 	// This is documented in abs_eap_stack_interface_c::get_is_valid().
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H bool get_is_valid();
 
 	/**
 	 * The object_increase_reference_count() function increases the reference count.
 	 */
-	EAP_FUNC_IMPORT void object_increase_reference_count();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H void object_increase_reference_count();
 
 	/**
 	 * The object_decrease_reference_count () function decreases 
 	 * the reference count and returns the remaining value.
 	 * The EAP type is removed after there is no references to it.
 	 */
-	EAP_FUNC_IMPORT u32_t object_decrease_reference_count();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H u32_t object_decrease_reference_count();
 
 	// See abs_eap_base_timer_c::timer_expired().
-	EAP_FUNC_IMPORT eap_status_e timer_expired(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e timer_expired(
 		const u32_t id, void *data);
 
 	// See abs_eap_base_timer_c::timer_delete_data().
-	EAP_FUNC_IMPORT eap_status_e timer_delete_data(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e timer_delete_data(
 		const u32_t id, void *data);
 
 	/**
 	 * Gets flag whether this session is marked removed.
 	 * Session is removed later if it is not reused.
 	 */
-	EAP_FUNC_IMPORT bool get_marked_removed();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H bool get_marked_removed();
 
 	/**
 	 * Marks this session removed.
 	 * Session is removed later if it is not reused.
 	 */
-	EAP_FUNC_IMPORT void set_marked_removed();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H void set_marked_removed();
 
 	/**
 	 * Marks this session not removed.
 	 * Session is not removed it is reused.
 	 */
-	EAP_FUNC_IMPORT void unset_marked_removed();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H void unset_marked_removed();
 
 	/**
 	 * This function resets object partially.
 	 * Member attributes needed in reassociation are left untouched.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reset_cached_pmksa();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e reset_cached_pmksa();
 
 	/**
 	 * This function resets the full state of object to same as 
@@ -947,17 +968,17 @@ public:
 	 * If object reset fails this function must return corresponding error status.
 	 * @return This function returns the status of reset operation.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e reset();
 
-	EAP_FUNC_IMPORT eap_status_e tkip_mic_failure(
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e tkip_mic_failure(
 		const bool fatal_failure_when_true,
 		const eapol_RSNA_key_header_c::eapol_tkip_mic_failure_type_e tkip_mic_failure_type);
 
 	//
-	EAP_FUNC_IMPORT eap_status_e init_pmksa_caching_timeout();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e init_pmksa_caching_timeout();
 
 	//
-	EAP_FUNC_IMPORT eap_status_e cancel_authentication_session();
+	EAP_FUNC_VISIBILITY_EAPOL_KEY_STATE_H eap_status_e cancel_authentication_session();
 
 	//--------------------------------------------------
 }; // class eapol_key_state_c

@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 8 %
+ * %version: 9 %
  */
 
 #ifndef EAPQTCONFIGINTERFACE_H
@@ -67,7 +67,7 @@ public:
 
     // NOTE: the default constuctor can only be used for creating validators
     // with validatorEap() and validatorPacStore(), and accessing EAP-FAST PAC store,
-    // any other call throws an exeption;
+    // any other call throws an exception;
     // also, throws an exception if the construction fails
     EapQtConfigInterface();
 

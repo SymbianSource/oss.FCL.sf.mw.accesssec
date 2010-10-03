@@ -15,7 +15,7 @@
 #	EAP method configuration QT interface
 #
 
-# %version: 25 %
+# %version: 28 %
 
 
 TEMPLATE            = lib
@@ -29,7 +29,8 @@ DEPENDPATH          += .
 CONFIG += hb
 
 # translations
-TRANSLATIONS = cpeapuiplugins.ts
+TRANSLATIONS += cpeapuiplugins.ts \
+				eapprompts.ts
 
 # Storage for generated files
 MOC_DIR     = _build
@@ -37,7 +38,8 @@ RCC_DIR     = _build
 OBJECTS_DIR = _build
 
 INCLUDEPATH += \
-    ../../inc
+    ../../inc \
+    ../../../inc/pacstore_inc
    
 HEADERS += \
     inc/eapqtcertificateinfo_p.h \
@@ -68,11 +70,15 @@ SOURCES += \
 # qt libs
 LIBS += \
     -leapqtplugininfo
-    
+
+mmpRuleDeffile = \
+    "$${LITERAL_HASH}ifdef WINSCW" \
+    "DEFFILE ./bwins/eapqtconfiginterface.def" \
+    "$${LITERAL_HASH}else" \
+    "DEFFILE ./eabi/eapqtconfiginterface.def" \
+    "$${LITERAL_HASH}endif"
+
 symbian { 
-    # path to def files
-    defFilePath = .
-    
     # symbian libs
     LIBS += \
         -leapsymbiantools \
@@ -83,6 +89,8 @@ symbian {
     TARGET.UID3 = 0x2002C2FC
     TARGET.EPOCALLOWDLLDATA = 1
     
+    MMP_RULES += mmpRuleDeffile
+
     TARGET.CAPABILITY = CAP_GENERAL_DLL
                     
     BLD_INF_RULES.prj_exports += \ 

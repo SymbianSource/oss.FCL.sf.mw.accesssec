@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 37 %
+* %version: 40 %
 */
 
 #include <platform_paths.hrh>
@@ -41,7 +41,7 @@ backup_registration_eapol.xml  /epoc32/release/winscw/urel/z/private/101F8EC5/ba
 
 // Backup registration file for backing up all EAP server databases. Exported to the private cage path of EAP server.
 backup_registration.xml  /epoc32/data/z/private/20026FCB/backup_registration.xml
-backup_registration.xml  /epoc32/release/udeb/urel/z/private/20026FCB/backup_registration.xml
+backup_registration.xml  /epoc32/release/winscw/udeb/z/private/20026FCB/backup_registration.xml
 backup_registration.xml  /epoc32/release/winscw/urel/z/private/20026FCB/backup_registration.xml
 
 // copy EAPOL configuration file to WLAN server's private cage path
@@ -93,7 +93,7 @@ eapgeneralsettings.mmp
 // Interface for providing EAP authentication services to VPN
 eapvpnif.mmp
 
-// Iterface for providing authentication services to WLAN
+// Interface for providing authentication services to WLAN
 wlaneapolif.mmp
 
 // End of file.

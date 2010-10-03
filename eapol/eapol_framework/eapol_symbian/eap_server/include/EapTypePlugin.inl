@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 6 %
+* %version: 7 %
 */
 
 /* The meaning and bit positions used in "opaque_data" field in ECOM implementation
@@ -69,7 +69,7 @@ const TUint8 KNotInsideFAST = 0x40; // Only the 7th last bit position is 1. 	(01
 const TUint8 KNotOutsideFAST = 0x80;  // Only the first bit position is 1. 		(1000 0000)
 
 // Used By Server
-inline CEapTypePlugin* CEapTypePlugin::NewL(const TDesC8& aCue, TIndexType aIndexType, TInt aIndex)
+inline CEapTypePlugin* CEapTypePlugin::NewL(const TDesC8& aCue, TIndexType aIndexType, TInt aIndex, abs_eap_am_tools_c * const aTools)
 {
     EAP_TRACE_DEBUG_SYMBIAN((_L("CEapTypePlugin::NewL(): start")));
 
@@ -78,10 +78,11 @@ inline CEapTypePlugin* CEapTypePlugin::NewL(const TDesC8& aCue, TIndexType aInde
     resolverParams.SetDataType(aCue);
 	
 	// The arguments are stored to a iapInfo struct.
-	SIapInfo iapInfo;
+	SPluginInfo iapInfo;
 	iapInfo.indexType = aIndexType;
 	iapInfo.index = aIndex;
 	iapInfo.aEapType = aCue;
+	iapInfo.aTools = aTools;
 
 	EAP_TRACE_DATA_DEBUG_SYMBIAN(("CEapTypePlugin::NewL(): resolverParams.DataType()",
 		resolverParams.DataType().Ptr(),

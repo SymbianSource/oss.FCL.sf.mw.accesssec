@@ -16,7 +16,7 @@
 */
 
 /*
-* %version:  41 %
+* %version:  50 %
 */
 
 #include "EapServerProcessHandler.h"
@@ -36,14 +36,15 @@ CEapServerProcessHandler::CEapServerProcessHandler()
 , iEapCore(0)
 , iEapPlugin(0)
 , iEapSettings(0)
-#if defined (USE_WAPI_CORE)
 , iWapiCore(0)
 , iWapiSettings(0)
-#endif
 #if defined(USE_FAST_EAP_TYPE)
 , iPacStore(0)
 #endif //#if defined(USE_FAST_EAP_TYPE)
-, iEapMessageQueue(0)
+, iEapSendMessageQueue(0)
+, iEapProcessMessageQueue(0)
+, iProcessMessage(0)
+, iHandlerState(EapServerProcessHandlerState_None)
 {
 	EAP_TRACE_DEBUG(
 		iTools,
@@ -64,11 +65,18 @@ CEapServerProcessHandler::~CEapServerProcessHandler()
 		this));
 	EAP_TRACE_RETURN_STRING(iTools, "returns: CEapServerProcessHandler::~CEapServerProcessHandler()");
 
-	if(IsActive())
-	{
-		Cancel();
-	}
-
+	if (iClient)
+		{
+		TInt error = iClient->CancelReadyHandler(this);
+		if (error != KErrNone)
+			{
+			EAP_TRACE_DEBUG(
+				iTools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("ERROR: CEapServerProcessHandler::~CEapServerProcessHandler(): iClient->CancelReadyHandler() failed, error=%d\n"),
+				error));
+			}
+		}
 	delete iEapCore;
 	iEapCore = 0;
 
@@ -78,21 +86,27 @@ CEapServerProcessHandler::~CEapServerProcessHandler()
 	delete iEapSettings;
 	iEapSettings = 0;
 
-#if defined (USE_WAPI_CORE)
     delete iWapiCore;
     iWapiCore = 0;
 
     delete iWapiSettings;
     iWapiSettings = 0;
-#endif
 
 #if defined(USE_FAST_EAP_TYPE)
     delete iPacStore;
     iPacStore = 0;
 #endif //#if defined(USE_FAST_EAP_TYPE)
 
-    delete iEapMessageQueue;
-	iEapMessageQueue = 0;
+	delete iEapSendMessageQueue;
+	iEapSendMessageQueue = 0;
+
+    delete iEapProcessMessageQueue;
+	iEapProcessMessageQueue = 0;
+
+	if(IsActive())
+	{
+		Cancel();
+	}
 }
     
 //----------------------------------------------------------------------------
@@ -114,23 +128,35 @@ void CEapServerProcessHandler::ConstructL(AbsEapProcessSendInterface* const clie
 	EAP_TRACE_RETURN_STRING(tools, "returns: CEapServerProcessHandler::ConstructL()");
 
 	iClient = client;
+
 	iTools = tools;
 
-	iEapMessageQueue = new(ELeave) EapMessageQueue(iTools);
+	iEapSendMessageQueue = new(ELeave) EapMessageQueue(iTools);
+
+	iEapProcessMessageQueue = new(ELeave) EapMessageQueue(iTools);
 }
 
 //----------------------------------------------------------------------------
 
 eap_status_e CEapServerProcessHandler::SendData(const void * const data, const u32_t length, TEapRequests message)
 {
+
 	EAP_TRACE_DEBUG(
 		iTools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapServerProcessHandler::SendData(): this=0x%08x\n"),
-		this));
+		(EAPL("CEapServerProcessHandler::SendData(): this=0x%08x, iProcessMessage=0x%08x, send message=%d=%s\n"),
+		this,
+		iProcessMessage,
+		message,
+		EapServerStrings::GetEapRequestsString(message)));
+
 	EAP_TRACE_RETURN_STRING(iTools, "returns: CEapServerProcessHandler::SendData()");
 
 	eap_status_e status(eap_status_ok);
+
+	// First message handled, remove the message.
+	iEapProcessMessageQueue->DeleteFirstMessage(iProcessMessage);
+	iProcessMessage = 0;
 
 	SaveMessage(message, data, length);
 
@@ -157,24 +183,47 @@ void CEapServerProcessHandler::SaveMessage(TEapRequests message, const void * co
 		data,
 		length));
 
-	EAP_TRACE_DEBUG(
-		iTools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapServerProcessHandler::SaveMessage(): calls iEapMessageQueue->AddMessage()\n")));
-
-	TInt error = iEapMessageQueue->AddMessage(message, data, length);
-
-	if (error != KErrNone)
+	if (message == EEapCoreSendData || message == EEapPluginSendData || message == EEapSettingsSendData || message == EEapPacStoreSendData || message == EWapiCoreSendData)
 	{
-		EAP_TRACE_DEBUG(
-			iTools,
-			TRACE_FLAGS_DEFAULT,
-			(EAPL("ERROR: CEapServerProcessHandler::SaveMessage(): failed = %d\n"),
-			error));
-		return;
-	}
+		TInt error = iEapSendMessageQueue->AddMessage(message, data, length);
 
-	Activate();
+		if (error != KErrNone)
+		{
+			EAP_TRACE_DEBUG(
+				iTools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("ERROR: CEapServerProcessHandler::SaveMessage(): failed = %d\n"),
+				error));
+			return;
+		}
+
+		Activate(EapServerProcessHandlerState_Send);
+	}
+	else
+	{
+		TInt error = iEapProcessMessageQueue->AddMessage(message, data, length);
+
+		if (error != KErrNone)
+		{
+			EAP_TRACE_DEBUG(
+				iTools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("ERROR: CEapServerProcessHandler::SaveMessage(): failed = %d\n"),
+				error));
+			return;
+		}
+
+		error = iClient->AddReadyHandler(this);
+		if (error != KErrNone)
+		{
+			EAP_TRACE_DEBUG(
+				iTools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("ERROR: CEapServerProcessHandler::SaveMessage(): iClient->AddReadyHandler(this) failed = %d\n"),
+				error));
+			return;
+		}
+	}
 
 	EAP_TRACE_DEBUG(
 		iTools,
@@ -187,13 +236,15 @@ void CEapServerProcessHandler::SaveMessage(TEapRequests message, const void * co
 
 //----------------------------------------------------------------------------
 
-void CEapServerProcessHandler::Activate()
+void CEapServerProcessHandler::Activate(const CEapServerProcessHandlerState aState)
 {
 	EAP_TRACE_DEBUG(
 		iTools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapServerProcessHandler::Activate(): this=0x%08x\n"),
-		this));
+		(EAPL("CEapServerProcessHandler::Activate(): this=0x%08x, iHandlerState=%d, aState=%d\n"),
+		this,
+		iHandlerState,
+		aState));
 	EAP_TRACE_RETURN_STRING(iTools, "returns: CEapServerProcessHandler::Activate()");
 
 	if(!IsActive())
@@ -202,6 +253,8 @@ void CEapServerProcessHandler::Activate()
 			iTools,
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("CEapServerProcessHandler::Activate(): calls User::RequestComplete()\n")));
+
+		iHandlerState = aState;
 
 		TRequestStatus* status = &iStatus;
 		User::RequestComplete(status, KErrNone);
@@ -236,10 +289,50 @@ void CEapServerProcessHandler::RunL()
 	EAP_TRACE_DEBUG(
 		iTools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapServerProcessHandler::RunL(): this=0x%08x\n"),
-		this));
+		(EAPL("CEapServerProcessHandler::RunL(): this=0x%08x, iProcessMessage=0x%08x, iHandlerState=%d\n"),
+		this,
+		iProcessMessage,
+		iHandlerState));
 
-	EapMessageBuffer * const message = iEapMessageQueue->GetFirstMessage();
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	const EapMessageBuffer * aSendMessage = 0;
+
+	// The send-message queue have priority over the process-message queue.
+	EapMessageBuffer * message = iEapSendMessageQueue->GetFirstMessage();
+
+	if (message != 0)
+	{
+		EAP_TRACE_DEBUG(
+			iTools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("CEapServerProcessHandler::RunL(): Send-message=0x%08x\n"),
+			this,
+			message));
+
+		aSendMessage = message;
+	}
+
+	// When send-operation is only allowed the process-message queue is NOT read.
+	if (message == 0
+		&& iHandlerState != EapServerProcessHandlerState_Send
+		)
+	{
+		message = iEapProcessMessageQueue->GetFirstMessage();
+
+		EAP_ASSERT_TOOLS(iTools, iProcessMessage == 0);
+
+		iProcessMessage = message;
+
+		EAP_TRACE_DEBUG(
+			iTools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("CEapServerProcessHandler::RunL(): Process-message=0x%08x\n"),
+			this,
+			message));
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	if (message != 0)
 	{
@@ -253,6 +346,8 @@ void CEapServerProcessHandler::RunL()
 			message->GetData()->Size()));
 
 		eap_status_e status(eap_status_ok);
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		switch (message->GetRequestType())
 		{
@@ -487,41 +582,47 @@ void CEapServerProcessHandler::RunL()
 
 			break;
 
-#if defined (USE_WAPI_CORE)
-	     case EWapiCoreIfNew:
-
+        case EWapiCoreIfNew:
+            {
 	            EAP_TRACE_DEBUG(
 	                iTools,
 	                TRACE_FLAGS_DEFAULT,
 	                (EAPL("CEapServerProcessHandler::RunL() EWapiCoreIfNew\n")));
 
-                iWapiCore = CWapiCoreIf::NewL(iTools, this);
+                TRAPD( err, iWapiCore = CWapiCoreIf::NewL(iTools, this));
+
+				EAP_UNREFERENCED_PARAMETER(err); // Only trace uses this.
 
 				EAP_TRACE_DEBUG(
 					iTools,
 					TRACE_FLAGS_DEFAULT,
-					(EAPL("CEapServerProcessHandler::RunL() EWapiCoreIfNew - iWapiCore = 0x%08x.\n"),
-					iWapiCore));
-
+					(EAPL("CEapServerProcessHandler::RunL() EWapiCoreIfNew - iWapiCore = 0x%08x, err=%i.\n"),
+					iWapiCore,
+					err));
 
 	            break;
+            }
 
-	        case EWapiSettingsNew:
+        case EWapiSettingsNew:
+            {
 
 	            EAP_TRACE_DEBUG(
 	                iTools,
 	                TRACE_FLAGS_DEFAULT,
 	                (EAPL("CEapServerProcessHandler::RunL() EWapiSettingsNew\n")));
 
-	            iWapiSettings = CWapiSettingsIf::NewL(iTools, this);
+	            TRAPD( err, iWapiSettings = CWapiSettingsIf::NewL(iTools, this));
+
+				EAP_UNREFERENCED_PARAMETER(err); // Only trace uses this.
 
 				EAP_TRACE_DEBUG(
 					iTools,
 					TRACE_FLAGS_DEFAULT,
-					(EAPL("CEapServerProcessHandler::RunL() EWapiSettingsNew - iWapiSettings = 0x%08x.\n"),
-					iWapiSettings));
+					(EAPL("CEapServerProcessHandler::RunL() EWapiSettingsNew - iWapiSettings = 0x%08x, err=%i.\n"),
+					iWapiSettings,
+					err));
 	            break;
-#endif
+            }
 	            
         case EEapPacStoreNew:
 
@@ -617,7 +718,7 @@ void CEapServerProcessHandler::RunL()
             {
                 void* aData = reinterpret_cast<void *>(const_cast<TUint8 *>(message->GetData()->Ptr()));
                 TInt aLength = message->GetData()->Size();
-                iEapCore->process_data(aData, aLength);
+                status = iEapCore->process_data(aData, aLength);
             }
             else
             {
@@ -641,7 +742,7 @@ void CEapServerProcessHandler::RunL()
 			{
 				void* aData = reinterpret_cast<void *>(const_cast<TUint8 *>(message->GetData()->Ptr()));
 				TInt aLength = message->GetData()->Size();
-				iPacStore->process_data(aData, aLength);
+                status = iPacStore->process_data(aData, aLength);
 			}
 			else
 			{
@@ -664,7 +765,7 @@ void CEapServerProcessHandler::RunL()
 			{
 				void* aData = reinterpret_cast<void *>(const_cast<TUint8 *>(message->GetData()->Ptr()));
 				TInt aLength = message->GetData()->Size();
-				iEapPlugin->process_data(aData, aLength);
+                status = iEapPlugin->process_data(aData, aLength);
 			}
 			else
 			{
@@ -687,7 +788,7 @@ void CEapServerProcessHandler::RunL()
 			{
 				void* aData = reinterpret_cast<void *>(const_cast<TUint8 *>(message->GetData()->Ptr()));
 				TInt aLength = message->GetData()->Size();
-				iEapSettings->process_data(aData, aLength);
+                status = iEapSettings->process_data(aData, aLength);
 			}
 			else
 			{
@@ -699,7 +800,6 @@ void CEapServerProcessHandler::RunL()
 
 			break;
 
-#if defined (USE_WAPI_CORE)
 		case EWapiCoreProcessData:
 
             EAP_TRACE_DEBUG(
@@ -711,7 +811,7 @@ void CEapServerProcessHandler::RunL()
             {
                 void* aData = reinterpret_cast<void *>(const_cast<TUint8 *>(message->GetData()->Ptr()));
                 TInt aLength = message->GetData()->Size();
-                iWapiCore->process_data(aData, aLength);
+                status = iWapiCore->process_data(aData, aLength);
             }
             else
             {
@@ -733,7 +833,7 @@ void CEapServerProcessHandler::RunL()
             {
                 void* aData = reinterpret_cast<void *>(const_cast<TUint8 *>(message->GetData()->Ptr()));
                 TInt aLength = message->GetData()->Size();
-                iWapiSettings->process_data(aData, aLength);
+                status = iWapiSettings->process_data(aData, aLength);
             }
             else
             {
@@ -744,16 +844,13 @@ void CEapServerProcessHandler::RunL()
             }
 
             break;
-#endif
 
 		case EEapCoreSendData:
 		case EEapPluginSendData:
 		case EEapSettingsSendData:
         case EEapPacStoreSendData:
-#if defined (USE_WAPI_CORE)
         case EWapiCoreSendData:
         case EWapiSettingsSendData:
-#endif
 			if (message->GetRequestType() == EEapCoreSendData)
 			{
 				EAP_TRACE_DEBUG(
@@ -782,7 +879,6 @@ void CEapServerProcessHandler::RunL()
                     TRACE_FLAGS_DEFAULT,
                     (EAPL("CEapServerProcessHandler::RunL() EEapPacStoreSendData\n")));
             }
-#if defined (USE_WAPI_CORE)
             else if (message->GetRequestType() == EWapiCoreSendData)
             {
                 EAP_TRACE_DEBUG(
@@ -797,7 +893,7 @@ void CEapServerProcessHandler::RunL()
                     TRACE_FLAGS_DEFAULT,
                     (EAPL("CEapServerProcessHandler::RunL() EWapiSettingsSendData\n")));
             }
-#endif
+
 			EAP_TRACE_DEBUG(
 				iTools,
 				TRACE_FLAGS_DEFAULT,
@@ -842,27 +938,63 @@ void CEapServerProcessHandler::RunL()
 
 		} // switch()
 
-		if (status == eap_status_ok)
-		{
-			// First one handled, remove message.
-			// iClient->SendData() call may fail, then we do not remove the message.
-			iEapMessageQueue->DeleteFirstMessage();
-		}
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	} // if ()
-
-	if (iEapMessageQueue->GetFirstMessage() != 0)
-	{
 		EAP_TRACE_DEBUG(
 			iTools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("CEapServerProcessHandler::RunL(): Still messages waiting.\n")));
+			(EAPL("CEapServerProcessHandler::RunL(): iProcessMessage=0x%08x, aSendMessage=0x%08x, status=%d=%s.\n"),
+			iProcessMessage,
+			aSendMessage,
+			status,
+			eap_status_string_c::get_status_string(status)));
 
+		// First send-message handled, remove the message.
+		// iClient->SendData() call may fail, then we do not remove the message.
+		if (aSendMessage != 0
+			&& status == eap_status_ok)
+		{
+			iEapSendMessageQueue->DeleteFirstMessage(aSendMessage);
+		}
+		else if (aSendMessage == 0
+			&& (status == eap_status_ok
+				|| status != eap_status_pending_request))
+		{
+			// First process-message handled, remove the message.
+			// Note the pending message will be removed after the operation has been completed in the SendData() function.
+			iEapProcessMessageQueue->DeleteFirstMessage(iProcessMessage);
+			iProcessMessage = 0;
+		}
+
+		// Send-message must be null after this step. The message is is still in the iEapSendMessageQueue if send-operation failed.
+		aSendMessage = 0;
+
+	} // if ()
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	EAP_TRACE_DEBUG(
+		iTools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapServerProcessHandler::RunL(): iProcessMessage=0x%08x, aSendMessage=0x%08x\n"),
+		iProcessMessage,
+		aSendMessage));
+
+	EAP_TRACE_DEBUG(
+		iTools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapServerProcessHandler::RunL(): iEapSendMessageQueue->GetFirstMessage()=0x%08x, iEapProcessMessageQueue->GetFirstMessage()=0x%08x\n"),
+		iEapSendMessageQueue->GetFirstMessage(),
+		iEapProcessMessageQueue->GetFirstMessage()));
+
+	if (iEapSendMessageQueue->GetFirstMessage() != 0)
+	{
 		if (iClient != NULL)
 		{
 			if (iClient->GetReceiveActive())
 			{
-				Activate();
+				// Still send-messages waiting, activate handler.
+				Activate(EapServerProcessHandlerState_Send);
 			}
 			else
 			{
@@ -873,12 +1005,37 @@ void CEapServerProcessHandler::RunL()
 			}
 		}
 	}
-	else
+	else if (iProcessMessage == 0
+		&& iEapProcessMessageQueue->GetFirstMessage() != 0)
 	{
 		EAP_TRACE_DEBUG(
 			iTools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("CEapServerProcessHandler::RunL(): No more messages to process.\n")));
+			(EAPL("CEapServerProcessHandler::RunL(): Still messages waiting.\n")));
+
+		if (iClient != NULL)
+		{
+			// Still process-messages waiting, activate handler.
+			Activate(EapServerProcessHandlerState_All);
+		}
+	}
+	else if (iProcessMessage == 0)
+	{
+		EAP_TRACE_DEBUG(
+			iTools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("CEapServerProcessHandler::RunL(): No new messages to process. Current message iProcessMessage=0x%08x\n"),
+			iProcessMessage));
+
+		TInt error = iClient->CompleteReadyHandler(this);
+		if (error != KErrNone)
+		{
+			EAP_TRACE_DEBUG(
+				iTools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("ERROR: CEapServerProcessHandler::RunL(): iClient->CompleteReadyHandler() failed, error=%d\n"),
+				error));
+		}
 	}
 
 	EAP_TRACE_DEBUG(

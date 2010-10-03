@@ -22,11 +22,33 @@
 #if !defined(_ABS_EAPOL_KEY_STATE_MAP_H_)
 #define _ABS_EAPOL_KEY_STATE_MAP_H_
 
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABS_EAPOL_KEY_STATE_MAP_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAPOL_KEY_STATE_MAP_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABS_EAPOL_KEY_STATE_MAP_H 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAPOL_KEY_STATE_MAP_H 
+	#define EAP_FUNC_EXPORT_ABS_EAPOL_KEY_STATE_MAP_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAPOL_KEY_STATE_MAP_H 
+#elif defined(EAP_EXPORT_ABS_EAPOL_KEY_STATE_MAP_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAPOL_KEY_STATE_MAP_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAPOL_KEY_STATE_MAP_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAPOL_KEY_STATE_MAP_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAPOL_KEY_STATE_MAP_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABS_EAPOL_KEY_STATE_MAP_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABS_EAPOL_KEY_STATE_MAP_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAPOL_KEY_STATE_MAP_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAPOL_KEY_STATE_MAP_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAPOL_KEY_STATE_MAP_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAPOL_KEY_STATE_MAP_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 /// This class is the interface to partner class of the eap_core_map_c class.
 /// This declares the pure virtual member functions eap_core_map_c class could call.
 /// Currently this interface is empty. No functions are defined.
-class EAP_EXPORT abs_eapol_key_state_map_c
+class EAP_CLASS_VISIBILITY_ABS_EAPOL_KEY_STATE_MAP_H abs_eapol_key_state_map_c
 {
 private:
 	//--------------------------------------------------

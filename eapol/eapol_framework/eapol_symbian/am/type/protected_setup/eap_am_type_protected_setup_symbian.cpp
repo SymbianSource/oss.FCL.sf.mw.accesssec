@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18.1.4.1.12 %
+* %version: 18.1.4.1.13 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -40,6 +40,7 @@
 #include "abs_simple_config_am_services.h"
 #include "simple_config_credential.h"
 #include "abs_eap_configuration_if.h"
+#include "eap_network_id_selector.h"
 
 #include "EapTraceSymbian.h"
 #include <mmtsy_names.h>
@@ -595,43 +596,15 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::type_configure_read(
 		
 		eap_status_e status(eap_status_ok);
 
-		eap_variable_data_c wanted_field(m_am_tools);
-		eap_variable_data_c type_field(m_am_tools);
-
-		status = wanted_field.set_buffer(
-			field->get_field(),
-			field->get_field_length(),
-			false,
-			false);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		status = type_field.set_buffer(
-			cf_str_EAP_SIMPLE_CONFIG_device_password.get_field()->get_field(),
-			cf_str_EAP_SIMPLE_CONFIG_device_password.get_field()->get_field_length(),
-			false,
-			false);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		if (!wanted_field.compare(&type_field))
+		if (cf_str_EAP_SIMPLE_CONFIG_device_password.get_field()->compare(
+			m_am_tools,
+			field) == true)
 		{
 			// We have to get the device password here. It is nothing but the PIN code in PIN based protected setup.
-			
-			TRAPD(err, read_device_passwordL(
-				field->get_field(),
-				field->get_field_length(),
-				data));
-			if (err != KErrNone) 
-			{	
-				status = m_am_tools->convert_am_error_to_eapol_error(err);
-			}
+
+			status = read_memory_store(
+				eap_type_protected_setup_stored_preshared_key,														
+				data);
 			
 			m_am_tools->trace_configuration(
 				status,
@@ -640,8 +613,7 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::type_configure_read(
 			
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 			return EAP_STATUS_RETURN(m_am_tools, status);
-		
-		} // if (!wanted_field.compare(&type_field))
+		}
 
 
 	// Read is routed to partner object.
@@ -660,16 +632,271 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::type_configure_read(
 //--------------------------------------------------
 
 //
+eap_status_e CEapAmProtectedSetupSymbian::read_memory_store(
+	const eap_type_protected_setup_stored_e data_type,														
+	eap_variable_data_c * const data)
+{
+	// Read data from memory store.
+
+	eap_variable_data_c memory_store_key(m_am_tools);
+
+	eap_status_e status = memory_store_key.set_copy_of_buffer(
+		EAP_WPS_CONFIGURATION_MEMORY_STORE_KEY,
+		sizeof(EAP_WPS_CONFIGURATION_MEMORY_STORE_KEY));
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	status = memory_store_key.add_data(
+		&m_is_client,
+		sizeof(m_is_client));
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	eap_network_id_selector_c state_selector(
+		m_am_tools,
+		&m_receive_network_id);
+
+	status = memory_store_key.add_data(
+		&state_selector);
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, status);
+	}
+
+	eap_tlv_message_data_c tlv_data(m_am_tools);
+
+	status = m_am_tools->memory_store_get_data(
+		&memory_store_key,
+		&tlv_data);
+	if (status != eap_status_ok)
+	{
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("simple_config_record_c::complete_query_network_and_device_parameters(): cannot get WPS credentials\n")));
+	}
+	else
+	{
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("simple_config_record_c::complete_query_network_and_device_parameters(): WPS credentials found\n")));
+
+		// Parse read data.
+		eap_array_c<eap_tlv_header_c> tlv_blocks(m_am_tools);
+			
+		status = tlv_data.parse_message_data(&tlv_blocks);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+
+		for (u32_t ind = 0ul; ind < tlv_blocks.get_object_count(); ind++)
+		{
+			eap_tlv_header_c * const tlv = tlv_blocks.get_object(ind);
+			if (tlv != 0)
+			{
+				if (tlv->get_type() == data_type)
+				{
+					status = data->set_copy_of_buffer(
+						tlv->get_value(tlv->get_value_length()),
+						tlv->get_value_length());
+					if (status != eap_status_ok)
+					{
+						EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+						return EAP_STATUS_RETURN(m_am_tools, status);
+					}
+				}
+			}
+		} // for()
+
+		if (data->get_is_valid_data() == false)
+		{
+			EAP_TRACE_ERROR(
+				m_am_tools,
+				TRACE_FLAGS_ERROR,
+				(EAPL("simple_config_record_c::complete_query_network_and_device_parameters(): cannot get data %d\n"),
+				data_type));
+
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
+		}
+	}
+
+	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+	return EAP_STATUS_RETURN(m_am_tools, status);
+}
+
+//--------------------------------------------------
+
+#if 0
+
+//
 void CEapAmProtectedSetupSymbian::read_device_passwordL(
-	eap_config_string /*field*/,
-	const u32_t /*field_length*/,
-	eap_variable_data_c * const /* data */)
+	eap_variable_data_c * const data)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
 	// Get the things from commsdat here.
 
-#if 0
+#if 1
+
+	// Read PIN from memory store.
+
+	eap_status_e status = read_memory_store(
+		eap_type_protected_setup_stored_preshared_key,														
+		data);
+
+#elif 0
+
+	{
+		eap_variable_data_c memory_store_key(m_am_tools);
+
+		eap_status_e status = memory_store_key.set_copy_of_buffer(
+			EAP_WPS_CONFIGURATION_MEMORY_STORE_KEY,
+			sizeof(EAP_WPS_CONFIGURATION_MEMORY_STORE_KEY));
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			(void) EAP_STATUS_RETURN(m_am_tools, status);
+			return;
+		}
+
+		status = memory_store_key.add_data(
+			&m_is_client,
+			sizeof(m_is_client));
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			(void) EAP_STATUS_RETURN(m_am_tools, status);
+			return;
+		}
+
+		eap_network_id_selector_c state_selector(
+			m_am_tools,
+			&m_receive_network_id);
+
+		status = memory_store_key.add_data(
+			&state_selector);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			(void) EAP_STATUS_RETURN(m_am_tools, status);
+			return;
+		}
+
+		eap_tlv_message_data_c tlv_data(m_am_tools);
+
+		status = m_am_tools->memory_store_get_data(
+			&memory_store_key,
+			&tlv_data);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("simple_config_record_c::complete_query_network_and_device_parameters(): cannot get WPS credentials\n")));
+		}
+		else
+		{
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("simple_config_record_c::complete_query_network_and_device_parameters(): WPS credentials found\n")));
+
+			// Parse read data.
+			eap_array_c<eap_tlv_header_c> tlv_blocks(m_am_tools);
+				
+			status = tlv_data.parse_message_data(&tlv_blocks);
+			if (status != eap_status_ok)
+			{
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				(void) EAP_STATUS_RETURN(m_am_tools, status);
+				return;
+			}
+
+			for (u32_t ind = 0ul; ind < tlv_blocks.get_object_count(); ind++)
+			{
+				eap_tlv_header_c * const tlv = tlv_blocks.get_object(ind);
+				if (tlv != 0)
+				{
+					if (tlv->get_type() == eap_type_protected_setup_stored_preshared_key)
+					{
+						status = data->set_copy_of_buffer(
+							tlv->get_value(tlv->get_value_length()),
+							tlv->get_value_length());
+						if (status != eap_status_ok)
+						{
+							EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+							(void) EAP_STATUS_RETURN(m_am_tools, status);
+							return;
+						}
+					}
+					else if (tlv->get_type() == eap_type_protected_setup_stored_ssid)
+					{
+						status = m_SSID.set_copy_of_buffer(
+							tlv->get_value(tlv->get_value_length()),
+							tlv->get_value_length());
+						if (status != eap_status_ok)
+						{
+							EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+							(void) EAP_STATUS_RETURN(m_am_tools, status);
+							return;
+						}
+					}
+				}
+			} // for()
+
+			if (data->get_is_valid_data() == false)
+			{
+				EAP_TRACE_ERROR(
+					m_am_tools,
+					TRACE_FLAGS_ERROR,
+					(EAPL("simple_config_record_c::complete_query_network_and_device_parameters(): cannot get WPS PIN\n")));
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				(void) EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
+				return;
+			}
+		}
+
+
+		EAP_TRACE_DATA_DEBUG(
+			m_am_tools, 
+			TRACE_FLAGS_DEFAULT, 
+			(EAPL("SIMPLE_CONFIG m_device_password"),
+			 m_device_password.get_data(),
+			 m_device_password.get_data_length()));
+
+		if (m_device_password.get_data_length() == SIMPLE_CONFIG_PBC_DEVICE_PASSWORD_PIN_SIZE
+			&& m_am_tools->memcmp(m_device_password.get_data(), SIMPLE_CONFIG_PBC_DEVICE_PASSWORD_PIN, SIMPLE_CONFIG_PBC_DEVICE_PASSWORD_PIN_SIZE) == 0)
+		{
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("CEapAmProtectedSetupSymbian::read_device_passwordL(): WPS push button\n")));
+
+			m_Device_Password_ID = simple_config_Device_Password_ID_PushButton;
+		}
+		else
+		{
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("CEapAmProtectedSetupSymbian::read_device_passwordL(): WPS PIN\n")));
+
+			m_Device_Password_ID = simple_config_Device_Password_ID_Default_PIN;
+		}
+	}
+
+#else
 
 	// We need PSK (PIN code for protected setup) from the CommsDat.
 	// CommDbIf is used to get the PSK.
@@ -775,6 +1002,8 @@ void CEapAmProtectedSetupSymbian::read_device_passwordL(
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
+
+#endif
 
 //--------------------------------------------------
 
@@ -933,6 +1162,46 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::query_network_and_devi
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	{
+		eap_variable_data_c device_password(m_am_tools);
+
+		status = read_memory_store(
+			eap_type_protected_setup_stored_preshared_key,														
+			&device_password);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+
+		EAP_TRACE_DATA_DEBUG(
+			m_am_tools, 
+			TRACE_FLAGS_DEFAULT, 
+			(EAPL("SIMPLE_CONFIG device_password"),
+			 device_password.get_data(),
+			 device_password.get_data_length()));
+
+		if (device_password.get_data_length() == SIMPLE_CONFIG_PBC_DEVICE_PASSWORD_PIN_SIZE
+			&& m_am_tools->memcmp(device_password.get_data(), SIMPLE_CONFIG_PBC_DEVICE_PASSWORD_PIN, SIMPLE_CONFIG_PBC_DEVICE_PASSWORD_PIN_SIZE) == 0)
+		{
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("CEapAmProtectedSetupSymbian::read_device_passwordL(): WPS push button\n")));
+
+			m_Device_Password_ID = simple_config_Device_Password_ID_PushButton;
+		}
+		else
+		{
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("CEapAmProtectedSetupSymbian::read_device_passwordL(): WPS PIN\n")));
+
+			m_Device_Password_ID = simple_config_Device_Password_ID_Default_PIN;
+		}
+	}
+
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
@@ -1070,6 +1339,33 @@ EAP_FUNC_EXPORT eap_status_e CEapAmProtectedSetupSymbian::query_network_and_devi
 			true,
 			OS_Version,
 			sizeof(OS_Version));
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+	{
+		eap_variable_data_c SSID(m_am_tools);
+
+		status = read_memory_store(
+			eap_type_protected_setup_stored_ssid,														
+			&SSID);
+		if (status != eap_status_ok)
+		{
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, status);
+		}
+
+		status = m_network_and_device_parameters.copy_attribute_data(
+			simple_config_Attribute_Type_SSID,
+			true,
+			SSID.get_data(),
+			SSID.get_data_length());
 		if (status != eap_status_ok)
 		{
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 62 %
+* %version: 64 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -182,7 +182,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::timer_expired(
 	
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("TIMER: [0x%08x]->eapol_message_wlan_authentication_c::timer_expired")
 		 EAPL("(id 0x%02x, data 0x%08x).\n"),
 		 this, id, data));
@@ -193,7 +193,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::timer_expired(
 	{
 		EAP_TRACE_DEBUG(
 			m_am_tools, 
-			EAP_TRACE_FLAGS_MESSAGE_DATA, 
+			TRACE_FLAGS_DEFAULT, 
 			(EAPL("TIMER: [0x%08x]->eapol_message_wlan_authentication_c::timer_expired: EAPOL_MESSAGE_TIMER_PROCESS_DATA_ID")
 			 EAPL("(id 0x%02x, data 0x%08x).\n"),
 			 this, id, data));
@@ -210,7 +210,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::timer_expired(
 	{
 		EAP_TRACE_DEBUG(
 			m_am_tools, 
-			EAP_TRACE_FLAGS_MESSAGE_DATA, 
+			TRACE_FLAGS_DEFAULT, 
 			(EAPL("TIMER: [0x%08x]->eapol_message_wlan_authentication_c::timer_expired: EAPOL_MESSAGE_TIMER_SEND_DATA_ID")
 			 EAPL("(id 0x%02x, data 0x%08x).\n"),
 			 this, id, data));
@@ -545,7 +545,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::packet_data_se
 	
 	EAP_TRACE_DEBUG(
 		m_am_tools,
-		EAP_TRACE_FLAGS_MESSAGE_DATA,
+		TRACE_FLAGS_DEFAULT,
 		(EAPL("test_eapol_c::packet_data_session_key(): key_type 0x%02x, key_index %d\n"),
 		 key->get_key_type(),
 		 key->get_key_index()));
@@ -1106,10 +1106,10 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::send_message(e
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("TIMER: eapol_message_wlan_authentication_c::send_message()\n")));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eapol_message_wlan_authentication_c::send_message()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eapol_message_wlan_authentication_c::send_message()");
 
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
@@ -1208,10 +1208,10 @@ EAP_FUNC_EXPORT wlan_eap_if_send_status_e eapol_message_wlan_authentication_c::p
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("TIMER: eapol_message_wlan_authentication_c::process_data()\n")));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eapol_message_wlan_authentication_c::process_data()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eapol_message_wlan_authentication_c::process_data()");
 
 	eap_status_e status(eap_status_ok);
 
@@ -1255,7 +1255,7 @@ EAP_FUNC_EXPORT wlan_eap_if_send_status_e eapol_message_wlan_authentication_c::p
 
 		EAP_TRACE_DEBUG(
 			m_am_tools, 
-			EAP_TRACE_FLAGS_MESSAGE_DATA, 
+			TRACE_FLAGS_DEFAULT, 
 			(EAPL("TIMER: eapol_message_wlan_authentication_c::process_data(): sets EAPOL_MESSAGE_TIMER_PROCESS_DATA_ID\n")));
 	
 		status = m_am_tools->am_set_timer(
@@ -1319,10 +1319,10 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::process_messag
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("TIMER: eapol_message_wlan_authentication_c::process_message()\n")));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eapol_message_wlan_authentication_c::process_message()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eapol_message_wlan_authentication_c::process_message()");
 
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
@@ -1393,6 +1393,14 @@ EAP_FUNC_EXPORT eap_status_e eapol_message_wlan_authentication_c::process_messag
 
 			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
+
+		EAP_TRACE_DEBUG(
+			m_am_tools, 
+			TRACE_FLAGS_DEFAULT, 
+			(EAPL("eapol_message_wlan_authentication_c::process_message(): this = 0x%08x, message=%d=%s\n"),
+			this,
+			function,
+			eap_process_tlv_message_data_c::get_function_string(function)));
 
 		switch(function)
 		{

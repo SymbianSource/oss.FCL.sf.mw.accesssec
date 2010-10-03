@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 15 %
+* %version: 12 %
 */
 
 // System include files
@@ -88,71 +88,84 @@ void CEapAuthObserver::SetNotifierType( CEapAuthNotifier::EEapNotifierType aType
 void CEapAuthObserver::DataReceived( CHbSymbianVariantMap& aData )
 {
     RDebug::Print(_L("CEapAuthObserver::DataReceived") );
+        
+    TInt status = KErrNone;    
     
     if ( iType == CEapAuthNotifier::EEapNotifierTypeLEapUsernamePasswordDialog )
         {
         RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypeLEapUsernamePasswordDialog") );
         UsernamePasswordDlgDataReceived(aData);
+        TRAP_IGNORE( iNotifier->CompleteL( status ));
         }
     else if ( iType == CEapAuthNotifier::EEapNotifierTypeGTCUsernamePasswordDialog )
         {
         RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypeGTCUsernamePasswordDialog") );
         UsernamePasswordDlgDataReceived(aData);
+        TRAP_IGNORE( iNotifier->CompleteL( status ));
         }
     else if ( iType == CEapAuthNotifier::EEapNotifierTypePapUsernamePasswordDialog )
         {
         RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypePapUsernamePasswordDialog") );
         UsernamePasswordDlgDataReceived(aData);
+        TRAP_IGNORE( iNotifier->CompleteL( status ));
         }
     else if ( iType == CEapAuthNotifier::EEapNotifierTypeEapMsChapV2UsernamePasswordDialog )
         {
         RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypeEapMsChapV2UsernamePasswordDialog") );
         UsernamePasswordDlgDataReceived(aData);
+        TRAP_IGNORE( iNotifier->CompleteL( status ));
         }
     else if ( iType == CEapAuthNotifier::EEapNotifierTypeMsChapV2UsernamePasswordDialog )
         {
         RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypeMsChapV2UsernamePasswordDialog") );
         UsernamePasswordDlgDataReceived(aData);
+        TRAP_IGNORE( iNotifier->CompleteL( status ));
         }
     else if ( iType == CEapAuthNotifier::EEapNotifierTypeGTCQueryDialog )
         {
         RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypeGTCQueryDialog") ); 
         PwdQueryDataReceived(aData);
+        TRAP_IGNORE( iNotifier->CompleteL( status ));
         }
     else if ( iType == CEapAuthNotifier::EEapNotifierTypePapAuthQueryDialog )
         {
         RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypePapAuthQueryDialog") ); 
         PwdQueryDataReceived(aData);
+        TRAP_IGNORE( iNotifier->CompleteL( status ));
         }
     else if ( iType == CEapAuthNotifier::EEapNotifierTypeFastPacStorePwQueryDialog )
         {
         RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypeFastPacStorePwQueryDialog") ); 
-        PwdQueryDataReceived(aData);
+        PacStorePwdQueryDataReceived(aData);
         }
     else if ( iType == CEapAuthNotifier::EEapNotifierTypeFastCreateMasterkeyQueryDialog )
         {
         RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypeFastCreateMasterkeyQueryDialog") ); 
         PwdQueryDataReceived(aData);
+        TRAP_IGNORE( iNotifier->CompleteL( status ));
         }
     else if ( iType == CEapAuthNotifier::EEapNotifierTypeFastPacFilePwQueryDialog )
         {
         RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypeFastPacFilePwQueryDialog") ); 
         PwdQueryDataReceived(aData);
+        TRAP_IGNORE( iNotifier->CompleteL( status ));
         }
     else if ( iType == CEapAuthNotifier::EEapNotifierTypeMsChapV2OldPasswordDialog )
         {
         RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypeMsChapV2OldPasswordDialog") ); 
         OldPwdQueryDataReceived(aData);
+        TRAP_IGNORE( iNotifier->CompleteL( status ));
         }
     else if ( iType == CEapAuthNotifier::EEapNotifierTypeMsChapV2NewPasswordDialog )
         {
         RDebug::Print(_L("CEapAuthObserver::DataReceived: EEapNotifierTypeMsChapV2NewPasswordDialog") ); 
         PwdQueryDataReceived(aData);
+        TRAP_IGNORE( iNotifier->CompleteL( status ));
         }
     
-    TInt status = KErrNone;
     
-    TRAP_IGNORE( iNotifier->CompleteL( status ));
+    
+    //TRAP_IGNORE( iNotifier->CompleteL( status ));
 }
 
 // ---------------------------------------------------------------------------
@@ -249,6 +262,51 @@ void CEapAuthObserver::PwdQueryDataReceived( CHbSymbianVariantMap& aData )
         }
        
     iNotifier->SetSelectedPassword( PasswordInfo );   
+}
+
+// ---------------------------------------------------------------------------
+// Handles the PAC Store password query user input received from the dialog
+// ---------------------------------------------------------------------------
+//
+void CEapAuthObserver::PacStorePwdQueryDataReceived( CHbSymbianVariantMap& aData )
+{
+    RDebug::Print(_L("CEapAuthObserver::PacStorePwdQueryDataReceived") ); 
+        
+    TBool Match = EFalse;   
+    TInt  status = KErrNone;    
+    
+    _LIT(KPassword, "password");
+    
+    CEapAuthNotifier::TEapDialogInfo PasswordInfo;
+    TDesC* Data = NULL;
+           
+    const CHbSymbianVariant *my_variant = aData.Get(KPassword); 
+    if ( my_variant != NULL )
+        {
+        ASSERT( my_variant->Type() == CHbSymbianVariant::EDes  );
+    
+        Data = reinterpret_cast<TDesC*>(my_variant->Data());     
+        PasswordInfo.iPassword.Copy( Data->Ptr(), Data->Length() );
+
+        RDebug::Print(_L("CEapAuthObserver::PwdQueryDataReceived: PasswordInfo.iPassword = %S\n"), &PasswordInfo.iPassword );
+        }
+             
+     // Check if given password can be used to open the PAC store.
+     Match = iNotifier->CheckPasswordMatchingL(PasswordInfo);
+
+     if ( Match != EFalse )
+        {
+        RDebug::Print(_L("CEapAuthObserver::PacStorePwdQueryDataReceived: Match == TRUE") );     
+        iNotifier->SetSelectedPassword( PasswordInfo );   
+        //update(true); 
+        TRAP_IGNORE( iNotifier->CompleteL( status ));    
+        } 
+     else
+        {
+        RDebug::Print(_L("CEapAuthObserver::PacStorePwdQueryDataReceived: Match == FALSE") );       
+        //update(false);       
+        }
+     iNotifier->UpdateDialogL(Match);       
 }
 
 // Derived function:

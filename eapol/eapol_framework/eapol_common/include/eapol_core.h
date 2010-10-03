@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 47 %
+* %version: 49 %
 */
 
 #if !defined(_EAPOL_CORE_H_)
@@ -24,6 +24,27 @@
 
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPOL_CORE_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_CORE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPOL_CORE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_CORE_H 
+	#define EAP_FUNC_EXPORT_EAPOL_CORE_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_CORE_H 
+#elif defined(EAP_EXPORT_EAPOL_CORE_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_CORE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_CORE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_CORE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_CORE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPOL_CORE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPOL_CORE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_CORE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_CORE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_CORE_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_CORE_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "abs_eap_session_core.h"
 #include "eap_core.h"
 #include "abs_eapol_core.h"
@@ -70,7 +91,7 @@ class eapol_RC4_key_header_c;
 
 
 /// A eapol_core_c class implements the basic functionality of EAPOL.
-class EAP_EXPORT eapol_core_c
+class EAP_CLASS_VISIBILITY_EAPOL_CORE_H eapol_core_c
 : public abs_eap_session_core_c
 , public abs_eap_base_timer_c
 , public abs_eap_stack_interface_c
@@ -135,13 +156,13 @@ private:
 	bool m_skip_start_4_way_handshake;
 
 
-	EAP_FUNC_IMPORT eap_status_e indicate_eapol_key_state_started_eap_authentication(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e indicate_eapol_key_state_started_eap_authentication(
 		const eap_am_network_id_c * const send_network_id);
 
-	EAP_FUNC_IMPORT eap_status_e init_eapol_key_pmksa_caching_timeout(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e init_eapol_key_pmksa_caching_timeout(
 		const eap_am_network_id_c * const send_network_id);
 
-	EAP_FUNC_IMPORT eap_status_e remove_eapol_key_state(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e remove_eapol_key_state(
 		const eap_am_network_id_c * const send_network_id,
 		const bool force_remove);
 
@@ -167,7 +188,7 @@ public:
 	/**
 	 * The destructor deletes the m_eap_core object.
 	 */
-	EAP_FUNC_IMPORT virtual ~eapol_core_c();
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H virtual ~eapol_core_c();
 
 	/**
 	 * The constructor creates the eap_core object and initializes the m_eap_core
@@ -178,7 +199,7 @@ public:
 	 * as a client (true) or server (false), in terms of EAP-protocol whether
 	 * this network entity is EAP-supplicant (true) or EAP-authenticator (false).
 	 */
-	EAP_FUNC_IMPORT eapol_core_c(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eapol_core_c(
 		abs_eap_am_tools_c * const tools,
 		abs_eapol_core_c * const partner,
 		const bool is_client_when_true);
@@ -189,10 +210,10 @@ public:
 	 * If this fails this function must return corresponding error status.
 	 * @return This function returns the status of operation.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_all_authentication_sessions();
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e cancel_all_authentication_sessions();
 
 	// This is documented in abs_eap_stack_interface_c::packet_process().
-	EAP_FUNC_IMPORT eap_status_e packet_process(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e packet_process(
 		const eap_am_network_id_c * const receive_network_id,
 		eap_general_header_base_c * const packet_data,
 		const u32_t packet_length); 
@@ -207,7 +228,7 @@ public:
 	 * @param data_length is length in bytes of the EAP-packet.
 	 * @param buffer_length is length in bytes of the whole packet buffer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e packet_send(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e packet_send(
 		const eap_am_network_id_c * const send_network_id,
 		eap_buf_chain_wr_c * const sent_packet,
 		const u32_t header_offset,
@@ -223,7 +244,7 @@ public:
 	 * @return Function returns the offset of EAP-header.
 	 * @see abs_eap_core_c::get_header_offset().
 	 */
-	EAP_FUNC_IMPORT u32_t get_header_offset(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H u32_t get_header_offset(
 		u32_t * const MTU,
 		u32_t * const trailer_length);
 
@@ -236,7 +257,7 @@ public:
 	 * The server does not need eap_acknowledge() function because
 	 * server (EAP-authenticator) sends the EAP-success message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e eap_acknowledge(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e eap_acknowledge(
 		const eap_am_network_id_c * const receive_network_id); 
 
 	/**
@@ -244,7 +265,7 @@ public:
 	 * load new module of EAP-type.
 	 * @see abs_eap_core_c::load_module().
 	 */
-	EAP_FUNC_IMPORT eap_status_e load_module(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e load_module(
 		const eap_type_value_e type,
 		const eap_type_value_e /* tunneling_type */,
 		abs_eap_base_type_c * const partner,
@@ -256,7 +277,7 @@ public:
 	 * The unload_module() function unloads the module of a EAP-type. 
 	 * @see abs_eap_core_c::unload_module().
 	 */
-	EAP_FUNC_IMPORT eap_status_e unload_module(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e unload_module(
 		const eap_type_value_e type); 
 
 	/**
@@ -267,7 +288,7 @@ public:
 	 * after function returns have PMKSA cached and read_reassociation_parameters() can be called
 	 * with those eap_am_network_id_c objects.
 	 */
-	EAP_FUNC_IMPORT eap_status_e check_pmksa_cache(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e check_pmksa_cache(
 		eap_array_c<eap_am_network_id_c> * const bssid_sta_receive_network_ids,
 		const eapol_key_authentication_type_e selected_eapol_key_authentication_type,
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e pairwise_key_cipher_suite,
@@ -279,7 +300,7 @@ public:
 	 * MAC address of Authenticator should be in source address.
 	 * MAC address of Supplicant should be in destination address.
 	 */
-	EAP_FUNC_IMPORT eap_status_e remove_pmksa_from_cache(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e remove_pmksa_from_cache(
 		const eap_am_network_id_c * const receive_network_id);
 
 	/**
@@ -295,7 +316,7 @@ public:
 	 * when EAP-authentication is needed with another peer.
 	 * @see abs_eap_core_c::restart_authentication().
 	 */
-	EAP_FUNC_IMPORT eap_status_e restart_authentication(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e restart_authentication(
 		const eap_am_network_id_c * const receive_network_id,
 		const bool is_client_when_true,
 		const bool force_clean_restart,
@@ -311,11 +332,11 @@ public:
 	 * The adaptation module calls the start_preauthentication() function
 	 * when preauthentication is needed with another AP.
 	 */
-	EAP_FUNC_IMPORT eap_status_e start_preauthentication(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e start_preauthentication(
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type);
 
-	EAP_FUNC_IMPORT eap_status_e read_reassociation_parameters(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e read_reassociation_parameters(
 		const eap_am_network_id_c * const old_receive_network_id, ///< source includes remote address, destination includes local address.
 		const eap_am_network_id_c * const new_receive_network_id, ///< source includes remote address, destination includes local address.
 		const eapol_key_authentication_type_e authentication_type,
@@ -323,12 +344,12 @@ public:
 		const eap_variable_data_c * const received_WPA_ie,
 		const eap_variable_data_c * const sent_WPA_ie);
 
-	EAP_FUNC_IMPORT eap_status_e start_reassociation(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e start_reassociation(
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type,
 		const eap_variable_data_c * const PMKID);
 
-	EAP_FUNC_IMPORT eap_status_e complete_reassociation(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e complete_reassociation(
 		const eapol_wlan_authentication_state_e reassociation_result,
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type,
@@ -337,12 +358,12 @@ public:
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e pairwise_key_cipher_suite,
 		const eapol_RSNA_key_header_c::eapol_RSNA_cipher_e group_key_cipher_suite);
 
-	EAP_FUNC_IMPORT eap_status_e start_WPXM_reassociation(
+	eap_status_e start_WPXM_reassociation(
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type,
 		eap_variable_data_c * const send_reassociation_request_ie);
 
-	EAP_FUNC_IMPORT eap_status_e complete_WPXM_reassociation(
+	eap_status_e complete_WPXM_reassociation(
 		const eapol_wlan_authentication_state_e reassociation_result,
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type,
@@ -351,7 +372,7 @@ public:
 	/**
 	 * he adaptation module calls the send_logoff() function to send a EAPOL-Logoff message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_logoff(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e send_logoff(
 		const eap_am_network_id_c * const receive_network_id);
 
 	/**
@@ -361,21 +382,21 @@ public:
 	 * to offer the keys to lower level.
 	 * @see abs_eap_base_type_c::packet_data_crypto_keys().
 	 */
-	EAP_FUNC_IMPORT eap_status_e packet_data_crypto_keys(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e packet_data_crypto_keys(
 		const eap_am_network_id_c * const send_network_id,
 		const eap_master_session_key_c * const master_session_key
 		);
 
 	// See abs_eapol_key_state_c::packet_data_session_key().
-	EAP_FUNC_IMPORT eap_status_e packet_data_session_key(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e packet_data_session_key(
 		const eap_am_network_id_c * const send_network_id,
 		const eapol_session_key_c * const key);
 
 	// This is documented in abs_eap_stack_interface_c::configure().
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e configure();
 
 	// This is documented in abs_eap_stack_interface_c::shutdown().
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e shutdown();
 
 	/**
 	 * The read_configure() function reads the configuration data identified
@@ -383,7 +404,7 @@ public:
 	 * the query to some persistent store.
 	 * @see abs_eap_base_type_c::read_configure().
 	 */
-	EAP_FUNC_IMPORT eap_status_e read_configure(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e read_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
@@ -393,33 +414,33 @@ public:
 	 * the action to some persistent store.
 	 * @see abs_eap_base_type_c::write_configure().
 	 */
-	EAP_FUNC_IMPORT eap_status_e write_configure(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e write_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
 	// This is documented in abs_eap_stack_interface_c::set_is_valid().
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H void set_is_valid();
 
 	// This is documented in abs_eap_stack_interface_c::get_is_valid().
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H bool get_is_valid();
 
 	// See abs_eap_base_type_c::state_notification().
-	EAP_FUNC_IMPORT void state_notification(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H void state_notification(
 		const abs_eap_state_notification_c * const state);
 
 	// See abs_eap_base_timer_c::timer_expired().
-	EAP_FUNC_IMPORT eap_status_e timer_expired(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e timer_expired(
 		const u32_t id, void *data);
 
 	// See abs_eap_base_timer_c::timer_delete_data().
-	EAP_FUNC_IMPORT eap_status_e timer_delete_data(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e timer_delete_data(
 		const u32_t id, void *data);
 
 	/**
 	 * This function tells lower layer to remove EAP session object asyncronously.
 	 * @param send_network_id is pointer to network id that identifies the removed EAP session.
 	 */
-	EAP_FUNC_IMPORT eap_status_e asynchronous_init_remove_eap_session(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e asynchronous_init_remove_eap_session(
 		const eap_am_network_id_c * const send_network_id);
 
 	/**
@@ -427,30 +448,30 @@ public:
 	 * when EAP-authentication is needed with another peer.
 	 * @see abs_eap_core_c::asynchronous_start_authentication().
 	 */
-	EAP_FUNC_IMPORT eap_status_e asynchronous_start_authentication(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e asynchronous_start_authentication(
 		const eap_am_network_id_c * const /* receive_network_id */,
 		const bool /* is_client_when_true */);
 
 	//
-	EAP_FUNC_IMPORT eap_status_e set_timer(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e set_timer(
 		abs_eap_base_timer_c * const p_initializer, 
 		const u32_t p_id, 
 		void * const p_data,
 		const u32_t p_time_ms);
 
-	EAP_FUNC_IMPORT eap_status_e cancel_timer(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e cancel_timer(
 		abs_eap_base_timer_c * const p_initializer, 
 		const u32_t p_id);
 
 	//
-	EAP_FUNC_IMPORT eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e check_is_valid_eap_type(const eap_type_value_e eap_type);
 
 	// See abs_eap_core_c::get_eap_type_list().
-	EAP_FUNC_IMPORT eap_status_e get_eap_type_list(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e get_eap_type_list(
 		eap_array_c<eap_type_value_e> * const eap_type_list);
 
 	// See abs_eapol_key_state_c::get_and_increment_global_key_counter().
-	EAP_FUNC_IMPORT eap_status_e get_and_increment_global_key_counter(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e get_and_increment_global_key_counter(
 		eap_variable_data_c * const key_counter);
 
 
@@ -461,7 +482,7 @@ public:
 	 * Supplicant should be in destination address.
 	 * @param authentication_type is the selected authentication type.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_state(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e create_state(
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type
 		);
@@ -476,7 +497,7 @@ public:
 	 * @param eapol_pairwise_cipher is the selected pairwise cipher.
 	 * @param eapol_group_cipher is the selected group cipher.
 	 */
-	EAP_FUNC_IMPORT eap_status_e association(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e association(
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type,
 		const eap_variable_data_c * const authenticator_RSNA_IE,
@@ -490,36 +511,36 @@ public:
 	 * @param receive_network_id carries the MAC addresses.
 	 * MAC address of Authenticator should be in source address. MAC address of Supplicant should be in destination address.
 	 */
-	EAP_FUNC_IMPORT eap_status_e disassociation(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e disassociation(
 		const bool complete_to_lower_layer,
 		const eap_am_network_id_c * const receive_network_id);
 
-	EAP_FUNC_IMPORT eap_status_e asynchronous_init_remove_eapol_key_state(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e asynchronous_init_remove_eapol_key_state(
 		const eap_am_network_id_c * const send_netword_id);
 
-	EAP_FUNC_IMPORT static eap_status_e shutdown_operation(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H static eap_status_e shutdown_operation(
 		eapol_key_state_c * const handler,
 		abs_eap_am_tools_c * const m_am_tools);
 
-	EAP_FUNC_IMPORT static eap_status_e cancel_authentication_session(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H static eap_status_e cancel_authentication_session(
 		eapol_key_state_c * const handler,
 		abs_eap_am_tools_c * const m_am_tools);
 
 	/// @see abs_eap_core_c::add_rogue_ap().
-	EAP_FUNC_IMPORT eap_status_e add_rogue_ap(eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list);
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e add_rogue_ap(eap_array_c<eap_rogue_ap_entry_c> & rogue_ap_list);
 
-	EAP_FUNC_IMPORT eap_status_e tkip_mic_failure(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e tkip_mic_failure(
 		const eap_am_network_id_c * const receive_network_id,
 		const bool fatal_failure_when_true,
 		const eapol_RSNA_key_header_c::eapol_tkip_mic_failure_type_e tkip_mic_failure_type);
 
 	// This is documented in abs_eap_core_c::set_session_timeout().
-	EAP_FUNC_IMPORT eap_status_e set_session_timeout(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e set_session_timeout(
 		const u32_t session_timeout_ms);
 
 #if defined(USE_EAP_SIMPLE_CONFIG)
 
-	EAP_FUNC_IMPORT eap_status_e save_simple_config_session(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e save_simple_config_session(
 		const simple_config_state_e state,
 		EAP_TEMPLATE_CONST eap_array_c<simple_config_credential_c> * const credential_array,
 		const eap_variable_data_c * const new_password,
@@ -528,21 +549,21 @@ public:
 
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
 
-	EAP_FUNC_IMPORT eap_status_e set_eap_database_reference_values(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e set_eap_database_reference_values(
 		const eap_variable_data_c * const reference);
 
-	EAP_FUNC_IMPORT eap_status_e get_802_11_authentication_mode(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e get_802_11_authentication_mode(
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_authentication_type_e authentication_type,
 		const eap_variable_data_c * const SSID,
 		const eap_variable_data_c * const preshared_key);
 
-	EAP_FUNC_IMPORT eap_status_e complete_get_802_11_authentication_mode(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e complete_get_802_11_authentication_mode(
 		const eap_status_e completion_status,
 		const eap_am_network_id_c * const receive_network_id,
 		const eapol_key_802_11_authentication_mode_e mode);
 
-	EAP_FUNC_IMPORT eap_status_e complete_remove_eap_session(
+	EAP_FUNC_VISIBILITY_EAPOL_CORE_H eap_status_e complete_remove_eap_session(
 		const bool complete_to_lower_layer,
 		const eap_am_network_id_c * const receive_network_id);
 

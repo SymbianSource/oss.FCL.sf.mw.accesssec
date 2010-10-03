@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 36 %
+ * %version: 39 %
  */
 
 #ifndef EAPQTCONFIGINTERFACEPRIVATE_H
@@ -38,6 +38,7 @@
 class HbTranslator;
 class CEapType;
 class CEapGeneralSettings;
+class CEapFastPacStore;
 class CpEapPluginInterface;
 class EapQtConfigInterface;
 
@@ -58,6 +59,9 @@ public:
     static const unsigned int CertLabelMaxLength = KMaxCertLabelLength;
     static const unsigned int CertThumbprintMaxLength = KThumbprintMaxLength;
     static const unsigned int CertSubjectKeyIdLength = KSHA1HashLengthBytes;
+
+    // PAC store password is in 8-bit format in EAP server
+    static const unsigned int PacPasswordMaxLength = StringMaxLength/2;
 
     // see eapqtinterface.h for documentation
 
@@ -141,6 +145,8 @@ private:
     // must be static for using via function pointers
     static bool pluginLessThan(const EapQtPluginInfo &plugin1, const EapQtPluginInfo &plugin2);
 
+    void getPacStoreIf();
+
     Q_DISABLE_COPY(EapQtConfigInterfacePrivate)
 
 private: // data
@@ -167,9 +173,10 @@ private: // data
     // currenly loaded outer EAP type
     EapQtPluginHandle mLastOuterHandle;
 
-    // translator object for EAP UIs
+    // translator objects for EAP UIs
     QScopedPointer<HbTranslator> mTranslator;
-
+    QScopedPointer<HbTranslator> mEapPromptsTranslator;
+    
     // read CA and user certificates
     QList<EapQtCertificateInfo> mCaCertificates;
     QList<EapQtCertificateInfo> mUserCertificates;
@@ -179,6 +186,7 @@ private: // data
     // pointers to EAP server interfaces
     QScopedPointer<CEapGeneralSettings> mEapGsIf;
     QScopedPointer<CEapType> mEapTypeIf;
+    QScopedPointer<CEapFastPacStore> mPacStoreIf;
 
     // current IAP ID
     int mIapId;

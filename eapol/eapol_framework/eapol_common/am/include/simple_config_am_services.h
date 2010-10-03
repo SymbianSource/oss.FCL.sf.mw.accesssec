@@ -25,6 +25,27 @@
 #include "eap_tools.h"
 #include "eap_variable_data.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_SIMPLE_CONFIG_AM_SERVICES_H)
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_AM_SERVICES_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_AM_SERVICES_H 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_AM_SERVICES_H 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_AM_SERVICES_H 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_AM_SERVICES_H 
+#elif defined(EAP_EXPORT_SIMPLE_CONFIG_AM_SERVICES_H)
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_AM_SERVICES_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_AM_SERVICES_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_AM_SERVICES_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_AM_SERVICES_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_AM_SERVICES_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_AM_SERVICES_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_AM_SERVICES_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_AM_SERVICES_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_AM_SERVICES_H 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_AM_SERVICES_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "abs_eap_am_type_simple_config.h"
 #include "eap_am_network_id.h"
 #include "eap_array.h"
@@ -36,7 +57,7 @@ class simple_config_credential_c;
 
 
 /// This class is interface to adaptation module of SIMPLE_CONFIG.
-class EAP_EXPORT simple_config_am_services_c
+class EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_AM_SERVICES_H simple_config_am_services_c
 {
 private:
 	//--------------------------------------------------
@@ -126,7 +147,7 @@ public:
  * @param tools is pointer to the abs_eap_am_tools class created by the adaptation module.
  * Adaptation module of SIMPLE_CONFIG will callback caller using the partner pointer.
  */
-EAP_C_FUNC_IMPORT  simple_config_am_services_c *new_simple_config_am_services(
+EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_AM_SERVICES_H  simple_config_am_services_c *new_simple_config_am_services(
 	abs_eap_am_tools_c * const tools);
 
 

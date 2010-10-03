@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 6 %
+* %version: 7 %
 */
 
 #if !defined(_EAP_PLUGIN_CLIENT_MESSAGE_IF_H_)
@@ -24,6 +24,27 @@
 
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_PLUGIN_CLIENT_MESSAGE_IF_H)
+	#define EAP_CLASS_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H 
+	#define EAP_FUNC_EXPORT_EAP_PLUGIN_CLIENT_MESSAGE_IF_H 
+	#define EAP_C_FUNC_EXPORT_EAP_PLUGIN_CLIENT_MESSAGE_IF_H 
+#elif defined(EAP_EXPORT_EAP_PLUGIN_CLIENT_MESSAGE_IF_H)
+	#define EAP_CLASS_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_PLUGIN_CLIENT_MESSAGE_IF_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_PLUGIN_CLIENT_MESSAGE_IF_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_PLUGIN_CLIENT_MESSAGE_IF_H 
+	#define EAP_C_FUNC_EXPORT_EAP_PLUGIN_CLIENT_MESSAGE_IF_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_plugin_message_base.h"
 #include "abs_eap_am_message_if.h"
 #include "eap_array.h"
@@ -36,7 +57,7 @@ class eap_tlv_header_c;
 
 /// A eap_plugin_client_message_if_c class implements mapping of EAP authentication sessions.
 /// Network identity separates parallel EAP authentication sessions.
-class EAP_EXPORT eap_plugin_client_message_if_c
+class EAP_CLASS_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H eap_plugin_client_message_if_c
 : public eap_plugin_message_base_c
 , public abs_eap_am_message_if_c
 {
@@ -97,7 +118,7 @@ public:
 	/**
 	 * The destructor of the eap_core class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~eap_plugin_client_message_if_c();
+	EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H virtual ~eap_plugin_client_message_if_c();
 
 	/**
 	 * The constructor initializes member attributes using parameters passed to it.
@@ -107,7 +128,7 @@ public:
 	 * as a client (true) or server (false), in terms of EAP-protocol
 	 * whether this network entity is EAP-supplicant (true) or EAP-authenticator (false).
 	 */
-	EAP_FUNC_IMPORT eap_plugin_client_message_if_c(
+	EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H eap_plugin_client_message_if_c(
 		abs_eap_am_tools_c * const tools,
 		eap_am_message_if_c * const client_if,
 		abs_eap_plugin_message_c * const partner);
@@ -119,34 +140,34 @@ public:
 	 * If object reset fails this function must return corresponding error status.
 	 * @return This function returns the status of reset operation.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H eap_status_e reset();
 
 	// This is documented in abs_eap_stack_interface_c::configure().
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H eap_status_e configure();
 
 	// This is documented in abs_eap_stack_interface_c::shutdown().
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H eap_status_e shutdown();
 
 	// This is documented in abs_eap_stack_interface_c::get_is_valid().
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H bool get_is_valid();
 
-	EAP_FUNC_IMPORT eap_status_e process_message(eap_process_tlv_message_data_c * const message);
+	EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H eap_status_e process_message(eap_process_tlv_message_data_c * const message);
 
-	EAP_FUNC_IMPORT eap_status_e get_configuration(const eap_method_settings_c * const internal_settings);
+	EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H eap_status_e get_configuration(const eap_method_settings_c * const internal_settings);
 
-	EAP_FUNC_IMPORT eap_status_e set_configuration(const eap_method_settings_c * const internal_settings);
+	EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H eap_status_e set_configuration(const eap_method_settings_c * const internal_settings);
 
-	EAP_FUNC_IMPORT eap_status_e copy_configuration(const eap_method_settings_c * const internal_settings);
+	EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H eap_status_e copy_configuration(const eap_method_settings_c * const internal_settings);
 
-	EAP_FUNC_IMPORT eap_status_e delete_configuration(const eap_method_settings_c * const internal_settings);
+	EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H eap_status_e delete_configuration(const eap_method_settings_c * const internal_settings);
 
-	EAP_FUNC_IMPORT eap_status_e set_index(const eap_method_settings_c * const internal_settings);
+	EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H eap_status_e set_index(const eap_method_settings_c * const internal_settings);
 
-	EAP_FUNC_IMPORT eap_status_e get_type_info(const eap_method_settings_c * const internal_settings);
+	EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H eap_status_e get_type_info(const eap_method_settings_c * const internal_settings);
 
-	EAP_FUNC_IMPORT eap_status_e invoke_ui(const eap_method_settings_c * const internal_settings);
+	EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H eap_status_e invoke_ui(const eap_method_settings_c * const internal_settings);
 
-	EAP_FUNC_IMPORT eap_status_e send_data(const void * const data, const u32_t length);
+	EAP_FUNC_VISIBILITY_EAP_PLUGIN_CLIENT_MESSAGE_IF_H eap_status_e send_data(const void * const data, const u32_t length);
 
 	//--------------------------------------------------
 }; // class eap_plugin_client_message_if_c

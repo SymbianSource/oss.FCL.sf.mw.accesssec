@@ -25,6 +25,27 @@
 #include "eap_tools.h"
 #include "eap_variable_data.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_RADIUS_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_RADIUS_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_RADIUS_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_RADIUS_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_RADIUS_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_RADIUS_H 
+#elif defined(EAP_EXPORT_EAP_AM_RADIUS_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_RADIUS_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_RADIUS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_RADIUS_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_RADIUS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_RADIUS_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_RADIUS_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_RADIUS_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_RADIUS_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_RADIUS_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_RADIUS_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "abs_eap_am_radius.h"
 #include "eap_sim_triplets.h"
 #include "eap_am_network_id.h"
@@ -32,7 +53,7 @@
 
 
 /// This class is interface to adaptation module of RADIUS.
-class EAP_EXPORT eap_am_radius_c
+class EAP_CLASS_VISIBILITY_EAP_AM_RADIUS_H eap_am_radius_c
 {
 private:
 	//--------------------------------------------------
@@ -331,7 +352,7 @@ public:
  * @param tools is pointer to the abs_eap_am_tools class created by the adaptation module.
  * RADIUS EAP-type will callback caller using the partner pointer.
  */
-EAP_C_FUNC_IMPORT  eap_am_radius_c *new_eap_am_radius(
+EAP_C_FUNC_VISIBILITY_EAP_AM_RADIUS_H  eap_am_radius_c *new_eap_am_radius(
 	abs_eap_am_tools_c * const tools,
 	abs_eap_base_type_c * const partner,
 	const bool is_client_when_true);

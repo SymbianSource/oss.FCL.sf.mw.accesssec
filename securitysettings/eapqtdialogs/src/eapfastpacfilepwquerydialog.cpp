@@ -16,13 +16,15 @@
 */
 
 /*
-* %version: 5 %
+* %version: 8 %
 */
 
 // System includes
 #include <HbTranslator>
 #include <HbAction>
 #include <HbParameterLengthLimiter>
+#include <HbEditorInterface>
+#include <EapSettings.h>
 
 // User includes
 #include "eapfastpacfilepwquerydialog.h"
@@ -98,6 +100,12 @@ void EapFastPacFilePwQueryDialog::createDialog(const QVariantMap &parameters )
     this->setPromptText(mainText, 0);   
     mEdit = this->lineEdit(0);
     mEdit->setEchoMode(HbLineEdit::Password);
+    mEdit->setMaxLength(KGeneralStringMaxLength);
+    mEdit->setInputMethodHints(
+        Qt::ImhNoAutoUppercase | Qt::ImhPreferLowercase | Qt::ImhNoPredictiveText);
+    
+    HbEditorInterface editInterface(mEdit);
+    editInterface.setSmileyTheme(HbSmileyTheme());    
               
     //Remove all default actions from the dialog           
     QList<QAction*> action_list = this->actions();     
@@ -113,15 +121,11 @@ void EapFastPacFilePwQueryDialog::createDialog(const QVariantMap &parameters )
     HbAction* actionCancel = new HbAction(hbTrId("txt_common_button_cancel"),this);
     this->addAction(actionCancel);    
      
-    //Disconnect action Ok from the default SLOT and connect to 
-    //a SLOT owned by this class    
-    disconnect(actionOk, SIGNAL(triggered()),this, SLOT(close()));
+    //Connect to a SLOT owned by this class    
     bool connected = connect(actionOk, SIGNAL(triggered()), this, SLOT(okPressed()));
     Q_ASSERT(connected == true);
     
-    //Disconnect action Cancel from the default SLOT and connect to 
-    //a SLOT owned by this class  
-    disconnect(actionCancel, SIGNAL(triggered()),this, SLOT(close()));
+    //Connect to a SLOT owned by this class
     connected = connect(actionCancel, SIGNAL(triggered()), this, SLOT(cancelPressed()));
     Q_ASSERT(connected == true);
     

@@ -27,6 +27,29 @@
 #include "eap_array.h"
 #include "eap_process_tlv_message_data.h"
 #include "eap_expanded_type.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPOL_HANDLE_TLV_MESSAGE_DATA_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_HANDLE_TLV_MESSAGE_DATA_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPOL_HANDLE_TLV_MESSAGE_DATA_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_HANDLE_TLV_MESSAGE_DATA_H 
+	#define EAP_FUNC_EXPORT_EAPOL_HANDLE_TLV_MESSAGE_DATA_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_HANDLE_TLV_MESSAGE_DATA_H 
+#elif defined(EAP_EXPORT_EAPOL_HANDLE_TLV_MESSAGE_DATA_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_HANDLE_TLV_MESSAGE_DATA_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_HANDLE_TLV_MESSAGE_DATA_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_HANDLE_TLV_MESSAGE_DATA_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_HANDLE_TLV_MESSAGE_DATA_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPOL_HANDLE_TLV_MESSAGE_DATA_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPOL_HANDLE_TLV_MESSAGE_DATA_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_HANDLE_TLV_MESSAGE_DATA_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_HANDLE_TLV_MESSAGE_DATA_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_HANDLE_TLV_MESSAGE_DATA_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_HANDLE_TLV_MESSAGE_DATA_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 /** @file */
 
@@ -44,7 +67,7 @@ class simple_config_credential_c;
 
 /// This class defines functions to add and parse message data composed
 /// of Attribute-Value Pairs (See eap_tlv_header_c) to/from eap_tlv_message_data_c object.
-class EAP_EXPORT eapol_handle_tlv_message_data_c
+class EAP_CLASS_VISIBILITY_EAPOL_HANDLE_TLV_MESSAGE_DATA_H eapol_handle_tlv_message_data_c
 : public eap_process_tlv_message_data_c
 {
 private:
@@ -65,12 +88,12 @@ public:
 	/**
 	 * The destructor of the eapol_handle_tlv_message_data_c class does nothing.
 	 */
-	EAP_FUNC_IMPORT virtual ~eapol_handle_tlv_message_data_c();
+	EAP_FUNC_VISIBILITY_EAPOL_HANDLE_TLV_MESSAGE_DATA_H virtual ~eapol_handle_tlv_message_data_c();
 
 	/**
 	 * The constructor of the eapol_handle_tlv_message_data_c class simply initializes the attributes.
 	 */
-	EAP_FUNC_IMPORT eapol_handle_tlv_message_data_c(
+	EAP_FUNC_VISIBILITY_EAPOL_HANDLE_TLV_MESSAGE_DATA_H eapol_handle_tlv_message_data_c(
 		abs_eap_am_tools_c * const tools);
 
 	/**
@@ -78,7 +101,7 @@ public:
 	 * If object initialization fails this function must return false.
 	 * @return This function returns the validity of this object.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAPOL_HANDLE_TLV_MESSAGE_DATA_H bool get_is_valid();
 
 	// 
 	//--------------------------------------------------

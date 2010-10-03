@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 44.1.18 %
+* %version: 53 %
 */
 
 #include <platform_paths.hrh>
@@ -29,7 +29,49 @@ TARGETTYPE    PLUGIN
 TARGET        eaptlspeap.dll
 UID	      0x10009d8d 0x101f8e4c
 
+//#if defined(USE_FAST_EAP_TYPE)
+//EXPORTUNFROZEN
+//#else
 deffile eaptlspeap.def
+//#endif //#if defined(USE_FAST_EAP_TYPE)
+
+MACRO EAP_NO_EXPORTS
+// Start: added by script change_mmp_export_macros.sh.
+MACRO EAP_NO_EXPORT_DUMMY_EAP_CORE_H
+MACRO EAP_NO_EXPORT_EAP_DIAMETER_AVP_CODE_H
+MACRO EAP_NO_EXPORT_EAP_DIAMETER_AVP_HEADER_H
+MACRO EAP_NO_EXPORT_EAP_DIAMETER_PAYLOADS_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_MSCHAPV2_HEADER_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_TLS_PEAP_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_TLS_PEAP_HEADER_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_TLS_PEAP_STATE_NOTIFICATION_H
+MACRO EAP_NO_EXPORT_TLS_ALERT_MESSAGE_H
+MACRO EAP_NO_EXPORT_TLS_APPLICATION_DATA_MESSAGE_H
+MACRO EAP_NO_EXPORT_TLS_APPLICATION_EAP_CORE_H
+MACRO EAP_NO_EXPORT_TLS_BASE_APPLICATION_H
+MACRO EAP_NO_EXPORT_TLS_BASE_RECORD_H
+MACRO EAP_NO_EXPORT_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H
+MACRO EAP_NO_EXPORT_TLS_COMPLETION_H
+MACRO EAP_NO_EXPORT_TLS_EXTENSION_H
+MACRO EAP_NO_EXPORT_TLS_HANDSHAKE_HEADER_H
+MACRO EAP_NO_EXPORT_TLS_HANDSHAKE_MESSAGE_H
+MACRO EAP_NO_EXPORT_TLS_MESSAGE_H
+MACRO EAP_NO_EXPORT_TLS_PEAP_TLV_HEADER_H
+MACRO EAP_NO_EXPORT_TLS_PEAP_TLV_PAYLOADS_H
+MACRO EAP_NO_EXPORT_TLS_PEAP_TYPES_H
+MACRO EAP_NO_EXPORT_TLS_RECORD_H
+MACRO EAP_NO_EXPORT_TLS_RECORD_HEADER_H
+MACRO EAP_NO_EXPORT_TLS_RECORD_MESSAGE_H
+MACRO EAP_NO_EXPORT_EAP_AM_TYPE_TLS_PEAP_SYMBIAN_H
+MACRO EAP_NO_EXPORT_EAPTLSPEAPCERTINTERFACE_H
+MACRO EAP_NO_EXPORT_EAPTLSPEAPCERTFETCHER_H
+MACRO EAP_NO_EXPORT_EAPTLSPEAP_H
+MACRO EAP_NO_EXPORT_PAC_STORE_INITIALIZATION_H
+// End: added by script change_mmp_export_macros.sh.
+
+#if defined(USE_FAST_EAP_TYPE)
+MACRO EAP_NO_EXPORT_mopo
+#endif //#if defined(USE_FAST_EAP_TYPE)
 
 SOURCEPATH    ../am/type/tls_peap/symbian/plugin/src
 
@@ -117,7 +159,7 @@ SOURCE		  eap_type_mschapv2_header.cpp
 
 #if defined(USE_FAST_EAP_TYPE)
 #include "wpxeap/eapfast.mmp"
-#endif
+#endif //#if defined(USE_FAST_EAP_TYPE)
 LANG		  SC
 
 SOURCEPATH		../am/type/tls_peap/symbian/plugin/inc
@@ -126,15 +168,18 @@ DOCUMENT		101f8e4c.loc
 // old ui
 USERINCLUDE   ../am/include/eaptlspeap_db_api_inc
 
+#if defined(USE_FAST_EAP_TYPE)
+USERINCLUDE ../../../../inc/pacstore_inc
+#endif //#if defined(USE_FAST_EAP_TYPE)
+
 // UI
 SOURCEPATH    ../am/type/tls_peap/symbian/plugin/src
-SOURCE		  EapTlsPeapUiConnection.cpp
-SOURCE        EapTlsPeapUiDataConnection.cpp
-SOURCE        EapTlsPeapUiTlsPeapData.cpp
 SOURCE		  EapTlsPeapCertFetcher.cpp
-SOURCE        EapTlsPeapUiEapTypes.cpp
-SOURCE        EapTlsPeapUiCertificates.cpp
-SOURCE        EapTlsPeapUiCipherSuites.cpp
+
+#if defined(USE_FAST_EAP_TYPE)
+SOURCEPATH  ../am/type/fast/symbian/src
+SOURCE		PacStoreInitialization.cpp
+#endif //#if defined(USE_FAST_EAP_TYPE)
 
 LIBRARY		  x509certnameparser.lib		// For parsing of certificate label. 
 
@@ -149,7 +194,6 @@ LIBRARY     eikdlg.lib
 LIBRARY     eikcore.lib
 LIBRARY		CommonEngine.lib
 
-LIBRARY     hlplch.lib
 LIBRARY		featmgr.lib
 
 LIBRARY     charconv.lib

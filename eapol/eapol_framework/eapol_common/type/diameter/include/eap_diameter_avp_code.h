@@ -26,6 +26,29 @@
 #include "eap_am_assert.h"
 #include "eap_am_tools.h"
 #include "eap_tools.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_DIAMETER_AVP_CODE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_DIAMETER_AVP_CODE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H 
+	#define EAP_FUNC_EXPORT_EAP_DIAMETER_AVP_CODE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_DIAMETER_AVP_CODE_H 
+#elif defined(EAP_EXPORT_EAP_DIAMETER_AVP_CODE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_DIAMETER_AVP_CODE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_DIAMETER_AVP_CODE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_DIAMETER_AVP_CODE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_DIAMETER_AVP_CODE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_DIAMETER_AVP_CODE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_DIAMETER_AVP_CODE_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 
 /** @file */
@@ -113,61 +136,61 @@ enum eap_diameter_vendor_codes_of_microsoft_e
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------
 
-class EAP_EXPORT eap_diameter_avp_code_c
+class EAP_CLASS_VISIBILITY_EAP_DIAMETER_AVP_CODE_H eap_diameter_avp_code_c
 {
 
 public:
 
-	EAP_FUNC_IMPORT ~eap_diameter_avp_code_c();
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H ~eap_diameter_avp_code_c();
 
-	EAP_FUNC_IMPORT eap_diameter_avp_code_c();
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H eap_diameter_avp_code_c();
 
-	EAP_FUNC_IMPORT eap_diameter_avp_code_c(
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H eap_diameter_avp_code_c(
 		const eap_diameter_vendor_id_e vendor_id,
 		const u32_t vendor_code);
 
-	EAP_FUNC_IMPORT eap_diameter_avp_code_c(
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H eap_diameter_avp_code_c(
 		const eap_diameter_avp_code_of_ietf_e ietf_code);
 
 
-	EAP_FUNC_IMPORT static bool is_ietf_code(const eap_diameter_avp_code_c code);
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H static bool is_ietf_code(const eap_diameter_avp_code_c code);
 
 
-	EAP_FUNC_IMPORT eap_status_e get_code_data(
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H eap_status_e get_code_data(
 		abs_eap_am_tools_c * const am_tools,
 		eap_diameter_avp_code_of_ietf_e * const code);
 
-	EAP_FUNC_IMPORT eap_status_e get_code_data(
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H eap_status_e get_code_data(
 		abs_eap_am_tools_c * const am_tools,
 		eap_diameter_avp_code_c * const code);
 
 
-	EAP_FUNC_IMPORT void set_code_values(
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H void set_code_values(
 		const eap_diameter_vendor_id_e vendor_id,
 		const u32_t vendor_code);
 
-	EAP_FUNC_IMPORT eap_diameter_vendor_id_e get_vendor_id() const;
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H eap_diameter_vendor_id_e get_vendor_id() const;
 
-	EAP_FUNC_IMPORT u32_t get_vendor_code() const;
-
-
-	EAP_FUNC_IMPORT bool operator == (const eap_diameter_avp_code_of_ietf_e right_type_value) const;
-
-	EAP_FUNC_IMPORT bool operator != (const eap_diameter_avp_code_of_ietf_e right_type_value) const;
-
-	EAP_FUNC_IMPORT bool operator == (const eap_diameter_avp_code_c &right_type_value) const;
-
-	EAP_FUNC_IMPORT bool operator != (const eap_diameter_avp_code_c &right_type_value) const;
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H u32_t get_vendor_code() const;
 
 
-	EAP_FUNC_IMPORT eap_diameter_avp_code_c &operator = (const eap_diameter_avp_code_of_ietf_e right_type_value);
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H bool operator == (const eap_diameter_avp_code_of_ietf_e right_type_value) const;
 
-	EAP_FUNC_IMPORT eap_diameter_avp_code_c &operator = (const eap_diameter_avp_code_c &right_type_value);
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H bool operator != (const eap_diameter_avp_code_of_ietf_e right_type_value) const;
 
-	EAP_FUNC_IMPORT eap_diameter_avp_code_c *operator & ();
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H bool operator == (const eap_diameter_avp_code_c &right_type_value) const;
+
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H bool operator != (const eap_diameter_avp_code_c &right_type_value) const;
 
 
-	EAP_FUNC_IMPORT const eap_diameter_avp_code_c *operator & () const;
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H eap_diameter_avp_code_c &operator = (const eap_diameter_avp_code_of_ietf_e right_type_value);
+
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H eap_diameter_avp_code_c &operator = (const eap_diameter_avp_code_c &right_type_value);
+
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H eap_diameter_avp_code_c *operator & ();
+
+
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H const eap_diameter_avp_code_c *operator & () const;
 
 
 private:
@@ -180,11 +203,11 @@ private:
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------
 
-class EAP_EXPORT eap_static_diameter_vendor_code_c
+class EAP_CLASS_VISIBILITY_EAP_DIAMETER_AVP_CODE_H eap_static_diameter_vendor_code_c
 {
 public:
 
-	EAP_FUNC_IMPORT const eap_diameter_avp_code_c & get_code() const;
+	EAP_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H const eap_diameter_avp_code_c & get_code() const;
 
 public:
 
@@ -199,9 +222,9 @@ public:
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------
 
-EAP_C_FUNC_IMPORT u32_t convert_eap_diameter_avp_code_to_u32_t(eap_diameter_avp_code_c code);
+EAP_C_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H u32_t convert_eap_diameter_avp_code_to_u32_t(eap_diameter_avp_code_c code);
 
-EAP_C_FUNC_IMPORT u64_t convert_eap_diameter_avp_code_to_u64_t(eap_diameter_avp_code_c code);
+EAP_C_FUNC_VISIBILITY_EAP_DIAMETER_AVP_CODE_H u64_t convert_eap_diameter_avp_code_to_u64_t(eap_diameter_avp_code_c code);
 
 //-----------------------------------------------------------------------------------------
 

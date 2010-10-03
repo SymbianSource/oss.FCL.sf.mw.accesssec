@@ -24,6 +24,29 @@
 
 
 #include "eap_general_header_base.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_EXPANDED_TYPE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_EXPANDED_TYPE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H 
+	#define EAP_FUNC_EXPORT_EAP_EXPANDED_TYPE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_EXPANDED_TYPE_H 
+#elif defined(EAP_EXPORT_EAP_EXPANDED_TYPE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_EXPANDED_TYPE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_EXPANDED_TYPE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_EXPANDED_TYPE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_EXPANDED_TYPE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_EXPANDED_TYPE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_EXPANDED_TYPE_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 
 /** @file */
@@ -95,7 +118,7 @@ enum eap_type_vendor_type_e
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------
 
-class EAP_EXPORT eap_expanded_type_c
+class EAP_CLASS_VISIBILITY_EAP_EXPANDED_TYPE_H eap_expanded_type_c
 {
 
 public:
@@ -109,76 +132,76 @@ public:
 	};
 
 	// This must not be virtual destructor.
-	EAP_FUNC_IMPORT ~eap_expanded_type_c();
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H ~eap_expanded_type_c();
 
-	EAP_FUNC_IMPORT eap_expanded_type_c();
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H eap_expanded_type_c();
 
-	EAP_FUNC_IMPORT eap_expanded_type_c(
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H eap_expanded_type_c(
 		const eap_type_vendor_id_e vendor_id,
 		const u32_t vendor_type);
 
-	EAP_FUNC_IMPORT eap_expanded_type_c(
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H eap_expanded_type_c(
 		const eap_type_ietf_values_e type);
 
-	EAP_FUNC_IMPORT bool get_is_valid() const;
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H bool get_is_valid() const;
 
-	EAP_FUNC_IMPORT bool get_is_valid_data() const;
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H bool get_is_valid_data() const;
 
-	EAP_FUNC_IMPORT eap_expanded_type_c * copy() const;
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H eap_expanded_type_c * copy() const;
 
-	EAP_FUNC_IMPORT static bool is_expanded_type(const eap_type_ietf_values_e eap_type);
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H static bool is_expanded_type(const eap_type_ietf_values_e eap_type);
 
-	EAP_FUNC_IMPORT static bool is_ietf_type(const eap_expanded_type_c eap_type);
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H static bool is_ietf_type(const eap_expanded_type_c eap_type);
 
-	EAP_FUNC_IMPORT eap_status_e get_type_data(
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H eap_status_e get_type_data(
 		abs_eap_am_tools_c * const am_tools,
 		eap_type_ietf_values_e * const type) const;
 
-	EAP_FUNC_IMPORT eap_status_e get_type_data(
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H eap_status_e get_type_data(
 		abs_eap_am_tools_c * const am_tools,
 		eap_expanded_type_c * const type) const;
 
-	EAP_FUNC_IMPORT eap_status_e get_expanded_type_data(
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H eap_status_e get_expanded_type_data(
 		abs_eap_am_tools_c * const am_tools,
 		eap_variable_data_c * const data) const;
 
-	EAP_FUNC_IMPORT eap_status_e set_expanded_type_data(
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H eap_status_e set_expanded_type_data(
 		abs_eap_am_tools_c * const am_tools,
 		const eap_variable_data_c * const data);
 
-	EAP_FUNC_IMPORT eap_status_e set_expanded_type_data(
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H eap_status_e set_expanded_type_data(
 		abs_eap_am_tools_c * const am_tools,
 		const void * const data,
 		const u32_t data_length);
 
-	EAP_FUNC_IMPORT void set_eap_type_values(
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H void set_eap_type_values(
 		const eap_type_vendor_id_e vendor_id,
 		const u32_t vendor_type);
 
-	EAP_FUNC_IMPORT eap_type_vendor_id_e get_vendor_id() const;
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H eap_type_vendor_id_e get_vendor_id() const;
 
-	EAP_FUNC_IMPORT u32_t get_vendor_type() const;
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H u32_t get_vendor_type() const;
 
-	EAP_FUNC_IMPORT static u32_t get_eap_expanded_type_size();
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H static u32_t get_eap_expanded_type_size();
 
-	EAP_FUNC_IMPORT bool operator == (const eap_type_ietf_values_e right_type_value) const;
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H bool operator == (const eap_type_ietf_values_e right_type_value) const;
 
-	EAP_FUNC_IMPORT bool operator != (const eap_type_ietf_values_e right_type_value) const;
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H bool operator != (const eap_type_ietf_values_e right_type_value) const;
 
-	EAP_FUNC_IMPORT bool operator == (const eap_expanded_type_c &right_type_value) const;
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H bool operator == (const eap_expanded_type_c &right_type_value) const;
 
-	EAP_FUNC_IMPORT bool operator != (const eap_expanded_type_c &right_type_value) const;
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H bool operator != (const eap_expanded_type_c &right_type_value) const;
 
-	EAP_FUNC_IMPORT eap_expanded_type_c &operator = (const eap_type_ietf_values_e right_type_value);
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H eap_expanded_type_c &operator = (const eap_type_ietf_values_e right_type_value);
 
-	EAP_FUNC_IMPORT eap_expanded_type_c &operator = (const eap_expanded_type_c &right_type_value);
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H eap_expanded_type_c &operator = (const eap_expanded_type_c &right_type_value);
 
-	EAP_FUNC_IMPORT eap_expanded_type_c *operator & ();
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H eap_expanded_type_c *operator & ();
 
-	EAP_FUNC_IMPORT const eap_expanded_type_c *operator & () const;
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H const eap_expanded_type_c *operator & () const;
 
 	/// This function reads EAP-type from offset.
-	EAP_FUNC_IMPORT static eap_status_e read_type(
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H static eap_status_e read_type(
 		abs_eap_am_tools_c * const am_tools,
 		const u32_t index,
 		const void * const buffer,
@@ -187,7 +210,7 @@ public:
 		);
 
 	/// This function writes EAP-type to offset.
-	EAP_FUNC_IMPORT static eap_status_e write_type(
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H static eap_status_e write_type(
 		abs_eap_am_tools_c * const am_tools,
 		const u32_t index, ///< Index is from 0 to n. Index 0 is the first EAP type field after base EAP header.
 		void * const buffer,
@@ -196,7 +219,7 @@ public:
 		const eap_expanded_type_c p_type ///< The EAP type to be written.
 		);
 
-	EAP_FUNC_IMPORT i32_t compare(const eap_expanded_type_c * const data) const;
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H i32_t compare(const eap_expanded_type_c * const data) const;
 
 private:
 
@@ -208,11 +231,11 @@ private:
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------
 
-class EAP_EXPORT eap_static_expanded_type_c
+class EAP_CLASS_VISIBILITY_EAP_EXPANDED_TYPE_H eap_static_expanded_type_c
 {
 public:
 
-	EAP_FUNC_IMPORT const eap_expanded_type_c & get_type() const;
+	EAP_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H const eap_expanded_type_c & get_type() const;
 
 public:
 
@@ -260,9 +283,9 @@ EAP_EXPANDED_TYPE(
 typedef eap_expanded_type_c eap_type_value_e;
 
 
-EAP_C_FUNC_IMPORT u32_t convert_eap_type_to_u32_t(eap_type_value_e type);
+EAP_C_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H u32_t convert_eap_type_to_u32_t(eap_type_value_e type);
 
-EAP_C_FUNC_IMPORT u64_t convert_eap_type_to_u64_t(eap_type_value_e type);
+EAP_C_FUNC_VISIBILITY_EAP_EXPANDED_TYPE_H u64_t convert_eap_type_to_u64_t(eap_type_value_e type);
 
 
 //-----------------------------------------------------------------------------------------

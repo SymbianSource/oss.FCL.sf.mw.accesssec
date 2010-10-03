@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 22 %
+* %version: 27 %
 */
 
 
@@ -29,10 +29,8 @@
 #include "EapPluginIf.h"
 #include "EapSettingsIf.h"
 
-#if defined (USE_WAPI_CORE)
 #include "WapiCoreIf.h"
 #include "WapiSettingsIf.h"
-#endif
 
 #if defined(USE_EAP_PAC_STORE_IF)
 #include "PacStoreIf.h"
@@ -40,6 +38,14 @@
 
 #include "EapMessageQueue.h"
 #include "AbsEapProcessSendInterface.h"
+
+
+enum CEapServerProcessHandlerState
+{
+	EapServerProcessHandlerState_None,
+	EapServerProcessHandlerState_Send,
+	EapServerProcessHandlerState_All,
+};
 
 class CEapServerProcessHandler
 : public CActive
@@ -58,7 +64,7 @@ public:
 
 	eap_status_e SendData(const void * const data, const u32_t length, TEapRequests message);
 
-	void Activate();
+	void Activate(const CEapServerProcessHandlerState aState);
 
 private:
 
@@ -78,17 +84,18 @@ private:
 	CEapPluginIf* iEapPlugin;
 	CEapSettingsIf* iEapSettings;
 
-#if defined (USE_WAPI_CORE)
 	CWapiCoreIf * iWapiCore;
-  CWapiSettingsIf* iWapiSettings;
-#endif
+	CWapiSettingsIf* iWapiSettings;
 
 #if defined(USE_EAP_PAC_STORE_IF) // JPH: does not compile anymore
     CPacStoreIf* iPacStore;
 #endif //#if defined(USE_EAP_PAC_STORE_IF) // JPH: does not compile anymore
 
-	EapMessageQueue* iEapMessageQueue;
+	EapMessageQueue* iEapSendMessageQueue;
+	EapMessageQueue* iEapProcessMessageQueue;
 	
+	const EapMessageBuffer * iProcessMessage;
+	CEapServerProcessHandlerState iHandlerState;
 
 };
     

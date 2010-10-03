@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 19 %
+* %version: 24 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -68,7 +68,7 @@ CEapProtectedSetup::CEapProtectedSetup(const TIndexType aIndexType,
 
 // ----------------------------------------------------------
 
-CEapProtectedSetup* CEapProtectedSetup::NewL(SIapInfo *aIapInfo)
+CEapProtectedSetup* CEapProtectedSetup::NewL(SPluginInfo *aIapInfo)
 {
 	EAP_TRACE_DEBUG_SYMBIAN(
 		(_L("CEapProtectedSetup::NewL index type=%d, index=%d"),
@@ -183,10 +183,6 @@ eap_base_type_c* CEapProtectedSetup::GetStackInterfaceL(abs_eap_am_tools_c* cons
 
 // ----------------------------------------------------------
 
-
-
-// ----------------------------------------------------------
-
 CEapTypeInfo* CEapProtectedSetup::GetInfoL()
 {
 	CEapTypeInfo* info = new(ELeave) CEapTypeInfo(
@@ -198,10 +194,11 @@ CEapTypeInfo* CEapProtectedSetup::GetInfoL()
 }
 
 // ----------------------------------------------------------
+
 void CEapProtectedSetup::DeleteConfigurationL()
 {
 	EAP_TRACE_DEBUG_SYMBIAN(
-		(_L("ERROR: CEapProtectedSetup::DeleteConfigurationL - THIS IS NOT SUPPORTED")));
+		(_L("WARNING: CEapProtectedSetup::DeleteConfigurationL - THIS IS NOT SUPPORTED")));
 }
 
 // ----------------------------------------------------------
@@ -229,8 +226,8 @@ void CEapProtectedSetup::SetTunnelingType(const TEapExpandedType aTunnelingType)
 
 }
 
-
 // ----------------------------------------------------------
+
 void CEapProtectedSetup::SetIndexL(
 		const TIndexType /*aIndexType*/, 
 		const TInt /*aIndex*/ )
@@ -264,5 +261,14 @@ void CEapProtectedSetup::CopySettingsL(
 	EAP_TRACE_DEBUG_SYMBIAN(
 		(_L("ERROR: CEapProtectedSetup::CopySettingsL - THIS IS NOT SUPPORTED")));
 }
+
+// ----------------------------------------------------------
+
+TInt CEapProtectedSetup::InitialisePacStore(AbsPacStoreInitializer * const /* initializer */)
+{
+	return KErrNone;
+}
+
+// ----------------------------------------------------------
 
 // End of file

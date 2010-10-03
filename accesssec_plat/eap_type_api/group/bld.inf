@@ -17,7 +17,7 @@
 */
 
 /*
-* %version: tr1cfwln#17 %
+* %version: tr1cfwln#18 %
 */
 
 #include <platform_paths.hrh>
@@ -32,11 +32,10 @@ PRJ_EXPORTS
 ../inc/EapTypeDefinitions.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTypeDefinitions.h)
 ../inc/EapType.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapType.h)
 ../inc/EapType.inl     MW_LAYER_PLATFORM_EXPORT_PATH(EapType.inl)
-../inc/EapTypePlugin.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTypePlugin.h)
-../inc/EapTypePlugin.inl     MW_LAYER_PLATFORM_EXPORT_PATH(EapTypePlugin.inl)
 ../inc/EapSettings.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapSettings.h)
 ../inc/EapTypeInfo.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapTypeInfo.h)
 ../inc/EapGeneralSettings.inl     MW_LAYER_PLATFORM_EXPORT_PATH(EapGeneralSettings.inl)
 ../inc/EapGeneralSettings.h     MW_LAYER_PLATFORM_EXPORT_PATH(EapGeneralSettings.h)
+../inc/AbsPacStoreInitializer.h     MW_LAYER_PLATFORM_EXPORT_PATH(AbsPacStoreInitializer.h)
 
 // end

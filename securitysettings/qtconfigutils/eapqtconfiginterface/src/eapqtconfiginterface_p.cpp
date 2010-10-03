@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 52 %
+ * %version: 55 %
  */
 
 // System includes
@@ -36,6 +36,7 @@
 #include <eapqtcertificateinfo.h>
 
 // User includes
+#include "EapFastPacStore.h"
 #include "cpeapplugininterface.h"
 #include "eapqtconfiginterface_p.h"
 #include "eapqtvalidatorpassword.h"
@@ -53,6 +54,7 @@
 
 // Local constants
 static const QString eapTranslationFile("cpeapuiplugins");
+static const QString eapPromptsTranslationFile("eapprompts");
 
 // ======== LOCAL FUNCTIONS ========
 
@@ -62,8 +64,10 @@ EapQtConfigInterfacePrivate::EapQtConfigInterfacePrivate() :
   mValidatorInstance(true),
   mLastOuterHandle(EapQtPluginHandle::PluginUndefined),
   mTranslator(NULL),
+  mEapPromptsTranslator(NULL),
   mEapGsIf(NULL), 
   mEapTypeIf(NULL),
+  mPacStoreIf(NULL),
   mIapId(0),
   mEapBearer(ELan),
   mEapDbIndex(EapQtConfigInterface::IapIdUndefined),
@@ -76,9 +80,11 @@ EapQtConfigInterfacePrivate::EapQtConfigInterfacePrivate(
     const EapQtConfigInterface::EapBearerType bearerType, const int iapId) :  
   mValidatorInstance(false),
   mLastOuterHandle(EapQtPluginHandle::PluginUndefined),
-  mTranslator(NULL), 
+  mTranslator(NULL),
+  mEapPromptsTranslator(NULL),
   mEapGsIf(NULL), 
   mEapTypeIf(NULL),
+  mPacStoreIf(NULL),
   mIapId(iapId),
   mEapBearer(ELan),
   mEapDbIndex(EapQtConfigInterface::IapIdUndefined),
@@ -130,6 +136,7 @@ void EapQtConfigInterfacePrivate::shutdown()
     // mTranslator gets deleted automatically (QScopedPointer)
     // mEapTypeIf gets deleted automatically (QScopedPointer)
     // mEapGsIf gets deleted automatically (QScopedPointer)
+    // mPacStoreIf gets deleted automatically (QScopedPointer)
 }
 
 bool EapQtConfigInterfacePrivate::setConfigurationReference(const int iapId)
@@ -144,7 +151,6 @@ bool EapQtConfigInterfacePrivate::setEapDbIndex(const int iapId)
 {
 
     qDebug("EapQtConfigInterfacePrivate::setIapId - requested id: %d, this = 0x%08x", iapId, this);
-
 
     // optimization: do not re-create the interface if the reference does
     // not change and mEapGsIf exists already
@@ -217,18 +223,20 @@ bool EapQtConfigInterfacePrivate::setEapDbIndex(const int iapId)
         mEapBearer, mEapDbIndex);
 
     // load EAP general settings interface
+    bool ret = true;
     CEapGeneralSettings* tmp = NULL;
     TRAPD(err, tmp = CEapGeneralSettings::NewL(mEapBearer, mEapDbIndex));
     if (err != KErrNone) {
         qDebug("ERROR: EapQtConfigInterfacePrivate::setIapId - CEapGeneralSettings::NewL() failed");
         mEapDbIndexValid = false;
-        return false;
+        tmp = NULL;
+        ret = false;
     }
 
     // set to the created instance
     mEapGsIf.reset(tmp);
 
-    return true;
+    return ret;
 }
 
 bool EapQtConfigInterfacePrivate::setEapWlanDbIndex(const int iapId)
@@ -245,15 +253,15 @@ bool EapQtConfigInterfacePrivate::setEapWlanDbIndex(const int iapId)
         return false;
     }
 
+    bool ret = true;
     TRAP(err, mEapDbIndex = cmm.GetConnectionMethodInfoIntL(iapId, CMManager::EWlanServiceId));
     if (err != KErrNone) {
         qDebug(
             "ERROR: EapQtConfigInterfacePrivate::setEapWlanDbIndex - cmm.GetConnectionMethodInfoIntL() failed",
             mEapBearer, iapId);
-        cmm.Close();
         mEapDbIndex = EapQtConfigInterface::IapIdUndefined;
         mIapId = 0;
-        return false;
+        ret = false;
     }
 
     cmm.Close();
@@ -261,7 +269,7 @@ bool EapQtConfigInterfacePrivate::setEapWlanDbIndex(const int iapId)
     qDebug("EapQtConfigInterfacePrivate::setEapWlanDbIndex - obtained WLAN service id: %d",
         mEapDbIndex);
 
-    return true;
+    return ret;
 }
 
 void EapQtConfigInterfacePrivate::checkInstanceThrowing() const
@@ -744,17 +752,19 @@ bool EapQtConfigInterfacePrivate::saveConfiguration(const EapQtPluginHandle &plu
 
     // copy the rest of the settings in the function
     copyToEapSettings(config, eapSettings);
+
     // store settings
+    bool ret = true;
     TRAPD(err, mEapTypeIf->SetConfigurationL(eapSettings));
     if (err != KErrNone) {
         qDebug("ERROR: EapQtConfigInterfacePrivate - saveConfiguration: SetConfigurationL failed");
         // clear the instance so that the next attempt starts from scratch
         mEapTypeIf.reset(NULL);
         mCurrentServerEapType = *EapExpandedTypeNone.GetType();
-        return false;
+        ret = false;
     }
 
-    return true;
+    return ret;
 }
 
 // config must be empty when calling
@@ -1790,7 +1800,11 @@ CpBaseSettingView *EapQtConfigInterfacePrivate::uiInstance(const EapQtPluginHand
         // install translations for EAP UI plugins
         mTranslator.reset(new HbTranslator(eapTranslationFile));
     }
-
+    if (mEapPromptsTranslator.isNull()) {
+        // install translations for EAP UI plugins
+        mEapPromptsTranslator.reset(new HbTranslator(eapPromptsTranslationFile));
+    }
+    
     // go through all interfaces (dlls)
     QList<CpEapPluginInterface*>::iterator iter;
     for (iter = mPlugins.begin(); iter != mPlugins.end(); ++iter) {
@@ -1900,16 +1914,241 @@ EapQtValidator *EapQtConfigInterfacePrivate::validatorEap(const EapQtExpandedEap
     return ret;
 }
 
-bool EapQtConfigInterfacePrivate::readPacStoreConfiguration(EapQtPacStoreConfig& /* config */)
+bool EapQtConfigInterfacePrivate::readPacStoreConfiguration(EapQtPacStoreConfig& config)
 {
-    // not supported
-    return false;
+    qDebug("EapQtConfigInterfacePrivate::readPacStoreConfiguration(), this = 0x%08x", this);
+
+    // reset config to make sure it is empty
+    config.clear();
+
+    // get PAC store IF
+    getPacStoreIf();
+
+    if (mPacStoreIf.isNull()) {
+        qDebug() << "ERROR: EapQtConfigInterfacePrivate::readPacStoreConfiguration()"
+            << "- mPacStoreIf creation failed";
+        return false;
+    }
+
+    // *** check if PAC store has been created
+    qDebug() << "EapQtConfigInterfacePrivate::readPacStoreConfiguration() - calls IsMasterKeyPresentL";
+
+    TBool status(EFalse);
+    TRAPD(err, status = mPacStoreIf->IsMasterKeyPresentL())
+    if (err != KErrNone) {
+        qDebug()
+            << "ERROR: EapQtConfigInterfacePrivate::readPacStoreConfiguration() - IsMasterKeyPresentL"
+            << "failed with code: " << err;
+        return false;
+    }
+
+    if (status != EFalse) {
+        // PAC store exists
+        config.setValue(EapQtPacStoreConfig::PacStoreState,
+            EapQtPacStoreConfig::PacStoreStatePasswordRequired);
+
+        qDebug() << "EapQtConfigInterfacePrivate::readPacStoreConfiguration()"
+            << "- setting status to PacStoreStatePasswordRequired";
+    }
+    else {
+        // PAC store does not exist
+        config.setValue(EapQtPacStoreConfig::PacStoreState,
+            EapQtPacStoreConfig::PacStoreStateStoreNotExists);
+
+        qDebug() << "EapQtConfigInterfacePrivate::readPacStoreConfiguration()"
+            << "- setting status to PacStoreStateStoreNotExists";
+
+        // enough info to exit here
+        return true;
+    }
+
+    // here the state is PacStoreStatePasswordRequired,
+    // lets check if we need to change it below
+
+    // *** check if PAC store password has been stored to settings database
+    TRAP(err, status = mPacStoreIf->IsPacStorePasswordPresentL())
+    if (err != KErrNone) {
+        qDebug()
+            << "ERROR: EapQtConfigInterfacePrivate::readPacStoreConfiguration() - IsPacStorePasswordPresentL"
+            << "failed with code: " << err;
+        config.clear();
+        return false;
+    }
+
+    if (status != EFalse) {
+        // password stored
+        config.setValue(EapQtPacStoreConfig::PacStoreState,
+            EapQtPacStoreConfig::PacStoreStatePasswordStored);
+
+        qDebug() << "EapQtConfigInterfacePrivate::readPacStoreConfiguration()"
+            << "- setting status to PacStoreStatePasswordStored";
+    }
+
+    return true;
 }
 
-bool EapQtConfigInterfacePrivate::savePacStoreConfiguration(const EapQtPacStoreConfig& /* config */)
+bool EapQtConfigInterfacePrivate::savePacStoreConfiguration(const EapQtPacStoreConfig& config)
 {
-    // not supported
-    return false;
+    qDebug("EapQtConfigInterfacePrivate::savePacStoreConfiguration(), this = 0x%08x", this);
+
+    // get PAC store IF
+    getPacStoreIf();
+
+    if (mPacStoreIf.isNull()) {
+        qDebug() << "ERROR: EapQtConfigInterfacePrivate::savePacStoreConfiguration()"
+            << "- mPacStoreIf creation failed";
+        return false;
+    }
+
+    // reset PAC store, overrides other settings,
+    // nothing else will be performed if this is set to true,
+    // called regardless of PAC store state
+    TInt err(KErrNone);
+    bool ret = false;
+    QVariant varValue = config.value(EapQtPacStoreConfig::PacStoreReset);
+    if (varValue.type() == QVariant::Bool && varValue.toBool()) {
+        qDebug() << "EapQtConfigInterfacePrivate::savePacStoreConfiguration() - calls DestroyPacStore";
+
+        err = mPacStoreIf->DestroyPacStore();
+        qDebug()
+            << "EapQtConfigInterfacePrivate::savePacStoreConfiguration() - DestroyPacStore returned:"
+            << err;
+        ret = (err == KErrNone);
+        return ret;
+    }
+
+    // check PAC store state
+    EapQtPacStoreConfig localPacConfig;
+    ret = readPacStoreConfiguration(localPacConfig);
+    if(!ret)
+    {
+        qDebug() << "ERROR: EapQtConfigInterfacePrivate::savePacStoreConfiguration()"
+            << "- PAC store state check failed";
+        return ret;
+    }
+
+    // store state
+    EapQtPacStoreConfig::PacStoreStatus pacStoreState =
+        static_cast<EapQtPacStoreConfig::PacStoreStatus> (localPacConfig.value(
+            EapQtPacStoreConfig::PacStoreState).toInt());
+
+    ret = true;
+    TInt leaveErr(KErrNone);
+    // TBufC8 must be twice as long as QString
+    TBufC8<StringMaxLength> tmpPassword;
+    const QVariant varPassword = config.value(EapQtPacStoreConfig::PacStorePassword);
+    varValue = config.value(EapQtPacStoreConfig::PacStoreSavePassword);
+
+    // create PAC store if it does not exist
+    if (pacStoreState == EapQtPacStoreConfig::PacStoreStateStoreNotExists && varPassword.type()
+        == QVariant::String && varPassword.toString().count() <= PacPasswordMaxLength) {
+
+        qDebug() << "EapQtConfigInterfacePrivate::savePacStoreConfiguration() -"
+            << "creating PAC store with password:" << varPassword.toString();
+
+        // Convert to suitable format
+        QByteArray tmp = varPassword.toString().toUtf8();
+        tmpPassword.Des().Copy(reinterpret_cast<const TUint8*>(tmp.data()), tmp.count());
+
+        TRAP(leaveErr, err = mPacStoreIf->CreateAndSaveMasterKeyL(tmpPassword));
+
+        qDebug() << "EapQtConfigInterfacePrivate::savePacStoreConfiguration() -"
+            << "CreateAndSaveMasterKeyL returned:" << err << ", trap returned:"
+            << leaveErr;
+
+        ret = (err == KErrNone) && (leaveErr == KErrNone);
+    }
+    else if (pacStoreState == EapQtPacStoreConfig::PacStoreStateStoreNotExists) {
+        qDebug() << "ERROR: EapQtConfigInterfacePrivate::savePacStoreConfiguration()"
+            << "- PAC store does not exist and password is not ok";
+        qDebug() << "ERROR: EapQtConfigInterfacePrivate::savePacStoreConfiguration()"
+            << "- password type == QString:" << (varPassword.type() == QVariant::String)
+            << ", password size:" << varPassword.toString().count();
+        ret = false;
+    }
+
+    // exit on failure
+    if(!ret) {
+        qDebug() << "ERROR: EapQtConfigInterfacePrivate::savePacStoreConfiguration()"
+            << "- PAC store creation failed";
+        return ret;
+    }
+
+    // clear tmpPassword
+    tmpPassword.Des().SetLength(0);
+
+    // PAC store exists, clear password
+    if (varValue.type() == QVariant::Bool && !varValue.toBool()) {
+
+        qDebug() << "EapQtConfigInterfacePrivate::savePacStoreConfiguration() - calls SetPacStorePasswordL with empty password";
+
+        // empty password clears the existing password from database and sets prompting on
+        TRAP(leaveErr, err = mPacStoreIf->SetPacStorePasswordL(tmpPassword));
+
+        qDebug() << "EapQtConfigInterfacePrivate::savePacStoreConfiguration() -"
+            << "clearing password, SetPacStorePasswordL returned:" << err << ", trap returned: "
+            << leaveErr;
+        ret = (err == KErrNone) && (leaveErr == KErrNone);
+    }
+    // PAC store exists, store password
+    // password's correcness is not checked here, PacStorePasswordConfirmation
+    // validator must be used to check it before calling savePacStoreConfiguration()
+    else if (varValue.type() == QVariant::Bool && varValue.toBool()) {
+        if (varPassword.type() == QVariant::String && varPassword.toString().count() <= PacPasswordMaxLength) {
+
+            qDebug() << "EapQtConfigInterfacePrivate::savePacStoreConfiguration() -"
+                << "storing password:" << varPassword.toString();
+
+            // Convert to suitable format
+            QByteArray tmp = varPassword.toString().toUtf8();
+            tmpPassword.Des().Copy(reinterpret_cast<const TUint8*>(tmp.data()), tmp.count());
+
+            TRAP(leaveErr, err = mPacStoreIf->SetPacStorePasswordL(tmpPassword));
+
+            qDebug() << "EapQtConfigInterfacePrivate::savePacStoreConfiguration() -"
+                << "SetPacStorePasswordL returned:" << err << ", trap returned:" << leaveErr;
+            ret = (err == KErrNone) && (leaveErr == KErrNone);
+        }
+        else {
+            qDebug() << "ERROR: EapQtConfigInterfacePrivate::savePacStoreConfiguration()"
+                << "- password not ok, not stored";
+            qDebug() << "ERROR: EapQtConfigInterfacePrivate::savePacStoreConfiguration()"
+                << "- password type == QString:" << (varPassword.type() == QVariant::String)
+                << ", password size:" << varPassword.toString().count();
+            ret = false;
+        }
+    }
+
+    qDebug() << "EapQtConfigInterfacePrivate::savePacStoreConfiguration() - returns: " << ret;
+    return ret;
+}
+
+void EapQtConfigInterfacePrivate::getPacStoreIf()
+{
+    qDebug("EapQtConfigInterfacePrivate::getPacStoreIf(), this = 0x%08x", this);
+
+    // cannot call isSupportedOuterType(EapQtPluginHandle::PluginEapFast) from
+    // validator instance (would throw), hence cannot check it here
+
+    // check if we already have an instance
+    if (!mPacStoreIf.isNull()) {
+        qDebug() << "EapQtConfigInterfacePrivate::getPacStoreIf() - mPacStoreIf exists already";
+        return;
+    }
+
+    qDebug() << "EapQtConfigInterfacePrivate::getPacStoreIf() - calls CEapFastPacStore::NewL";
+
+    // try to create PAC store instance, this will fail is EAP-FAST is not supported
+    CEapFastPacStore* tmpPacStoreIf = NULL;
+    TRAPD(err, tmpPacStoreIf = CEapFastPacStore::NewL());
+    if (err != KErrNone) {
+        qDebug()
+            << "ERROR: EapQtConfigInterfacePrivate::getPacStoreIf() - CEapFastPacStore::NewL failed";
+        tmpPacStoreIf = NULL;
+    }
+
+    // move the result to scoped member pointer
+    mPacStoreIf.reset(tmpPacStoreIf);
 }
 
 EapQtValidator *EapQtConfigInterfacePrivate::validatorPacStore(
@@ -1917,7 +2156,15 @@ EapQtValidator *EapQtConfigInterfacePrivate::validatorPacStore(
 {
     qDebug("EapQtConfigInterfacePrivate::validatorPacStore(), this = 0x%08x", this);
 
-    EapQtValidator *ret = NULL;
+    // cannot call isSupportedOuterType(EapQtPluginHandle::PluginEapFast) from
+    // validator instance (would throw), hence cannot check it here
+
+    // Instead, EAP-FAST support is checked in EapQtValidatorPacStorePasswordConfirm constuctor:
+    // it throws if PAC store IF cannot be created
+
+    // EapQtValidatorPacStorePassword (format validator) is always usable
+
+    EapQtValidator* ret = NULL;
 
     switch (id) {
     case EapQtPacStoreConfig::PacStorePassword:

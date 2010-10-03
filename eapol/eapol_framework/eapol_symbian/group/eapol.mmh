@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 48.1.18 %
+* %version: 48.1.25 %
 */
 
 //-------------------------------------------------------------------
@@ -85,7 +85,7 @@ MACRO USE_EAP_SIMPLE_CONFIG=1
 
 #if defined(FF_WLAN_EXTENSIONS)
 
-#warning FF_WLAN_EXTENSIONS enabled
+//#warning FF_WLAN_EXTENSIONS enabled
 
 MACRO USE_FAST_EAP_TYPE=1
 #define USE_FAST_EAP_TYPE
@@ -173,7 +173,7 @@ MACRO EAP_NO_STDINT_H_HEADER=1
 #define EAP_NO_STDINT_H_HEADER
 
 // This is disabled because QT leaks memory and EAP-server panics on __UHEAP_MARKEND always.
-// Define this after QT fixes memory leks.
+// Define this after QT fixes memory leaks.
 //MACRO USE_EAP_HEAP_CHECK=1
 
 //-------------------------------------------------------------------

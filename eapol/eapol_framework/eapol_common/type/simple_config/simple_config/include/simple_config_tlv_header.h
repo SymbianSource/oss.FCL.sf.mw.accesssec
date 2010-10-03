@@ -25,6 +25,29 @@
 #include "eap_tools.h"
 #include "eap_general_header_base.h"
 #include "simple_config_attribute_type.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_SIMPLE_CONFIG_TLV_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_TLV_HEADER_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TLV_HEADER_H 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_TLV_HEADER_H 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_TLV_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_TLV_HEADER_H 
+#elif defined(EAP_EXPORT_SIMPLE_CONFIG_TLV_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_TLV_HEADER_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TLV_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_TLV_HEADER_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_TLV_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_TLV_HEADER_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_TLV_HEADER_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TLV_HEADER_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_TLV_HEADER_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_TLV_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_TLV_HEADER_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 /** @file */
 
@@ -53,7 +76,7 @@
  * 16-bits Data Length;            This is a length field, the length (in bytes) of the following Data.
  * @endcode
  */
-class EAP_EXPORT simple_config_tlv_header_c
+class EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_TLV_HEADER_H simple_config_tlv_header_c
 : public eap_general_header_base_c
 {
 private:
@@ -115,7 +138,7 @@ public:
 	/**
 	 * This function returns the header length of TLV.
 	 */
-	EAP_FUNC_IMPORT static u32_t get_header_length();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_TLV_HEADER_H static u32_t get_header_length();
 
 	/**
 	 * This function returns pointer to the offset of data of TLV.

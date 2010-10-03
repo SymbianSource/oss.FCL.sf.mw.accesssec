@@ -26,6 +26,27 @@
 #include "eap_tools.h"
 #include "eap_am_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_ARRAY_H)
+	#define EAP_CLASS_VISIBILITY_EAP_ARRAY_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_ARRAY_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_ARRAY_H 
+	#define EAP_FUNC_EXPORT_EAP_ARRAY_H 
+	#define EAP_C_FUNC_EXPORT_EAP_ARRAY_H 
+#elif defined(EAP_EXPORT_EAP_ARRAY_H)
+	#define EAP_CLASS_VISIBILITY_EAP_ARRAY_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_ARRAY_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_ARRAY_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_ARRAY_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_ARRAY_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_ARRAY_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_ARRAY_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_ARRAY_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_ARRAY_H 
+	#define EAP_C_FUNC_EXPORT_EAP_ARRAY_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 #if defined(_WIN32) && !defined(__GNUC__)
 	#pragma warning( disable : 4251 ) // needs to have dll-interface to be used by clients
@@ -54,7 +75,7 @@
  * @param Type template parameter is the actual type which is stored.
  */
 template <class Type>
-class EAP_EXPORT eap_array_atom_c
+class EAP_CLASS_VISIBILITY_EAP_ARRAY_H eap_array_atom_c
 {
 private:
 
@@ -132,7 +153,7 @@ public:
   * @param Type template parameter is the actual type which is stored.
   */
 template <class Type>
-class EAP_EXPORT eap_array_c
+class EAP_CLASS_VISIBILITY_EAP_ARRAY_H eap_array_c
 {
 private:
 	//--------------------------------------------------

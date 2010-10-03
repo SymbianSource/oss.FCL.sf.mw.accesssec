@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 48 %
+* %version: 53 %
 */
 
 //-------------------------------------------------------------------
@@ -34,6 +34,16 @@ UID			0x1000008d  0x101f8e48
 
 deffile eapolprotected.def
 
+LIBRARY bafl.lib
+LIBRARY wlandbif.lib
+
+///////////////////////////////////////////////////////////////////
+
+LANG	SC
+
+MACRO EAP_NO_EXPORT_EAPOL_WPXM_REASSOCIATION_DATA_H
+MACRO EAP_NO_EXPORT_EAPOL_WPXM_REASSOCIATION_REQUEST_DATA_H
+
 SOURCEPATH	../../eapol_common/am/core
 SOURCE eapol_am_wlan_authentication.cpp
 
@@ -42,13 +52,6 @@ SOURCE eapol_am_wlan_authentication_symbian.cpp
 
 SOURCEPATH	../am/common/symbian
 SOURCE EapConfigToolsSymbian.cpp
-
-LIBRARY bafl.lib
-LIBRARY wlandbif.lib
-
-///////////////////////////////////////////////////////////////////
-
-LANG	SC
 
 #if defined(USE_EAPOL_WLAN_AUTHENTICATION_MESSAGE_IF)
 SOURCEPATH	../../eapol_common/common
@@ -105,7 +108,7 @@ SYSTEMINCLUDE	/epoc32/include/libc/netinet
 MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
 
 #if !defined(USE_EAPOL_WLAN_WPX_STUB)
-#warning STATICLIBRARY eapolwpx.lib
+//#warning STATICLIBRARY eapolwpx.lib
 STATICLIBRARY eapolwpx.lib
 #else
 STATICLIBRARY eapolwpxstub.lib

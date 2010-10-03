@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 32 %
+* %version: 34 %
 */
 
 
@@ -384,12 +384,17 @@ void CEapSession::ServiceL(const RMessage2& aMessage)
 		EAP_TRACE_DEBUG(
 			iTools,
 			TRACE_FLAGS_DEFAULT,
-			(EAPL("CEapSession::ServiceL(): EEapIfReqReceive\n")));
+			(EAPL("CEapSession::ServiceL(): EEapIfReqReceive, iReceiveMessage=0x%08x\n"),
+			&iReceiveMessage));
+
         __ASSERT_DEBUG(!iReceiveActive, Server()->PanicClient(EReceiveReceiveAlreadyActive));
+
         // remember receive request
         iReceiveMessage = aMessage;
         iReceiveActive=ETrue;
-		iEapProcessHandler->Activate();
+
+		iEapProcessHandler->Activate(EapServerProcessHandlerState_Send);
+
         break;
     case EEapIfCancelReceive:
 		EAP_TRACE_DEBUG(
@@ -444,8 +449,9 @@ void CEapSession::Receive(RMessage2& aBuffer)
 	EAP_TRACE_DEBUG(
 		iTools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapSession::Receive(): this=0x%08x\n"),
-		this));
+		(EAPL("CEapSession::Receive(): this=0x%08x, iReceiveMessage=0x%08x\n"),
+		this,
+		&iReceiveMessage));
 	EAP_TRACE_RETURN_STRING(iTools, "returns: CEapSession::Receive()");
 
     __ASSERT_DEBUG(!iReceiveActive,Server()->PanicClient(EReceiveReceiveAlreadyActive));
@@ -462,8 +468,9 @@ void CEapSession::CancelReceive()
 	EAP_TRACE_DEBUG(
 		iTools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapSession::CancelReceive(): this=0x%08x\n"),
-		this));
+		(EAPL("CEapSession::CancelReceive(): this=0x%08x, iReceiveMessage=0x%08x\n"),
+		this,
+		&iReceiveMessage));
 	EAP_TRACE_RETURN_STRING(iTools, "returns: CEapSession::CancelReceive()");
 
     if (!iReceiveActive)
@@ -497,7 +504,7 @@ TBool CEapSession::GetReceiveActive()
 // -----------------------------------------------------------------------------------------
 
 eap_status_e CEapSession::SendData(EapMessageBuffer * const message)
-    {
+{
 	EAP_TRACE_DEBUG(
 		iTools,
 		TRACE_FLAGS_DEFAULT,
@@ -508,16 +515,16 @@ eap_status_e CEapSession::SendData(EapMessageBuffer * const message)
 		message->GetData()->Length()));
 	EAP_TRACE_RETURN_STRING(iTools, "returns: CEapSession::SendData()");
 
-    if (!iReceiveActive)
+	if (!iReceiveActive)
 	{
 		EAP_TRACE_DEBUG(
 			iTools,
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("CEapSession::SendData(): No receive active\n")));
-        return EAP_STATUS_RETURN(iTools, iTools->convert_am_error_to_eapol_error(KErrCancel));
+		return EAP_STATUS_RETURN(iTools, iTools->convert_am_error_to_eapol_error(KErrCancel));
 	}
 
-    TInt error(KErrNone);
+	TInt error(KErrNone);
 
 	EAP_TRACE_DEBUG(
 		iTools,
@@ -529,14 +536,60 @@ eap_status_e CEapSession::SendData(EapMessageBuffer * const message)
 	EAP_TRACE_DEBUG(
 		iTools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapSession::SendData(): calls iReceiveMessage.Complete(): Write() error=%d\n"),
-		error));
+		(EAPL("CEapSession::SendData(): calls iReceiveMessage.Complete(): Write() error=%d, iReceiveMessage=0x%08x\n"),
+		error,
+		&iReceiveMessage));
 
-    iReceiveMessage.Complete(KErrNone);
-    iReceiveActive=EFalse;
+	iReceiveMessage.Complete(KErrNone);
+	iReceiveActive=EFalse;
 
-    return EAP_STATUS_RETURN(iTools, iTools->convert_am_error_to_eapol_error(error));
-    }
+	return EAP_STATUS_RETURN(iTools, iTools->convert_am_error_to_eapol_error(error));
+}
+
+// -----------------------------------------------------------------------------------------
+
+TInt CEapSession::AddReadyHandler(CEapServerProcessHandler * const handler)
+{
+	EAP_TRACE_DEBUG(
+		iTools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapSession::AddReadyHandler(): this=0x%08x: handler=0x%08x\n"),
+		this,
+		handler));
+	EAP_TRACE_RETURN_STRING(iTools, "returns: CEapSession::AddReadyHandler()");
+
+	return Server()->AddReadyHandler(handler);
+}
+
+// -----------------------------------------------------------------------------------------
+
+TInt CEapSession::CompleteReadyHandler(CEapServerProcessHandler * const handler)
+{
+	EAP_TRACE_DEBUG(
+		iTools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapSession::CompleteReadyHandler(): this=0x%08x: handler=0x%08x\n"),
+		this,
+		handler));
+	EAP_TRACE_RETURN_STRING(iTools, "returns: CEapSession::CompleteReadyHandler()");
+
+	return Server()->CompleteReadyHandler(handler);
+}
+
+// -----------------------------------------------------------------------------------------
+
+TInt CEapSession::CancelReadyHandler(CEapServerProcessHandler * const handler)
+{
+	EAP_TRACE_DEBUG(
+		iTools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapSession::CancelReadyHandler(): this=0x%08x: handler=0x%08x\n"),
+		this,
+		handler));
+	EAP_TRACE_RETURN_STRING(iTools, "returns: CEapSession::CancelReadyHandler()");
+
+	return Server()->CancelReadyHandler(handler);
+}
 
 // -----------------------------------------------------------------------------------------
 // end

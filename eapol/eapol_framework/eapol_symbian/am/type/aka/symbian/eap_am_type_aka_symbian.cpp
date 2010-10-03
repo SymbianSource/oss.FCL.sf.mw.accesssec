@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 46.1.10 %
+* %version: 46.1.11 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -228,7 +228,7 @@ EAP_FUNC_EXPORT eap_am_type_aka_symbian_c* eap_am_type_aka_symbian_c::NewL(
 	const bool aIsClient,
 	const eap_am_network_id_c * const receive_network_id)
 {
-	eap_am_type_aka_symbian_c* self = new(ELeave) eap_am_type_aka_symbian_c(
+	eap_am_type_aka_symbian_c* self = new eap_am_type_aka_symbian_c(
 		aTools, 
 		aPartner, 
 		aIndexType, 
@@ -237,16 +237,29 @@ EAP_FUNC_EXPORT eap_am_type_aka_symbian_c* eap_am_type_aka_symbian_c::NewL(
 		aIsClient,
 		receive_network_id);
 		
-	CleanupStack::PushL(self);
-	
-	self->ConstructL();
-
-	if (self->get_is_valid() != true)
+	if (self == 0
+		|| self->get_is_valid() != true)
 	{
+		if (self != 0)
+		{
+			self->shutdown();
+		}
+
+		delete self;
+
 		User::Leave(KErrGeneral);
 	}
-	
-	CleanupStack::Pop();
+
+	TRAPD(error, self->ConstructL());
+
+	if (error != KErrNone)
+	{
+		self->shutdown();
+		delete self;
+
+		User::Leave(error);
+	}
+
 	return self;
 }
 

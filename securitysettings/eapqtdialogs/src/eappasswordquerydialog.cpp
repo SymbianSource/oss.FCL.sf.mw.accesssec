@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 6 %
+* %version: 7 %
 */
 
 // System includes
@@ -100,7 +100,8 @@ void EapPasswordQueryDialog::createDialog(const QVariantMap &parameters )
     //by pressing any of the Action buttons
     this->setModal(true);
     this->setTimeout(HbPopup::NoTimeout);
-    this->setDismissPolicy(HbPopup::NoDismiss);
+    this->setDismissPolicy(HbPopup::NoDismiss);        
+    this->setDismissOnAction(false);    
     this->setPromptText(labelText, 0);   
     mEdit = this->lineEdit(0);
     mEdit->setEchoMode(HbLineEdit::Password);
@@ -136,15 +137,11 @@ void EapPasswordQueryDialog::createDialog(const QVariantMap &parameters )
     HbAction* actionCancel = new HbAction(hbTrId("txt_common_button_cancel"),this);
     this->addAction(actionCancel);    
     
-    //Disconnect action Ok from the default SLOT and connect to 
-    //a SLOT owned by this class  
-    disconnect(actionOk, SIGNAL(triggered()),this, SLOT(close()));
+    //Connect to a SLOT owned by this class  
     bool connected = connect(actionOk, SIGNAL(triggered()), this, SLOT(okPressed()));
     Q_ASSERT(connected == true);
     
-    //Disconnect action Cancel from the default SLOT and connect to 
-    //a SLOT owned by this class  
-    disconnect(actionCancel, SIGNAL(triggered()),this, SLOT(close()));
+    //Connect to a SLOT owned by this class  
     connected = connect(actionCancel, SIGNAL(triggered()), this, SLOT(cancelPressed()));
     Q_ASSERT(connected == true);
     

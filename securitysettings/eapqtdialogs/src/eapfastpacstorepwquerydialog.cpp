@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 7 %
+* %version: 12 %
 */
 
 // System includes
@@ -25,10 +25,8 @@
 #include <HbTranslator>
 #include <HbMessageBox>
 #include <HbParameterLengthLimiter>
-#include <eapqtvalidator.h>
-#include <eapqtexpandedeaptype.h>
-#include <eapqtconfiginterface.h>
-#include <eapqtconfig.h>
+#include <HbEditorInterface>
+#include <EapSettings.h>
 
 // User includes
 #include "eapfastpacstorepwquerydialog.h"
@@ -59,7 +57,6 @@ static const uint PacStorePwQueryTimeout = 60000;
  */
 EapFastPacStorePwQueryDialog::EapFastPacStorePwQueryDialog(const QVariantMap &parameters) 
  :mEdit(NULL), 
- mPwdValidator(NULL),
  mTranslator(new HbTranslator("eapprompts")),
  mErrMsgTranslator(new HbTranslator("cpdestinationplugin")),
  mClose(false)
@@ -68,7 +65,7 @@ EapFastPacStorePwQueryDialog::EapFastPacStorePwQueryDialog(const QVariantMap &pa
     qDebug("EapFastPacStorePwQueryDialog::EapFastPacStorePwQueryDialog ENTER");
     
     Q_UNUSED(parameters)
-          
+
     createDialog();
      
     OstTraceFunctionExit0( EAPFASTPACSTOREPWQUERYDIALOG_EAPFASTPACSTOREPWQUERYDIALOG_EXIT );
@@ -90,19 +87,18 @@ void EapFastPacStorePwQueryDialog::createDialog()
     this->setModal(true);
     this->setTimeout(PacStorePwQueryTimeout);
     this->setDismissPolicy(HbPopup::NoDismiss);
+    this->setDismissOnAction(false);    
     this->setPromptText(labelText, 0);  
     
     mEdit = this->lineEdit(0);
     mEdit->setEchoMode(HbLineEdit::Password);
-      
-    EapQtConfigInterface eap_config_if;
-        
-    mPwdValidator.reset( eap_config_if.validatorPacStore(
-                EapQtPacStoreConfig::PacStorePasswordConfirmation) );    
-    Q_ASSERT( mPwdValidator.isNull() == false );
+    mEdit->setMaxLength(KGeneralStringMaxLength);
+    mEdit->setInputMethodHints(
+        Qt::ImhNoAutoUppercase | Qt::ImhPreferLowercase | Qt::ImhNoPredictiveText);
     
-    mPwdValidator->updateEditor(mEdit);
-    
+    HbEditorInterface editInterface(mEdit);
+    editInterface.setSmileyTheme(HbSmileyTheme());
+
     
     //Remove all default actions from the dialog                   
     QList<QAction*> action_list = this->actions();        
@@ -118,15 +114,11 @@ void EapFastPacStorePwQueryDialog::createDialog()
     HbAction* actionCancel = new HbAction(hbTrId("txt_common_button_cancel"),this);
     this->addAction(actionCancel);    
     
-    //Disconnect action Ok from the default SLOT and connect to 
-    //a SLOT owned by this class   
-    disconnect(actionOk, SIGNAL(triggered()),this, SLOT(close()));
+    //Connect to a SLOT owned by this class   
     bool connected = connect(actionOk, SIGNAL(triggered()), this, SLOT(okPressed()));
     Q_ASSERT(connected == true);
     
-    //Disconnect action Cancel from the default SLOT and connect to 
-    //a SLOT owned by this class  
-    disconnect(actionCancel, SIGNAL(triggered()),this, SLOT(close()));
+    //Connect to a SLOT owned by this class  
     connected = connect(actionCancel, SIGNAL(triggered()), this, SLOT(cancelPressed()));
     Q_ASSERT(connected == true);
     
@@ -149,30 +141,10 @@ EapFastPacStorePwQueryDialog::~EapFastPacStorePwQueryDialog()
     OstTraceFunctionEntry0( EAPFASTPACSTOREPWQUERYDIALOG_DEAPFASTPACSTOREPWQUERYDIALOG_ENTRY );
     
     // The dialog widgets are deleted as the dialog is deleted        
-    // mPwdValidator:   scoped pointer deleted automatically
     
     OstTraceFunctionExit0( EAPFASTPACSTOREPWQUERYDIALOG_DEAPFASTPACSTOREPWQUERYDIALOG_EXIT );
 }
 
-/*!
- * Line edit validator
- *
- * @return true if content is valid.
- */
-bool EapFastPacStorePwQueryDialog::validate() const
-{
-    qDebug("EapFastPacStorePwQueryDialog::validate ENTER");
-    
-    bool valid = false;
-
-    if ( mPwdValidator->validate(mEdit->text())== EapQtValidator::StatusOk ) {
-        qDebug("EapFastPacStorePwQueryDialog::validate: returns TRUE");
-        valid = true;
-    }
-    
-    qDebug("EapFastPacStorePwQueryDialog::validate EXIT");
-    return valid;
-}
 
 /*!
  * Function is called when the Ok Action button is pressed
@@ -182,26 +154,14 @@ void EapFastPacStorePwQueryDialog::okPressed()
     OstTraceFunctionEntry0( EAPFASTPACSTOREPWQUERYDIALOG_OKPRESSED_ENTRY );
     qDebug("EapFastPacStorePwQueryDialog::okPressed ENTER");
     
-    if ( validate() == true ) {
-            
-        QVariantMap data;
+    QVariantMap data;
         
-        data["password"] = mEdit->text();
+    data["password"] = mEdit->text();
       
-        qDebug("EapFastPacStorePwQueryDialog::okPressed: emit deviceDialogData");
+    qDebug("EapFastPacStorePwQueryDialog::okPressed: emit deviceDialogData");
     
-        emit deviceDialogData(data); 
-        closeDeviceDialog(true);
-        }
-    else {
-        HbMessageBox *box = 
-            new HbMessageBox(hbTrId("txt_occ_info_incorrect_password_msg_box"),
-            HbMessageBox::MessageTypeInformation);
-        
-        box->setAttribute(Qt::WA_DeleteOnClose);
-        box->open();       
-        }
-        
+    emit deviceDialogData(data); 
+            
     OstTraceFunctionExit0( EAPFASTPACSTOREPWQUERYDIALOG_OKPRESSED_EXIT );
     qDebug("EapFastPacStorePwQueryDialog::okPressed EXIT");
 }
@@ -236,19 +196,43 @@ void EapFastPacStorePwQueryDialog::closingDialog()
 
 /*!
  * Device dialog parameters to be set while dialog is displayed.
- * Not supported. 
  *
- * @param [in] parameters NOT USED
+ * @param [in] parameters Parameters for the method
  * @return true always.
  */  
 bool EapFastPacStorePwQueryDialog::setDeviceDialogParameters
                 (const QVariantMap &parameters)
 {
     OstTraceFunctionEntry0( EAPFASTPACSTOREPWQUERYDIALOG_SETDEVICEDIALOGPARAMETERS_ENTRY );
+    qDebug("EapFastPacStorePwQueryDialog::setDeviceDialogParameters ENTER");
+        
+    QString key("pwdcorrectind");
     
-    Q_UNUSED(parameters)
-    // changing the dialog after presenting it is not supported.
+    bool isPwdCorrect = false;
     
+    //Get the needed information from parameters that indicates 
+    //the correctness of the password 
+    if ( parameters.empty() == false ) {
+        if ( parameters.contains(key) ) {
+            QVariant variant = parameters.value(key);
+            isPwdCorrect = variant.toBool();
+            }
+        }      
+    
+    if ( isPwdCorrect != false ) {
+        qDebug("EapFastPacStorePwQueryDialog::setDeviceDialogParameters: isPwdCorrect == TRUE");    
+        closeDeviceDialog(true);
+        }
+    else {
+        HbMessageBox *box = 
+            new HbMessageBox(hbTrId("txt_occ_info_incorrect_password_msg_box"),
+            HbMessageBox::MessageTypeInformation);
+        
+        box->setAttribute(Qt::WA_DeleteOnClose);
+        box->open();       
+        }
+   
+    qDebug("EapFastPacStorePwQueryDialog::setDeviceDialogParameters EXIT");
     OstTraceFunctionExit0( EAPFASTPACSTOREPWQUERYDIALOG_SETDEVICEDIALOGPARAMETERS_EXIT );
     return true;
 }

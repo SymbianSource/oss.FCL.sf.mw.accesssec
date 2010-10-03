@@ -26,6 +26,29 @@
 #include "eap_array.h"
 #include "tls_record_message.h"
 #include "abs_tls_message_hash.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_TLS_COMPLETION_H)
+	#define EAP_CLASS_VISIBILITY_TLS_COMPLETION_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_TLS_COMPLETION_H 
+	#define EAP_C_FUNC_VISIBILITY_TLS_COMPLETION_H 
+	#define EAP_FUNC_EXPORT_TLS_COMPLETION_H 
+	#define EAP_C_FUNC_EXPORT_TLS_COMPLETION_H 
+#elif defined(EAP_EXPORT_TLS_COMPLETION_H)
+	#define EAP_CLASS_VISIBILITY_TLS_COMPLETION_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_COMPLETION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_COMPLETION_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_TLS_COMPLETION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_TLS_COMPLETION_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_TLS_COMPLETION_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_COMPLETION_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_COMPLETION_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_TLS_COMPLETION_H 
+	#define EAP_C_FUNC_EXPORT_TLS_COMPLETION_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 /** @file */
 
@@ -65,7 +88,7 @@ enum tls_completion_action_e
 
 
 /// This class defines one TLS completion action.
-class EAP_EXPORT tls_completion_c
+class EAP_CLASS_VISIBILITY_TLS_COMPLETION_H tls_completion_c
 {
 private:
 	//--------------------------------------------------
@@ -83,7 +106,7 @@ private:
 	 * The set_is_valid() function sets the state of the object valid.
 	 * The creator of this object calls this function after it is initialized. 
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_TLS_COMPLETION_H void set_is_valid();
 
 	//--------------------------------------------------
 protected:
@@ -96,12 +119,12 @@ public:
 	/**
 	 * Destructor does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~tls_completion_c();
+	EAP_FUNC_VISIBILITY_TLS_COMPLETION_H virtual ~tls_completion_c();
 
 	/**
 	 * Constructor initializes object.
 	 */
-	EAP_FUNC_IMPORT tls_completion_c(
+	EAP_FUNC_VISIBILITY_TLS_COMPLETION_H tls_completion_c(
 		abs_eap_am_tools_c * const tools,
 		tls_completion_action_e completion_action);
 
@@ -110,22 +133,22 @@ public:
 	 * If object initialization fails this function must return false.
 	 * @return This function returns the validity of this object.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_TLS_COMPLETION_H bool get_is_valid();
 
 	/**
 	 * This function sets the completion action type.
 	 */
-	EAP_FUNC_IMPORT void set_completion_action(tls_completion_action_e completion_action);
+	EAP_FUNC_VISIBILITY_TLS_COMPLETION_H void set_completion_action(tls_completion_action_e completion_action);
 
 	/**
 	 * This function gets the completion action type.
 	 */
-	EAP_FUNC_IMPORT tls_completion_action_e get_completion_action() const;
+	EAP_FUNC_VISIBILITY_TLS_COMPLETION_H tls_completion_action_e get_completion_action() const;
 
 	/**
 	 * This function gets the debug string of the completion action type.
 	 */
-	EAP_FUNC_IMPORT eap_const_string  get_completion_action_string() const;
+	EAP_FUNC_VISIBILITY_TLS_COMPLETION_H eap_const_string  get_completion_action_string() const;
 
 	// 
 	//--------------------------------------------------

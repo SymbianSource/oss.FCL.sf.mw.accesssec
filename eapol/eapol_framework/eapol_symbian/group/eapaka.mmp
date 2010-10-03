@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 17.1.12 %
+* %version: 17.1.17 %
 */
 
 #include <platform_paths.hrh>
@@ -30,6 +30,21 @@ TARGET	eapaka.dll
 UID		0x10009d8d 0x102073c1
 
 deffile eapaka.def
+
+MACRO EAP_NO_EXPORTS
+// Start: added by script change_mmp_export_macros.sh.
+MACRO EAP_NO_EXPORT_EAP_TYPE_AKA_AUTHENTICATION_VECTOR_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_AKA_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_AKA_HEADER_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_AKA_PAYLOADS_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_AKA_STATE_H
+MACRO EAP_NO_EXPORT_EAP_TYPE_AKA_STATE_NOTIFICATION_H
+MACRO EAP_NO_EXPORT_EAPAKAINTERFACE_H
+MACRO EAP_NO_EXPORT_EAP_AM_TYPE_AKA_SYMBIAN_H
+MACRO EAP_NO_EXPORT_EAPAKA_H
+// End: added by script change_mmp_export_macros.sh.
+
+MACRO EAP_NO_EXPORT_EAP_TYPE_AKA_TYPES_H
 
 SOURCEPATH    ../am/type/aka/symbian/plugin/src
 
@@ -66,7 +81,8 @@ USERINCLUDE   	../../eapol_common/include
 USERINCLUDE   	../../eapol_common/am/include
 USERINCLUDE   	../../eapol_common/type/aka/include
 USERINCLUDE  	../am/type/aka/symbian/plugin/inc
-USERINCLUDE   ../../eapol_common/type
+USERINCLUDE  	../../eapol_common/type
+USERINCLUDE  	../eap_server/include
 
 MW_LAYER_SYSTEMINCLUDE // For the MiddleWare domain headers.
 
@@ -80,13 +96,12 @@ LANG		SC
 
 SOURCEPATH	../am/type/aka/symbian
 SOURCE		EapAkaInterface.cpp
-LIBRARY		CustomAPI.lib etelmm.lib etel.lib	// For ETel connection
+LIBRARY		customapi.lib etelmm.lib etel.lib	// For ETel connection
 		
 #endif // End of #if !defined(WINS) && defined(USE_EAP_AKA_INTERFACE)
 
 LIBRARY     eikdlg.lib
 LIBRARY     eikcore.lib
-LIBRARY     hlplch.lib
 LIBRARY		featmgr.lib
 
 

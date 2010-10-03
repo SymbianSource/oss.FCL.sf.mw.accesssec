@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 9 %
+* %version: 12 %
 */
 
 #if !defined(_ABS_ETHERNET_CORE_H_)
@@ -28,6 +28,29 @@
 #if defined(USE_EAP_SIMPLE_CONFIG)
 	#include "abs_eap_configuration_if.h"
 #endif // #if defined(USE_EAP_SIMPLE_CONFIG)
+
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABS_ETHERNET_CORE_H)
+	#define EAP_CLASS_VISIBILITY_ABS_ETHERNET_CORE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABS_ETHERNET_CORE_H 
+	#define EAP_C_FUNC_VISIBILITY_ABS_ETHERNET_CORE_H 
+	#define EAP_FUNC_EXPORT_ABS_ETHERNET_CORE_H 
+	#define EAP_C_FUNC_EXPORT_ABS_ETHERNET_CORE_H 
+#elif defined(EAP_EXPORT_ABS_ETHERNET_CORE_H)
+	#define EAP_CLASS_VISIBILITY_ABS_ETHERNET_CORE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_ETHERNET_CORE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_ETHERNET_CORE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABS_ETHERNET_CORE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABS_ETHERNET_CORE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABS_ETHERNET_CORE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_ETHERNET_CORE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_ETHERNET_CORE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABS_ETHERNET_CORE_H 
+	#define EAP_C_FUNC_EXPORT_ABS_ETHERNET_CORE_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 class abs_eapol_core_c;
 class eap_am_network_id_c;
@@ -42,7 +65,7 @@ class eap_rogue_ap_entry_c;
 /// will use with the partner class.
 /// Later eapol and ethernet could be integrated.
 /// Now I am too lazy and there could be some benefit using separate eapol and ethernet layers.
-class EAP_EXPORT abs_ethernet_core_c
+class EAP_CLASS_VISIBILITY_ABS_ETHERNET_CORE_H abs_ethernet_core_c
 {
 private:
 	//--------------------------------------------------

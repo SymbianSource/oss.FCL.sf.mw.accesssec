@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 17.1.4 %
 */
 
 #if !defined(_EAPOL_KEY_TYPES_H_)
@@ -187,6 +187,7 @@ enum eapol_key_state_e
 	eapol_key_state_wapi_authentication_terminated_unsuccessfull = 20,
 	eapol_key_state_wapi_authentication_finished_successfull = 21,
 	eapol_key_state_wapi_authentication_running = 22,
+	eapol_key_state_wapi_authentication_running_waits_message = 23,
 #endif //#if defined(USE_WAPI_CORE)
 
 };

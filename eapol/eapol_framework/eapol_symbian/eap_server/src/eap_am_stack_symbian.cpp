@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 49 %
+* %version: 52 %
 */
 
 #include "eap_am_stack_symbian.h"
@@ -340,18 +340,8 @@ eap_status_e eap_am_stack_symbian_c::reset_eap_plugins()
 		 this,
 		 dynamic_cast<abs_eap_base_timer_c *>(this)));
 
-	// Unload all loaded plugins
-	for(int ind = 0; ind < m_plugin_if_array.Count(); ind++)
-	{
-		delete m_plugin_if_array[ind];
-	}
-
-	m_plugin_if_array.Close();
-
-
 	iEnabledEapMethodsArray.reset();
 	iDisabledEapMethodsArray.reset();
-
 	
 	m_eap_type_array.reset();
 	
@@ -376,6 +366,14 @@ EAP_FUNC_EXPORT eap_status_e eap_am_stack_symbian_c::shutdown()
 
 	delete iFileconfig;
 	iFileconfig = 0;
+
+	// Unload all loaded plugins
+	for(int ind = 0; ind < m_plugin_if_array.Count(); ind++)
+	{
+		delete m_plugin_if_array[ind];
+	}
+
+	m_plugin_if_array.Close();
 
 	(void) reset_eap_plugins();
 
@@ -443,7 +441,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_stack_symbian_c::read_configure(
 			EAP_TRACE_ERROR(
 				iTools,
 				TRACE_FLAGS_DEFAULT,
-				(EAPL("EAP settings not read from CommsDat\n")));
+				(EAPL("ERROR: No activated EAP-methods.\n")));
 
 			EAP_TRACE_END(iTools, TRACE_FLAGS_DEFAULT);	
 			return EAP_STATUS_RETURN(iTools, eap_status_process_general_error);
@@ -702,7 +700,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_stack_symbian_c::get_eap_type_list(
 			EAP_TRACE_DEBUG(
 				iTools, 
 				TRACE_FLAGS_DEFAULT, 
-				(EAPL("eap_am_stack_symbian_c::ReadEAPSettingsL(): Enabled expanded EAP type at index=%d, EAP-type=0xfe%06x%08x\n"),
+				(EAPL("eap_am_stack_symbian_c::get_eap_type_list(): Enabled expanded EAP type at index=%d, EAP-type=0xfe%06x%08x\n"),
 				 ind,
 				 allowed_eap_method->get_vendor_id(),
 				 allowed_eap_method->get_vendor_type()));
@@ -823,7 +821,8 @@ EAP_FUNC_EXPORT eap_status_e eap_am_stack_symbian_c::load_module(
 		TRAP(error, (eapType = CEapTypePlugin::NewL(
 			expanded_type,
 			iIndexType,
-			iIndex)));   
+			iIndex,
+			iTools)));   
 		if (error != KErrNone
 			|| eapType == 0)
 		{
@@ -1442,7 +1441,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_stack_symbian_c::get_802_11_authentication_m
 			EAP_TRACE_DEBUG(
 				iTools, 
 				TRACE_FLAGS_DEFAULT, 
-				(EAPL("eap_am_stack_symbian_c::ReadEAPSettingsL(): Enabled expanded EAP type at index=%d, EAP-type=0xfe%06x%08x\n"),
+				(EAPL("eap_am_stack_symbian_c::get_802_11_authentication_mode(): Enabled expanded EAP type at index=%d, EAP-type=0xfe%06x%08x\n"),
 				 ind_type,
 				 allowed_eap_method->get_vendor_id(),
 				 allowed_eap_method->get_vendor_type()));

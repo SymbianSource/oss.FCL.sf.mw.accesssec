@@ -23,6 +23,27 @@
 #define _MSCHAPV2_STATE_H_
 
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_TYPE_MSCHAPV2_STATE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_MSCHAPV2_STATE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_STATE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_STATE_H 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_STATE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_STATE_H 
+#elif defined(EAP_EXPORT_EAP_TYPE_MSCHAPV2_STATE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_MSCHAPV2_STATE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_STATE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_STATE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_STATE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_STATE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_MSCHAPV2_STATE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_STATE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_STATE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_STATE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_STATE_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "abs_eap_am_tools.h"
 
 /**
@@ -51,7 +72,7 @@ enum eap_type_mschapv2_state_variable_e
 	eap_type_mschapv2_state_change_password_response
 };
 
-class EAP_EXPORT eap_type_mschapv2_state_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_MSCHAPV2_STATE_H eap_type_mschapv2_state_c
 {
 
 private:
@@ -69,7 +90,7 @@ private:
 public:
 	eap_type_mschapv2_state_c(abs_eap_am_tools_c * const tools, const bool client);
 
-	EAP_FUNC_IMPORT virtual ~eap_type_mschapv2_state_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_STATE_H virtual ~eap_type_mschapv2_state_c();
 
 	void reset();
 

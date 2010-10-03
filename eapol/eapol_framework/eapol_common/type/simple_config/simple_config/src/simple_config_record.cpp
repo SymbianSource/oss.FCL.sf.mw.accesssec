@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 69.1.7 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -416,26 +416,6 @@ EAP_FUNC_EXPORT eap_status_e simple_config_record_c::configure()
 	}
 
 	//----------------------------------------------------------
-
-#if 0
-	{
-		status = get_type_partner()->read_configure(
-			cf_str_EAP_SIMPLE_CONFIG_device_password.get_field(),
-			&m_device_password);
-		if (status != eap_status_ok
-			|| m_device_password.get_is_valid_data() == false)
-		{
-			// This is mandatory value.
-			EAP_TRACE_ERROR(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("ERROR: SIMPLE_CONFIG: %s: simple_config_record_c::configure(): Missing device password.\n"),
-				 (m_is_client == true ? "client": "server")));
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_wrong_password);
-		}
-	}
-#endif
 
 	if (m_is_client == false)
 	{
@@ -8029,7 +8009,26 @@ EAP_FUNC_EXPORT eap_status_e simple_config_record_c::complete_query_network_and_
 	eap_status_e local_completion_status(p_completion_status);
 	eap_status_e status(eap_status_process_general_error);
 
+	if (m_is_client == true)
+	{
+		status = get_type_partner()->read_configure(
+			cf_str_EAP_SIMPLE_CONFIG_device_password.get_field(),
+			&m_device_password);
+		if (status != eap_status_ok
+			|| m_device_password.get_is_valid_data() == false)
+		{
+			// This is mandatory value.
+			EAP_TRACE_ERROR(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("ERROR: SIMPLE_CONFIG: %s: simple_config_record_c::configure(): Missing device password.\n"),
+				 (m_is_client == true ? "client": "server")));
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, eap_status_wrong_password);
+		}
+	}
 
+	
 	{
 		if (m_simple_config_state == simple_config_state_process_simple_config_start)
 		{
@@ -8182,132 +8181,6 @@ EAP_FUNC_EXPORT eap_status_e simple_config_record_c::complete_query_network_and_
 						return EAP_STATUS_RETURN(m_am_tools, eap_status_missing_payload);
 					}
 				}
-			}
-		}
-	}
-
-
-	if (m_local_Device_Password_ID == simple_config_Device_Password_ID_PushButton)
-	{
-		// Set m_device_password to all ascii zeroes SIMPLE_CONFIG_PBC_DEVICE_PASSWORD_PIN.
-		status = m_device_password.set_copy_of_buffer(
-			SIMPLE_CONFIG_PBC_DEVICE_PASSWORD_PIN,
-			SIMPLE_CONFIG_PBC_DEVICE_PASSWORD_PIN_SIZE);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-	}
-	else if (m_local_Device_Password_ID == simple_config_Device_Password_ID_Default_PIN
-		&& m_is_client == true)
-	{
-		// Read PIN from memory store.
-
-		eap_variable_data_c memory_store_key(m_am_tools);
-
-		eap_status_e status = memory_store_key.set_copy_of_buffer(
-			EAP_WPS_CONFIGURATION_MEMORY_STORE_KEY,
-			sizeof(EAP_WPS_CONFIGURATION_MEMORY_STORE_KEY));
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		status = memory_store_key.add_data(
-			&m_is_client,
-			sizeof(m_is_client));
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		eap_am_network_id_c receive_network_id(m_am_tools,
-			m_send_network_id.get_destination_id(),
-			m_send_network_id.get_source_id(),
-			m_send_network_id.get_type());
-
-		eap_network_id_selector_c state_selector(
-			m_am_tools,
-			&receive_network_id);
-
-		status = memory_store_key.add_data(
-			&state_selector);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-
-		eap_tlv_message_data_c tlv_data(m_am_tools);
-
-		status = m_am_tools->memory_store_get_data(
-			&memory_store_key,
-			&tlv_data);
-		if (status != eap_status_ok)
-		{
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("simple_config_record_c::complete_query_network_and_device_parameters(): cannot get WPS credentials\n")));
-		}
-		else
-		{
-			EAP_TRACE_DEBUG(
-				m_am_tools,
-				TRACE_FLAGS_DEFAULT,
-				(EAPL("simple_config_record_c::complete_query_network_and_device_parameters(): WPS credentials found\n")));
-
-			// Parse read data.
-			eap_array_c<eap_tlv_header_c> tlv_blocks(m_am_tools);
-				
-			status = tlv_data.parse_message_data(&tlv_blocks);
-			if (status != eap_status_ok)
-			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);
-			}
-
-			for (u32_t ind = 0ul; ind < tlv_blocks.get_object_count(); ind++)
-			{
-				eap_tlv_header_c * const tlv = tlv_blocks.get_object(ind);
-				if (tlv != 0)
-				{
-					if (tlv->get_type() == eap_type_protected_setup_stored_preshared_key)
-					{
-						status = m_device_password.set_copy_of_buffer(
-							tlv->get_value(tlv->get_value_length()),
-							tlv->get_value_length());
-						if (status != eap_status_ok)
-						{
-							EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-							return EAP_STATUS_RETURN(m_am_tools, status);
-						}
-					}
-					else if (tlv->get_type() == eap_type_protected_setup_stored_ssid)
-					{
-						status = m_SSID.set_copy_of_buffer(
-							tlv->get_value(tlv->get_value_length()),
-							tlv->get_value_length());
-						if (status != eap_status_ok)
-						{
-							EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-							return EAP_STATUS_RETURN(m_am_tools, status);
-						}
-					}
-				}
-			} // for()
-
-			if (m_device_password.get_is_valid_data() == false)
-			{
-				EAP_TRACE_ERROR(
-					m_am_tools,
-					TRACE_FLAGS_ERROR,
-					(EAPL("simple_config_record_c::complete_query_network_and_device_parameters(): cannot get WPS PIN\n")));
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
 			}
 		}
 	}

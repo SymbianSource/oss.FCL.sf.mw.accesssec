@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 18 %
 */
 
 #ifndef _EAPTLSPEAPUITLSPEAPDATA_H_

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 26 %
+* %version: 27 %
 */
 
 #if !defined(_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H_)
@@ -25,6 +25,27 @@
 #include "eap_tools.h"
 #include "eap_status.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H 
+#elif defined(EAP_EXPORT_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_expanded_type.h"
 #include "eap_array.h"
 #include "eap_database_reference_if.h"
@@ -41,7 +62,7 @@ class CEapTlsPeapCertFetcher;
 
 /// This class is the common part of EAP message interface.
 /// This class is interface to the message creation and parsing function.
-class EAP_EXPORT eap_am_general_settings_symbian_c
+class EAP_CLASS_VISIBILITY_EAP_AM_GENERAL_SETTINGS_SYMBIAN_H eap_am_general_settings_symbian_c
 : public eap_am_general_settings_c
 , public CAbsEapCertificateFetcher
 {

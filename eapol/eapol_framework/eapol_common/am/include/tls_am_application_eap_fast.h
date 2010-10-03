@@ -25,6 +25,27 @@
 #if defined(USE_FAST_EAP_TYPE)
 
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_TLS_AM_APPLICATION_EAP_FAST_H)
+	#define EAP_CLASS_VISIBILITY_TLS_AM_APPLICATION_EAP_FAST_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_TLS_AM_APPLICATION_EAP_FAST_H 
+	#define EAP_C_FUNC_VISIBILITY_TLS_AM_APPLICATION_EAP_FAST_H 
+	#define EAP_FUNC_EXPORT_TLS_AM_APPLICATION_EAP_FAST_H 
+	#define EAP_C_FUNC_EXPORT_TLS_AM_APPLICATION_EAP_FAST_H 
+#elif defined(EAP_EXPORT_TLS_AM_APPLICATION_EAP_FAST_H)
+	#define EAP_CLASS_VISIBILITY_TLS_AM_APPLICATION_EAP_FAST_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_AM_APPLICATION_EAP_FAST_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_AM_APPLICATION_EAP_FAST_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_TLS_AM_APPLICATION_EAP_FAST_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_TLS_AM_APPLICATION_EAP_FAST_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_TLS_AM_APPLICATION_EAP_FAST_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_AM_APPLICATION_EAP_FAST_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_AM_APPLICATION_EAP_FAST_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_TLS_AM_APPLICATION_EAP_FAST_H 
+	#define EAP_C_FUNC_EXPORT_TLS_AM_APPLICATION_EAP_FAST_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_array.h"
 #include "eap_fast_pac_store_types.h"
 
@@ -40,7 +61,7 @@ class eap_fast_variable_data_c;
 
 /// This class declares the functions adaptation module of TLS
 /// requires from the TLS.
-class EAP_EXPORT tls_am_application_eap_fast_c
+class EAP_CLASS_VISIBILITY_TLS_AM_APPLICATION_EAP_FAST_H tls_am_application_eap_fast_c
 {
 private:
 	//--------------------------------------------------

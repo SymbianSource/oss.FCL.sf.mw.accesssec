@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 21 %
+* %version: 22 %
 */
 
 
@@ -33,6 +33,29 @@
 #include "eap_am_types.h"
 #include "SendPacketHandler.h"
 #include "EapMessageQueue.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_REAPSESSION_H)
+	#define EAP_CLASS_VISIBILITY_REAPSESSION_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_REAPSESSION_H 
+	#define EAP_C_FUNC_VISIBILITY_REAPSESSION_H 
+	#define EAP_FUNC_EXPORT_REAPSESSION_H 
+	#define EAP_C_FUNC_EXPORT_REAPSESSION_H 
+#elif defined(EAP_EXPORT_REAPSESSION_H)
+	#define EAP_CLASS_VISIBILITY_REAPSESSION_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_REAPSESSION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_REAPSESSION_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_REAPSESSION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_REAPSESSION_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_REAPSESSION_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_REAPSESSION_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_REAPSESSION_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_REAPSESSION_H 
+	#define EAP_C_FUNC_EXPORT_REAPSESSION_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 //----------------------------------------------------------------
 
@@ -59,7 +82,7 @@ private:
 
 //----------------------------------------------------------------
 
-class EAP_EXPORT REapSession :  public RSessionBase
+class EAP_CLASS_VISIBILITY_REAPSESSION_H REapSession :  public RSessionBase
     {
 public:
 
@@ -74,10 +97,10 @@ public:
 	{
 	};
 
-	EAP_FUNC_IMPORT virtual ~REapSession();
+	EAP_FUNC_VISIBILITY_REAPSESSION_H virtual ~REapSession();
 
 
-	EAP_FUNC_IMPORT void ConnectL(
+	EAP_FUNC_VISIBILITY_REAPSESSION_H void ConnectL(
 		abs_eap_am_tools_c * const tools,
 		MSendPacketHandler * Client,
 		const TBuf<KMaxServerExe> ServerName,
@@ -86,14 +109,14 @@ public:
 		const TInt aConfigurationDataLength,
 		const TEapRequests aIfRequest);
 
-    EAP_FUNC_IMPORT void Close();
+    EAP_FUNC_VISIBILITY_REAPSESSION_H void Close();
 
-    EAP_FUNC_IMPORT bool get_is_valid();
+    EAP_FUNC_VISIBILITY_REAPSESSION_H bool get_is_valid();
  
     /// Function receives the data message from lower layer.
     /// Data is formatted to Attribute-Value Pairs.
     /// Look at eap_tlv_header_c and eap_tlv_message_data_c.
-    EAP_FUNC_IMPORT eap_status_e process_data(const TEapRequests aMessageType, const void * const data, const u32_t length);
+    EAP_FUNC_VISIBILITY_REAPSESSION_H eap_status_e process_data(const TEapRequests aMessageType, const void * const data, const u32_t length);
 
 	const EapMessageBuffer * GetFirstMessage();
 

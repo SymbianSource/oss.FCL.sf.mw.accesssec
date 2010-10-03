@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 8 %
 */
 
 #if !defined(_ABS_EAP_PAC_STORE_MESSAGE_H_)
@@ -24,12 +24,33 @@
 
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABS_EAP_PAC_STORE_MESSAGE_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_PAC_STORE_MESSAGE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_PAC_STORE_MESSAGE_H 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_PAC_STORE_MESSAGE_H 
+	#define EAP_FUNC_EXPORT_ABS_EAP_PAC_STORE_MESSAGE_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_PAC_STORE_MESSAGE_H 
+#elif defined(EAP_EXPORT_ABS_EAP_PAC_STORE_MESSAGE_H)
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_PAC_STORE_MESSAGE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_PAC_STORE_MESSAGE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_PAC_STORE_MESSAGE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_PAC_STORE_MESSAGE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_PAC_STORE_MESSAGE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABS_EAP_PAC_STORE_MESSAGE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_EAP_PAC_STORE_MESSAGE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_EAP_PAC_STORE_MESSAGE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABS_EAP_PAC_STORE_MESSAGE_H 
+	#define EAP_C_FUNC_EXPORT_ABS_EAP_PAC_STORE_MESSAGE_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 class eap_method_settings_c;
 
 /// This class defines the interface the eap_core_c class
 /// will use with the partner class (lower layer).
-class EAP_EXPORT abs_eap_pac_store_message_c
+class EAP_CLASS_VISIBILITY_ABS_EAP_PAC_STORE_MESSAGE_H abs_eap_pac_store_message_c
 {
 private:
 	//--------------------------------------------------
@@ -55,12 +76,6 @@ public:
 	abs_eap_pac_store_message_c()
 	{
 	}
-
-	virtual eap_status_e complete_open_pac_store(
-		const eap_status_e completion_status) = 0;
-
-	virtual eap_status_e complete_create_device_seed(
-		const eap_status_e completion_status) = 0;
 
 	virtual eap_status_e complete_is_master_key_present(
 	  bool is_present

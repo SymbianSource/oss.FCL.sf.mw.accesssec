@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 34 %
+* %version: 38 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -172,9 +172,7 @@ eap_am_type_mschapv2_symbian_c * eap_am_type_mschapv2_symbian_c::NewL(
 	const bool aIsClient,
 	const eap_am_network_id_c * const receive_network_id)
 {
-	eap_am_type_mschapv2_symbian_c * self;
-
-	self = new(ELeave) eap_am_type_mschapv2_symbian_c(
+	eap_am_type_mschapv2_symbian_c * self = new eap_am_type_mschapv2_symbian_c(
 		aTools,
 		aPartner,
 		aIndexType,
@@ -183,16 +181,28 @@ eap_am_type_mschapv2_symbian_c * eap_am_type_mschapv2_symbian_c::NewL(
 		aIsClient,
 		receive_network_id);
 
-	CleanupStack::PushL(self);
-
-	if (self->get_is_valid() != true)
+	if (self == 0
+		|| self->get_is_valid() != true)
 	{
+		if (self != 0)
+		{
+			self->shutdown();
+		}
+
+		delete self;
+
 		User::Leave(KErrGeneral);
 	}
 
-	self->ConstructL();
+	TRAPD(error, self->ConstructL());
 
-	CleanupStack::Pop();
+	if (error != KErrNone)
+	{
+		self->shutdown();
+		delete self;
+
+		User::Leave(error);
+	}
 
 	return self;
 }
@@ -262,6 +272,13 @@ void eap_am_type_mschapv2_symbian_c::send_error_notification(const eap_status_e 
 	notification.set_authentication_error(error);
 
 	m_partner->state_notification(&notification);
+}
+
+//--------------------------------------------------
+TBool eap_am_type_mschapv2_symbian_c::IsMasterKeyAndPasswordMatchingL(
+	      const TDesC16 & /*aPassword8*/)
+{
+	return EFalse;
 }
 
 //--------------------------------------------------

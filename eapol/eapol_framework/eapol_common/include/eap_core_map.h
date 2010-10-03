@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 12 %
 */
 
 #if !defined(_EAP_TYPE_MAP_H_)
@@ -24,6 +24,27 @@
 
 #include "eap_am_memory.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_CORE_MAP_H)
+	#define EAP_CLASS_VISIBILITY_EAP_CORE_MAP_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_CORE_MAP_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_CORE_MAP_H 
+	#define EAP_FUNC_EXPORT_EAP_CORE_MAP_H 
+	#define EAP_C_FUNC_EXPORT_EAP_CORE_MAP_H 
+#elif defined(EAP_EXPORT_EAP_CORE_MAP_H)
+	#define EAP_CLASS_VISIBILITY_EAP_CORE_MAP_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_CORE_MAP_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_CORE_MAP_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_CORE_MAP_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_CORE_MAP_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_CORE_MAP_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_CORE_MAP_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_CORE_MAP_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_CORE_MAP_H 
+	#define EAP_C_FUNC_EXPORT_EAP_CORE_MAP_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "abs_eap_core_map.h"
 #include "eap_variable_data.h"
 #include "eap_am_tools.h"
@@ -39,7 +60,7 @@ const u32_t EAP_MAP_SIZE = 256;
 
 //
 template <class Type, class Selector_Type>
-class EAP_EXPORT eap_state_map_atom_c
+class EAP_CLASS_VISIBILITY_EAP_CORE_MAP_H eap_state_map_atom_c
 {
 private:
 
@@ -228,7 +249,7 @@ public:
   *
   */
 template <class Type, class Abs_Type, class Selector_Type>
-class EAP_EXPORT eap_core_map_c
+class EAP_CLASS_VISIBILITY_EAP_CORE_MAP_H eap_core_map_c
 {
 private:
 	//--------------------------------------------------
@@ -353,6 +374,19 @@ public:
 		if (cursor != 0)
 		{
 			// Already exists.
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("WARNING: CORE_MAP: add_handler(): index %d\n"),
+				index));
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("WARNING: CORE_MAP: cursor"),
+				cursor->get_selector()->get_data(cursor->get_selector()->get_data_length()),
+				cursor->get_selector()->get_data_length()));
+
 			return EAP_STATUS_RETURN(m_am_tools, eap_status_handler_exists_error);
 		}
 		else

@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 6 %
+ * %version: 7 %
  */
 
 #ifndef EAPQTPACSTORECONFIG_H
@@ -46,7 +46,7 @@ public:
 
     // Data types
 
-    enum PacStoreState
+    enum PacStoreStatus
     {
         // PAC store does not exist and needs to be created
         // (status also reverts to PacStoreStateStoreNotExists if the PAC store is
@@ -78,10 +78,10 @@ public:
         PacStoreSavePassword,
         /*! write-only: bool
          *      true: deletes PAC store, i.e. clears everything related to the
-         *        existing PAC store inlcuding saved password
+         *        existing PAC store including saved password
          *      false/QVariant::Invalid: no actions */
         PacStoreReset,
-        /*! read-only: int (PacStoreState) */
+        /*! read-only: int (PacStoreStatus) */
         PacStoreState,
         /*! no write nor read operation, for validator usage only
          *  - uses the validator to check if the given password

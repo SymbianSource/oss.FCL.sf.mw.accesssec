@@ -16,15 +16,16 @@
 */
 
 /*
-* %version: 21 %
+* %version: 22 %
 */
 
 #include "EapCoreInterface.h"
 #include "eap_am_tools.h"
 #include "EapolUID.h"
 #include "EapPluginTools.h"
+#include "eap_am_message_if.h"
 
-CEapCoreInterface::CEapCoreInterface(const u32_t MTU):
+EAP_FUNC_EXPORT CEapCoreInterface::CEapCoreInterface(const u32_t MTU):
   iClient(NULL)
   ,iIsValid(FALSE)
   ,iTools(0)
@@ -34,7 +35,7 @@ CEapCoreInterface::CEapCoreInterface(const u32_t MTU):
      {
      }
 
-CEapCoreInterface::~CEapCoreInterface()
+EAP_FUNC_EXPORT CEapCoreInterface::~CEapCoreInterface()
     {
     delete iEapCoreInterface;
     }
@@ -76,7 +77,8 @@ EAP_FUNC_EXPORT CEapProcessInterface* CEapCoreInterface::ConstrucL(abs_eap_am_to
     
     }
 
-EAP_FUNC_EXPORT eap_am_message_if_c * new_eap_am_client_message_if_c(
+
+EAP_C_FUNC_EXPORT eap_am_message_if_c * new_eap_am_client_message_if_c(
         abs_eap_am_tools_c * const tools,
         const bool /* is_client_when_true */,
         const u32_t MTU)

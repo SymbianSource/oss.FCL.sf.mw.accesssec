@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 5 %
+* %version: 8 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -120,7 +120,7 @@ EAP_FUNC_EXPORT dummy_eap_core_c::dummy_eap_core_c(
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("ummy_eap_core_c::dummy_eap_core_c: ")
+		(EAPL("dummy_eap_core_c::dummy_eap_core_c: ")
 		 EAPL("this = 0x%08x\n"),
 		 this));
 
@@ -658,7 +658,7 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::configure()
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: dummy_eap_core_c::configure()");
 
-	eap_status_e status(eap_status_process_general_error);
+	eap_status_e status(eap_status_ok);
 
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -822,7 +822,7 @@ EAP_FUNC_EXPORT eap_status_e dummy_eap_core_c::read_configure(
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
-	eap_status_e status = eap_status_process_general_error;
+	eap_status_e status = eap_status_illegal_configure_field;
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);

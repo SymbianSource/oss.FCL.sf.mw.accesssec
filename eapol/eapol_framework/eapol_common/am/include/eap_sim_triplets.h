@@ -25,6 +25,27 @@
 //#include "eap_am_memory.h"
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_SIM_TRIPLETS_H)
+	#define EAP_CLASS_VISIBILITY_EAP_SIM_TRIPLETS_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H 
+	#define EAP_FUNC_EXPORT_EAP_SIM_TRIPLETS_H 
+	#define EAP_C_FUNC_EXPORT_EAP_SIM_TRIPLETS_H 
+#elif defined(EAP_EXPORT_EAP_SIM_TRIPLETS_H)
+	#define EAP_CLASS_VISIBILITY_EAP_SIM_TRIPLETS_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_SIM_TRIPLETS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_SIM_TRIPLETS_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_SIM_TRIPLETS_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_SIM_TRIPLETS_H 
+	#define EAP_C_FUNC_EXPORT_EAP_SIM_TRIPLETS_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_variable_data.h"
 
 
@@ -35,7 +56,7 @@ const u32_t SIM_KC_LENGTH   = 8u;
 const u32_t SIM_SRES_LENGTH = 4u;
 
 
-class EAP_EXPORT eap_type_saesim_triplet_c
+class EAP_CLASS_VISIBILITY_EAP_SIM_TRIPLETS_H eap_type_saesim_triplet_c
 {
 private:
 
@@ -46,38 +67,38 @@ private:
 
 public:
 
-	EAP_FUNC_IMPORT virtual ~eap_type_saesim_triplet_c();
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H virtual ~eap_type_saesim_triplet_c();
 
-	EAP_FUNC_IMPORT eap_type_saesim_triplet_c(
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H eap_type_saesim_triplet_c(
 		abs_eap_am_tools_c * const tools
 		);
 
-	EAP_FUNC_IMPORT void reset();
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H void reset();
 
-	EAP_FUNC_IMPORT eap_status_e set_triplet(
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H eap_status_e set_triplet(
 		eap_variable_data_c * const kc,
 		eap_variable_data_c * const rand,
 		eap_variable_data_c * const sres
 		);
 
-	EAP_FUNC_IMPORT eap_type_saesim_triplet_c * copy(
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H eap_type_saesim_triplet_c * copy(
 		abs_eap_am_tools_c * const tools
 		);
 
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H void set_is_valid();
 
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H bool get_is_valid();
 
-	EAP_FUNC_IMPORT eap_variable_data_c *get_kc();
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H eap_variable_data_c *get_kc();
 
-	EAP_FUNC_IMPORT eap_variable_data_c *get_rand();
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H eap_variable_data_c *get_rand();
 
-	EAP_FUNC_IMPORT eap_variable_data_c *get_sres();
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H eap_variable_data_c *get_sres();
 };
 
 //-----------------------------------------------
 
-class EAP_EXPORT eap_type_sim_triplet_array_c
+class EAP_CLASS_VISIBILITY_EAP_SIM_TRIPLETS_H eap_type_sim_triplet_array_c
 {
 private:
 
@@ -87,27 +108,27 @@ private:
 
 public:
 
-	EAP_FUNC_IMPORT virtual ~eap_type_sim_triplet_array_c();
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H virtual ~eap_type_sim_triplet_array_c();
 
-	EAP_FUNC_IMPORT eap_type_sim_triplet_array_c(
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H eap_type_sim_triplet_array_c(
 		abs_eap_am_tools_c * const tools
 		);
 
-	EAP_FUNC_IMPORT eap_status_e set_triplet_count(
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H eap_status_e set_triplet_count(
 		const u32_t triplet_count
 		);
 
-	EAP_FUNC_IMPORT eap_type_saesim_triplet_c * add_triplet();
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H eap_type_saesim_triplet_c * add_triplet();
 
-	EAP_FUNC_IMPORT eap_type_saesim_triplet_c * get_triplet(abs_eap_am_tools_c * const m_am_tools, u32_t index);
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H eap_type_saesim_triplet_c * get_triplet(abs_eap_am_tools_c * const m_am_tools, u32_t index);
 
-	EAP_FUNC_IMPORT eap_status_e set_triplet(u32_t index, eap_type_saesim_triplet_c * const triplet);
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H eap_status_e set_triplet(u32_t index, eap_type_saesim_triplet_c * const triplet);
 
-	EAP_FUNC_IMPORT u32_t get_triplet_count();
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H u32_t get_triplet_count();
 
-	EAP_FUNC_IMPORT eap_type_sim_triplet_array_c * copy();
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H eap_type_sim_triplet_array_c * copy();
 
-	EAP_FUNC_IMPORT void reset();
+	EAP_FUNC_VISIBILITY_EAP_SIM_TRIPLETS_H void reset();
 
 };
 

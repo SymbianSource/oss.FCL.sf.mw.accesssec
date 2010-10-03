@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 61 %
+* %version: 67 %
 */
 
 // INCLUDE FILES
@@ -25,6 +25,7 @@
 
 #include <EapType.h>
 #include <EapTypePlugin.h>
+#include <EapGeneralSettings.h>
 
 #include "eap_vpn_if_implementation.h"
 #include "eap_am_memory.h"
@@ -48,6 +49,7 @@
 #include "eap_automatic_variable.h"
 #include "eap_core_client_message_if.h"
 #include "eap_process_tlv_message_data.h"
+#include "eapol_wlan_database_reference.h"
 
 // LOCAL CONSTANTS
 const TUint KMaxConfigStringLength = 256;
@@ -56,7 +58,10 @@ const u32_t KTrailerLength = 0;
 const u32_t KHeaderOffset = 0;
 
 #define KEapIdentityOffset 5
+
+#ifdef USE_EAP_VPN_FILETRACE
 const eap_const_string EAPPLUGIN_TRACE_FILE = EAPL("logs\\eapol\\eap_vpn_if.txt");
+#endif
 
 enum eapol_am_core_timer_id_e
 {
@@ -140,6 +145,7 @@ void CEapVpnInterfaceImplementation::ConstructL(MAbsEapVpnInterface* aCaller, TB
 	}
 
 
+#ifdef USE_EAP_VPN_FILETRACE
 	{
 		TFileName drivePath( PathInfo::MemoryCardRootPath() );
 
@@ -215,7 +221,8 @@ void CEapVpnInterfaceImplementation::ConstructL(MAbsEapVpnInterface* aCaller, TB
 
 		CleanupStack::PopAndDestroy(buf); // Delete pathbuffer.
 	}
-    
+#endif
+
 	m_eap_type_array = new eap_array_c<eap_type_value_e>(m_am_tools);
 	if (m_eap_type_array == 0)
 	{
@@ -318,9 +325,10 @@ CEapVpnInterfaceImplementation::~CEapVpnInterfaceImplementation()
 		TRACE_FLAGS_DEFAULT,
 		(EAPL("CEapVpnInterfaceImplementation::~CEapVpnInterfaceImplementation() - destructor\n")));
 
+#ifdef USE_EAP_VPN_FILETRACE
 	delete m_trace_log_file_name;
 	m_trace_log_file_name = 0;
-
+#endif
 	shutdown();
 }
 
@@ -428,8 +436,6 @@ eap_status_e CEapVpnInterfaceImplementation::shutdown()
 
 	return eap_status_ok;
 }
-    
-
 
 //--------------------------------------------------
 
@@ -527,7 +533,6 @@ eap_status_e CEapVpnInterfaceImplementation::configure()
 	// So we return OK.
 	return eap_status_ok;
 }
-
     
 //----------------------------------------------------------        
 // Implementations of virtual functions from CEapVpnInterface
@@ -624,10 +629,302 @@ TInt CEapVpnInterfaceImplementation::EapConfigure(
 		iRealmPrefix->Ptr(),
 		iRealmPrefix->Size()));
 
+		//--------------------------------------------------------
+		//--------------------------------------------------------
+		// Set the values for realm and user name if there is any.
+		// If there is no values the default settings will be used( automatic realm and username).
+
+
+	{
+		EAP_TRACE_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("CEapVpnInterfaceImplementation::EapConfigure(): About to configure manual/auto username and manual/auto realm, m_index_type=%d, m_index=%d\n"),
+			m_index_type,
+			m_index));
+
+		CEapType* eapType = 0;
+
+		// Check if this EAP type has already been loaded
+		i32_t eapArrayIndex = find<eap_type_value_e>(
+			m_eap_type_array,
+			&iRequestedEapType,
+			m_am_tools);
+
+		if (eapArrayIndex >= 0)
+		{
+			// Yep. It was loaded already.
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("CEapVpnInterfaceImplementation::EapConfigure(): EAP Type Already loaded\n")));
+
+			eapType = m_eap_if_array[eapArrayIndex];		
+		}
+		else 
+		{
+			// We must have a trap here since the EAP core knows nothing about Symbian.
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("CEapVpnInterfaceImplementation::EapConfigure(): EAP Type new\n")));
+
+			TEapExpandedType aEapType;
+
+			TInt error = CEapConversion::ConvertInternalTypeToExpandedEAPType(
+				&iRequestedEapType,
+				&aEapType);
+			if (error != KErrNone)
+			{
+				EAP_TRACE_DEBUG_SYMBIAN(
+					(_L("ERROR: CEapVpnInterfaceImplementation::EapConfigure(): Error from CEapConversion::ConvertExpandedEAPTypeToInternalType()=%d\n"),
+					error));		
+			
+				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+				return EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(error));
+			}
+
+			TRAP(error, (eapType = CEapType::NewL(m_index_type, m_index, aEapType)));	
+
+			if (error != KErrNone
+				|| eapType == 0)
+			{
+				// Interface not found or implementation creation function failed
+				
+				delete eapType;
+				
+				EAP_TRACE_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("CEapVpnInterfaceImplementation::EapConfigure(): EAP Type new, unable to load\n")));
+				EAP_TRACE_ALWAYS(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("ECom could not find/initiate implementation.\n")));
+				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
+			}
+
+			// Add EAP-interface information to the member arrays.
+			if (m_eap_if_array.Append(eapType) != KErrNone)
+			{
+				delete eapType;
+				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);				
+			}
+		}
+		
+		EAPSettings* setSettings = new EAPSettings;
+		if( setSettings == NULL )     
+		{
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("CEapVpnInterfaceImplementation::EapConfigure(): EAPSettings allocation error \n")));
+
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);				
+		}
+		
+		if(iRequestedEapType == eap_type_aka)
+		{
+			setSettings->iEAPExpandedType = *EapExpandedTypeAka.GetType();
+			
+		}
+		else if(iRequestedEapType == eap_type_gsmsim)
+		{
+			setSettings->iEAPExpandedType = *EapExpandedTypeSim.GetType();
+		}
+		else
+		{
+			delete setSettings;
+
+			// Only EAP-SIM and AKA are possible now.
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_eap_type);
+		}
+		
+		if(iManualUsername && iManualUsername->Length() != 0)
+		{
+    		setSettings->iUsernamePresent = ETrue; // Same value for both SIM and AKA.
+	    	setSettings->iUsername.Copy(iManualUsername->Des());
+		}
+		else
+		{
+	    	// No user name. we have to set automatic now.
+	    	setSettings->iUsernamePresent = EFalse; // Same value for both SIM and AKA.
+	    	setSettings->iUseAutomaticUsernamePresent = ETrue; // Same value for both SIM and AKA.
+	    	setSettings->iUseAutomaticUsername = ETrue; // Same value for both SIM and AKA.
+		}
+		
+		if(iManualRealm && iManualRealm->Length() != 0)
+		{
+	    	setSettings->iRealmPresent = ETrue; // Same value for both SIM and AKA.
+	    	setSettings->iRealm.Copy(iManualRealm->Des());
+		}
+		else
+		{
+	    	// No realm. we have to set automatic now.
+	    	setSettings->iRealmPresent = EFalse; // Same value for both SIM and AKA.
+	    	setSettings->iUseAutomaticRealmPresent = ETrue; // Same value for both SIM and AKA.
+	    	setSettings->iUseAutomaticRealm = ETrue; // Same value for both SIM and AKA.
+		}    
+		
+		TRAP(error, eapType->SetConfigurationL(*setSettings) );
+
+		delete setSettings;
+		setSettings = 0;
+
+		if ( error != KErrNone )
+		{
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("ERROR: CEapVpnInterfaceImplementation::EapConfigure(): Setting Manual Username and Realm failed. SetConfigurationL() error=%d\n")));
+			return error;
+		}
+	}
+
+	{
+		CEapGeneralSettings* genSet = NULL;
+
+		TRAPD(error, genSet = CEapGeneralSettings::NewL(m_index_type, m_index));
+
+		if (error != KErrNone)
+		{
+			delete genSet;
+
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("ERROR: CEapVpnInterfaceImplementation::EapConfigure(): CEapGeneralSettings::NewL() error=%d\n")));
+			return error;
+		}
+
+		TEapExpandedType tmpEap;
+		RArray<TEapExpandedType> OuterEapsOn;
+	    RArray<TEapExpandedType> OuterEapsOff;
+
+		tmpEap.SetValue(
+			iRequestedEapType.get_vendor_id(),
+			iRequestedEapType.get_vendor_type());
+
+		error = OuterEapsOn.Append(tmpEap);
+		if(error != KErrNone)
+		{
+			OuterEapsOn.Close();
+			OuterEapsOff.Close();
+			delete genSet;
+
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("ERROR: CEapVpnInterfaceImplementation::EapConfigure(): OuterEapsOn.Append() error=%d\n")));
+			return error;
+		}
+
+		error = genSet->SetEapMethods(OuterEapsOn, OuterEapsOff);
+
+		OuterEapsOn.Close();
+		OuterEapsOff.Close();
+		delete genSet;
+
+		if (error != KErrNone)
+		{
+			EAP_TRACE_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("ERROR: CEapVpnInterfaceImplementation::EapConfigure(): SetEapMethods() error=%d\n")));
+			return error;
+		}
+
+	}
+
+	{
+		eap_status_e status(eap_status_ok);
+
+		eap_variable_data_c reference(m_am_tools);
+
+		{
+			eapol_wlan_database_reference_values_s values = {m_index_type, m_index};
+
+			status = reference.set_copy_of_buffer(&values, sizeof(values));
+			if (status != eap_status_ok)
+			{
+				return m_am_tools->convert_eapol_error_to_am_error(
+					EAP_STATUS_RETURN(m_am_tools, status));
+			}
+		}
+
+		status = iEapCore->set_eap_database_reference_values(&reference);
+		if (status != eap_status_ok)
+		{
+			return m_am_tools->convert_eapol_error_to_am_error(
+				EAP_STATUS_RETURN(m_am_tools, status));
+		}
+
+		eap_variable_data_c SSID(m_am_tools);
+
+		if (SSID.get_is_valid() == false)
+		{
+			EAP_TRACE_ERROR(
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT, 
+				(EAPL("CEapVpnInterfaceImplementation::EapConfigure(): SSID failed.\n")));
+			return m_am_tools->convert_eapol_error_to_am_error(
+				EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error));
+		}
+
+		const u8_t dummy[] = "dummy";
+		status = SSID.set_copy_of_buffer(dummy, sizeof(dummy));
+		if (status != eap_status_ok)
+		{
+			return m_am_tools->convert_eapol_error_to_am_error(
+				EAP_STATUS_RETURN(m_am_tools, status));
+		}
+
+		eap_variable_data_c preshared_key(m_am_tools);
+		if (preshared_key.get_is_valid() == false)
+		{
+			EAP_TRACE_ERROR(
+				m_am_tools, 
+				TRACE_FLAGS_DEFAULT, 
+				(EAPL("CEapVpnInterfaceImplementation::EapConfigure(): preshared_key failed.\n")));
+			return m_am_tools->convert_eapol_error_to_am_error(
+				EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error));
+		}
+
+		// This is asynchronous function call that is completed by complete_get_802_11_authentication_mode() function call.
+		status = iEapCore->get_802_11_authentication_mode(
+			m_receive_network_id,
+			eapol_key_authentication_type_RSNA_EAP,
+			&SSID,
+			&preshared_key);
+		if (status != eap_status_ok)
+		{
+			return m_am_tools->convert_eapol_error_to_am_error(
+				EAP_STATUS_RETURN(m_am_tools, status));
+		}
+
+		status = wait_complete_get_802_11_authentication_mode();
+		if (status != eap_status_ok)
+		{
+			return m_am_tools->convert_eapol_error_to_am_error(
+				EAP_STATUS_RETURN(m_am_tools, status));
+		}
+
+		// Creates a EAP-session.
+		status = iEapCore->create_eap_session(m_receive_network_id);
+		if (status != eap_status_ok)
+		{
+			return m_am_tools->convert_eapol_error_to_am_error(
+				EAP_STATUS_RETURN(m_am_tools, status));
+		}
+	}
+    
 	return KErrNone;
 }
 
-    
+//--------------------------------------------------
+
 /**
  * Function:    StartL
  *
@@ -812,6 +1109,8 @@ TInt CEapVpnInterfaceImplementation::CompleteAssociation(
 	return m_am_tools->convert_eapol_error_to_am_error(EAP_STATUS_RETURN(m_am_tools, status));
 }
 
+//--------------------------------------------------
+
 /**
  * Function:    QueryIdentity
  *
@@ -927,6 +1226,19 @@ eap_status_e CEapVpnInterfaceImplementation::send_eap_identity_request()
 	eap_request.set_type_data_length(0u, false);
 	eap_request.set_type(eap_type_identity, false);
 
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("CEapVpnInterfaceImplementation::send_eap_identity_request(): %s, code=0x%02x=%s, identifier=0x%02x, length=0x%04x, type=0x%08x=%s, packet length 0x%04x\n"),
+		(m_is_client == true) ? "client": "server",
+		eap_request.get_code(),
+		eap_request.get_code_string(),
+		eap_request.get_identifier(),
+		eap_request.get_length(),
+		convert_eap_type_to_u32_t(eap_request.get_type()),
+		eap_request.get_type_string(),
+		eap_request.get_length()));
+
 	EAP_ASSERT(eap_request.get_length() >= 4);
 
 	status = iEapCore->packet_process(
@@ -943,6 +1255,7 @@ eap_status_e CEapVpnInterfaceImplementation::send_eap_identity_request()
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
+//--------------------------------------------------
 
 /**
  * Function:    EapInbound
@@ -985,6 +1298,26 @@ TInt CEapVpnInterfaceImplementation::EapInbound(const TDesC8& aMessage)
 		m_am_tools,
 		request_packet.get_data_offset(0, aMessage.Length()),
 		aMessage.Length());
+
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("CEapVpnInterfaceImplementation::EapInbound(): %s, code=0x%02x=%s, identifier=0x%02x, length=0x%04x, type=0x%08x=%s, packet length 0x%04x\n"),
+		(m_is_client == true) ? "client": "server",
+		eap_request.get_code(),
+		eap_request.get_code_string(),
+		eap_request.get_identifier(),
+		eap_request.get_length(),
+		convert_eap_type_to_u32_t(eap_request.get_type()),
+		eap_request.get_type_string(),
+		eap_request.get_length()));
+
+	EAP_TRACE_DATA_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapVpnInterfaceImplementation::EapInbound(): EAP-packet"),
+		aMessage.Ptr(),
+		aMessage.Length()));
 
 	// Forward the packet to the Eap layer of the EAPOL stack. Ignore return value. Failure is signalled using state_notification.
 	status = iEapCore->packet_process(
@@ -1061,6 +1394,7 @@ eap_status_e CEapVpnInterfaceImplementation::create_upper_stack()
 	return status;	
 }
 
+//--------------------------------------------------
 
 // Virtual callback function implementations, called by the eap_core
 
@@ -1090,7 +1424,7 @@ eap_status_e CEapVpnInterfaceImplementation::packet_send(
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("packet_send: packet buffer corrupted.\n")));
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return eap_status_process_general_error;
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_process_general_error);
 	}
 	else if (header_offset+data_length != sent_packet->get_data_length())
 	{
@@ -1100,7 +1434,7 @@ eap_status_e CEapVpnInterfaceImplementation::packet_send(
 			(EAPL("ERROR: packet_send: packet buffer corrupted (data_length != sent_packet->get_data_length()).\n")));
 			EAP_ASSERT(data_length == sent_packet->get_buffer_length());
 		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return eap_status_process_general_error;
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_process_general_error);
 	}	
 
 	if (m_block_packet_sends_and_notifications == true)
@@ -1121,15 +1455,35 @@ eap_status_e CEapVpnInterfaceImplementation::packet_send(
 			header_offset, data_length),
 			data_length);
 
+	EAP_TRACE_DEBUG(
+		m_am_tools, 
+		TRACE_FLAGS_DEFAULT, 
+		(EAPL("CEapVpnInterfaceImplementation::packet_send(): %s, code=0x%02x=%s, identifier=0x%02x, length=0x%04x, type=0x%08x=%s, packet length 0x%04x\n"),
+		(m_is_client == true) ? "client": "server",
+		eap.get_code(),
+		eap.get_code_string(),
+		eap.get_identifier(),
+		eap.get_length(),
+		convert_eap_type_to_u32_t(eap.get_type()),
+		eap.get_type_string(),
+		eap.get_length()));
+
 	TInt status(KErrNone);
 	if (status == KErrNone)
 	{
 		u8_t * const packet_data = sent_packet->get_data_offset(header_offset, data_length);
 		if (packet_data == 0)
 		{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return eap_status_buffer_too_short;
+			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+			return eap_status_buffer_too_short;
 		}
+
+		EAP_TRACE_DATA_DEBUG(
+			m_am_tools,
+			TRACE_FLAGS_DEFAULT,
+			(EAPL("CEapVpnInterfaceImplementation::packet_send(): EAP-packet"),
+			packet_data,
+			data_length));
 
 		// Here we send the original packet.
 		HBufC8* eapData = NULL;
@@ -1193,6 +1547,7 @@ eap_status_e CEapVpnInterfaceImplementation::packet_send(
 	return EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(status));
 }
 
+//--------------------------------------------------
 
 /**
  * The get_header_offset() function obtains the header offset of EAP-packet.
@@ -1211,6 +1566,8 @@ u32_t CEapVpnInterfaceImplementation::get_header_offset(
 
 	return KHeaderOffset;
 }
+
+//--------------------------------------------------
 
 /**
  * The load_module() function function indicates the lower level to
@@ -1342,11 +1699,12 @@ eap_status_e CEapVpnInterfaceImplementation::load_module(
 			}
 		}
 
+#if 0
+
 		//--------------------------------------------------------
 		//--------------------------------------------------------
 		// Set the values for realm and user name if there is any.
 		// If there is no values the default settings will be used( automatic realm and username).
-
 
 		{
 			EAP_TRACE_DEBUG(
@@ -1423,11 +1781,13 @@ eap_status_e CEapVpnInterfaceImplementation::load_module(
 			delete setSettings;
 			setSettings = 0;    
 		}
+#endif
+
 	}
     
 	//--------------------------------------------------------
 	//--------------------------------------------------------
-	
+
 	// Create the EAP protocol interface implementation.
 	EAP_TRACE_DEBUG(
 		m_am_tools,
@@ -1438,7 +1798,7 @@ eap_status_e CEapVpnInterfaceImplementation::load_module(
 	{
 		CEapTypePlugin* eapPlugin = 0;
 
-		TRAP(error, (eapPlugin = CEapTypePlugin::NewL(aEapType.GetValue(), m_index_type, m_index)));
+		TRAP(error, (eapPlugin = CEapTypePlugin::NewL(aEapType.GetValue(), m_index_type, m_index, m_am_tools)));
 
 		if (error != KErrNone
 			|| eapPlugin == 0)
@@ -1570,6 +1930,8 @@ eap_status_e CEapVpnInterfaceImplementation::load_module(
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
+//--------------------------------------------------
+
 /**
  * The unload_module() function unloads the module of a EAP-type. 
  * @param eap_type is the requested EAP-type.
@@ -1608,25 +1970,35 @@ void CEapVpnInterfaceImplementation::set_is_valid()
 	m_is_valid = true;
 }
 
+//--------------------------------------------------
+
 bool CEapVpnInterfaceImplementation::get_is_valid()
 {
 	return m_is_valid;
 }
+
+//--------------------------------------------------
 
 void CEapVpnInterfaceImplementation::increment_authentication_counter()
 {
 	++m_authentication_counter;
 }
 
+//--------------------------------------------------
+
 u32_t CEapVpnInterfaceImplementation::get_authentication_counter()
 {
 	return m_authentication_counter;
 }
 
+//--------------------------------------------------
+
 bool CEapVpnInterfaceImplementation::get_is_client()
 {
 	return m_is_client;
 }
+
+//--------------------------------------------------
 
 /**
  * Note this function is just an example. Parameters will change later.
@@ -1672,6 +2044,8 @@ eap_status_e CEapVpnInterfaceImplementation::packet_data_crypto_keys(
 	return eap_status_ok;
 }
 
+//--------------------------------------------------
+
 /**
  * The packet_data_session_key() function passes one traffic encryption key to 
  * the lower layers. Ultimately the key can end up to the WLAN hardware.
@@ -1694,11 +2068,12 @@ eap_status_e CEapVpnInterfaceImplementation::packet_data_session_key(
 	return EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(status));
 }
 
+//--------------------------------------------------
 
 eap_status_e CEapVpnInterfaceImplementation::add_configuration_data(
 	eap_process_tlv_message_data_c * const message,
 	const eap_configuration_field_c * field,
-	const eap_configure_type_e /* type */,
+	const eap_configure_type_e type,
 	const eap_variable_data_c * const value_data
     )
 {
@@ -1722,7 +2097,7 @@ eap_status_e CEapVpnInterfaceImplementation::add_configuration_data(
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 	}
 
-	config.set_type(eap_configure_type_hex_data);
+	config.set_type(type);
 
 	status = config.get_data()->set_copy_of_buffer(
 		value_data);
@@ -1745,6 +2120,7 @@ eap_status_e CEapVpnInterfaceImplementation::add_configuration_data(
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
+//--------------------------------------------------
 
 const TUint32 K2DigitMncMccList[]
 	= {
@@ -1769,6 +2145,8 @@ const TUint32 K2DigitMncMccList[]
 		653,654,655,702,704,706,710,712,
 		714,716,724,730,734,744,746,901
 	};
+
+//--------------------------------------------------
 
 /**
  * The read_configure() function reads the configuration data identified
@@ -1933,12 +2311,15 @@ eap_status_e CEapVpnInterfaceImplementation::read_configure(
 				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 			}
 
-			// Set uma realm prefix of EAP-SIM and EAP-AKA.
-			status = value_data.set_copy_of_buffer(iRealmPrefix->Ptr(), iRealmPrefix->Length());
-			if (status != eap_status_ok)
+			if (iRealmPrefix != 0)
 			{
-				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-				return EAP_STATUS_RETURN(m_am_tools, status);			
+				// Set uma realm prefix of EAP-SIM and EAP-AKA.
+				status = value_data.set_copy_of_buffer(iRealmPrefix->Ptr(), iRealmPrefix->Length());
+				if (status != eap_status_ok)
+				{
+					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+					return EAP_STATUS_RETURN(m_am_tools, status);			
+				}
 			}
 
 			status = add_configuration_data(
@@ -2149,6 +2530,7 @@ eap_status_e CEapVpnInterfaceImplementation::read_configure(
 			{
 				return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
 			}
+#ifdef USE_EAP_VPN_FILETRACE
 
 			status = value_data.set_copy_of_buffer(m_trace_log_file_name);
 			if (status != eap_status_ok)
@@ -2156,7 +2538,7 @@ eap_status_e CEapVpnInterfaceImplementation::read_configure(
 				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 				return EAP_STATUS_RETURN(m_am_tools, status);			
 			}
-
+#endif
 			status = add_configuration_data(
 				&message,
 				cf_str_EAP_TRACE_output_file_name.get_field(),
@@ -2410,7 +2792,16 @@ eap_status_e CEapVpnInterfaceImplementation::read_configure(
 					cf_str_EAP_AKA_UMA_realm_prefix.get_field()->get_field_length()) == 0)
 		{
 			// Set uma realm prefix of EAP-SIM and EAP-AKA.
-			status = data->set_copy_of_buffer(iRealmPrefix->Ptr(), iRealmPrefix->Length());
+
+			if (iRealmPrefix != 0)
+			{
+				status = data->set_copy_of_buffer(iRealmPrefix->Ptr(), iRealmPrefix->Length());
+			}
+			else
+			{
+				status = eap_status_illegal_configure_field;
+			}
+
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 			return EAP_STATUS_RETURN(m_am_tools, status);		
 		}
@@ -2439,7 +2830,15 @@ eap_status_e CEapVpnInterfaceImplementation::read_configure(
 					cf_str_EAP_AKA_manual_realm.get_field()->get_field_length()) == 0)
 		{
 			// ManualRealm of EAP-SIM and EAP-AKA.
-			status = data->set_copy_of_buffer(iManualRealm->Ptr(), iManualRealm->Length());
+			if(iManualRealm != 0)
+			{
+				status = data->set_copy_of_buffer(iManualRealm->Ptr(), iManualRealm->Length());
+			}
+			else
+			{
+				status = eap_status_illegal_configure_field;
+			}
+
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 			return EAP_STATUS_RETURN(m_am_tools, status);		
 		}
@@ -2491,6 +2890,7 @@ eap_status_e CEapVpnInterfaceImplementation::read_configure(
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 			return EAP_STATUS_RETURN(m_am_tools, status);		
 		}
+#ifdef USE_EAP_VPN_FILETRACE
 		else if (wanted_field.compare(
 				cf_str_EAP_TRACE_output_file_name.get_field()->get_field(),
 				cf_str_EAP_TRACE_output_file_name.get_field()->get_field_length()) == 0)
@@ -2501,6 +2901,7 @@ eap_status_e CEapVpnInterfaceImplementation::read_configure(
 			EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 			return EAP_STATUS_RETURN(m_am_tools, status);		
 		}
+#endif
 		else if (wanted_field.compare(
 					cf_str_EAP_GSMSIM_max_session_validity_time.get_field()->get_field(),
 					cf_str_EAP_GSMSIM_max_session_validity_time.get_field()->get_field_length()) == 0
@@ -2547,6 +2948,8 @@ eap_status_e CEapVpnInterfaceImplementation::read_configure(
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
 
+//--------------------------------------------------
+
 /**
  * The write_configure() function writes the configuration data identified
  * by the field string of field_length bytes length. Adaptation module must direct
@@ -2561,6 +2964,8 @@ eap_status_e CEapVpnInterfaceImplementation::write_configure(
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return eap_status_not_supported;
 }
+
+//--------------------------------------------------
 
 /**
  * This is notification of internal state transition.
@@ -2580,7 +2985,9 @@ void CEapVpnInterfaceImplementation::state_notification(
 	EAP_TRACE_DEBUG(
 		m_am_tools,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapVpnInterfaceImplementation::state_notification() = %d\n"), state->get_current_state()));
+		(EAPL("CEapVpnInterfaceImplementation::state_notification() = %d=%s\n"),
+		state->get_current_state(),
+		eap_state_notification_c::get_state_string(eap_protocol_layer_eap, state->get_current_state())));
 
 	if (m_block_packet_sends_and_notifications == true)
 	{
@@ -2650,6 +3057,8 @@ void CEapVpnInterfaceImplementation::state_notification(
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 }
 
+//--------------------------------------------------
+
 /**
  * The set_timer() function initializes timer to be elapsed after time_ms milliseconds.
  * @param initializer is pointer to object which timer_expired() function will
@@ -2684,6 +3093,8 @@ eap_status_e CEapVpnInterfaceImplementation::set_timer(
 	return status;
 }
 
+//--------------------------------------------------
+
 /**
  * The cancel_timer() function cancels the timer id initiated by initializer.
  * @param initializer is pointer to object which set the cancelled timer.
@@ -2711,6 +3122,8 @@ eap_status_e CEapVpnInterfaceImplementation::cancel_timer(
 	return status;
 }
 
+//--------------------------------------------------
+
 /**
  * The cancel_all_timers() function cancels all timers.
  * User should use this in termination of the stack before
@@ -2734,6 +3147,8 @@ eap_status_e CEapVpnInterfaceImplementation::cancel_all_timers()
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return status;
 }
+
+//--------------------------------------------------
 
 /**
  * This function queries the validity of EAP-type.
@@ -2790,6 +3205,8 @@ eap_status_e CEapVpnInterfaceImplementation::check_is_valid_eap_type(const eap_t
 
 	return EAP_STATUS_RETURN(m_am_tools, status);
 }
+
+//--------------------------------------------------
 
 /**
  * This function queries the list of supported EAP-types.
@@ -2873,8 +3290,8 @@ eap_status_e CEapVpnInterfaceImplementation::get_eap_type_list(eap_array_c<eap_t
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return eap_status_ok;
 }
-//--------------------------------------------------
 
+//--------------------------------------------------
 
 eap_status_e CEapVpnInterfaceImplementation::add_rogue_ap(eap_array_c<eap_rogue_ap_entry_c> & /*rogue_ap_list*/)
 {
@@ -2891,6 +3308,7 @@ eap_status_e CEapVpnInterfaceImplementation::add_rogue_ap(eap_array_c<eap_rogue_
 	return EAP_STATUS_RETURN(m_am_tools, m_am_tools->convert_am_error_to_eapol_error(err));
 }
 
+//--------------------------------------------------
 
 eap_status_e CEapVpnInterfaceImplementation::restart_authentication(
 	const eap_am_network_id_c * const /*receive_network_id*/,
@@ -3035,17 +3453,53 @@ void CEapVpnInterfaceImplementation::CleanupImplArray( TAny* aAny )
 
 //--------------------------------------------------
 
+eap_status_e CEapVpnInterfaceImplementation::wait_complete_get_802_11_authentication_mode()
+{
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapGeneralSettingsImpl::wait_complete_get_802_11_authentication_mode(): calls iWait.Start()\n")));
+
+	iWait.Start();
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapGeneralSettingsImpl::WaitCompletion(): iWait.Start() returns, m_completion_status=%d\n"),
+		m_completion_status));
+
+	return EAP_STATUS_RETURN(m_am_tools, m_completion_status);
+}
+
+//--------------------------------------------------
+
 eap_status_e CEapVpnInterfaceImplementation::complete_get_802_11_authentication_mode(
-	const eap_status_e /* completion_status */,
-	const eap_am_network_id_c * /* const receive_network_id */,
+	const eap_status_e completion_status,
+	const eap_am_network_id_c * const /* receive_network_id */,
 	const eapol_key_802_11_authentication_mode_e /* mode */)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapGeneralSettingsImpl::complete_get_802_11_authentication_mode(): calls iWait.AsyncStop()\n")));
+
 
 	EAP_ASSERT(m_am_tools->get_global_mutex()->get_is_reserved() == true);
 
+	m_completion_status = completion_status;
+
+	// This is needed to continue the execution after iWait->Start(); 
+	iWait.AsyncStop();
+
+	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapGeneralSettingsImpl::complete_get_802_11_authentication_mode(): iWait.AsyncStop() returns, m_completion_status=%d\n"),
+		m_completion_status));
+
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, eap_status_not_supported);
+	return EAP_STATUS_RETURN(m_am_tools, m_completion_status);
 }
 
 //--------------------------------------------------

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 22 %
+* %version: 23 %
 */
 
 // INCLUDES
@@ -253,7 +253,7 @@ eap_status_e CEapCoreInterfaceImplementation::send_data(const TDesC8& message)
 // Returns: KErrNone
 // ---------------------------------------------------------
 //
-EAP_FUNC_EXPORT const TImplementationProxy* ImplementationGroupProxy( TInt& aTableCount )
+EXPORT_C const TImplementationProxy* ImplementationGroupProxy( TInt& aTableCount )
     {
     EAP_TRACE_DEBUG_SYMBIAN(
             (_L("TImplementationProxy* ImplementationGroupProxy")));  

@@ -30,10 +30,33 @@
 #include "abs_eap_am_type_mschapv2.h"
 #include "eap_am_type_mschapv2.h"
 #include "eap_type_mschapv2_header.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_TYPE_MSCHAPV2_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_MSCHAPV2_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_H 
+#elif defined(EAP_EXPORT_EAP_TYPE_MSCHAPV2_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_MSCHAPV2_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_MSCHAPV2_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_MSCHAPV2_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 
 /// This class is implementation of MS-CHAP-v2 EAP-type.
-class EAP_EXPORT eap_type_mschapv2_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_MSCHAPV2_H eap_type_mschapv2_c
 	: public abs_eap_am_type_mschapv2_c 
 	, public eap_base_type_c
 {
@@ -141,16 +164,16 @@ private:
 
 	void send_error_notification(const eap_status_e error);
 
-	EAP_FUNC_IMPORT eap_status_e finish_successful_authentication();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H eap_status_e finish_successful_authentication();
 
 	eap_status_e finish_unsuccessful_authentication(
 		const bool authentication_cancelled);
 
-	EAP_FUNC_IMPORT eap_status_e complete_eap_identity_query();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H eap_status_e complete_eap_identity_query();
 
-	EAP_FUNC_IMPORT eap_status_e complete_failure_retry_response();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H eap_status_e complete_failure_retry_response();
 
-	EAP_FUNC_IMPORT eap_status_e complete_change_password_query();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H eap_status_e complete_change_password_query();
 
 	eap_status_e client_packet_process(
 		eap_header_wr_c * const eap, ///< This is pointer to EAP header and data.
@@ -356,12 +379,12 @@ public:
 	/**
 	 * Destructor cancels all timers and deletes member attributes.
 	 */
-	EAP_FUNC_IMPORT virtual ~eap_type_mschapv2_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H virtual ~eap_type_mschapv2_c();
 
 	/**
 	 * Constructor initializes all member attributes.
 	 */
-	EAP_FUNC_IMPORT eap_type_mschapv2_c(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H eap_type_mschapv2_c(
 		abs_eap_am_tools_c * const tools,
 		abs_eap_base_type_c * const partner,
 		eap_am_type_mschapv2_c * const am_type_mschapv2,
@@ -373,36 +396,36 @@ public:
 	 * The partner class calls this function when EAP/MS-CHAP-v2 packet is received.
 	 * see also eap_base_type_c::packet_process().
 	 */
-	EAP_FUNC_IMPORT eap_status_e packet_process(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H eap_status_e packet_process(
 		const eap_am_network_id_c * const receive_network_id, ///< This is the network identity of the received EAP packet.
 		eap_header_wr_c * const eap, ///< This is pointer to EAP header and data.
 		const u32_t eap_packet_length ///< This is length of received EAP packet.
 		);
 
 	// This is commented in eap_base_type_c::get_is_valid().
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H bool get_is_valid();
 	
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H void set_is_valid();
 
 	/**
 	 * This function resets the reused eap_type_mschapv2_c object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H eap_status_e reset();
 
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H eap_status_e shutdown();
 
-	EAP_FUNC_IMPORT eap_status_e set_initial_eap_identifier(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H eap_status_e set_initial_eap_identifier(
 		const eap_am_network_id_c * const receive_network_id,
 		const u8_t initial_identifier);
 
 	// This is commented in eap_base_type_c::eap_acknowledge().
-	EAP_FUNC_IMPORT eap_status_e eap_acknowledge(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H eap_status_e eap_acknowledge(
 		const eap_am_network_id_c * const receive_network_id);
 
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H eap_status_e configure();
 
 	// This is commented in eap_base_type_c::query_eap_identity().
-	EAP_FUNC_IMPORT eap_status_e query_eap_identity(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_MSCHAPV2_H eap_status_e query_eap_identity(
 		const bool must_be_synchronous,
 		eap_variable_data_c * const identity,
 		const eap_am_network_id_c * const receive_network_id,

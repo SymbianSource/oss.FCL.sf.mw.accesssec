@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 24 %
 */
 
 #if !defined(_ABS_TLS_BASE_APPLICATION_H_)
@@ -28,6 +28,29 @@
 
 #include "tls_record_header.h"
 #include "tls_handshake_header.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_ABS_TLS_BASE_APPLICATION_H)
+	#define EAP_CLASS_VISIBILITY_ABS_TLS_BASE_APPLICATION_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_ABS_TLS_BASE_APPLICATION_H 
+	#define EAP_C_FUNC_VISIBILITY_ABS_TLS_BASE_APPLICATION_H 
+	#define EAP_FUNC_EXPORT_ABS_TLS_BASE_APPLICATION_H 
+	#define EAP_C_FUNC_EXPORT_ABS_TLS_BASE_APPLICATION_H 
+#elif defined(EAP_EXPORT_ABS_TLS_BASE_APPLICATION_H)
+	#define EAP_CLASS_VISIBILITY_ABS_TLS_BASE_APPLICATION_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_TLS_BASE_APPLICATION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_TLS_BASE_APPLICATION_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_ABS_TLS_BASE_APPLICATION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_ABS_TLS_BASE_APPLICATION_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_ABS_TLS_BASE_APPLICATION_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_ABS_TLS_BASE_APPLICATION_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_ABS_TLS_BASE_APPLICATION_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_ABS_TLS_BASE_APPLICATION_H 
+	#define EAP_C_FUNC_EXPORT_ABS_TLS_BASE_APPLICATION_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 class eap_buf_chain_wr_c;
 class eap_variable_data_c;
@@ -41,7 +64,7 @@ class eap_fast_variable_data_c;
 
 /// The class is the interface to partner class of the tls_base_application_c class.
 /// This declares the pure virtual member functions tls_base_application_c class could call.
-class EAP_EXPORT abs_tls_base_application_c
+class EAP_CLASS_VISIBILITY_ABS_TLS_BASE_APPLICATION_H abs_tls_base_application_c
 {
 private:
 	//--------------------------------------------------

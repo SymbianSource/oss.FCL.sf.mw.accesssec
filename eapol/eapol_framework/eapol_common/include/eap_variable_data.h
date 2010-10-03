@@ -24,6 +24,27 @@
 
 #include "eap_am_types.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_VARIABLE_DATA_H)
+	#define EAP_CLASS_VISIBILITY_EAP_VARIABLE_DATA_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H 
+	#define EAP_FUNC_EXPORT_EAP_VARIABLE_DATA_H 
+	#define EAP_C_FUNC_EXPORT_EAP_VARIABLE_DATA_H 
+#elif defined(EAP_EXPORT_EAP_VARIABLE_DATA_H)
+	#define EAP_CLASS_VISIBILITY_EAP_VARIABLE_DATA_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_VARIABLE_DATA_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_VARIABLE_DATA_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_VARIABLE_DATA_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_VARIABLE_DATA_H 
+	#define EAP_C_FUNC_EXPORT_EAP_VARIABLE_DATA_H 
+#endif
+// End: added by script change_export_macros.sh.
 //#include "eap_am_memory.h"
 #include "eap_am_assert.h"
 #include "eap_status.h"
@@ -34,7 +55,7 @@ class abs_eap_am_tools_c;
 
 
 /// This class stores any data in byte array.
-class EAP_EXPORT eap_variable_data_c
+class EAP_CLASS_VISIBILITY_EAP_VARIABLE_DATA_H eap_variable_data_c
 {
 private:
 	//--------------------------------------------------
@@ -74,9 +95,9 @@ private:
 	eap_variable_data_impl_str *  m_data;
 
 
-	EAP_FUNC_IMPORT eap_status_e initialize_members();
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e initialize_members();
 
-	EAP_FUNC_IMPORT eap_status_e allocate_buffer(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e allocate_buffer(
 		const u32_t required_buffer_length);
 
 	//--------------------------------------------------
@@ -91,13 +112,13 @@ public:
 	 * Destructor of the eap_variable_data class will release 
 	 * the buffer if attribute m_free_buffer is true.
 	 */
-	EAP_FUNC_IMPORT virtual ~eap_variable_data_c();
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H virtual ~eap_variable_data_c();
 
 	/**
 	 * Constructor takes only one parameter called tools.
 	 * @param tools is pointer to the tools class. @see abs_eap_am_tools_c.
 	 */
-	EAP_FUNC_IMPORT eap_variable_data_c(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_variable_data_c(
 		abs_eap_am_tools_c * const tools);
 
 	/**
@@ -108,7 +129,7 @@ public:
 	 * @param free_buffer indicates whether the buffer must be freed in the destructor.
 	 * @param is_writable indicates whether the buffer is writable.
 	 */
-	EAP_FUNC_IMPORT eap_variable_data_c(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_variable_data_c(
 		abs_eap_am_tools_c * const tools,
 		const void * const buffer,
 		const u32_t buffer_length,
@@ -120,7 +141,7 @@ public:
 	 * The get_is_valid() function returns the status of the eap_variable_data object.
 	 * @return True indicates the object is initialized.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid() const;
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H bool get_is_valid() const;
 
 
 	/**
@@ -129,53 +150,53 @@ public:
 	 * Note the object may include zero length data, and that is valid data.
 	 * @return True indicates the object includes valid data.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid_data() const;
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H bool get_is_valid_data() const;
 
 	/**
 	 * The set_is_valid() function sets the state of the eap_variable_data object valid.
 	 * The eap_variable_data_c object calls this function after it is initialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H void set_is_valid();
 
 	/**
 	 * The set_is_invalid() function sets the state of the eap_variable_data object invalid.
 	 * The eap_variable_data_c object calls this function after it is uninitialized.
 	 */
-	EAP_FUNC_IMPORT void set_is_invalid();
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H void set_is_invalid();
 
 	/**
 	 * This function returns flag that indicates whether this
 	 * buffer is writeble (true) or read only (false).
 	 */
-	EAP_FUNC_IMPORT bool get_is_writable() const;
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H bool get_is_writable() const;
 
 	/**
 	 * The get_data_offset() function returns the pointer to the buffer.
 	 * @param offset is offset from the begin of the buffer.
 	 * @param buffer_length is required count of bytes.
 	 */
-	EAP_FUNC_IMPORT u8_t * get_buffer_offset(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H u8_t * get_buffer_offset(
 		const u32_t offset,
 		const u32_t buffer_length) const;
 
 	/**
 	 * The get_buffer() function returns the pointer to the buffer.
 	 */
-	EAP_FUNC_IMPORT u8_t * get_buffer(const u32_t buffer_length) const;
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H u8_t * get_buffer(const u32_t buffer_length) const;
 
 	/**
 	 * The get_data_offset() function returns the pointer to the data.
 	 * @param offset is offset from the begin of the data.
 	 * @param data_length is required count of bytes.
 	 */
-	EAP_FUNC_IMPORT u8_t * get_data_offset(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H u8_t * get_data_offset(
 		const u32_t offset,
 		const u32_t data_length) const;
 
 	/**
 	 * The get_data() function returns the pointer to the begin of the data.
 	 */
-	EAP_FUNC_IMPORT u8_t * get_data(const u32_t data_length) const;
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H u8_t * get_data(const u32_t data_length) const;
 
 
 	/**
@@ -208,7 +229,7 @@ public:
 
 #else
 
-	EAP_FUNC_IMPORT u8_t * get_data() const;
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H u8_t * get_data() const;
 
 #endif //#if defined(USE_EAP_INLINE_FUNCTIONS)
 
@@ -240,7 +261,7 @@ public:
 
 #else
 
-	EAP_FUNC_IMPORT u32_t get_data_length() const;
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H u32_t get_data_length() const;
 
 #endif //#if defined(USE_EAP_INLINE_FUNCTIONS)
 
@@ -273,7 +294,7 @@ public:
 
 #else
 
-	EAP_FUNC_IMPORT u32_t get_buffer_length() const;
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H u32_t get_buffer_length() const;
 
 #endif //#if defined(USE_EAP_INLINE_FUNCTIONS)
 
@@ -282,20 +303,20 @@ public:
 	 * The reset_start_offset_and_data_length() function sets the begin offset of the data to zero
 	 * and the length of data to zero.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reset_start_offset_and_data_length();
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e reset_start_offset_and_data_length();
 
 	/**
 	 * The set_start_offset() function sets the begin offset of the data to index.
 	 * With this function data in the begin of the buffer can be removed
 	 * without any copy operations.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_start_offset(const u32_t index);
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e set_start_offset(const u32_t index);
 
 	/**
 	 * The set_data_length() function changes the length of the data.
 	 * @param length is count of bytes in the buffer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_data_length(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e set_data_length(
 		const u32_t length);
 
 	/**
@@ -306,7 +327,7 @@ public:
 	 * @param free_buffer indicates whether the buffer must be freed in the destructor.
 	 * @param is_writable indicates whether the buffer is writable.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_buffer(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e set_buffer(
 		const void * const buffer,
 		const u32_t buffer_length,
 		bool free_buffer,
@@ -320,7 +341,7 @@ public:
 	 * @param free_buffer indicates whether the buffer must be freed in the destructor.
 	 * @param is_writable indicates whether the buffer is writable.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_buffer(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e set_buffer(
 		void * const buffer,
 		const u32_t buffer_length,
 		bool free_buffer,
@@ -332,7 +353,7 @@ public:
 	 * Data can be modified through both eap_variable_data objects.
 	 * @param buffer is pointer to the buffer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_buffer(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e set_buffer(
 		const eap_variable_data_c * const buffer);
 
 	/**
@@ -340,7 +361,7 @@ public:
 	 * @param buffer points the data to be copied.
 	 * @param buffer_length is length of the buffer in bytes.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_copy_of_buffer(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e set_copy_of_buffer(
 		const void * const buffer,
 		const u32_t buffer_length);
 
@@ -349,7 +370,7 @@ public:
 	 * The first version copies data pointed by parameter buffer.
 	 * @param buffer points the data to be copied.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_copy_of_buffer(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e set_copy_of_buffer(
 		const eap_variable_data_c * const buffer);
 
 	/**
@@ -360,7 +381,7 @@ public:
 	 * @param buffer points the data to be added.
 	 * @param buffer_length is length of the buffer in bytes.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_buffer_length(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e set_buffer_length(
 		const u32_t buffer_length);
 
 	/**
@@ -369,7 +390,7 @@ public:
 	 * @param buffer points the data to be added.
 	 * @param buffer_length is length of the buffer in bytes.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_data(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e add_data(
 		const void * const buffer,
 		const u32_t buffer_length);
 
@@ -378,7 +399,7 @@ public:
 	 * If the buffer is empty the data is added to begin of the buffer.
 	 * @param buffer points the data to be added.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_data(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e add_data(
 		const eap_variable_data_c * const buffer);
 
 	/**
@@ -387,7 +408,7 @@ public:
 	 * @param buffer points the data to be added.
 	 * @param buffer_length is length of the buffer in bytes.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_data_to_offset(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e add_data_to_offset(
 		const u32_t offset,
 		const void * const buffer,
 		const u32_t buffer_length);
@@ -397,7 +418,7 @@ public:
 	 * @param offset tells the place where data will begin.
 	 * @param buffer points the data to be added.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_data_to_offset(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e add_data_to_offset(
 		const u32_t offset,
 		const eap_variable_data_c * const buffer);
 
@@ -407,7 +428,7 @@ public:
 	 * This function is usefull when null terminated strings are stored to
 	 * eap_variable_data_c object.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_end_null();
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e add_end_null();
 
 	/**
 	 * The reset() function resets the eap_variable_data object.
@@ -415,20 +436,20 @@ public:
 	 * Object does not include data after this call and get_is_valid_data()
 	 * returns false.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e reset();
 
 	/**
 	 * The init() function initializes the eap_variable_data object.
 	 * @param length is length of buffer in bytes that is allocated.
 	 * Buffer is set empty, data length is set zero.
 	 */
-	EAP_FUNC_IMPORT eap_status_e init(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_status_e init(
 		const u32_t length);
 
 	/**
 	 * The copy() function copies the eap_variable_data object and data.
 	 */
-	EAP_FUNC_IMPORT eap_variable_data_c * copy() const;
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H eap_variable_data_c * copy() const;
 
 
 	/**
@@ -439,7 +460,7 @@ public:
 	 * If the data of the parameter object is shorter than compare_length bytes
 	 * or the first different byte of the caller is larger the function returns positive value.
 	 */
-	EAP_FUNC_IMPORT i32_t compare_length(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H i32_t compare_length(
 		const void * const data,
 		const u32_t data_length,
 		const u32_t compare_length_of_data) const;
@@ -452,7 +473,7 @@ public:
 	 * If the data of the parameter object is shorter than compare_length bytes
 	 * or the first different byte of the caller is larger the function returns positive value.
 	 */
-	EAP_FUNC_IMPORT i32_t compare_length(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H i32_t compare_length(
 		const eap_variable_data_c * const data,
 		const u32_t compare_length_of_data) const;
 
@@ -464,7 +485,7 @@ public:
 	 * If the data of the caller object is longer or the first different byte
 	 * of the caller is larger the function returns positive value.
 	 */
-	EAP_FUNC_IMPORT i32_t compare(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H i32_t compare(
 		const void * const data,
 		const u32_t data_length) const;
 
@@ -476,7 +497,7 @@ public:
 	 * If the data of the caller object is longer or the first different byte
 	 * of the caller is larger the function returns positive value.
 	 */
-	EAP_FUNC_IMPORT i32_t compare(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H i32_t compare(
 		const eap_variable_data_c * const data) const;
 
 
@@ -484,7 +505,7 @@ public:
 	 * The hash() function returns HASH-value calculated from the data.
 	 * @return Maximum returned value is size-1. Minimum returned value is zero.
 	 */
-	EAP_FUNC_IMPORT u32_t hash(
+	EAP_FUNC_VISIBILITY_EAP_VARIABLE_DATA_H u32_t hash(
 		const u32_t size) const;
 
 	//--------------------------------------------------

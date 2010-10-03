@@ -24,6 +24,27 @@
 
 #include "eap_variable_data.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_STATE_NOTIFICATION_H)
+	#define EAP_CLASS_VISIBILITY_EAP_STATE_NOTIFICATION_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H 
+	#define EAP_FUNC_EXPORT_EAP_STATE_NOTIFICATION_H 
+	#define EAP_C_FUNC_EXPORT_EAP_STATE_NOTIFICATION_H 
+#elif defined(EAP_EXPORT_EAP_STATE_NOTIFICATION_H)
+	#define EAP_CLASS_VISIBILITY_EAP_STATE_NOTIFICATION_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_STATE_NOTIFICATION_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_STATE_NOTIFICATION_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_STATE_NOTIFICATION_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_STATE_NOTIFICATION_H 
+	#define EAP_C_FUNC_EXPORT_EAP_STATE_NOTIFICATION_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_protocol_layer.h"
 #include "abs_eap_state_notification.h"
 
@@ -32,7 +53,7 @@
 /// This is used for state change indications of EAP-protocol.
 /// EAP-Success and EAP-Failure are sent based on eap_state_variable_e::eap_state_authentication_finished_successfully
 /// and eap_state_variable_e::eap_state_authentication_terminated_unsuccessfully notifications.
-class EAP_EXPORT eap_state_notification_c
+class EAP_CLASS_VISIBILITY_EAP_STATE_NOTIFICATION_H eap_state_notification_c
 : public abs_eap_state_notification_c
 {
 private:
@@ -75,12 +96,12 @@ public:
 	/**
 	 * The destructor of the eap_state_notification_c class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~eap_state_notification_c();
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H virtual ~eap_state_notification_c();
 
 	/**
 	 * The constructor of the eap_state_notification_c class does nothing special.
 	 */
-	EAP_FUNC_IMPORT eap_state_notification_c(
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H eap_state_notification_c(
 		abs_eap_am_tools_c * const tools,
 		const eap_am_network_id_c * const send_network_id,
 		bool is_client,
@@ -92,7 +113,7 @@ public:
 		u8_t eap_identifier,
 		bool allow_send_eap_success);
 
-	EAP_FUNC_IMPORT eap_state_notification_c(
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H eap_state_notification_c(
 		abs_eap_am_tools_c * const tools,
 		const eap_am_network_id_c * const send_network_id,
 		bool is_client,
@@ -104,7 +125,7 @@ public:
 		u8_t eap_identifier,
 		bool allow_send_eap_success);
 
-	EAP_FUNC_IMPORT eap_state_notification_c(
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H eap_state_notification_c(
 		abs_eap_am_tools_c * const tools,
 		const eap_am_network_id_c * const send_network_id,
 		bool is_client,
@@ -117,68 +138,68 @@ public:
 		bool allow_send_eap_success);
 
 	// This is commented in abs_eap_state_notification_c::get_send_network_id().
-	EAP_FUNC_IMPORT const eap_am_network_id_c * get_send_network_id() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H const eap_am_network_id_c * get_send_network_id() const;
 
 	// This is commented in abs_eap_state_notification_c::get_protocol_layer().
-	EAP_FUNC_IMPORT eap_protocol_layer_e get_protocol_layer() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H eap_protocol_layer_e get_protocol_layer() const;
 
 	// This is commented in abs_eap_state_notification_c::get_protocol().
-	EAP_FUNC_IMPORT u32_t get_protocol() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H u32_t get_protocol() const;
 
 	// This is commented in abs_eap_state_notification_c::get_eap_type().
-	EAP_FUNC_IMPORT eap_type_value_e get_eap_type() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H eap_type_value_e get_eap_type() const;
 
 	// This is commented in abs_eap_state_notification_c::get_previous_state().
-	EAP_FUNC_IMPORT u32_t get_previous_state() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H u32_t get_previous_state() const;
 
 	// This is commented in abs_eap_state_notification_c::get_previous_state_string().
-	EAP_FUNC_IMPORT eap_const_string get_previous_state_string() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H eap_const_string get_previous_state_string() const;
 
 	// This is commented in abs_eap_state_notification_c::get_current_state().
-	EAP_FUNC_IMPORT u32_t get_current_state() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H u32_t get_current_state() const;
 
 	// This is commented in abs_eap_state_notification_c::get_current_state_string().
-	EAP_FUNC_IMPORT eap_const_string get_current_state_string() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H eap_const_string get_current_state_string() const;
 
 	// This is commented in abs_eap_state_notification_c::get_is_client().
-	EAP_FUNC_IMPORT bool get_is_client() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H bool get_is_client() const;
 
 	// This is commented in abs_eap_state_notification_c::get_eap_identifier().
-	EAP_FUNC_IMPORT u8_t get_eap_identifier() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H u8_t get_eap_identifier() const;
 
 	// This is commented in abs_eap_state_notification_c::get_allow_send_eap_success().
-	EAP_FUNC_IMPORT bool get_allow_send_eap_success() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H bool get_allow_send_eap_success() const;
 
 	// This is commented in abs_eap_state_notification_c::set_notification_string().
-	EAP_FUNC_IMPORT eap_status_e set_notification_string(
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H eap_status_e set_notification_string(
 		const eap_variable_data_c * const notification_string,
 		const bool needs_confirmation_from_user);
 
 	// This is commented in abs_eap_state_notification_c::get_notification_string().
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_notification_string() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H const eap_variable_data_c * get_notification_string() const;
 
 	// This is commented in abs_eap_state_notification_c::get_needs_confirmation_from_user().
-	EAP_FUNC_IMPORT bool get_needs_confirmation_from_user() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H bool get_needs_confirmation_from_user() const;
 
 
 	// This is commented in abs_eap_state_notification_c::set_authentication_error().
-	EAP_FUNC_IMPORT void set_authentication_error(const eap_status_e error);
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H void set_authentication_error(const eap_status_e error);
 
 	// This is commented in abs_eap_state_notification_c::get_authentication_error().
-	EAP_FUNC_IMPORT eap_status_e get_authentication_error() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H eap_status_e get_authentication_error() const;
 
 
-	EAP_FUNC_IMPORT static eap_const_string get_state_string(const u32_t protocol_layer, const u32_t state);
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H static eap_const_string get_state_string(const u32_t protocol_layer, const u32_t state);
 	
 
-	EAP_FUNC_IMPORT static eap_const_string get_protocol_layer_string(const u32_t protocol_layer);
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H static eap_const_string get_protocol_layer_string(const u32_t protocol_layer);
 
-	EAP_FUNC_IMPORT eap_const_string get_protocol_layer_string() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H eap_const_string get_protocol_layer_string() const;
 
 
-	EAP_FUNC_IMPORT static eap_const_string get_protocol_string(const u32_t protocol_layer, const u32_t state);
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H static eap_const_string get_protocol_string(const u32_t protocol_layer, const u32_t state);
 
-	EAP_FUNC_IMPORT eap_const_string get_protocol_string() const;
+	EAP_FUNC_VISIBILITY_EAP_STATE_NOTIFICATION_H eap_const_string get_protocol_string() const;
 
 	//--------------------------------------------------
 }; // class eap_state_notification_c

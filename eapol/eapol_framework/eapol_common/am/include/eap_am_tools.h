@@ -27,6 +27,27 @@
 #include "eap_tools.h"
 #include "eap_status.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_TOOLS_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TOOLS_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TOOLS_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_TOOLS_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TOOLS_H 
+#elif defined(EAP_EXPORT_EAP_AM_TOOLS_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TOOLS_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TOOLS_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TOOLS_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TOOLS_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TOOLS_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TOOLS_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TOOLS_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TOOLS_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_status_string.h"
 #include "abs_eap_am_memory_store_data.h"
 
@@ -39,7 +60,7 @@ class eap_am_memory_store_c;
 
 /// This class defines the common functions of tools.
 /// These are the platform independent functions used in tools.
-class EAP_EXPORT eap_am_tools_c
+class EAP_CLASS_VISIBILITY_EAP_AM_TOOLS_H eap_am_tools_c
 : public abs_eap_am_tools_c
 //#if !defined(NO_EAP_AM_MEMORY_STORE)
 , public abs_eap_am_memory_store_data_c
@@ -77,13 +98,13 @@ private:
 	u8_t m_tmp_ascii_buffer[256];
 
 
-	EAP_FUNC_IMPORT u8_t octet_to_ascii_armor(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H u8_t octet_to_ascii_armor(
 		const u8_t source_byte);
 
-	EAP_FUNC_IMPORT u8_t octet_from_ascii_armor(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H u8_t octet_from_ascii_armor(
 		const u8_t source_byte);
 
-	EAP_FUNC_IMPORT void convert_selected_bytes_to_ascii_armor(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H void convert_selected_bytes_to_ascii_armor(
 		const u8_t source_byte,
 		u32_t * const saved_bit_count,
 		u8_t * const saved_bits,
@@ -91,7 +112,7 @@ private:
 		u32_t * const output_ind,
 		const bool last_input_byte);
 
-	EAP_FUNC_IMPORT void restore_selected_bytes_from_ascii_armor(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H void restore_selected_bytes_from_ascii_armor(
 		const u8_t source_byte,
 		u32_t * const missing_bit_count,
 		u8_t * const target,
@@ -123,80 +144,80 @@ public:
 		eap_trace_mask_trace_never        = (1u << 16u), ///< This value never traces. This can disable trace always.
 	};
 
-	EAP_FUNC_IMPORT u8_t octet_to_ascii(i32_t octet);
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H u8_t octet_to_ascii(i32_t octet);
 
-	EAP_FUNC_IMPORT u8_t ascii_to_octet(i32_t character);
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H u8_t ascii_to_octet(i32_t character);
 
-	EAP_FUNC_IMPORT virtual ~eap_am_tools_c();
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H virtual ~eap_am_tools_c();
 
-	EAP_FUNC_IMPORT eap_am_tools_c();
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_am_tools_c();
 
-	EAP_FUNC_IMPORT bool get_use_seconds_timestamp_in_traces();
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H bool get_use_seconds_timestamp_in_traces();
 
-	EAP_FUNC_IMPORT bool get_thread_stopped();
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H bool get_thread_stopped();
 
-	EAP_FUNC_IMPORT void set_use_timer_queue();
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H void set_use_timer_queue();
 
-	EAP_FUNC_IMPORT bool get_use_timer_queue();
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H bool get_use_timer_queue();
 
-	EAP_FUNC_IMPORT u32_t get_trace_mask() const;
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H u32_t get_trace_mask() const;
 
-	EAP_FUNC_IMPORT void set_trace_mask(const u32_t mask);
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H void set_trace_mask(const u32_t mask);
 
-	EAP_FUNC_IMPORT void set_activate_trace_on_error();
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H void set_activate_trace_on_error();
 
-	EAP_FUNC_IMPORT void check_activate_trace_on_error();
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H void check_activate_trace_on_error();
 
-	EAP_FUNC_IMPORT void trace_data(eap_const_string prefix, const void * const data, const u32_t data_length);
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H void trace_data(eap_const_string prefix, const void * const data, const u32_t data_length);
 
-	EAP_FUNC_IMPORT eap_status_e timer_thread_function();
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e timer_thread_function();
 
-	EAP_FUNC_IMPORT eap_status_e convert_ascii_to_uppercase(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e convert_ascii_to_uppercase(
 		u8_t * const source_bytes,
 		const u32_t source_bytes_length);
 
-	EAP_FUNC_IMPORT eap_status_e convert_bytes_to_hex_ascii(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e convert_bytes_to_hex_ascii(
 		const u8_t * const source_bytes,
 		const u32_t source_bytes_length,
 		u8_t * const target,
 		u32_t *target_length);
 
-	EAP_FUNC_IMPORT eap_status_e convert_bytes_to_hex_ascii(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e convert_bytes_to_hex_ascii(
 		const void * const source_bytes,
 		const u32_t source_bytes_length,
 		eap_variable_data_c * const target);
 
-	EAP_FUNC_IMPORT eap_status_e convert_hex_ascii_to_bytes(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e convert_hex_ascii_to_bytes(
 		const u8_t * const source_bytes,
 		const u32_t source_bytes_length,
 		u8_t * const target,
 		u32_t *target_length);
 
-	EAP_FUNC_IMPORT eap_status_e convert_hex_ascii_to_bytes(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e convert_hex_ascii_to_bytes(
 		const void * const source_bytes,
 		const u32_t source_bytes_length,
 		eap_variable_data_c * const target);
 
 	
-	EAP_FUNC_IMPORT eap_status_e convert_bytes_to_ascii_armor(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e convert_bytes_to_ascii_armor(
 		const u8_t * const source_bytes,
 		const u32_t source_bytes_length,
 		u8_t * const target,
 		u32_t *target_length);
 
-	EAP_FUNC_IMPORT eap_status_e restore_bytes_from_ascii_armor(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e restore_bytes_from_ascii_armor(
 		const u8_t * const source_bytes,
 		const u32_t source_bytes_length,
 		u8_t * const target,
 		u32_t *target_length);
 
-	EAP_FUNC_IMPORT eap_status_e eap_status_return(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e eap_status_return(
 		const bool print_error_when_true,
 		const eap_status_e status,
 		const eap_char * const file_name,
 		const i32_t line_number);
 
-	EAP_FUNC_IMPORT eap_status_e eap_status_return_file_number(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e eap_status_return_file_number(
 		const bool print_error_when_true,
 		const eap_status_e status,
 		const u32_t file_date,
@@ -205,26 +226,26 @@ public:
 
 
 	// This is documented in abs_eap_am_tools_c::memory_store_add_data().
-	EAP_FUNC_IMPORT eap_status_e memory_store_add_data(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e memory_store_add_data(
 		const eap_variable_data_c * const key,
 		eap_tlv_message_data_c * const data,
 		const u32_t timeout);
 
 	// This is documented in abs_eap_am_tools_c::memory_store_get_data().
-	EAP_FUNC_IMPORT eap_status_e memory_store_get_data(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e memory_store_get_data(
 		const eap_variable_data_c * const key,
 		eap_tlv_message_data_c * const data);
 
 	// This is documented in abs_eap_am_tools_c::memory_store_remove_data().
-	EAP_FUNC_IMPORT eap_status_e memory_store_remove_data(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e memory_store_remove_data(
 		const eap_variable_data_c * const key);
 
 
 	/// This function shuts down eap_am_tools_c object.
-	EAP_FUNC_IMPORT eap_status_e shutdown_am_tools();
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e shutdown_am_tools();
 
 	/// The implementing function must call eap_am_tools_c::shutdown_am_tools().
-	EAP_FUNC_IMPORT virtual eap_status_e shutdown() = 0;
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H virtual eap_status_e shutdown() = 0;
 
 	/**
 	 * Function converts unicode characters into UTF8 characters.
@@ -232,7 +253,7 @@ public:
 	 * @param src is refrence to unicode variable data.
 	 * @return eap status code.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generic_convert_unicode_to_utf8(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e generic_convert_unicode_to_utf8(
 		eap_variable_data_c & dest,
 		const eap_variable_data_c & src);
 
@@ -242,7 +263,7 @@ public:
 	 * @param src is refrence to UTF8 variable data.
 	 * @return eap status code.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generic_convert_utf8_to_unicode(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e generic_convert_utf8_to_unicode(
 		eap_variable_data_c & dest,
 		const eap_variable_data_c & src);
 
@@ -250,14 +271,14 @@ public:
 	 * Function parses NAI to usename and realm.
 	 * If either is missing the corresponding value will be invalid.
 	 */
-	EAP_FUNC_IMPORT eap_status_e parse_nai(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e parse_nai(
 		const eap_variable_data_c * const nai,
 		eap_variable_data_c * const username,
 		eap_variable_data_c * const realm);
 
 
 #if defined(USE_EAP_ERROR_TESTS)
-	EAP_FUNC_IMPORT eap_status_e generate_random_error(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e generate_random_error(
 		eap_buf_chain_wr_c * const sent_packet,
 		const bool forse_error,
 		const u32_t packet_index,
@@ -265,36 +286,36 @@ public:
 		const u32_t error_probability,
 		const u32_t minimum_packet_length);
 
-	EAP_FUNC_IMPORT u32_t get_packet_index();
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H u32_t get_packet_index();
 
-	EAP_FUNC_IMPORT void increase_packet_index();
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H void increase_packet_index();
 #endif //#if defined(USE_EAP_ERROR_TESTS)
 
 
-	EAP_FUNC_IMPORT eap_status_e number_string_to_u32(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e number_string_to_u32(
 		const u8_t * const number_string,
 		const u32_t number_string_length,
 		u32_t * const integer);
 
-	EAP_FUNC_IMPORT void trace_configuration(
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H void trace_configuration(
 		const eap_status_e configuration_read_status,
 		const eap_configuration_field_c * const field,
 		const eap_variable_data_c * const data);
 
-	EAP_FUNC_IMPORT u64_t xor_u64(const u64_t a, const u64_t b);
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H u64_t xor_u64(const u64_t a, const u64_t b);
 
-	EAP_FUNC_IMPORT u64_t multiply_u64(const u64_t a, const u64_t b);
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H u64_t multiply_u64(const u64_t a, const u64_t b);
 
-	EAP_FUNC_IMPORT i32_t compare_u64(const u64_t a, const u64_t b);
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H i32_t compare_u64(const u64_t a, const u64_t b);
 
-	EAP_FUNC_IMPORT eap_status_e create_uuid_v5( 
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e create_uuid_v5( 
 		const void* const ns_uuid,
 		const u32_t ns_uuid_length,
 		const void* const name, 
 		const u32_t name_length,
 		eap_variable_data_c* const uuid );
 
-	EAP_FUNC_IMPORT eap_status_e create_uuid_v5_from_mac_address( 
+	EAP_FUNC_VISIBILITY_EAP_AM_TOOLS_H eap_status_e create_uuid_v5_from_mac_address( 
 		const u8_t* const mac_address, 
 		const u32_t mac_address_length,
 		eap_variable_data_c* const uuid );

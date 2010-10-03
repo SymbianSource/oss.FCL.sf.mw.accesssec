@@ -23,6 +23,27 @@
 #define _EAP_BASE_TYPE_H_
 
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_BASE_TYPE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_BASE_TYPE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_BASE_TYPE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_BASE_TYPE_H 
+	#define EAP_FUNC_EXPORT_EAP_BASE_TYPE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_BASE_TYPE_H 
+#elif defined(EAP_EXPORT_EAP_BASE_TYPE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_BASE_TYPE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_BASE_TYPE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_BASE_TYPE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_BASE_TYPE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_BASE_TYPE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_BASE_TYPE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_BASE_TYPE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_BASE_TYPE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_BASE_TYPE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_BASE_TYPE_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "abs_eap_base_type.h"
 #include "eap_header.h"
 
@@ -34,7 +55,7 @@ class eap_am_network_id_c;
 /// a user class of EAP-type class could call.
 /// See also abs_eap_stack_interface_c. It includes
 /// important functions too.
-class EAP_EXPORT eap_base_type_c
+class EAP_CLASS_VISIBILITY_EAP_BASE_TYPE_H eap_base_type_c
 //: public abs_eap_stack_interface_c This is not used here because packet_process() function differs.
 {
 
@@ -70,7 +91,7 @@ public:
 	/**
 	 * The destructor of the eap_base_type class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~eap_base_type_c();
+	EAP_FUNC_VISIBILITY_EAP_BASE_TYPE_H virtual ~eap_base_type_c();
 
 	/**
 	 * The constructor of the eap_base_type class simply initializes the attributes.
@@ -78,27 +99,27 @@ public:
 	 * @param partner is back pointer to object which created this object.
 	 * The eap_base_type_c object sends packets to the network using m_type_partner object.
 	 */
-	EAP_FUNC_IMPORT eap_base_type_c(
+	EAP_FUNC_VISIBILITY_EAP_BASE_TYPE_H eap_base_type_c(
 		abs_eap_am_tools_c * const tools,
 		abs_eap_base_type_c * const partner);
 
 	/**
 	 * The object_increase_reference_count() function increases the reference count.
 	 */
-	EAP_FUNC_IMPORT void object_increase_reference_count();
+	EAP_FUNC_VISIBILITY_EAP_BASE_TYPE_H void object_increase_reference_count();
 
 	/**
 	 * The object_decrease_reference_count () function decreases 
 	 * the reference count and returns the remaining value.
 	 * The EAP type is removed after there is no references to it.
 	 */
-	EAP_FUNC_IMPORT u32_t object_decrease_reference_count();
+	EAP_FUNC_VISIBILITY_EAP_BASE_TYPE_H u32_t object_decrease_reference_count();
 
 	/**
 	 * Type partner is object below the EAP-type object.
 	 * @return The get_type_partner() function returns the pointer to the partner class.
 	 */
-	EAP_FUNC_IMPORT abs_eap_base_type_c * get_type_partner();
+	EAP_FUNC_VISIBILITY_EAP_BASE_TYPE_H abs_eap_base_type_c * get_type_partner();
 
 	/**
 	 * This function queries the identity of user using this type.

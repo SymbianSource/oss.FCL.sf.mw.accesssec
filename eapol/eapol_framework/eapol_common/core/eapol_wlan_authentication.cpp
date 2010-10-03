@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 115 %
+* %version: 120 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -236,7 +236,8 @@ EAP_FUNC_EXPORT eapol_wlan_authentication_c::eapol_wlan_authentication_c(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eapol_wlan_authentication_c::~eapol_wlan_authentication_c()
+// Something in RVCT 2 forces this function cannot be exported.
+eapol_wlan_authentication_c::~eapol_wlan_authentication_c()
 {
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
@@ -420,6 +421,20 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::start_authentication(
 
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns to partner: eapol_wlan_authentication_c::start_authentication()");
 
+    EAP_TRACE_DATA_DEBUG(
+        m_am_tools,
+        TRACE_FLAGS_DEFAULT,
+        (EAPL("new SSID"),
+        SSID->get_data(),
+        SSID->get_data_length()));
+
+    EAP_TRACE_DATA_DEBUG(
+        m_am_tools,
+        TRACE_FLAGS_DEFAULT,
+        (EAPL("new preshared_key"),
+        preshared_key->get_data(),
+        preshared_key->get_data_length()));
+
 	eap_status_e status(eap_status_ok);
 
 	status = cancel_all_authentication_sessions();
@@ -482,6 +497,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_wlan_authentication_c::start_authentication(
 		(EAPL("calls: eapol_wlan_authentication_c::start_authentication(): m_am_wauth->get_wlan_configuration(): %s.\n"),
 		(m_is_client == true) ? "client": "server"));
 
+	// Normally here is HASH of WPA pre-shared key, but when connection is Wi-fi Protected setup here is PIN or push button (00000000) key.
 	status = m_am_wauth->get_wlan_configuration(
 		&m_wpa_preshared_key_hash);
 	if (status != eap_status_ok)

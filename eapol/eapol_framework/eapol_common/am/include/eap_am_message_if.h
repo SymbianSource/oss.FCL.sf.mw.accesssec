@@ -24,6 +24,27 @@
 
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_MESSAGE_IF_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_MESSAGE_IF_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_MESSAGE_IF_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_MESSAGE_IF_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_MESSAGE_IF_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_MESSAGE_IF_H 
+#elif defined(EAP_EXPORT_EAP_AM_MESSAGE_IF_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_MESSAGE_IF_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_MESSAGE_IF_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_MESSAGE_IF_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_MESSAGE_IF_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_MESSAGE_IF_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_MESSAGE_IF_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_MESSAGE_IF_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_MESSAGE_IF_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_MESSAGE_IF_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_MESSAGE_IF_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 class abs_eap_general_settings_message_c;
 
@@ -31,7 +52,7 @@ class abs_eap_general_settings_message_c;
 
 /// This class is the common part of EAP message interface.
 /// This class is interface to the message creation and parsing function.
-class EAP_EXPORT eap_am_message_if_c
+class EAP_CLASS_VISIBILITY_EAP_AM_MESSAGE_IF_H eap_am_message_if_c
 {
 
 private:
@@ -80,7 +101,7 @@ public:
 	// ----------------------------------------------------------------------
 };
 
-EAP_FUNC_IMPORT eap_am_message_if_c * new_eap_am_client_message_if_c(
+EAP_FUNC_VISIBILITY_EAP_AM_MESSAGE_IF_H eap_am_message_if_c * new_eap_am_client_message_if_c(
 	abs_eap_am_tools_c * const tools,
 	const bool is_client_when_true,
 	const u32_t MTU);

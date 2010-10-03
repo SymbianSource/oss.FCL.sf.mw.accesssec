@@ -27,28 +27,49 @@
 #include "eap_variable_data.h"
 #include "eap_status.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_HEADER_STRING_H)
+	#define EAP_CLASS_VISIBILITY_EAP_HEADER_STRING_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_HEADER_STRING_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_HEADER_STRING_H 
+	#define EAP_FUNC_EXPORT_EAP_HEADER_STRING_H 
+	#define EAP_C_FUNC_EXPORT_EAP_HEADER_STRING_H 
+#elif defined(EAP_EXPORT_EAP_HEADER_STRING_H)
+	#define EAP_CLASS_VISIBILITY_EAP_HEADER_STRING_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_HEADER_STRING_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_HEADER_STRING_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_HEADER_STRING_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_HEADER_STRING_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_HEADER_STRING_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_HEADER_STRING_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_HEADER_STRING_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_HEADER_STRING_H 
+	#define EAP_C_FUNC_EXPORT_EAP_HEADER_STRING_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_header.h"
 
 /// This class includes the debug strings of the eap_header_base_c.
-class EAP_EXPORT eap_header_string_c
+class EAP_CLASS_VISIBILITY_EAP_HEADER_STRING_H eap_header_string_c
 {
 public:
 
-	EAP_FUNC_IMPORT virtual ~eap_header_string_c();
+	EAP_FUNC_VISIBILITY_EAP_HEADER_STRING_H virtual ~eap_header_string_c();
 
-	EAP_FUNC_IMPORT eap_header_string_c();
+	EAP_FUNC_VISIBILITY_EAP_HEADER_STRING_H eap_header_string_c();
 
 	/**
 	 * Function returns string of eap_code_value_e.
 	 * @param code is the queried string.
 	 */
-	EAP_FUNC_IMPORT static eap_const_string get_eap_code_string(const eap_code_value_e code);
+	EAP_FUNC_VISIBILITY_EAP_HEADER_STRING_H static eap_const_string get_eap_code_string(const eap_code_value_e code);
 
 	/**
 	 * Function returns string of eap_type_value_e.
 	 * @param type is the queried string.
 	 */
-	EAP_FUNC_IMPORT static eap_const_string get_eap_type_string(const eap_type_value_e type);
+	EAP_FUNC_VISIBILITY_EAP_HEADER_STRING_H static eap_const_string get_eap_type_string(const eap_type_value_e type);
 
 };
 

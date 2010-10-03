@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 36 %
+* %version: 39 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -85,15 +85,7 @@ EAP_FUNC_EXPORT eap_am_tools_symbian_c::eap_am_tools_symbian_c(eap_const_string 
 {
 	EAP_TRACE_BEGIN(this, TRACE_FLAGS_DEFAULT);
 
-#if defined(USE_EAP_HARDWARE_TRACE)
-	set_trace_mask(
-		TRACE_FLAGS_ALWAYS
-		| TRACE_FLAGS_ERROR
-		| eap_am_tools_c::eap_trace_mask_debug
-		| EAP_TRACE_FLAGS_MESSAGE_DATA
-		| TRACE_FLAGS_TIMER
-		| TRACE_FLAGS_TIMER_QUEUE);
-#endif //#if defined(USE_EAP_HARDWARE_TRACE)
+	set_default_trace_mask();
 
 	const u8_t DEFAULT_PREFIX[] = "EAPOL";
 
@@ -166,6 +158,24 @@ EAP_FUNC_EXPORT eap_am_tools_symbian_c::eap_am_tools_symbian_c(eap_const_string 
 //--------------------------------------------------
 
 //
+void eap_am_tools_symbian_c::set_default_trace_mask()
+{
+
+#if defined(USE_EAP_HARDWARE_TRACE)
+	set_trace_mask(
+		TRACE_FLAGS_ALWAYS
+		| TRACE_FLAGS_ERROR
+		| eap_am_tools_c::eap_trace_mask_debug
+		/* | EAP_TRACE_FLAGS_MESSAGE_DATA */
+		| TRACE_FLAGS_TIMER
+		| TRACE_FLAGS_TIMER_QUEUE);
+#endif //#if defined(USE_EAP_HARDWARE_TRACE)
+
+}
+
+//--------------------------------------------------
+
+//
 EAP_FUNC_EXPORT void eap_am_tools_symbian_c::set_use_eap_milli_second_timer(
 	const bool use_eap_millisecond_timer)
 {
@@ -199,15 +209,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_symbian_c::configure()
 		return EAP_STATUS_RETURN(this, eap_status_ok);
 	}
 
-#if defined(USE_EAP_HARDWARE_TRACE)
-	set_trace_mask(
-		TRACE_FLAGS_ALWAYS
-		| TRACE_FLAGS_ERROR
-		| eap_am_tools_c::eap_trace_mask_debug
-		| EAP_TRACE_FLAGS_MESSAGE_DATA
-		| TRACE_FLAGS_TIMER
-		| TRACE_FLAGS_TIMER_QUEUE);
-#endif //#if defined(USE_EAP_HARDWARE_TRACE)
+	set_default_trace_mask();
 
 	m_start_ticks = get_clock_ticks();
 	iLastTime = m_start_ticks;
@@ -1037,6 +1039,7 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_symbian_c::convert_am_error_to_eapol_e
 		aErr));
 
 	eap_status_e status;
+
 	switch (aErr)
 	{
 	case KErrNone:
@@ -1106,47 +1109,55 @@ EAP_FUNC_EXPORT eap_status_e eap_am_tools_symbian_c::convert_am_error_to_eapol_e
 		status = eap_status_process_general_error;
 		break;		
 	}
-	return status;
+
+	EAP_TRACE_DEBUG(
+		this,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_status_e eap_am_tools_symbian_c::convert_am_error_to_eapol_error(): status=%d\n"),
+		aErr));
+
+	return EAP_STATUS_RETURN(this, status);
 }
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT i32_t eap_am_tools_symbian_c::convert_eapol_error_to_am_error(eap_status_e aErr)
+EAP_FUNC_EXPORT i32_t eap_am_tools_symbian_c::convert_eapol_error_to_am_error(eap_status_e status)
 {
 	EAP_TRACE_DEBUG(
 		this,
 		TRACE_FLAGS_DEFAULT,
-		(EAPL("eap_am_tools_symbian_c::convert_eapol_error_to_am_error(): error=%d\n"),
-		aErr));
+		(EAPL("eap_am_tools_symbian_c::convert_eapol_error_to_am_error(): status=%d\n"),
+		status));
 
-	TInt status;
-	switch (aErr)
+	TInt error;
+
+	switch (status)
 	{
 	case eap_status_ok: 
 	case eap_status_success:
-		status = KErrNone;
+		error = KErrNone;
 		break;
 	
 	case eap_status_allocation_error: 
-		status = KErrNoMemory;
+		error = KErrNoMemory;
 		break;
 
 	case eap_status_not_supported: 
-		status = KErrNotSupported;
+		error = KErrNotSupported;
 		break;
 
 
 	case eap_status_illegal_handle:
-		status = KErrBadHandle;
+		error = KErrBadHandle;
 		break;
 
 	case eap_status_pending_request:
-		status = KErrCompletion;
+		error = KErrCompletion;
 		break;
 
 	case eap_status_not_found:
 	case eap_status_illegal_configure_field:
-		status = KErrNotFound;
+		error = KErrNotFound;
 		break;
 
 	case eap_status_completed_request:
@@ -1201,11 +1212,18 @@ EAP_FUNC_EXPORT i32_t eap_am_tools_symbian_c::convert_eapol_error_to_am_error(ea
 	case eap_status_exit_test:
 	case eap_status_no_matching_protocol_version:
 	default:
-		status = KErrGeneral;
+		error = KErrGeneral;
 		break;	
 	}
 	
-	return status;
+	EAP_TRACE_DEBUG(
+		this,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("eap_am_tools_symbian_c::convert_eapol_error_to_am_error(): error=%d (KErrGeneral=%d)\n"),
+		error,
+		KErrGeneral));
+
+	return error;
 }
 
 //--------------------------------------------------
@@ -1581,7 +1599,7 @@ void eap_am_tools_symbian_c::DoCancel()
 //--------------------------------------------------
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT_INTERFACE abs_eap_am_tools_c * abs_eap_am_tools_c::new_abs_eap_am_tools_c()
+EAP_FUNC_EXPORT abs_eap_am_tools_c * abs_eap_am_tools_c::new_abs_eap_am_tools_c()
 {
     EAP_TRACE_DEBUG_SYMBIAN((_L("abs_eap_am_tools_c::new_abs_eap_am_tools_c()")));
 
@@ -1613,7 +1631,7 @@ EAP_FUNC_EXPORT_INTERFACE abs_eap_am_tools_c * abs_eap_am_tools_c::new_abs_eap_a
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT_INTERFACE void abs_eap_am_tools_c::delete_abs_eap_am_tools_c(abs_eap_am_tools_c * const am_tools)
+EAP_FUNC_EXPORT void abs_eap_am_tools_c::delete_abs_eap_am_tools_c(abs_eap_am_tools_c * const am_tools)
 {
     EAP_TRACE_DEBUG_SYMBIAN((_L("abs_eap_am_tools_c::delete_abs_eap_am_tools_c()")));
 

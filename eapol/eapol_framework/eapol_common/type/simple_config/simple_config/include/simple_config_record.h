@@ -36,6 +36,29 @@
 #include "eap_automatic_variable.h"
 #include "eap_master_session_key.h"
 #include "abs_eap_base_timer.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_SIMPLE_CONFIG_RECORD_H)
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_RECORD_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_RECORD_H 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_RECORD_H 
+#elif defined(EAP_EXPORT_SIMPLE_CONFIG_RECORD_H)
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_RECORD_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_RECORD_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_RECORD_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_RECORD_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_RECORD_H 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_RECORD_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 
 class abs_simple_config_base_record_c;
@@ -76,7 +99,7 @@ enum simple_config_record_timer_timeouts_e
  * See more detailed design and architecture document <a href="../../type/simple_config/documentation/EAP_SIMPLE_CONFIG.doc">EAP_SIMPLE_CONFIG.doc</a>
  * and <a href="../../type/simple_config/documentation/rfc2246.txt">RFC 2246</a>.
  */
-class EAP_EXPORT simple_config_record_c
+class EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_RECORD_H simple_config_record_c
 : public simple_config_base_record_c
 , public abs_simple_config_am_services_c
 , public abs_eap_base_timer_c
@@ -287,102 +310,102 @@ private:
 	 * The set_is_valid() function sets the state of the object valid.
 	 * The creator of this object calls this function after it is initialized. 
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H void set_is_valid();
 
 
-	EAP_FUNC_IMPORT eap_status_e add_common_attributes(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e add_common_attributes(
 		simple_config_payloads_c * const payloads,
 		const simple_config_Message_Type_e message_type,
 		const bool add_enrollee_nonce,
 		const bool add_registrar_nonce);
 
 
-	EAP_FUNC_IMPORT eap_status_e send_M1(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e send_M1(
 		const simple_config_payloads_c * const network_and_device_parameters);
 
-	EAP_FUNC_IMPORT eap_status_e send_M3();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e send_M3();
 
-	EAP_FUNC_IMPORT eap_status_e send_M5();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e send_M5();
 
-	EAP_FUNC_IMPORT eap_status_e send_M7();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e send_M7();
 
-	EAP_FUNC_IMPORT eap_status_e send_WSC_ACK();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e send_WSC_ACK();
 
-	EAP_FUNC_IMPORT eap_status_e send_WSC_NACK();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e send_WSC_NACK();
 
-	EAP_FUNC_IMPORT eap_status_e send_WSC_Done();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e send_WSC_Done();
 
 
 #if defined(USE_EAP_TYPE_SERVER_SIMPLE_CONFIG)
 
-	EAP_FUNC_IMPORT eap_status_e send_M2(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e send_M2(
 		const simple_config_payloads_c * const network_and_device_parameters);
 
-	EAP_FUNC_IMPORT eap_status_e send_M2D(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e send_M2D(
 		const simple_config_payloads_c * const network_and_device_parameters);
 
-	EAP_FUNC_IMPORT eap_status_e send_M4();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e send_M4();
 
-	EAP_FUNC_IMPORT eap_status_e send_M6();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e send_M6();
 
-	EAP_FUNC_IMPORT eap_status_e send_M8();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e send_M8();
 
 #endif //#if defined(USE_EAP_TYPE_SERVER_SIMPLE_CONFIG)
 
 
-	EAP_FUNC_IMPORT eap_status_e process_M2(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e process_M2(
 		const simple_config_payloads_c * const payloads);
 
-	EAP_FUNC_IMPORT eap_status_e process_M2D(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e process_M2D(
 		const simple_config_payloads_c * const payloads);
 
-	EAP_FUNC_IMPORT eap_status_e process_M4(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e process_M4(
 		const simple_config_payloads_c * const payloads);
 
-	EAP_FUNC_IMPORT eap_status_e process_M6(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e process_M6(
 		const simple_config_payloads_c * const payloads);
 
-	EAP_FUNC_IMPORT eap_status_e process_M8(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e process_M8(
 		const simple_config_payloads_c * const payloads);
 
-	EAP_FUNC_IMPORT eap_status_e process_WSC_ACK(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e process_WSC_ACK(
 		const simple_config_payloads_c * const payloads);
 
-	EAP_FUNC_IMPORT eap_status_e process_WSC_NACK(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e process_WSC_NACK(
 		const simple_config_payloads_c * const payloads);
 
 #if defined(USE_EAP_TYPE_SERVER_SIMPLE_CONFIG)
 
-	EAP_FUNC_IMPORT eap_status_e process_M1(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e process_M1(
 		const simple_config_payloads_c * const payloads);
 
-	EAP_FUNC_IMPORT eap_status_e process_M3(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e process_M3(
 		const simple_config_payloads_c * const payloads);
 
-	EAP_FUNC_IMPORT eap_status_e process_M5(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e process_M5(
 		const simple_config_payloads_c * const payloads);
 
-	EAP_FUNC_IMPORT eap_status_e process_M7(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e process_M7(
 		const simple_config_payloads_c * const payloads);
 
-	EAP_FUNC_IMPORT eap_status_e process_WSC_DONE(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e process_WSC_DONE(
 		const simple_config_payloads_c * const payloads);
 
 #endif //#if defined(USE_EAP_TYPE_SERVER_SIMPLE_CONFIG)
 
-	EAP_FUNC_IMPORT void send_error_notification(const eap_status_e error);
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H void send_error_notification(const eap_status_e error);
 
 
 	/**
 	 * This function processes received SIMPLE_CONFIG attributes.
 	 */
-	EAP_FUNC_IMPORT eap_status_e process_simple_config_attributes(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e process_simple_config_attributes(
 		const simple_config_payloads_c * const payloads);
 
 	/**
 	 * This function processes received SIMPLE_CONFIG message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e process_simple_config_message();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e process_simple_config_message();
 
 
 	/**
@@ -390,31 +413,31 @@ private:
 	 * If no correct message is received before this timeout the authentication
 	 * is terminated.
 	 */
-	EAP_FUNC_IMPORT eap_status_e initalize_error_message_timeout();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e initalize_error_message_timeout();
 
 	/**
 	 * This function cancels timeout for received erroneous message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e cancel_error_message_timeout();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e cancel_error_message_timeout();
 
 
-	EAP_FUNC_IMPORT eap_status_e initialize_M2D_received_timeout();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e initialize_M2D_received_timeout();
 
-	EAP_FUNC_IMPORT eap_status_e cancel_M2D_received_timeout();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e cancel_M2D_received_timeout();
 
 
-	EAP_FUNC_IMPORT eap_status_e timer_expired(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e timer_expired(
 		const u32_t id,
 		void * data);
 
-	EAP_FUNC_IMPORT eap_status_e timer_delete_data(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e timer_delete_data(
 		const u32_t id,
 		void * data);
 
 	/**
 	 * This function verifies the Authenticator of received SIMPLE_CONFIG message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e verify_nonces_and_authenticator(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e verify_nonces_and_authenticator(
 		const eap_variable_data_c * const auth_key,
 		const eap_variable_data_c * const registrar_nonce,
 		const eap_variable_data_c * const enrollee_nonce,
@@ -426,49 +449,49 @@ private:
 	/**
 	 * This function checks whether all pending queries are completed.
 	 */
-	EAP_FUNC_IMPORT eap_status_e are_pending_queries_completed();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e are_pending_queries_completed();
 
 	/**
 	 * This function indicates state to lower layer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e indicate_state_to_lower_layer(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e indicate_state_to_lower_layer(
 		const simple_config_state_e indicated_state);
 
 	/**
 	 * This function indicates all message processed to lower layer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e indicate_messages_processed();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e indicate_messages_processed();
 
 	/**
 	 * This function combines SIMPLE_CONFIG-protocols data to a buffer and sends SIMPLE_CONFIG-message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e send_simple_config_message();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e send_simple_config_message();
 
 	/**
 	 * This function checks all queries are completed.
 	 * If all queries are completed this function send the pending LS-messages.
 	 */
-	EAP_FUNC_IMPORT eap_status_e check_sent_simple_config_message();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e check_sent_simple_config_message();
 
 	/**
 	 * This function generates ephemeral Diffie-Hellman keys.
 	 * Keys are stored to m_own_private_dhe_key and m_own_public_dhe_key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_dhe_keys();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e generate_dhe_keys();
 
 	/**
 	 * This function generates ephemeral Diffie-Hellman shared secret.
 	 * Shared secret is stored to dhe_shared_secret.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_dhe_shared_secret(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e generate_dhe_shared_secret(
 		const eap_variable_data_c * const registrar_public_key_data,
 		eap_variable_data_c * const dhe_shared_secret);
 
-	EAP_FUNC_IMPORT eap_status_e generate_nonce(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e generate_nonce(
 		eap_variable_data_c * const nonce,
 		const u32_t nonce_length);
 
-	EAP_FUNC_IMPORT eap_status_e generate_erhash(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e generate_erhash(
 		const bool verify,
 		const eap_variable_data_c * const half_of_device_password,
 		const eap_variable_data_c * const PKE,
@@ -477,7 +500,7 @@ private:
 		eap_variable_data_c * const ERSn,
 		eap_variable_data_c * const ERHash);
 
-	EAP_FUNC_IMPORT eap_status_e generate_er_hashs(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e generate_er_hashs(
 		const bool verify,
 		const eap_variable_data_c * const device_password,
 		const eap_variable_data_c * const PKE,
@@ -490,7 +513,7 @@ private:
 		eap_variable_data_c * const ER_Hash2);
 
 
-	EAP_FUNC_IMPORT eap_status_e keyed_hmac(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e keyed_hmac(
 		const eap_variable_data_c * const key,
 		const eap_variable_data_c * const input,
 		eap_variable_data_c * const output);
@@ -498,7 +521,7 @@ private:
 	/**
 	 * This function generates KDK of Simple Config.
 	 */
-	EAP_FUNC_IMPORT eap_status_e generate_kdk(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e generate_kdk(
 		const eap_variable_data_c * const dhe_shared_secret,
 		const eap_variable_data_c * const nonce_1,
 		const eap_variable_data_c * const enrollee_mac,
@@ -508,7 +531,7 @@ private:
 	/**
 	 * This is key derivation function of Simple Config.
 	 */
-	EAP_FUNC_IMPORT eap_status_e key_derivation_function(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e key_derivation_function(
 		const eap_variable_data_c * const key,
 		const eap_variable_data_c * const personalization_string,
 		const u32_t total_key_bits,
@@ -517,28 +540,28 @@ private:
 	/**
 	 * This function derives additional keys of Simple Config.
 	 */
-	EAP_FUNC_IMPORT eap_status_e derive_additional_keys(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e derive_additional_keys(
 		const eap_variable_data_c * const kdk,
 		eap_variable_data_c * const auth_key,
 		eap_variable_data_c * const key_wrap_key,
 		eap_variable_data_c * const EMSK);
 
-	EAP_FUNC_IMPORT eap_status_e generate_authenticator(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e generate_authenticator(
 		const eap_variable_data_c * const received_simple_config_message,
 		const eap_variable_data_c * const new_simple_config_message_data,
 		eap_variable_data_c * const authenticator);
 
-	EAP_FUNC_IMPORT eap_status_e add_authenticator_attribute(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e add_authenticator_attribute(
 		simple_config_message_c * const received_simple_config_message,
 		simple_config_message_c * const new_simple_config_message);
 
-	EAP_FUNC_IMPORT eap_status_e encrypt_payloads(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e encrypt_payloads(
 		const eap_variable_data_c * const auth_key,
 		const eap_variable_data_c * const key_wrap_key,
 		simple_config_payloads_c * const plaintext_payloads,
 		simple_config_variable_data_c * const encrypted_settings);
 
-	EAP_FUNC_IMPORT eap_status_e decrypt_payloads(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e decrypt_payloads(
 		const eap_variable_data_c * const auth_key,
 		const eap_variable_data_c * const key_wrap_key,
 		simple_config_variable_data_c * const encrypted_settings,
@@ -547,35 +570,35 @@ private:
 	/**
 	 * This function adds new completion action to the end of the m_completion_queue.
 	 */
-	EAP_FUNC_IMPORT eap_status_e completion_action_add(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e completion_action_add(
 		simple_config_completion_action_e action);
 
 	/**
 	 * This function verifies all completion actions are completed.
 	 */
-	EAP_FUNC_IMPORT eap_status_e completion_action_clenup();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e completion_action_clenup();
 
 	/**
 	 * This function checks and completes completion actions.
 	 * This function could return eap_status_pending_request if the
 	 * first completion action cannot be completed yet.
 	 */
-	EAP_FUNC_IMPORT eap_status_e completion_action_check();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e completion_action_check();
 
 	/**
 	 * This function sets the state of SIMPLE_CONFIG.
 	 */
-	EAP_FUNC_IMPORT simple_config_state_e get_state() const;
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H simple_config_state_e get_state() const;
 
 	/**
 	 * This function gets the state of SIMPLE_CONFIG.
 	 */
-	EAP_FUNC_IMPORT void set_state(const simple_config_state_e state);
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H void set_state(const simple_config_state_e state);
 
 	/**
 	 * This function verified the current state of SIMPLE_CONFIG and parameter state are equal.
 	 */
-	EAP_FUNC_IMPORT bool verify_state(const simple_config_state_e state);
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H bool verify_state(const simple_config_state_e state);
 
 	eap_status_e fix_incorrect_network_key(
 		eap_variable_data_c * const network_key, 
@@ -592,13 +615,13 @@ public:
 	/**
 	 * The destructor of the simple_config_record_c class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~simple_config_record_c();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H virtual ~simple_config_record_c();
 
 	/**
 	 * The constructor of the simple_config_record_c class simply initializes the attributes.
 	 * The simple_config_record_c object sends packets to the network using simple_config_base_record_c::get_type_partner() object.
 	 */
-	EAP_FUNC_IMPORT simple_config_record_c(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H simple_config_record_c(
 		abs_eap_am_tools_c * const tools, ///< tools is pointer to the tools class. @see abs_eap_am_tools_c.
 		simple_config_am_services_c * const am_simple_config_services, ///< This is pointer to adaoptation module of SIMPLE_CONFIG.
 		const bool free_am_simple_config_services,
@@ -610,7 +633,7 @@ public:
 	 * object is successfully executed. During the function call the object 
 	 * could query the configuration. Each derived class must define this function.
 	 */
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e configure();
 
 	/**
 	 * The shutdown() function is called before the destructor of the 
@@ -618,29 +641,29 @@ public:
 	 * could shutdown the operations, for example cancel timers.
 	 * Each derived class must define this function.
 	 */
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e shutdown();
 
 	/**
 	 * This function sets the NAI realm.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_nai_realm(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e set_nai_realm(
 		const eap_variable_data_c * const NAI_realm ///< This is the full NAI realm.
 		);
 
 	// This is commented in abs_simple_config_base_application_c.
-	EAP_FUNC_IMPORT eap_status_e read_configure(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e read_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
 	// This is commented in abs_simple_config_base_application_c.
-	EAP_FUNC_IMPORT eap_status_e write_configure(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e write_configure(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
 	/**
 	 * This function sends starts EAP-SIMPLE_CONFIG/PEAP after a start message is received.
 	 */
-	EAP_FUNC_IMPORT eap_status_e start_simple_config_authentication(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e start_simple_config_authentication(
 		const eap_variable_data_c * const NAI ///< This is the full NAI of the client.
 		);
 
@@ -648,7 +671,7 @@ public:
 	 * This function processes the received packet.
 	 * @param simple_config_packet includes the buffer of the whole reassembled SIMPLE_CONFIG-packet.
 	 */
-	EAP_FUNC_IMPORT eap_status_e packet_process(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e packet_process(
 		eap_variable_data_c * const simple_config_packet,
 		const u8_t received_eap_identifier);
 
@@ -657,7 +680,7 @@ public:
 	 * If object initialization fails this function must return false.
 	 * @return This function returns the validity of this object.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H bool get_is_valid();
 
 	/**
 	 * This function must reset the state of object to same as 
@@ -666,10 +689,10 @@ public:
 	 * If object reset fails this function must return corresponding error status.
 	 * @return This function returns the status of reset operation.
 	 */
-	EAP_FUNC_IMPORT eap_status_e reset();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e reset();
 
 	// This is commented in abs_simple_config_am_services_c::complete_query_network_and_device_parameters().
-	EAP_FUNC_IMPORT eap_status_e complete_query_network_and_device_parameters(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_RECORD_H eap_status_e complete_query_network_and_device_parameters(
 		const simple_config_state_e state,
 		simple_config_payloads_c * const network_and_device_parameters,
 		const eap_status_e completion_status);

@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 42 %
+* %version: 45 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -1328,7 +1328,8 @@ EAP_FUNC_EXPORT eap_status_e eap_process_tlv_message_data_c::add_parameter_data(
 //--------------------------------------------------
 
 EAP_FUNC_EXPORT eap_status_e eap_process_tlv_message_data_c::add_parameter_data(
-	const eap_general_header_base_c * const packet_data)
+	const eap_general_header_base_c * const packet_data,
+	const u32_t packet_length)
 {
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
 
@@ -1346,10 +1347,16 @@ EAP_FUNC_EXPORT eap_status_e eap_process_tlv_message_data_c::add_parameter_data(
 		return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
 	}
 
+	if (packet_length > packet_data->get_header_buffer_length())
+	{
+		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
+		return EAP_STATUS_RETURN(m_am_tools, eap_status_illegal_parameter);
+	}
+
 	eap_status_e status = add_message_data(
 		eap_tlv_message_type_variable_data,
-		packet_data->get_header_buffer_length(),
-		packet_data->get_header_buffer(packet_data->get_header_buffer_length()));
+		packet_length,
+		packet_data->get_header_buffer(packet_length));
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
 	return EAP_STATUS_RETURN(m_am_tools, status);

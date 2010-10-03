@@ -25,6 +25,29 @@
 #include "eapol_header.h"
 #include "eap_general_header_base.h"
 #include "eapol_key_header.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H 
+	#define EAP_FUNC_EXPORT_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H 
+#elif defined(EAP_EXPORT_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 
 //------------------------------------------------------
@@ -44,7 +67,7 @@
  *  +-------+-------+-------+-------+-------+-------+-------+-------+
  * @endcode
  */
-class EAP_EXPORT eapol_rsna_key_data_gtk_header_c
+class EAP_CLASS_VISIBILITY_EAPOL_RSNA_KEY_DATA_GTK_HEADER_H eapol_rsna_key_data_gtk_header_c
 : public eap_general_header_base_c
 {
 private:

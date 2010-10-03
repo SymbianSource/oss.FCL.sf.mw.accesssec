@@ -16,12 +16,34 @@
 */
 
 /*
-* %version: %
+* %version: 22.1.2 %
 */
 
 #if !defined(_AKA_TYPES_H_)
 #define _AKA_TYPES_H_
 
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_TYPE_AKA_TYPES_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_TYPES_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_TYPES_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_AKA_TYPES_H 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_AKA_TYPES_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_AKA_TYPES_H 
+#elif defined(EAP_EXPORT_EAP_TYPE_AKA_TYPES_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_TYPES_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_TYPES_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_AKA_TYPES_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_AKA_TYPES_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_AKA_TYPES_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_TYPES_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_TYPES_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_AKA_TYPES_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_AKA_TYPES_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_AKA_TYPES_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_type_aka_header.h"
 #include "eap_type_all_types.h"
 #include "eap_configuration_field.h"
@@ -726,7 +748,7 @@ EAP_CONFIGURATION_FIELD(
 
 
 /// These are the stored attributes for message authentication calculations.
-class eap_type_aka_MAC_attributes_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_TYPES_H eap_type_aka_MAC_attributes_c
 {
 private:
 	//--------------------------------------------------

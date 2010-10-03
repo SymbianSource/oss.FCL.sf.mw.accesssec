@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 10.1.3 %
 */
 
 #if !defined(_TLS_HANDSHAKE_MESSAGE_H_)
@@ -31,7 +31,30 @@
 
 #if defined(USE_EAP_TLS_SESSION_TICKET)
 #include "tls_extension.h"
+#include "eap_am_export.h"
 #endif // #if defined(USE_EAP_TLS_SESSION_TICKET)
+
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_TLS_HANDSHAKE_MESSAGE_H)
+	#define EAP_CLASS_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H 
+	#define EAP_C_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H 
+	#define EAP_FUNC_EXPORT_TLS_HANDSHAKE_MESSAGE_H 
+	#define EAP_C_FUNC_EXPORT_TLS_HANDSHAKE_MESSAGE_H 
+#elif defined(EAP_EXPORT_TLS_HANDSHAKE_MESSAGE_H)
+	#define EAP_CLASS_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_TLS_HANDSHAKE_MESSAGE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_TLS_HANDSHAKE_MESSAGE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_TLS_HANDSHAKE_MESSAGE_H 
+	#define EAP_C_FUNC_EXPORT_TLS_HANDSHAKE_MESSAGE_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 
 /** @file */
@@ -49,7 +72,7 @@
  * because of the PKI functions are asyncronous in
  * Symbian.
  */
-class EAP_EXPORT tls_handshake_message_c
+class EAP_CLASS_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H tls_handshake_message_c
 {
 private:
 	//--------------------------------------------------
@@ -136,9 +159,9 @@ private:
 	 * The set_is_valid() function sets the state of the object valid.
 	 * The creator of this object calls this function after it is initialized. 
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H void set_is_valid();
 
-	EAP_FUNC_IMPORT static eap_status_e u16_t_to_network_order(
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H static eap_status_e u16_t_to_network_order(
 		u16_t * const value,
 		abs_eap_am_tools_c * const m_am_tools);
 
@@ -153,12 +176,12 @@ public:
 	/**
 	 * The destructor of the tls_handshake_message_c class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~tls_handshake_message_c();
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H virtual ~tls_handshake_message_c();
 
 	/**
 	 * The constructor of the tls_handshake_message_c class simply initializes the attributes.
 	 */
-	EAP_FUNC_IMPORT tls_handshake_message_c(
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H tls_handshake_message_c(
 		abs_eap_am_tools_c * const tools,
 		abs_tls_message_hash_c * const message_hash,
 		const bool is_client);
@@ -168,73 +191,73 @@ public:
 	 * If object initialization fails this function must return false.
 	 * @return This function returns the validity of this object.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H bool get_is_valid();
 
 
 	/**
 	 * This function sets this message is analysed.
 	 */
-	EAP_FUNC_IMPORT void set_is_analysed();
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H void set_is_analysed();
 
 	/**
 	 * This function returns whether message is analysed (true) or not (false).
 	 */
-	EAP_FUNC_IMPORT bool get_is_analysed();
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H bool get_is_analysed();
 
 
 	/**
 	 * This function creates data of the Handshake message to internal buffer.
 	 * Later this data is added to final TLS-record buffer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_message_data();
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e create_message_data();
 
 
 	/**
 	 * This function copies the appropriate fields of the TLS-handshake message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_handshake_header_copy(const tls_handshake_header_c * const tls_handshake_header);
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_handshake_header_copy(const tls_handshake_header_c * const tls_handshake_header);
 
 
 	/**
 	 * This function sets the type of TLS-handshake message.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_handshake_type(tls_handshake_type_e type);
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_handshake_type(tls_handshake_type_e type);
 
 	/**
 	 * This function returns the type of TLS-handshake message.
 	 */
-	EAP_FUNC_IMPORT tls_handshake_type_e get_handshake_type() const;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H tls_handshake_type_e get_handshake_type() const;
 
 
 	/**
 	 * This function copies the list of the cipher suites.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_cipher_suites(
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_cipher_suites(
 		EAP_TEMPLATE_CONST eap_array_c<u16_t> * const cipher_suites);
 
 	/**
 	 * This function returns the list of the cipher suites.
 	 */
-	EAP_FUNC_IMPORT EAP_TEMPLATE_CONST eap_array_c<u16_t> * get_cipher_suites() EAP_TEMPLATE_CONST;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H EAP_TEMPLATE_CONST eap_array_c<u16_t> * get_cipher_suites() EAP_TEMPLATE_CONST;
 
 
 	/**
 	 * This function copies the list of the compression methods.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_compression_methods(
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_compression_methods(
 		EAP_TEMPLATE_CONST eap_array_c<u8_t> * const compression_methods);
 
 	/**
 	 * This function returns the list of the compression methods.
 	 */
-	EAP_FUNC_IMPORT EAP_TEMPLATE_CONST eap_array_c<u8_t> * get_compression_methods() EAP_TEMPLATE_CONST;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H EAP_TEMPLATE_CONST eap_array_c<u8_t> * get_compression_methods() EAP_TEMPLATE_CONST;
 
 
 #if defined(USE_EAP_TLS_SESSION_TICKET)
 	/**
 	 * This function copies the list of the TLS extensions.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_tls_extensions(
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_tls_extensions(
 		EAP_TEMPLATE_CONST eap_array_c<tls_extension_c> * const compression_methods);
 #endif // #if defined(USE_EAP_TLS_SESSION_TICKET)
 
@@ -242,162 +265,162 @@ public:
 	/**
 	 * This function returns the list of the TLS extensions.
 	 */
-	EAP_FUNC_IMPORT EAP_TEMPLATE_CONST eap_array_c<tls_extension_c> * get_tls_extensions() EAP_TEMPLATE_CONST;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H EAP_TEMPLATE_CONST eap_array_c<tls_extension_c> * get_tls_extensions() EAP_TEMPLATE_CONST;
 #endif // #if defined(USE_EAP_TLS_SESSION_TICKET)
 
 
 	/**
 	 * This function copies the random value.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_random_value(
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_random_value(
 		const eap_variable_data_c * const random_value);
 
 	/**
 	 * This function returns the random value.
 	 */
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_random_value() const;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H const eap_variable_data_c * get_random_value() const;
 
 
 	/**
 	 * This function copies the session id.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_session_id(
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_session_id(
 		const eap_variable_data_c * const session_id);
 
 	/**
 	 * This function returns the session id.
 	 */
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_session_id() const;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H const eap_variable_data_c * get_session_id() const;
 
 
 	/**
 	 * This function copies the certificate chain.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_certificate_chain(
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_certificate_chain(
 		EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * const certificate_chain);
 
 	/**
 	 * This function returns the certificate chain.
 	 */
-	EAP_FUNC_IMPORT EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * get_certificate_chain() EAP_TEMPLATE_CONST;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * get_certificate_chain() EAP_TEMPLATE_CONST;
 
 
 	/**
 	 * This function copies the list of the certificate authorities.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_certificate_authorities(
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_certificate_authorities(
 		EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * const certificate_authorities);
 
 	/**
 	 * This function returns the list of the certificate authorities.
 	 */
-	EAP_FUNC_IMPORT EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * get_certificate_authorities() EAP_TEMPLATE_CONST;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H EAP_TEMPLATE_CONST eap_array_c<eap_variable_data_c> * get_certificate_authorities() EAP_TEMPLATE_CONST;
 
 
 	/**
 	 * This function copies the list of the certificate types.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_certificate_types(
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_certificate_types(
 		EAP_TEMPLATE_CONST eap_array_c<u8_t> * const certificate_types);
 
 	/**
 	 * This function returns the list of the certificate types.
 	 */
-	EAP_FUNC_IMPORT EAP_TEMPLATE_CONST eap_array_c<u8_t> * get_certificate_types() EAP_TEMPLATE_CONST;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H EAP_TEMPLATE_CONST eap_array_c<u8_t> * get_certificate_types() EAP_TEMPLATE_CONST;
 
 
 	/**
 	 * This function sets the list of the selected cipher suite.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_selected_cipher_suite(const tls_cipher_suites_e selected_cipher_suite);
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_selected_cipher_suite(const tls_cipher_suites_e selected_cipher_suite);
 
 	/**
 	 * This function returns the list of the selected cipher suite.
 	 */
-	EAP_FUNC_IMPORT tls_cipher_suites_e get_selected_cipher_suite() const;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H tls_cipher_suites_e get_selected_cipher_suite() const;
 
 
 	/**
 	 * This function sets the list of the selected compression method.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_selected_compression_method(const tls_compression_method_e selected_compression_method);
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_selected_compression_method(const tls_compression_method_e selected_compression_method);
 
 	/**
 	 * This function returns the list of the selected compression method.
 	 */
-	EAP_FUNC_IMPORT tls_compression_method_e get_selected_compression_method() const;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H tls_compression_method_e get_selected_compression_method() const;
 
 
 	/**
 	 * This function copies the encrypted premaster secret.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_encrypted_premaster_secret(const eap_variable_data_c * const encrypted_premaster_secret);
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_encrypted_premaster_secret(const eap_variable_data_c * const encrypted_premaster_secret);
 
 	/**
 	 * This function returns the encrypted premaster secret.
 	 */
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_encrypted_premaster_secret() const;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H const eap_variable_data_c * get_encrypted_premaster_secret() const;
 
 
 	/**
 	 * This function copies the ephemeral Diffie-Hellman public key.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_public_dhe_key(const eap_variable_data_c * const public_dhe_key);
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_public_dhe_key(const eap_variable_data_c * const public_dhe_key);
 
 	/**
 	 * This function returns the ephemeral Diffie-Hellman public key.
 	 */
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_public_dhe_key() const;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H const eap_variable_data_c * get_public_dhe_key() const;
 
 
 	/**
 	 * This function copies the ephemeral Diffie-Hellman prime.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_dhe_prime(const eap_variable_data_c * const dhe_prime);
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_dhe_prime(const eap_variable_data_c * const dhe_prime);
 
 	/**
 	 * This function returns the ephemeral Diffie-Hellman prime.
 	 */
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_dhe_prime() const;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H const eap_variable_data_c * get_dhe_prime() const;
 
 
 	/**
 	 * This function copies the ephemeral Diffie-Hellman group generator.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_dhe_group_generator(const eap_variable_data_c * const dhe_group_generator);
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_dhe_group_generator(const eap_variable_data_c * const dhe_group_generator);
 
 	/**
 	 * This function returns the ephemeral Diffie-Hellman group generator.
 	 */
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_dhe_group_generator() const;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H const eap_variable_data_c * get_dhe_group_generator() const;
 
 
 	/**
 	 * This function copies the signed message HASH.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_signed_message_hash(const eap_variable_data_c * const signed_message_hash);
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_signed_message_hash(const eap_variable_data_c * const signed_message_hash);
 
 	/**
 	 * This function returns the signed message HASH.
 	 */
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_signed_message_hash() const;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H const eap_variable_data_c * get_signed_message_hash() const;
 
 
 	/**
 	 * This function copies the TLS-finished data.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_finished_data(const eap_variable_data_c * const finished_data);
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e set_finished_data(const eap_variable_data_c * const finished_data);
 
 	/**
 	 * This function returns the TLS-finished data.
 	 */
-	EAP_FUNC_IMPORT const eap_variable_data_c * get_finished_data() const;
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H const eap_variable_data_c * get_finished_data() const;
 
 
 	/**
 	 * This function adds data of the TLS-handshake message to tls_message_buffer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_message_data(
+	EAP_FUNC_VISIBILITY_TLS_HANDSHAKE_MESSAGE_H eap_status_e add_message_data(
 		eap_variable_data_c * const tls_message_buffer);
 	
 	// 

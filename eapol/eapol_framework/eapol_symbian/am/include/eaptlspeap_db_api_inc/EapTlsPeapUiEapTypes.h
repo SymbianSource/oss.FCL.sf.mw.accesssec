@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 16 %
 */
 
 #ifndef _EAPTLSPEAPUIEAPTYPES_H_

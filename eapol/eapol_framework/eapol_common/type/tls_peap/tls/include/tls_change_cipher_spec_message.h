@@ -25,6 +25,29 @@
 #include "eap_tools.h"
 #include "eap_array.h"
 #include "abs_tls_change_cipher_spec.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H)
+	#define EAP_CLASS_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H 
+	#define EAP_C_FUNC_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H 
+	#define EAP_FUNC_EXPORT_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H 
+	#define EAP_C_FUNC_EXPORT_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H 
+#elif defined(EAP_EXPORT_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H)
+	#define EAP_CLASS_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H 
+	#define EAP_C_FUNC_EXPORT_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 
 /** @file */
@@ -44,7 +67,7 @@ enum tls_change_cipher_spec_type_e
 /**
  * This class includes data of TLS-ChangeCipherSpec message.
  */
-class EAP_EXPORT tls_change_cipher_spec_message_c
+class EAP_CLASS_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H tls_change_cipher_spec_message_c
 {
 private:
 	//--------------------------------------------------
@@ -73,7 +96,7 @@ private:
 	 * The set_is_valid() function sets the state of the object valid.
 	 * The creator of this object calls this function after it is initialized. 
 	 */
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H void set_is_valid();
 
 	//--------------------------------------------------
 protected:
@@ -86,12 +109,12 @@ public:
 	/**
 	 * Destructor does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~tls_change_cipher_spec_message_c();
+	EAP_FUNC_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H virtual ~tls_change_cipher_spec_message_c();
 
 	/**
 	 * Constructor initializes class.
 	 */
-	EAP_FUNC_IMPORT tls_change_cipher_spec_message_c(
+	EAP_FUNC_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H tls_change_cipher_spec_message_c(
 		abs_eap_am_tools_c * const tools,
 		abs_tls_change_cipher_spec_c * const change_cipher_spec,
 		const bool is_client);
@@ -101,29 +124,29 @@ public:
 	 * If object initialization fails this function must return false.
 	 * @return This function returns the validity of this object.
 	 */
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H bool get_is_valid();
 
 	/**
 	 * This function creates data of the Handshake message to internal buffer.
 	 * Later this data is added to final TLS-record buffer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e create_message_data();
+	EAP_FUNC_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H eap_status_e create_message_data();
 
 
 	/**
 	 * This function sets the change cipher spec message type.
 	 */
-	EAP_FUNC_IMPORT eap_status_e set_change_cipher_spec_type(tls_change_cipher_spec_type_e type);
+	EAP_FUNC_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H eap_status_e set_change_cipher_spec_type(tls_change_cipher_spec_type_e type);
 
 	/**
 	 * This function gets the change cipher spec message type.
 	 */
-	EAP_FUNC_IMPORT tls_change_cipher_spec_type_e get_change_cipher_spec_type() const;
+	EAP_FUNC_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H tls_change_cipher_spec_type_e get_change_cipher_spec_type() const;
 
 	/**
 	 * This function adds data of the TLS-CahneCipherSpec data message from m_tls_change_cipher_spec_message_buffer to tls_message_buffer.
 	 */
-	EAP_FUNC_IMPORT eap_status_e add_message_data(
+	EAP_FUNC_VISIBILITY_TLS_CHANGE_CIPHER_SPEC_MESSAGE_H eap_status_e add_message_data(
 		eap_variable_data_c * const tls_message_buffer);
 
 	// 

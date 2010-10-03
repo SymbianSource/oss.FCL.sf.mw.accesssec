@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 8 %
+* %version: 13 %
 */
 
 #ifndef _EAP_TYPE_PLUGIN_H_
@@ -40,6 +40,15 @@ class eap_am_network_id_c;
 class abs_eap_configuration_if_c;
 #endif
 
+class AbsPacStoreInitializer;
+
+struct SPluginInfo
+{
+	TIndexType indexType;
+	TInt index;
+	TEapExpandedType aEapType;
+	abs_eap_am_tools_c * aTools;
+}; 
 
 // CLASS DECLARATION
 
@@ -61,7 +70,7 @@ public:
 	* @param aIndex Index for the connection. aIndexType and aIndex uniquely specify the connection.
 	* @return Pointer to the implementation.
 	*/
-	inline static CEapTypePlugin* NewL(const TDesC8& aCue, TIndexType aIndexType, TInt aIndex);	
+	inline static CEapTypePlugin* NewL(const TDesC8& aCue, TIndexType aIndexType, TInt aIndex, abs_eap_am_tools_c * const aTools);	
 
 	/**
 	* Unloads the implementation DLL.
@@ -79,8 +88,8 @@ public:
 	* @param eap_config_if Pointer used for call back to creater of stack (eapol_am_wlan_authentication_symbian_c class).
 	* @return Pointer to the implementation.
 	*/		
-	virtual eap_base_type_c* GetStackInterfaceL(abs_eap_am_tools_c* const aTools, 
-											   abs_eap_base_type_c* const aPartner,
+	virtual eap_base_type_c* GetStackInterfaceL(abs_eap_am_tools_c * const aTools, 
+											   abs_eap_base_type_c * const aPartner,
 											   const bool is_client_when_true,
 											   const eap_am_network_id_c * const receive_network_id,
 											   abs_eap_configuration_if_c * const configuration_if) = 0;
@@ -193,6 +202,7 @@ public:
 		const TIndexType aDestinationIndexType, 
 		const TInt aDestinationIndex) = 0;
 
+	virtual TInt InitialisePacStore(AbsPacStoreInitializer * const initializer) = 0;
 
 private:
 

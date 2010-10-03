@@ -16,25 +16,49 @@
 */
 
 /*
-* %version: 5 %
+* %version: 6 %
 */
 
 #ifndef EAPCLIENTIF_H_
 #define EAPCLIENTIF_H_
 
 #include <e32base.h>
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPCLIENTIF_H)
+	#define EAP_CLASS_VISIBILITY_EAPCLIENTIF_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPCLIENTIF_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPCLIENTIF_H 
+	#define EAP_FUNC_EXPORT_EAPCLIENTIF_H 
+	#define EAP_C_FUNC_EXPORT_EAPCLIENTIF_H 
+#elif defined(EAP_EXPORT_EAPCLIENTIF_H)
+	#define EAP_CLASS_VISIBILITY_EAPCLIENTIF_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPCLIENTIF_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPCLIENTIF_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPCLIENTIF_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPCLIENTIF_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPCLIENTIF_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPCLIENTIF_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPCLIENTIF_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPCLIENTIF_H 
+	#define EAP_C_FUNC_EXPORT_EAPCLIENTIF_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "EapServerClientDef.h"
 
-class EapClientIf
+class EAP_CLASS_VISIBILITY_EAPCLIENTIF_H EapClientIf
 {
 public:
 
-    IMPORT_C EapClientIf();
+    EAP_FUNC_VISIBILITY_EAPCLIENTIF_H EapClientIf();
 
-    IMPORT_C virtual ~EapClientIf();
+    EAP_FUNC_VISIBILITY_EAPCLIENTIF_H virtual ~EapClientIf();
 
 protected:
-    IMPORT_C static TInt GetServerNameAndExe(TBuf<KMaxServerExe> * const ServerName, TBuf<KMaxServerExe> * const ServerExe);
+
+    EAP_FUNC_VISIBILITY_EAPCLIENTIF_H static TInt GetServerNameAndExe(TBuf<KMaxServerExe> * const ServerName, TBuf<KMaxServerExe> * const ServerExe);
+
 };
 
 

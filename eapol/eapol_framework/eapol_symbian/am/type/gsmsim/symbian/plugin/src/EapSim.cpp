@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 26 %
+* %version: 30 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -61,7 +61,7 @@ CEapSim::CEapSim(const TIndexType aIndexType,
 
 // ----------------------------------------------------------
 
-CEapSim* CEapSim::NewL(const SIapInfo *aIapInfo)
+CEapSim* CEapSim::NewL(const SPluginInfo *aIapInfo)
 {
 	return new (ELeave) CEapSim(aIapInfo->indexType, aIapInfo->index);
 }
@@ -180,8 +180,8 @@ iTunnelingType = aInternalType;
 
 }
 
-
 // ----------------------------------------------------------
+
 void CEapSim::SetIndexL(
 		const TIndexType aIndexType, 
 		const TInt aIndex)
@@ -261,6 +261,8 @@ void CEapSim::SetConfigurationL(const EAPSettings& aSettings)
 	CleanupStack::PopAndDestroy(&session);
 }
 
+// ----------------------------------------------------------
+
 void CEapSim::GetConfigurationL(EAPSettings& aSettings)
 {
 	RDbNamedDatabase db;
@@ -289,6 +291,8 @@ void CEapSim::GetConfigurationL(EAPSettings& aSettings)
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 }
+
+// ----------------------------------------------------------
 
 void CEapSim::CopySettingsL(
 	const TIndexType aDestinationIndexType,
@@ -338,5 +342,13 @@ void CEapSim::CopySettingsL(
 	
 }
 
+// ----------------------------------------------------------
+
+TInt CEapSim::InitialisePacStore(AbsPacStoreInitializer * const /* initializer */)
+{
+	return KErrNone;
+}
+
+// ----------------------------------------------------------
 	
 // End of file

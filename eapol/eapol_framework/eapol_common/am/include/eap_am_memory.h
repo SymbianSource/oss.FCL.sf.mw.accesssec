@@ -41,6 +41,27 @@
 	#include "eap_tools.h"
 	#include "eap_variable_data.h"
 	#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_MEMORY_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_MEMORY_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_MEMORY_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_MEMORY_H 
+#elif defined(EAP_EXPORT_EAP_AM_MEMORY_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_MEMORY_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_MEMORY_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_MEMORY_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_MEMORY_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_MEMORY_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_MEMORY_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_MEMORY_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 
 	#if defined(USE_EAP_MEMORY_FUNCTIONS_FAILURES)
@@ -84,41 +105,41 @@
 		/*
 		 * An overload function the malloc.
 		 */
-		EAP_C_FUNC_IMPORT void *jph_malloc(size_t n);
+		EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_H void *jph_malloc(size_t n);
 
 		/*
 		 * An overload function the malloc.
 		 */
-		EAP_C_FUNC_IMPORT void *jph_malloc_ex(size_t n, const char *file, int line);
+		EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_H void *jph_malloc_ex(size_t n, const char *file, int line);
 
 		#if defined(USE_JPH_REALLOC)
 			/*
 			 * An overload function the realloc.
 			 */
-			EAP_C_FUNC_IMPORT void *jph_realloc(void *oldbuf, size_t n);
+			EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_H void *jph_realloc(void *oldbuf, size_t n);
 
 			/*
 			 * An overload function the realloc.
 			 */
-			EAP_C_FUNC_IMPORT void *jph_realloc_ex(void *oldbuf, size_t n, const char *file, int line);
+			EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_H void *jph_realloc_ex(void *oldbuf, size_t n, const char *file, int line);
 		#endif //#if defined(USE_JPH_REALLOC)
 
 		#if defined(USE_JPH_CALLOC)
 			/*
 			 * An overload function the calloc.
 			 */
-			EAP_C_FUNC_IMPORT void *jph_calloc(size_t count, size_t size);
+			EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_H void *jph_calloc(size_t count, size_t size);
 		#endif //#if defined(USE_JPH_CALLOC)
 
 		/*
 		 * An overload function for the free.
 		 */
-		EAP_C_FUNC_IMPORT void jph_free(void *cp);
+		EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_H void jph_free(void *cp);
 
 
-		EAP_C_FUNC_IMPORT void *jph_new(size_t n);
+		EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_H void *jph_new(size_t n);
 
-		EAP_C_FUNC_IMPORT void jph_delete(void *cp);
+		EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_H void jph_delete(void *cp);
 
 	#endif /* #if defined(_WIN32) */
 
@@ -176,10 +197,10 @@
 
 		#if defined(unix)
 			typedef int (*jph_new_handler) (size_t);
-			EAP_C_FUNC_IMPORT jph_new_handler jph_set_new_handler(jph_new_handler);
+			EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_H jph_new_handler jph_set_new_handler(jph_new_handler);
 		#elif defined(_WIN32) && !defined(__GNUC__)
 			typedef int (__cdecl * jph_new_handler) (size_t);
-			EAP_C_FUNC_IMPORT jph_new_handler __cdecl jph_set_new_handler(jph_new_handler);
+			EAP_C_FUNC_VISIBILITY_EAP_AM_MEMORY_H jph_new_handler __cdecl jph_set_new_handler(jph_new_handler);
 		#else
 			// Not supported in Symbian.
 		#endif

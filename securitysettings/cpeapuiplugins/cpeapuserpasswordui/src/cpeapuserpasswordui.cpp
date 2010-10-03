@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 27 %
+ * %version: 29 %
  */
 
 // System includes
@@ -92,7 +92,8 @@ CpEapUserPasswordUi::CpEapUserPasswordUi(
         QT_THROW(std::bad_alloc());
         // scoped pointer gets deleted automaticaly on exception
     }
-
+    setObjectName("CpEapUserPasswordUi");
+    
     // Get EAP config interface
     mConfigIf.reset(new EapQtConfigInterface(bearer, iapId));
     
@@ -127,14 +128,21 @@ void CpEapUserPasswordUi::createUi()
 
     // Construct username-password UI
     mForm = new HbDataForm();
+    mForm->setObjectName("CpEapUserPasswordUiForm");
     this->setWidget(mForm);
+    
     mModel = new HbDataFormModel(mForm);
-
+    mModel->setObjectName("CpEapUserPasswordUiModel");
+    
     // Create settings group
-    mGroupItem = new HbDataFormModelItem(HbDataFormModelItem::GroupItem,
+    mGroupItem = new HbDataFormModelItem(
+        HbDataFormModelItem::GroupItem,
         HbParameterLengthLimiter(
-            hbTrId("txt_occ_subhead_eap_module_settings")).arg(
+            "txt_occ_subhead_eap_module_settings").arg(
                 mPluginInfo.localizationId()));
+    
+    mGroupItem->setContentWidgetData("objectName", "CpEapUserPasswordUiGroup");
+    
     mModel->appendDataFormItem(mGroupItem);
 
     // The parameter given as 0 is a HbDataForm pointer, not parent
@@ -149,7 +157,10 @@ void CpEapUserPasswordUi::createUi()
     mForm->setModel(mModel);
     
     // Connect signal to add validators when items get activated (visualization created).
-    bool connected = connect(mForm, SIGNAL( itemShown(const QModelIndex&) ), this,
+    bool connected = connect(
+        mForm, 
+        SIGNAL( itemShown(const QModelIndex&) ), 
+        this,
         SLOT( setValidator(const QModelIndex) ));
     Q_ASSERT(connected);
     
@@ -164,8 +175,12 @@ void CpEapUserPasswordUi::createUsername()
 {
     qDebug("CpEapUserPasswordUi::createUsername()");
     // Username
-    mUsername = new CpSettingFormItemData(HbDataFormModelItem::TextItem, hbTrId(
-        "txt_occ_setlabel_user_name"));
+    mUsername = new CpSettingFormItemData(
+        HbDataFormModelItem::TextItem, 
+        hbTrId("txt_occ_setlabel_user_name"));
+    
+    mUsername->setContentWidgetData("objectName", "CpEapUserPasswordUiUsername");
+    
     // Initialize the value from EapQtConfig
     mUsername->setContentWidgetData("text", mEapConfig.value(EapQtConfig::Username));
     mGroupItem->appendChild(mUsername);
@@ -179,20 +194,42 @@ void CpEapUserPasswordUi::createPassword()
 {
     qDebug("CpEapUserPasswordUi::createPassword()");
     // Password prompting
-    mPasswordPrompt = new CpSettingFormItemData(HbDataFormModelItem::CheckBoxItem, hbTrId(
-        "txt_occ_setlabel_password"));
-    mPasswordPrompt->setContentWidgetData("text", hbTrId("txt_occ_setlabel_password_val_prompt"));
-    mPasswordPrompt->setContentWidgetData("checkState", boolToCheckState(mEapConfig.value(
-        EapQtConfig::PasswordPrompt).toBool()));
+    mPasswordPrompt = new CpSettingFormItemData(
+        HbDataFormModelItem::CheckBoxItem, 
+        hbTrId("txt_occ_setlabel_password"));
+    
+    mPasswordPrompt->setContentWidgetData(
+        "objectName", 
+        "CpEapUserPasswordUiPasswordPrompt");
+    
+    mPasswordPrompt->setContentWidgetData(
+        "text", 
+        hbTrId("txt_occ_setlabel_password_val_prompt"));
+    
+    mPasswordPrompt->setContentWidgetData(
+        "checkState", 
+        boolToCheckState(mEapConfig.value(EapQtConfig::PasswordPrompt).toBool()));
+    
     // Connect signal to disable/enable password when passwordPrompt changed 
-    mForm->addConnection(mPasswordPrompt, SIGNAL(stateChanged(int)), this,
+    mForm->addConnection(
+        mPasswordPrompt, 
+        SIGNAL(stateChanged(int)), 
+        this,
         SLOT(passwordPromptChanged(int)));
+    
     mGroupItem->appendChild(mPasswordPrompt);
 
     // Password
-    mPassword = new CpSettingFormItemData(HbDataFormModelItem::TextItem, hbTrId(
-        "txt_occ_setlabel_password"));
+    mPassword = new CpSettingFormItemData(
+        HbDataFormModelItem::TextItem, 
+        hbTrId("txt_occ_setlabel_password"));
+    
+    mPassword->setContentWidgetData(
+        "objectName", 
+        "CpEapUserPasswordUiPassword");
+
     mPasswordStored = mEapConfig.value(EapQtConfig::PasswordStored).toBool();
+    
     // If password has already been stored into the databse
     // fixed number of asterisks are shown in UI
     if (mPasswordStored) {
@@ -200,8 +237,10 @@ void CpEapUserPasswordUi::createPassword()
     }
     // Set password echo mode
     mPassword->setContentWidgetData("echoMode", HbLineEdit::Password);
+    
     // Dim password if passwordPrompt is selected
     passwordPromptChanged(mPasswordPrompt->contentWidgetData("checkState") == Qt::Checked);
+    
     // Connect signal to get info that user has changed the password
     mForm->addConnection(mPassword, SIGNAL(editingFinished()), this, SLOT(passwordChanged()));
     mGroupItem->appendChild(mPassword);
@@ -222,15 +261,21 @@ void CpEapUserPasswordUi::setValidator(const QModelIndex modelIndex)
     
     if (modelItem == mUsername) {
         // When username lineEdit is activated (shown) first time, validator is added
-        mValidatorUsername.reset(mConfigIf->validatorEap(mPluginInfo.pluginHandle().type(),
-            EapQtConfig::Username));
+        mValidatorUsername.reset(
+            mConfigIf->validatorEap(
+                mPluginInfo.pluginHandle().type(),
+                EapQtConfig::Username));
+        
         HbLineEdit *usernameEdit = qobject_cast<HbLineEdit *> (viewItem->dataItemContentWidget());
         mValidatorUsername->updateEditor(usernameEdit);
     }
     else if (modelItem == mPassword) {
         // When password lineEdit is activated (shown) first time, validator is added
-        mValidatorPassword.reset(mConfigIf->validatorEap(mPluginInfo.pluginHandle().type(),
-            EapQtConfig::Password));
+        mValidatorPassword.reset(
+            mConfigIf->validatorEap(
+                mPluginInfo.pluginHandle().type(),
+                EapQtConfig::Password));
+        
         mPasswordEdit = qobject_cast<HbLineEdit *> (viewItem->dataItemContentWidget());
         mValidatorPassword->updateEditor(mPasswordEdit);
         // Install event filter to clear dummy password, when password is started to edit.
@@ -263,11 +308,12 @@ void CpEapUserPasswordUi::close()
             qDebug("CpEapUserPasswordUi::close - Store settings failed, prompt warning");
             // Store failed. Show error note to user
             QScopedPointer<HbMessageBox> infoBox;
-            infoBox.reset(new HbMessageBox(
-                HbMessageBox::MessageTypeWarning));
+            infoBox.reset(new HbMessageBox(HbMessageBox::MessageTypeWarning));
+            infoBox->setObjectName("CpEapUserPasswordUiMessageBoxFailed");
             infoBox->setAttribute(Qt::WA_DeleteOnClose);
             infoBox->setText(hbTrId("txt_occ_info_unable_to_save_setting"));
             infoBox->clearActions();
+            
             // Connect 'OK'-button to CpBaseSettingView 'aboutToClose'-signal
             HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
             infoBox->addAction(okAction);
@@ -286,11 +332,12 @@ void CpEapUserPasswordUi::close()
 
         // Validate failed. Request user to exit anyway
         QScopedPointer<HbMessageBox> messageBox;
-        messageBox.reset(new HbMessageBox(
-            HbMessageBox::MessageTypeQuestion));
+        messageBox.reset(new HbMessageBox(HbMessageBox::MessageTypeQuestion));
+        messageBox->setObjectName("CpEapUserPasswordUiMessageBoxValidationFailed");
         messageBox->setAttribute(Qt::WA_DeleteOnClose);
         messageBox->setText(hbTrId("txt_occ_info_incomplete_details_return_without_sa"));
         messageBox->clearActions();
+        
         // Connect 'YES'-button to CpBaseSettingView 'aboutToClose'-signal
         HbAction *okAction = new HbAction(hbTrId("txt_common_button_yes"));
         messageBox->addAction(okAction);
@@ -300,6 +347,7 @@ void CpEapUserPasswordUi::close()
             this,
             SIGNAL(aboutToClose()));
         Q_ASSERT(connected);
+        
         // Clicking 'NO'-button does nothing
         HbAction *cancelAction = new HbAction(hbTrId("txt_common_button_no"));
         messageBox->addAction(cancelAction);
@@ -452,7 +500,7 @@ bool CpEapUserPasswordUi::storeSettings()
     eapConfig.setValue(EapQtConfig::PasswordPrompt, checkStateToBool(
         mPasswordPrompt->contentWidgetData("checkState").toInt()));
     if (mPasswordPrompt->contentWidgetData("checkState") == Qt::Checked) {
-        if(mPasswordStored) {
+        if (mPasswordStored) {
             // Stored password is cleared if prompting has been enabled
             eapConfig.setValue(EapQtConfig::PasswordClear, true);
             eapConfig.setValue(EapQtConfig::Password, "");

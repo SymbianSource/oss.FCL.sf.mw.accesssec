@@ -79,6 +79,7 @@ EAP_FUNC_EXPORT eap_variable_data_c::~eap_variable_data_c()
 #endif //#if !defined(NO_EAP_VARIABLE_DATA_MEMORY_ZERO)
 
 			delete [] m_data->m_buffer;
+			m_data->m_buffer = 0;
 		}
 		m_data->m_buffer = 0;
 		m_data->m_buffer_length = 0ul;
@@ -431,6 +432,7 @@ EAP_FUNC_EXPORT eap_status_e eap_variable_data_c::reset()
 #endif //#if !defined(NO_EAP_VARIABLE_DATA_MEMORY_ZERO)
 
 			delete [] m_data->m_buffer;
+			m_data->m_buffer = 0;
 			m_data->m_free_buffer = false;
 		}
 		m_data->m_buffer = 0;
@@ -647,6 +649,7 @@ EAP_FUNC_EXPORT eap_status_e eap_variable_data_c::allocate_buffer(
 #endif //#if !defined(NO_EAP_VARIABLE_DATA_MEMORY_ZERO)
 
 		delete [] m_data->m_buffer;
+		m_data->m_buffer = 0;
 	}
 	
 	m_data->m_buffer = tmp_buffer;

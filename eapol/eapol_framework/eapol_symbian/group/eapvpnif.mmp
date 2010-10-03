@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 11.1.10 %
+* %version: 11.1.15 %
 */
 
 #include <platform_paths.hrh>
@@ -33,8 +33,17 @@ UID 0x10009D8D 0x10200ec9
 
 deffile eapvpnif.def
 
+MACRO EAP_NO_EXPORTS
+// Start: added by script change_mmp_export_macros.sh.
+MACRO EAP_NO_EXPORT_EAP_CORE_CLIENT_MESSAGE_IF_H
+MACRO EAP_NO_EXPORT_EAP_VPN_IF_IMPLEMENTATION_H
+MACRO EAP_NO_EXPORT_EAP_VPN_IF_TIMER_H
+MACRO EAP_NO_EXPORT_EAPCOREINTERFACE_H
+// End: added by script change_mmp_export_macros.sh.
+
+MACRO EAP_NO_EXPORT_EAP_AM_MESSAGE_IF_H
+
 SOURCEPATH ../am/eapvpnif/src
-//SOURCE		eap_vpn_if_main.cpp
 SOURCE		eap_vpn_if_proxy.cpp
 SOURCE		eap_vpn_if_implementation.cpp
 SOURCE		eap_vpn_if_timer.cpp
@@ -70,7 +79,12 @@ START RESOURCE	10200ec9.rss
 TARGET eapvpnif.rsc
 END
 
-LIBRARY euser.lib ECom.lib eaptools.lib eaptrace.lib eapsymbiantools.lib edbms.lib efsrv.lib PlatformEnv.lib
+LIBRARY euser.lib ecom.lib eaptools.lib eaptrace.lib eapsymbiantools.lib edbms.lib efsrv.lib
+
+#ifdef USE_EAP_VPN_FILETRACE
+LIBRARY PlatformEnv.lib
+#endif
+
 DEBUGLIBRARY    flogger.lib
 
 

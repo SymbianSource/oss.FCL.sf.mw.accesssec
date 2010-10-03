@@ -25,6 +25,29 @@
 #include "eap_tools.h"
 #include "eap_header.h"
 #include "eap_header_string.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_TYPE_AKA_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_HEADER_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_AKA_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_AKA_HEADER_H 
+#elif defined(EAP_EXPORT_EAP_TYPE_AKA_HEADER_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_HEADER_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_AKA_HEADER_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_AKA_HEADER_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_HEADER_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_AKA_HEADER_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_AKA_HEADER_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 /** @file */
 
@@ -102,7 +125,7 @@ enum eap_aka_client_error_code_e
  * @endcode
  *
  */
-class EAP_EXPORT aka_payload_AT_header_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_HEADER_H aka_payload_AT_header_c
 : public eap_general_header_base_c
 {
 private:
@@ -128,49 +151,49 @@ public:
 	//--------------------------------------------------
 
 	// 
-	EAP_FUNC_IMPORT virtual ~aka_payload_AT_header_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H virtual ~aka_payload_AT_header_c();
 
 	// 
-	EAP_FUNC_IMPORT aka_payload_AT_header_c(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H aka_payload_AT_header_c(
 		abs_eap_am_tools_c * const tools,
 		void * const header_buffer,
 		const u32_t header_buffer_length);
 
-	EAP_FUNC_IMPORT aka_payload_AT_type_e get_current_payload() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H aka_payload_AT_type_e get_current_payload() const;
 
-	EAP_FUNC_IMPORT u16_t get_payload_length() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H u16_t get_payload_length() const;
 
-	EAP_FUNC_IMPORT u16_t get_reserved() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H u16_t get_reserved() const;
 
-	EAP_FUNC_IMPORT u8_t * get_reserved_pointer(const u32_t contignuous_bytes) const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H u8_t * get_reserved_pointer(const u32_t contignuous_bytes) const;
 
-	EAP_FUNC_IMPORT u32_t get_data_length() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H u32_t get_data_length() const;
 
-	EAP_FUNC_IMPORT static u16_t get_header_length();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H static u16_t get_header_length();
 
-	EAP_FUNC_IMPORT static u16_t get_max_payload_data_length();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H static u16_t get_max_payload_data_length();
 
-	EAP_FUNC_IMPORT u8_t * get_data(const u32_t contignuous_bytes) const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H u8_t * get_data(const u32_t contignuous_bytes) const;
 
-	EAP_FUNC_IMPORT u8_t * get_data_offset(const u32_t offset, const u32_t contignuous_bytes) const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H u8_t * get_data_offset(const u32_t offset, const u32_t contignuous_bytes) const;
 
-	EAP_FUNC_IMPORT u8_t * get_next_header() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H u8_t * get_next_header() const;
 
 	// Mostly this is zero.
 	// With some attributes this is used for special purposes.
-	EAP_FUNC_IMPORT void set_reserved(const u16_t reserved);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H void set_reserved(const u16_t reserved);
 
-	EAP_FUNC_IMPORT void set_current_payload(const aka_payload_AT_type_e p_current_payload);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H void set_current_payload(const aka_payload_AT_type_e p_current_payload);
 
-	EAP_FUNC_IMPORT void set_data_length(const u16_t p_data_length);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H void set_data_length(const u16_t p_data_length);
 
-	EAP_FUNC_IMPORT void reset_header(const u16_t data_length);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H void reset_header(const u16_t data_length);
 
-	EAP_FUNC_IMPORT static eap_const_string get_payload_AT_string(const aka_payload_AT_type_e payload_type);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H static eap_const_string get_payload_AT_string(const aka_payload_AT_type_e payload_type);
 
-	EAP_FUNC_IMPORT eap_const_string get_payload_AT_string() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H eap_const_string get_payload_AT_string() const;
 
-	EAP_FUNC_IMPORT eap_status_e check_header() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H eap_status_e check_header() const;
 
 	// 
 	//--------------------------------------------------
@@ -198,7 +221,7 @@ public:
  * @endcode
  *
  */
-class EAP_EXPORT aka_header_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_AKA_HEADER_H aka_header_c
 : public eap_header_base_c
 {
 private:
@@ -219,49 +242,49 @@ public:
 	//--------------------------------------------------
 
 	// 
-	EAP_FUNC_IMPORT virtual ~aka_header_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H virtual ~aka_header_c();
 
 	// 
-	EAP_FUNC_IMPORT aka_header_c(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H aka_header_c(
 		abs_eap_am_tools_c * const tools,
 		u8_t * const header_buffer,
 		const u32_t header_buffer_length);
 
-	EAP_FUNC_IMPORT aka_subtype_e get_subtype() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H aka_subtype_e get_subtype() const;
 
-	EAP_FUNC_IMPORT u16_t get_data_length() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H u16_t get_data_length() const;
 
 	/// This returns the length of EAP-header, EAP-type, subtype and reserved fields.
-	EAP_FUNC_IMPORT u32_t get_header_length() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H u32_t get_header_length() const;
 
-	EAP_FUNC_IMPORT u32_t get_sub_type_offset() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H u32_t get_sub_type_offset() const;
 
-	EAP_FUNC_IMPORT u8_t * get_data_offset(const u32_t offset, const u32_t contignuous_bytes) const;
-
-
-	EAP_FUNC_IMPORT u8_t * get_data(const u32_t contignuous_bytes) const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H u8_t * get_data_offset(const u32_t offset, const u32_t contignuous_bytes) const;
 
 
-	EAP_FUNC_IMPORT u16_t get_reserved() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H u8_t * get_data(const u32_t contignuous_bytes) const;
 
 
-	EAP_FUNC_IMPORT eap_status_e check_header() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H u16_t get_reserved() const;
 
-	EAP_FUNC_IMPORT eap_const_string get_subtype_string() const;
 
-	EAP_FUNC_IMPORT eap_const_string get_code_string() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H eap_status_e check_header() const;
 
-	EAP_FUNC_IMPORT eap_const_string get_eap_type_string() const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H eap_const_string get_subtype_string() const;
 
-	EAP_FUNC_IMPORT void set_reserved(const u16_t reserved);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H eap_const_string get_code_string() const;
 
-	EAP_FUNC_IMPORT void set_subtype(const aka_subtype_e p_subtype);
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H eap_const_string get_eap_type_string() const;
 
-	EAP_FUNC_IMPORT void set_data_length(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H void set_reserved(const u16_t reserved);
+
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H void set_subtype(const aka_subtype_e p_subtype);
+
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H void set_data_length(
 		const u32_t p_data_length,
 		const bool expanded_type_when_true);
 
-	EAP_FUNC_IMPORT void reset_header(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_AKA_HEADER_H void reset_header(
 		const u32_t buffer_length,
 		const bool expanded_type_when_true);
 

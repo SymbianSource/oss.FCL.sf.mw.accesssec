@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 10.1.2 %
+* %version: 10.1.3 %
 */
 
 #ifndef _EAPAKAINTERFACE_H_
@@ -26,6 +26,28 @@
 #include <e32base.h>
 #include "eap_tools.h"
 #include "eap_am_type_aka_symbian.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAPAKAINTERFACE_H)
+	#define EAP_CLASS_VISIBILITY_EAPAKAINTERFACE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAPAKAINTERFACE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAPAKAINTERFACE_H 
+	#define EAP_FUNC_EXPORT_EAPAKAINTERFACE_H 
+	#define EAP_C_FUNC_EXPORT_EAPAKAINTERFACE_H 
+#elif defined(EAP_EXPORT_EAPAKAINTERFACE_H)
+	#define EAP_CLASS_VISIBILITY_EAPAKAINTERFACE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAPAKAINTERFACE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPAKAINTERFACE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAPAKAINTERFACE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAPAKAINTERFACE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAPAKAINTERFACE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAPAKAINTERFACE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAPAKAINTERFACE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAPAKAINTERFACE_H 
+	#define EAP_C_FUNC_EXPORT_EAPAKAINTERFACE_H 
+#endif
+// End: added by script change_export_macros.sh.
 
 #include <etelmm.h>
 #include <rmmcustomapi.h>
@@ -34,7 +56,7 @@
 /**
 * Class (active object) that handles the communications with the 3G SIM.
 */
-class CEapAkaInterface 
+class EAP_CLASS_VISIBILITY_EAPAKAINTERFACE_H CEapAkaInterface 
 : public CActive
 {
 public:

@@ -26,6 +26,29 @@
 #include "simple_config_types.h"
 #include "eap_array.h"
 #include "eap_header.h"
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_SIMPLE_CONFIG_BASE_RECORD_H)
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_BASE_RECORD_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_BASE_RECORD_H 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_BASE_RECORD_H 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_BASE_RECORD_H 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_BASE_RECORD_H 
+#elif defined(EAP_EXPORT_SIMPLE_CONFIG_BASE_RECORD_H)
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_BASE_RECORD_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_BASE_RECORD_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_BASE_RECORD_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_BASE_RECORD_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_BASE_RECORD_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_BASE_RECORD_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_BASE_RECORD_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_SIMPLE_CONFIG_BASE_RECORD_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_SIMPLE_CONFIG_BASE_RECORD_H 
+	#define EAP_C_FUNC_EXPORT_SIMPLE_CONFIG_BASE_RECORD_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 class abs_simple_config_base_record_c;
 class abs_eap_am_tools_c;
@@ -36,7 +59,7 @@ class eap_rogue_ap_entry_c;
 
 /// The simple_config_base_record_c class declares pure virtual functions 
 /// a user class of SIMPLE_CONFIG-record class could call.
-class EAP_EXPORT simple_config_base_record_c
+class EAP_CLASS_VISIBILITY_SIMPLE_CONFIG_BASE_RECORD_H simple_config_base_record_c
 {
 private:
 	//--------------------------------------------------
@@ -66,7 +89,7 @@ public:
 	/**
 	 * The destructor of the simple_config_base_record_c class does nothing special.
 	 */
-	EAP_FUNC_IMPORT virtual ~simple_config_base_record_c();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_BASE_RECORD_H virtual ~simple_config_base_record_c();
 
 	/**
 	 * The constructor of the simple_config_base_record_c class simply initializes the attributes.
@@ -74,16 +97,16 @@ public:
 	 * @param partner is back pointer to object which created this object.
 	 * The simple_config_base_record_c object sends packets to the network using m_type_partner object.
 	 */
-	EAP_FUNC_IMPORT simple_config_base_record_c(
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_BASE_RECORD_H simple_config_base_record_c(
 		abs_eap_am_tools_c * const tools);
 
 	/**
 	 * Type partner is object below the simple_config_base_record_c object.
 	 * @return The get_type_partner() function returns the pointer to the partner class.
 	 */
-	EAP_FUNC_IMPORT abs_simple_config_base_record_c * get_type_partner();
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_BASE_RECORD_H abs_simple_config_base_record_c * get_type_partner();
 
-	EAP_FUNC_IMPORT void set_type_partner(abs_simple_config_base_record_c * const partner);
+	EAP_FUNC_VISIBILITY_SIMPLE_CONFIG_BASE_RECORD_H void set_type_partner(abs_simple_config_base_record_c * const partner);
 
 	/**
 	 * The configure() function is called after the constructor of the 

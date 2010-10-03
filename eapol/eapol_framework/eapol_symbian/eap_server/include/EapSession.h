@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 15 %
+* %version: 17 %
 */
 
 
@@ -60,7 +60,13 @@ public:
 
 	TBool GetReceiveActive();
 
- private:
+	TInt AddReadyHandler(CEapServerProcessHandler * const handler);
+
+	TInt CompleteReadyHandler(CEapServerProcessHandler * const handler);
+
+	TInt CancelReadyHandler(CEapServerProcessHandler * const handler);
+
+private:
 
     CEapServer* Server() const;
 

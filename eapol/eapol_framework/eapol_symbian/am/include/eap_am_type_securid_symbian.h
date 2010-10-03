@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 16.1.11 %
+* %version: 16.1.15 %
 */
 
 #ifndef EAP_AM_TYPE_SECURID_SYMBIAN_H
@@ -31,6 +31,29 @@
 
 #include <EapType.h>
 #include <d32dbms.h>
+#include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_AM_TYPE_SECURID_SYMBIAN_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_SECURID_SYMBIAN_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_SECURID_SYMBIAN_H 
+#elif defined(EAP_EXPORT_EAP_AM_TYPE_SECURID_SYMBIAN_H)
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_SECURID_SYMBIAN_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_SECURID_SYMBIAN_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_AM_TYPE_SECURID_SYMBIAN_H 
+	#define EAP_C_FUNC_EXPORT_EAP_AM_TYPE_SECURID_SYMBIAN_H 
+#endif
+// End: added by script change_export_macros.sh.
+
 
 const TUint KDefaultTimeoutEAPSecurId = 120000;
 
@@ -38,7 +61,7 @@ const TUint KDefaultTimeoutEAPSecurId = 120000;
 * Class that implements the operating system dependent portion of EAP SecurID protocol.
 * For Symbian OS.
 */
-class EAP_EXPORT eap_am_type_securid_symbian_c
+class EAP_CLASS_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H eap_am_type_securid_symbian_c
 	: public CActive
 	, public eap_am_type_securid_c
 	, public abs_eap_base_timer_c
@@ -144,7 +167,7 @@ public:
 		const bool aIsClient,
 		const eap_am_network_id_c * const receive_network_id);
 
-	EAP_FUNC_IMPORT virtual ~eap_am_type_securid_symbian_c();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H virtual ~eap_am_type_securid_symbian_c();
 
 	eap_status_e show_identity_query_dialog(
 		eap_type_value_e eap_type,
@@ -165,28 +188,28 @@ public:
 		u32_t message_length,
 		bool is_first_query);
 
-	EAP_FUNC_IMPORT eap_status_e configure();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H eap_status_e configure();
 
-	EAP_FUNC_IMPORT eap_status_e reset();	
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H eap_status_e reset();	
 
-	EAP_FUNC_IMPORT void set_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H void set_is_valid();
 
-	EAP_FUNC_IMPORT bool get_is_valid();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H bool get_is_valid();
 
-	EAP_FUNC_IMPORT eap_status_e type_configure_read(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H eap_status_e type_configure_read(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
-	EAP_FUNC_IMPORT eap_status_e type_configure_write(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H eap_status_e type_configure_write(
 		const eap_configuration_field_c * const field,
 		eap_variable_data_c * const data);
 
-	EAP_FUNC_IMPORT eap_status_e shutdown();
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H eap_status_e shutdown();
 
-	EAP_FUNC_IMPORT eap_status_e read_auth_failure_string(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H eap_status_e read_auth_failure_string(
 		eap_variable_data_c * const string);
 
-	EAP_FUNC_IMPORT eap_status_e get_memory_store_key(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H eap_status_e get_memory_store_key(
 		eap_variable_data_c * const memory_store_key);
 
 	/**
@@ -208,13 +231,16 @@ public:
 
 	void DlgComplete( TInt aStatus );
 
+	TBool IsMasterKeyAndPasswordMatchingL(
+	      const TDesC16 & aPassword8);
+	      
 	TInt IsDlgReadyToCompleteL();
 
-	EAP_FUNC_IMPORT eap_status_e timer_expired(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H eap_status_e timer_expired(
 		const u32_t id, void *data);
 
 	//
-	EAP_FUNC_IMPORT eap_status_e timer_delete_data(
+	EAP_FUNC_VISIBILITY_EAP_AM_TYPE_SECURID_SYMBIAN_H eap_status_e timer_delete_data(
 		const u32_t id, void *data);
 
 }; // class eap_am_type_securid_symbian_c

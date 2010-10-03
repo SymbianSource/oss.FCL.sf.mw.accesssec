@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 7 %
+* %version: 13 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -83,11 +83,11 @@ EAP_FUNC_EXPORT eap_pac_store_client_message_if_c::eap_pac_store_client_message_
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::eap_pac_store_client_message_if_c(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::eap_pac_store_client_message_if_c()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::eap_pac_store_client_message_if_c()");
 
 	m_is_valid = true;
 }
@@ -113,11 +113,11 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::configure()
 {
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::configure(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::configure()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::configure()");
 
 	eap_status_e status = m_client_if->configure(0);
 
@@ -131,11 +131,11 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::shutdown()
 {
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::shutdown(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::shutdown()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::shutdown()");
 
 	eap_status_e status = m_client_if->shutdown();
 
@@ -156,7 +156,7 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::process_message(
 {
 	// Sends message data composed of Attribute-Value Pairs.
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::process_message()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::process_message()");
 
 	EAP_TRACE_DATA_DEBUG(
 		m_am_tools,
@@ -184,52 +184,6 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::process_message(
 
 //--------------------------------------------------
 
-EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::open_pac_store(
-		const eap_status_e /* completion_status */)
-		{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	eap_status_e status(eap_status_process_general_error);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
-		(EAPL("eap_pac_store_client_message_if_c::open_pac_store(): this = 0x%08x.\n"),
-		this));
-
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::open_pac_store()");
-
-// Creates message data composed of Attribute-Value Pairs.
-
-	eap_process_tlv_message_data_c message(m_am_tools);
-
-	if (message.get_is_valid() == false)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-	}
-
-	status = message.add_parameter_data(eap_tlv_message_type_function_pac_store_open_pac_store);
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-
-	status = process_message(&message);
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, status);
-
-		}
-
-//--------------------------------------------------
-
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::destroy_pac_store(
 		const eap_status_e /* completion_status */)
 		{
@@ -239,11 +193,11 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::destroy_pac_stor
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::destroy_pac_store(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::destroy_pac_store()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::destroy_pac_store()");
 
 // Creates message data composed of Attribute-Value Pairs.
 
@@ -273,52 +227,9 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::destroy_pac_stor
 	return EAP_STATUS_RETURN(m_am_tools, status);
 
 		}
-//--------------------------------------------------------------------------------------------
-EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::create_device_seed(
-		const eap_status_e /* completion_status */)
-		{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	eap_status_e status(eap_status_process_general_error);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
-		(EAPL("eap_pac_store_client_message_if_c::create_device_seed(): this = 0x%08x.\n"),
-		this));
-
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::create_device_seed()");
-
-// Creates message data composed of Attribute-Value Pairs.
-
-	eap_process_tlv_message_data_c message(m_am_tools);
-
-	if (message.get_is_valid() == false)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-	}
-
-	status = message.add_parameter_data(eap_tlv_message_type_function_pac_store_create_device_seed);
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-
-	status = process_message(&message);
-	if (status != eap_status_ok)
-	{
-		EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-
-	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);
-	return EAP_STATUS_RETURN(m_am_tools, status);
-			
-		}
 
 //--------------------------------------------------
+
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::is_master_key_present(
 		const eap_status_e /* completion_status */)
 		{
@@ -328,11 +239,11 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::is_master_key_pr
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::is_master_key_present(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::is_master_key_present()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::is_master_key_present()");
 			
 	eap_process_tlv_message_data_c message(m_am_tools);
 
@@ -361,6 +272,7 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::is_master_key_pr
 		}
 
 //--------------------------------------------------
+
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::is_master_key_and_password_matching(
 		const eap_variable_data_c * const pac_store_password
 		,const eap_status_e /* completion_status */)
@@ -371,11 +283,11 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::is_master_key_an
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::is_master_key_and_password_matching(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::is_master_key_and_password_matching()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::is_master_key_and_password_matching()");
 			
 // Creates message data composed of Attribute-Value Pairs.
 		eap_process_tlv_message_data_c message(m_am_tools);
@@ -413,6 +325,7 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::is_master_key_an
 	}
 
 //--------------------------------------------------
+
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::create_and_save_master_key(
 		const eap_variable_data_c * const pac_store_password
 		,const eap_status_e /* completion_status */)
@@ -423,11 +336,11 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::create_and_save_
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::create_and_save_master_key(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::create_and_save_master_key()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::create_and_save_master_key()");
 			
 // Creates message data composed of Attribute-Value Pairs.
 		eap_process_tlv_message_data_c message(m_am_tools);
@@ -465,6 +378,7 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::create_and_save_
 		}
 
 //--------------------------------------------------
+
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::compare_pac_store_password(
 		eap_variable_data_c * pac_store_password)
 		{
@@ -474,11 +388,11 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::compare_pac_stor
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::compare_pac_store_password(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::compare_pac_store_password()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::compare_pac_store_password()");
 
 // Creates message data composed of Attribute-Value Pairs.
 		eap_process_tlv_message_data_c message(m_am_tools);
@@ -514,7 +428,9 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::compare_pac_stor
 	return EAP_STATUS_RETURN(m_am_tools, status);
 			
 		}
+
 //--------------------------------------------------
+
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::is_pacstore_password_present()
 		{
 	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
@@ -523,11 +439,11 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::is_pacstore_pass
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::is_pacstore_password_present(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::is_pacstore_password_present()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::is_pacstore_password_present()");
 			
 	eap_process_tlv_message_data_c message(m_am_tools);
 
@@ -555,8 +471,8 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::is_pacstore_pass
 	return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 
-
 //--------------------------------------------------
+
 EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::set_pac_store_password(
 		const eap_variable_data_c * const pac_store_password
 		,const eap_status_e /* completion_status */)
@@ -567,11 +483,11 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::set_pac_store_pa
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::set_pac_store_password(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::set_pac_store_password()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::set_pac_store_password()");
 
 // Creates message data composed of Attribute-Value Pairs.
 		eap_process_tlv_message_data_c message(m_am_tools);
@@ -609,90 +525,6 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::set_pac_store_pa
 		}
 
 //--------------------------------------------------
-eap_status_e eap_pac_store_client_message_if_c::complete_open_pac_store(
-		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters)
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	eap_status_e status(eap_status_process_general_error);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
-		(EAPL("eap_pac_store_client_message_if_c::complete_open_pac_store(): this = 0x%08x.\n"),
-		this));
-
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::complete_open_pac_store()");
-
-	u32_t parameter_index(eap_message_payload_index_first_parameter);
-
-	eap_process_tlv_message_data_c message_data(m_am_tools);
-
-	if (message_data.get_is_valid() == false)
-		{
-		status = m_partner->complete_open_pac_store(
-			eap_status_allocation_error);
-			return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-		}
-
-  eap_status_e return_status;
-	status = message_data.read_parameter_data(parameters, parameter_index, eap_tlv_message_type_eap_status, &return_status);
-	if (status != eap_status_ok)
-		{
-		status = m_partner->complete_open_pac_store(
-			status);
-			return EAP_STATUS_RETURN(m_am_tools, status);
-		}
-	
-	status = m_partner->complete_open_pac_store(
-		return_status);
-		
-	return status;	
-	
-
-}
-
-//--------------------------------------------------
-
-eap_status_e eap_pac_store_client_message_if_c::complete_create_device_seed(
-		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters)
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	eap_status_e status(eap_status_ok);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
-		(EAPL("eap_pac_store_client_message_if_c::complete_create_device_seed(): this = 0x%08x.\n"),
-		this));
-
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::complete_create_device_seed()");
-
-	u32_t parameter_index(eap_message_payload_index_first_parameter);
-
-	eap_process_tlv_message_data_c message_data(m_am_tools);
-
-	if (message_data.get_is_valid() == false)
-	{
-	status = m_partner->complete_create_device_seed(eap_status_allocation_error);
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-	}
-
-  eap_status_e return_status;
-	status = message_data.read_parameter_data(parameters, parameter_index, eap_tlv_message_type_eap_status, &return_status);
-	if (status != eap_status_ok)
-	{
-	status = m_partner->complete_create_device_seed(status);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-
-	status = m_partner->complete_create_device_seed(return_status);
-
-	return status;
-}
-
-//--------------------------------------------------
 
 eap_status_e eap_pac_store_client_message_if_c::complete_is_master_key_present(
 		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters)
@@ -703,11 +535,11 @@ eap_status_e eap_pac_store_client_message_if_c::complete_is_master_key_present(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::complete_is_master_key_present(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::complete_is_master_key_present()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::complete_is_master_key_present()");
 
 	u32_t parameter_index(eap_message_payload_index_first_parameter);
 
@@ -745,7 +577,7 @@ eap_status_e eap_pac_store_client_message_if_c::complete_is_master_key_and_passw
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::complete_is_master_key_and_password_matching(): this = 0x%08x.\n"),
 		this));
 
@@ -772,7 +604,7 @@ eap_status_e eap_pac_store_client_message_if_c::complete_is_master_key_and_passw
 
 	status = m_partner->complete_is_master_key_and_password_matching(is_matching, status);
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::complete_is_master_key_and_password_matching()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::complete_is_master_key_and_password_matching()");
   return status;
 }
 
@@ -787,11 +619,11 @@ eap_status_e eap_pac_store_client_message_if_c::complete_create_and_save_master_
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::complete_create_and_save_master_key(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::complete_create_and_save_master_key()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::complete_create_and_save_master_key()");
 
 	u32_t parameter_index(eap_message_payload_index_first_parameter);
 
@@ -829,11 +661,11 @@ eap_status_e eap_pac_store_client_message_if_c::complete_is_pacstore_password_pr
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::complete_is_pacstore_password_present(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::complete_is_pacstore_password_present()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::complete_is_pacstore_password_present()");
 
 	u32_t parameter_index(eap_message_payload_index_first_parameter);
 
@@ -871,7 +703,7 @@ eap_status_e eap_pac_store_client_message_if_c::complete_compare_pac_store_passw
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::complete_compare_pac_store_password(): this = 0x%08x.\n"),
 		this));
 
@@ -898,68 +730,10 @@ eap_status_e eap_pac_store_client_message_if_c::complete_compare_pac_store_passw
 
 	status = m_partner->complete_compare_pac_store_password(is_matching);
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::complete_compare_pac_store_password()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::complete_compare_pac_store_password()");
   return status;
 }
 
-//--------------------------------------------------
-
-//--------------------------------------------------
-/*
-eap_status_e eap_pac_store_client_message_if_c::complete_get_pac_store_password(
-		EAP_TEMPLATE_CONST eap_array_c<eap_tlv_header_c> * const parameters)
-{
-	EAP_TRACE_BEGIN(m_am_tools, TRACE_FLAGS_DEFAULT);
-
-	eap_status_e status(eap_status_process_general_error);
-
-	EAP_TRACE_DEBUG(
-		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
-		(EAPL("eap_pac_store_client_message_if_c::complete_get_pac_store_password(): this = 0x%08x.\n"),
-		this));
-
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::complete_get_pac_store_password()");
-	
-	u32_t parameter_index(eap_message_payload_index_first_parameter);
-
-	eap_process_tlv_message_data_c message_data(m_am_tools);
-
-	if (message_data.get_is_valid() == false)
-	{
-	status = m_partner->complete_get_pac_store_password(
-		NULL);
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-	}
-
-	eap_variable_data_c * const password = new eap_variable_data_c(m_am_tools);
-	// eap_automatic_variable_c can be used in this block because no functions are leaving here.
-	eap_automatic_variable_c<eap_variable_data_c> automatic_password_data(m_am_tools, password);
-
-	if (password == 0)
-	{
-	status = m_partner->complete_get_pac_store_password(
-		password);
-		return EAP_STATUS_RETURN(m_am_tools, eap_status_allocation_error);
-	}
-
-	status = message_data.read_parameter_data(parameters, parameter_index, password);
-	if (status != eap_status_ok)
-	{
-	status = m_partner->complete_get_pac_store_password(
-		password);
-		return EAP_STATUS_RETURN(m_am_tools, status);
-	}
-
-
-	status = m_partner->complete_get_pac_store_password(
-		password);
-
-	return EAP_STATUS_RETURN(m_am_tools, status);
-
-
-}
-*/
 //--------------------------------------------------
 
 eap_status_e eap_pac_store_client_message_if_c::complete_set_pac_store_password(
@@ -971,11 +745,11 @@ eap_status_e eap_pac_store_client_message_if_c::complete_set_pac_store_password(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::complete_set_pac_store_password(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::complete_set_pac_store_password()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::complete_set_pac_store_password()");
 
 	u32_t parameter_index(eap_message_payload_index_first_parameter);
 
@@ -1013,11 +787,11 @@ eap_status_e eap_pac_store_client_message_if_c::complete_destroy_pac_store(
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::complete_destroy_pac_store(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::complete_destroy_pac_store()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::complete_destroy_pac_store()");
 
 	u32_t parameter_index(eap_message_payload_index_first_parameter);
 
@@ -1046,22 +820,6 @@ eap_status_e eap_pac_store_client_message_if_c::complete_destroy_pac_store(
 	
 
 }
-
-//--------------------------------------------------
-
-//--------------------------------------------------
-
-
-//--------------------------------------------------
-
-
-//--------------------------------------------------
-
-
-//--------------------------------------------------
-
-//--------------------------------------------------
-//--------------------------------------------------
 
 //--------------------------------------------------
 
@@ -1106,11 +864,11 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::send_data(const 
 
 	EAP_TRACE_DEBUG(
 		m_am_tools, 
-		EAP_TRACE_FLAGS_MESSAGE_DATA, 
+		TRACE_FLAGS_DEFAULT, 
 		(EAPL("eap_pac_store_client_message_if_c::send_data(): this = 0x%08x.\n"),
 		this));
 
-	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, EAP_TRACE_FLAGS_MESSAGE_DATA, "returns: eap_pac_store_client_message_if_c::send_data()");
+	EAP_TRACE_RETURN_STRING_FLAGS(m_am_tools, TRACE_FLAGS_DEFAULT, "returns: eap_pac_store_client_message_if_c::send_data()");
 
 	eap_status_e status(eap_status_process_general_error);
 
@@ -1176,14 +934,16 @@ EAP_FUNC_EXPORT eap_status_e eap_pac_store_client_message_if_c::send_data(const 
 			return EAP_STATUS_RETURN(m_am_tools, status);
 		}
 
+		EAP_TRACE_DEBUG(
+			m_am_tools, 
+			TRACE_FLAGS_DEFAULT, 
+			(EAPL("eap_pac_store_client_message_if_c::send_data(): this = 0x%08x, message=%d=%s\n"),
+			this,
+			function,
+			eap_process_tlv_message_data_c::get_function_string(function)));
+
 		switch(function)
 		{
-		case eap_tlv_message_type_function_pac_store_complete_open_pac_store:
-			status = complete_open_pac_store(&parameters);
-			break;
-		case eap_tlv_message_type_function_pac_store_complete_create_device_seed:
-			status = complete_create_device_seed(&parameters);
-			break;
 		case eap_tlv_message_type_function_pac_store_complete_is_master_key_present:
 			status = complete_is_master_key_present(&parameters);
 			break;

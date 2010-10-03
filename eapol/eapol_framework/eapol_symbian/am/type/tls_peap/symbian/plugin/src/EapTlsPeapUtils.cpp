@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 140 %
+* %version: 141 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -4929,11 +4929,11 @@ void EapTlsPeapUtils::DeleteConfigurationL(
 		User::LeaveIfError(error);
 	}
 	
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapLeapDbUtils::DeleteConfigurationL(): - calls aDatabase.Open()\n")));
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL(): - calls aDatabase.Open()\n")));
 
 	error = aDatabase.Open(aFileServerSession, aPrivateDatabasePathName);
 
-	EAP_TRACE_DEBUG_SYMBIAN((_L("EapLeapDbUtils::DeleteConfigurationL(): - Opened private DB for %S. error=%d\n"),
+	EAP_TRACE_DEBUG_SYMBIAN((_L("EapTlsPeapUtils::DeleteConfigurationL(): - Opened private DB for %S. error=%d\n"),
 		&dbname,
 		error));
 

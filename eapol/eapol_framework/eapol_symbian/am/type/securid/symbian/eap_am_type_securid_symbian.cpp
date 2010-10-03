@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 29.1.36 %
+* %version: 29.1.41 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -172,7 +172,7 @@ eap_am_type_securid_symbian_c* eap_am_type_securid_symbian_c::NewL(
 	const bool aIsClient,
 	const eap_am_network_id_c * const receive_network_id)
 {
-	eap_am_type_securid_symbian_c * self = new(ELeave) eap_am_type_securid_symbian_c(
+	eap_am_type_securid_symbian_c * self = new eap_am_type_securid_symbian_c(
 		aTools, 
 		aPartner, 
 		aIndexType, 
@@ -182,16 +182,28 @@ eap_am_type_securid_symbian_c* eap_am_type_securid_symbian_c::NewL(
 		aIsClient,
 		receive_network_id);
 
-	CleanupStack::PushL(self);
-
-	if (self->get_is_valid() != true)
+	if (self == 0
+		|| self->get_is_valid() != true)
 	{
+		if (self != 0)
+		{
+			self->shutdown();
+		}
+
+		delete self;
+
 		User::Leave(KErrGeneral);
 	}
 
-	self->ConstructL();
+	TRAPD(error, self->ConstructL());
 
-	CleanupStack::Pop();
+	if (error != KErrNone)
+	{
+		self->shutdown();
+		delete self;
+
+		User::Leave(error);
+	}
 
 	return self;
 }
@@ -716,7 +728,7 @@ eap_status_e eap_am_type_securid_symbian_c::show_gtc_query_dialog(
 			TRACE_FLAGS_DEFAULT,
 			(EAPL("eap_am_type_securid_symbian_c::show_gtc_query_dialog(): EHandlingTimerCall\n")));
 
-		if(m_partner->set_timer(this,EHandlingTimerCall, 0 /*data*/, 2 /*time ms*/) != eap_status_ok)
+		if (m_partner->set_timer(this,EHandlingTimerCall, 0 /*data*/, 2 /*time ms*/) != eap_status_ok)
 			status = eap_status_process_general_error;	
 		}
 
@@ -995,6 +1007,13 @@ EAP_FUNC_EXPORT void eap_am_type_securid_symbian_c::DlgComplete( TInt aStatus )
 
 			eap_variable_data_c identity(m_am_tools);
 
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_securid_symbian_c::DlgComplete(): iUsername"),
+				m_dialog_data_ptr->iUsername.Ptr(),
+				m_dialog_data_ptr->iUsername.Size()));
+
 			eap_status_e status = identity.set_copy_of_buffer(
 				m_dialog_data_ptr->iUsername.Ptr(),
 				m_dialog_data_ptr->iUsername.Size());
@@ -1014,6 +1033,13 @@ EAP_FUNC_EXPORT void eap_am_type_securid_symbian_c::DlgComplete( TInt aStatus )
 				return;
 			}
 
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_securid_symbian_c::DlgComplete(): identity_utf8"),
+				identity_utf8.get_data(),
+				identity_utf8.get_data_length()));
+
 			status = get_am_partner()->complete_eap_identity_query(&identity_utf8);
 		}
 		break;
@@ -1023,6 +1049,13 @@ EAP_FUNC_EXPORT void eap_am_type_securid_symbian_c::DlgComplete( TInt aStatus )
 			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("eap_am_type_securid_symbian_c::DlgComplete(): EHandlingPasscodeQuery\n")));
 
 			eap_variable_data_c passcode(m_am_tools);
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_securid_symbian_c::DlgComplete(): iPassword"),
+				m_dialog_data_ptr->iPassword.Ptr(),
+				m_dialog_data_ptr->iPassword.Size()));
 
 			eap_status_e status = passcode.set_copy_of_buffer(
 				m_dialog_data_ptr->iPassword.Ptr(),
@@ -1043,6 +1076,13 @@ EAP_FUNC_EXPORT void eap_am_type_securid_symbian_c::DlgComplete( TInt aStatus )
 				return;
 			}
 
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_securid_symbian_c::DlgComplete(): passcode_utf8"),
+				passcode_utf8.get_data(),
+				passcode_utf8.get_data_length()));
+
 			status = get_am_partner()->client_securid_complete_passcode_query(&passcode_utf8);
 		}
 		break;
@@ -1051,9 +1091,16 @@ EAP_FUNC_EXPORT void eap_am_type_securid_symbian_c::DlgComplete( TInt aStatus )
 		{
 			EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("eap_am_type_securid_symbian_c::DlgComplete(): EHandlingPincodeQuery\n")));
 
-			eap_variable_data_c pincode(m_am_tools);
+			eap_variable_data_c identity(m_am_tools);
 
-			eap_status_e status = pincode.set_copy_of_buffer(
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_securid_symbian_c::DlgComplete(): iUsername"),
+				m_dialog_data_ptr->iUsername.Ptr(),
+				m_dialog_data_ptr->iUsername.Size()));
+
+			eap_status_e status = identity.set_copy_of_buffer(
 				m_dialog_data_ptr->iUsername.Ptr(),
 				m_dialog_data_ptr->iUsername.Size());
 			if (status != eap_status_ok)
@@ -1064,6 +1111,13 @@ EAP_FUNC_EXPORT void eap_am_type_securid_symbian_c::DlgComplete( TInt aStatus )
 			}
 
 			eap_variable_data_c passcode(m_am_tools);
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_securid_symbian_c::DlgComplete(): iPassword"),
+				m_dialog_data_ptr->iPassword.Ptr(),
+				m_dialog_data_ptr->iPassword.Size()));
 
 			status = passcode.set_copy_of_buffer(
 				m_dialog_data_ptr->iPassword.Ptr(),
@@ -1076,14 +1130,21 @@ EAP_FUNC_EXPORT void eap_am_type_securid_symbian_c::DlgComplete( TInt aStatus )
 			}
 
 
-			eap_variable_data_c pincode_utf8(m_am_tools);
-			status = m_am_tools->convert_unicode_to_utf8(pincode_utf8, pincode);
+			eap_variable_data_c identity_utf8(m_am_tools);
+			status = m_am_tools->convert_unicode_to_utf8(identity_utf8, identity);
 			if (status != eap_status_ok)
 			{
 				EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
 				(void)EAP_STATUS_RETURN(m_am_tools, status);
 				return;
 			}
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_securid_symbian_c::DlgComplete(): identity_utf8"),
+				identity_utf8.get_data(),
+				identity_utf8.get_data_length()));
 
 			eap_variable_data_c passcode_utf8(m_am_tools);
 			status = m_am_tools->convert_unicode_to_utf8(passcode_utf8, passcode);
@@ -1093,6 +1154,13 @@ EAP_FUNC_EXPORT void eap_am_type_securid_symbian_c::DlgComplete( TInt aStatus )
 				(void)EAP_STATUS_RETURN(m_am_tools, status);
 				return;
 			}
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_securid_symbian_c::DlgComplete(): passcode_utf8"),
+				passcode_utf8.get_data(),
+				passcode_utf8.get_data_length()));
 
 			status = get_am_partner()->client_securid_complete_pincode_query(&passcode_utf8, &passcode_utf8);
 		}
@@ -1105,7 +1173,52 @@ EAP_FUNC_EXPORT void eap_am_type_securid_symbian_c::DlgComplete( TInt aStatus )
 			delete m_message_buf;
 			m_message_buf = NULL;
 
+			eap_variable_data_c identity(m_am_tools);
+			eap_variable_data_c identity_utf8(m_am_tools);
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_securid_symbian_c::DlgComplete(): iUsername"),
+				m_dialog_data_ptr->iUsername.Ptr(),
+				m_dialog_data_ptr->iUsername.Size()));
+
+			if (m_dialog_data_ptr->iUsername.Size() > 0)
+			{
+				eap_status_e status = identity.set_copy_of_buffer(
+					m_dialog_data_ptr->iUsername.Ptr(),
+					m_dialog_data_ptr->iUsername.Size());
+				if (status != eap_status_ok)
+				{
+					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+					(void)EAP_STATUS_RETURN(m_am_tools, status);
+					return;
+				}
+
+				status = m_am_tools->convert_unicode_to_utf8(identity_utf8, identity);
+				if (status != eap_status_ok)
+				{
+					EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);	
+					(void)EAP_STATUS_RETURN(m_am_tools, status);
+					return;
+				}
+
+				EAP_TRACE_DATA_DEBUG(
+					m_am_tools,
+					TRACE_FLAGS_DEFAULT,
+					(EAPL("eap_am_type_securid_symbian_c::DlgComplete(): identity_utf8"),
+					identity_utf8.get_data(),
+					identity_utf8.get_data_length()));
+			}
+
 			eap_variable_data_c passcode(m_am_tools);
+
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_securid_symbian_c::DlgComplete(): iPassword"),
+				m_dialog_data_ptr->iPassword.Ptr(),
+				m_dialog_data_ptr->iPassword.Size()));
 
 			eap_status_e status = passcode.set_copy_of_buffer(
 				m_dialog_data_ptr->iPassword.Ptr(),
@@ -1126,6 +1239,13 @@ EAP_FUNC_EXPORT void eap_am_type_securid_symbian_c::DlgComplete( TInt aStatus )
 				return;
 			}
 			
+			EAP_TRACE_DATA_DEBUG(
+				m_am_tools,
+				TRACE_FLAGS_DEFAULT,
+				(EAPL("eap_am_type_securid_symbian_c::DlgComplete(): passcode_utf8"),
+				passcode_utf8.get_data(),
+				passcode_utf8.get_data_length()));
+
 			// User must have entered some password and pressed OK.
 			// Treat this as a full authentication and update the Last Auth Time.
 			status = store_authentication_time();
@@ -1140,7 +1260,7 @@ EAP_FUNC_EXPORT void eap_am_type_securid_symbian_c::DlgComplete( TInt aStatus )
 				status = eap_status_ok;
 			}			
 
-			status = get_am_partner()->client_gtc_complete_user_input_query(&passcode_utf8);
+			status = get_am_partner()->client_gtc_complete_user_input_query(&identity_utf8, &passcode_utf8);
 		}
 		break;
 
@@ -1529,6 +1649,14 @@ void eap_am_type_securid_symbian_c::store_authentication_timeL()
 	CleanupStack::PopAndDestroy(buf); // Delete buf.
 
 	EAP_TRACE_END(m_am_tools, TRACE_FLAGS_DEFAULT);			
+}
+
+//--------------------------------------------------
+
+TBool eap_am_type_securid_symbian_c::IsMasterKeyAndPasswordMatchingL(
+	      const TDesC16 & /* aPassword8 */)
+{
+	return EFalse;
 }
 
 //--------------------------------------------------

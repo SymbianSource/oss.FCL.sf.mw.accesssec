@@ -16,22 +16,22 @@
 */
 
 /*
-* %version: 6 %
+* %version: 7 %
 */
 
 #include "EapClientIf.h"
 
 
-EXPORT_C EapClientIf::EapClientIf()
+EAP_FUNC_EXPORT EapClientIf::EapClientIf()
 {
 }
 
-EXPORT_C EapClientIf::~EapClientIf()
+EAP_FUNC_EXPORT EapClientIf::~EapClientIf()
 {
 }
 
     
-EXPORT_C TInt EapClientIf::GetServerNameAndExe(TBuf<KMaxServerExe> * const ServerName, TBuf<KMaxServerExe> * const ServerExe)
+EAP_FUNC_EXPORT TInt EapClientIf::GetServerNameAndExe(TBuf<KMaxServerExe> * const ServerName, TBuf<KMaxServerExe> * const ServerExe)
 {
 	_LIT( KEapServerName,"EapAuthServer" );
 	_LIT( KEapServerExe, "EapAuthServerExe.exe");

@@ -17,7 +17,7 @@
  */
 
 /*
- * %version:  7 %
+ * %version:  8 %
  */
 
 // System includes
@@ -103,6 +103,11 @@ QList<EapQtPluginInfo> CpEapTlsMethodsPlugin::pluginInfo()
         EapQtPluginHandle::PluginEapTls,
         EapQtUiConstants::StringEapTls,
         EapQtUiConstants::OrderEapTls) );
+
+    ret.append(EapQtPluginInfo(
+        EapQtPluginHandle::PluginEapFast,
+        EapQtUiConstants::StringEapFast,
+        EapQtUiConstants::OrderEapFast) );
 
     return ret;
 }

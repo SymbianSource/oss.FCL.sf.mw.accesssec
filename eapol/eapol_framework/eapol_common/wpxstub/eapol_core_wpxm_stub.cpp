@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: %
+* %version: 10 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -29,6 +29,7 @@
 
 
 
+#include "eap_am_export.h"
 #include "eap_am_memory.h"
 #include "eap_tools.h"
 #include "eapol_core.h"
@@ -46,7 +47,7 @@
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eapol_core_c::start_WPXM_reassociation(
+eap_status_e eapol_core_c::start_WPXM_reassociation(
 	const eap_am_network_id_c * const /* receive_network_id */,
 	const eapol_key_authentication_type_e /* authentication_type */,
 	eap_variable_data_c * const /* send_reassociation_request_ie */)
@@ -57,7 +58,7 @@ EAP_FUNC_EXPORT eap_status_e eapol_core_c::start_WPXM_reassociation(
 //--------------------------------------------------
 
 //
-EAP_FUNC_EXPORT eap_status_e eapol_core_c::complete_WPXM_reassociation(
+eap_status_e eapol_core_c::complete_WPXM_reassociation(
 	const eapol_wlan_authentication_state_e /* reassociation_result */,
 	const eap_am_network_id_c * const /* receive_network_id */,
 	const eapol_key_authentication_type_e /* authentication_type */,

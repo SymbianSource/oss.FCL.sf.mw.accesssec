@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: tr1cfwln#18 %
+ * %version: tr1cfwln#20 %
  */
 
 #ifndef CPWEPUI_H
@@ -29,14 +29,15 @@
 #include <HbMessageBox>
 #include <cpwlansecurityplugininterface.h>
 
-//User Includes
+// User Includes
 
 // Forward declarations
 class CmConnectionMethodShim;
 class HbTranslator;
 class WepKeyValidator;
 
-//Constant declarations
+// Constants
+
 //!Maximum Number of Keys for WEP
 static const int KMaxNumberofKeys =  4;
 
@@ -45,39 +46,39 @@ static const int KMaxNumberofKeys =  4;
  */
 
 // Class declaration
-class CpWepUi : public QObject, public CpWlanSecurityPluginInterface
+class CpWepUi : public CpSettingFormItemData
 {
     Q_OBJECT
-    Q_INTERFACES(CpWlanSecurityPluginInterface)
 
-public:
-    CpWepUi();
+public: // CpWepUi public methods
+    
+    CpWepUi(
+        CpItemDataHelper* dataHelper,
+        CmConnectionMethodShim* cmCM );
+    
     ~CpWepUi();
-
-public:
-    // from CpWlanSecurityPluginInterface 
-
-    CMManagerShim::WlanSecMode securityMode() const;
-
-    QString securityModeTextId() const;
-    
-    void setReference(CmConnectionMethodShim *cmCm, uint id);
-    
-    int orderNumber() const;
-    
-    CpSettingFormItemData* uiInstance(CpItemDataHelper &dataHelper);
     
     bool validateSettings();
 
-private:
+signals:
+
+public slots:
+
+protected:
+
+protected slots:
+    
+private: // CpWepUi private definitions
 
     enum WEPKeyFormat
         {
         EFormatHex, EFormatAscii,
         };
 
-private:
+private: // CpWepUi private methods
 
+    void createUi();
+    
     void loadFieldsFromDataBase();
 
     void wepKeyTextChanged(int index);
@@ -93,13 +94,13 @@ private:
 
     void commitWEPkeys(int index);
     
-    void createWEPKeyOneGroup(CpItemDataHelper &dataHelpper);
+    void createWEPKeyOneGroup(CpItemDataHelper &dataHelper);
     
-    void createWEPKeyTwoGroup(CpItemDataHelper &dataHelpper);
+    void createWEPKeyTwoGroup(CpItemDataHelper &dataHelper);
     
-    void createWEPKeyThreeGroup(CpItemDataHelper &dataHelpper);
+    void createWEPKeyThreeGroup(CpItemDataHelper &dataHelper);
     
-    void createWEPKeyFourGroup(CpItemDataHelper &dataHelpper); 
+    void createWEPKeyFourGroup(CpItemDataHelper &dataHelper); 
     
     void storeWEPKey(CMManagerShim::ConnectionMethodAttribute enumValue,QString& key);
     
@@ -109,7 +110,7 @@ private:
     
     void createWEPKeyGroup(int index);
     
-    void addConnections(CpItemDataHelper &dataHelpper);
+    void addConnections(CpItemDataHelper* dataHelper);
     
 private slots:
 
@@ -125,12 +126,9 @@ private slots:
     
     void setEditorPreferences(const QModelIndex &modelIndex);
 
-private:
+private: // CpWepUi private members
 
     Q_DISABLE_COPY(CpWepUi)
-
-    //!WEP security group item
-    CpSettingFormItemData* mUi;
 
     //! Store strings of WEP keys
     QStringList mKeyData;
@@ -143,15 +141,9 @@ private:
 
     //!Store the index of the current key in use   
     int mNewKeySelected;
-   
-    //!Translator for all the localisation Text Id's
-    HbTranslator* mTranslator;
 
     //!Connection Settings Shim connection method pointer
     CmConnectionMethodShim *mCmCM;
-
-    //! Connection method Id
-    int mCmId;
 
     //! Message box for info notes
     QSharedPointer<HbMessageBox> mMessageBox;
@@ -160,8 +152,6 @@ private:
     WEPKeyFormat mkeyFormat[KMaxNumberofKeys];
         
     CpItemDataHelper* mItemDataHelper;
-    
-    
 
 };
 

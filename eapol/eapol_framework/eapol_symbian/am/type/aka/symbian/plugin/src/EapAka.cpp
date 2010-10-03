@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 25 %
+* %version: 29 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -62,7 +62,7 @@ CEapAka::CEapAka(const TIndexType aIndexType,
 
 // ----------------------------------------------------------
 
-CEapAka* CEapAka::NewL(SIapInfo *aIapInfo)
+CEapAka* CEapAka::NewL(SPluginInfo *aIapInfo)
 {
 	return new (ELeave) CEapAka(aIapInfo->indexType, aIapInfo->index);
 }
@@ -343,5 +343,14 @@ void CEapAka::CopySettingsL(
 	CleanupStack::PopAndDestroy(&db);
 	CleanupStack::PopAndDestroy(&session);
 }
+
+// ----------------------------------------------------------
+
+TInt CEapAka::InitialisePacStore(AbsPacStoreInitializer * const /* initializer */)
+{
+	return KErrNone;
+}
+
+// ----------------------------------------------------------
 
 // End of file

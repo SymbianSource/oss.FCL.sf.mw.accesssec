@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 18 %
+* %version: 19 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -191,6 +191,8 @@ void CEapAkaInterface::DoCancel()
 
 	if (iQueryId == EQueryRES)
 	{
+		iQueryId = EQueryNone;
+
 		// Cancel the request.
 		iCustomAPI.CancelAsyncRequest( ECustomGetSimAuthenticationDataIPC );
 
@@ -229,12 +231,15 @@ void CEapAkaInterface::RunL()
 		switch( iQueryId )
 		{
 			case EQueryIMSI:
+
 				EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("AKA interface: Got IMSI reply.\n")));
 						
 				EAP_TRACE_DATA_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("IMSI"),
 						iSubscriberId.Ptr(),
 						iSubscriberId.Size()));
 				
+				iQueryId = EQueryNone;
+
 				// Convert the IMSI from unicode to UTF8 characters.
 
 				completion_status = imsiInUnicode.set_buffer(iSubscriberId.Ptr(), iSubscriberId.Size(), false, false);
@@ -263,6 +268,7 @@ void CEapAkaInterface::RunL()
 			break;
 			
 			case EQueryRES:
+
 				EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("####AKA interface: Got RES, CK, IK and AUTS reply. ####\n")));			
 				
 				EAP_TRACE_DATA_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("RES"),
@@ -281,6 +287,8 @@ void CEapAkaInterface::RunL()
 						iEAPAka.iAUTS.Ptr(),
 						iEAPAka.iAUTS.Size()));
 										
+				iQueryId = EQueryNone;
+
 				delete iAuthenticationData;
 				iAuthenticationData = NULL;	
 						
@@ -335,6 +343,7 @@ void CEapAkaInterface::RunL()
 			case EQueryIMSI:
 			
 				// Error with IMSI. Reset it and complete the request.			
+				iQueryId = EQueryNone;
 				imsi.reset();
 				EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("AKA interface: Error in IMSI.\n")));
 							
@@ -346,6 +355,7 @@ void CEapAkaInterface::RunL()
 				// Re-synchronization needed or error with RES or CK or IK.
 				
 				// We have to close the custom API anyway. 
+				iQueryId = EQueryNone;
 				iCustomAPI.Close();				
 				EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapAkaInterface::RunL() - error case: CLOSED CUSTOM API \n")));
 				
@@ -482,6 +492,8 @@ void CEapAkaInterface::DisconnectMMETel()
 {
 	EAP_TRACE_DEBUG(m_am_tools, TRACE_FLAGS_DEFAULT, (EAPL("CEapAkaInterface::DisconnectMMETel()\n")));
 	EAP_TRACE_RETURN_STRING(m_am_tools, "returns: CEapAkaInterface::DisconnectMMETel()");
+
+	iQueryId = EQueryNone;
 
 	// Close the custom API since we don't need it any more.
 	iCustomAPI.Close();

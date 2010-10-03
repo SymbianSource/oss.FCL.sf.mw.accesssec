@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2006 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 22 %
+* %version: 30 %
 */
 
 #include <e32base.h>
@@ -51,8 +51,12 @@ CEapFastPacStore* CEapFastPacStoreImpl::NewL()
 
     CEapFastPacStoreImpl* self = new (ELeave) CEapFastPacStoreImpl();
 		
-		self->ConstructL();
+	CleanupStack::PushL(self);
+		
+	self->ConstructL();
 
+	CleanupStack::Pop(self);
+	
     EAP_TRACE_DEBUG_SYMBIAN(
      (_L("CEapFastPacStoreImpl::NewL end")));  
 	return self;
@@ -193,68 +197,6 @@ void CEapFastPacStoreImpl::WaitCompletion()
 
 // ----------------------------------------------------------
 
-void CEapFastPacStoreImpl::OpenPacStoreL()
-	{
-  EAP_TRACE_DEBUG_SYMBIAN(
-     (_L("CEapFastPacStoreImpl::OpenPacStoreL")));  
-
-		eap_status_e status = iPartner->open_pac_store(
-		iCompletionStatus);
-		
-	if (status != eap_status_ok)
-	{
-		User::Leave(iTools->convert_eapol_error_to_am_error(
-			EAP_STATUS_RETURN(iTools, status)));
-	}
-
-	iWaitState = eap_fast_pac_store_impl_wait_state_complete_open_pac_store;
-    Activate();
-    WaitCompletion();
-
-	if (iCompletionStatus != eap_status_ok)
-	{
-		User::Leave(iTools->convert_eapol_error_to_am_error(
-			EAP_STATUS_RETURN(iTools, iCompletionStatus)));
-	}
-
-  EAP_TRACE_DEBUG_SYMBIAN(
-     (_L("CEapFastPacStoreImpl::OpenPacStoreL end")));  
-
-}
-    
-// ----------------------------------------------------------
-
-void CEapFastPacStoreImpl::CreateDeviceSeedL()
-{
-    EAP_TRACE_DEBUG_SYMBIAN(
-     (_L("CEapFastPacStoreImpl::CreateDeviceSeedL")));  
-
-	eap_status_e status = iPartner->create_device_seed(
-		iCompletionStatus);
-
-	if (status != eap_status_ok)
-	{
-		User::Leave(iTools->convert_eapol_error_to_am_error(
-			EAP_STATUS_RETURN(iTools, status)));
-	}
-
-	iWaitState = eap_fast_pac_store_impl_wait_state_complete_create_device_seed;
-    Activate();
-    WaitCompletion();
-
-	if (iCompletionStatus != eap_status_ok)
-	{
-		User::Leave(iTools->convert_eapol_error_to_am_error(
-			EAP_STATUS_RETURN(iTools, iCompletionStatus)));
-	}
-
-    EAP_TRACE_DEBUG_SYMBIAN(
-     (_L("CEapFastPacStoreImpl::CreateDeviceSeedL end")));  
-
-}
-
-// ----------------------------------------------------------
-
 TBool CEapFastPacStoreImpl::IsMasterKeyPresentL()
 {
     EAP_TRACE_DEBUG_SYMBIAN(
@@ -357,7 +299,8 @@ TInt CEapFastPacStoreImpl::CreateAndSaveMasterKeyL(
   EAP_TRACE_DEBUG_SYMBIAN(
      (_L("CEapFastPacStoreImpl::CreateAndSaveMasterKeyL end")));  
 
-  return iCompletionStatus;
+  return iTools->convert_eapol_error_to_am_error(
+			EAP_STATUS_RETURN(iTools, iCompletionStatus));
 
 }
 
@@ -460,7 +403,8 @@ TInt CEapFastPacStoreImpl::SetPacStorePasswordL(
   EAP_TRACE_DEBUG_SYMBIAN(
      (_L("CEapFastPacStoreImpl::SetPacStorePasswordL end")));  
 
-	return iCompletionStatus;
+	return iTools->convert_eapol_error_to_am_error(
+			EAP_STATUS_RETURN(iTools, iCompletionStatus));
 
 
 }
@@ -487,68 +431,9 @@ TInt CEapFastPacStoreImpl::DestroyPacStore()
   EAP_TRACE_DEBUG_SYMBIAN(
      (_L("CEapFastPacStoreImpl::DestroyPacStore end")));  
 
-	return iCompletionStatus;
+	return iTools->convert_eapol_error_to_am_error(
+			EAP_STATUS_RETURN(iTools, iCompletionStatus));
 
-
-}
-
-// ----------------------------------------------------------
-
-eap_status_e CEapFastPacStoreImpl::complete_open_pac_store(
-		const eap_status_e completion_status)
-{
-	EAP_TRACE_DEBUG(
-		iTools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapFastPacStoreImpl::complete_open_pac_store(): this=0x%08x, iWaitState=%d\n"),
-		this,
-		iWaitState));
-
-	iCompletionStatus = completion_status;
-
-	if (iWaitState != eap_fast_pac_store_impl_wait_state_complete_open_pac_store
-		&& iCompletionStatus == eap_status_ok)
-	{
-		// ERROR wrong state.
-		iCompletionStatus = eap_status_wrong_eap_type_state;
-	}
-
-	Complete();
-
-    EAP_TRACE_DEBUG_SYMBIAN(
-     (_L("CEapFastPacStoreImpl::complete_open_pac_store end")));  
-
-	return iCompletionStatus;
-
-}
-
-// ----------------------------------------------------------
-
-eap_status_e CEapFastPacStoreImpl::complete_create_device_seed(
-		const eap_status_e completion_status)
-{
-	EAP_TRACE_DEBUG(
-		iTools,
-		TRACE_FLAGS_DEFAULT,
-		(EAPL("CEapFastPacStoreImpl::complete_create_device_seed(): this=0x%08x, iWaitState=%d\n"),
-		this,
-		iWaitState));
-
-	iCompletionStatus = completion_status;
-
-	if (iWaitState != eap_fast_pac_store_impl_wait_state_complete_create_device_seed
-		&& iCompletionStatus == eap_status_ok)
-	{
-		// ERROR wrong state.
-		iCompletionStatus = eap_status_wrong_eap_type_state;
-	}
-
-	Complete();
-
-  EAP_TRACE_DEBUG_SYMBIAN(
-     (_L("CEapFastPacStoreImpl::complete_create_device_seed end")));  
-
-	return iCompletionStatus;
 
 }
 

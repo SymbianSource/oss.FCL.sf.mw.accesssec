@@ -17,7 +17,7 @@
 */
 
 /*
-* %version: 21 %
+* %version: 24 %
 */
 
 // System include files
@@ -43,6 +43,7 @@ _LIT( KPacfilename, "pacfilename");
 _LIT( KEaptype, "eaptype");
 _LIT( KMessage, "messagetxt");
 _LIT( KFastprovwaitnote, "notificationtxt");
+_LIT( KPwdcorrectness, "pwdcorrectind");
 
 _LIT(KTypeunamepwddlg, "com.nokia.eap.usernamepassworddialog/1.0");
 _LIT(KTypepwdquerydlg, "com.nokia.eap.passwordquerydialog/1.0");
@@ -541,7 +542,61 @@ void CEapAuthNotifier::SetSelectedOldPassword ( TEapDialogInfo& aPasswordInfo )
     iEapInfo->iOldPassword = aPasswordInfo.iOldPassword;
     RDebug::Print(_L("CEapAuthNotifier::SetSelectedOldPassword: iEapInfo->iOldPassword = %S\n"), &iEapInfo->iOldPassword );    
     }
+    
+// ---------------------------------------------------------------------------
+// Check if password match
+// ---------------------------------------------------------------------------
+//
+TBool CEapAuthNotifier::CheckPasswordMatchingL ( TEapDialogInfo& aPasswordInfo )   
+    {
+    RDebug::Print(_L("CEapAuthNotifier::CheckPasswordMatchingL"));   
+    
+    TBool match(EFalse);
+ 
+    TRAPD(err, match = iClient.IsMasterKeyAndPasswordMatchingL(aPasswordInfo.iPassword));     
+    
+    RDebug::Print(_L("CEapAuthNotifier::CheckPasswordMatchingL: trap returned err = %d\n"), err );    
+    
+    return match;
+    } 
 
+// ---------------------------------------------------------------------------
+// Update device dialog parameters 
+// ---------------------------------------------------------------------------
+//
+void CEapAuthNotifier::UpdateDialogL( TBool aIsPwdCorrect )
+    {
+    RDebug::Print(_L("CEapAuthNotifier::UpdateDialogL: ENTERING"));  
+    
+    TInt error;
+        
+    //The variant map is needed to update the dialog parameters
+    CHbSymbianVariantMap* map = CHbSymbianVariantMap::NewL();
+    CleanupStack::PushL( map );  
+      
+    TBuf<KVariableLength> key(KPwdcorrectness);
+            
+    CHbSymbianVariant *variant = NULL;
+    
+    //Create the variant data information for the plugin
+    variant =  
+        CHbSymbianVariant::NewL (
+        &aIsPwdCorrect, CHbSymbianVariant::EBool );
+    CleanupStack::PushL( variant );
+    error = map->Add( key, variant);
+    User::LeaveIfError( error );
+    CleanupStack::Pop( variant ); // map's cleanup sequence handles variant.    
+    
+    //Update the dialog.
+    error = iDialog->Update( *map );
+    
+    User::LeaveIfError( error );           
+    CleanupStack::PopAndDestroy( map ); 
+
+    RDebug::Print(_L("CEapAuthNotifier::UpdateDialogL: LEAVING") );    
+        
+    }
+    
 // ---------------------------------------------------------------------------
 // The notifier is complete
 // ---------------------------------------------------------------------------

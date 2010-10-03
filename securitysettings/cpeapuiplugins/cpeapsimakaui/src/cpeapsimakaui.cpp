@@ -17,7 +17,7 @@
  */
 
 /*
- * %version:  18 %
+ * %version:  20 %
  */
 
 // System includes
@@ -78,6 +78,7 @@ CpEapSimAkaUi::CpEapSimAkaUi(
 {
     qDebug("CpEapSimAkaUi::CpEapSimAkaUi");
 
+    setObjectName("CpEapSimAkaUi");
     // IAP must be valid in construction (check includes
     // EapQtConfigInterface::IapIdUndefined)
     if (iapId < 0) {
@@ -119,13 +120,20 @@ void CpEapSimAkaUi::createUi()
     
     // Construct EAP-SIM/AKA settings UI 
     mForm = new HbDataForm();
+    mForm->setObjectName("CpEapSimAkaUiForm");
     this->setWidget(mForm);
+    
     mModel = new HbDataFormModel(mForm);
-
-    mGroupItem = new HbDataFormModelItem(HbDataFormModelItem::GroupItem,
+    mModel->setObjectName("CpEapSimAkaUiModel");
+    
+    mGroupItem = new HbDataFormModelItem(
+        HbDataFormModelItem::GroupItem,
         HbParameterLengthLimiter(
-            hbTrId("txt_occ_subhead_eap_module_settings")).arg(
+            "txt_occ_subhead_eap_module_settings").arg(
                 mPluginInfo.localizationId()));
+    
+    mGroupItem->setContentWidgetData("objectName", "CpEapSimAkaUiGroupItem");
+    
     mModel->appendDataFormItem(mGroupItem);
 
     // The parameter given as 0 is a HbDataForm pointer, not parent
@@ -140,7 +148,10 @@ void CpEapSimAkaUi::createUi()
     mForm->setModel(mModel);
     
     // Connect signal to add validators when items get activated (visualization created).
-    bool connected = connect(mForm, SIGNAL( itemShown(const QModelIndex&) ), this,
+    bool connected = connect(
+        mForm, 
+        SIGNAL( itemShown(const QModelIndex&) ), 
+        this,
         SLOT( setValidator(const QModelIndex) ));
     Q_ASSERT(connected);
 
@@ -156,23 +167,36 @@ void CpEapSimAkaUi::createUsername()
 {
     qDebug("CpEapSimAkaUi::createUsername()");
     // UsernameAutomatic
-    mUsernameAutomatic = new CpSettingFormItemData(HbDataFormModelItem::CheckBoxItem, hbTrId(
-        "txt_occ_setlabel_user_name"));
-    mUsernameAutomatic->setContentWidgetData("text", hbTrId(
-        "txt_occ_setlabel_user_name_val_generate_automatica"));
+    mUsernameAutomatic = new CpSettingFormItemData(
+        HbDataFormModelItem::CheckBoxItem, 
+        hbTrId("txt_occ_setlabel_user_name"));
+    
+    mUsernameAutomatic->setContentWidgetData("objectName", "CpEapSimAkaUiUsernameAutomatic");
+    mUsernameAutomatic->setContentWidgetData(
+        "text", 
+        hbTrId("txt_occ_setlabel_user_name_val_generate_automatica"));
+    
     // Initialize the value from EapQtConfig
     // Generate username automatically is selected by default
-    mUsernameAutomatic->setContentWidgetData("checkState", boolToCheckState(mEapConfig.value(
-        EapQtConfig::UsernameAutomatic).toBool()));
+    mUsernameAutomatic->setContentWidgetData(
+        "checkState", 
+        boolToCheckState(mEapConfig.value(EapQtConfig::UsernameAutomatic).toBool()));
+    
     // Connect signal to disable/enable username when usernameAutomatic changed   
-    mForm->addConnection(mUsernameAutomatic, SIGNAL(stateChanged(int)), this,
-        SLOT(usernameAutomaticChanged(int)));
+    mForm->addConnection(
+        mUsernameAutomatic, SIGNAL(stateChanged(int)), 
+        this, SLOT(usernameAutomaticChanged(int)));
+    
     mGroupItem->appendChild(mUsernameAutomatic);
 
     //Username
-    mUsername = new CpSettingFormItemData(HbDataFormModelItem::TextItem, hbTrId(
-        "txt_occ_setlabel_user_name"));
+    mUsername = new CpSettingFormItemData(
+        HbDataFormModelItem::TextItem, 
+        hbTrId("txt_occ_setlabel_user_name"));
+    
+    mUsername->setContentWidgetData("objectName", "CpEapSimAkaUiUsername");
     mUsername->setContentWidgetData("text", mEapConfig.value(EapQtConfig::Username));
+    
     // Dim username if usernameAutomatic selected
     usernameAutomaticChanged(mUsernameAutomatic->contentWidgetData("checkState") == Qt::Checked);
     mGroupItem->appendChild(mUsername);
@@ -186,23 +210,38 @@ void CpEapSimAkaUi::createRealm()
 {
     qDebug("CpEapSimAkaUi::createRealm()");
     // RealmAutomatic
-    mRealmAutomatic = new CpSettingFormItemData(HbDataFormModelItem::CheckBoxItem, hbTrId(
-        "txt_occ_setlabel_realm"));
-    mRealmAutomatic->setContentWidgetData("text", hbTrId(
-        "txt_occ_setlabel_realm_val_generate_automatically"));
+    mRealmAutomatic = new CpSettingFormItemData(
+        HbDataFormModelItem::CheckBoxItem, 
+        hbTrId("txt_occ_setlabel_realm"));
+    
+    mRealmAutomatic->setContentWidgetData("objectName", "CpEapSimAkaUiRealmAutomatic");
+    mRealmAutomatic->setContentWidgetData(
+        "text", 
+        hbTrId("txt_occ_setlabel_realm_val_generate_automatically"));
+    
     // Initialize the value from EapQtConfig
     // Generate realm automatically is selected by default
-    mRealmAutomatic->setContentWidgetData("checkState", boolToCheckState(mEapConfig.value(
-        EapQtConfig::RealmAutomatic).toBool()));
+    mRealmAutomatic->setContentWidgetData(
+        "checkState", 
+        boolToCheckState(mEapConfig.value(EapQtConfig::RealmAutomatic).toBool()));
+    
     // connect signal to disable/enable realm when realmAutomatic changed 
-    mForm->addConnection(mRealmAutomatic, SIGNAL(stateChanged(int)), this,
+    mForm->addConnection(
+        mRealmAutomatic, 
+        SIGNAL(stateChanged(int)), 
+        this, 
         SLOT(realmAutomaticChanged(int)));
+    
     mGroupItem->appendChild(mRealmAutomatic);
 
     //Realm
-    mRealm = new CpSettingFormItemData(HbDataFormModelItem::TextItem, hbTrId(
-        "txt_occ_setlabel_realm"));
+    mRealm = new CpSettingFormItemData(
+        HbDataFormModelItem::TextItem, 
+        hbTrId("txt_occ_setlabel_realm"));
+    
+    mRealm->setContentWidgetData("objectName", "CpEapSimAkaUiRealm");
     mRealm->setContentWidgetData("text", mEapConfig.value(EapQtConfig::Realm));
+    
     // Dim realm if realmAutomatic selected
     realmAutomaticChanged(mRealmAutomatic->contentWidgetData("checkState") == Qt::Checked);
     mGroupItem->appendChild(mRealm);
@@ -223,15 +262,21 @@ void CpEapSimAkaUi::setValidator(const QModelIndex modelIndex)
     
     if (modelItem == mUsername) {
         // When username lineEdit is activated (shown) first time, validator is added
-        mValidatorUsername.reset(mConfigIf->validatorEap(mPluginInfo.pluginHandle().type(),
-            EapQtConfig::Username));
+        mValidatorUsername.reset(
+            mConfigIf->validatorEap(
+                mPluginInfo.pluginHandle().type(),
+                EapQtConfig::Username));
+        
         HbLineEdit *edit = qobject_cast<HbLineEdit *> (viewItem->dataItemContentWidget());
         mValidatorUsername->updateEditor(edit);
     }
     else if (modelItem == mRealm) {
         // When realm lineEdit is activated (shown) first time, validator is added
-        mValidatorRealm.reset(mConfigIf->validatorEap(mPluginInfo.pluginHandle().type(),
+        mValidatorRealm.reset(
+            mConfigIf->validatorEap(
+                mPluginInfo.pluginHandle().type(),
                 EapQtConfig::Realm));
+        
         HbLineEdit *edit = qobject_cast<HbLineEdit *> (viewItem->dataItemContentWidget());
         mValidatorRealm->updateEditor(edit);
     }
@@ -262,20 +307,23 @@ void CpEapSimAkaUi::close()
             qDebug("CpEapSimAkaUi::close - Store settings failed, prompt warning");
             // Store failed. Show error note to user
             QScopedPointer<HbMessageBox> infoBox;
-            infoBox.reset(new HbMessageBox(
-                HbMessageBox::MessageTypeWarning));
+            infoBox.reset(new HbMessageBox(HbMessageBox::MessageTypeWarning));
+            infoBox->setObjectName("CpEapSimAkaUiMessageBoxFailed");
             infoBox->setAttribute(Qt::WA_DeleteOnClose);
             infoBox->setText(hbTrId("txt_occ_info_unable_to_save_setting"));
             infoBox->clearActions();
+            
             // Connect 'OK'-button to CpBaseSettingView 'aboutToClose'-signal
             HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
             infoBox->addAction(okAction);
+            
             bool connected = connect(
                 okAction,
                 SIGNAL(triggered()),
                 this,
                 SIGNAL(aboutToClose()));
             Q_ASSERT(connected);
+            
             infoBox->open();
             infoBox.take();
         }
@@ -283,20 +331,23 @@ void CpEapSimAkaUi::close()
     else {
         qDebug("CpEapSimAkaUi::close - validation failed. Prompt question.");
         QScopedPointer<HbMessageBox> messageBox;
-        messageBox.reset(new HbMessageBox(
-            HbMessageBox::MessageTypeQuestion));
+        messageBox.reset(new HbMessageBox(HbMessageBox::MessageTypeQuestion));
+        messageBox->setObjectName("CpEapSimAkaUiMessageBoxValidationFailed");
         messageBox->setAttribute(Qt::WA_DeleteOnClose);
         messageBox->setText(hbTrId("txt_occ_info_incomplete_details_return_without_sa"));
         messageBox->clearActions();
+        
         // Connect 'YES'-button to CpBaseSettingView 'aboutToClose'-signal
         HbAction *okAction = new HbAction(hbTrId("txt_common_button_yes"));
         messageBox->addAction(okAction);
+        
         bool connected = connect(
             okAction,
             SIGNAL(triggered()),
             this,
             SIGNAL(aboutToClose()));
         Q_ASSERT(connected);
+        
         // Clicking 'NO'-button does nothing
         HbAction *cancelAction = new HbAction(hbTrId("txt_common_button_no"));
         messageBox->addAction(cancelAction);
@@ -400,13 +451,25 @@ bool CpEapSimAkaUi::storeSettings()
 
     EapQtConfig eapConfig;
 
-    eapConfig.setValue(EapQtConfig::OuterType, qVariantFromValue(mOuterHandle));
-    eapConfig.setValue(EapQtConfig::UsernameAutomatic, checkStateToBool(
-        mUsernameAutomatic->contentWidgetData("checkState").toInt()));
-    eapConfig.setValue(EapQtConfig::Username, mUsername->contentWidgetData("text"));
-    eapConfig.setValue(EapQtConfig::RealmAutomatic, checkStateToBool(
-        mRealmAutomatic->contentWidgetData("checkState").toInt()));
-    eapConfig.setValue(EapQtConfig::Realm, mRealm->contentWidgetData("text"));
+    eapConfig.setValue(
+        EapQtConfig::OuterType, 
+        qVariantFromValue(mOuterHandle));
+    
+    eapConfig.setValue(
+        EapQtConfig::UsernameAutomatic, 
+        checkStateToBool(mUsernameAutomatic->contentWidgetData("checkState").toInt()));
+    
+    eapConfig.setValue(
+        EapQtConfig::Username, 
+        mUsername->contentWidgetData("text"));
+    
+    eapConfig.setValue(
+        EapQtConfig::RealmAutomatic, 
+        checkStateToBool(mRealmAutomatic->contentWidgetData("checkState").toInt()));
+    
+    eapConfig.setValue(
+        EapQtConfig::Realm, 
+        mRealm->contentWidgetData("text"));
 
     // Save configuration
     if (!mConfigIf->saveConfiguration(mPluginInfo.pluginHandle(), eapConfig)) {

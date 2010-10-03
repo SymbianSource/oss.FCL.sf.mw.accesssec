@@ -17,7 +17,7 @@
  */
 
 /*
- * %version: 6 %
+ * %version: 8 %
  */
 
 // System includes
@@ -36,6 +36,7 @@
 // External function prototypes
 
 // Local constants
+static const unsigned int MinPacStorePasswordSize = 6;
 
 // ======== LOCAL FUNCTIONS ========
 
@@ -51,11 +52,28 @@ EapQtValidatorPacStorePassword::~EapQtValidatorPacStorePassword()
     // nothing to do
 }
 
-EapQtValidator::Status EapQtValidatorPacStorePassword::validate(const QVariant& /* value */)
+EapQtValidator::Status EapQtValidatorPacStorePassword::validate(const QVariant& value)
 {
-    qDebug("EapQtValidatorPacStorePassword::validate()");
-    // not supported
-    return EapQtValidator::StatusInvalidCharacters;
+    Status status(StatusOk);
+    const QString str = value.toString();
+
+    // input must be of correct type
+    if (value.type() != QVariant::String) {
+        status = StatusInvalid;
+    }
+    // check minimum length
+    else if (str.length() < MinPacStorePasswordSize) {
+        status = StatusTooShort;
+    }
+    // check maximum length
+    else if (str.length() > EapQtConfigInterfacePrivate::PacPasswordMaxLength) {
+        status = StatusTooLong;
+    }
+
+    // any character is ok for passwords
+    qDebug("EapQtValidatorPacStorePassword::validate - return status: %d", status);
+
+    return status;
 }
 
 void EapQtValidatorPacStorePassword::updateEditor(HbLineEdit* const edit)
@@ -64,7 +82,7 @@ void EapQtValidatorPacStorePassword::updateEditor(HbLineEdit* const edit)
 
     Q_ASSERT(edit);
 
-    edit->setMaxLength(EapQtConfigInterfacePrivate::StringMaxLength);
+    edit->setMaxLength(EapQtConfigInterfacePrivate::PacPasswordMaxLength);
     edit->setInputMethodHints(Qt::ImhNoAutoUppercase | Qt::ImhPreferLowercase
         | Qt::ImhNoPredictiveText);
 

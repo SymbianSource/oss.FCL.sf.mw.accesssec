@@ -24,6 +24,27 @@
 
 #include "eap_tools.h"
 #include "eap_am_export.h"
+// Start: added by script change_export_macros.sh.
+#if defined(EAP_NO_EXPORT_EAP_TYPE_GSMSIM_STATE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_GSMSIM_STATE_H EAP_NONSHARABLE 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_STATE_H 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_STATE_H 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_GSMSIM_STATE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_GSMSIM_STATE_H 
+#elif defined(EAP_EXPORT_EAP_TYPE_GSMSIM_STATE_H)
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_GSMSIM_STATE_H EAP_EXPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_STATE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_STATE_H EAP_C_FUNC_EXPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_GSMSIM_STATE_H EAP_FUNC_EXPORT 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_GSMSIM_STATE_H EAP_C_FUNC_EXPORT 
+#else
+	#define EAP_CLASS_VISIBILITY_EAP_TYPE_GSMSIM_STATE_H EAP_IMPORT 
+	#define EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_STATE_H EAP_FUNC_IMPORT 
+	#define EAP_C_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_STATE_H EAP_C_FUNC_IMPORT 
+	#define EAP_FUNC_EXPORT_EAP_TYPE_GSMSIM_STATE_H 
+	#define EAP_C_FUNC_EXPORT_EAP_TYPE_GSMSIM_STATE_H 
+#endif
+// End: added by script change_export_macros.sh.
 #include "eap_base_type.h"
 #include "eap_variable_data.h"
 #include "eap_type_gsmsim_header.h"
@@ -45,7 +66,7 @@ const u32_t GSMSIM_STATE_MAX_TYPES = 4;
 
 /// This class stores the valid GSMSIM messages (gsmsim_subtype_e)
 /// within a one state (eap_type_gsmsim_state_variable_e).
-class EAP_EXPORT eap_type_gsmsim_state_variable_parameters_c
+class EAP_CLASS_VISIBILITY_EAP_TYPE_GSMSIM_STATE_H eap_type_gsmsim_state_variable_parameters_c
 {
 private:
 
@@ -63,27 +84,27 @@ public:
 	/**
 	 * Destructor does nothing.
 	 */
-	EAP_FUNC_IMPORT virtual ~eap_type_gsmsim_state_variable_parameters_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_STATE_H virtual ~eap_type_gsmsim_state_variable_parameters_c();
 
 	/**
 	 * Constructor initializes attributes with default values.
 	 */
-	EAP_FUNC_IMPORT eap_type_gsmsim_state_variable_parameters_c();
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_STATE_H eap_type_gsmsim_state_variable_parameters_c();
 
 	/**
 	 * This function checks the GSMSIM message is valid in this state.
 	 */
-	EAP_FUNC_IMPORT bool check_valid_types(gsmsim_subtype_e type) const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_STATE_H bool check_valid_types(gsmsim_subtype_e type) const;
 
 	/**
 	 * This function checks the initiator is valid in this state.
 	 */
-	EAP_FUNC_IMPORT bool check_initiator(const bool is_initiator) const;
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_STATE_H bool check_initiator(const bool is_initiator) const;
 
 	/**
 	 * This function initializes this state to allow three GSMSIM message types.
 	 */
-	EAP_FUNC_IMPORT void init_state(
+	EAP_FUNC_VISIBILITY_EAP_TYPE_GSMSIM_STATE_H void init_state(
 		const bool must_be_initiator,
 		const bool must_be_responder,
 		const gsmsim_subtype_e type0,
