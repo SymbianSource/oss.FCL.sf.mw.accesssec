@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: tr1cfwln#28 %
+* %version: tr1cfwln#26 %
 */
 
 #ifndef WPASECURITYSETTINGSIMPL_H
@@ -161,20 +161,6 @@ NONSHARABLE_CLASS( CWPASecuritySettingsImpl ) : public CBase
         */
         inline void SetWpa2Only( const TBool aAllowed );
 
-        
-        /**
-        * Tells if 802.1x Unencrypted connection is allowed
-        * @return ETrue if Unencrypted connection is allowed
-        */
-        inline TBool WPAUnencryptedConn() const;
-
-
-        /**
-        * Sets the 802.1x Unencrypted connection enabling variable
-        * @param aUnencryptedConn   ETrue if Unencrypted connection is allowed
-        */
-        inline void SetWPAUnencryptedConn( const TBool aUnencryptedConn );
-        
 
         /**
         * Returns the Pre-shared key
@@ -304,9 +290,6 @@ NONSHARABLE_CLASS( CWPASecuritySettingsImpl ) : public CBase
 
         // WPA2 Only mode enabled or not
         TBool iWpa2Only;
- 
-        // 802.1x unencrypted connection allowed or not
-        TBool iWPAUnencryptedConn;
         
         // The Id of the AP.
         TUint32 iIapId;

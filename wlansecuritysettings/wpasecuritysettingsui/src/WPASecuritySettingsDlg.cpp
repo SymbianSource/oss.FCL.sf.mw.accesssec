@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: tr1cfwln#33 %
+* %version: tr1cfwln#31 %
 */
 
 // INCLUDE FILES
@@ -115,22 +115,20 @@ TInt CWPASecuritySettingsDlg::ConstructAndRunLD(
     {
 	CleanupStack::PushL( this );
 
-    const TInt Titles_Wpa_Main[KNumOfFieldsMain+2] =
+    const TInt Titles_Wpa_Main[KNumOfFieldsMain+1] =
         {
         R_WPA_MODE,
         R_WPA_EAP_CONFIG,
         R_WPA_MODE_PRESHARED_KEY,
-        R_WPA_TKIP_CIPHER,
-        R_WPA_UNENCRYPTED_CONN
+        R_WPA_TKIP_CIPHER
         };
 
-    const TInt Fields_Wpa_Main[KNumOfFieldsMain+2] =
+    const TInt Fields_Wpa_Main[KNumOfFieldsMain+1] =
         {
         EWpaMode,
         EWpaEapConfig,
         EWpaPreSharedKey,
-        EWpaWpa2Only,
-        EWpaUnencryptedConn
+        EWpaWpa2Only
         };
 
     iSecuritySettings = aSecuritySettings;
@@ -385,13 +383,7 @@ void CWPASecuritySettingsDlg::HandleListBoxEventL( CEikListBox* /*aListBox*/,
 
         default:
             {
-            // New events like
-            // EEventPanningStarted
-            // EEventPanningStopped
-            // EEventFlickStarted
-            // EEventFlickStopped
-            // EEventEmptyListClicked
-            // EEventEmptyAreaClicked
+            __ASSERT_DEBUG( EFalse, Panic( EUnknownCase ) );
             break;
             };
         };
@@ -467,14 +459,6 @@ void CWPASecuritySettingsDlg::FillListWithDataL( CDesCArrayFlat& aItemArray,
 
     for( TInt i = 0; i < numOfFields; i++ )
         {
-        // 802.1x has no WpaMode (PSK not supported) and no Wpa2Only selection
-        if ( iSecuritySettings->SecurityMode() == ESecurityMode8021x && 
-                    (*wpaMember == EWpaMode ||*wpaMember == EWpaWpa2Only ) )
-            {
-            wpaMember++;
-            aRes++;
-            }
-        // If PSK in use, EAP plug-in configuration is not shown
         if ( *wpaMember == EWpaEapConfig && iSecuritySettings->WPAMode() )
             {
             wpaMember++;
@@ -500,20 +484,15 @@ void CWPASecuritySettingsDlg::FillListWithDataL( CDesCArrayFlat& aItemArray,
 
             CleanupStack::PopAndDestroy( 2, title );   // itemText, title
             
-            // If Eap in use, PreSharedKey is not shown
             wpaMember++;
             aRes++;
             }
-        else            // EWpaMode, EWpaPreSharedKey, EWpaWpa2Only, EWpaUnencryptedConn:
+        else            // EWpaMode, EWpaPreSharedKey, EWpaWpa2Only:
             {
-            if (( *wpaMember != EWpaUnencryptedConn ) || 
-                (FeatureManager::FeatureSupported( KFeatureIdFfWlanAuthenticationOnlySupport ) ) )
-                {
-                HBufC* itemText = CreateTextualListBoxItemL( *wpaMember, *aRes );
-                CleanupStack::PushL( itemText );
-                aItemArray.AppendL( itemText->Des() );
-                CleanupStack::PopAndDestroy( itemText );
-                }
+            HBufC* itemText = CreateTextualListBoxItemL( *wpaMember, *aRes );
+            CleanupStack::PushL( itemText );
+            aItemArray.AppendL( itemText->Des() );
+            CleanupStack::PopAndDestroy( itemText );
             }
 
         wpaMember++;
@@ -600,13 +579,6 @@ HBufC* CWPASecuritySettingsDlg::CreateTextualListBoxItemL( TWpaMember aMember,
             break;
             }
 
-        case EWpaUnencryptedConn:
-            {
-            valueResourceID = iSecuritySettings->WPAUnencryptedConn() ?
-                              R_WPA_UNENCRYPTED_CONN_ALLOW : R_WPA_UNENCRYPTED_CONN_NOT_ALLOW;
-            break;
-            }
-            
         case EWpaPreSharedKey:
             {
             valueResourceID = 
@@ -673,19 +645,9 @@ TBool CWPASecuritySettingsDlg::ShowPopupSettingPageL( TWpaMember aData )
     {
     TInt currvalue( 0 );
     TBool retval( EFalse );
-    TInt attr_resid( 0 );
-    
     CDesCArrayFlat* items = FillPopupSettingPageLC( aData,  currvalue );
 
-    
-    if ( aData == EWpaUnencryptedConn)
-        {
-        attr_resid = R_WPA_UNENCRYPTED_CONN;
-        }
-    else
-        {
-        attr_resid = aData == EWpaMode ? R_WPA_MODE : R_WPA_TKIP_CIPHER;
-        }
+    TInt attr_resid = aData == EWpaMode ? R_WPA_MODE : R_WPA_TKIP_CIPHER;
 
     HBufC* titlebuf = iEikonEnv->AllocReadResourceLC( attr_resid );
     CAknRadioButtonSettingPage* dlg = new ( ELeave )CAknRadioButtonSettingPage(
@@ -819,7 +781,7 @@ CDesCArrayFlat* CWPASecuritySettingsDlg::FillPopupSettingPageLC(
                                                 R_WPA_MODE_PRESHARED_KEY ) );
         CleanupStack::PopAndDestroy();
         }
-    else if ( aData == EWpaWpa2Only )
+    else        // EWpaWpa2Only:
         {
         items->AppendL( *iEikonEnv->AllocReadResourceLC( 
                                                 R_WPA_CIPHER_ALLOWED ) );
@@ -830,18 +792,7 @@ CDesCArrayFlat* CWPASecuritySettingsDlg::FillPopupSettingPageLC(
 
         aCurrvalue = iSecuritySettings->Wpa2Only();
         }
-    else    // EWpaUnencryptedConn
-        {
-        items->AppendL( *iEikonEnv->AllocReadResourceLC( 
-                                            R_WPA_UNENCRYPTED_CONN_NOT_ALLOW ) );
-        CleanupStack::PopAndDestroy();
-        items->AppendL( *iEikonEnv->AllocReadResourceLC( 
-                                            R_WPA_UNENCRYPTED_CONN_ALLOW ) );
-        CleanupStack::PopAndDestroy();
 
-        aCurrvalue = iSecuritySettings->WPAUnencryptedConn();
-        }
-    
     return items;
     }
 
@@ -868,19 +819,11 @@ TBool CWPASecuritySettingsDlg::UpdateFromPopupSettingPage( TWpaMember aData,
             retVal = ETrue;
             }
         }
-    else if ( aData == EWpaWpa2Only )
+    else        // EWpaWpa2Only:
         {
         if ( iSecuritySettings->Wpa2Only() != aCurrvalue )
             {   
             iSecuritySettings->SetWpa2Only( aCurrvalue );
-            retVal = ETrue;
-            }
-        }
-    else  // EWpaUnencryptedConn
-        {
-        if ( iSecuritySettings->WPAUnencryptedConn() != aCurrvalue )
-            {   
-            iSecuritySettings->SetWPAUnencryptedConn( aCurrvalue );
             retVal = ETrue;
             }
         }
@@ -915,18 +858,10 @@ void CWPASecuritySettingsDlg::ChangeSettingsL( TBool aQuick )
 
     itemIndex = ( Max( iList->CurrentItemIndex(), 0 ) );
 
-    //In 802.1x the first item is EapConfig and second item is UncryptedConn
-    if (iSecuritySettings->SecurityMode() == ESecurityMode8021x)
-        {
-        shift = ( itemIndex == EWpaMode ) ? 1 : 3;
-        }
-    else
-        {
-        shift = ( itemIndex >= EWpaWpa2Only || 
-                ( itemIndex == EWpaEapConfig && 
-                        iSecuritySettings->WPAMode() ) ) ? 1 : 0;
-        }
-    
+    shift = ( itemIndex >= EWpaWpa2Only || 
+              ( itemIndex == EWpaEapConfig && 
+                iSecuritySettings->WPAMode() ) ) ? 1 : 0;
+
     TWpaMember* ptr = iFieldsMain + itemIndex + shift;
     TInt* titPtr = iTitlesMain + itemIndex + shift;
 
@@ -988,27 +923,6 @@ void CWPASecuritySettingsDlg::ChangeSettingsL( TBool aQuick )
                 }
             break;
             }
-
-        case EWpaUnencryptedConn:
-             { // Setting item with two available values
-             TBool changed( ETrue );
-             if ( aQuick )
-                 {
-                 iSecuritySettings->SetWPAUnencryptedConn( 
-                                             !iSecuritySettings->WPAUnencryptedConn() );
-                 }
-             else
-                 {
-                 changed = ShowPopupSettingPageL( EWpaUnencryptedConn );
-                 }
-
-             if ( changed )
-                 {
-                 UpdateTextualListBoxItemL( *ptr, *titPtr, itemIndex );
-                 *iEventStore |= CWPASecuritySettings::EModified;
-                 }
-             break;
-             }
 
         case EWpaPreSharedKey:
             { // Text setting item

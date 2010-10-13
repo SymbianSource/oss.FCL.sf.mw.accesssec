@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: tr1cfwln#21 %
+* %version: tr1cfwln#20 %
 */
 
 #ifndef WPA_SECURITY_SETTINGS_DLG_H
@@ -31,8 +31,7 @@ enum TWpaMember
     EWpaMode,           // WPA mode
     EWpaEapConfig,      // EAP Plugin configuration
     EWpaWpa2Only,       // Wpa2 only mode
-    EWpaPreSharedKey,    // Pre-shared key
-    EWpaUnencryptedConn
+    EWpaPreSharedKey    // Pre-shared key
     };
 
 
