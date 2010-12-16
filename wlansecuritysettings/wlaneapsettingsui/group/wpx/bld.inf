@@ -1,0 +1,46 @@
+/*
+* ==============================================================================
+*  Name        : Bld.inf
+*  Part of     : WLAN EAP Settings Ui
+*  Description : This file provides the information required for building the
+*    		     CCX related part of WLAN EAP Settings Ui
+*  Version     : %version: 3 %
+*
+*  Copyright © 2002-2005, 2008 Nokia. All rights reserved.
+*  This material, including documentation and any related 
+*  computer programs, is protected by copyright controlled by 
+*  Nokia. All rights are reserved. Copying, including 
+*  reproducing, storing, adapting or translating, any 
+*  or all of this material requires the prior written consent of 
+*  Nokia. This material also contains confidential 
+*  information which may not be disclosed to others without the 
+*  prior written consent of Nokia.
+* ==============================================================================
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+// export localised loc file
+../../eapfast/configui/loc/eapfastui.loc   MW_LAYER_LOC_EXPORT_PATH(eapfastui.loc)
+../../eapfast/notifierui/loc/eapfastnotifdlg.loc  MW_LAYER_LOC_EXPORT_PATH(eapfastnotifdlg.loc)
+../../EapLeap/ConfigUi/loc/eapleapui.loc   MW_LAYER_LOC_EXPORT_PATH(eapleapui.loc)
+../../EapLeap/NotifierUi/loc/leapnotifdlg.loc  MW_LAYER_LOC_EXPORT_PATH(leapnotifdlg.loc)
+
+PRJ_MMPFILES
+
+// Settings dialogs
+EapLeapUi.mmp
+eapfastui.mmp
+
+// Notifiers components
+LeapNotifDlg.mmp
+eapfastnotifdlg.mmp
+
+PRJ_TESTMMPFILES
+
+//  End of File

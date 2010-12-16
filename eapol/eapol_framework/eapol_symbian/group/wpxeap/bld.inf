@@ -1,0 +1,30 @@
+/*
+* ============================================================================
+*  Name        : bld.inf
+*  Part of     : EAPOL / EAP WPX       *** Info from the SWAD
+*  Description : Build information file for project EAPOL
+*  Version     : %version: 2 % << Don't touch! Updated by Synergy at check-out.
+*
+*  Copyright © 2001-2006 Nokia.  All rights reserved.
+*  This material, including documentation and any related computer
+*  programs, is protected by copyright controlled by Nokia.  All
+*  rights are reserved.  Copying, including reproducing, storing,
+*  adapting or translating, any or all of this material requires the
+*  prior written consent of Nokia.  This material also contains
+*  confidential information which may not be disclosed to others
+*  without the prior written consent of Nokia.
+* ============================================================================
+* Template version: 4.1
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_MMPFILES
+
+// EAP-LEAP is part of WPX. You need special release to compile this.
+eapleap.mmp
+
+// End of file.

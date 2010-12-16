@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 43 %
+* %version: 44 %
 */
 
 // This is enumeration of EAPOL source code.
@@ -772,6 +772,17 @@ void CEapTlsPeapCertInterface::RunL()
 		TRACE_FLAGS_DEFAULT,
 		(EAPL("CEapTlsPeapCertInterface::RunL(): iStatus %d\n"),
 		iStatus.Int()));
+
+#if defined(_DEBUG) || defined(DEBUG)
+  // print out process mem consumption
+  TInt totalAllocated = 0;
+  TInt cellCount = User::AllocSize( totalAllocated );
+ 	EAP_TRACE_DEBUG(
+		m_am_tools,
+		TRACE_FLAGS_DEFAULT,
+		(EAPL("CEapTlsPeapCertInterface::RunL() - MEMORYINFO: mem allocated == %d, cellcount == %d\n"),
+		  totalAllocated, cellCount));
+#endif
 
 	if (!(iStatus.Int() == KErrNone))
 	{		

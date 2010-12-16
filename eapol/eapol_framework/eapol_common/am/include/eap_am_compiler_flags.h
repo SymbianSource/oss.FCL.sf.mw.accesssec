@@ -16,7 +16,7 @@
 */
 
 /*
-* %version: 4 %
+* %version: 5 %
 */
 
 #if !defined(_EAP_AM_COMPILER_FLAGS_H_)
@@ -64,7 +64,7 @@
 
 	#if !defined(USE_EAP_FILE_TRACE)
 		// This macro activates file tracing.
-		#define USE_EAP_FILE_TRACE
+		// #define USE_EAP_FILE_TRACE
 	#endif //#if !defined(USE_EAP_FILE_TRACE)
 
 	#if !defined(USE_EAP_HARDWARE_TRACE)
